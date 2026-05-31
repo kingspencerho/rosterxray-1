@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 // ============ DATA ============
 
@@ -6663,6 +6664,7 @@ Travis Etienne`;
           </a>
         </div>
       </div>
+      <Analytics />
     </div>
   );
 }
