@@ -1103,6 +1103,18 @@ const findPlayer = (name, format = "standard") => {
     }
   }
 
+  // 5. Fallback: if superflex/yahoo lookup failed, try ADP_DATA as safety net.
+  // Ensures late-round players in the base table are never silently dropped.
+  if (format === "superflex" || format === "yahoo") {
+    if (ADP_DATA[norm]) return mk(norm, ADP_DATA[norm]);
+    if (normWords.length >= 2) {
+      for (const key of Object.keys(ADP_DATA)) {
+        if (!key.includes(" ")) continue;
+        if (norm.includes(key)) return mk(key, ADP_DATA[key]);
+      }
+    }
+  }
+
   return null;
 };
 
