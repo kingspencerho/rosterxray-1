@@ -1,10 +1,5 @@
 {
-  "rewrites": [
-    { "source": "/api/analyze", "destination": "/analyze.js" }
-  ],
-  "functions": {
-    "analyze.js": {
-      "maxDuration": 60
-    }
-  }
+  "buildCommand": "mkdir -p api && cp analyze.js api/analyze.js && npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
 }
