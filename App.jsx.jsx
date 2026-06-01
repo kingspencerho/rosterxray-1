@@ -524,13 +524,13 @@ const ADP_SUPERFLEX = {
   "malachi fields": { adp: 235, pos: "WR", team: "NYG" },
   "jaydon blue": { adp: 236, pos: "RB", team: "DAL" },
   "ollie gordon": { adp: 237, pos: "RB", team: "MIA" },
-  "eli heidenreich": { adp: 287, pos: "RB", team: "PIT" },
-  "heidenreich": { adp: 287, pos: "RB", team: "PIT" },
+  "eli heidenreich": { adp: 215.9, pos: "RB", team: "PIT" },
+  "heidenreich": { adp: 215.9, pos: "RB", team: "PIT" },
 };
 
 // Tournament configurations — week weights for grade rollup
 const TOURNAMENTS = {
-  main: { name: "General", entries: "4,500", weights: [1, 1, 1], note: "Equal weighting · ceiling + floor balance", format: "standard" },
+  main: { name: "General", entries: "", weights: [1, 1, 1], note: "Equal weighting · ceiling + floor balance", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 spike critical · 1-of-14 advances", format: "standard" },
   puppy: { name: "The Puppy", entries: "225k", weights: [1, 2, 1.5], note: "W16 kill shot · W17 final", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "Redraft format · 2 QBs required · 4for4 ADP", format: "superflex" },
@@ -602,44 +602,76 @@ const TEAM_CHALK = {
   JAX: "sharp", LV: "sharp", NYJ: "sharp", NYG: "sharp", TEN: "sharp", ARI: "sharp", CAR: "sharp", CLE: "sharp", TB: "sharp",
 };
 
-// Player verdicts from memory — date-stamped for freshness check
-const VERDICTS = {
-  "hubbard": { verdict: "fade", date: "2026-05-19", reason: "3.8 YPC, Brooks returning, classic Hubbard Trap", confidence: "HIGH" },
-  "chuba hubbard": { verdict: "fade", date: "2026-05-19", reason: "3.8 YPC, Brooks returning, classic Hubbard Trap", confidence: "HIGH" },
-  "rj harvey": { verdict: "fade", date: "2026-05-19", reason: "3.7 YPC, pass-pro issues, ADP rising wrong way", confidence: "HIGH" },
-  "jk dobbins": { verdict: "fade", date: "2026-05-19", reason: "Two major knee surgeries, Harvey ahead", confidence: "HIGH" },
-  "j.k. dobbins": { verdict: "fade", date: "2026-05-19", reason: "Two major knee surgeries, Harvey ahead", confidence: "HIGH" },
-  "tony pollard": { verdict: "fade", date: "2026-05-19", reason: "31 years old, Cam Ward era TEN = pass-first", confidence: "HIGH" },
-  "tyler allgeier": { verdict: "fade", date: "2026-05-19", reason: "Three-way committee, Brissett QB, 36.1% run rate", confidence: "HIGH" },
-  "mike washington": { verdict: "fade", date: "2026-05-19", reason: "Combine fraud, 10 career fumbles, no tape", confidence: "MEDIUM" },
-  "jaxson dart": { verdict: "fade", date: "2026-05-19", reason: "Harbaugh + Nagy caps fantasy QB ceiling", confidence: "MEDIUM" },
-  "ja'kobi lane": { verdict: "HARD FADE", date: "2026-05-19", reason: "BAL run-heaviest, Minter HC, WR targets suppressed", confidence: "HIGH" },
-  "jakobi lane": { verdict: "HARD FADE", date: "2026-05-19", reason: "BAL run-heaviest, Minter HC, WR targets suppressed", confidence: "HIGH" },
-  "lamar jackson": { verdict: "fade", date: "2026-05-19", reason: "Playoff schedule brutal, new HC/OC uncertainty", confidence: "MEDIUM" },
-  // Targets
-  "luther burden": { verdict: "TARGET", date: "2026-05-19", reason: "2.83 YPRR rookie, 26.1% target rate, Moore vacated", confidence: "HIGH" },
-  "jadarian price": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital, run-first scheme, Charbonnet ACL", confidence: "HIGH" },
-  "kc concepcion": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital at R5 ADP, WR1 role, vacated targets", confidence: "HIGH" },
-  "carnell tate": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital, WR1 role confirmed, refined route runner", confidence: "HIGH" },
-  "kyler murray": { verdict: "TARGET", date: "2026-05-19", reason: "Top-5 QB ceiling at QB17 IF wins job. MIN W16-17 elite", confidence: "HIGH (conditional)" },
-  "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
-  "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
-  "harold fannin": { verdict: "TARGET", date: "2026-05-19", reason: "72/731/6 as rookie, 31% target share, Monken offense", confidence: "HIGH" },
-  "cam skattebo": { verdict: "TARGET", date: "2026-05-19", reason: "Workhorse profile, Harbaugh run-heavy = volume", confidence: "HIGH" },
-  "kaytron allen": { verdict: "TARGET", date: "2026-05-19", reason: "Best late dart, WAS run-heavy, Quinn/Reich stable", confidence: "LOTTERY" },
-  "omarion hampton": { verdict: "TARGET", date: "2026-05-19", reason: "McDaniel zone-run scheme-perfect", confidence: "HIGH" },
-  "jaylen warren": { verdict: "TARGET", date: "2026-05-19", reason: "RB17 in 2025, PPR-friendly, McCarthy OC upgrade", confidence: "HIGH" },
-  "eli stowers": { verdict: "TARGET (2027)", date: "2026-05-19", reason: "Buy now at ADP 195, TE1 job 2027 when Goedert gone", confidence: "MEDIUM-HIGH" },
-  // 2026 role-concern fades — filtered from pivot recommendations
-  "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
-  "david montgomery": { verdict: "fade", date: "2026-05-26", reason: "HOU added competition, age concern at 28", confidence: "MEDIUM" },
-  "d'andre swift": { verdict: "fade", date: "2026-05-26", reason: "Committee back in CHI, no clear bell-cow role", confidence: "MEDIUM" },
-  "breece hall": { verdict: "fade", date: "2026-05-26", reason: "Contract narrative, NYJ rebuild, role uncertainty", confidence: "MEDIUM" },
-  "derrick henry": { verdict: "fade", date: "2026-05-26", reason: "Age cliff risk at 32, BAL run-heavy but volume concern", confidence: "MEDIUM" },
-  "stefon diggs": { verdict: "HARD FADE", date: "2026-05-26", reason: "Free agent, no team, effectively retired", confidence: "HIGH" },
-  "christian mccaffrey": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
-  "cmc": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
+// ── COMPETITION FLAGS ─────────────────────────────────────────────────────
+// Objective role-competition data — used to filter misleading pivot suggestions.
+// NOT opinions. These are factual backfield/depth situations confirmed by OTAs,
+// contracts, and coaching statements as of late May 2026.
+// Tiers: "committee" = genuine split, "depth" = clear backup, "returning" = missed time
+//
+// Source: OTA reports, beat reporters, contract data (May 2026)
+const COMPETITION_FLAGS = {
+  // ── RB COMMITTEES ─ confirmed multi-back splits (OTA reports, contracts, May 2026) ──
+  "emanuel wilson":         { tier: "depth",     note: "SEA — behind Price (R1) + Charbonnet returning from ACL" },
+  "noah cain":              { tier: "depth",     note: "SEA depth behind Price/Wilson/Charbonnet" },
+  "lhomme sainristil":      { tier: "depth",     note: "SEA depth — fourth on depth chart" },
+  "chuba hubbard":          { tier: "committee", note: "CAR — Brooks returning from 2nd ACL, role split likely mid-season" },
+  "jonathon brooks":        { tier: "returning", note: "CAR — 2nd ACL same knee, Hubbard starts W1, Brooks earns role gradually" },
+  "jk dobbins":             { tier: "committee", note: "DEN — Harvey + Coleman three-way split, ACL/Achilles history" },
+  "j.k. dobbins":           { tier: "committee", note: "DEN — Harvey + Coleman three-way split, ACL/Achilles history" },
+  "rj harvey":              { tier: "committee", note: "DEN — Dobbins + Coleman split, 3.7 YPC efficiency concern in year 1" },
+  "jonah coleman":          { tier: "committee", note: "DEN — Dobbins + Harvey ahead, ceiling depends on attrition" },
+  "tyler allgeier":         { tier: "committee", note: "ARI — three-way with Love, Brissett QB caps ceiling systemically" },
+  "tony pollard":           { tier: "committee", note: "TEN — Cam Ward pass-first scheme, Singleton absorbs passing downs" },
+  "nicholas singleton":     { tier: "committee", note: "TEN — committee back, Pollard leads early down, Singleton sub" },
+  "tyjae spears":           { tier: "committee", note: "TEN — behind both Pollard and Singleton on depth chart" },
+  "david montgomery":       { tier: "committee", note: "HOU — Woody Marks confirmed rostered, genuine committee, age 29" },
+  "woody marks":            { tier: "committee", note: "HOU — committee with Montgomery, similar skill sets limit ceiling" },
+  "d'andre swift":          { tier: "committee", note: "CHI — Monangai confirmed co-starter, genuine split, no bell-cow" },
+  "kyle monangai":          { tier: "committee", note: "CHI — Swift leads but Monangai is a real piece, not a handcuff" },
+  "bhayshul tuten":         { tier: "committee", note: "JAX — three-way with Rodriguez + Allen, Tuten listed RB1 at OTAs" },
+  "chris rodriguez":        { tier: "committee", note: "JAX — committee, Tuten RB1, Rodriguez short-yardage/TD role" },
+  "travis etienne":         { tier: "committee", note: "NO — Kamara still on roster, Etienne is lead but not workhorse" },
+  "travis etienne jr":      { tier: "committee", note: "NO — Kamara still on roster, Etienne is lead but not workhorse" },
+  "breece hall":            { tier: "committee", note: "NYJ — Braelon Allen confirmed co-starter in rebuild year" },
+  "braelon allen":          { tier: "committee", note: "NYJ — Hall leads but Allen confirmed real committee piece" },
+  "isiah pacheco":          { tier: "committee", note: "DET — Warren on roster, role unclear in McCarthy scheme shift" },
+  "jaylen warren":          { tier: "committee", note: "PIT — Dowdle is lead (1,300+ scrimmage yds), Warren confirmed split" },
+  "rico dowdle":            { tier: "committee", note: "PIT — Warren confirmed on roster, McCarthy expects both involved" },
+  "mike washington":        { tier: "depth",     note: "LV — depth behind Jeanty, no established NFL role" },
+  "alvin kamara":           { tier: "depth",     note: "NO — Etienne signed as lead, Kamara twilight complementary role" },
+  "kaytron allen":          { tier: "committee", note: "WAS — committee, role undefined, Daniels pass-first caps RB ceiling" },
+  "jacory croskey-merritt": { tier: "committee", note: "WAS — wide open backfield, multiple backs splitting work" },
+  // GB — Jacobs legal trouble (May 26 2026) creates real depth risk
+  "chris brooks":           { tier: "committee", note: "GB — primary Jacobs backup after Wilson departed; legal situation elevated his role" },
+  "marshawn lloyd":         { tier: "committee", note: "GB — Jacobs depth alongside Brooks, Wilson's 254 touches left vacancy" },
+  "pierre strong":          { tier: "depth",     note: "GB — RB3 depth, only relevant if Jacobs suspended/injured" },
+
+  // ── WR DEPTH ─ confirmed target-share ceiling concerns ──
+  "jalen nailor":           { tier: "depth",     note: "LV — WR2/3 behind Adams + Hunter, target share structurally capped" },
+  "ja'kobi lane":           { tier: "depth",     note: "BAL — Minter run-heavy system suppresses WR volume league-wide" },
+  "jakobi lane":            { tier: "depth",     note: "BAL — Minter run-heavy system suppresses WR volume league-wide" },
+  "wan'dale robinson":      { tier: "depth",     note: "TEN — Tate confirmed WR1, Wandale WR3/4 at best" },
+  "wandale robinson":       { tier: "depth",     note: "TEN — Tate confirmed WR1, Wandale WR3/4 at best" },
+
+  // ── TE AGE / ROLE CEILING CONCERNS ──────────────────────────────────────────
+  // These players aren't backups — but age, injury history, or scheme cap their
+  // ceiling enough that a matchup-only pivot showing them as a 'Big Upgrade' is misleading.
+  "mike gesicki":           { tier: "committee", note: "CIN — 38% snap share 2025, pectoral IR, 2nd option behind Chase/Higgins, turns 30" },
+  "travis kelce":           { tier: "committee", note: "KC — turns 37 Oct 2026, YPRR below 1.5 two straight years, efficiency cliff confirmed" },
+  // LAC TE room reshuffled — Kolar signed from BAL, now TE1 per beat reporters
+  "oronde gadsden":         { tier: "committee", note: "LAC — Kolar (ex-BAL) confirmed TE1 by Daniel Popper/The Athletic, Gadsden now TE2" },
+  "david njoku":            { tier: "committee", note: "LAC — behind Kolar in restructured LAC TE room, snap share capped" },
+  "cade otton":             { tier: "committee", note: "TB — TE2 behind Stowers in target hierarchy, limited ceiling" },
+  "hunter henry":           { tier: "committee", note: "NE — 30 years old, Warren Kraft pushing for snaps, role shrinking" },
+
+  // ── QB COMPETITION ───────────────────────────────────────────────────────────
+  "deshaun watson":         { tier: "committee", note: "CLE — Sanders competitive, Monken said depth chart may not be set until summer" },
+  "jacoby brissett":        { tier: "depth",     note: "ARI — Beck pushing for job, contract dispute, missing voluntary OTAs" },
 };
+
+
+
+
 
 
 // ============ REDRAFT DATA ============
@@ -1016,10 +1048,11 @@ const WIN_TOTALS = {
 
 // Coaching-adjusted overrides (2026 projections)
 const COACHING_ADJ = {
+  // ── 2025 SCHEME ADJUSTMENTS (proven track records) ──────────────────────
   BAL: { all: -2.5, note: "Minter HC, top-8 D projection" },
   PIT: { all: -2.0, note: "Patrick Graham DC, top-10" },
   CLE: { all: -1.0, note: "Schwartz gone, slight regression" },
-  GB: { all: -1.5, note: "Parsons added, top-10 when healthy" },
+  GB:  { all: -1.5, note: "Parsons added, top-10 when healthy" },
   CHI: { all: +1.5, note: "Lost Allen/Greenard/Hargrave" },
   DAL: { all: +2.0, note: "Parsons + Diggs gone, bottom-5" },
   WAS: { all: +1.5, note: "Full rebuild, stays bottom-5" },
@@ -1027,9 +1060,76 @@ const COACHING_ADJ = {
   TEN: { all: +1.0, note: "Saleh needs time, bottom-5" },
 };
 
+// ── 2026 OFFSEASON PROJECTION ADJUSTMENTS ───────────────────────────────
+// Applied on top of 2025 actuals when user selects "2026 Est." mode.
+// These are estimates — not real data. Based on confirmed roster moves.
+// Conservative values intentionally: real impact unknown until games are played.
+const OFFSEASON_ADJ_2026 = {
+  // FREE AGENCY
+  // CIN: Dexter Lawrence (traded from NYG, elite NT), Boye Mafe (edge, $60M),
+  //      Jonathan Allen (interior DT). Transforms run defense from worst to average.
+  //      RB opponents get harder; QB pressure increases significantly.
+  CIN: { rb: -3.0, qb: -2.5, wr: -1.0, te: -0.5,
+         note: "Lawrence + Mafe + Allen overhaul. RB/QB matchup hardest to exploit." },
+
+  // BAL: Hendrickson (edge, $112M/4yr) adds elite pass rush to already top-8 D.
+  //      QB matchup tightens further. WR already tough — marginal bump.
+  BAL: { qb: -1.5, wr: -0.5, rb: 0, te: 0,
+         note: "Hendrickson seals elite pass rush. QB matchup becomes one of toughest." },
+
+  // CAR: Phillips (edge, $120M) + Faulk (DE, R1) = first real pass rush in years.
+  //      Secondly modest upgrade. WR opponents face more pressure.
+  CAR: { wr: -1.5, qb: -1.0, rb: 0, te: 0,
+         note: "Phillips + Faulk give CAR a genuine two-edge pass rush for first time." },
+
+  // LAR: McDuffie (CB, traded from KC) + Will Johnson (CB, R1) = elite secondary.
+  //      WR opponents significantly tighter. Run D unchanged.
+  LAR: { wr: -2.0, qb: -0.5, rb: 0, te: 0,
+         note: "McDuffie + W.Johnson = top-5 CB duo. WR matchup tightens meaningfully." },
+
+  // NYG: Lost Dexter Lawrence (traded to CIN). Run defense loses its anchor.
+  //      RB and WR opponents get easier; interior collapses without him.
+  NYG: { rb: +2.0, wr: +1.5, qb: +0.5, te: +0.5,
+         note: "Lost Lawrence — interior run D gutted. Opponents get easier matchup." },
+
+  // WAS: Oweh + Chaisson at edge are real but LB/secondary still rebuilding.
+  //      Slight pass rush improvement but overall still bottom-5.
+  WAS: { qb: -0.5, wr: -0.5, rb: 0, te: 0,
+         note: "Oweh/Chaisson add edge rush but defense stays bottom-5 overall." },
+
+  // DRAFT
+  // KC: Mansoor Delane (CB, pick 6) replaces traded McDuffie directly.
+  //     Peter Woods (DT, pick 29) adds interior depth behind Jones.
+  //     WR matchup tightens — McDuffie-level talent fills the void.
+  KC:  { wr: -1.0, qb: -0.5, rb: 0, te: 0,
+         note: "Delane (pick 6 CB) replaces McDuffie. Woods adds DT depth. Secondary holds." },
+
+  // JAX: Travis Hunter (WR/CB, R1) — CB role confirmed. Adds secondary piece.
+  //      Conservative: rookie CB, marginal tightening only. (See note.)
+  JAX: { wr: -0.5, qb: 0, rb: 0, te: 0,
+         note: "Travis Hunter at CB adds secondary depth. Conservative — rookie year." },
+};
+
 // ============ HELPERS ============
 
-const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
+const normalize = (s) => s
+  .toLowerCase()
+  .trim()
+  // Strip parenthetical content — vision often appends "(PHI)" or "(RB)" to names
+  .replace(/\([^)]*\)/g, "")
+  // Normalize Unicode apostrophes + optional trailing space → remove entirely
+  // Handles: D'Andre, D'Andre, D' Andre, Wan'Dale across all apostrophe variants
+  // Covers: curly right/left U+2019/2018, modifier letter U+02BC, fullwidth U+FF07,
+  //         prime U+2032, backtick, acute, standard straight apostrophe
+  .replace(/[\u2018\u2019\u02BC\uFF07\u2032\u0060\u00B4']\s*/g, "")
+  // Normalize Unicode dashes → space (en-dash U+2013, em-dash U+2014, figure/horizontal)
+  .replace(/[\u2013\u2014\u2012\u2015]/g, " ")
+  // Strip remaining standard punctuation, convert hyphen to space
+  .replace(/[.,]/g, "")
+  .replace(/-/g, " ")
+  // Collapse all whitespace
+  .replace(/\s+/g, " ")
+  .trim();
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -1155,8 +1255,37 @@ const preprocessRoster = (text, format = "standard") => {
     return m ? m.map(Number) : [];
   };
 
-  // Pass 1: classify every line
-  const classified = rawLines.map((line, i) => {
+  // Pass 0: pre-merge adjacent lines that look like split first/last names
+  // Mobile copy sometimes wraps long names across lines: "Eli" + "Heidenreich"
+  // Strategy: if a short single-word line doesn't resolve alone but merges with
+  // the next line to form a resolvable name, collapse them into one line.
+  const mergedLines = [];
+  let i = 0;
+  while (i < rawLines.length) {
+    const line = rawLines[i];
+    if (!line.trim()) { mergedLines.push(line); i++; continue; }
+    const words = line.trim().split(/\s+/);
+    // Candidate for split name: single capitalized word, not a junk/team/pos token
+    if (words.length === 1 && /^[A-Z][a-z]+$/.test(words[0]) &&
+        !JUNK_LINE.test(words[0]) && !TEAM_CODE.test(words[0]) && !POS_HEADER.test(words[0])) {
+      const next = rawLines[i + 1]?.trim();
+      if (next && /^[A-Z][a-z]+/.test(next) && !JUNK_LINE.test(next) && !TEAM_CODE.test(next)) {
+        const merged = `${words[0]} ${next}`;
+        // Only merge if the combined string resolves as a player
+        const player = findPlayer(merged, format);
+        if (player) {
+          mergedLines.push(merged);
+          i += 2; // skip both lines
+          continue;
+        }
+      }
+    }
+    mergedLines.push(line);
+    i++;
+  }
+
+  // Pass 1: classify every line (using merged lines from Pass 0)
+  const classified = mergedLines.map((line, i) => {
     if (!line) return { i, line, type: "blank" };
     const player = resolves(line);
     if (player) return { i, line, type: "name", player };
@@ -1412,13 +1541,25 @@ const parseRosterLegacy = (text, format = "standard") => {
   return picks;
 };
 
-const getMatchupTier = (opponentTeam, pos) => {
+const getMatchupTier = (opponentTeam, pos, useProjected = false) => {
   const opp = opponentTeam.replace("@", "");
   let pts = FPA[pos]?.[opp];
   if (pts == null) return { tier: "—", score: 0, opp };
-  // apply coaching adjustment
+
+  // Apply scheme-based coaching adjustment (always on — proven track records)
   const adj = COACHING_ADJ[opp];
   if (adj) pts -= adj.all;
+
+  // Apply 2026 offseason projection layer (only when user selects "2026 Est." mode)
+  // These are estimates based on roster moves — not real data yet.
+  if (useProjected) {
+    const offAdj = OFFSEASON_ADJ_2026[opp];
+    if (offAdj) {
+      const posKey = pos.toLowerCase(); // "qb" | "rb" | "wr" | "te"
+      const delta = offAdj[posKey];
+      if (delta != null) pts -= delta; // negative delta = harder matchup, positive = easier
+    }
+  }
 
   // Rank-based tiering using position-specific distribution
   const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
@@ -1445,14 +1586,16 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
     const l = s.toLowerCase();
     // Best Ball strengths
     if (l.includes("primary qb stack") || l.includes("primary stacks built")) return "QB game-stacks built";
-    if (l.includes("elite stack")) return "an elite-window stack";
+    if (l.includes("elite stack")) return "an elite-matchup stack";
     if (l.includes("w16 kill-shot") || l.includes("w16")) return "W16 kill-shot ceiling";
     if (l.includes("w15 spike") || (l.includes("w15") && l.includes("stack"))) return "a W15 spike stack";
     if (l.includes("roster construction") && l.includes("matches")) return "clean construction";
     if (l.includes("roster construction") && l.includes("fits superflex")) return "clean Superflex build";
     if (l.includes("game stack(s) with bring-back")) return "bring-back game stacks";
-    if (l.includes("orphan(s) with strong playoff")) return "solo picks in strong windows";
-    if (l.includes("match your target verdicts") || l.includes("players match your target")) return "confirmed target picks";
+    if (l.includes("orphan(s) with strong playoff")) return "solo picks with strong matchups";
+    if (l.includes("hidden gem")) return "underpriced elite-matchup picks";
+    if (l.includes("depth/backup roles")) return "depth/backup players on roster — ceiling capped";
+    if (l.includes("match your target verdicts") || l.includes("players match your target")) return null;
     if (l.includes("sharp/leverage stack")) return "field-leverage stacks";
     if (l.includes("adp value pick")) return "real ADP value grabs";
     // Redraft strengths
@@ -1473,7 +1616,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
     if (l.includes("only") && l.includes("qb") && l.includes("sf requires")) return "not enough QBs for SF";
     if (l.includes("significant reaches")) return "multiple ADP reaches";
     if (l.includes("orphans with no matchup or value edge")) return "wasted solo picks";
-    if (l.includes("match your fade verdicts")) return "picks fighting your own fade list";
+    if (l.includes("match your fade verdicts")) return null; // verdict system removed
 
     // Redraft weaknesses
     if (l.includes("weak starting lineup")) return "a weak starting lineup";
@@ -1565,7 +1708,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
   return `${firstSentence} Overall: ${verdict.charAt(0).toLowerCase() + verdict.slice(1)}`;
 };
 
-const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) => {
+const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, useProjected = false) => {
   const tournament = TOURNAMENTS[tournamentKey];
   const weights = tournament.weights;
   const format = tournament.format || "standard";
@@ -1645,7 +1788,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     stack.players.forEach(player => {
       const opps = PLAYOFFS[stack.team] || [];
       opps.forEach((opp, wkIdx) => {
-        const m = getMatchupTier(opp, player.pos);
+        const m = getMatchupTier(opp, player.pos, useProjected);
         weekScores[wkIdx] += m.score;
         weekDetails[wkIdx].push({ name: player.name, pos: player.pos, ...m });
       });
@@ -1667,9 +1810,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     const opps = PLAYOFFS[stack.team] || [];
     opps.forEach((oppRaw, wkIdx) => {
       const opp = oppRaw.replace("@", "");
-      // Find any roster players on this opponent
       const bringBackPlayers = valid.filter(p => p.team === opp && p.team !== stack.team);
       if (bringBackPlayers.length > 0) {
+        // Ceiling score = sum of matchup scores for all pieces on both sides of this game
+        // Higher = more players pointing at a favorable matchup simultaneously
+        const stackMatchupScore = stack.players.reduce((sum, p) => {
+          const m = getMatchupTier(oppRaw, p.pos, useProjected);
+          return sum + m.score;
+        }, 0);
+        const bringBackMatchupScore = bringBackPlayers.reduce((sum, p) => {
+          const stackOpp = opps[wkIdx];
+          const m = getMatchupTier(stackOpp || opp, p.pos, useProjected);
+          return sum + m.score;
+        }, 0);
+        const ceilingScore = stackMatchupScore + bringBackMatchupScore;
+
         bringBacks.push({
           stackTeam: stack.team,
           opponent: opp,
@@ -1678,13 +1833,22 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           stackPieces: stack.players,
           bringBackPieces: bringBackPlayers,
           hasQB: stack.hasQB,
+          ceilingScore,
         });
       }
     });
   });
 
-  // Sort bring-backs chronologically by playoff week (W15 → W16 → W17)
+  // Sort chronologically W15 → W16 → W17 (intuitive reading order)
+  // Ceiling score is used only to tag the top game, not to reorder
   bringBacks.sort((a, b) => a.weekIdx - b.weekIdx);
+
+  // Tag the single highest ceiling bring-back regardless of week position
+  if (bringBacks.length > 0) {
+    const topIdx = bringBacks.reduce((best, bb, i) =>
+      bb.ceilingScore > bringBacks[best].ceilingScore ? i : best, 0);
+    bringBacks[topIdx].isCeilingGame = true;
+  }
 
   // === ORPHAN CLASSIFICATION ===
   // Players NOT in any stack — classify by playoff window quality
@@ -1693,7 +1857,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
   const orphans = valid.filter(p => !stackedPlayerNames.has(p.name)).map(p => {
     const opps = PLAYOFFS[p.team] || [];
-    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos));
+    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos, useProjected));
     const w17 = matchups[2];
     const peakScore = Math.max(...matchups.map(m => m.score));
     const weightedScore = matchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
@@ -1701,12 +1865,18 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     const normalized = (weightedScore / maxWeighted) * 15;
 
     // Classification
+    // Strong Window: needs BOTH a peak Good+ week AND a solid overall score
+    // One-Week Window: has one decent week but the overall window is weak — informational, not strong
+    // No Edge: no meaningful playoff matchup advantage at all
     let tier, color;
-    if (peakScore >= 4 || (w17.score >= 4 && tournamentKey !== "bbm7")) {
-      tier = "Strong Window";
+    if (peakScore >= 4 && normalized >= 7) {
+      tier = "Strong Matchups";
       color = "elite";
+    } else if (peakScore >= 4 && normalized < 7) {
+      tier = "One-Week Spike";
+      color = "neutral";
     } else if (normalized >= 8) {
-      tier = "Decent Window";
+      tier = "Decent Matchups";
       color = "neutral";
     } else {
       tier = "No Edge";
@@ -1737,14 +1907,18 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
       // Avoid alias dupes — only consider primary keys (longer than 8 chars, has space)
       if (!key.includes(" ") || key.length < 5) return;
 
-      // Filter out HARD FADEs and known role-concern players from recommendations
-      // A player flagged as a fade should never show up as a suggested upgrade
-      const altVerdict = VERDICTS[key] || VERDICTS[normalize(key)];
-      if (altVerdict && (altVerdict.verdict === "HARD FADE" || altVerdict.verdict === "fade")) return;
+      // Filter out players with confirmed role-competition concerns
+      // These are factual depth/committee situations — not opinions.
+      // "depth" tier = clear backup, never surfaces as upgrade
+      // "committee" tier = surfaces but only if improvement is significant (4+)
+      const altFlag = COMPETITION_FLAGS[key] || COMPETITION_FLAGS[normalize(key)];
+      if (altFlag && altFlag.tier === "depth") return;
+      // Committee backs can still surface but need a bigger improvement gap
+      const committeeThreshold = (altFlag && altFlag.tier === "committee") ? 3.5 : 1.5;
 
       // Score the alternative
       const altOpps = PLAYOFFS[alt.team] || [];
-      const altMatchups = altOpps.map((opp, i) => getMatchupTier(opp, alt.pos));
+      const altMatchups = altOpps.map((opp, i) => getMatchupTier(opp, alt.pos, useProjected));
       const altWeighted = altMatchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
       const maxW = 5 * weights.reduce((a, b) => a + b, 0);
       const altScore = (altWeighted / maxW) * 15;
@@ -1754,29 +1928,33 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
       // Player's own score for comparison
       const playerOpps = PLAYOFFS[player.team] || [];
-      const playerMatchups = playerOpps.map((opp, i) => getMatchupTier(opp, player.pos));
+      const playerMatchups = playerOpps.map((opp, i) => getMatchupTier(opp, player.pos, useProjected));
       const playerWeighted = playerMatchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
       const playerScore = (playerWeighted / maxW) * 15;
 
       // === BRING-BACK BREAK COST ===
       // If swapping this player would destroy an existing bring-back relationship,
-      // penalize the improvement score and flag it in the UI.
-      // A bring-back is broken if: player is part of a bring-back (either as stack piece
-      // or bring-back piece) AND the alt is NOT on the same team or game opponent.
-      const playerBreaksBringBack = bringBacks.some(bb => {
+      // penalize the improvement score and flag it in the UI with the specific week.
+      const brokenBringBacks = bringBacks.filter(bb => {
         const inStack = bb.stackPieces.some(p => p.name === player.name);
         const inBringBack = bb.bringBackPieces.some(p => p.name === player.name);
         if (!inStack && !inBringBack) return false;
-        // Alt must be on neither team to break the connection
         return alt.team !== bb.stackTeam && alt.team !== bb.opponent;
       });
+      const playerBreaksBringBack = brokenBringBacks.length > 0;
+      // Find the most important broken week (W16 > W17 > W15 for Puppy/main)
+      const brokenWeeks = brokenBringBacks.map(bb => bb.week);
+      const brokenWeekLabel = brokenWeeks.includes("W16") ? "W16"
+        : brokenWeeks.includes("W17") ? "W17"
+        : brokenWeeks.includes("W15") ? "W15"
+        : brokenWeeks[0] || "playoff";
       // Penalty: reduce improvement by 1.5 if it breaks a bring-back
       // This means a "BIG UPGRADE" (4+) can still surface, but marginal pivots get suppressed
       const breakCostPenalty = playerBreaksBringBack ? 1.5 : 0;
       const improvement = altScore - playerScore - breakCostPenalty;
 
-      // Only include if meaningfully better in some way
-      if (improvement > 1.5 || (stackFit && improvement > 0)) {
+      // Only include if meaningfully better — committee backs need bigger gap
+      if (improvement > committeeThreshold || (stackFit && improvement > 0)) {
         // === VARIED REASON GENERATOR ===
         // Pick the most-relevant angle for THIS pivot (not the same line for every one)
         // so users actually read the explanation instead of skimming past identical text.
@@ -1810,7 +1988,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else if (altSmash >= 2 && altSmash > playerSmash) {
           // Multiple smash matchups
           const variants = [
-            `${altSmash} smash matchups in the playoff window`,
+            `${altSmash} smash matchups in the playoff stretch`,
             `Multiple elite spike-week opportunities (W15–W17)`,
             `Playoff schedule built for explosion weeks`,
           ];
@@ -1818,7 +1996,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else if (improvement >= 4) {
           // Big gap, generic but strong
           const variants = [
-            `Dramatically better playoff window`,
+            `Dramatically better playoff matchups`,
             `Massive playoff-schedule edge`,
             `Playoff slate is on a different tier`,
             `The matchup gap is enormous`,
@@ -1826,7 +2004,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           reason = variants[(pickNum + alt.adp) % variants.length];
         } else if (improvement >= 3) {
           const variants = [
-            `Significantly better playoff window`,
+            `Significantly better playoff matchups`,
             `Cleaner W15–W17 matchups across the board`,
             `Notably softer playoff slate`,
             `Stronger title-week schedule`,
@@ -1859,7 +2037,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else {
           // Default fallback variants
           const variants = [
-            `Better playoff window matchups`,
+            `Better playoff matchups`,
             `Softer W15–W17 schedule overall`,
             `Edge in the title-stretch matchups`,
             `Marginal but real playoff upgrade`,
@@ -1882,6 +2060,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           playerAvoid,
           adpDelta,
           breaksBringBack: playerBreaksBringBack,
+          brokenWeekLabel,
         });
       }
     });
@@ -1935,27 +2114,8 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     stack.chalkLevel = chalkLevel;
   });
 
-  // === VERDICT ALIGNMENT ===
-  const today = new Date(); // dynamic — always current date, not hardcoded
-  const verdictAlignments = [];
-  valid.forEach(p => {
-    const norm = normalize(p.name);
-    const v = VERDICTS[norm];
-    if (v) {
-      const verdictDate = new Date(v.date);
-      const daysOld = Math.floor((today - verdictDate) / (1000 * 60 * 60 * 24));
-      const stale = daysOld > 45;
-      verdictAlignments.push({
-        ...p,
-        verdict: v.verdict,
-        reason: v.reason,
-        confidence: v.confidence,
-        date: v.date,
-        daysOld,
-        stale,
-      });
-    }
-  });
+  // === STACK UNIQUENESS ===
+  // Assign uniqueness rating to each stack for field-leverage analysis
 
   let grade = "C";
   let strengths = [];
@@ -2077,9 +2237,9 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
   // Orphan analysis
   // Fix 3: steepened no-edge penalty from flat -0.6 to -0.2 per orphan
   const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge");
-  const strongOrphans = orphans.filter(o => o.tier === "Strong Window");
+  const strongOrphans = orphans.filter(o => o.tier === "Strong Matchups");
   if (strongOrphans.length >= 2) {
-    strengths.push(`${strongOrphans.length} orphan(s) with strong playoff windows`);
+    strengths.push(`${strongOrphans.length} orphan(s) with strong playoff matchups`);
     score += 0.5;
   }
   if (noEdgeOrphans.length >= 3) {
@@ -2087,16 +2247,31 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     score -= noEdgeOrphans.length * 0.2;
   }
 
-  // Verdict alignment penalties — only for current verdicts (not stale)
-  const activeFades = verdictAlignments.filter(v => !v.stale && (v.verdict === "fade" || v.verdict === "HARD FADE"));
-  const activeTargets = verdictAlignments.filter(v => !v.stale && (v.verdict === "TARGET" || v.verdict.includes("TARGET")));
-  if (activeFades.length >= 2) {
-    weaknesses.push(`${activeFades.length} player(s) match your fade verdicts`);
-    score -= activeFades.length * 0.4;
+  // === VERDICT ALIGNMENT REMOVED ===
+  // Previously used subjective player verdicts to adjust grading.
+  // Replaced with competition flag awareness — objective role-competition data.
+  // Players with confirmed depth/committee situations are surfaced in pivot logic,
+  // not in the grading score. Grading now reflects only matchup, construction, and window data.
+
+  // Competition concern flag — surface as a soft weakness if 2+ committee/depth backs rostered
+  const competitionConcerns = valid.filter(p => {
+    const flag = COMPETITION_FLAGS[normalize(p.name)];
+    return flag && flag.tier === "depth";
+  });
+  if (competitionConcerns.length >= 2) {
+    weaknesses.push(`${competitionConcerns.length} players with confirmed depth/backup roles — ceiling capped`);
+    score -= 0.3 * competitionConcerns.length;
   }
-  if (activeTargets.length >= 3) {
-    strengths.push(`${activeTargets.length} players match your target verdicts`);
-    score += Math.min(activeTargets.length * 0.3, 1.5);
+
+  // Hidden gem signal — orphans with elite window at late ADP (objective, no opinion required)
+  const hiddenGems = orphans.filter(o =>
+    o.tier === "Strong Matchups" &&
+    o.adp >= 100 &&
+    (o.matchups || []).reduce((s, m) => s + m.score, 0) >= 12
+  );
+  if (hiddenGems.length >= 1) {
+    strengths.push(`${hiddenGems.length} hidden gem(s) — elite playoff matchups at late-round price`);
+    score += Math.min(hiddenGems.length * 0.4, 1.0);
   }
 
   // Stack uniqueness bonus for larger fields
@@ -2143,7 +2318,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
   const matchupScoreFor = (p) => {
     const opps = PLAYOFFS[p.team] || [];
     if (opps.length === 0) return null;
-    const matchups = opps.map(opp => getMatchupTier(opp, p.pos));
+    const matchups = opps.map(opp => getMatchupTier(opp, p.pos, useProjected));
     const avg = matchups.reduce((s, m) => s + m.score, 0) / matchups.length;
     return { avg, matchups };
   };
@@ -2160,7 +2335,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     rosterStandouts.push({
       kind: "playoff",
       icon: "🏆",
-      label: "Best Playoff Window",
+      label: "Best Playoff Matchups",
       player: top.p,
       detail: smashCount >= 2
         ? `${smashCount} Smash matchups across W15–W17 — championship-week ceiling`
@@ -2270,7 +2445,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     valid, picks, posCounts, stacks, stackGrades, adpFlags, benchmarkIssues,
     grade, strengths, weaknesses, goodStacks, eliteStacks, primaryStacks,
     tournament, hasPickNumbers, format, score,
-    bringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
+    bringBacks, orphans, topPivots, byeMap, byeConflicts,
     rosterStandouts: finalStandouts,
     nutshell,
   };
@@ -2364,7 +2539,7 @@ const getMatchupScoreForOpponent = (opp, pos) => {
 
 // ============ REDRAFT ANALYZER ============
 
-const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false) => {
+const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false, useProjected = false) => {
   // Accept either a preset key (string) or a resolved league object (custom)
   const league = typeof leagueOrKey === "string"
     ? REDRAFT_LEAGUES[leagueOrKey]
@@ -2697,7 +2872,8 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   }
 
   // 3c. PPR-specific TE check — elite TE in PPR is a major edge; weak TE is a real hole
-  if (isPPR) {
+  // Skip in Superflex — TE is structurally deprioritized when QB slots eat roster space
+  if (isPPR && !isSuperflex) {
     const teStarters = allStarters.filter(p => p.pos === "TE");
     const eliteTE = teStarters.find(p => p.adp <= 30);
     const weakTE = teStarters.find(p => p.adp >= 100);
@@ -2889,12 +3065,16 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       // Concern: wall matchup — find best bench swap suggestion
       if (p.matchup.color === "wall") {
         // Find bench players with better matchups
+        // Filter out confirmed depth/committee players — same logic as pivot system
         const benchOptions = benchSchedules
           .map(bs => {
             const bm = bs.weeklyMatchups?.[wkIdx];
             if (!bm || bm.isBye) return null;
             const score = bm.score || 0;
-            if (score <= (p.matchup.score || 0)) return null; // not an upgrade
+            if (score <= (p.matchup.score || 0)) return null;
+            // Don't suggest confirmed depth players as weekly starters
+            const compFlag = COMPETITION_FLAGS[normalize(bs.name)];
+            if (compFlag && compFlag.tier === "depth") return null;
             return { ...bs, matchup: bm, score };
           })
           .filter(Boolean)
@@ -2932,7 +3112,9 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     return { week, locks, concerns };
   }).filter(Boolean);
 
-  const lineupConfidencePreview = lineupConfidence.slice(0, 8);
+  // Show all 17 weeks — W15-17 are most critical for redraft playoff decisions
+  // Previously capped at 8 which buried the playoff weeks entirely
+  const lineupConfidencePreview = lineupConfidence;
 
   // === BENCH MOVES ALERTS ===
   const benchAlerts = [];
@@ -3010,14 +3192,14 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       return;
     }
 
-    // 4. SAFE STASH: rostered bench player with upside but no near-term action
+    // 4. BENCH HOLD: rostered bench player with upside but no near-term action
     // In redraft, a stash is a volatile role player — ADP >= 120 means genuinely
     // speculative. ADP 100 is starter-quality and shouldn't be labeled a "stash".
     if ((bp.pos === "RB" || bp.pos === "WR") && bp.adp >= 120) {
       benchAlerts.push({
         type: "stash",
-        emoji: "🔻",
-        label: "Safe Stash",
+        emoji: "💤",
+        label: "Bench Hold",
         player: bp,
         detail: `ADP ${bp.adp} — holding for opportunity`,
         matchupNote: smashCount >= 2 ? `${smashCount} Smash weeks ahead when the role opens` : "Monitor depth chart for role clarity",
@@ -3064,11 +3246,11 @@ export default function RosterScorer() {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState(null);
-  const [debugResponse, setDebugResponse] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [mode, setMode] = useState("paste"); // "upload" | "paste" — paste leads (reliable path; upload requires API)
   const [tournament, setTournament] = useState("main");
   const [analysisMode, setAnalysisMode] = useState("bestball"); // "bestball" | "redraft"
+  const [dataMode, setDataMode] = useState("actual"); // "actual" | "projected" — 2025 real data vs 2026 estimates
   const [redraftLeague, setRedraftLeague] = useState("yahoo_std");
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
   const [customExpanded, setCustomExpanded] = useState(false);
@@ -3086,11 +3268,11 @@ export default function RosterScorer() {
     if (analysisMode === "redraft") {
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
-      setAnalyzed(analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers));
+      setAnalyzed(analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected"));
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
-      setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers));
+      setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected"));
     }
   }, [showPickAnalysis, input]);
 
@@ -3119,7 +3301,7 @@ Greg Dulcich 208`;
     setShowPickAnalysis(true);
     const fmt = TOURNAMENTS["main"].format || "standard";
     const picks = parseRoster(exampleText, fmt);
-    setAnalyzed(analyzeRoster(picks, "main", true));
+    setAnalyzed(analyzeRoster(picks, "main", true, dataMode === "projected"));
   }, []);
 
   const exportCardRef = React.useRef(null);
@@ -3217,27 +3399,46 @@ Greg Dulcich 208`;
     reader.readAsDataURL(file);
   });
 
+  // ── Screenshot extraction state ──────────────────────────────────────────
+  // extractedPlayers: list awaiting user review before analysis runs
+  const [extractedPlayers, setExtractedPlayers] = useState(null); // null = not yet extracted
+  const [extractProgress, setExtractProgress] = useState(""); // progress message during extraction
+
   const handleFiles = async (fileList) => {
-    const files = Array.from(fileList).filter(f => f.type.startsWith("image/"));
+    const MAX = 4;
+    const files = Array.from(fileList)
+      .filter(f => f.type.startsWith("image/"))
+      .slice(0, MAX);
     if (files.length === 0) {
-      setExtractError("Only image files supported");
+      setExtractError("Please upload image files (PNG, JPG, HEIC)");
       return;
     }
-    setExtractError(null);
+    if (Array.from(fileList).length > MAX) {
+      setExtractError(`Maximum ${MAX} images at once — we took the first ${MAX}`);
+    } else {
+      setExtractError(null);
+    }
     const processed = await Promise.all(files.map(async (f) => ({
       name: f.name,
       type: f.type,
       data: await fileToBase64(f),
       preview: URL.createObjectURL(f),
     })));
-    setUploadedImages(prev => [...prev, ...processed]);
+    setUploadedImages(prev => {
+      // Revoke old previews to avoid memory leaks
+      prev.forEach(i => URL.revokeObjectURL(i.preview));
+      return processed;
+    });
+    setExtractedPlayers(null); // reset review state on new upload
   };
 
   const extractFromImages = async () => {
     if (uploadedImages.length === 0) return;
     setExtracting(true);
     setExtractError(null);
-    setDebugResponse(null);
+    setExtractedPlayers(null);
+    setExtractProgress("Sending to server…");
+
     try {
       const content = [
         ...uploadedImages.map(img => ({
@@ -3246,44 +3447,55 @@ Greg Dulcich 208`;
         })),
         {
           type: "text",
-          text: `These are screenshots of a fantasy football best ball draft roster (likely Underdog, Yahoo, Sleeper, or similar).
+          text: `These are screenshots of a fantasy football roster (Underdog, Yahoo, Sleeper, or similar platform).
 
-Extract every player name from the roster. Return ONLY a JSON array of player name strings in draft order if pick numbers are visible. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
+Extract every player name visible across ALL images. Return ONLY a JSON array of player name strings. No markdown, no code fences, no explanation — just the raw JSON array.
 
-Example output exactly:
-["Bijan Robinson","Tetairoa McMillan","Trey McBride","Caleb Williams"]
+Rules:
+- Include all skill positions: QB, RB, WR, TE
+- Skip kickers (K) and team defenses (D/ST, DEF)
+- If a player appears in multiple images, include them only once (deduplicate)
+- Preserve exact spelling and suffixes (Jr., II, III, etc.)
+- Include apostrophes in names exactly as shown (D'Andre, Wan'Dale)
 
-Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. Deduplicate if the same player appears twice.`
+Example output:
+["Bijan Robinson","Ja'Marr Chase","Trey McBride","Jaxson Dart","Travis Etienne Jr."]`
         }
       ];
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      setExtractProgress("Reading your roster… (this takes 5–10 seconds)");
+
+      // Call our own serverless proxy — API key never touches the browser
+      const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-opus-4-6",
           max_tokens: 1500,
           messages: [{ role: "user", content }]
         })
       });
 
-      const data = await response.json();
-      setDebugResponse(JSON.stringify(data, null, 2));
+      setExtractProgress("Processing results…");
 
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Server error ${response.status}`);
+      }
+
+      const data = await response.json();
       if (data.error) throw new Error(data.error.message || "API error");
-      if (!data.content || !Array.isArray(data.content)) throw new Error("No content in response");
+      if (!data.content || !Array.isArray(data.content)) throw new Error("Unexpected response from server");
 
       const text = data.content
         .filter(b => b.type === "text")
         .map(b => b.text)
         .join("\n");
 
-      // Strategy 1: try to find and parse a JSON array
+      // Parse JSON array from response — try multiple strategies
       let players = null;
+
+      // Strategy 1: find and parse JSON array directly
       const arrayMatch = text.match(/\[[\s\S]*?\]/);
       if (arrayMatch) {
         try {
@@ -3298,88 +3510,87 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
         } catch (e) { /* fall through */ }
       }
 
-      // Strategy 2: extract quoted strings from anywhere in the response
+      // Strategy 2: extract quoted strings
       if (!players || players.length < 3) {
         const quoted = [...text.matchAll(/"([^"]{3,40})"/g)].map(m => m[1]);
         const filtered = quoted.filter(s =>
-          /^[A-Z][a-zA-Z]/.test(s) &&
-          /\s/.test(s) &&
-          !s.includes(":") &&
-          !s.toLowerCase().includes("example") &&
-          !s.toLowerCase().includes("player name")
+          /^[A-Z][a-zA-Z]/.test(s) && /\s/.test(s) &&
+          !s.includes(":") && !s.toLowerCase().includes("example")
         );
         if (filtered.length >= 5) players = filtered;
       }
 
-      // Strategy 3: line-by-line — look for capitalized name-like strings
+      // Strategy 3: line-by-line name extraction
       if (!players || players.length < 3) {
         const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
         const extracted = lines
           .map(l => l.replace(/^[-*•\d.)\s"'\[,]+/, "").replace(/["'\],\s]+$/, "").trim())
           .filter(l =>
-            l.length >= 4 &&
-            l.length <= 35 &&
-            /^[A-Z]/.test(l) &&
-            /\s/.test(l) &&
-            !l.includes(":") &&
-            !l.includes("{") &&
+            l.length >= 4 && l.length <= 35 &&
+            /^[A-Z]/.test(l) && /\s/.test(l) &&
+            !l.includes(":") && !l.includes("{") &&
             !/^(QB|RB|WR|TE|Round|Pick|ADP|Bye)/i.test(l)
           );
         if (extracted.length >= 5) players = extracted;
       }
 
       if (!players || players.length === 0) {
-        throw new Error("Could not parse player list — tap Show Debug Response below to see what the API returned");
+        throw new Error("Couldn't read any player names from the screenshot. Try a clearer image or use Paste Text instead.");
       }
 
-      // Final safety filter — strip any AI preamble/explanation that leaked
-      // through (e.g. "Here is the requested information extracted from image.png").
-      // Real NFL names never contain these tokens or end with a period.
+      // Filter out AI preamble that leaked through
       const JUNK_TOKENS = [
-        "here is", "here are", "extracted", "image", "requested", "information",
-        "following", "roster", "screenshot", ".png", ".jpg", ".jpeg", "json",
-        "sure", "i've", "i have", "below", "these are", "the player", "list of",
+        "here is", "here are", "extracted", "image", "requested",
+        "following", "roster", "screenshot", ".png", ".jpg", ".jpeg",
+        "sure", "i've", "below", "these are", "the player", "list of",
         "based on", "no player", "unable", "cannot", "could not",
       ];
       players = players.filter(p => {
         const low = p.toLowerCase().trim();
-        // Drop sentences ending in a period (names don't, except "Jr." which we handle)
         if (/\.$/.test(low) && !/\bjr\.$|\bsr\.$|\bii\.$|\biii\.$/.test(low)) return false;
-        // Drop anything containing a junk token
         if (JUNK_TOKENS.some(tok => low.includes(tok))) return false;
-        // Drop overly long strings (real names are <= ~28 chars)
-        if (p.length > 30) return false;
-        // Must contain at least one space (first + last name)
+        if (p.length > 32) return false;
         if (!/\s/.test(p.trim())) return false;
         return true;
       });
 
-      if (players.length === 0) {
-        throw new Error("Extraction returned only non-player text — tap Show Debug Response to inspect, or try Paste Text mode");
-      }
-
-      // Dedupe
       players = [...new Set(players.map(p => p.trim()))];
 
-      const newInput = players.join("\n");
-      setInput(newInput);
-      if (analysisMode === "redraft") {
-        const picks = parseRosterRedraft(newInput);
-        const league = resolveLeague(redraftLeague, customConfig);
-        const result = analyzeRedraft(picks, league, picks.hasPickNumbers);
-        setAnalyzed(result);
-      } else {
-        const fmt = TOURNAMENTS[tournament].format || "standard";
-        const picks = parseRoster(newInput, fmt);
-        const result = analyzeRoster(picks, tournament, picks.hasPickNumbers);
-        setAnalyzed(result);
+      if (players.length === 0) {
+        throw new Error("No valid player names found. Try a clearer screenshot or Paste Text mode.");
       }
-      setMode("paste");
+
+      // Show the review step — don't auto-analyze yet
+      setExtractedPlayers(players);
+
     } catch (err) {
-      setExtractError(err.message || "Extraction failed");
+      setExtractError(err.message || "Extraction failed — please try again or use Paste Text mode");
     } finally {
       setExtracting(false);
+      setExtractProgress("");
     }
+  };
+
+  // Called when user confirms extracted roster looks correct
+  const confirmExtractedRoster = () => {
+    if (!extractedPlayers || extractedPlayers.length === 0) return;
+    const newInput = extractedPlayers.join("\n");
+    setInput(newInput);
+    setExtractedPlayers(null);
+    if (analysisMode === "redraft") {
+      const picks = parseRosterRedraft(newInput);
+      const league = resolveLeague(redraftLeague, customConfig);
+      const result = analyzeRedraft(picks, league, picks.hasPickNumbers, dataMode === "projected");
+      setAnalyzed(result);
+    } else {
+      const fmt = TOURNAMENTS[tournament].format || "standard";
+      const picks = parseRoster(newInput, fmt);
+      const result = analyzeRoster(picks, tournament, picks.hasPickNumbers, dataMode === "projected");
+      setAnalyzed(result);
+    }
+    setMode("paste");
+    uploadedImages.forEach(i => URL.revokeObjectURL(i.preview));
+    setUploadedImages([]);
   };
 
   const removeImage = (idx) => {
@@ -3387,6 +3598,7 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
       URL.revokeObjectURL(prev[idx].preview);
       return prev.filter((_, i) => i !== idx);
     });
+    setExtractedPlayers(null);
   };
 
   const handleDrop = (e) => {
@@ -3461,12 +3673,12 @@ Travis Etienne`;
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
       // showPickAnalysis is user opt-in — if off, never show ADP deltas regardless of parser detection
-      const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers);
+      const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
-      const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers);
+      const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
     }
   };
@@ -3594,6 +3806,76 @@ Travis Etienne`;
         .scroll-shadow::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         button:hover:not(:disabled) { filter: brightness(1.15); }
         textarea:focus { outline: none; border-color: #4ade80 !important; }
+        .xray-electric {
+          display: inline-block;
+          animation: electricFlicker 6s ease-in-out infinite;
+          transform-origin: center;
+        }
+        @keyframes electricFlicker {
+          0% {
+            color: #fff;
+            text-shadow: 0 0 8px #22d3ee, 0 0 20px #22d3ee, 0 0 40px #06b6d4;
+          }
+          2% {
+            color: #22d3ee;
+            text-shadow: none;
+          }
+          4% {
+            color: #fff;
+            text-shadow: 0 0 12px #22d3ee, 0 0 30px #22d3ee, 0 0 60px #06b6d4, 0 0 80px #0891b2;
+          }
+          5% {
+            color: #22d3ee;
+            text-shadow: 0 0 4px #22d3ee;
+          }
+          7% {
+            color: #fff;
+            text-shadow: 0 0 8px #22d3ee, 0 0 20px #22d3ee;
+          }
+          9%, 89%, 100% {
+            color: #22d3ee;
+            text-shadow: none;
+          }
+          90% {
+            color: #fff;
+            text-shadow: 0 0 8px #22d3ee, 0 0 20px #22d3ee, 0 0 40px #06b6d4;
+          }
+          91% {
+            color: #22d3ee;
+            text-shadow: none;
+          }
+          92% {
+            color: #fff;
+            text-shadow: 0 0 8px #22d3ee, 0 0 20px #22d3ee, 0 0 40px #06b6d4;
+          }
+          93%, 96% {
+            color: #22d3ee;
+            text-shadow: none;
+          }
+          97% {
+            color: #fff;
+            text-shadow: 0 0 12px #22d3ee, 0 0 30px #22d3ee, 0 0 60px #06b6d4, 0 0 80px #0891b2;
+          }
+          98% {
+            color: #22d3ee;
+            text-shadow: 0 0 4px #22d3ee;
+          }
+          99% {
+            color: #fff;
+            text-shadow: 0 0 8px #22d3ee, 0 0 20px #22d3ee;
+          }
+        }
+        .ceiling-glow {
+          animation: ceilingGlow 3s ease-in-out infinite;
+        }
+        @keyframes ceilingGlow {
+          0%, 100% {
+            box-shadow: 0 0 6px #22d3ee44, 0 0 0 1px #22d3ee33;
+          }
+          50% {
+            box-shadow: 0 0 18px #22d3ee99, 0 0 32px #22d3ee44, 0 0 0 1px #22d3eeaa;
+          }
+        }
       `}</style>
 
       {/* Header */}
@@ -3611,7 +3893,7 @@ Travis Etienne`;
               margin: 0,
               color: "#fafafa",
             }}>
-              <span style={{ color: "#fafafa" }}>ROSTER </span><span style={{ color: "#22d3ee" }}>X-RAY</span>
+              <span style={{ color: "#fafafa" }}>ROSTER </span><span className="xray-electric">X-RAY</span>
             </h1>
             <span style={{
               fontSize: "10px",
@@ -3646,7 +3928,7 @@ Travis Etienne`;
                 🏆 Best Ball Tournament
               </div>
               <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Underdog · stack-focused · playoff windows
+                Underdog · stack-focused · playoff matchups
               </div>
             </button>
             <button
@@ -3671,6 +3953,74 @@ Travis Etienne`;
           </div>
         </div>
 
+        {/* ── Matchup Data Toggle: 2025 Data vs 2026 Est. ── */}
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+            <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              Matchup Data
+            </div>
+            {/* Info tooltip trigger */}
+            <div
+              title="2025 Data uses real stats from last season — the ground truth. 2026 Est. adds adjustments for this offseason's biggest roster moves (free agency + key draft picks). Estimates only — not real data yet."
+              style={{
+                width: "14px", height: "14px", borderRadius: "50%",
+                background: "#1a1a1a", border: "1px solid #333",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "9px", color: "#666", cursor: "help", flexShrink: 0,
+              }}
+            >ⓘ</div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            {/* 2025 Data button */}
+            <button
+              onClick={() => { setDataMode("actual"); if (analyzed) setAnalyzed(null); }}
+              style={{
+                background: dataMode === "actual" ? "#0d1f33" : "#0f0f0f",
+                border: `1px solid ${dataMode === "actual" ? "#22d3ee" : "#222"}`,
+                borderRadius: "4px", padding: "12px 14px",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+              }}
+            >
+              <div style={{ fontSize: "13px", color: dataMode === "actual" ? "#22d3ee" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
+                📊 2025 Data
+              </div>
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
+                Real stats from last season
+              </div>
+            </button>
+            {/* 2026 Est. button */}
+            <button
+              onClick={() => { setDataMode("projected"); if (analyzed) setAnalyzed(null); }}
+              style={{
+                background: dataMode === "projected" ? "#1a1200" : "#0f0f0f",
+                border: `1px solid ${dataMode === "projected" ? "#f59e0b" : "#222"}`,
+                borderRadius: "4px", padding: "12px 14px",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+              }}
+            >
+              <div style={{ fontSize: "13px", color: dataMode === "projected" ? "#fbbf24" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
+                🔮 2026 Est.
+              </div>
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
+                Adjusted for offseason moves
+              </div>
+            </button>
+          </div>
+          {/* Amber warning banner — only visible in projected mode */}
+          {dataMode === "projected" && (
+            <div style={{
+              marginTop: "8px", padding: "8px 12px",
+              background: "#1a1200", border: "1px solid #f59e0b55",
+              borderRadius: "4px", display: "flex", alignItems: "flex-start", gap: "8px",
+            }}>
+              <span style={{ fontSize: "12px", flexShrink: 0 }}>⚠️</span>
+              <div style={{ fontSize: "10px", color: "#d97706", lineHeight: 1.5 }}>
+                <strong>Estimated mode</strong> — matchup ratings reflect projected 2026 defensive changes based on free agency and the draft. These are not real stats. Switch to <strong>2025 Data</strong> for ground truth.
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Tournament selector — Best Ball only */}
         {analysisMode === "bestball" && (
         <div style={{ marginBottom: "20px" }}>
@@ -3686,7 +4036,7 @@ Travis Etienne`;
                   if (analyzed) {
                     const fmt = TOURNAMENTS[key].format || "standard";
                     const picks = parseRoster(input, fmt);
-                    const result = analyzeRoster(picks, key, picks.hasPickNumbers);
+                    const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
                     setAnalyzed(result);
                   }
                 }}
@@ -3747,7 +4097,7 @@ Travis Etienne`;
                   setCustomExpanded(false);
                   if (analyzed) {
                     const picks = parseRosterRedraft(input);
-                    const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers);
+                    const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers, dataMode === "projected");
                     setAnalyzed(result);
                   }
                 }}
@@ -3785,7 +4135,7 @@ Travis Etienne`;
                 setCustomExpanded(true);
                 if (analyzed) {
                   const picks = parseRosterRedraft(input);
-                  const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers);
+                  const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers, dataMode === "projected");
                   setAnalyzed(result);
                 }
               }}
@@ -3851,7 +4201,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, teams: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3873,7 +4223,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, scoring: e.target.value };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3895,7 +4245,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, QB: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3916,7 +4266,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, RB: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3937,7 +4287,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, WR: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3958,7 +4308,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, TE: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -3979,7 +4329,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, FLEX: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -4001,7 +4351,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, SFLEX: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -4022,7 +4372,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, benchSize: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -4044,7 +4394,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, irSlots: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -4066,7 +4416,7 @@ Travis Etienne`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, playoffWeeks: e.target.value === "14" ? [14, 15, 16] : [15, 16, 17] };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -4103,7 +4453,7 @@ Travis Etienne`;
               opacity: 0.5,
             }}
           >
-            📸 Upload Screenshot <span style={{ fontSize: "9px", color: "#555", marginLeft: "4px", letterSpacing: "0.05em" }}>(Coming Soon)</span>
+            📸 Upload Screenshot
           </button>
           <button
             onClick={() => setMode("paste")}
@@ -4128,137 +4478,222 @@ Travis Etienne`;
         {/* Upload Mode */}
         {mode === "upload" && (
           <div style={{ marginBottom: "24px" }}>
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              onPaste={handlePaste}
-              tabIndex={0}
-              style={{
-                border: `2px dashed ${dragOver ? "#4ade80" : "#333"}`,
-                background: dragOver ? "#0d1f14" : "#0d0d0d",
-                borderRadius: "6px",
-                padding: "40px 20px",
-                textAlign: "center",
-                transition: "all 0.2s",
-                cursor: "pointer",
-              }}
-              onClick={() => document.getElementById("file-input").click()}
-            >
-              <input
-                id="file-input"
-                type="file"
-                accept="image/*"
-                multiple
-                style={{ display: "none" }}
-                onChange={(e) => handleFiles(e.target.files)}
-              />
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>📸</div>
-              <div style={{ fontSize: "14px", color: "#fafafa", marginBottom: "6px", fontWeight: 600 }}>
-                Drop screenshots here, click to browse, or paste (Cmd/Ctrl+V)
-              </div>
-              <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN · any roster screenshot. Multiple images OK.
-              </div>
+
+            {/* How-to tip */}
+            <div style={{
+              background: "#0d1a12", border: "1px solid #1e3a28",
+              borderLeft: "3px solid #22d3ee", borderRadius: "5px",
+              padding: "10px 14px", marginBottom: "12px", fontSize: "11px",
+              color: "#888", lineHeight: 1.6,
+            }}>
+              <span style={{ color: "#22d3ee", fontWeight: 600 }}>Tip:</span>{" "}
+              If your roster doesn't fit in one screenshot, take 2–3 scrolled screenshots and upload them all at once. We'll combine and deduplicate automatically.
             </div>
 
-            {/* Image previews */}
-            {uploadedImages.length > 0 && (
-              <div style={{ marginTop: "12px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "8px" }}>
-                {uploadedImages.map((img, i) => (
-                  <div key={i} style={{ position: "relative", border: "1px solid #222", borderRadius: "4px", overflow: "hidden", background: "#0a0a0a" }}>
-                    <img src={img.preview} alt={img.name} style={{ width: "100%", height: "120px", objectFit: "cover", display: "block" }} />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeImage(i); }}
-                      style={{
-                        position: "absolute",
-                        top: "4px",
-                        right: "4px",
-                        background: "rgba(0,0,0,0.8)",
-                        color: "#f87171",
-                        border: "none",
-                        borderRadius: "3px",
-                        width: "22px",
-                        height: "22px",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        lineHeight: 1,
-                      }}
-                    >×</button>
-                  </div>
-                ))}
+            {/* Drop zone — only show when no images uploaded yet */}
+            {uploadedImages.length === 0 && (
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                onPaste={handlePaste}
+                tabIndex={0}
+                style={{
+                  border: `2px dashed ${dragOver ? "#4ade80" : "#333"}`,
+                  background: dragOver ? "#0d1f14" : "#0d0d0d",
+                  borderRadius: "6px",
+                  padding: "40px 20px",
+                  textAlign: "center",
+                  transition: "all 0.2s",
+                  cursor: "pointer",
+                }}
+                onClick={() => document.getElementById("file-input").click()}
+              >
+                <input
+                  id="file-input"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={(e) => handleFiles(e.target.files)}
+                />
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>📸</div>
+                <div style={{ fontSize: "14px", color: "#fafafa", marginBottom: "6px", fontWeight: 600 }}>
+                  Tap to upload, drag & drop, or paste (Ctrl+V)
+                </div>
+                <div style={{ fontSize: "11px", color: "#555" }}>
+                  Underdog · Yahoo · Sleeper · ESPN · up to 4 images
+                </div>
               </div>
             )}
 
+            {/* Image previews + add more */}
+            {uploadedImages.length > 0 && !extractedPlayers && (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: "8px", marginBottom: "10px" }}>
+                  {uploadedImages.map((img, i) => (
+                    <div key={i} style={{ position: "relative", border: "1px solid #222", borderRadius: "4px", overflow: "hidden", background: "#0a0a0a" }}>
+                      <img src={img.preview} alt={img.name} style={{ width: "100%", height: "110px", objectFit: "cover", display: "block" }} />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeImage(i); }}
+                        style={{
+                          position: "absolute", top: "4px", right: "4px",
+                          background: "rgba(0,0,0,0.85)", color: "#f87171",
+                          border: "none", borderRadius: "3px",
+                          width: "22px", height: "22px",
+                          cursor: "pointer", fontSize: "12px", lineHeight: 1,
+                        }}
+                      >×</button>
+                    </div>
+                  ))}
+                  {/* Add more button */}
+                  {uploadedImages.length < 4 && (
+                    <div
+                      onClick={() => document.getElementById("file-input-more").click()}
+                      style={{
+                        border: "2px dashed #333", borderRadius: "4px",
+                        height: "110px", display: "flex", flexDirection: "column",
+                        alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", color: "#555", fontSize: "22px",
+                        background: "#0d0d0d",
+                      }}
+                    >
+                      <input
+                        id="file-input-more"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: "none" }}
+                        onChange={(e) => handleFiles(e.target.files)}
+                      />
+                      <span>+</span>
+                      <span style={{ fontSize: "9px", marginTop: "4px", letterSpacing: "0.05em" }}>ADD MORE</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Progress message during extraction */}
+                {extracting && extractProgress && (
+                  <div style={{
+                    padding: "10px 14px", marginBottom: "8px",
+                    background: "#0d1a12", border: "1px solid #1e3a28",
+                    borderRadius: "4px", fontSize: "11px", color: "#4ade80",
+                    display: "flex", alignItems: "center", gap: "8px",
+                  }}>
+                    <span style={{ animation: "pulse 1.5s ease-in-out infinite", display: "inline-block" }}>●</span>
+                    {extractProgress}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── REVIEW STEP ── */}
+            {extractedPlayers && (
+              <div style={{
+                background: "#0a1a0a", border: "1px solid #1a3a1a",
+                borderLeft: "3px solid #4ade80", borderRadius: "5px",
+                padding: "14px", marginBottom: "10px",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
+                  <div>
+                    <div style={{ fontSize: "12px", color: "#4ade80", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                      ✓ {extractedPlayers.length} Players Found
+                    </div>
+                    <div style={{ fontSize: "10px", color: "#666", marginTop: "2px" }}>
+                      {extractedPlayers.length < 16 ? `⚠ Expected 18 — looks like some may be missing. Upload another screenshot?` : "Looks complete — confirm to run analysis."}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      onClick={confirmExtractedRoster}
+                      style={{
+                        background: "#4ade80", color: "#0a0a0a",
+                        border: "none", padding: "8px 16px",
+                        fontSize: "11px", fontWeight: 700,
+                        fontFamily: "inherit", letterSpacing: "0.08em",
+                        textTransform: "uppercase", cursor: "pointer",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      Confirm & Analyze →
+                    </button>
+                    <button
+                      onClick={() => { setExtractedPlayers(null); setUploadedImages([]); }}
+                      style={{
+                        background: "transparent", color: "#666",
+                        border: "1px solid #333", padding: "8px 12px",
+                        fontSize: "11px", fontFamily: "inherit",
+                        cursor: "pointer", borderRadius: "3px",
+                      }}
+                    >
+                      Retake
+                    </button>
+                  </div>
+                </div>
+                {/* Player list for review */}
+                <div style={{
+                  display: "grid", gridTemplateColumns: "1fr 1fr",
+                  gap: "2px", maxHeight: "200px", overflowY: "auto",
+                  fontSize: "11px",
+                }}>
+                  {extractedPlayers.map((name, i) => (
+                    <div key={i} style={{
+                      padding: "4px 8px", background: "#0d1a0d",
+                      borderRadius: "2px", color: "#ccc",
+                      display: "flex", alignItems: "center", gap: "6px",
+                    }}>
+                      <span style={{ color: "#333", fontSize: "9px", minWidth: "16px" }}>{i + 1}</span>
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
             {extractError && (
-              <div style={{ marginTop: "10px", padding: "10px 14px", background: "#2e1414", border: "1px solid #7c2d12", borderRadius: "4px", color: "#fb923c", fontSize: "12px" }}>
+              <div style={{
+                marginTop: "8px", padding: "10px 14px",
+                background: "#2e1414", border: "1px solid #7c2d12",
+                borderRadius: "4px", color: "#fb923c", fontSize: "12px", lineHeight: 1.5,
+              }}>
                 {extractError}
               </div>
             )}
 
-            {debugResponse && (
-              <details style={{ marginTop: "8px" }} open={!!extractError}>
-                <summary style={{ cursor: "pointer", fontSize: "11px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 0" }}>
-                  Show Debug Response
-                </summary>
-                <pre style={{
-                  background: "#0a0a0a",
-                  border: "1px solid #222",
-                  borderRadius: "3px",
-                  padding: "10px",
-                  fontSize: "10px",
-                  color: "#888",
-                  maxHeight: "300px",
-                  overflow: "auto",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}>
-                  {debugResponse}
-                </pre>
-              </details>
-            )}
-
-            <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
-              <button
-                onClick={extractFromImages}
-                disabled={uploadedImages.length === 0 || extracting}
-                style={{
-                  background: "#4ade80",
-                  color: "#0a0a0a",
-                  border: "none",
-                  padding: "10px 24px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  fontFamily: "inherit",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  cursor: uploadedImages.length > 0 && !extracting ? "pointer" : "not-allowed",
-                  opacity: uploadedImages.length > 0 && !extracting ? 1 : 0.4,
-                  borderRadius: "3px",
-                }}
-              >
-                {extracting ? "Extracting..." : "Extract & Analyze →"}
-              </button>
-              {uploadedImages.length > 0 && (
+            {/* Action buttons */}
+            {uploadedImages.length > 0 && !extractedPlayers && (
+              <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
                 <button
-                  onClick={() => { uploadedImages.forEach(i => URL.revokeObjectURL(i.preview)); setUploadedImages([]); }}
+                  onClick={extractFromImages}
+                  disabled={uploadedImages.length === 0 || extracting}
                   style={{
-                    background: "transparent",
-                    color: "#888",
-                    border: "1px solid #333",
-                    padding: "10px 18px",
-                    fontSize: "12px",
-                    fontFamily: "inherit",
-                    letterSpacing: "0.1em",
+                    background: "#4ade80", color: "#0a0a0a",
+                    border: "none", padding: "10px 24px",
+                    fontSize: "12px", fontWeight: 600,
+                    fontFamily: "inherit", letterSpacing: "0.1em",
                     textTransform: "uppercase",
-                    cursor: "pointer",
+                    cursor: uploadedImages.length > 0 && !extracting ? "pointer" : "not-allowed",
+                    opacity: uploadedImages.length > 0 && !extracting ? 1 : 0.4,
                     borderRadius: "3px",
                   }}
                 >
-                  Clear Images
+                  {extracting ? "Reading roster…" : "Extract Roster →"}
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={() => { uploadedImages.forEach(i => URL.revokeObjectURL(i.preview)); setUploadedImages([]); setExtractedPlayers(null); }}
+                  style={{
+                    background: "transparent", color: "#666",
+                    border: "1px solid #2a2a2a", padding: "10px 18px",
+                    fontSize: "12px", fontFamily: "inherit",
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    cursor: "pointer", borderRadius: "3px",
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -4563,7 +4998,7 @@ Travis Etienne`;
                         <span style={{ color: "#4ade80" }}>Construction</span> — does your roster have the right position counts? Best ball targets are 6–7 WRs, 5–6 RBs, 2–3 TEs, 2–3 QBs. Too heavy or too light at any position costs points.
                       </div>
                       <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#4ade80" }}>Playoff window</span> — your W15–W17 opponent matchups. Facing weak defenses in the championship weeks boosts your score. Facing tough ones hurts it.
+                        <span style={{ color: "#4ade80" }}>Playoff matchups</span> — your W15–W17 opponents. Facing weak defenses in the championship weeks boosts your score. Facing tough ones hurts it.
                       </div>
                       <div>
                         <span style={{ color: "#4ade80" }}>Bring-backs</span> — when you own players from both sides of the same playoff game, a high-scoring shootout benefits multiple players at once.
@@ -4646,10 +5081,10 @@ Travis Etienne`;
                 margin: "0 0 4px",
                 color: "#fafafa",
               }}>
-                STACKS · PLAYOFF WINDOWS
+                STACKS · PLAYOFF MATCHUPS
               </h2>
               <div style={{ fontSize: "11px", color: "#888", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
-                A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "#22d3ee", fontWeight: 600 }}>double the upside</span>. The window rating shows how good their shared playoff matchups are.
+                A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "#22d3ee", fontWeight: 600 }}>double the upside</span>. The matchup rating shows how favorable their shared playoff schedule is.
               </div>
               <MatchupLegend />
               {analyzed.stackGrades.length === 0 && (
@@ -4679,7 +5114,7 @@ Travis Etienne`;
                         </span>
                       </div>
                       <span style={{ fontSize: "11px", color: stackColor, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>
-                        {stackTier} Window
+                        {stackTier} Matchups
                       </span>
                     </div>
 
@@ -4753,11 +5188,12 @@ Travis Etienne`;
                 </div>
                 {analyzed.bringBacks.map((bb, idx) => {
                   const wc = weekColor(bb.weekIdx);
+                  const isCeiling = bb.isCeilingGame;
                   return (
-                  <div key={idx} style={{
+                  <div key={idx} className={isCeiling ? "ceiling-glow" : ""} style={{
                     background: wc.bg,
-                    border: `1px solid ${wc.border}55`,
-                    borderLeft: `3px solid ${wc.border}`,
+                    border: isCeiling ? `1px solid #22d3ee99` : `1px solid ${wc.border}55`,
+                    borderLeft: isCeiling ? `3px solid #22d3ee` : `3px solid ${wc.border}`,
                     borderRadius: "4px",
                     padding: "12px 16px",
                     marginBottom: "8px",
@@ -4772,7 +5208,17 @@ Travis Etienne`;
                         padding: "1px 7px",
                       }}>{bb.week}</span>
                       <span style={{ color: "#999" }}>{bb.stackTeam} vs {bb.opponent}</span>
-                      {bb.hasQB && (
+                      {isCeiling ? (
+                        <span style={{
+                          color: "#22d3ee",
+                          fontWeight: 700,
+                          background: "#051520",
+                          border: "1px solid #22d3ee66",
+                          borderRadius: "3px",
+                          padding: "1px 7px",
+                          fontSize: "9px",
+                        }}>🔥 CEILING GAME</span>
+                      ) : bb.hasQB && (
                         <span style={{
                           color: "#4ade80",
                           fontWeight: 700,
@@ -4839,21 +5285,40 @@ Travis Etienne`;
                           <span style={{ fontSize: "12px", color: "#fafafa", fontWeight: 600 }}>{o.name}</span>
                           <span style={{ fontSize: "9px", color: "#666", letterSpacing: "0.05em" }}>{o.pos} · {o.team}</span>
                         </div>
-                        <span style={{
-                          display: "inline-block",
-                          fontSize: "9px",
-                          color: s.text,
-                          background: `${s.text}15`,
-                          border: `1px solid ${s.text}44`,
-                          fontWeight: 700,
-                          letterSpacing: "0.08em",
-                          marginBottom: "8px",
-                          padding: "1px 7px",
-                          borderRadius: "3px",
-                          textTransform: "uppercase",
-                        }}>
-                          {o.tier}
-                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+                          <span style={{
+                            display: "inline-block",
+                            fontSize: "9px",
+                            color: o.tier === "One-Week Spike" ? "#f59e0b" : s.text,
+                            background: o.tier === "One-Week Spike" ? "#1a120044" : `${s.text}15`,
+                            border: `1px solid ${o.tier === "One-Week Spike" ? "#f59e0b44" : s.text + "44"}`,
+                            fontWeight: 700,
+                            letterSpacing: "0.08em",
+                            padding: "1px 7px",
+                            borderRadius: "3px",
+                            textTransform: "uppercase",
+                          }}>
+                            {o.tier}
+                          </span>
+                          {/* Hidden Gem badge — elite matchups at late-round price */}
+                          {o.tier === "Strong Matchups" && o.adp >= 100 &&
+                           (o.matchups || []).reduce((sum, m) => sum + m.score, 0) >= 12 && (
+                            <span style={{
+                              display: "inline-block",
+                              fontSize: "9px",
+                              color: "#22d3ee",
+                              background: "#0a1f2a",
+                              border: "1px solid #22d3ee55",
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              padding: "1px 7px",
+                              borderRadius: "3px",
+                              textTransform: "uppercase",
+                            }}>
+                              💎 Hidden Gem
+                            </span>
+                          )}
+                        </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", fontSize: "9px" }}>
                           {o.matchups.map((m, j) => {
                             const ms = tierStyle(m.color);
@@ -4893,14 +5358,14 @@ Travis Etienne`;
                   WHAT IF YOU HAD<span style={{ color: "#666" }}>...</span>
                 </h2>
                 <div style={{ fontSize: "11px", color: "#888", marginBottom: "8px", lineHeight: 1.5, maxWidth: "640px" }}>
-                  Every pick has a road not taken. Here are the players sitting at <span style={{ color: "#22d3ee", fontWeight: 600 }}>similar ADP</span> as your picks — and whether grabbing them instead would have built a stronger roster.
+                  Every pick has a road not taken. Here are players at <span style={{ color: "#22d3ee", fontWeight: 600 }}>similar ADP</span> who had better playoff matchups. This compares <strong>schedules only</strong> — not player talent, age, or role. Use as a matchup reference, not a player ranking.
                 </div>
                 {/* Upgrade tier legend */}
                 <div style={{ display: "flex", gap: "10px", fontSize: "9px", marginBottom: "12px", letterSpacing: "0.05em", flexWrap: "wrap" }}>
-                  <span style={{ color: "#4ade80", fontWeight: 600 }}>■ BIG UPGRADE</span>
-                  <span style={{ color: "#facc15", fontWeight: 600 }}>■ UPGRADE</span>
-                  <span style={{ color: "#60a5fa", fontWeight: 600 }}>■ SLIGHT</span>
-                  <span style={{ color: "#333" }}>· vs your actual pick's playoff window</span>
+                  <span style={{ color: "#4ade80", fontWeight: 600 }}>■ BETTER MATCHUPS</span>
+                  <span style={{ color: "#facc15", fontWeight: 600 }}>■ SOFTER SCHEDULE</span>
+                  <span style={{ color: "#60a5fa", fontWeight: 600 }}>■ SLIGHT EDGE</span>
+                  <span style={{ color: "#333" }}>· vs your actual pick's playoff matchups</span>
                 </div>
                 {analyzed.topPivots.map((pivot, idx) => {
                   // Determine best alt tier for card left border color
@@ -4956,16 +5421,16 @@ Travis Etienne`;
                           return `${Math.abs(Math.round(alt.adpDelta))} picks cheaper at similar value — frees draft capital`;
                         }
                         if (alt.improvement >= 4) {
-                          return `Significantly better playoff window — worth the swap at this ADP`;
+                          return `Significantly better playoff matchups — worth the swap at this ADP`;
                         }
                         return `Modest playoff upgrade at roughly the same draft cost`;
                       })();
 
                       const upgradeTier = alt.improvement >= 4
-                        ? { label: "BIG UPGRADE", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
+                        ? { label: "BETTER MATCHUPS", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
                         : alt.improvement >= 2
-                        ? { label: "UPGRADE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
-                        : { label: "SLIGHT", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
+                        ? { label: "SOFTER SCHEDULE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
+                        : { label: "SLIGHT EDGE", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
 
                       return (
                       <div key={j} style={{
@@ -5012,9 +5477,9 @@ Travis Etienne`;
                           )}
                           {alt.breaksBringBack && (
                             <span style={{
-                              background: "#1a0a00",
-                              border: "1px solid #f97316aa",
-                              color: "#f97316",
+                              background: alt.brokenWeekLabel === "W16" ? "#2a0800" : "#1a0a00",
+                              border: `1px solid ${alt.brokenWeekLabel === "W16" ? "#ef4444cc" : "#f97316aa"}`,
+                              color: alt.brokenWeekLabel === "W16" ? "#f87171" : "#f97316",
                               fontWeight: 800,
                               padding: "2px 7px",
                               borderRadius: "3px",
@@ -5022,7 +5487,7 @@ Travis Etienne`;
                               letterSpacing: "0.08em",
                               textTransform: "uppercase",
                               flexShrink: 0,
-                            }}>⚠ Breaks Bring-Back</span>
+                            }}>⚠ Breaks {alt.brokenWeekLabel} Bring-Back</span>
                           )}
                           <span style={{ color: "#888", fontSize: "10px", lineHeight: 1.4 }}>{laymanReason}</span>
                         </div>
@@ -5665,8 +6130,11 @@ Travis Etienne`;
               }}>
                 PLAYOFF SCHEDULE · STARTERS
               </h2>
-              <p style={{ fontSize: "11px", color: "#666", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <p style={{ fontSize: "11px", color: "#666", margin: "0 0 6px", maxWidth: "640px", lineHeight: 1.5 }}>
                 The playoff weeks that <span style={{ color: "#22d3ee", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "#4ade80", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "#f87171", fontWeight: 600 }}>red flag</span>.
+              </p>
+              <p style={{ fontSize: "10px", color: "#555", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5, fontStyle: "italic" }}>
+                In redraft you start your best available players regardless — use this to know which weeks to manage your lineup most carefully, not which players to cut.
               </p>
               <MatchupLegend />
               <div style={{
@@ -5979,7 +6447,7 @@ Travis Etienne`;
                   </div>
                 </div>
                 <div style={{ fontSize: "9px", color: "#555", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid #1a1a1a", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
-                  ← swipe to scroll all 18 weeks · <span style={{ color: "#c084fc", fontWeight: 600 }}>purple W15–W17</span> = playoff window · player names stay locked
+                  ← swipe to scroll all 18 weeks · <span style={{ color: "#c084fc", fontWeight: 600 }}>purple W15–W17</span> = playoff matchups · player names stay locked
                 </div>
               </div>
             </div>
@@ -6051,10 +6519,14 @@ Travis Etienne`;
                       <div>
                         {wk.concerns.map((c, j) => {
                           const pc = posColor(c.pos);
+                          const hasSuggestion = !!c.suggestion;
+                          // No bench option = informational "Tough Week", not an actionable sit
+                          const concernColor = hasSuggestion ? "#f87171" : "#f59e0b";
+                          const concernArrow = hasSuggestion ? "▼" : "~";
                           return (
                             <div key={j} style={{ marginBottom: j < wk.concerns.length - 1 ? "6px" : 0 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: c.suggestion ? "4px" : "3px", fontSize: "12px" }}>
-                                <span style={{ color: "#f87171", fontSize: "10px", width: "14px", flexShrink: 0 }}>▼</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: hasSuggestion ? "4px" : "3px", fontSize: "12px" }}>
+                                <span style={{ color: concernColor, fontSize: "10px", width: "14px", flexShrink: 0 }}>{concernArrow}</span>
                                 <span style={{ color: "#fafafa", fontWeight: 600 }}>{c.name}</span>
                                 <span style={{
                                   fontSize: "9px",
@@ -6067,10 +6539,15 @@ Travis Etienne`;
                                 }}>
                                   {c.slot === "FLEX" || c.slot === "SFLEX" ? c.slot : c.pos}
                                 </span>
-                                <span style={{ color: "#f87171", fontSize: "10px" }}>
+                                <span style={{ color: concernColor, fontSize: "10px" }}>
                                   vs {c.matchup.opp.replace("@","")} · {c.matchup.tier}
                                 </span>
                               </div>
+                              {!hasSuggestion && (
+                                <div style={{ paddingLeft: "20px", fontSize: "10px", color: "#666", lineHeight: 1.4 }}>
+                                  No better bench option — start them, just a tough week
+                                </div>
+                              )}
                               {c.suggestion && (() => {
                                 const spc = posColor(c.suggestion.pos);
                                 const isCrossPos = c.suggestion.pos !== c.pos;
@@ -6519,11 +6996,11 @@ Travis Etienne`;
                         const score = Math.round((topStarter.totalScore / 15) * 10);
                         standouts.push({
                           icon: "🏆",
-                          label: "Best Playoff Window",
+                          label: "Best Playoff Matchups",
                           player: topStarter,
                           detail: score >= 8
                             ? `Elite playoff slate — built to peak when it matters`
-                            : `Top playoff window on roster — your schedule ace`,
+                            : `Top playoff matchups on roster — your schedule ace`,
                         });
                         used.add(topStarter.name);
                       }
@@ -6646,7 +7123,7 @@ Travis Etienne`;
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
           <a
-            href="https://twitter.com/RosterXRay"
+            href="https://x.com/hawktuahnacua"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -6660,7 +7137,7 @@ Travis Etienne`;
               borderRadius: "3px",
             }}
           >
-            𝕏 Twitter
+            𝕏 @hawktuahnacua
           </a>
           <a
             href="https://discord.gg/rosterxray"
