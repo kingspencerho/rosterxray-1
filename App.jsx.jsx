@@ -4436,21 +4436,19 @@ Travis Etienne`;
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid #222" }}>
           <button
-            disabled
-            title="Coming soon — vote with your interest!"
+            onClick={() => { setMode("upload"); setAnalyzed(null); setInput(""); }}
             style={{
               background: "transparent",
-              color: "#444",
+              color: mode === "upload" ? "#4ade80" : "#666",
               border: "none",
-              borderBottom: "2px solid transparent",
+              borderBottom: mode === "upload" ? "2px solid #4ade80" : "2px solid transparent",
               padding: "12px 18px",
               fontSize: "11px",
               fontFamily: "inherit",
               letterSpacing: "0.15em",
               textTransform: "uppercase",
-              cursor: "not-allowed",
+              cursor: "pointer",
               fontWeight: 600,
-              opacity: 0.5,
             }}
           >
             📸 Upload Screenshot
