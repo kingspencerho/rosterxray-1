@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "mkdir -p api && cp analyze.js api/analyze.js && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
