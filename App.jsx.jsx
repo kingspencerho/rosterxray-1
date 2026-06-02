@@ -3232,7 +3232,21 @@ export default function RosterScorer() {
 
   const fileToBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1200;
+        const scale = Math.min(MAX_WIDTH / img.width, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.7).split(",")[1]);
+      };
+      img.onerror = () => reject(new Error("Image processing failed"));
+      img.src = e.target.result;
+    };
     reader.onerror = () => reject(new Error("File read failed"));
     reader.readAsDataURL(file);
   });
@@ -3246,7 +3260,7 @@ export default function RosterScorer() {
     setExtractError(null);
     const processed = await Promise.all(files.map(async (f) => ({
       name: f.name,
-      type: f.type,
+      type: "image/jpeg",
       data: await fileToBase64(f),
       preview: URL.createObjectURL(f),
     })));
@@ -3277,7 +3291,7 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
         }
       ];
 
-      const response = await fetch("https://rosterxray.com/api/analyze", {
+      const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
