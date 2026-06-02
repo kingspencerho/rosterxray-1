@@ -263,6 +263,13 @@ const ADP_DATA = {
   "marshawn lloyd": { adp: 215.5, pos: "RB", team: "GB" },
   "devaughn vele": { adp: 215.5, pos: "WR", team: "NO" },
   "oscar delp": { adp: 215.5, pos: "TE", team: "NO" },
+  "eli raridon": { adp: 215.7, pos: "TE", team: "NE" },
+  "raridon": { adp: 215.7, pos: "TE", team: "NE" },
+  "chris brooks": { adp: 211.1, pos: "RB", team: "GB" },
+  "samaje perine": { adp: 215.3, pos: "RB", team: "CIN" },
+  "najee harris": { adp: 215.4, pos: "RB", team: "FA" },
+  "darius slayton": { adp: 215.4, pos: "WR", team: "NYG" },
+  "chimere dike": { adp: 215.5, pos: "WR", team: "TEN" },
   "michael mayer": { adp: 215.5, pos: "TE", team: "LV" },
 };
 
@@ -1384,7 +1391,19 @@ const parseRosterLegacy = (text, format = "standard") => {
     if (player) {
       picks.push({ ...player, pickNum: idx + 1, actualPick: actualPick || idx + 1, raw: line });
     } else {
-      picks.push({ name: cleaned, raw: line, notFound: true, pickNum: idx + 1, actualPick: actualPick || idx + 1 });
+      // Graceful fallback — keep the player in the roster so they're never silently dropped.
+      // Mark as unmatched so ADP delta, stack detection, and matchup grading are skipped for them.
+      // They still show in the full roster list with a "?" indicator.
+      picks.push({
+        name: cleaned,
+        raw: line,
+        notFound: true,
+        pos: "?",
+        team: "?",
+        adp: null,
+        pickNum: idx + 1,
+        actualPick: actualPick || null,
+      });
     }
   });
 
@@ -4767,9 +4786,14 @@ Travis Etienne`;
                 marginBottom: "20px",
                 fontSize: "12px",
               }}>
-                <div style={{ color: "#fb923c", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>UNMATCHED</div>
-                <div style={{ color: "#a8a29e" }}>
-                  {analyzed.picks.filter(p => p.notFound).map(p => p.raw).join(" · ")}
+                <div style={{ color: "#fb923c", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>
+                  ⚠ {analyzed.picks.filter(p => p.notFound).length} PLAYER{analyzed.picks.filter(p => p.notFound).length > 1 ? "S" : ""} NOT IN ADP DATABASE
+                </div>
+                <div style={{ color: "#a8a29e", marginBottom: "6px" }}>
+                  {analyzed.picks.filter(p => p.notFound).map(p => p.name).join(" · ")}
+                </div>
+                <div style={{ color: "#666", fontSize: "11px", lineHeight: 1.5 }}>
+                  These players are included in your roster count but excluded from stack detection, matchup grading, and ADP analysis. They're likely recent signings or rookies not yet in our May 29 dataset — we'll update the database as ADP data becomes available.
                 </div>
               </div>
             )}
