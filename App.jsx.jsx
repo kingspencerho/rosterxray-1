@@ -3277,7 +3277,7 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
         }
       ];
 
-      const response = await fetch("/api/analyze", {
+      const response = await fetch("https://rosterxray.com/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
