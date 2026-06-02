@@ -530,10 +530,10 @@ const ADP_SUPERFLEX = {
 
 // Tournament configurations — week weights for grade rollup
 const TOURNAMENTS = {
-  main: { name: "General", entries: "4,500", weights: [1, 1, 1], note: "Equal weighting · ceiling + floor balance", format: "standard" },
-  bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 spike critical · 1-of-14 advances", format: "standard" },
-  puppy: { name: "The Puppy", entries: "225k", weights: [1, 2, 1.5], note: "W16 kill shot · W17 final", format: "standard" },
-  superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "Redraft format · 2 QBs required · 4for4 ADP", format: "superflex" },
+  main: { name: "General", entries: "4,500", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
+  bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
+  puppy: { name: "The Puppy", entries: "225k", weights: [1, 2, 1.5], note: "W16 is the kill shot · survive to W17 or go home", format: "standard" },
+  superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
 
 // Playoff schedule W15/W16/W17
@@ -631,6 +631,7 @@ const VERDICTS = {
   "jaylen warren": { verdict: "TARGET", date: "2026-05-19", reason: "RB17 in 2025, PPR-friendly, McCarthy OC upgrade", confidence: "HIGH" },
   "eli stowers": { verdict: "TARGET (2027)", date: "2026-05-19", reason: "Buy now at ADP 195, TE1 job 2027 when Goedert gone", confidence: "MEDIUM-HIGH" },
   // 2026 role-concern fades — filtered from pivot recommendations
+  "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
   "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
   "david montgomery": { verdict: "fade", date: "2026-05-26", reason: "HOU added competition, age concern at 28", confidence: "MEDIUM" },
   "d'andre swift": { verdict: "fade", date: "2026-05-26", reason: "Committee back in CHI, no clear bell-cow role", confidence: "MEDIUM" },
@@ -1403,23 +1404,25 @@ const getMatchupTier = (opponentTeam, pos) => {
 // Converts the raw strengths/weaknesses arrays + grade into a 2-sentence
 // plain-English summary. Beginner-friendly, no jargon, anchored at the top
 // of every results page so users get the headline truth before the data.
-const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
+const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [], primaryStacks = [], eliteStacks = [], verdictAlignments = [] }) => {
   // === Translation layer: strip jargon, return short plain-English phrases ===
   // Returns null if the input string isn't important enough to surface.
   const translate = (s) => {
     const l = s.toLowerCase();
     // Best Ball strengths
     if (l.includes("primary qb stack") || l.includes("primary stacks built")) return "QB game-stacks built";
-    if (l.includes("elite stack")) return "an elite-window stack";
+    if (l.includes("elite stack")) return "an elite-matchup stack";
     if (l.includes("w16 kill-shot") || l.includes("w16")) return "W16 kill-shot ceiling";
     if (l.includes("w15 spike") || (l.includes("w15") && l.includes("stack"))) return "a W15 spike stack";
     if (l.includes("roster construction") && l.includes("matches")) return "clean construction";
     if (l.includes("roster construction") && l.includes("fits superflex")) return "clean Superflex build";
     if (l.includes("game stack(s) with bring-back")) return "bring-back game stacks";
-    if (l.includes("orphan(s) with strong playoff")) return "solo picks in strong windows";
+    if (l.includes("orphan(s) with strong playoff")) return "solo picks with strong matchups";
     if (l.includes("match your target verdicts") || l.includes("players match your target")) return "confirmed target picks";
     if (l.includes("sharp/leverage stack")) return "field-leverage stacks";
     if (l.includes("adp value pick")) return "real ADP value grabs";
+    if (l.includes("hidden gem")) return "underpriced elite-matchup picks";
+    if (l.includes("depth/backup roles")) return "depth/backup players on roster — ceiling capped";
     // Redraft strengths
     if (l.includes("elite starting lineup")) return "an elite starting lineup";
     if (l.includes("strong starting lineup")) return "a strong starting lineup";
@@ -1438,7 +1441,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
     if (l.includes("only") && l.includes("qb") && l.includes("sf requires")) return "not enough QBs for SF";
     if (l.includes("significant reaches")) return "multiple ADP reaches";
     if (l.includes("orphans with no matchup or value edge")) return "wasted solo picks";
-    if (l.includes("match your fade verdicts")) return "picks fighting your own fade list";
+    if (l.includes("match your fade verdicts")) return null; // suppress — covered by weak link callout
 
     // Redraft weaknesses
     if (l.includes("weak starting lineup")) return "a weak starting lineup";
@@ -1499,32 +1502,116 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode }) => {
     firstSentence = "Roster reads as average across the board — no major edges, no critical holes.";
   }
 
-  // === Grade-tier-keyed verdict tail ===
+  // === Dynamic verdict tail — signal-keyed selection ===
+  // Priority order: confirmed ADP steal → elite stack anchor (grade A only) →
+  // fade+reach weak link (grade C/D only) → grade + score band fallback.
+  // Player callouts fire only on high-confidence, unambiguous signals.
+  // One callout max per nutshell. When in doubt, fall through to grade-band default.
+
+  // Signal 1: confirmed ADP steal — picked 15+ after ADP (big positive delta = value)
+  const stealThreshold = 15;
+  const confirmedSteals = (adpFlags || []).filter(p => p.delta >= stealThreshold);
+  const stealPlayer = confirmedSteals.length >= 1
+    ? confirmedSteals.sort((a, b) => b.delta - a.delta)[0]
+    : null;
+
+  // Signal 2: elite stack anchor — QB in an elite-window stack (normalizedScore >= 12)
+  const eliteStackQBs = (eliteStacks || [])
+    .map(s => s.players?.find(p => p.pos === "QB"))
+    .filter(Boolean);
+  const anchorQB = eliteStackQBs.length >= 1 ? eliteStackQBs[0] : null;
+
+  // Signal 3: confirmed fade player who was also a significant reach (delta <= -20)
+  // Both conditions must be true — one alone is not enough to name someone publicly
+  const reachThreshold = 20;
+  const fadeReaches = (adpFlags || []).filter(p => {
+    if (p.delta > -reachThreshold) return false;
+    const fadedPlayer = (verdictAlignments || []).find(
+      v => v.name === p.name && !v.stale && (v.verdict === "fade" || v.verdict === "HARD FADE")
+    );
+    return !!fadedPlayer;
+  });
+  const weakLinkPlayer = fadeReaches.length >= 1
+    ? fadeReaches.sort((a, b) => a.delta - b.delta)[0]
+    : null;
+
+  // Score bands within each grade for two-tier defaults
+  const scoreBandHigh = score >= 4.0;   // upper half of A/A- range
+  const scoreBandMid  = score >= 2.5;   // upper half of B+/B range
+  const scoreBandMod  = score >= 1.8;   // upper half of B range
+
   let verdict;
-  if (grade.startsWith("A")) {
+
+  // --- Callout variants (high-confidence signals only, B+ and above) ---
+  if (stealPlayer?.name && (grade === "A" || grade === "A-" || grade === "B+")) {
+    const last = stealPlayer.name.split(" ").slice(-1)[0];
     verdict = mode === "bestball"
-      ? "League-winning ceiling if the stacks hit."
-      : "Title-contender build top to bottom.";
+      ? `${last} is a confirmed ADP steal — that delta alone separates this roster.`
+      : `${last} is a clear ADP value — that pick elevates the whole floor.`;
+
+  } else if (anchorQB?.name && grade.startsWith("A")) {
+    const last = anchorQB.name.split(" ").slice(-1)[0];
+    verdict = mode === "bestball"
+      ? `The ${anchorQB.team} stack anchored by ${last} is the ceiling driver — everything else is support.`
+      : `${last} is the stack anchor — this roster builds around that ceiling.`;
+
+  } else if (weakLinkPlayer?.name && (grade === "C" || grade === "C+" || grade === "D")) {
+    const last = weakLinkPlayer.name.split(" ").slice(-1)[0];
+    verdict = mode === "bestball"
+      ? `${last} is a drag — a reach on a faded player. That pick caps the ceiling.`
+      : `${last} is the weak link — a reach on a contested role that costs lineup flexibility.`;
+
+  // --- Grade + score-band defaults ---
+  } else if (grade === "A") {
+    verdict = scoreBandHigh
+      ? (mode === "bestball"
+          ? "This is a title-contender build — stacks, construction, and window all aligned."
+          : "Elite from top to bottom — every slot is a real starter.")
+      : (mode === "bestball"
+          ? "League-winning ceiling is there — just needs the stacks to fire in the right weeks."
+          : "Title-contender build — one or two injuries from a dominant run.");
+
+  } else if (grade === "A-") {
+    verdict = scoreBandHigh
+      ? (mode === "bestball"
+          ? "Strong ceiling build — one elite week from winning the whole thing."
+          : "Near-elite roster — this competes for the title if the schedule breaks right.")
+      : (mode === "bestball"
+          ? "Upside is real, but needs a spike week to separate from the field."
+          : "Strong starter — a few waiver moves away from a title run.");
+
   } else if (grade === "B+") {
-    verdict = mode === "bestball"
-      ? "Above-average ceiling with a clear identity."
-      : "Strong starter with fixable depth.";
+    verdict = scoreBandMid
+      ? (mode === "bestball"
+          ? "Above-average ceiling with a clear identity — one stack hitting makes this dangerous."
+          : "Strong roster with real depth — fixable issues at the margin.")
+      : (mode === "bestball"
+          ? "Solid build with upside, but the kill-shot piece isn't obvious yet."
+          : "Competitive lineup — needs sharper bench management to reach its ceiling.");
+
   } else if (grade === "B") {
-    verdict = mode === "bestball"
-      ? "Solid foundation, missing the kill-shot piece."
-      : "Playable lineup, needs sharper bench moves.";
+    verdict = scoreBandMod
+      ? (mode === "bestball"
+          ? "Good foundation — this wins when two or three pieces break out in the same week."
+          : "Solid lineup with real contributors — depth is the limiting factor.")
+      : (mode === "bestball"
+          ? "Playable build — missing the explosive ceiling piece that separates from the field."
+          : "Functional roster, but needs active bench moves to stay competitive.");
+
   } else if (grade === "C+") {
     verdict = mode === "bestball"
-      ? "Middling — needs a pivot or two to break out."
-      : "Lineup-fragile but workable with management.";
+      ? "Middle of the pack — needs a pivot or a breakout to become a contender."
+      : "Workable lineup, but roster-fragile — one injury changes the season.";
+
   } else if (grade === "C") {
     verdict = mode === "bestball"
-      ? "Thin build — relying on outlier weeks."
-      : "Holes in the lineup — active waiver play required.";
+      ? "Thin build — ceiling depends on outlier weeks that may never come."
+      : "Holes in the lineup — active waiver play required all season.";
+
   } else {
     verdict = mode === "bestball"
-      ? "Construction issues drag down the ceiling."
-      : "Significant gaps — rebuild via trades and waivers.";
+      ? "Construction issues are dragging down the ceiling — needs a rebuild from Round 1."
+      : "Significant gaps — this roster needs trades and aggressive waiver activity to compete.";
   }
 
   return `${firstSentence} Overall: ${verdict.charAt(0).toLowerCase() + verdict.slice(1)}`;
@@ -1635,6 +1722,15 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
       // Find any roster players on this opponent
       const bringBackPlayers = valid.filter(p => p.team === opp && p.team !== stack.team);
       if (bringBackPlayers.length > 0) {
+        const stackMatchupScore = stack.players.reduce((sum, p) => {
+          const m = getMatchupTier(oppRaw, p.pos);
+          return sum + m.score;
+        }, 0);
+        const bringBackMatchupScore = bringBackPlayers.reduce((sum, p) => {
+          const m = getMatchupTier(oppRaw, p.pos);
+          return sum + m.score;
+        }, 0);
+        const ceilingScore = stackMatchupScore + bringBackMatchupScore;
         bringBacks.push({
           stackTeam: stack.team,
           opponent: opp,
@@ -1643,6 +1739,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           stackPieces: stack.players,
           bringBackPieces: bringBackPlayers,
           hasQB: stack.hasQB,
+          ceilingScore,
         });
       }
     });
@@ -1650,6 +1747,13 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
   // Sort bring-backs chronologically by playoff week (W15 → W16 → W17)
   bringBacks.sort((a, b) => a.weekIdx - b.weekIdx);
+
+  // Tag the single highest ceiling bring-back — this becomes the 🔥 CEILING GAME badge
+  if (bringBacks.length > 0) {
+    const topIdx = bringBacks.reduce((best, bb, i) =>
+      bb.ceilingScore > bringBacks[best].ceilingScore ? i : best, 0);
+    bringBacks[topIdx].isCeilingGame = true;
+  }
 
   // === ORPHAN CLASSIFICATION ===
   // Players NOT in any stack — classify by playoff window quality
@@ -1666,12 +1770,19 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     const normalized = (weightedScore / maxWeighted) * 15;
 
     // Classification
+    // Strong Matchups: peak Good+ week AND solid overall score
+    // One-Week Spike: one elite week but weak overall — informational, not a true window
+    // Decent Matchups: no single great week but consistent softness
+    // No Edge: no meaningful playoff matchup advantage
     let tier, color;
-    if (peakScore >= 4 || (w17.score >= 4 && tournamentKey !== "bbm7")) {
-      tier = "Strong Window";
+    if (peakScore >= 4 && normalized >= 7) {
+      tier = "Strong Matchups";
       color = "elite";
+    } else if (peakScore >= 4 && normalized < 7) {
+      tier = "One-Week Spike";
+      color = "neutral";
     } else if (normalized >= 8) {
-      tier = "Decent Window";
+      tier = "Decent Matchups";
       color = "neutral";
     } else {
       tier = "No Edge";
@@ -1723,21 +1834,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
       const playerWeighted = playerMatchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
       const playerScore = (playerWeighted / maxW) * 15;
 
-      // === BRING-BACK BREAK COST ===
-      // If swapping this player would destroy an existing bring-back relationship,
-      // penalize the improvement score and flag it in the UI.
-      // A bring-back is broken if: player is part of a bring-back (either as stack piece
-      // or bring-back piece) AND the alt is NOT on the same team or game opponent.
-      const playerBreaksBringBack = bringBacks.some(bb => {
+      // Would swapping this player destroy an existing bring-back? Flag it and penalize.
+      const brokenBringBacks = bringBacks.filter(bb => {
         const inStack = bb.stackPieces.some(p => p.name === player.name);
         const inBringBack = bb.bringBackPieces.some(p => p.name === player.name);
         if (!inStack && !inBringBack) return false;
-        // Alt must be on neither team to break the connection
         return alt.team !== bb.stackTeam && alt.team !== bb.opponent;
       });
-      // Penalty: reduce improvement by 1.5 if it breaks a bring-back
-      // This means a "BIG UPGRADE" (4+) can still surface, but marginal pivots get suppressed
+      const playerBreaksBringBack = brokenBringBacks.length > 0;
+      const brokenWeeks = brokenBringBacks.map(bb => bb.week);
+      const brokenWeekLabel = brokenWeeks.includes("W16") ? "W16"
+        : brokenWeeks.includes("W17") ? "W17"
+        : brokenWeeks.includes("W15") ? "W15"
+        : brokenWeeks[0] || "playoff";
       const breakCostPenalty = playerBreaksBringBack ? 1.5 : 0;
+
       const improvement = altScore - playerScore - breakCostPenalty;
 
       // Only include if meaningfully better in some way
@@ -1775,7 +1886,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else if (altSmash >= 2 && altSmash > playerSmash) {
           // Multiple smash matchups
           const variants = [
-            `${altSmash} smash matchups in the playoff window`,
+            `${altSmash} smash matchups in the playoff stretch`,
             `Multiple elite spike-week opportunities (W15–W17)`,
             `Playoff schedule built for explosion weeks`,
           ];
@@ -1783,7 +1894,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else if (improvement >= 4) {
           // Big gap, generic but strong
           const variants = [
-            `Dramatically better playoff window`,
+            `Dramatically better playoff matchups`,
             `Massive playoff-schedule edge`,
             `Playoff slate is on a different tier`,
             `The matchup gap is enormous`,
@@ -1791,7 +1902,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           reason = variants[(pickNum + alt.adp) % variants.length];
         } else if (improvement >= 3) {
           const variants = [
-            `Significantly better playoff window`,
+            `Significantly better playoff matchups`,
             `Cleaner W15–W17 matchups across the board`,
             `Notably softer playoff slate`,
             `Stronger title-week schedule`,
@@ -1824,7 +1935,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
         } else {
           // Default fallback variants
           const variants = [
-            `Better playoff window matchups`,
+            `Better playoff matchups`,
             `Softer W15–W17 schedule overall`,
             `Edge in the title-stretch matchups`,
             `Marginal but real playoff upgrade`,
@@ -1847,6 +1958,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
           playerAvoid,
           adpDelta,
           breaksBringBack: playerBreaksBringBack,
+          brokenWeekLabel,
         });
       }
     });
@@ -2013,38 +2125,19 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
   }
 
   // Bring-back bonus — game stacks are positively correlated
-  // QB-anchored bring-backs: full credit (+0.35) — QB+pass catcher on one side, bring-back on the other
+  // Fix 1: reduced from +0.8 to +0.35 — bring-backs are correlated value, not a stack
   const qbBringBacks = bringBacks.filter(b => b.hasQB && b.bringBackPieces.some(p => p.pos === "WR" || p.pos === "TE"));
   if (qbBringBacks.length >= 1) {
-    strengths.push(`${qbBringBacks.length} QB game stack(s) with bring-back correlation`);
+    strengths.push(`${qbBringBacks.length} game stack(s) with bring-back correlation`);
     score += qbBringBacks.length * 0.35;
-  }
-  // Naked bring-backs: same-game correlation without a QB anchor (+0.15 each, cap at 2)
-  // e.g. Gibbs + J.Williams (DET) with Loveland (CHI) — both sides of W17 DET@CHI
-  const nakedBringBacks = bringBacks.filter(b =>
-    !b.hasQB &&
-    b.stackPieces.length >= 2 &&
-    b.bringBackPieces.some(p => p.pos === "WR" || p.pos === "TE" || p.pos === "RB")
-  );
-  // Deduplicate: one naked bring-back per unique game (stackTeam+opponent pair)
-  const seenNakedGames = new Set();
-  const uniqueNakedBringBacks = nakedBringBacks.filter(b => {
-    const key = [b.stackTeam, b.opponent].sort().join("-");
-    if (seenNakedGames.has(key)) return false;
-    seenNakedGames.add(key);
-    return true;
-  });
-  if (uniqueNakedBringBacks.length >= 1) {
-    strengths.push(`${uniqueNakedBringBacks.length} naked game stack(s) with bring-back — correlated ceiling without QB`);
-    score += Math.min(uniqueNakedBringBacks.length * 0.15, 0.3);
   }
 
   // Orphan analysis
   // Fix 3: steepened no-edge penalty from flat -0.6 to -0.2 per orphan
   const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge");
-  const strongOrphans = orphans.filter(o => o.tier === "Strong Window");
+  const strongOrphans = orphans.filter(o => o.tier === "Strong Matchups");
   if (strongOrphans.length >= 2) {
-    strengths.push(`${strongOrphans.length} orphan(s) with strong playoff windows`);
+    strengths.push(`${strongOrphans.length} orphan(s) with strong playoff matchups`);
     score += 0.5;
   }
   if (noEdgeOrphans.length >= 3) {
@@ -2082,14 +2175,14 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     if (posCounts.QB < 2) score -= 3;
   }
 
-  // Fix 5: adjusted grade thresholds — spreads distribution more naturally
-  // A ≥ 5.5, A- ≥ 4.0, B+ ≥ 2.5, B ≥ 1.0, C+ ≥ 0, C ≥ -1.5, D below
-  if (score >= 5.5) grade = "A";
-  else if (score >= 4.0) grade = "A-";
-  else if (score >= 2.5) grade = "B+";
-  else if (score >= 1.0) grade = "B";
-  else if (score >= 0) grade = "C+";
-  else if (score >= -1.5) grade = "C";
+  // Recalibrated thresholds — harder curve, more actionable grades
+  // A ≥ 7.0, A- ≥ 5.5, B+ ≥ 3.5, B ≥ 2.0, C+ ≥ 0.5, C ≥ -1.0, D below
+  if (score >= 7.0) grade = "A";
+  else if (score >= 5.5) grade = "A-";
+  else if (score >= 3.5) grade = "B+";
+  else if (score >= 2.0) grade = "B";
+  else if (score >= 0.5) grade = "C+";
+  else if (score >= -1.0) grade = "C";
   else grade = "D";
 
   // === ROSTER STANDOUTS ===
@@ -2125,7 +2218,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     rosterStandouts.push({
       kind: "playoff",
       icon: "🏆",
-      label: "Best Playoff Window",
+      label: "Best Playoff Matchups",
       player: top.p,
       detail: smashCount >= 2
         ? `${smashCount} Smash matchups across W15–W17 — championship-week ceiling`
@@ -2229,7 +2322,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
   // Cap at 5 standouts
   const finalStandouts = rosterStandouts.slice(0, 5);
 
-  const nutshell = buildNutshell({ strengths, weaknesses, grade, score, mode: "bestball" });
+  const nutshell = buildNutshell({ strengths, weaknesses, grade, score, mode: "bestball", adpFlags, primaryStacks, eliteStacks, verdictAlignments });
 
   return {
     valid, picks, posCounts, stacks, stackGrades, adpFlags, benchmarkIssues,
@@ -2253,7 +2346,7 @@ const REDRAFT_LEAGUES = {
     benchSize: 6,
     irSlots: 1,
     playoffWeeks: [15, 16, 17],
-    note: "Yahoo default · Half-PPR · W15-17",
+    note: "Yahoo default · Half-PPR · one bad week can end your season",
   },
   yahoo_ppr: {
     name: "PPR 12-Team",
@@ -2263,7 +2356,7 @@ const REDRAFT_LEAGUES = {
     benchSize: 6,
     irSlots: 1,
     playoffWeeks: [15, 16, 17],
-    note: "Full PPR · W15-17",
+    note: "Full PPR · receivers rewarded · WR depth wins leagues",
   },
   yahoo_std_10: {
     name: "10-Team Standard",
@@ -2273,7 +2366,7 @@ const REDRAFT_LEAGUES = {
     benchSize: 6,
     irSlots: 1,
     playoffWeeks: [15, 16, 17],
-    note: "10-team · Half-PPR · Wider talent pool",
+    note: "10-team · talent pool is deeper · every waiver wire matters",
   },
 };
 
@@ -2643,11 +2736,8 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   }
 
   // 3b. Bench depth floor — adjusted for SF (fewer bench slots available for skill)
-  // benchSize/4 means on a 6-bench roster the floor is 1 backup per position —
-  // realistic given starters consume most slots. /3 was too aggressive and fired
-  // false shallow-bench warnings on correctly constructed rosters.
   const benchSize = league.benchSize || 6;
-  const benchFloor = Math.max(1, Math.floor(benchSize / 4));
+  const benchFloor = Math.max(1, Math.floor(benchSize / 3));
   const rbBench = depthAnalysis.RB.count - rbNeeded;
   const wrBench = depthAnalysis.WR.count - wrNeeded;
   if (depthPenaltyScale >= 0.85) {
@@ -2746,10 +2836,8 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   }
 
   // 7. Playoff schedule strength
-  // Elite: totalScore >= 12 = avg 4.0+/week (Good+ across all 3 playoff weeks)
-  // Brutal: totalScore <= 7 = avg ≤2.3/week (Hard or worse dominating the window)
-  const eliteStarterPlayoffs = playoffMatchups.filter(p => p.totalScore >= 12);
-  const tougholoffStarters = playoffMatchups.filter(p => p.totalScore <= 7);
+  const eliteStarterPlayoffs = playoffMatchups.filter(p => p.totalScore >= 11);
+  const tougholoffStarters = playoffMatchups.filter(p => p.totalScore <= 6);
   if (eliteStarterPlayoffs.length >= 3) {
     strengths.push(`${eliteStarterPlayoffs.length} starters with elite playoff schedule`);
     score += 1;
@@ -2797,15 +2885,12 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   }
 
   // Convert to grade
-  // Redraft thresholds are intentionally tighter than best ball —
-  // more dimensions (depth, handcuffs, byes, schedule) means more ways to fail,
-  // so the same raw score should earn a lower letter grade.
-  if (score >= 6) grade = "A";
-  else if (score >= 4.5) grade = "A-";
-  else if (score >= 3) grade = "B+";
-  else if (score >= 1.5) grade = "B";
-  else if (score >= 0) grade = "C+";
-  else if (score >= -2) grade = "C";
+  if (score >= 5) grade = "A";
+  else if (score >= 3.5) grade = "A-";
+  else if (score >= 2) grade = "B+";
+  else if (score >= 0.5) grade = "B";
+  else if (score >= -1) grade = "C+";
+  else if (score >= -2.5) grade = "C";
   else grade = "D";
 
   // === LINEUP CONFIDENCE — per-week start/sit intel with bench swap suggestions ===
@@ -2845,9 +2930,8 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       const samePoStarters = byPos[p.pos] || [];
       const isFlexSlot = p.slot === "FLEX" || p.slot === "SFLEX";
 
-      // Lock: elite matchup — always surface for Smash weeks (redraft users need this signal
-      // for any starter, not just when 2+ at same position). Still highlight flex decisions too.
-      if (p.matchup.color === "elite") {
+      // Lock: elite matchup — highlight if 2+ at same pos OR in flex (always worth noting)
+      if (p.matchup.color === "elite" && (samePoStarters.length >= 2 || isFlexSlot)) {
         locks.push({ ...p });
       }
 
@@ -2976,9 +3060,8 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     }
 
     // 4. SAFE STASH: rostered bench player with upside but no near-term action
-    // In redraft, a stash is a volatile role player — ADP >= 120 means genuinely
-    // speculative. ADP 100 is starter-quality and shouldn't be labeled a "stash".
-    if ((bp.pos === "RB" || bp.pos === "WR") && bp.adp >= 120) {
+    // Only flag RBs/WRs with decent ADP (under 100) who aren't already classified
+    if ((bp.pos === "RB" || bp.pos === "WR") && bp.adp <= 100) {
       benchAlerts.push({
         type: "stash",
         emoji: "🔻",
@@ -3017,7 +3100,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     rbNeeded, wrNeeded, rbStrong, wrStrong, benchFloor,
     benchMoves,
     lineupConfidencePreview,
-    nutshell: buildNutshell({ strengths, weaknesses, grade, score, mode: "redraft" }),
+    nutshell: buildNutshell({ strengths, weaknesses, grade, score, mode: "redraft", adpFlags }),
   };
 };
 
@@ -3042,6 +3125,7 @@ export default function RosterScorer() {
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
   const [showPickAnalysis, setShowPickAnalysis] = useState(false); // opt-in: user confirms paste has pick numbers
+  const [uploadTabClicked, setUploadTabClicked] = useState(false); // stops glow once user clicks upload tab
 
   // Re-run analysis when the pick analysis toggle changes — so users don't have
   // to manually re-click Analyze after checking/unchecking the box.
@@ -3058,35 +3142,6 @@ export default function RosterScorer() {
       setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers));
     }
   }, [showPickAnalysis, input]);
-
-  // Auto-load example roster on first visit so hiring managers and new users
-  // see the tool working immediately — no blank state.
-  useEffect(() => {
-    const exampleText = `Jayden Daniels 64
-Jared Goff 105
-Kyler Murray 112
-Jeremiyah Love 16
-Bhayshul Tuten 57
-Kyle Monangai 88
-Emmett Johnson 177
-Kaytron Allen 184
-Amon-Ra St. Brown 9
-Chris Olave 33
-Luther Burden 40
-Jordan Addison 81
-Omar Cooper 136
-Antonio Williams 153
-Zachariah Branch 201
-Jake Ferguson 129
-T.J. Hockenson 160
-Greg Dulcich 208`;
-    setInput(exampleText);
-    setShowPickAnalysis(true);
-    const fmt = TOURNAMENTS["main"].format || "standard";
-    const picks = parseRoster(exampleText, fmt);
-    setAnalyzed(analyzeRoster(picks, "main", true));
-  }, []);
-
   const exportCardRef = React.useRef(null);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
@@ -3175,7 +3230,7 @@ Greg Dulcich 208`;
     });
   };
 
-  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result.split(",")[1]);
     reader.onerror = () => reject(new Error("File read failed"));
@@ -3197,6 +3252,8 @@ Greg Dulcich 208`;
     })));
     setUploadedImages(prev => [...prev, ...processed]);
   };
+
+
 
   const extractFromImages = async () => {
     if (uploadedImages.length === 0) return;
@@ -3222,15 +3279,13 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
         }
       ];
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-6",
           max_tokens: 1500,
           messages: [{ role: "user", content }]
         })
@@ -3532,10 +3587,24 @@ Travis Etienne`;
       background: "#0a0a0a",
       color: "#e5e5e5",
       fontFamily: "'IBM Plex Mono', 'JetBrains Mono', monospace",
-      padding: "24px",
+      padding: "24px 24px 0 24px",
+      margin: 0,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #0a0a0a;
+          min-height: 100%;
+        }
+        #root {
+          margin: 0;
+          padding: 0;
+          background: #0a0a0a;
+        }
 
         .grade-pulse {
           animation: pulse 2.5s ease-in-out infinite;
@@ -3559,6 +3628,43 @@ Travis Etienne`;
         .scroll-shadow::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         button:hover:not(:disabled) { filter: brightness(1.15); }
         textarea:focus { outline: none; border-color: #4ade80 !important; }
+
+        /* Dying-light flicker — X-RAY only, plays once on load, irregular fluorescent tube */
+        .xray-word-flicker {
+          animation:
+            dyingLight 7s ease-out forwards,
+            hum 3.8s ease-in-out 7s infinite;
+        }
+        @keyframes dyingLight {
+          0%    { opacity: 1; }
+          6%    { opacity: 0.08; }
+          9%    { opacity: 0.85; }
+          11%   { opacity: 0.08; }
+          14%   { opacity: 1; }
+          31%   { opacity: 1; }
+          33%   { opacity: 0.12; }
+          36%   { opacity: 0.9; }
+          41%   { opacity: 1; }
+          58%   { opacity: 1; }
+          60%   { opacity: 0.35; }
+          63%   { opacity: 1; }
+          79%   { opacity: 0.7; }
+          81%   { opacity: 1; }
+          100%  { opacity: 1; }
+        }
+        @keyframes hum {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.78; }
+        }
+
+        /* Upload tab glow — cyan pulse, stops when clicked */
+        .upload-tab-glow {
+          animation: tabGlow 1.8s ease-in-out infinite;
+        }
+        @keyframes tabGlow {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(74, 222, 128, 0); }
+          50%       { box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.25); }
+        }
       `}</style>
 
       {/* Header */}
@@ -3576,15 +3682,16 @@ Travis Etienne`;
               margin: 0,
               color: "#fafafa",
             }}>
-              <span style={{ color: "#fafafa" }}>ROSTER </span><span style={{ color: "#22d3ee" }}>X-RAY</span>
+              ROSTER <span className="xray-word-flicker" style={{ color: "#60c8f5" }}>X-RAY</span>
             </h1>
             <span style={{
-              fontSize: "10px",
-              color: "#666",
-              letterSpacing: "0.1em",
+              fontSize: "11px",
+              color: "#aaa",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
+              fontWeight: 500,
             }}>
-              See inside your team
+              Diagnose your roster.
             </span>
           </div>
         </div>
@@ -3611,7 +3718,7 @@ Travis Etienne`;
                 🏆 Best Ball Tournament
               </div>
               <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Underdog · stack-focused · playoff windows
+                Find your stacks · exploit playoff matchups · win
               </div>
             </button>
             <button
@@ -3627,10 +3734,10 @@ Travis Etienne`;
               }}
             >
               <div style={{ fontSize: "13px", color: analysisMode === "redraft" ? "#c084fc" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
-                📋 Redraft League
+                💰 Redraft League
               </div>
               <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Yahoo · lineup-focused · weekly management
+                Weekly matchups · money on the line · don't blow it
               </div>
             </button>
           </div>
@@ -3777,7 +3884,7 @@ Travis Etienne`;
                 </span>
               </div>
               <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Build your own league
+                Build your own league · match your exact setup
               </div>
             </button>
           </div>
@@ -4051,24 +4158,24 @@ Travis Etienne`;
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid #222" }}>
           <button
-            disabled
-            title="Coming soon — vote with your interest!"
+            onClick={() => { setMode("upload"); setUploadTabClicked(true); }}
+            className={!uploadTabClicked && mode !== "upload" ? "upload-tab-glow" : ""}
             style={{
               background: "transparent",
-              color: "#444",
+              color: mode === "upload" ? "#4ade80" : "#666",
               border: "none",
-              borderBottom: "2px solid transparent",
+              borderBottom: mode === "upload" ? "2px solid #4ade80" : "2px solid transparent",
               padding: "12px 18px",
               fontSize: "11px",
               fontFamily: "inherit",
               letterSpacing: "0.15em",
               textTransform: "uppercase",
-              cursor: "not-allowed",
+              cursor: "pointer",
               fontWeight: 600,
-              opacity: 0.5,
+              borderRadius: "4px 4px 0 0",
             }}
           >
-            📸 Upload Screenshot <span style={{ fontSize: "9px", color: "#555", marginLeft: "4px", letterSpacing: "0.05em" }}>(Coming Soon)</span>
+            📸 Upload Screenshots
           </button>
           <button
             onClick={() => setMode("paste")}
@@ -4120,10 +4227,10 @@ Travis Etienne`;
               />
               <div style={{ fontSize: "32px", marginBottom: "8px" }}>📸</div>
               <div style={{ fontSize: "14px", color: "#fafafa", marginBottom: "6px", fontWeight: 600 }}>
-                Drop screenshots here, click to browse, or paste (Cmd/Ctrl+V)
+                Drop your roster screenshot — get an instant diagnosis
               </div>
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN · any roster screenshot. Multiple images OK.
+                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
               </div>
             </div>
 
@@ -4275,10 +4382,10 @@ Travis Etienne`;
               }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>
-                    New here?
+                    First time?
                   </div>
                   <div style={{ fontSize: "13px", color: "#cfcfcf", lineHeight: 1.4 }}>
-                    Load a sample roster to see what the analysis looks like.
+                    See what a full diagnosis looks like.
                   </div>
                 </div>
                 <button
@@ -4300,14 +4407,14 @@ Travis Etienne`;
                     flexShrink: 0,
                   }}
                 >
-                  Try this example →
+                  Load Sample Roster →
                 </button>
               </div>
             )}
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={`Paste your roster here — one player per line.\n\nWorks with or without pick numbers:\n  Jayden Daniels 64\n  Bijan Robinson 2\n  Nico Collins\n\nNames are auto-matched to ADP.`}
+              placeholder={`Paste your roster here — one player per line.\n\nWorks with or without pick numbers:\n  Jayden Daniels 64\n  Bijan Robinson 2\n  Nico Collins\n\nHit Analyze. We'll do the rest.`}
               style={{
                 width: "100%",
                 minHeight: "200px",
@@ -4374,28 +4481,10 @@ Travis Etienne`;
               >
                 Analyze →
               </button>
-              <button
-                onClick={handleExample}
-                style={{
-                  background: "linear-gradient(90deg, #d97706, #b45309)",
-                  color: "#1a0e00",
-                  border: "none",
-                  padding: "10px 18px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  fontFamily: "inherit",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  borderRadius: "3px",
-                  boxShadow: "0 0 10px #f59e0b33",
-                }}
-              >
-                Try Example
-              </button>
-              {(analyzed || input.trim()) && (
+
+              {analyzed && (
                 <button
-                  onClick={() => { setAnalyzed(null); setInput(""); setShowPickAnalysis(false); }}
+                  onClick={() => { setAnalyzed(null); setInput(""); }}
                   style={{
                     background: "transparent",
                     color: "#666",
@@ -4409,7 +4498,7 @@ Travis Etienne`;
                     borderRadius: "3px",
                   }}
                 >
-                  Clear Roster
+                  Clear
                 </button>
               )}
             </div>
@@ -4528,7 +4617,7 @@ Travis Etienne`;
                         <span style={{ color: "#4ade80" }}>Construction</span> — does your roster have the right position counts? Best ball targets are 6–7 WRs, 5–6 RBs, 2–3 TEs, 2–3 QBs. Too heavy or too light at any position costs points.
                       </div>
                       <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#4ade80" }}>Playoff window</span> — your W15–W17 opponent matchups. Facing weak defenses in the championship weeks boosts your score. Facing tough ones hurts it.
+                        <span style={{ color: "#4ade80" }}>Playoff matchups</span> — your W15–W17 opponent matchups. Facing weak defenses in the championship weeks boosts your score. Facing tough ones hurts it.
                       </div>
                       <div>
                         <span style={{ color: "#4ade80" }}>Bring-backs</span> — when you own players from both sides of the same playoff game, a high-scoring shootout benefits multiple players at once.
@@ -4611,10 +4700,10 @@ Travis Etienne`;
                 margin: "0 0 4px",
                 color: "#fafafa",
               }}>
-                STACKS · PLAYOFF WINDOWS
+                STACKS · PLAYOFF MATCHUPS
               </h2>
               <div style={{ fontSize: "11px", color: "#888", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
-                A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "#22d3ee", fontWeight: 600 }}>double the upside</span>. The window rating shows how good their shared playoff matchups are.
+                A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "#22d3ee", fontWeight: 600 }}>double the upside</span>. The matchup rating shows how favorable their shared playoff schedule is.
               </div>
               <MatchupLegend />
               {analyzed.stackGrades.length === 0 && (
@@ -4644,7 +4733,7 @@ Travis Etienne`;
                         </span>
                       </div>
                       <span style={{ fontSize: "11px", color: stackColor, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>
-                        {stackTier} Window
+                        {stackTier} Matchups
                       </span>
                     </div>
 
@@ -4718,11 +4807,12 @@ Travis Etienne`;
                 </div>
                 {analyzed.bringBacks.map((bb, idx) => {
                   const wc = weekColor(bb.weekIdx);
+                  const isCeiling = bb.isCeilingGame;
                   return (
                   <div key={idx} style={{
-                    background: wc.bg,
-                    border: `1px solid ${wc.border}55`,
-                    borderLeft: `3px solid ${wc.border}`,
+                    background: isCeiling ? "#050d1a" : wc.bg,
+                    border: isCeiling ? `1px solid #22d3ee99` : `1px solid ${wc.border}55`,
+                    borderLeft: isCeiling ? `3px solid #22d3ee` : `3px solid ${wc.border}`,
                     borderRadius: "4px",
                     padding: "12px 16px",
                     marginBottom: "8px",
@@ -4737,7 +4827,17 @@ Travis Etienne`;
                         padding: "1px 7px",
                       }}>{bb.week}</span>
                       <span style={{ color: "#999" }}>{bb.stackTeam} vs {bb.opponent}</span>
-                      {bb.hasQB && (
+                      {isCeiling ? (
+                        <span style={{
+                          color: "#22d3ee",
+                          fontWeight: 700,
+                          background: "#051520",
+                          border: "1px solid #22d3ee66",
+                          borderRadius: "3px",
+                          padding: "1px 7px",
+                          fontSize: "9px",
+                        }}>🔥 CEILING GAME</span>
+                      ) : bb.hasQB && (
                         <span style={{
                           color: "#4ade80",
                           fontWeight: 700,
@@ -4804,21 +4904,40 @@ Travis Etienne`;
                           <span style={{ fontSize: "12px", color: "#fafafa", fontWeight: 600 }}>{o.name}</span>
                           <span style={{ fontSize: "9px", color: "#666", letterSpacing: "0.05em" }}>{o.pos} · {o.team}</span>
                         </div>
-                        <span style={{
-                          display: "inline-block",
-                          fontSize: "9px",
-                          color: s.text,
-                          background: `${s.text}15`,
-                          border: `1px solid ${s.text}44`,
-                          fontWeight: 700,
-                          letterSpacing: "0.08em",
-                          marginBottom: "8px",
-                          padding: "1px 7px",
-                          borderRadius: "3px",
-                          textTransform: "uppercase",
-                        }}>
-                          {o.tier}
-                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+                          <span style={{
+                            display: "inline-block",
+                            fontSize: "9px",
+                            color: o.tier === "One-Week Spike" ? "#f59e0b" : s.text,
+                            background: o.tier === "One-Week Spike" ? "#1a120044" : `${s.text}15`,
+                            border: `1px solid ${o.tier === "One-Week Spike" ? "#f59e0b44" : s.text + "44"}`,
+                            fontWeight: 700,
+                            letterSpacing: "0.08em",
+                            padding: "1px 7px",
+                            borderRadius: "3px",
+                            textTransform: "uppercase",
+                          }}>
+                            {o.tier}
+                          </span>
+                          {/* Hidden Gem badge — elite matchups at late-round price */}
+                          {o.tier === "Strong Matchups" && o.adp >= 100 &&
+                           (o.matchups || []).reduce((sum, m) => sum + m.score, 0) >= 12 && (
+                            <span style={{
+                              display: "inline-block",
+                              fontSize: "9px",
+                              color: "#22d3ee",
+                              background: "#0a1f2a",
+                              border: "1px solid #22d3ee55",
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              padding: "1px 7px",
+                              borderRadius: "3px",
+                              textTransform: "uppercase",
+                            }}>
+                              💎 Hidden Gem
+                            </span>
+                          )}
+                        </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", fontSize: "9px" }}>
                           {o.matchups.map((m, j) => {
                             const ms = tierStyle(m.color);
@@ -4865,7 +4984,7 @@ Travis Etienne`;
                   <span style={{ color: "#4ade80", fontWeight: 600 }}>■ BIG UPGRADE</span>
                   <span style={{ color: "#facc15", fontWeight: 600 }}>■ UPGRADE</span>
                   <span style={{ color: "#60a5fa", fontWeight: 600 }}>■ SLIGHT</span>
-                  <span style={{ color: "#333" }}>· vs your actual pick's playoff window</span>
+                  <span style={{ color: "#333" }}>· vs your actual pick's playoff matchups</span>
                 </div>
                 {analyzed.topPivots.map((pivot, idx) => {
                   // Determine best alt tier for card left border color
@@ -4921,16 +5040,16 @@ Travis Etienne`;
                           return `${Math.abs(Math.round(alt.adpDelta))} picks cheaper at similar value — frees draft capital`;
                         }
                         if (alt.improvement >= 4) {
-                          return `Significantly better playoff window — worth the swap at this ADP`;
+                          return `Significantly better playoff matchups — worth the swap at this ADP`;
                         }
                         return `Modest playoff upgrade at roughly the same draft cost`;
                       })();
 
                       const upgradeTier = alt.improvement >= 4
-                        ? { label: "BIG UPGRADE", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
+                        ? { label: "BETTER MATCHUPS", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
                         : alt.improvement >= 2
-                        ? { label: "UPGRADE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
-                        : { label: "SLIGHT", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
+                        ? { label: "SOFTER SCHEDULE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
+                        : { label: "SLIGHT EDGE", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
 
                       return (
                       <div key={j} style={{
@@ -4977,9 +5096,9 @@ Travis Etienne`;
                           )}
                           {alt.breaksBringBack && (
                             <span style={{
-                              background: "#1a0a00",
-                              border: "1px solid #f97316aa",
-                              color: "#f97316",
+                              background: alt.brokenWeekLabel === "W16" ? "#2a0800" : "#1a0a00",
+                              border: `1px solid ${alt.brokenWeekLabel === "W16" ? "#ef4444cc" : "#f97316aa"}`,
+                              color: alt.brokenWeekLabel === "W16" ? "#f87171" : "#f97316",
                               fontWeight: 800,
                               padding: "2px 7px",
                               borderRadius: "3px",
@@ -4987,7 +5106,7 @@ Travis Etienne`;
                               letterSpacing: "0.08em",
                               textTransform: "uppercase",
                               flexShrink: 0,
-                            }}>⚠ Breaks Bring-Back</span>
+                            }}>⚠ Breaks {alt.brokenWeekLabel} Bring-Back</span>
                           )}
                           <span style={{ color: "#888", fontSize: "10px", lineHeight: 1.4 }}>{laymanReason}</span>
                         </div>
@@ -5944,7 +6063,7 @@ Travis Etienne`;
                   </div>
                 </div>
                 <div style={{ fontSize: "9px", color: "#555", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid #1a1a1a", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
-                  ← swipe to scroll all 18 weeks · <span style={{ color: "#c084fc", fontWeight: 600 }}>purple W15–W17</span> = playoff window · player names stay locked
+                  ← swipe to scroll all 18 weeks · <span style={{ color: "#c084fc", fontWeight: 600 }}>purple W15–W17</span> = playoff matchups · player names stay locked
                 </div>
               </div>
             </div>
@@ -6484,11 +6603,11 @@ Travis Etienne`;
                         const score = Math.round((topStarter.totalScore / 15) * 10);
                         standouts.push({
                           icon: "🏆",
-                          label: "Best Playoff Window",
+                          label: "Best Playoff Matchups",
                           player: topStarter,
                           detail: score >= 8
                             ? `Elite playoff slate — built to peak when it matters`
-                            : `Top playoff window on roster — your schedule ace`,
+                            : `Top playoff matchups on roster — your schedule ace`,
                         });
                         used.add(topStarter.name);
                       }
@@ -6590,77 +6709,6 @@ Travis Etienne`;
               </div>
             );
           })()}
-        </div>
-      </div>
-
-      {/* Social Footer */}
-      <div style={{
-        maxWidth: "1100px",
-        margin: "40px auto 0",
-        borderTop: "1px solid #1a1a1a",
-        paddingTop: "20px",
-        paddingBottom: "24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "12px",
-      }}>
-        <div style={{ fontSize: "10px", color: "#444", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-          ROSTER X-RAY · 2026 · Free Tool
-        </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-          <a
-            href="https://twitter.com/RosterXRay"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: "11px",
-              color: "#555",
-              textDecoration: "none",
-              fontFamily: "'IBM Plex Mono', monospace",
-              letterSpacing: "0.05em",
-              padding: "5px 10px",
-              border: "1px solid #222",
-              borderRadius: "3px",
-            }}
-          >
-            𝕏 Twitter
-          </a>
-          <a
-            href="https://discord.gg/rosterxray"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: "11px",
-              color: "#555",
-              textDecoration: "none",
-              fontFamily: "'IBM Plex Mono', monospace",
-              letterSpacing: "0.05em",
-              padding: "5px 10px",
-              border: "1px solid #222",
-              borderRadius: "3px",
-            }}
-          >
-            Discord
-          </a>
-          <a
-            href="https://buymeacoffee.com/rosterxray"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: "11px",
-              color: "#555",
-              textDecoration: "none",
-              fontFamily: "'IBM Plex Mono', monospace",
-              letterSpacing: "0.05em",
-              padding: "5px 10px",
-              border: "1px solid #222",
-              borderRadius: "3px",
-            }}
-          >
-            ☕ Buy Me a Coffee
-          </a>
         </div>
       </div>
     </div>
