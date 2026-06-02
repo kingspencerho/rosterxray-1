@@ -3277,12 +3277,10 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
         }
       ];
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
