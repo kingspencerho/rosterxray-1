@@ -3230,39 +3230,11 @@ export default function RosterScorer() {
     });
   };
 
-  const fileToBase64 = (file) => new Promise((resolve, reject) => {
-    // Use createImageBitmap + blob URL — avoids canvas taint issues on iOS/Chrome
-    const blobUrl = URL.createObjectURL(file);
-    createImageBitmap(file).then(bitmap => {
-      try {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1200;
-        const scale = Math.min(MAX_WIDTH / bitmap.width, 1);
-        canvas.width = Math.round(bitmap.width * scale);
-        canvas.height = Math.round(bitmap.height * scale);
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        bitmap.close();
-        URL.revokeObjectURL(blobUrl);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        resolve(dataUrl.split(",")[1]);
-      } catch (err) {
-        // Canvas failed — fall back to raw FileReader
-        bitmap.close();
-        URL.revokeObjectURL(blobUrl);
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = () => reject(new Error("File read failed"));
-        reader.readAsDataURL(file);
-      }
-    }).catch(() => {
-      // createImageBitmap not supported — fall back to FileReader
-      URL.revokeObjectURL(blobUrl);
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = () => reject(new Error("File read failed"));
-      reader.readAsDataURL(file);
-    });
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = () => reject(new Error("File read failed"));
+    reader.readAsDataURL(file);
   });
 
   const handleFiles = async (fileList) => {
@@ -3274,12 +3246,14 @@ export default function RosterScorer() {
     setExtractError(null);
     const processed = await Promise.all(files.map(async (f) => ({
       name: f.name,
-      type: "image/jpeg",
+      type: f.type,
       data: await fileToBase64(f),
       preview: URL.createObjectURL(f),
     })));
     setUploadedImages(prev => [...prev, ...processed]);
   };
+
+
 
   const extractFromImages = async () => {
     if (uploadedImages.length === 0) return;
