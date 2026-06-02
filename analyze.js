@@ -2,6 +2,7 @@
 export const config = { maxDuration: 60 };
 
 export default async function handler(req, res) {
+  // CORS configuration
   const origin = req.headers.origin || "";
   const allowed = [
     "https://www.rosterxray.com",
@@ -45,6 +46,7 @@ export default async function handler(req, res) {
     const data = await response.json();
     return res.status(200).json(data);
   } catch (err) {
+    console.error("API proxy error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
