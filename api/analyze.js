@@ -1,18 +1,11 @@
 // /api/analyze.js
-// Vercel serverless function — Anthropic API proxy
-// All calls from the frontend hit this endpoint.
-// The ANTHROPIC_API_KEY env var lives in Vercel dashboard, never in client code.
-
-export const config = { maxDuration: 60 }; // allow up to 60s for vision calls
+export const config = { maxDuration: 60 };
 
 export default async function handler(req, res) {
-  // CORS — allow requests from your own domain only
   const origin = req.headers.origin || "";
   const allowed = [
     "https://www.rosterxray.com",
     "https://rosterxray-1.vercel.app",
-    "http://localhost:5173",  // local dev
-    "http://localhost:3000",
   ];
   if (allowed.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -29,7 +22,6 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
-    // Forward the request to Anthropic
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -38,8 +30,8 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: body.model || "claude-opus-4-6",
-        max_tokens: body.max_tokens || 2000,
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 2000,
         messages: body.messages,
         ...(body.system ? { system: body.system } : {}),
       }),
@@ -52,9 +44,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     return res.status(200).json(data);
-
   } catch (err) {
-    console.error("API proxy error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
