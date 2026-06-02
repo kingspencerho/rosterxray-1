@@ -3587,10 +3587,24 @@ Travis Etienne`;
       background: "#0a0a0a",
       color: "#e5e5e5",
       fontFamily: "'IBM Plex Mono', 'JetBrains Mono', monospace",
-      padding: "24px",
+      padding: "24px 24px 0 24px",
+      margin: 0,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #0a0a0a;
+          min-height: 100%;
+        }
+        #root {
+          margin: 0;
+          padding: 0;
+          background: #0a0a0a;
+        }
 
         .grade-pulse {
           animation: pulse 2.5s ease-in-out infinite;
