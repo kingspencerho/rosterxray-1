@@ -1005,7 +1005,21 @@ const COACHING_ADJ = {
   TEN: { all: +1.0, note: "Saleh needs time, bottom-5" },
 };
 
-// ============ HELPERS ============
+// 2026 offseason projection adjustments — position-specific deltas
+// Applied ONLY when user selects "2026 Est." mode. Not real data — estimates based on roster moves.
+// Positive delta = easier matchup (defense got worse), negative = harder (defense improved).
+const OFFSEASON_ADJ_2026 = {
+  CIN: { wr: -1.5, rb: -1.0, te: -1.0, note: "Lou Anarumo back, secondary upgraded" },
+  BAL: { wr: -1.0, rb: -0.5, te: -0.5, note: "Minter DC promotion, Humphrey healthy" },
+  CAR: { wr: +1.5, rb: +1.0, te: +1.0, note: "Lost Brian Burns, thin secondary" },
+  LAR: { wr: +1.0, rb: +0.5, te: +0.5, note: "Verse traded to CLE, pass rush weakened" },
+  CLE: { wr: -1.0, rb: -0.5, te: -0.5, note: "Verse arrival strengthens pass rush" },
+  NYG: { wr: +1.5, rb: +1.0, te: +1.0, note: "Rebuilding D, bottom-5 projection" },
+  WAS: { wr: +1.0, rb: +0.5, te: +0.5, note: "Full rebuild, Payne age concern" },
+  KC:  { wr: -0.5, rb: -0.5, te: -0.5, note: "Spagnuolo continuity, secondary intact" },
+  JAX: { wr: -1.0, rb: -0.5, te: -0.5, note: "New DC, cap space used on defense" },
+  DAL: { wr: +2.0, rb: +1.5, te: +1.5, note: "Parsons + Diggs gone, bottom-3 projection" },
+};
 
 const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
 
@@ -1378,13 +1392,21 @@ const parseRosterLegacy = (text, format = "standard") => {
   return picks;
 };
 
-const getMatchupTier = (opponentTeam, pos) => {
+const getMatchupTier = (opponentTeam, pos, useProjected = false) => {
   const opp = opponentTeam.replace("@", "");
   let pts = FPA[pos]?.[opp];
   if (pts == null) return { tier: "—", score: 0, opp };
-  // apply coaching adjustment
+  // apply coaching adjustment (always on)
   const adj = COACHING_ADJ[opp];
   if (adj) pts -= adj.all;
+  // apply 2026 offseason layer (only in projected mode)
+  if (useProjected) {
+    const offAdj = OFFSEASON_ADJ_2026[opp];
+    if (offAdj) {
+      const delta = offAdj[pos.toLowerCase()];
+      if (delta != null) pts -= delta;
+    }
+  }
 
   // Rank-based tiering using position-specific distribution
   const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
@@ -1617,7 +1639,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
   return `${firstSentence} Overall: ${verdict.charAt(0).toLowerCase() + verdict.slice(1)}`;
 };
 
-const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) => {
+const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, useProjected = false) => {
   const tournament = TOURNAMENTS[tournamentKey];
   const weights = tournament.weights;
   const format = tournament.format || "standard";
@@ -1697,7 +1719,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
     stack.players.forEach(player => {
       const opps = PLAYOFFS[stack.team] || [];
       opps.forEach((opp, wkIdx) => {
-        const m = getMatchupTier(opp, player.pos);
+        const m = getMatchupTier(opp, player.pos, useProjected);
         weekScores[wkIdx] += m.score;
         weekDetails[wkIdx].push({ name: player.name, pos: player.pos, ...m });
       });
@@ -1723,11 +1745,11 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
       const bringBackPlayers = valid.filter(p => p.team === opp && p.team !== stack.team);
       if (bringBackPlayers.length > 0) {
         const stackMatchupScore = stack.players.reduce((sum, p) => {
-          const m = getMatchupTier(oppRaw, p.pos);
+          const m = getMatchupTier(oppRaw, p.pos, useProjected);
           return sum + m.score;
         }, 0);
         const bringBackMatchupScore = bringBackPlayers.reduce((sum, p) => {
-          const m = getMatchupTier(oppRaw, p.pos);
+          const m = getMatchupTier(oppRaw, p.pos, useProjected);
           return sum + m.score;
         }, 0);
         const ceilingScore = stackMatchupScore + bringBackMatchupScore;
@@ -1762,7 +1784,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
   const orphans = valid.filter(p => !stackedPlayerNames.has(p.name)).map(p => {
     const opps = PLAYOFFS[p.team] || [];
-    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos));
+    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos, useProjected));
     const w17 = matchups[2];
     const peakScore = Math.max(...matchups.map(m => m.score));
     const weightedScore = matchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
@@ -1820,7 +1842,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
       // Score the alternative
       const altOpps = PLAYOFFS[alt.team] || [];
-      const altMatchups = altOpps.map((opp, i) => getMatchupTier(opp, alt.pos));
+      const altMatchups = altOpps.map((opp, i) => getMatchupTier(opp, alt.pos, useProjected));
       const altWeighted = altMatchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
       const maxW = 5 * weights.reduce((a, b) => a + b, 0);
       const altScore = (altWeighted / maxW) * 15;
@@ -1830,7 +1852,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
 
       // Player's own score for comparison
       const playerOpps = PLAYOFFS[player.team] || [];
-      const playerMatchups = playerOpps.map((opp, i) => getMatchupTier(opp, player.pos));
+      const playerMatchups = playerOpps.map((opp, i) => getMatchupTier(opp, player.pos, useProjected));
       const playerWeighted = playerMatchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
       const playerScore = (playerWeighted / maxW) * 15;
 
@@ -2201,7 +2223,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false) =>
   const matchupScoreFor = (p) => {
     const opps = PLAYOFFS[p.team] || [];
     if (opps.length === 0) return null;
-    const matchups = opps.map(opp => getMatchupTier(opp, p.pos));
+    const matchups = opps.map(opp => getMatchupTier(opp, p.pos, useProjected));
     const avg = matchups.reduce((s, m) => s + m.score, 0) / matchups.length;
     return { avg, matchups };
   };
@@ -2404,13 +2426,20 @@ const buildLeagueFromConfig = (cfg) => {
 };
 
 // Position-vs-opponent ceiling calculator using FPA + adjustments
-const getMatchupScoreForOpponent = (opp, pos) => {
+const getMatchupScoreForOpponent = (opp, pos, useProjected = false) => {
   const oppClean = opp.replace("@", "");
   if (oppClean === "BYE") return null;
   let pts = FPA[pos]?.[oppClean];
   if (pts == null) return { score: 3, tier: "Unknown" };
   const adj = COACHING_ADJ[oppClean];
   if (adj) pts -= adj.all;
+  if (useProjected) {
+    const offAdj = OFFSEASON_ADJ_2026[oppClean];
+    if (offAdj) {
+      const delta = offAdj[pos.toLowerCase()];
+      if (delta != null) pts -= delta;
+    }
+  }
   const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
   const rank = allPts.findIndex(v => v <= pts) + 1;
   if (rank <= 8) return { score: 5, tier: "Smash", color: "elite" };
@@ -2422,7 +2451,7 @@ const getMatchupScoreForOpponent = (opp, pos) => {
 
 // ============ REDRAFT ANALYZER ============
 
-const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false) => {
+const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false, useProjected = false) => {
   // Accept either a preset key (string) or a resolved league object (custom)
   const league = typeof leagueOrKey === "string"
     ? REDRAFT_LEAGUES[leagueOrKey]
@@ -2495,7 +2524,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     let softWeeks = 0;
     const weeklyMatchups = fullSchedule.map((opp, weekIdx) => {
       if (!opp || opp === "BYE") return { week: weekIdx + 1, opp: "BYE", isBye: true };
-      const m = getMatchupScoreForOpponent(opp, player.pos);
+      const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
       return { week: weekIdx + 1, opp, isBye: false, ...m };
     });
     fullSchedule.forEach((opp) => {
@@ -2523,7 +2552,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     const playoffMatches = league.playoffWeeks.map(wk => {
       const opp = fullSchedule[wk - 1];
       if (!opp || opp === "BYE") return { week: wk, opp: "BYE", score: 0, tier: "BYE", color: "wall" };
-      const m = getMatchupScoreForOpponent(opp, player.pos);
+      const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
       return { week: wk, opp, ...m };
     });
     const totalScore = playoffMatches.reduce((sum, m) => sum + m.score, 0);
@@ -3124,8 +3153,9 @@ export default function RosterScorer() {
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
-  const [showPickAnalysis, setShowPickAnalysis] = useState(false); // opt-in: user confirms paste has pick numbers
-  const [uploadTabClicked, setUploadTabClicked] = useState(false); // stops glow once user clicks upload tab
+  const [showPickAnalysis, setShowPickAnalysis] = useState(false);
+  const [uploadTabClicked, setUploadTabClicked] = useState(false);
+  const [dataMode, setDataMode] = useState("actual"); // "actual" | "projected"
 
   // Re-run analysis when the pick analysis toggle changes — so users don't have
   // to manually re-click Analyze after checking/unchecking the box.
@@ -3135,11 +3165,11 @@ export default function RosterScorer() {
     if (analysisMode === "redraft") {
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
-      setAnalyzed(analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers));
+      setAnalyzed(analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected"));
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
-      setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers));
+      setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected"));
     }
   }, [showPickAnalysis, input]);
   const exportCardRef = React.useRef(null);
@@ -3386,12 +3416,12 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
       if (analysisMode === "redraft") {
         const picks = parseRosterRedraft(newInput);
         const league = resolveLeague(redraftLeague, customConfig);
-        const result = analyzeRedraft(picks, league, picks.hasPickNumbers);
+        const result = analyzeRedraft(picks, league, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
       } else {
         const fmt = TOURNAMENTS[tournament].format || "standard";
         const picks = parseRoster(newInput, fmt);
-        const result = analyzeRoster(picks, tournament, picks.hasPickNumbers);
+        const result = analyzeRoster(picks, tournament, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
       }
       setMode("paste");
@@ -3481,12 +3511,12 @@ Travis Etienne`;
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
       // showPickAnalysis is user opt-in — if off, never show ADP deltas regardless of parser detection
-      const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers);
+      const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
-      const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers);
+      const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
     }
   };
@@ -3743,6 +3773,59 @@ Travis Etienne`;
           </div>
         </div>
 
+        {/* Data Mode Toggle: 2025 Actual vs 2026 Projected */}
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
+            Data Mode
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            <button
+              onClick={() => { setDataMode("actual"); setAnalyzed(null); }}
+              style={{
+                background: dataMode === "actual" ? "#0d1f33" : "#0f0f0f",
+                border: `1px solid ${dataMode === "actual" ? "#22d3ee" : "#222"}`,
+                borderRadius: "4px", padding: "12px 14px",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+              }}
+            >
+              <div style={{ fontSize: "13px", color: dataMode === "actual" ? "#22d3ee" : "#fafafa", fontWeight: 600 }}>
+                📊 2025 Data
+              </div>
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
+                Real stats from last season
+              </div>
+            </button>
+            <button
+              onClick={() => { setDataMode("projected"); setAnalyzed(null); }}
+              style={{
+                background: dataMode === "projected" ? "#1a1200" : "#0f0f0f",
+                border: `1px solid ${dataMode === "projected" ? "#f59e0b" : "#222"}`,
+                borderRadius: "4px", padding: "12px 14px",
+                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+              }}
+            >
+              <div style={{ fontSize: "13px", color: dataMode === "projected" ? "#fbbf24" : "#fafafa", fontWeight: 600 }}>
+                🔮 2026 Est.
+              </div>
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
+                Adjusted for offseason moves
+              </div>
+            </button>
+          </div>
+          {dataMode === "projected" && (
+            <div style={{
+              marginTop: "8px", padding: "8px 12px",
+              background: "#1a1200", border: "1px solid #f59e0b55",
+              borderRadius: "4px", display: "flex", alignItems: "flex-start", gap: "8px",
+            }}>
+              <span style={{ fontSize: "12px", flexShrink: 0 }}>⚠️</span>
+              <div style={{ fontSize: "10px", color: "#d97706", lineHeight: 1.5 }}>
+                <strong>Estimated mode</strong> — matchup ratings reflect projected 2026 defensive changes based on offseason moves. These are not real stats. Switch to <strong>2025 Data</strong> for ground truth.
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Tournament selector — Best Ball only */}
         {analysisMode === "bestball" && (
         <div style={{ marginBottom: "20px" }}>
@@ -3758,7 +3841,7 @@ Travis Etienne`;
                   if (analyzed) {
                     const fmt = TOURNAMENTS[key].format || "standard";
                     const picks = parseRoster(input, fmt);
-                    const result = analyzeRoster(picks, key, picks.hasPickNumbers);
+                    const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
                     setAnalyzed(result);
                   }
                 }}
@@ -3819,7 +3902,7 @@ Travis Etienne`;
                   setCustomExpanded(false);
                   if (analyzed) {
                     const picks = parseRosterRedraft(input);
-                    const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers);
+                    const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers, dataMode === "projected");
                     setAnalyzed(result);
                   }
                 }}
@@ -3857,7 +3940,7 @@ Travis Etienne`;
                 setCustomExpanded(true);
                 if (analyzed) {
                   const picks = parseRosterRedraft(input);
-                  const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers);
+                  const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers, dataMode === "projected");
                   setAnalyzed(result);
                 }
               }}
