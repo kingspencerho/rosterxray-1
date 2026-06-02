@@ -1,4 +1,4 @@
-// /api/analyze.js
+// api/analyze.js
 export const config = { maxDuration: 60 };
 
 export default async function handler(req, res) {
@@ -6,8 +6,9 @@ export default async function handler(req, res) {
   const origin = req.headers.origin || "";
   const allowed = [
     "https://www.rosterxray.com",
-    "https://rosterxray-1.vercel.app",
+    "https://rosterxray-1.vercel.app", // Adjust if your new project has a different URL
   ];
+
   if (allowed.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
@@ -31,7 +32,8 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
+        // UPDATED MODEL STRING BELOW
+        model: "claude-sonnet-4-6", 
         max_tokens: 2000,
         messages: body.messages,
         ...(body.system ? { system: body.system } : {}),
