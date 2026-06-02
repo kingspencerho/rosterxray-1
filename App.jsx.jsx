@@ -3285,7 +3285,7 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-3-5-sonnet-20241022",
+          model: "claude-sonnet-4-6",
           max_tokens: 1500,
           messages: [{ role: "user", content }]
         })
