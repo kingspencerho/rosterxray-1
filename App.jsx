@@ -625,11 +625,11 @@ const VERDICTS = {
   "tyler shough": { verdict: "TARGET", date: "2026-06-03", reason: "Closed 2025 with 22+ PPG in last 3 starts, locked NO job, ADP reflects real momentum", confidence: "MEDIUM-HIGH" },
   "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
-  "harold fannin": { verdict: "TARGET", date: "2026-05-19", reason: "72/731/6 as rookie, 31% target share, Monken offense", confidence: "HIGH" },
+  "harold fannin": { verdict: "TARGET", date: "2026-06-03", reason: "72/731/6 as rookie, 31% target share, Monken now HC brings same pass-heavy identity as HC", confidence: "HIGH" },
   "cam skattebo": { verdict: "TARGET", date: "2026-05-19", reason: "Workhorse profile, Harbaugh run-heavy = volume", confidence: "HIGH" },
-  "kaytron allen": { verdict: "TARGET", date: "2026-05-19", reason: "Best late dart, WAS run-heavy, Quinn/Reich stable", confidence: "LOTTERY" },
+  "kaytron allen": { verdict: "TARGET", date: "2026-06-03", reason: "Best late dart, WAS run-heavy, Quinn retained as HC", confidence: "LOTTERY" },
   "omarion hampton": { verdict: "TARGET", date: "2026-05-19", reason: "McDaniel zone-run scheme-perfect", confidence: "HIGH" },
-  "jaylen warren": { verdict: "TARGET", date: "2026-05-19", reason: "RB17 in 2025, PPR-friendly, McCarthy OC upgrade", confidence: "HIGH" },
+  "jaylen warren": { verdict: "TARGET", date: "2026-06-03", reason: "RB17 in 2025, PPR-friendly, McCarthy HC brings run-heavy identity to PIT", confidence: "HIGH" },
   "eli stowers": { verdict: "TARGET (2027)", date: "2026-05-19", reason: "Buy now at ADP 195, TE1 job 2027 when Goedert gone", confidence: "MEDIUM-HIGH" },
   // 2026 role-concern fades — filtered from pivot recommendations
   "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
@@ -642,6 +642,28 @@ const VERDICTS = {
   "christian mccaffrey": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
   "cmc": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
 };
+
+// ============ 2026 NFL COACHING REFERENCE (verified June 2026) ============
+// Use this to keep trendNotes and verdicts accurate. Update each offseason.
+// KEY CHANGES FROM 2025:
+//   BAL: HC Jesse Minter (ex-LAC DC), OC Declan Doyle — Harbaugh gone to NYG
+//   NYG: HC John Harbaugh (from BAL), OC Matt Nagy
+//   BUF: HC Joe Brady (replaced McDermott), OC Pete Carmichael Jr
+//   LAC: HC Mike McDaniel (from MIA) — zone-run system continues, Hampton is scheme fit
+//   MIA: New HC (McDaniel gone) — Achane role intact, new staff inherits featured weapon
+//   PIT: HC Mike McCarthy (from DAL/GB) — run-heavy identity, Warren benefits
+//   CLE: HC Todd Monken (from BAL OC), OC Travis Switzer — Switzer was BAL run-game coord
+//   DAL: HC Brian Schottenheimer, OC Klayton Adams
+//   LV:  HC Klint Kubiak (from SEA), OC Andrew Janocko
+//   NO:  HC Kellen Moore, OC Doug Nussmeier — Staley DC
+//   ATL: HC Kevin Stefanski, OC Tommy Rees
+//   ARI: HC Mike LaFleur, OC Nathaniel Hackett
+//   CHI: HC Ben Johnson (retained), OC Press Taylor — passing game continuity
+//   WAS: HC Dan Quinn (retained), OC David Blough — Reich gone
+//   DEN: HC Sean Payton, OC Davis Webb — Payton surrendered play-calling
+//   SF:  HC Kyle Shanahan RETAINED — McCaffrey fade = injury, not scheme change
+//   Stable (no major changes): KC, MIN, DET, GB, PHI, SEA, LAR, TEN, HOU, IND, JAX, CAR, TB, NYJ
+// ==========================================================================
 
 // ============ SITUATIONS — static, curated, freshness-gated ============
 // Used by Championship Window Score (Component 3) and share card feedback copy
@@ -656,12 +678,12 @@ const SITUATIONS = {
   "saquon barkley": { verdict: "TARGET", trend: "stable", trendNote: "Workhorse with AJ Brown gone — even more targets now", situationFlags: ["target_vacuum"], riskFlags: [] },
   "james cook": { verdict: "TARGET", trend: "stable", trendNote: "Bellcow in top-5 offense, no real competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "ashton jeanty": { verdict: "TARGET", trend: "rising", trendNote: "Early camp reports: workhorse usage from Day 1", situationFlags: ["breakout_profile"], riskFlags: [] },
-  "devon achane": { verdict: "TARGET", trend: "stable", trendNote: "Elite pass-catcher in McDaniel system, locked role", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "devon achane": { verdict: "TARGET", trend: "stable", trendNote: "Elite pass-catcher in MIA offense, locked role — new staff inherits a featured weapon", situationFlags: ["scheme_fit"], riskFlags: [] },
   "omarion hampton": { verdict: "TARGET", trend: "rising", trendNote: "McDaniel zone-run fit is elite — scheme match grade A+", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: [] },
   "cam skattebo": { verdict: "TARGET", trend: "stable", trendNote: "Harbaugh run-heavy, Skattebo has workhorse ceiling", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jadarian price": { verdict: "TARGET", trend: "rising", trendNote: "R1 capital, Charbonnet ACL, run-first SEA scheme", situationFlags: ["breakout_profile", "scheme_fit"], riskFlags: [] },
-  "kaytron allen": { verdict: "TARGET", trend: "stable", trendNote: "WAS run-heavy, Quinn/Reich stable, lottery at ADP", situationFlags: ["scheme_fit"], riskFlags: [] },
-  "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy OC upgrade at PIT", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "kaytron allen": { verdict: "TARGET", trend: "stable", trendNote: "WAS run-heavy under Quinn, new OC Blough — scheme continuity intact, lottery at ADP", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy now HC at PIT — run-heavy system suits Warren's receiving back profile", situationFlags: ["scheme_fit"], riskFlags: [] },
   "travis etienne": { verdict: "TARGET", trend: "stable", trendNote: "New team NO, signed as lead back — fresh situation", situationFlags: ["committee_breaker"], riskFlags: [] },
   "brock bowers": { verdict: "TARGET", trend: "stable", trendNote: "TE1 in league's easiest playoff window", situationFlags: ["target_vacuum"], riskFlags: [] },
   "harold fannin": { verdict: "TARGET", trend: "stable", trendNote: "72/731/6 as rookie, 31% target share, elite floor", situationFlags: ["target_vacuum"], riskFlags: [] },
@@ -686,10 +708,10 @@ const SITUATIONS = {
   "d'andre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
   "dandre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
   "derrick henry": { verdict: "TARGET", trend: "stable", trendNote: "Has defied the age cliff every season — BAL run-heavy with soft W16-17 closing schedule", situationFlags: ["scheme_fit"], riskFlags: [] },
-  "christian mccaffrey": { verdict: "fade", trend: "falling", trendNote: "Injury history, SF offense in post-Shanahan transition", situationFlags: [], riskFlags: ["injury_history"] },
+  "christian mccaffrey": { verdict: "fade", trend: "falling", trendNote: "Injury history the real concern — missed significant 2024 time, SF scheme unchanged under Shanahan", situationFlags: [], riskFlags: ["injury_history"] },
   "malik nabers": { verdict: "fade", trend: "falling", trendNote: "2nd knee cleanup, Week 1 uncertain — freshness risk", situationFlags: [], riskFlags: ["injury_history"] },
   "rashee rice": { verdict: "fade", trend: "falling", trendNote: "30-day jail sentence, misses OTAs, chemistry concern", situationFlags: [], riskFlags: ["injury_history"] },
-  "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "Brutal playoff schedule + new HC/OC = ceiling risk", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "BAL brutal playoff schedule + new HC Minter/OC Doyle = scheme uncertainty ceiling risk in 2026", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
   "kenneth gainwell": { verdict: "fade", trend: "stable", trendNote: "TB committee, no clear path to workhorse role", situationFlags: [], riskFlags: ["creeping_committee"] },
@@ -2973,9 +2995,6 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   const sfDepthRelief = isSuperflex ? 0.75 : 1.0;
 
   // 1. Starting lineup quality (lower avg ADP = better)
-  // Thresholds scale with team count: deeper leagues (14-team) naturally have
-  // worse avg starter ADP, shallower (10-team) have better. Baseline = 12-team.
-  // Scale factor stretches the bands proportionally to roster pool depth.
   const teamScale = teamCount / 12;
   const eliteADP = 60 * teamScale;
   const strongADP = 90 * teamScale;
@@ -2989,6 +3008,20 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   } else if (avgStarterADP >= weakADP) {
     weaknesses.push("Weak starting lineup ADP");
     score -= 1.5;
+  }
+
+  // 1b. Elite talent concentration bonus
+  // Avg ADP undersells a roster with multiple true studs — reward it explicitly
+  const eliteStud = allStarters.filter(p => p.adp && p.adp <= 20).length;
+  const solidStud = allStarters.filter(p => p.adp && p.adp <= 40).length;
+  if (eliteStud >= 3) {
+    strengths.push(`${eliteStud} top-20 ADP studs — elite ceiling floor`);
+    score += 1.5;
+  } else if (eliteStud >= 2) {
+    score += 0.75; // quiet bonus — two true studs is still exceptional
+  }
+  if (solidStud >= 4 && eliteStud < 3) {
+    score += 0.5; // four top-40 starters is a deep quality build
   }
 
   // Match rate scale — suppresses depth penalties when roster is incomplete
