@@ -7313,7 +7313,7 @@ Analyze this best ball roster. Return JSON only.`;
                   </>
                 ) : (
                   <>
-                    {/* Redraft: Championship Window Score — centerpiece */}
+                    {/* Redraft: Playoff Ceiling Rating — centerpiece */}
                     {(() => {
                       const cws = calcChampionshipWindowScore(analyzed, ADP_YAHOO);
                       if (!cws) return null;
@@ -7339,7 +7339,10 @@ Analyze this best ball roster. Return JSON only.`;
 
                           {/* CWS Centerpiece */}
                           <div style={{ ...section({}), background: "#0d0d0d", padding: "12px 18px" }}>
-                            <div style={secLabel}>Championship Window Score</div>
+                            <div style={{ ...secLabel, marginBottom: "2px" }}>Playoff Ceiling Rating</div>
+                            <div style={{ fontSize: "9px", color: "#555", lineHeight: 1.4, marginBottom: "8px" }}>
+                              How dangerous is this roster in W15–17 specifically — separate from your overall construction grade.
+                            </div>
                             {/* Score block — number pushed up, tier top-aligned */}
                             <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", padding: "10px 0 14px" }}>
                               {/* Number */}
