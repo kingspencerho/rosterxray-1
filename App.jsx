@@ -612,7 +612,7 @@ const VERDICTS = {
   "tony pollard": { verdict: "fade", date: "2026-05-19", reason: "31 years old, Cam Ward era TEN = pass-first", confidence: "HIGH" },
   "tyler allgeier": { verdict: "fade", date: "2026-05-19", reason: "Three-way committee, Brissett QB, 36.1% run rate", confidence: "HIGH" },
   "mike washington": { verdict: "fade", date: "2026-05-19", reason: "Combine fraud, 10 career fumbles, no tape", confidence: "MEDIUM" },
-  "jaxson dart": { verdict: "fade", date: "2026-05-19", reason: "Harbaugh + Nagy caps fantasy QB ceiling", confidence: "MEDIUM" },
+  "jaxson dart": { verdict: "TARGET", date: "2026-06-03", reason: "NYG run-heavy limits ceiling but W17 @DAL + DAL bottom-5 defense is a real spike week; late-round leverage play", confidence: "MEDIUM" },
   "ja'kobi lane": { verdict: "HARD FADE", date: "2026-05-19", reason: "BAL run-heaviest, Minter HC, WR targets suppressed", confidence: "HIGH" },
   "jakobi lane": { verdict: "HARD FADE", date: "2026-05-19", reason: "BAL run-heaviest, Minter HC, WR targets suppressed", confidence: "HIGH" },
   "lamar jackson": { verdict: "fade", date: "2026-05-19", reason: "Playoff schedule brutal, new HC/OC uncertainty", confidence: "MEDIUM" },
@@ -637,7 +637,7 @@ const VERDICTS = {
   "david montgomery": { verdict: "fade", date: "2026-05-26", reason: "HOU added competition, age concern at 28", confidence: "MEDIUM" },
   "d'andre swift": { verdict: "fade", date: "2026-05-26", reason: "Committee back in CHI, no clear bell-cow role", confidence: "MEDIUM" },
   "breece hall": { verdict: "fade", date: "2026-05-26", reason: "Contract narrative, NYJ rebuild, role uncertainty", confidence: "MEDIUM" },
-  "derrick henry": { verdict: "fade", date: "2026-05-26", reason: "Age cliff risk at 32, BAL run-heavy but volume concern", confidence: "MEDIUM" },
+  "derrick henry": { verdict: "TARGET", date: "2026-06-03", reason: "Defied age cliff every season, BAL run-heavy, W16 CLE and W17 @CIN are soft closes", confidence: "MEDIUM" },
   "stefon diggs": { verdict: "HARD FADE", date: "2026-05-26", reason: "Free agent, no team, effectively retired", confidence: "HIGH" },
   "christian mccaffrey": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
   "cmc": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
@@ -685,12 +685,12 @@ const SITUATIONS = {
   "david montgomery": { verdict: "fade", trend: "falling", trendNote: "HOU added competition, age concern at 28", situationFlags: [], riskFlags: ["creeping_committee"] },
   "d'andre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
   "dandre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
-  "derrick henry": { verdict: "fade", trend: "falling", trendNote: "Age cliff risk at 32, volume concern even if still starter", situationFlags: [], riskFlags: ["injury_history"] },
+  "derrick henry": { verdict: "TARGET", trend: "stable", trendNote: "Has defied the age cliff every season — BAL run-heavy with soft W16-17 closing schedule", situationFlags: ["scheme_fit"], riskFlags: [] },
   "christian mccaffrey": { verdict: "fade", trend: "falling", trendNote: "Injury history, SF offense in post-Shanahan transition", situationFlags: [], riskFlags: ["injury_history"] },
   "malik nabers": { verdict: "fade", trend: "falling", trendNote: "2nd knee cleanup, Week 1 uncertain — freshness risk", situationFlags: [], riskFlags: ["injury_history"] },
   "rashee rice": { verdict: "fade", trend: "falling", trendNote: "30-day jail sentence, misses OTAs, chemistry concern", situationFlags: [], riskFlags: ["injury_history"] },
   "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "Brutal playoff schedule + new HC/OC = ceiling risk", situationFlags: [], riskFlags: ["qb_uncertainty"] },
-  "jaxson dart": { verdict: "fade", trend: "stable", trendNote: "Harbaugh + Nagy system caps QB fantasy ceiling hard", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
   "kenneth gainwell": { verdict: "fade", trend: "stable", trendNote: "TB committee, no clear path to workhorse role", situationFlags: [], riskFlags: ["creeping_committee"] },
   // === ROLE CEILING FLAGS ===
@@ -3797,7 +3797,7 @@ Travis Etienne`;
         : "";
 
       const verdictLines = !isRedraft
-        ? (result.verdictAlignments || []).filter(v => !v.stale).map(v =>
+        ? (result.verdictAlignments || []).filter(v => !v.stale && (v.verdict === "TARGET" || v.verdict.includes("TARGET"))).map(v =>
             `${v.name}: ${v.verdict} (${v.reason})`
           ).join("; ")
         : "";
@@ -3856,7 +3856,7 @@ Travis Etienne`;
       // === BENCH MOVES CONTEXT (redraft) ===
       const benchMovesForPrompt = isRedraft
         ? (result.benchMoves || []).map(a =>
-            `${a.player.name} (${a.player.pos}·${a.player.team}): ${a.label} — ${a.detail}`
+            `${a.player.name} (${a.player.pos}·${a.player.team} ADP ${a.player.adp})`
           ).join(" | ")
         : "";
 
@@ -3886,7 +3886,7 @@ Rules per section:
 - standoutDetails: specific situation, not just matchup quality. Under 20 words.
 - bringBackNotes: key format "TEAMAVSTEAMB_WEEK" e.g. "DALVSNYG_W17". Focus on whether this is a real ceiling game or just a coincidence.
 - lineupNotes: redraft only. One sentence per playoff week covering the most important decision.
-- benchMoveNotes: redraft only. One sentence per player — validate or challenge the formula's classification.
+- benchMoveNotes: redraft only. One sentence per player — use your own knowledge of their 2025 season, role, and 2026 situation. The formula that classified these players only looks at matchups and ADP, not player history or narrative. Challenge the classification when your knowledge suggests a different read. A former RB1 on a bad team is not the same as a true backup. A QB2 with elite upside is not the same as a streamer. Be honest about ceiling AND floor.
 
 gradeModifier rules:
 +2 = meaningfully stronger than score suggests
@@ -4187,6 +4187,15 @@ Analyze this best ball roster. Return JSON only.`;
         @keyframes tabGlow {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(74, 222, 128, 0); }
           50%       { box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.25); }
+        }
+        /* Strobe dot — used on ANALYZING and Extracting states */
+        .strobe-dot {
+          animation: strobeDot 1.1s ease-in-out infinite;
+        }
+        @keyframes strobeDot {
+          0%, 100% { opacity: 1; }
+          45%      { opacity: 0.15; }
+          55%      { opacity: 0.15; }
         }
       `}</style>
 
@@ -4898,7 +4907,7 @@ Analyze this best ball roster. Return JSON only.`;
                   borderRadius: "3px",
                 }}
               >
-                {extracting ? "Extracting..." : "Extract & Analyze →"}
+                {extracting ? <span><span className="strobe-dot" style={{ marginRight: "5px" }}>●</span>Extracting…</span> : "Extract & Analyze →"}
               </button>
               {uploadedImages.length > 0 && (
                 <button
@@ -5146,7 +5155,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px" }}>
                       Your team in a nutshell
                       {aiLoading && (
-                        <span style={{ fontSize: "8px", color: "#4ade80", letterSpacing: "0.08em" }}>● ANALYZING</span>
+                        <span className="strobe-dot" style={{ fontSize: "8px", color: "#4ade80", letterSpacing: "0.08em" }}>● ANALYZING</span>
                       )}
                       {aiNutshell && !aiLoading && (
                         <span style={{ fontSize: "8px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>
@@ -5208,29 +5217,26 @@ Analyze this best ball roster. Return JSON only.`;
                   {gradeExplainerOpen && (
                     <div style={{
                       marginTop: "8px",
-                      padding: "12px",
+                      padding: "10px 12px",
                       background: "#0a0a0a",
                       border: "1px solid #1e1e1e",
                       borderRadius: "4px",
-                      fontSize: "11px",
-                      color: "#888",
-                      lineHeight: 1.7,
                     }}>
-                      <div style={{ color: "#aaa", fontWeight: 600, marginBottom: "8px", fontSize: "11px" }}>
-                        Your grade is built from 4 things:
+                      <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                        Grade factors · Best Ball
                       </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#4ade80" }}>Stacks</span> — the biggest factor. A stack = a QB + at least one pass-catcher from the same team. More stacks with better playoff matchups = better grade.
-                      </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#4ade80" }}>Construction</span> — does your roster have the right position counts? Best ball targets are 6–7 WRs, 5–6 RBs, 2–3 TEs, 2–3 QBs. Too heavy or too light at any position costs points.
-                      </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#4ade80" }}>Playoff matchups</span> — your W15–W17 opponent matchups. Facing weak defenses in the championship weeks boosts your score. Facing tough ones hurts it.
-                      </div>
-                      <div>
-                        <span style={{ color: "#4ade80" }}>Bring-backs</span> — when you own players from both sides of the same playoff game, a high-scoring shootout benefits multiple players at once.
-                      </div>
+                      {[
+                        { label: "Stacks", note: "QB + pass-catcher from same team. More stacks, better matchups = higher grade.", color: "#4ade80" },
+                        { label: "Construction", note: "Right position counts. Targets: 6–7 WR, 5–6 RB, 2–3 TE, 2–3 QB.", color: "#4ade80" },
+                        { label: "Playoff window", note: "W15–W17 opponent quality. Soft schedules rewarded, tough ones penalized.", color: "#4ade80" },
+                        { label: "Bring-backs", note: "Players from both sides of a playoff game. Shootouts help multiple roster spots.", color: "#4ade80" },
+                        { label: "AI review", note: "Claude adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
+                      ].map((f, i) => (
+                        <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: i < 4 ? "6px" : 0 }}>
+                          <span style={{ fontSize: "9px", fontWeight: 700, color: f.color, whiteSpace: "nowrap", minWidth: "80px" }}>{f.label}</span>
+                          <span style={{ fontSize: "10px", color: "#666", lineHeight: 1.4 }}>{f.note}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -5993,7 +5999,9 @@ Analyze this best ball roster. Return JSON only.`;
                 FULL ROSTER
               </h2>
               <p style={{ fontSize: "11px", color: "#666", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
-                All 18 picks in draft order. {analyzed.hasPickNumbers ? "Pick number shown on the left." : "Add pick numbers to see draft slot."}
+                {analyzed.hasPickNumbers
+                  ? "Sorted by draft slot — your picks from Round 1 to the wire."
+                  : "Your full roster. Add pick numbers to unlock draft slot and ADP value analysis."}
               </p>
               <div style={{
                 background: "#0f0f0f",
@@ -6118,7 +6126,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px" }}>
                       Your team in a nutshell
                       {aiLoading && (
-                        <span style={{ fontSize: "8px", color: "#c084fc", letterSpacing: "0.08em" }}>● ANALYZING</span>
+                        <span className="strobe-dot" style={{ fontSize: "8px", color: "#c084fc", letterSpacing: "0.08em" }}>● ANALYZING</span>
                       )}
                       {aiNutshell && !aiLoading && (
                         <span style={{ fontSize: "8px", color: "#c084fcaa", letterSpacing: "0.08em" }}>✦ AI</span>
@@ -6180,29 +6188,26 @@ Analyze this best ball roster. Return JSON only.`;
                   {gradeExplainerOpen && (
                     <div style={{
                       marginTop: "8px",
-                      padding: "12px",
+                      padding: "10px 12px",
                       background: "#0a0a0a",
                       border: "1px solid #1e1e1e",
                       borderRadius: "4px",
-                      fontSize: "11px",
-                      color: "#888",
-                      lineHeight: 1.7,
                     }}>
-                      <div style={{ color: "#aaa", fontWeight: 600, marginBottom: "8px", fontSize: "11px" }}>
-                        Your grade is built from 4 things:
+                      <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                        Grade factors · Redraft
                       </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#c084fc" }}>Starting lineup</span> — the average ADP of your starters. Lower ADP = better players = better grade. Elite ADP averages get a big bonus; weak averages get penalized.
-                      </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#c084fc" }}>Depth</span> — do you have enough RBs and WRs to survive injuries? The target is 4–5 RBs and 5–6 WRs. Thin benches get flagged.
-                      </div>
-                      <div style={{ marginBottom: "6px" }}>
-                        <span style={{ color: "#c084fc" }}>Bye weeks</span> — if multiple starters share the same bye week, you'll have a lineup hole that week. Stacked byes are penalized, scaled by league size.
-                      </div>
-                      <div>
-                        <span style={{ color: "#c084fc" }}>Playoff schedule</span> — your starters' W15–W17 matchups. Facing weak defenses when it matters most boosts your score; tough slates hurt it.
-                      </div>
+                      {[
+                        { label: "Lineup caliber", note: "Average ADP of your starters. Lower = better players = better grade.", color: "#c084fc" },
+                        { label: "Depth", note: "Enough RBs and WRs to survive injuries. Targets: 4–5 RB, 5–6 WR.", color: "#c084fc" },
+                        { label: "Bye weeks", note: "Starters sharing the same bye = lineup hole that week. Penalized by count.", color: "#c084fc" },
+                        { label: "Playoff schedule", note: "W15–W17 matchup quality for your starters. Soft slates rewarded.", color: "#c084fc" },
+                        { label: "AI review", note: "Claude adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
+                      ].map((f, i) => (
+                        <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: i < 4 ? "6px" : 0 }}>
+                          <span style={{ fontSize: "9px", fontWeight: 700, color: f.color, whiteSpace: "nowrap", minWidth: "90px" }}>{f.label}</span>
+                          <span style={{ fontSize: "10px", color: "#666", lineHeight: 1.4 }}>{f.note}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -7119,7 +7124,13 @@ Analyze this best ball roster. Return JSON only.`;
                       ))}
                     </div>
                     {(aiNutshell || analyzed.nutshell) && (
-                      <div style={{ fontSize: "10px", color: "#888", lineHeight: 1.45 }}>{aiNutshell || analyzed.nutshell}</div>
+                      <div style={{ fontSize: "10px", color: "#888", lineHeight: 1.45 }}>{
+                        (() => {
+                          const full = aiNutshell || analyzed.nutshell;
+                          const sentences = full.match(/[^.!?]+[.!?]+/g) || [full];
+                          return sentences.slice(0, 3).join(" ").trim();
+                        })()
+                      }</div>
                     )}
                     {/* Inline strength/weakness — plain colored text, no box */}
                     {((analyzed.strengths || []).length > 0 || (analyzed.weaknesses || []).length > 0) && (
@@ -7343,8 +7354,11 @@ Analyze this best ball roster. Return JSON only.`;
                               {aiNutshell && <span style={{ fontSize: "7px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>}
                             </div>
                             {(() => {
-                              const text = aiNutshell || (cws.feedback || []).join(" ");
-                              if (!text) return null;
+                              const raw = aiNutshell || (cws.feedback || []).join(" ");
+                              if (!raw) return null;
+                              // Limit to 3 sentences for card layout
+                              const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+                              const text = sentences.slice(0, 3).join(" ").trim();
 
                               // Bold any player names found in the text
                               const allNames = (analyzed.valid || [])
