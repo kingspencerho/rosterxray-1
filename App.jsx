@@ -263,13 +263,6 @@ const ADP_DATA = {
   "marshawn lloyd": { adp: 215.5, pos: "RB", team: "GB" },
   "devaughn vele": { adp: 215.5, pos: "WR", team: "NO" },
   "oscar delp": { adp: 215.5, pos: "TE", team: "NO" },
-  "eli raridon": { adp: 215.7, pos: "TE", team: "NE" },
-  "raridon": { adp: 215.7, pos: "TE", team: "NE" },
-  "chris brooks": { adp: 211.1, pos: "RB", team: "GB" },
-  "samaje perine": { adp: 215.3, pos: "RB", team: "CIN" },
-  "najee harris": { adp: 215.4, pos: "RB", team: "FA" },
-  "darius slayton": { adp: 215.4, pos: "WR", team: "NYG" },
-  "chimere dike": { adp: 215.5, pos: "WR", team: "TEN" },
   "michael mayer": { adp: 215.5, pos: "TE", team: "LV" },
 };
 
@@ -648,6 +641,187 @@ const VERDICTS = {
   "christian mccaffrey": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
   "cmc": { verdict: "fade", date: "2026-05-26", reason: "Injury history, SF offense in transition", confidence: "MEDIUM" },
 };
+
+// ============ SITUATIONS — static, curated, freshness-gated ============
+// Used by Championship Window Score (Component 3) and share card feedback copy
+// situationFlags: committee_breaker | target_vacuum | breakout_profile | scheme_fit
+// riskFlags: creeping_committee | injury_history | ol_dependency | contract_year | qb_uncertainty
+const SITUATIONS = {
+  "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "saquon barkley": { verdict: "TARGET", trend: "stable", trendNote: "Workhorse with AJ Brown gone — even more targets now", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "james cook": { verdict: "TARGET", trend: "stable", trendNote: "Bellcow in top-5 offense, no real competition", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "ashton jeanty": { verdict: "TARGET", trend: "rising", trendNote: "Early camp reports: workhorse usage from Day 1", situationFlags: ["breakout_profile"], riskFlags: [] },
+  "devon achane": { verdict: "TARGET", trend: "stable", trendNote: "Elite pass-catcher in McDaniel system, locked role", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "omarion hampton": { verdict: "TARGET", trend: "rising", trendNote: "McDaniel zone-run fit is elite — scheme match grade A+", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: [] },
+  "cam skattebo": { verdict: "TARGET", trend: "stable", trendNote: "Harbaugh run-heavy, Skattebo has workhorse ceiling", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "jadarian price": { verdict: "TARGET", trend: "rising", trendNote: "R1 capital, Charbonnet ACL, run-first SEA scheme", situationFlags: ["breakout_profile", "scheme_fit"], riskFlags: [] },
+  "kaytron allen": { verdict: "TARGET", trend: "stable", trendNote: "WAS run-heavy, Quinn/Reich stable, lottery at ADP", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy OC upgrade at PIT", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "travis etienne": { verdict: "TARGET", trend: "stable", trendNote: "New team NO, signed as lead back — fresh situation", situationFlags: ["committee_breaker"], riskFlags: [] },
+  "brock bowers": { verdict: "TARGET", trend: "stable", trendNote: "TE1 in league's easiest playoff window", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "harold fannin": { verdict: "TARGET", trend: "stable", trendNote: "72/731/6 as rookie, 31% target share, elite floor", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "trey mcbride": { verdict: "TARGET", trend: "stable", trendNote: "Locked TE1 with elite target share in ARI air attack", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "caleb williams": { verdict: "TARGET", trend: "rising", trendNote: "Year 3 leap expected, Ben Johnson retained, CHI stack anchor", situationFlags: ["breakout_profile"], riskFlags: [] },
+  "carnell tate": { verdict: "TARGET", trend: "stable", trendNote: "R1 capital, WR1 role confirmed in TEN offense", situationFlags: ["breakout_profile"], riskFlags: [] },
+  "kc concepcion": { verdict: "TARGET", trend: "stable", trendNote: "R1 pick at WR5 ADP, vacated CLE target tree is massive", situationFlags: ["target_vacuum", "breakout_profile"], riskFlags: [] },
+  "jadarian price": { verdict: "TARGET", trend: "rising", trendNote: "R1 capital + Charbonnet ACL = path to workhorse snaps", situationFlags: ["committee_breaker", "breakout_profile"], riskFlags: [] },
+  "luther burden": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward WR1 starter role in CHI", situationFlags: ["breakout_profile", "target_vacuum"], riskFlags: [] },
+  "eli stowers": { verdict: "TARGET", trend: "stable", trendNote: "AJ Brown to NE strengthens PHI TE target share — buy window open", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "jonah coleman": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward every-down role as Harvey struggles in pass pro", situationFlags: ["committee_breaker", "scheme_fit"], riskFlags: [] },
+  "quinshon judkins": { verdict: "TARGET", trend: "stable", trendNote: "Young back in CLE committee — upside if Mitchell slips", situationFlags: ["breakout_profile"], riskFlags: ["creeping_committee"] },
+  "bhayshul tuten": { verdict: "TARGET", trend: "stable", trendNote: "Best back in JAX room after last year's breakout flashes", situationFlags: ["committee_breaker"], riskFlags: [] },
+  // Risk/fade situations
+  "chuba hubbard": { verdict: "fade", trend: "falling", trendNote: "Brooks returning, 3.8 YPC, ADP rising wrong way", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "rj harvey": { verdict: "fade", trend: "falling", trendNote: "Pass-pro issues, ADP rising into the mistake zone", situationFlags: [], riskFlags: ["creeping_committee", "ol_dependency"] },
+  "jk dobbins": { verdict: "fade", trend: "falling", trendNote: "Two major knee surgeries, Harvey clearly ahead in depth chart", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
+  "tony pollard": { verdict: "fade", trend: "falling", trendNote: "31 years old, Cam Ward era TEN is pass-first now", situationFlags: [], riskFlags: ["contract_year"] },
+  "tyler allgeier": { verdict: "fade", trend: "stable", trendNote: "Three-way committee, Brissett QB, 36.1% run rate is brutal", situationFlags: [], riskFlags: ["creeping_committee", "qb_uncertainty"] },
+  "breece hall": { verdict: "fade", trend: "falling", trendNote: "Contract narrative + NYJ rebuild = role uncertainty", situationFlags: [], riskFlags: ["contract_year", "creeping_committee"] },
+  "david montgomery": { verdict: "fade", trend: "falling", trendNote: "HOU added competition, age concern at 28", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "d'andre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "dandre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "derrick henry": { verdict: "fade", trend: "falling", trendNote: "Age cliff risk at 32, volume concern even if still starter", situationFlags: [], riskFlags: ["injury_history"] },
+  "christian mccaffrey": { verdict: "fade", trend: "falling", trendNote: "Injury history, SF offense in post-Shanahan transition", situationFlags: [], riskFlags: ["injury_history"] },
+  "malik nabers": { verdict: "fade", trend: "falling", trendNote: "2nd knee cleanup, Week 1 uncertain — freshness risk", situationFlags: [], riskFlags: ["injury_history"] },
+  "rashee rice": { verdict: "fade", trend: "falling", trendNote: "30-day jail sentence, misses OTAs, chemistry concern", situationFlags: [], riskFlags: ["injury_history"] },
+  "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "Brutal playoff schedule + new HC/OC = ceiling risk", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "jaxson dart": { verdict: "fade", trend: "stable", trendNote: "Harbaugh + Nagy system caps QB fantasy ceiling hard", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "kenneth gainwell": { verdict: "fade", trend: "stable", trendNote: "TB committee, no clear path to workhorse role", situationFlags: [], riskFlags: ["creeping_committee"] },
+};
+
+// ============ CHAMPIONSHIP WINDOW SCORE ============
+// Computes redraft share card 0–10 score from 3 components
+// Returns { total, comp1, comp2, comp3, tier, feedback }
+function calcChampionshipWindowScore(analyzed, adpSource) {
+  if (!analyzed) return null;
+
+  // --- Component 1: Playoff Schedule Quality (0–4) ---
+  const pm = analyzed.playoffMatchups || [];
+  const starters = pm.filter(p => p.pos !== "K" && p.pos !== "DST");
+
+  const posWeights = { QB: 1.2, RB: 1.0, WR: 1.0, TE: 0.8 };
+  let weightedSum = 0;
+  let totalWeight = 0;
+
+  starters.forEach(p => {
+    const w = posWeights[p.pos] || 1.0;
+    // totalScore is sum of 3 week tier values (each 0–5), max 15
+    const avgTier = p.totalScore / 3;
+    weightedSum += avgTier * w;
+    totalWeight += w;
+  });
+
+  const weightedAvg = totalWeight > 0 ? weightedSum / totalWeight : 0;
+  let comp1 = 0;
+  if (weightedAvg >= 4.2) comp1 = 4.0;
+  else if (weightedAvg >= 3.8) comp1 = 3.5;
+  else if (weightedAvg >= 3.3) comp1 = 3.0;
+  else if (weightedAvg >= 2.8) comp1 = 2.0;
+  else comp1 = 1.0;
+
+  // Schedule tier label
+  const schedTierLabel = comp1 >= 4.0 ? "Elite" : comp1 >= 3.5 ? "Strong" : comp1 >= 3.0 ? "Above avg" : comp1 >= 2.0 ? "Average" : "Below avg";
+
+  // --- Component 2: Starter Caliber (0–4) ---
+  const activeAdp = adpSource || ADP_DATA;
+  const starterPositions = ["QB", "RB", "WR", "TE"];
+  const startingPlayers = (analyzed.valid || []).filter(p => starterPositions.includes(p.pos) && !p.isBench);
+
+  let adpSum = 0;
+  let adpCount = 0;
+  startingPlayers.forEach(p => {
+    const key = p.name.toLowerCase();
+    const entry = activeAdp[key];
+    if (entry && entry.adp) { adpSum += entry.adp; adpCount++; }
+    else if (p.adp) { adpSum += p.adp; adpCount++; }
+  });
+
+  const avgAdp = adpCount > 0 ? adpSum / adpCount : 120;
+  let comp2 = 0;
+  if (avgAdp <= 40) comp2 = 4.0;
+  else if (avgAdp <= 65) comp2 = 3.5;
+  else if (avgAdp <= 90) comp2 = 3.0;
+  else if (avgAdp <= 115) comp2 = 2.0;
+  else comp2 = 1.0;
+
+  const caliberLabel = comp2 >= 4.0 ? "Elite" : comp2 >= 3.5 ? "Strong" : comp2 >= 3.0 ? "Solid" : comp2 >= 2.0 ? "Average" : "Thin";
+
+  // --- Component 3: Roster Situation Score (0–2) ---
+  // Check top 5 starters from SITUATIONS data
+  const topStarters = [...(analyzed.valid || [])]
+    .filter(p => starterPositions.includes(p.pos) && !p.isBench)
+    .slice(0, 5);
+
+  let posCount = 0;
+  let riskCount = 0;
+  let situationNotes = [];
+
+  topStarters.forEach(p => {
+    const key = p.name.toLowerCase();
+    const sit = SITUATIONS[key];
+    if (!sit) return;
+    if (sit.situationFlags && sit.situationFlags.length > 0) posCount++;
+    if (sit.riskFlags && sit.riskFlags.length > 0) riskCount++;
+    if (sit.trendNote) situationNotes.push({ name: p.name, note: sit.trendNote, trend: sit.trend, flags: sit.situationFlags, risks: sit.riskFlags });
+  });
+
+  let comp3 = 0;
+  if (riskCount === 0 && posCount >= 2) comp3 = 2.0;
+  else if (riskCount <= 1 && posCount >= 1) comp3 = 1.5;
+  else if (riskCount <= 2) comp3 = 1.0;
+  else comp3 = 0.5;
+
+  // Round to nearest 0.5
+  const total = Math.round((comp1 + comp2 + comp3) * 2) / 2;
+
+  const tier = total >= 9 ? "Elite" : total >= 7.5 ? "Contender" : total >= 6 ? "Competitive" : total >= 4.5 ? "Risky" : "Rebuild";
+  const tierColor = total >= 9 ? "#4ade80" : total >= 7.5 ? "#a3e635" : total >= 6 ? "#facc15" : total >= 4.5 ? "#fb923c" : "#f87171";
+
+  // --- Feedback copy: 3 sentences, player-specific ---
+  // Sort starters by playoff score — sentence 1 describes the BEST windows, not the average
+  const sortedByPlayoff = [...starters].sort((a, b) => b.totalScore - a.totalScore);
+  const top2 = sortedByPlayoff.slice(0, 2);
+  const top2Names = top2.map(p => p.name.split(" ").slice(-1)[0]).join(" and ");
+
+  // Score the top-2 avg independently (not comp1 which averages all starters)
+  const top2Avg = top2.length > 0 ? top2.reduce((s, p) => s + p.totalScore / 3, 0) / top2.length : 0;
+
+  const schedSentence = top2Avg >= 4.0
+    ? `${top2Names} are elite playoff weapons — both face soft defenses across W15–17.`
+    : top2Avg >= 3.3
+    ? `${top2Names} have strong playoff matchups — your top weapons are well-positioned.`
+    : top2Avg >= 2.5
+    ? `${top2Names} have workable playoff matchups — not elite, but no landmines either.`
+    : `${top2Names} face tough playoff defenses — your top weapons hit walls at peak time.`;
+
+  const caliberSentence = `Your starting lineup averages ADP ${Math.round(avgAdp)} — ${caliberLabel.toLowerCase()} caliber${comp2 >= 3.5 ? ", which is a genuine edge" : comp2 >= 2.5 ? ", right around the field" : ", leaving you thin in the playoffs"}.`;
+
+  let sitSentence = "";
+  const riskNote = situationNotes.find(n => n.risks.length > 0);
+  const posNote = situationNotes.find(n => n.flags.length > 0);
+  if (riskNote) {
+    sitSentence = `Watch ${riskNote.name}: ${riskNote.note.toLowerCase()}`;
+  } else if (posNote) {
+    sitSentence = `${posNote.name} is a bright spot: ${posNote.note.toLowerCase()}`;
+  } else {
+    sitSentence = "No major situation red flags on your key starters — clean roster heading into playoffs.";
+  }
+
+  return {
+    total,
+    comp1, comp2, comp3,
+    tier, tierColor,
+    schedTierLabel, caliberLabel,
+    avgAdp: Math.round(avgAdp),
+    weightedAvg: Math.round(weightedAvg * 10) / 10,
+    top2Avg,
+    feedback: [schedSentence, caliberSentence, sitSentence],
+    situationNotes,
+    topPlayoffStarters: sortedByPlayoff.slice(0, 3),
+  };
+}
 
 
 // ============ REDRAFT DATA ============
@@ -1391,19 +1565,7 @@ const parseRosterLegacy = (text, format = "standard") => {
     if (player) {
       picks.push({ ...player, pickNum: idx + 1, actualPick: actualPick || idx + 1, raw: line });
     } else {
-      // Graceful fallback — keep the player in the roster so they're never silently dropped.
-      // Mark as unmatched so ADP delta, stack detection, and matchup grading are skipped for them.
-      // They still show in the full roster list with a "?" indicator.
-      picks.push({
-        name: cleaned,
-        raw: line,
-        notFound: true,
-        pos: "?",
-        team: "?",
-        adp: null,
-        pickNum: idx + 1,
-        actualPick: actualPick || null,
-      });
+      picks.push({ name: cleaned, raw: line, notFound: true, pickNum: idx + 1, actualPick: actualPick || idx + 1 });
     }
   });
 
@@ -3029,7 +3191,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     return { week, locks, concerns };
   }).filter(Boolean);
 
-  const lineupConfidencePreview = lineupConfidence.slice(0, 8);
+  const lineupConfidencePreview = lineupConfidence; // all 17 weeks including W15–17 playoffs
 
   // === BENCH MOVES ALERTS ===
   const benchAlerts = [];
@@ -3684,6 +3846,13 @@ Travis Etienne`;
             dyingLight 7s ease-out forwards,
             hum 3.8s ease-in-out 7s infinite;
         }
+        /* Gradient variant — opacity flicker + background-position sweep after settle */
+        .xray-gradient-flicker {
+          background-size: 200% auto;
+          animation:
+            dyingLight 7s ease-out forwards,
+            gradientSweep 4s linear 7s infinite;
+        }
         @keyframes dyingLight {
           0%    { opacity: 1; }
           6%    { opacity: 0.08; }
@@ -3704,6 +3873,10 @@ Travis Etienne`;
         @keyframes hum {
           0%, 100% { opacity: 1; }
           50%      { opacity: 0.78; }
+        }
+        @keyframes gradientSweep {
+          0%   { background-position: 0% center; }
+          100% { background-position: 200% center; }
         }
 
         /* Upload tab glow — cyan pulse, stops when clicked */
@@ -3726,12 +3899,25 @@ Travis Etienne`;
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap" }}>
             <h1 style={{
               fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: "42px",
-              letterSpacing: "0.04em",
+              fontSize: "50px",
+              letterSpacing: "0.03em",
               margin: 0,
               color: "#fafafa",
+              lineHeight: 1,
             }}>
-              ROSTER <span className="xray-word-flicker" style={{ color: "#60c8f5" }}>X-RAY</span>
+              ROSTER{" "}
+              <span
+                className="xray-gradient-flicker"
+                style={{
+                  background: "linear-gradient(90deg, #60c8f5 0%, #a8e8ff 25%, #ffffff 50%, #a8e8ff 75%, #60c8f5 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  backgroundSize: "200% auto",
+                }}
+              >
+                X-RAY
+              </span>
             </h1>
             <span style={{
               fontSize: "11px",
@@ -3740,7 +3926,7 @@ Travis Etienne`;
               textTransform: "uppercase",
               fontWeight: 500,
             }}>
-              Diagnose your roster.
+              Don't just draft. See.
             </span>
           </div>
         </div>
@@ -4329,7 +4515,7 @@ Travis Etienne`;
               />
               <div style={{ fontSize: "32px", marginBottom: "8px" }}>📸</div>
               <div style={{ fontSize: "14px", color: "#fafafa", marginBottom: "6px", fontWeight: 600 }}>
-                Drop your roster screenshot — get an instant diagnosis
+                Drop your roster screenshot — see what your league-mates can't
               </div>
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
                 Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
@@ -4744,8 +4930,9 @@ Travis Etienne`;
                         padding: "8px 16px",
                         color: exportingCard ? "#555" : "#93c5fd",
                         fontSize: "12px",
-                        fontWeight: 600,
-                        letterSpacing: "0.05em",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
                         cursor: exportingCard ? "default" : "pointer",
                         display: "flex",
                         alignItems: "center",
@@ -4753,11 +4940,25 @@ Travis Etienne`;
                         boxShadow: exportingCard ? "none" : "0 0 12px #3b82f633",
                       }}
                     >
-                      {exportingCard ? "⏳ Generating…" : exportedDataUrl ? "🔄 Regenerate Card" : "📤 Share My Grade"}
+                      {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
-                    <span style={{ fontSize: "10px", color: "#2a2a2a", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                      ROSTER X-RAY
-                    </span>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); }}
+                      style={{
+                        background: "transparent",
+                        border: "1px solid #333",
+                        borderRadius: "4px",
+                        padding: "8px 14px",
+                        color: "#555",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ↩ New Analysis
+                    </button>
                   </div>
                   {exportedDataUrl && (
                     <div style={{ marginTop: "14px" }}>
@@ -4786,14 +4987,9 @@ Travis Etienne`;
                 marginBottom: "20px",
                 fontSize: "12px",
               }}>
-                <div style={{ color: "#fb923c", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>
-                  ⚠ {analyzed.picks.filter(p => p.notFound).length} PLAYER{analyzed.picks.filter(p => p.notFound).length > 1 ? "S" : ""} NOT IN ADP DATABASE
-                </div>
-                <div style={{ color: "#a8a29e", marginBottom: "6px" }}>
-                  {analyzed.picks.filter(p => p.notFound).map(p => p.name).join(" · ")}
-                </div>
-                <div style={{ color: "#666", fontSize: "11px", lineHeight: 1.5 }}>
-                  These players are included in your roster count but excluded from stack detection, matchup grading, and ADP analysis. They're likely recent signings or rookies not yet in our May 29 dataset — we'll update the database as ADP data becomes available.
+                <div style={{ color: "#fb923c", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>UNMATCHED</div>
+                <div style={{ color: "#a8a29e" }}>
+                  {analyzed.picks.filter(p => p.notFound).map(p => p.raw).join(" · ")}
                 </div>
               </div>
             )}
@@ -5667,8 +5863,9 @@ Travis Etienne`;
                         padding: "8px 16px",
                         color: exportingCard ? "#555" : "#93c5fd",
                         fontSize: "12px",
-                        fontWeight: 600,
-                        letterSpacing: "0.05em",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
                         cursor: exportingCard ? "default" : "pointer",
                         display: "flex",
                         alignItems: "center",
@@ -5676,11 +5873,25 @@ Travis Etienne`;
                         boxShadow: exportingCard ? "none" : "0 0 12px #3b82f633",
                       }}
                     >
-                      {exportingCard ? "⏳ Generating…" : exportedDataUrl ? "🔄 Regenerate Card" : "📤 Share My Grade"}
+                      {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
-                    <span style={{ fontSize: "10px", color: "#2a2040", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                      ROSTER X-RAY
-                    </span>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); }}
+                      style={{
+                        background: "transparent",
+                        border: "1px solid #333",
+                        borderRadius: "4px",
+                        padding: "8px 14px",
+                        color: "#555",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ↩ New Analysis
+                    </button>
                   </div>
                   {exportedDataUrl && (
                     <div style={{ marginTop: "14px" }}>
@@ -6466,7 +6677,7 @@ Travis Etienne`;
             position: "fixed",
             top: 0,
             left: "-9999px",
-            width: "390px",
+            width: "420px",
             background: "#0a0a0a",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             border: "1px solid #1a1a1a",
@@ -6488,7 +6699,7 @@ Travis Etienne`;
             const cardWkLabels = cardPlayoffWeeks.map(w => `W${w}`);
 
             // Shared inline styles
-            const secLabel = { fontSize: "8px", color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "7px", fontFamily: "monospace" };
+            const secLabel = { fontSize: "8px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "7px", fontFamily: "'Inter', 'DM Sans', sans-serif", fontWeight: 600 };
             const row = { display: "flex", alignItems: "center", gap: "7px", padding: "3px 0", borderBottom: "1px solid #0d0d0d", fontSize: "11px" };
             const slotStyle = { fontSize: "9px", color: "#333", width: "26px", flexShrink: 0, fontFamily: "monospace" };
             const nameStyle = { color: "#e0e0e0", fontWeight: 500, flex: 1 };
@@ -6503,7 +6714,7 @@ Travis Etienne`;
                 FLEX: { bg: "#94a3b818", border: "#94a3b844", color: "#94a3b8" },
               };
               const c = map[pos] || map.FLEX;
-              return { fontSize: "8px", fontWeight: 700, background: c.bg, border: `1px solid ${c.border}`, color: c.color, padding: "1px 4px", borderRadius: "2px", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: "14px", height: "14px" };
+              return { fontSize: "8px", fontWeight: 700, background: c.bg, border: `1px solid ${c.border}`, color: c.color, padding: "0", width: "26px", height: "16px", borderRadius: "2px", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
             };
 
             const wkChipStyle = (color) => {
@@ -6515,11 +6726,11 @@ Travis Etienne`;
                 wall:    { bg: "#2a0a0a", color: "#f87171" },
               };
               const c = map[color] || { bg: "#1a1a1a", color: "#444" };
-              return { fontSize: "8px", fontWeight: 700, padding: "1px 4px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: "14px", height: "14px" };
+              return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
             };
 
             const section = (children, extraStyle = {}) => ({
-              padding: "9px 22px 9px 22px",
+              padding: "8px 18px",
               borderBottom: "1px solid #111",
               ...extraStyle,
             });
@@ -6535,35 +6746,28 @@ Travis Etienne`;
                 </div>
 
                 {/* Grade bar */}
-                <div style={{ background: "#111", padding: "12px 14px", display: "flex", alignItems: "center", gap: "12px", borderBottom: "1px solid #1a1a1a" }}>
+                <div style={{ background: "#111", padding: "10px 16px", display: "flex", alignItems: "center", gap: "14px", borderBottom: "1px solid #1a1a1a" }}>
                   <div style={{ fontWeight: 900, fontSize: "52px", lineHeight: 1, color: gc, letterSpacing: "-0.01em", flexShrink: 0 }}>{analyzed.grade}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", gap: "12px", marginBottom: "5px", fontSize: "12px" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: "14px", marginBottom: "5px", fontSize: "12px" }}>
                       {["QB","RB","WR","TE"].map(pos => (
                         <span key={pos}><span style={{ color: "#444", fontSize: "10px" }}>{pos} </span><span style={{ color: "#fafafa", fontWeight: 600 }}>{analyzed.posCounts[pos] || 0}</span></span>
                       ))}
                     </div>
                     {analyzed.nutshell && (
-                      <div style={{ fontSize: "11px", color: "#666", lineHeight: 1.45 }}>{analyzed.nutshell}</div>
+                      <div style={{ fontSize: "10px", color: "#666", lineHeight: 1.45 }}>{analyzed.nutshell}</div>
                     )}
-                  </div>
-                </div>
-
-                {/* Strengths + Weaknesses */}
-                <div style={section({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" })}>
-                  <div>
-                    <div style={secLabel}>Strengths</div>
-                    {(analyzed.strengths || []).slice(0, 3).map((s, i) => (
-                      <div key={i} style={{ fontSize: "10px", color: "#4ade80", marginBottom: "4px", lineHeight: 1.4 }}>✓ {s}</div>
-                    ))}
-                    {!(analyzed.strengths || []).length && <div style={{ fontSize: "10px", color: "#444" }}>None identified</div>}
-                  </div>
-                  <div>
-                    <div style={secLabel}>Weaknesses</div>
-                    {(analyzed.weaknesses || []).slice(0, 3).map((w, i) => (
-                      <div key={i} style={{ fontSize: "10px", color: "#fb923c", marginBottom: "4px", lineHeight: 1.4 }}>⚠ {w}</div>
-                    ))}
-                    {!(analyzed.weaknesses || []).length && <div style={{ fontSize: "10px", color: "#444" }}>None flagged</div>}
+                    {/* Inline strength/weakness — plain colored text, no box */}
+                    {((analyzed.strengths || []).length > 0 || (analyzed.weaknesses || []).length > 0) && (
+                      <div style={{ marginTop: "5px" }}>
+                        {(analyzed.strengths || []).slice(0, 1).map((s, i) => (
+                          <div key={i} style={{ fontSize: "9px", color: "#4ade80", lineHeight: 1.4 }}>✓ {s}</div>
+                        ))}
+                        {(analyzed.weaknesses || []).slice(0, 1).map((w, i) => (
+                          <div key={i} style={{ fontSize: "9px", color: "#fb923c", lineHeight: 1.4 }}>⚠ {w}</div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -6658,151 +6862,173 @@ Travis Etienne`;
                   </>
                 ) : (
                   <>
-                    {/* Redraft: Playoff Threats — top 3 starters by playoff score */}
-                    <div style={section({})}>
-                      <div style={secLabel}>Playoff Threats</div>
-                      <div style={{ display: "flex", gap: "2px", justifyContent: "flex-end", marginBottom: "4px" }}>
-                        {cardWkLabels.map(wk => (
-                          <div key={wk} style={{ width: "30px", textAlign: "center", fontSize: "8px", color: "#555", fontFamily: "monospace" }}>{wk}</div>
-                        ))}
-                        <div style={{ width: "24px", textAlign: "center", fontSize: "8px", color: "#555", fontFamily: "monospace" }}>/10</div>
-                      </div>
-                      {[...(analyzed.playoffMatchups || [])]
-                        .sort((a, b) => b.totalScore - a.totalScore)
-                        .slice(0, 3)
-                        .map((p, i, arr) => {
-                          const score = Math.round((p.totalScore / 15) * 10);
-                          const sc = score >= 7 ? "#4ade80" : score <= 4 ? "#f87171" : "#facc15";
-                          const posColors = { QB: "#f59e0b", RB: "#22d3ee", WR: "#4ade80", TE: "#c084fc" };
-                          const pc = posColors[p.pos] || "#888";
-                          return (
-                            <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "3px 0 3px 10px", borderBottom: i < arr.length - 1 ? "1px solid #0d0d0d" : "none" }}>
-                              <span style={posChipStyle(p.pos)}>{p.pos}</span>
-                              <div style={{ flex: 1, fontSize: "11px", color: "#e0e0e0" }}>{p.name}</div>
-                              <div style={{ display: "flex", gap: "2px", flexShrink: 0 }}>
-                                {(p.playoffMatches || []).map((m, j) => {
-                                  const oppLabel = (m.opp || "?").replace("@","").slice(0,3);
-                                  return (
-                                    <div key={j} style={{ ...wkChipStyle(m.color || "neutral"), width: "30px", textAlign: "center", fontSize: "8px" }}>
-                                      {oppLabel}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              <div style={{ width: "24px", textAlign: "right", fontSize: "11px", fontWeight: 700, color: sc, fontFamily: "monospace", flexShrink: 0 }}>{score}</div>
-                            </div>
-                          );
-                        })}
-                    </div>
-
-                    {/* Redraft: Roster Standouts */}
+                    {/* Redraft: Championship Window Score — centerpiece */}
                     {(() => {
-                      // Build redraft standouts inline — best playoff starter, ADP steal, key bench move
-                      const pm = (analyzed.playoffMatchups || []);
-                      const topStarter = [...pm].sort((a, b) => b.totalScore - a.totalScore)[0];
+                      const cws = calcChampionshipWindowScore(analyzed, ADP_YAHOO);
+                      if (!cws) return null;
                       const posColors = { QB: "#f59e0b", RB: "#22d3ee", WR: "#4ade80", TE: "#c084fc" };
-                      const used = new Set();
 
-                      const standouts = [];
-
-                      // 1) Best playoff window starter
-                      if (topStarter) {
-                        const score = Math.round((topStarter.totalScore / 15) * 10);
-                        standouts.push({
-                          icon: "🏆",
-                          label: "Best Playoff Matchups",
-                          player: topStarter,
-                          detail: score >= 8
-                            ? `Elite playoff slate — built to peak when it matters`
-                            : `Top playoff matchups on roster — your schedule ace`,
-                        });
-                        used.add(topStarter.name);
-                      }
-
-                      // 2) ADP Steal — if pick numbers available
-                      if (analyzed.hasPickNumbers) {
-                        const steal = (analyzed.valid || [])
-                          .filter(p => p.actualPick != null && (p.actualPick - p.adp) >= 12 && !used.has(p.name))
-                          .sort((a, b) => (b.actualPick - b.adp) - (a.actualPick - a.adp))[0];
-                        if (steal) {
-                          const delta = Math.round(steal.actualPick - steal.adp);
-                          standouts.push({
-                            icon: "💰",
-                            label: "ADP Steal",
-                            player: steal,
-                            detail: `Drafted ${delta} picks later than ADP — pure value`,
-                          });
-                          used.add(steal.name);
-                        }
-                      }
-
-                      // 3) Key bench move — filtered for genuinely impressive highlights only
-                      // Rules:
-                      // - bye_fill excluded: roster hygiene, not a standout
-                      // - handcuff only if 12+ team league AND shallow RB bench (mirrors weakness logic)
-                      // - same-team filter: skip if player shares team with already-used standout
-                      const usedTeams = new Set(
-                        standouts.map(s => s.player?.team).filter(Boolean)
+                      // Component bar helper
+                      const compBar = (label, val, max, color) => (
+                        <div style={{ marginBottom: "7px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "3px" }}>
+                            <div style={{ fontSize: "8px", color, opacity: 0.75, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Inter', 'DM Sans', sans-serif", fontWeight: 600 }}>{label}</div>
+                            <div style={{ fontSize: "9px", color, fontWeight: 700, fontFamily: "'Inter', monospace" }}>{val.toFixed(1)}<span style={{ color: "#333", fontWeight: 400 }}>/{max}</span></div>
+                          </div>
+                          <div style={{ height: "3px", background: "#1a1a1a", borderRadius: "2px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${(val / max) * 100}%`, background: color, borderRadius: "2px", transition: "width 0.3s" }} />
+                          </div>
+                        </div>
                       );
-                      const teamCount = analyzed.teamCount || 12;
-                      const rbDepth = (analyzed.valid || []).filter(p => p.pos === "RB").length;
-                      const rbNeeded = analyzed.rbNeeded || 4;
-                      const thinWaivers = teamCount >= 12;
-                      const shallowRB = rbDepth < rbNeeded + 2;
 
-                      const eligibleAlert = (analyzed.benchMoves || []).find(alert => {
-                        if (!alert.player) return false;
-                        if (used.has(alert.player.name)) return false;
-                        // Drop bye fills
-                        if (alert.type === "bye_fill") return false;
-                        // Gate handcuffs on league size + RB depth
-                        if (alert.type === "handcuff" && !(thinWaivers && shallowRB)) return false;
-                        // Drop if same team as existing standout
-                        if (usedTeams.has(alert.player.team)) return false;
-                        return true;
-                      });
-
-                      if (eligibleAlert) {
-                        const alertLabels = {
-                          handcuff: { icon: "🛡️", label: "Handcuff Locked" },
-                          streamer: { icon: "📈", label: "Streamer Upside" },
-                          stash: { icon: "🎲", label: "Late Round Dart" },
-                        };
-                        const al = alertLabels[eligibleAlert.type] || { icon: "⚡", label: "Bench Asset" };
-                        standouts.push({
-                          icon: al.icon,
-                          label: al.label,
-                          player: eligibleAlert.player,
-                          detail: eligibleAlert.detail || eligibleAlert.matchupNote || "Key bench piece",
-                        });
-                        used.add(eligibleAlert.player.name);
-                      }
-
-                      if (standouts.length === 0) return null;
                       return (
-                        <div style={section({})}>
-                          <div style={secLabel}>Roster Standouts</div>
-                          {standouts.map((s, i) => {
-                            const pc = posColors[s.player?.pos] || "#888";
-                            return (
-                              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "5px 0 5px 10px", borderBottom: i < standouts.length - 1 ? "1px solid #0d0d0d" : "none" }}>
-                                <div style={{ fontSize: "12px", flexShrink: 0 }}>{s.icon}</div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: "8px", color: "#555", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "monospace", marginBottom: "2px" }}>{s.label}</div>
-                                  <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
-                                    <div style={{ fontSize: "10px", color: "#e0e0e0", fontWeight: 700, paddingLeft: "2px" }}>{s.player?.name}</div>
-                                    {s.player?.pos && (
-                                      <div style={{ fontSize: "8px", fontWeight: 700, color: pc, background: pc + "18", border: "1px solid " + pc + "44", borderRadius: "3px", padding: "1px 4px", fontFamily: "monospace", flexShrink: 0 }}>
-                                        {s.player.pos}{s.player.team ? "·" + s.player.team : ""}
+                        <>
+                          {/* Thin divider between grade and CWS */}
+                          <div style={{ height: "1px", background: "linear-gradient(to right, #222, #333, #222)", margin: "0" }} />
+
+                          {/* CWS Centerpiece */}
+                          <div style={{ ...section({}), background: "#0d0d0d", padding: "12px 18px" }}>
+                            <div style={secLabel}>Championship Window Score</div>
+                            {/* Score block — number pushed up, tier top-aligned */}
+                            <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", padding: "10px 0 14px" }}>
+                              {/* Number */}
+                              <div style={{ fontFamily: "'Bebas Neue', 'Impact', monospace", fontSize: "52px", fontWeight: 900, lineHeight: 1, color: cws.tierColor, letterSpacing: "0.01em", flexShrink: 0 }}>
+                                {cws.total.toFixed(1)}
+                              </div>
+                              {/* Tier label above out-of, both pinned to bottom of number */}
+                              <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", alignSelf: "stretch", gap: "3px", paddingBottom: "3px" }}>
+                                <div style={{ fontFamily: "'Bebas Neue', 'Impact', sans-serif", fontSize: "20px", fontWeight: 900, color: cws.tierColor, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>{cws.tier}</div>
+                                <div style={{ fontSize: "8px", color: "#444", fontFamily: "monospace", lineHeight: 1 }}>out of 10.0</div>
+                              </div>
+                            </div>
+                            {/* Component bars */}
+                            {compBar("Schedule Quality", cws.comp1, 4, cws.comp1 >= 3.5 ? "#4ade80" : cws.comp1 >= 2.5 ? "#facc15" : "#f87171")}
+                            {compBar("Starter Caliber", cws.comp2, 4, cws.comp2 >= 3.5 ? "#4ade80" : cws.comp2 >= 2.5 ? "#facc15" : "#f87171")}
+                            {compBar("Roster Situations", cws.comp3, 2, cws.comp3 >= 1.5 ? "#4ade80" : cws.comp3 >= 1.0 ? "#facc15" : "#f87171")}
+                          </div>
+
+                          {/* Playoff schedule chips — top 3 starters */}
+                          <div style={section({})}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                              <div style={secLabel}>Playoff Threats</div>
+                              <div style={{ display: "flex", gap: "2px" }}>
+                                {cardWkLabels.map(wk => (
+                                  <div key={wk} style={{ width: "28px", textAlign: "center", fontSize: "8px", color: "#555", fontFamily: "monospace" }}>{wk}</div>
+                                ))}
+                                <div style={{ width: "22px", textAlign: "right", fontSize: "8px", color: "#555", fontFamily: "monospace" }}>/10</div>
+                              </div>
+                            </div>
+                            {[...(analyzed.playoffMatchups || [])]
+                              .sort((a, b) => b.totalScore - a.totalScore)
+                              .slice(0, 3)
+                              .map((p, i, arr) => {
+                                const score = Math.round((p.totalScore / 15) * 10);
+                                const sc = score >= 7 ? "#4ade80" : score <= 4 ? "#f87171" : "#facc15";
+                                const pc = posColors[p.pos] || "#888";
+                                return (
+                                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 0 4px 6px", borderBottom: i < arr.length - 1 ? "1px solid #0d0d0d" : "none" }}>
+                                    <span style={posChipStyle(p.pos)}>{p.pos}</span>
+                                    <div style={{ flex: 1, fontSize: "10px", color: "#e0e0e0", minWidth: 0 }}>{p.name}</div>
+                                    <div style={{ display: "flex", gap: "2px", flexShrink: 0 }}>
+                                      {(p.playoffMatches || []).map((m, j) => {
+                                        const oppLabel = (m.opp || "?").replace("@","").slice(0,3);
+                                        return (
+                                          <div key={j} style={{ ...wkChipStyle(m.color || "neutral"), width: "28px", textAlign: "center", fontSize: "8px" }}>
+                                            {oppLabel}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                    <div style={{ width: "22px", textAlign: "right", fontSize: "10px", fontWeight: 700, color: sc, fontFamily: "monospace", flexShrink: 0 }}>{score}</div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+
+                          {/* Roster Situation Highlights */}
+                          {cws.situationNotes.length > 0 && (
+                            <div style={{ ...section({}), borderLeft: "3px solid #333", paddingLeft: "19px" }}>
+                              <div style={secLabel}>Situation Highlights</div>
+                              {cws.situationNotes.slice(0, 3).map((s, i) => {
+                                const pc = posColors[(analyzed.valid || []).find(p => p.name === s.name)?.pos] || "#888";
+                                const isRisk = s.risks.length > 0;
+                                const trendIcon = s.trend === "rising" ? "↑" : s.trend === "falling" ? "↓" : "→";
+                                const trendColor = s.trend === "rising" ? "#4ade80" : s.trend === "falling" ? "#f87171" : "#888";
+                                return (
+                                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "6px", padding: "5px 0 5px 6px", borderBottom: i < Math.min(cws.situationNotes.length, 3) - 1 ? "1px solid #0d0d0d" : "none" }}>
+                                    <div style={{ fontSize: "10px", color: trendColor, flexShrink: 0, fontWeight: 700, paddingTop: "2px" }}>{trendIcon}</div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
+                                        <div style={{ fontSize: "10px", color: "#e0e0e0", fontWeight: 700 }}>{s.name}</div>
+                                        <div style={{ fontSize: "7px", color: isRisk ? "#fb923c" : "#4ade80", background: isRisk ? "#fb923c15" : "#4ade8015", border: `1px solid ${isRisk ? "#fb923c40" : "#4ade8040"}`, borderRadius: "2px", padding: "1px 4px", fontFamily: "monospace", letterSpacing: "0.06em", flexShrink: 0 }}>
+                                          {isRisk ? "RISK" : "UPSIDE"}
+                                        </div>
                                       </div>
+                                      <div style={{ fontSize: "9px", color: "#666", lineHeight: 1.45 }}>{s.note}</div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Feedback copy */}
+                          <div style={{ ...section({}), background: "#0a0a0a", borderLeft: "3px solid #333", paddingLeft: "15px" }}>
+                            <div style={secLabel}>Scout Report</div>
+                            {cws.feedback.map((line, i) => {
+                              // Dot color: driven by sentence sentiment, not component scores
+                              // Sentence 0 = schedule (top2Avg), 1 = caliber (comp2), 2 = situation (comp3/risk)
+                              const sentimentColors = [
+                                cws.top2Avg >= 3.3 ? "#4ade80" : cws.top2Avg >= 2.5 ? "#facc15" : "#f87171",
+                                cws.comp2 >= 3.5 ? "#4ade80" : cws.comp2 >= 2.5 ? "#60a5fa" : "#f87171",
+                                cws.comp3 >= 1.5 ? "#4ade80" : "#facc15",
+                              ];
+                              const dot = sentimentColors[i] || "#555";
+
+                              // Bold full player names found in the sentence
+                              const allNames = (analyzed.valid || [])
+                                .map(p => p.name)
+                                .filter(n => n.length > 2)
+                                .sort((a, b) => b.length - a.length); // longest first to avoid partial matches
+
+                              // Build segments by scanning for full names
+                              let segments = [{ text: line, bold: false }];
+                              for (const name of allNames) {
+                                const next = [];
+                                for (const seg of segments) {
+                                  if (seg.bold) { next.push(seg); continue; }
+                                  // Try full name first, then last name only as fallback
+                                  const lastName = name.split(" ").slice(-1)[0];
+                                  const searchTerm = seg.text.includes(name) ? name : (lastName.length > 2 && seg.text.includes(lastName) ? lastName : null);
+                                  if (!searchTerm) { next.push(seg); continue; }
+                                  const idx = seg.text.indexOf(searchTerm);
+                                  if (idx !== -1) {
+                                    if (idx > 0) next.push({ text: seg.text.slice(0, idx), bold: false });
+                                    next.push({ text: searchTerm, bold: true });
+                                    const after = seg.text.slice(idx + searchTerm.length);
+                                    if (after) next.push({ text: after, bold: false });
+                                  } else {
+                                    next.push(seg);
+                                  }
+                                }
+                                segments = next;
+                              }
+
+                              return (
+                                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "7px", marginBottom: i < cws.feedback.length - 1 ? "7px" : 0 }}>
+                                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0, marginTop: "5px" }} />
+                                  <div style={{ fontSize: "9px", color: "#777", lineHeight: 1.55 }}>
+                                    {segments.map((seg, si) =>
+                                      seg.bold
+                                        ? <span key={si} style={{ color: "#e0e0e0", fontWeight: 700 }}>{seg.text}</span>
+                                        : seg.text
                                     )}
                                   </div>
-                                  <div style={{ fontSize: "9px", color: "#666", lineHeight: 1.4 }}>{s.detail}</div>
                                 </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                              );
+                            })}
+                          </div>
+                        </>
                       );
                     })()}
                   </>
