@@ -1295,7 +1295,19 @@ const findPlayer = (name, format = "standard") => {
 };
 
 const parseRosterRedraft = (text) => {
-  return parseRoster(text, "yahoo");
+  // Strip K and D/ST lines before parsing — they're never graded and
+  // would land as notFound entries dragging down match rate and depth scores
+  const KDST_LINE = /^(.*\s+)?(k|kicker|def|dst|d\/st|defense|d\/s\/t)([\s·\-].*)?$/i;
+  const KDST_NAME = /^(.*\b(kicker|defense|def|dst)\b.*)$/i;
+  const cleaned = text.split("\n").filter(line => {
+    const t = line.trim();
+    if (!t) return true; // keep blanks for structure
+    if (KDST_LINE.test(t)) return false;
+    // Also filter common DST name patterns like "Eagles D/ST", "Patriots Defense"
+    if (/\b(d\/st|defense|dst)\b/i.test(t)) return false;
+    return true;
+  }).join("\n");
+  return parseRoster(cleaned, "yahoo");
 };
 
 // Universal preprocessor: takes ANY messy paste (Underdog vertical "Copy All" dump,
@@ -2984,10 +2996,10 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   const depthPenaltyScale = matchRate >= 0.85 ? 1.0 : matchRate >= 0.70 ? 0.5 : 0.2;
 
   // Config-derived depth needs: needed = starters + FLEX-eligible + 1 buffer
-  // thin = below needed; strong = needed + 2 (per Phase 2 spec)
+  // Capped at 4 RBs and 4 WRs — beyond that is unrealistic for any standard roster size
   const flexSlots = league.lineup.FLEX || 0;
-  const rbNeeded = (league.lineup.RB || 0) + flexSlots + 1;
-  const wrNeeded = (league.lineup.WR || 0) + flexSlots + 1;
+  const rbNeeded = Math.min(4, (league.lineup.RB || 0) + flexSlots + 1);
+  const wrNeeded = Math.min(4, (league.lineup.WR || 0) + flexSlots + 1);
   const rbStrong = rbNeeded + 2;
   const wrStrong = wrNeeded + 2;
   // Effective strong thresholds after scoring format adjustment
@@ -3022,9 +3034,10 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     score -= 1 * depthPenaltyScale * wrPenaltyMult * sfDepthRelief;
   }
 
-  // 3b. Bench depth floor — adjusted for SF (fewer bench slots available for skill)
+  // 3b. Bench depth floor — 1 backup per position is the realistic floor for standard redraft
+  // Math.floor(benchSize / 4) gives floor=1 for 6-bench leagues, floor=2 for 8-bench leagues
   const benchSize = league.benchSize || 6;
-  const benchFloor = Math.max(1, Math.floor(benchSize / 3));
+  const benchFloor = Math.max(1, Math.floor(benchSize / 4));
   const rbBench = depthAnalysis.RB.count - rbNeeded;
   const wrBench = depthAnalysis.WR.count - wrNeeded;
   if (depthPenaltyScale >= 0.85) {
@@ -3171,13 +3184,23 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     }
   }
 
-  // Convert to grade
-  if (score >= 5) grade = "A";
-  else if (score >= 3.5) grade = "A-";
-  else if (score >= 2) grade = "B+";
-  else if (score >= 0.5) grade = "B";
-  else if (score >= -1) grade = "C+";
-  else if (score >= -2.5) grade = "C";
+  // Convert to grade — normalized by league difficulty
+  // Larger leagues and superflex formats have shallower player pools;
+  // the same raw score means more in a 14-team SF than a 10-team standard
+  const difficultyShift = (() => {
+    let shift = 0;
+    if (teamCount >= 14) shift += 0.5;
+    else if (teamCount <= 10) shift -= 0.3;
+    if (isSuperflex) shift += 0.4;
+    return shift;
+  })();
+
+  if (score >= 5 - difficultyShift) grade = "A";
+  else if (score >= 3.5 - difficultyShift) grade = "A-";
+  else if (score >= 2 - difficultyShift) grade = "B+";
+  else if (score >= 0.5 - difficultyShift) grade = "B";
+  else if (score >= -1 - difficultyShift) grade = "C+";
+  else if (score >= -2.5 - difficultyShift) grade = "C";
   else grade = "D";
 
   // === LINEUP CONFIDENCE — per-week start/sit intel with bench swap suggestions ===
@@ -3897,11 +3920,27 @@ gradeModifier rules:
 
 Never reference internal numbers the user cannot see. Plain language only.
 
-Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye weeks, injury insurance. Skip pivotNotes, standoutDetails, bringBackNotes — return empty objects for those." : `BEST BALL (${tournamentName}) — focus on ceiling, stacks, playoff window, boom/bust variance. Skip lineupNotes and benchMoveNotes — return empty objects for those.`}`;
+Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye weeks, injury insurance. The league structure is provided in the user prompt — use it to calibrate expectations. In a superflex league 3 QBs is correct roster construction, not a problem. In a 14-team league shallow depth is expected. Never penalize correct format-specific construction. Skip pivotNotes, standoutDetails, bringBackNotes — return empty objects for those." : `BEST BALL (${tournamentName}) — focus on ceiling, stacks, playoff window, boom/bust variance. Skip lineupNotes and benchMoveNotes — return empty objects for those.`}`;
+
+      // === LEAGUE CONTEXT for AI prompt ===
+      const leagueContext = isRedraft ? (() => {
+        const lg = result.league || {};
+        const lineup = lg.lineup || {};
+        const parts = [];
+        if (lg.teams) parts.push(`${lg.teams}-team league`);
+        if (lg.scoring) parts.push(lg.scoring);
+        if (lg.isSuperflex) parts.push("SUPERFLEX (2QB required)");
+        const lineupStr = Object.entries(lineup).filter(([,v]) => v > 0)
+          .map(([k,v]) => `${v} ${k}`).join(", ");
+        if (lineupStr) parts.push(`Lineup: ${lineupStr}`);
+        if (lg.benchSize) parts.push(`${lg.benchSize} bench spots`);
+        return parts.join(" · ");
+      })() : "";
 
       // === USER PROMPT ===
       const userPrompt = isRedraft
         ? `Roster: ${rosterLines}
+League: ${leagueContext || "Standard 12-team Half-PPR"}
 Grade: ${grade} (score ${score})
 Strengths: ${strengthLines || "none"}
 Weaknesses: ${weaknessLines || "none"}
@@ -3951,10 +3990,12 @@ Analyze this best ball roster. Return JSON only.`;
       if (parsed.lineupNotes && typeof parsed.lineupNotes === "object") setAiLineupNotes(parsed.lineupNotes);
       if (parsed.benchMoveNotes && typeof parsed.benchMoveNotes === "object") setAiBenchMoveNotes(parsed.benchMoveNotes);
 
-      // Apply grade modifier
+      // Apply grade modifier — negative capped at -1 to prevent AI overcorrecting
+      // The formula has already penalized structural issues; AI is a secondary adjustment
       if (parsed.gradeModifier && parsed.gradeModifier !== 0) {
-        const modifierMap = { "+2": 2.0, "+1": 0.8, "0": 0, "-1": -0.8, "-2": -2.0 };
-        const delta = modifierMap[String(parsed.gradeModifier)] ?? (parsed.gradeModifier * 0.8);
+        const rawModifier = Math.max(-1, Math.min(2, parsed.gradeModifier)); // clamp -1 to +2
+        const modifierMap = { "2": 2.0, "1": 0.8, "0": 0, "-1": -0.8 };
+        const delta = modifierMap[String(rawModifier)] ?? (rawModifier * 0.8);
         setAnalyzed(prev => {
           if (!prev) return prev;
           const newScore = (prev.score || 0) + delta;
@@ -3965,10 +4006,10 @@ Analyze this best ball roster. Return JSON only.`;
             newScore >= 2.0 ? "B" :
             newScore >= 0.5 ? "C+" :
             newScore >= -1.0 ? "C" : "D";
-          const updatedWeaknesses = parsed.gradeModifier < 0 && parsed.modifierReason
+          const updatedWeaknesses = rawModifier < 0 && parsed.modifierReason
             ? [...(prev.weaknesses || []), `AI flag: ${parsed.modifierReason}`]
             : prev.weaknesses;
-          const updatedStrengths = parsed.gradeModifier > 0 && parsed.modifierReason
+          const updatedStrengths = rawModifier > 0 && parsed.modifierReason
             ? [...(prev.strengths || []), `AI flag: ${parsed.modifierReason}`]
             : prev.strengths;
           return { ...prev, score: newScore, grade: newGrade, weaknesses: updatedWeaknesses, strengths: updatedStrengths };
