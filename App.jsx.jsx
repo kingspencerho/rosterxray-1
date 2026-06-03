@@ -3640,16 +3640,20 @@ Include ALL skill position players visible across all images (QB, RB, WR, TE). S
 
       const newInput = players.join("\n");
       setInput(newInput);
+      setAiNutshell(null);
+      setAiLoading(false);
       if (analysisMode === "redraft") {
         const picks = parseRosterRedraft(newInput);
         const league = resolveLeague(redraftLeague, customConfig);
         const result = analyzeRedraft(picks, league, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
+        fetchAiNutshell(result);
       } else {
         const fmt = TOURNAMENTS[tournament].format || "standard";
         const picks = parseRoster(newInput, fmt);
         const result = analyzeRoster(picks, tournament, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
+        fetchAiNutshell(result);
       }
       setMode("paste");
     } catch (err) {
