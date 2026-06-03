@@ -3752,24 +3752,24 @@ Jake Ferguson 129
 T.J. Hockenson 160
 Greg Dulcich 208`;
 
-  // REDRAFT example — curated to exercise lineup grading, depth, schedule, handcuffs.
-  // Lights up: elite starting lineup ADP (early-round studs), workhorse RB1s,
-  // mixed playoff windows, manageable bye spread, and TE-streamable depth.
-  const exampleRosterRedraft = `Bijan Robinson
-Saquon Barkley
+  // REDRAFT example — realistic 12-team half-PPR roster. Mix of elite starters,
+  // mid-round value picks, and realistic bench depth. Exercises: lineup caliber,
+  // positional depth, bye week spread, playoff schedule, and bench move classification.
+  const exampleRosterRedraft = `Saquon Barkley
 Justin Jefferson
-CeeDee Lamb
-Brock Purdy
-Trey McBride
-Garrett Wilson
-DeVon Achane
-Tyrone Tracy
-Romeo Doubs
-George Pickens
-Jordan Addison
-Patrick Mahomes
+Kyler Murray
+De'Von Achane
+Chris Olave
+Tee Higgins
+Dalton Kincaid
+Alvin Kamara
+Rashid Shaheed
+Dak Prescott
+Chuba Hubbard
+Zay Jones
+Elijah Mitchell
 Sam LaPorta
-Travis Etienne`;
+Wan'Dale Robinson`;
 
   const exampleRoster = exampleRosterBestBall;
 
@@ -3886,7 +3886,7 @@ Rules per section:
 - standoutDetails: specific situation, not just matchup quality. Under 20 words.
 - bringBackNotes: key format "TEAMAVSTEAMB_WEEK" e.g. "DALVSNYG_W17". Focus on whether this is a real ceiling game or just a coincidence.
 - lineupNotes: redraft only. One sentence per playoff week covering the most important decision.
-- benchMoveNotes: redraft only. One sentence per player — use your own knowledge of their 2025 season, role, and 2026 situation. The formula that classified these players only looks at matchups and ADP, not player history or narrative. Challenge the classification when your knowledge suggests a different read. A former RB1 on a bad team is not the same as a true backup. A QB2 with elite upside is not the same as a streamer. Be honest about ceiling AND floor.
+- benchMoveNotes: redraft only. One sentence per player — use your own knowledge of their 2025 season, role, and 2026 situation. The formula only looks at matchups and ADP, not player history or narrative. Give a balanced read: acknowledge real strengths and real concerns. A former elite player on a new team deserves credit for their track record — don't just focus on the downside. An organizational commitment signal like a big contract is real signal of intent. Be honest about ceiling AND floor without being brutal. One sentence, specific, fair.
 
 gradeModifier rules:
 +2 = meaningfully stronger than score suggests
@@ -5230,7 +5230,7 @@ Analyze this best ball roster. Return JSON only.`;
                         { label: "Construction", note: "Right position counts. Targets: 6–7 WR, 5–6 RB, 2–3 TE, 2–3 QB.", color: "#4ade80" },
                         { label: "Playoff window", note: "W15–W17 opponent quality. Soft schedules rewarded, tough ones penalized.", color: "#4ade80" },
                         { label: "Bring-backs", note: "Players from both sides of a playoff game. Shootouts help multiple roster spots.", color: "#4ade80" },
-                        { label: "AI review", note: "Claude adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
+                        { label: "AI review", note: "An AI layer adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
                       ].map((f, i) => (
                         <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: i < 4 ? "6px" : 0 }}>
                           <span style={{ fontSize: "9px", fontWeight: 700, color: f.color, whiteSpace: "nowrap", minWidth: "80px" }}>{f.label}</span>
@@ -6201,7 +6201,7 @@ Analyze this best ball roster. Return JSON only.`;
                         { label: "Depth", note: "Enough RBs and WRs to survive injuries. Targets: 4–5 RB, 5–6 WR.", color: "#c084fc" },
                         { label: "Bye weeks", note: "Starters sharing the same bye = lineup hole that week. Penalized by count.", color: "#c084fc" },
                         { label: "Playoff schedule", note: "W15–W17 matchup quality for your starters. Soft slates rewarded.", color: "#c084fc" },
-                        { label: "AI review", note: "Claude adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
+                        { label: "AI review", note: "An AI layer adjusts the grade based on player situations the formula can't see.", color: "#22d3ee" },
                       ].map((f, i) => (
                         <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: i < 4 ? "6px" : 0 }}>
                           <span style={{ fontSize: "9px", fontWeight: 700, color: f.color, whiteSpace: "nowrap", minWidth: "90px" }}>{f.label}</span>
