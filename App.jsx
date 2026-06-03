@@ -602,6 +602,25 @@ const TEAM_CHALK = {
   JAX: "sharp", LV: "sharp", NYJ: "sharp", NYG: "sharp", TEN: "sharp", ARI: "sharp", CAR: "sharp", CLE: "sharp", TB: "sharp",
 };
 
+// Recent news — post-training updates injected directly into AI prompt
+// Format: normalized player name → one-sentence situation update
+// Update this alongside VERDICTS whenever a significant role/roster change happens
+const RECENT_NEWS = {
+  "travis etienne": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
+  "travis etienne jr": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
+  "alvin kamara": "Kamara lost his starting job in NO — Etienne signed a 2yr/$14M deal and is now RB1.",
+  "wandale robinson": "Robinson moved to TEN where Carnell Tate (2026 draft pick) is the clear WR1, limiting Robinson's ceiling.",
+  "carnell tate": "Tate was drafted by TEN in 2026 and is projected as their WR1, ahead of Robinson on the depth chart.",
+  "aj brown": "AJ Brown was traded to NE (2028 1st + 2027 5th), leaving PHI — no longer on PHI.",
+  "malik nabers": "Nabers had a 2nd knee cleanup (scar tissue removal) in 2026 and Week 1 availability is uncertain.",
+  "rashee rice": "Rice is serving a 30-day jail sentence and missed OTAs — availability and role for Week 1 unclear.",
+  "luther burden": "Burden is trending toward the CHI WR1 starter role per 2026 camp reports.",
+  "eli stowers": "Stowers won the Mackey Award in 2025; with Goedert as bridge and AJ Brown gone from PHI, his TE1 path accelerated.",
+  "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
+  "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
+  "myles garrett": "Garrett was traded to LAR (Jared Verse + 2027 1st + picks), no longer on CLE.",
+};
+
 // Player verdicts from memory — date-stamped for freshness check
 const VERDICTS = {
   "hubbard": { verdict: "fade", date: "2026-05-19", reason: "3.8 YPC, Brooks returning, classic Hubbard Trap", confidence: "HIGH" },
@@ -714,13 +733,13 @@ const SITUATIONS = {
   "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "BAL brutal playoff schedule + new HC Minter/OC Doyle = scheme uncertainty ceiling risk in 2026", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
-  "kenneth gainwell": { verdict: "fade", trend: "stable", trendNote: "TB committee, no clear path to workhorse role", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   // === ROLE CEILING FLAGS ===
   // slot_only: high target share WRs locked into short/underneath routes, no red zone role, hard TD ceiling cap
   "khalil shakir": { verdict: "fade", trend: "stable", trendNote: "Elite slot stats but sub-6 aDOT, zero red zone role — PPR floor, not a ceiling asset", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "jakobi meyers": { verdict: "fade", trend: "stable", trendNote: "Possession slot, sub-7 aDOT — high floor, no boom ceiling without a red zone role change", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "josh downs": { verdict: "fade", trend: "stable", trendNote: "Slot-only role in IND offense, limited air yards despite target volume — TD regression risk", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
-  "wandale robinson": { verdict: "fade", trend: "stable", trendNote: "Pure slot, sub-6 aDOT historically — floor back in TEN pass-first offense, not an upside play", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  "wandale robinson": { verdict: "fade", trend: "stable", trendNote: "Pure slot, sub-6 aDOT — Carnell Tate drafted as TEN WR1 further caps Robinson's ceiling; depth flier only", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "parker washington": { verdict: "fade", trend: "stable", trendNote: "Slot receiver in JAX committee — target share without air yards is noise in best ball", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
   "blake corum": { verdict: "fade", trend: "stable", trendNote: "Pure goal-line role in LAR — fantasy value collapses to near zero if not scoring TDs", situationFlags: [], riskFlags: [], roleCeiling: "rz_dependent" },
@@ -3972,6 +3991,15 @@ Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye wee
         return parts.join(" · ");
       })() : "";
 
+      // === RECENT NEWS CONTEXT — roster-filtered ===
+      const newsContext = (result.valid || [])
+        .map(p => {
+          const key = normalize(p.name);
+          return RECENT_NEWS[key] ? `${p.name}: ${RECENT_NEWS[key]}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === USER PROMPT ===
       const userPrompt = isRedraft
         ? `Roster: ${rosterLines}
@@ -3983,7 +4011,7 @@ Playoff matchups: ${playoffLines || "none"}
 Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
-
+${newsContext ? `\nRecent news (override training data with these facts):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
         : `Roster: ${rosterLines}
 Stacks: ${stackLines || "none"}
@@ -3996,7 +4024,7 @@ Pivot candidates: ${pivotForPrompt || "none"}
 Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
-
+${newsContext ? `\nRecent news (override training data with these facts):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
 
       const response = await fetch("/api/analyze", {
