@@ -622,6 +622,7 @@ const VERDICTS = {
   "kc concepcion": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital at R5 ADP, WR1 role, vacated targets", confidence: "HIGH" },
   "carnell tate": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital, WR1 role confirmed, refined route runner", confidence: "HIGH" },
   "kyler murray": { verdict: "TARGET", date: "2026-05-19", reason: "Top-5 QB ceiling at QB17 IF wins job. MIN W16-17 elite", confidence: "HIGH (conditional)" },
+  "tyler shough": { verdict: "TARGET", date: "2026-06-03", reason: "Closed 2025 with 22+ PPG in last 3 starts, locked NO job, ADP reflects real momentum", confidence: "MEDIUM-HIGH" },
   "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
   "harold fannin": { verdict: "TARGET", date: "2026-05-19", reason: "72/731/6 as rookie, 31% target share, Monken offense", confidence: "HIGH" },
@@ -1965,11 +1966,43 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // Sort bring-backs chronologically by playoff week (W15 → W16 → W17)
   bringBacks.sort((a, b) => a.weekIdx - b.weekIdx);
 
+  // === DEDUPLICATE MIRROR PAIRS ===
+  // DAL vs NYG generates two entries (one from each stack's perspective).
+  // Merge them: one card per unique game per week, showing all pieces from both teams.
+  const mergedBringBacks = [];
+  const seenGames = new Set();
+  bringBacks.forEach(bb => {
+    const gameKey = [bb.stackTeam, bb.opponent].sort().join("_") + "_" + bb.week;
+    if (seenGames.has(gameKey)) return;
+    seenGames.add(gameKey);
+    // Find the mirror entry (opponent's perspective)
+    const mirror = bringBacks.find(b =>
+      b.stackTeam === bb.opponent && b.opponent === bb.stackTeam && b.week === bb.week
+    );
+    // Combine all pieces from both sides — dedupe by name
+    const allPieces = [...bb.stackPieces, ...bb.bringBackPieces];
+    if (mirror) {
+      mirror.stackPieces.forEach(p => { if (!allPieces.find(x => x.name === p.name)) allPieces.push(p); });
+      mirror.bringBackPieces.forEach(p => { if (!allPieces.find(x => x.name === p.name)) allPieces.push(p); });
+    }
+    const teamA = { team: bb.stackTeam, players: allPieces.filter(p => p.team === bb.stackTeam) };
+    const teamB = { team: bb.opponent, players: allPieces.filter(p => p.team === bb.opponent) };
+    mergedBringBacks.push({
+      ...bb,
+      teamA,
+      teamB,
+      allPieces,
+      // Preserve ceiling score as sum of all pieces
+      ceilingScore: bb.ceilingScore,
+      isMerged: true,
+    });
+  });
+
   // Tag the single highest ceiling bring-back — this becomes the 🔥 CEILING GAME badge
-  if (bringBacks.length > 0) {
-    const topIdx = bringBacks.reduce((best, bb, i) =>
-      bb.ceilingScore > bringBacks[best].ceilingScore ? i : best, 0);
-    bringBacks[topIdx].isCeilingGame = true;
+  if (mergedBringBacks.length > 0) {
+    const topIdx = mergedBringBacks.reduce((best, bb, i) =>
+      bb.ceilingScore > mergedBringBacks[best].ceilingScore ? i : best, 0);
+    mergedBringBacks[topIdx].isCeilingGame = true;
   }
 
   // === ORPHAN CLASSIFICATION ===
@@ -2574,7 +2607,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     valid, picks, posCounts, stacks, stackGrades, adpFlags, benchmarkIssues,
     grade, strengths, weaknesses, goodStacks, eliteStacks, primaryStacks,
     tournament, hasPickNumbers, format, score,
-    bringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
+    bringBacks: mergedBringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
     rosterStandouts: finalStandouts,
     roleCeilingFlags,
     nutshell,
@@ -3383,6 +3416,11 @@ export default function RosterScorer() {
   const [dataMode, setDataMode] = useState("actual");
   const [aiNutshell, setAiNutshell] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiPivotNotes, setAiPivotNotes] = useState({});
+  const [aiStandoutDetails, setAiStandoutDetails] = useState({});
+  const [aiBenchMoveNotes, setAiBenchMoveNotes] = useState({});
+  const [aiLineupNotes, setAiLineupNotes] = useState({});
+  const [aiBringBackNotes, setAiBringBackNotes] = useState({});
 
   // Re-run analysis when the pick analysis toggle changes — so users don't have
   // to manually re-click Analyze after checking/unchecking the box.
@@ -3739,63 +3777,160 @@ Travis Etienne`;
     setAiLoading(true);
     setAiNutshell(null);
     try {
+      const isRedraft = result.mode === "redraft";
+
+      // === SHARED CONTEXT ===
       const rosterLines = (result.valid || []).map(p =>
         `${p.name} (${p.pos}·${p.team}${p.actualPick ? ` pick ${p.actualPick}` : ""}${p.adp ? ` ADP ${p.adp}` : ""})`
       ).join(", ");
 
-      const stackLines = (result.stackGrades || []).map(s =>
-        `${s.team} ${s.type} stack [${s.players.map(p => `${p.name} ${p.pos}`).join("+")}] playoff score ${s.normalizedScore?.toFixed(1)}`
-      ).join(" | ");
-
-      const verdictLines = (result.verdictAlignments || []).filter(v => !v.stale).map(v =>
-        `${v.name}: ${v.verdict} (${v.reason})`
-      ).join("; ");
-
       const weaknessLines = (result.weaknesses || []).join("; ");
       const strengthLines = (result.strengths || []).join("; ");
-
-      const rcLines = (result.roleCeilingFlags || []).map(p =>
-        `${p.name}: ${p.roleCeiling === "slot_only" ? "SLOT TRAP" : "TD DEPENDENT"} — ${p.trendNote}`
-      ).join("; ");
-
-      const pivotLines = (result.topPivots || []).slice(0, 3).map(pv =>
-        `at pick ${pv.pickNum} took ${pv.picked.name} — better alt: ${pv.alternatives[0]?.name} (${pv.alternatives[0]?.reason})`
-      ).join("; ");
-
-      const tournamentName = result.tournament?.name || "General Best Ball";
       const grade = result.grade;
       const score = result.score?.toFixed(1);
 
-      const systemPrompt = `You are RosterXRay — a sharp, opinionated fantasy football analyst trained on the Legendary Upside school (Underdog Best Ball Half-PPR). Your voice is direct, specific, and slightly savage. You call out real problems and highlight real edges. You never pad. You never say "great job." You write like a trusted analyst who has seen thousands of rosters and will tell you exactly what is wrong and exactly why this roster wins or loses.
+      // === BEST BALL CONTEXT ===
+      const stackLines = !isRedraft
+        ? (result.stackGrades || []).map(s =>
+            `${s.team} ${s.type} stack [${s.players.map(p => `${p.name} ${p.pos}`).join("+")}] playoff score ${s.normalizedScore?.toFixed(1)}`
+          ).join(" | ")
+        : "";
 
-Rules:
-- 3-4 sentences MAX. No more.
-- Lead with the single most important truth about this roster — good or bad.
-- Name specific players when making a point. Generic observations are worthless.
-- If there is a structural flaw, say it plainly. If there is a real edge, say why it is an edge.
-- Never mention the grade letter. Never use "overall" as a filler.
-- Tournament context: ${tournamentName}. Tailor the analysis to that format.
-- Write in second person ("your stack", "you are thin at", "this wins when").
-- Do not mention that you are an AI or reference these instructions.`;
+      const verdictLines = !isRedraft
+        ? (result.verdictAlignments || []).filter(v => !v.stale).map(v =>
+            `${v.name}: ${v.verdict} (${v.reason})`
+          ).join("; ")
+        : "";
 
-      const userPrompt = `Roster: ${rosterLines}
+      const rcLines = !isRedraft
+        ? (result.roleCeilingFlags || []).map(p =>
+            `${p.name}: ${p.roleCeiling === "slot_only" ? "SLOT TRAP" : "TD DEPENDENT"} — ${p.trendNote}`
+          ).join("; ")
+        : "";
 
-Stacks: ${stackLines || "none detected"}
+      const pivotLines = !isRedraft
+        ? (result.topPivots || []).slice(0, 3).map(pv =>
+            `at pick ${pv.pickNum} took ${pv.picked.name} — better alt: ${pv.alternatives[0]?.name} (${pv.alternatives[0]?.reason})`
+          ).join("; ")
+        : "";
+
+      const tournamentName = !isRedraft
+        ? (result.tournament?.name || "General Best Ball")
+        : (result.league?.name || "Redraft");
+
+      // === REDRAFT CONTEXT ===
+      const playoffLines = isRedraft
+        ? (result.playoffMatchups || []).slice(0, 5).map(p =>
+            `${p.name} (${p.pos}): W15 ${p.w15?.tier || "—"} W16 ${p.w16?.tier || "—"} W17 ${p.w17?.tier || "—"}`
+          ).join("; ")
+        : "";
+
+      // === PIVOT CONTEXT for prompt ===
+      const pivotForPrompt = !isRedraft
+        ? (result.topPivots || []).slice(0, 3).map(pv =>
+            `${pv.picked.name} (${pv.picked.pos}·${pv.picked.team} ADP ${pv.picked.adp}) → alt: ${pv.alternatives[0]?.name} (${pv.alternatives[0]?.pos}·${pv.alternatives[0]?.team} ADP ${pv.alternatives[0]?.adp})`
+          ).join(" | ")
+        : "";
+
+      // === STANDOUT CONTEXT for prompt ===
+      const standoutsForPrompt = !isRedraft
+        ? (result.rosterStandouts || []).map(s =>
+            `${s.player.name} (${s.player.pos}·${s.player.team}) — label: ${s.label}`
+          ).join(" | ")
+        : "";
+
+      // === BRING-BACK CONTEXT ===
+      const bringBackForPrompt = !isRedraft
+        ? (result.bringBacks || []).map(bb =>
+            `${bb.week} ${bb.teamA?.team || bb.stackTeam} vs ${bb.teamB?.team || bb.opponent}: ${(bb.allPieces || [...(bb.stackPieces||[]), ...(bb.bringBackPieces||[])]).map(p => `${p.name} ${p.pos}`).join(", ")}`
+          ).join(" | ")
+        : "";
+
+      // === LINEUP CONFIDENCE CONTEXT (redraft) ===
+      const lineupConfidenceForPrompt = isRedraft
+        ? (result.lineupConfidencePreview || []).filter(wk => wk.week >= 15).map(wk =>
+            `W${wk.week}: start ${wk.locks.map(l => l.name).join(",")||"none"} / sit? ${wk.concerns.map(c => c.name).join(",")||"none"}`
+          ).join(" | ")
+        : "";
+
+      // === BENCH MOVES CONTEXT (redraft) ===
+      const benchMovesForPrompt = isRedraft
+        ? (result.benchMoves || []).map(a =>
+            `${a.player.name} (${a.player.pos}·${a.player.team}): ${a.label} — ${a.detail}`
+          ).join(" | ")
+        : "";
+
+      const adpFlagLines = (result.adpFlags || []).map(p =>
+        `${p.name}: ${p.delta > 0 ? `+${Math.round(p.delta)} value` : `${Math.round(p.delta)} reach`}`
+      ).join("; ");
+
+      // === SYSTEM PROMPT ===
+      const systemPrompt = `You are RosterXRay — a sharp, opinionated fantasy football analyst. Your voice is direct, specific, and slightly savage. You write like a trusted analyst who has seen thousands of rosters.
+
+You have full knowledge of every NFL player's 2025 season performance, role, situation, ADP context, and 2026 outlook. Use that knowledge actively. Context and narrative matter as much as raw stats.
+
+FORMAT: Return valid JSON only. No markdown, no explanation outside the JSON.
+{
+  "nutshell": "3-4 sentence breakdown. Lead with the single most important truth. Name specific players. Second person. No grade letter. No filler.",
+  "gradeModifier": 0,
+  "modifierReason": "one sentence explaining the adjustment, or null if no adjustment",
+  "pivotNotes": { "AltPlayerName": "one sentence on whether this swap is actually worth it" },
+  "standoutDetails": { "PlayerName": "one sharp sentence, under 20 words, specific to their 2026 situation" },
+  "bringBackNotes": { "TEAMAVSTEAMB_WEEK": "one sentence on why this game is or isn't a real ceiling game — reference the teams, QB situations, blowout risk, or defensive matchup" },
+  "lineupNotes": { "W15": "one sentence on the most important start/sit decision this week", "W16": "...", "W17": "..." },
+  "benchMoveNotes": { "PlayerName": "one sentence — is this bench role actually what it appears to be? Any role concern, opportunity, or situation the formula might have missed?" }
+}
+
+Rules per section:
+- pivotNotes: only the alt players (suggested swaps). Flag role concerns honestly.
+- standoutDetails: specific situation, not just matchup quality. Under 20 words.
+- bringBackNotes: key format "TEAMAVSTEAMB_WEEK" e.g. "DALVSNYG_W17". Focus on whether this is a real ceiling game or just a coincidence.
+- lineupNotes: redraft only. One sentence per playoff week covering the most important decision.
+- benchMoveNotes: redraft only. One sentence per player — validate or challenge the formula's classification.
+
+gradeModifier rules:
++2 = meaningfully stronger than score suggests
++1 = slight upside the score undersells
+0  = score is accurate
+-1 = one real flaw the score missed
+-2 = significant structural problem the score missed
+
+Never reference internal numbers the user cannot see. Plain language only.
+
+Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye weeks, injury insurance. Skip pivotNotes, standoutDetails, bringBackNotes — return empty objects for those." : `BEST BALL (${tournamentName}) — focus on ceiling, stacks, playoff window, boom/bust variance. Skip lineupNotes and benchMoveNotes — return empty objects for those.`}`;
+
+      // === USER PROMPT ===
+      const userPrompt = isRedraft
+        ? `Roster: ${rosterLines}
+Grade: ${grade} (score ${score})
+Strengths: ${strengthLines || "none"}
+Weaknesses: ${weaknessLines || "none"}
+Playoff matchups: ${playoffLines || "none"}
+Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
+Bench moves: ${benchMovesForPrompt || "none"}
+ADP flags: ${adpFlagLines || "none"}
+
+Analyze this redraft roster. Return JSON only.`
+        : `Roster: ${rosterLines}
+Stacks: ${stackLines || "none"}
 Grade: ${grade} (score ${score})
 Strengths: ${strengthLines || "none"}
 Weaknesses: ${weaknessLines || "none"}
 Verdict alignments: ${verdictLines || "none"}
 Role ceiling flags: ${rcLines || "none"}
-Draft pivots missed: ${pivotLines || "none"}
+Pivot candidates: ${pivotForPrompt || "none"}
+Standout players: ${standoutsForPrompt || "none"}
+Bring-back games: ${bringBackForPrompt || "none"}
+ADP flags: ${adpFlagLines || "none"}
 
-Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players.`;
+Analyze this best ball roster. Return JSON only.`;
 
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 300,
+          max_tokens: 1000,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
         }),
@@ -3803,10 +3938,44 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
 
       if (!response.ok) throw new Error("API error");
       const data = await response.json();
-      const text = data?.content?.[0]?.text?.trim();
-      if (text) setAiNutshell(text);
+      const raw = data?.content?.[0]?.text?.trim();
+      if (!raw) return;
+
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+
+      if (parsed.nutshell) setAiNutshell(parsed.nutshell);
+      if (parsed.pivotNotes && typeof parsed.pivotNotes === "object") setAiPivotNotes(parsed.pivotNotes);
+      if (parsed.standoutDetails && typeof parsed.standoutDetails === "object") setAiStandoutDetails(parsed.standoutDetails);
+      if (parsed.bringBackNotes && typeof parsed.bringBackNotes === "object") setAiBringBackNotes(parsed.bringBackNotes);
+      if (parsed.lineupNotes && typeof parsed.lineupNotes === "object") setAiLineupNotes(parsed.lineupNotes);
+      if (parsed.benchMoveNotes && typeof parsed.benchMoveNotes === "object") setAiBenchMoveNotes(parsed.benchMoveNotes);
+
+      // Apply grade modifier
+      if (parsed.gradeModifier && parsed.gradeModifier !== 0) {
+        const modifierMap = { "+2": 2.0, "+1": 0.8, "0": 0, "-1": -0.8, "-2": -2.0 };
+        const delta = modifierMap[String(parsed.gradeModifier)] ?? (parsed.gradeModifier * 0.8);
+        setAnalyzed(prev => {
+          if (!prev) return prev;
+          const newScore = (prev.score || 0) + delta;
+          const newGrade =
+            newScore >= 7.0 ? "A" :
+            newScore >= 5.5 ? "A-" :
+            newScore >= 3.5 ? "B+" :
+            newScore >= 2.0 ? "B" :
+            newScore >= 0.5 ? "C+" :
+            newScore >= -1.0 ? "C" : "D";
+          const updatedWeaknesses = parsed.gradeModifier < 0 && parsed.modifierReason
+            ? [...(prev.weaknesses || []), `AI flag: ${parsed.modifierReason}`]
+            : prev.weaknesses;
+          const updatedStrengths = parsed.gradeModifier > 0 && parsed.modifierReason
+            ? [...(prev.strengths || []), `AI flag: ${parsed.modifierReason}`]
+            : prev.strengths;
+          return { ...prev, score: newScore, grade: newGrade, weaknesses: updatedWeaknesses, strengths: updatedStrengths };
+        });
+      }
     } catch (e) {
-      // Silent fail — static nutshell stays as fallback
+      // Silent fail — static content stays as fallback
     } finally {
       setAiLoading(false);
     }
@@ -3817,6 +3986,8 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
     setExportedDataUrl(null);
     setAiNutshell(null);
     setAiLoading(false);
+    setAiPivotNotes({});
+    setAiStandoutDetails({});
     if (analysisMode === "redraft") {
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
@@ -4902,7 +5073,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
 
               {analyzed && (
                 <button
-                  onClick={() => { setAnalyzed(null); setInput(""); setAiNutshell(null); setAiLoading(false); }}
+                  onClick={() => { setAnalyzed(null); setInput(""); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
                   style={{
                     background: "transparent",
                     color: "#666",
@@ -5093,7 +5264,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -5261,6 +5432,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                 {analyzed.bringBacks.map((bb, idx) => {
                   const wc = weekColor(bb.weekIdx);
                   const isCeiling = bb.isCeilingGame;
+                  const aiNote = aiPivotNotes[`bringback_${bb.stackTeam}_${bb.opponent}_${bb.week}`];
                   return (
                   <div key={idx} style={{
                     background: isCeiling ? "#050d1a" : wc.bg,
@@ -5279,48 +5451,45 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                         borderRadius: "3px",
                         padding: "1px 7px",
                       }}>{bb.week}</span>
-                      <span style={{ color: "#999" }}>{bb.stackTeam} vs {bb.opponent}</span>
+                      <span style={{ color: "#999" }}>{bb.teamA.team} vs {bb.teamB.team}</span>
                       {isCeiling ? (
                         <span style={{
-                          color: "#22d3ee",
-                          fontWeight: 700,
-                          background: "#051520",
-                          border: "1px solid #22d3ee66",
-                          borderRadius: "3px",
-                          padding: "1px 7px",
-                          fontSize: "9px",
+                          color: "#22d3ee", fontWeight: 700, background: "#051520",
+                          border: "1px solid #22d3ee66", borderRadius: "3px",
+                          padding: "1px 7px", fontSize: "9px",
                         }}>🔥 CEILING GAME</span>
                       ) : bb.hasQB && (
                         <span style={{
-                          color: "#4ade80",
-                          fontWeight: 700,
-                          background: "#0d3320",
-                          border: "1px solid #22c55e66",
-                          borderRadius: "3px",
-                          padding: "1px 7px",
-                          fontSize: "9px",
+                          color: "#4ade80", fontWeight: 700, background: "#0d3320",
+                          border: "1px solid #22c55e66", borderRadius: "3px",
+                          padding: "1px 7px", fontSize: "9px",
                         }}>★ QB GAME STACK</span>
                       )}
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "center", fontSize: "12px" }}>
                       <div>
-                        <div style={{ color: "#888", fontSize: "10px", letterSpacing: "0.05em" }}>{bb.stackTeam} pieces</div>
-                        {bb.stackPieces.map(p => (
+                        <div style={{ color: "#888", fontSize: "10px", letterSpacing: "0.05em", marginBottom: "4px" }}>{bb.teamA.team}</div>
+                        {bb.teamA.players.map(p => (
                           <div key={p.name} style={{ color: "#fafafa" }}>
                             {p.name} <span style={{ color: "#555" }}>{p.pos}</span>
                           </div>
                         ))}
                       </div>
-                      <div style={{ color: wc.text, fontSize: "20px" }}>↔</div>
+                      <div style={{ color: wc.text, fontSize: "20px", textAlign: "center" }}>↔</div>
                       <div>
-                        <div style={{ color: "#888", fontSize: "10px", letterSpacing: "0.05em" }}>{bb.opponent} bring-back</div>
-                        {bb.bringBackPieces.map(p => (
+                        <div style={{ color: "#888", fontSize: "10px", letterSpacing: "0.05em", marginBottom: "4px" }}>{bb.teamB.team}</div>
+                        {bb.teamB.players.map(p => (
                           <div key={p.name} style={{ color: "#fafafa" }}>
                             {p.name} <span style={{ color: "#555" }}>{p.pos}</span>
                           </div>
                         ))}
                       </div>
                     </div>
+                    {aiNote && (
+                      <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: `1px solid ${wc.border}33`, fontSize: "10px", color: "#aaa", lineHeight: 1.5 }}>
+                        {aiNote}
+                      </div>
+                    )}
                   </div>
                   );
                 })}
@@ -5561,7 +5730,9 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                               flexShrink: 0,
                             }}>⚠ Breaks {alt.brokenWeekLabel} Bring-Back</span>
                           )}
-                          <span style={{ color: "#888", fontSize: "10px", lineHeight: 1.4 }}>{laymanReason}</span>
+                          <span style={{ color: "#888", fontSize: "10px", lineHeight: 1.4 }}>
+                            {aiPivotNotes[alt.name] || laymanReason}
+                          </span>
                         </div>
                       </div>
                       );
@@ -5739,7 +5910,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                           }}>{s.player.pos} · {s.player.team}</span>
                         </div>
                         <div style={{ fontSize: "11px", color: "#cfcfcf", lineHeight: 1.5 }}>
-                          {s.detail}
+                          {aiStandoutDetails[s.player.name] || s.detail}
                         </div>
                       </div>
                     );
@@ -6064,7 +6235,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -6610,6 +6781,11 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                     }}>
                       WEEK {wk.week}{wk.week >= 15 ? " · PLAYOFFS" : ""}
                     </div>
+                    {wk.week >= 15 && aiLineupNotes[`W${wk.week}`] && (
+                      <div style={{ fontSize: "10px", color: "#c084fcaa", lineHeight: 1.5, marginBottom: "8px", paddingBottom: "6px", borderBottom: "1px solid #2a2a2a", fontStyle: "italic" }}>
+                        {aiLineupNotes[`W${wk.week}`]}
+                      </div>
+                    )}
                     {wk.locks.length > 0 && (
                       <div style={{ marginBottom: wk.concerns.length > 0 ? "6px" : 0 }}>
                         {wk.locks.map((l, j) => {
@@ -6803,8 +6979,8 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                         </span>
                       </div>
                       <div style={{ color: "#aaa", paddingLeft: "22px", lineHeight: "1.5" }}>
-                        <span>{alert.detail}</span>
-                        {alert.matchupNote && (
+                        <span>{aiBenchMoveNotes[alert.player.name] || alert.detail}</span>
+                        {!aiBenchMoveNotes[alert.player.name] && alert.matchupNote && (
                           <span style={{ color: "#666", marginLeft: "8px" }}>· {alert.matchupNote}</span>
                         )}
                       </div>
@@ -6942,8 +7118,8 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                         <span key={pos}><span style={{ color: "#444", fontSize: "10px" }}>{pos} </span><span style={{ color: "#fafafa", fontWeight: 600 }}>{analyzed.posCounts[pos] || 0}</span></span>
                       ))}
                     </div>
-                    {analyzed.nutshell && (
-                      <div style={{ fontSize: "10px", color: "#666", lineHeight: 1.45 }}>{analyzed.nutshell}</div>
+                    {(aiNutshell || analyzed.nutshell) && (
+                      <div style={{ fontSize: "10px", color: "#888", lineHeight: 1.45 }}>{aiNutshell || analyzed.nutshell}</div>
                     )}
                     {/* Inline strength/weakness — plain colored text, no box */}
                     {((analyzed.strengths || []).length > 0 || (analyzed.weaknesses || []).length > 0) && (
@@ -7040,7 +7216,7 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                                     </div>
                                   )}
                                 </div>
-                                <div style={{ fontSize: "9px", color: "#666", lineHeight: 1.4 }}>{s.detail}</div>
+                                <div style={{ fontSize: "9px", color: "#666", lineHeight: 1.4 }}>{aiStandoutDetails[s.player?.name] || s.detail}</div>
                               </div>
                             </div>
                           );
@@ -7160,32 +7336,27 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                             </div>
                           )}
 
-                          {/* Feedback copy */}
-                          <div style={{ ...section({}), background: "#0a0a0a", borderLeft: "3px solid #333", paddingLeft: "15px" }}>
-                            <div style={secLabel}>Scout Report</div>
-                            {cws.feedback.map((line, i) => {
-                              // Dot color: driven by sentence sentiment, not component scores
-                              // Sentence 0 = schedule (top2Avg), 1 = caliber (comp2), 2 = situation (comp3/risk)
-                              const sentimentColors = [
-                                cws.top2Avg >= 3.3 ? "#4ade80" : cws.top2Avg >= 2.5 ? "#facc15" : "#f87171",
-                                cws.comp2 >= 3.5 ? "#4ade80" : cws.comp2 >= 2.5 ? "#60a5fa" : "#f87171",
-                                cws.comp3 >= 1.5 ? "#4ade80" : "#facc15",
-                              ];
-                              const dot = sentimentColors[i] || "#555";
+                          {/* AI Breakdown — replaces static Scout Report */}
+                          <div style={{ ...section({}), background: "#0a0a0a", borderLeft: `3px solid ${analyzed.grade === "A" || analyzed.grade === "A-" ? "#4ade80" : analyzed.grade === "B+" || analyzed.grade === "B" ? "#a3e635" : "#facc15"}`, paddingLeft: "15px" }}>
+                            <div style={{ ...secLabel, display: "flex", alignItems: "center", gap: "6px" }}>
+                              X-Ray Breakdown
+                              {aiNutshell && <span style={{ fontSize: "7px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>}
+                            </div>
+                            {(() => {
+                              const text = aiNutshell || (cws.feedback || []).join(" ");
+                              if (!text) return null;
 
-                              // Bold full player names found in the sentence
+                              // Bold any player names found in the text
                               const allNames = (analyzed.valid || [])
                                 .map(p => p.name)
                                 .filter(n => n.length > 2)
-                                .sort((a, b) => b.length - a.length); // longest first to avoid partial matches
+                                .sort((a, b) => b.length - a.length);
 
-                              // Build segments by scanning for full names
-                              let segments = [{ text: line, bold: false }];
+                              let segments = [{ text, bold: false }];
                               for (const name of allNames) {
                                 const next = [];
                                 for (const seg of segments) {
                                   if (seg.bold) { next.push(seg); continue; }
-                                  // Try full name first, then last name only as fallback
                                   const lastName = name.split(" ").slice(-1)[0];
                                   const searchTerm = seg.text.includes(name) ? name : (lastName.length > 2 && seg.text.includes(lastName) ? lastName : null);
                                   if (!searchTerm) { next.push(seg); continue; }
@@ -7203,18 +7374,15 @@ Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players
                               }
 
                               return (
-                                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "7px", marginBottom: i < cws.feedback.length - 1 ? "7px" : 0 }}>
-                                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: dot, flexShrink: 0, marginTop: "5px" }} />
-                                  <div style={{ fontSize: "9px", color: "#777", lineHeight: 1.55 }}>
-                                    {segments.map((seg, si) =>
-                                      seg.bold
-                                        ? <span key={si} style={{ color: "#e0e0e0", fontWeight: 700 }}>{seg.text}</span>
-                                        : seg.text
-                                    )}
-                                  </div>
+                                <div style={{ fontSize: "9px", color: "#777", lineHeight: 1.6 }}>
+                                  {segments.map((seg, si) =>
+                                    seg.bold
+                                      ? <span key={si} style={{ color: "#e0e0e0", fontWeight: 700 }}>{seg.text}</span>
+                                      : seg.text
+                                  )}
                                 </div>
                               );
-                            })}
+                            })()}
                           </div>
                         </>
                       );
