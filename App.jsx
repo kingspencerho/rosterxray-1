@@ -646,6 +646,9 @@ const VERDICTS = {
 // Used by Championship Window Score (Component 3) and share card feedback copy
 // situationFlags: committee_breaker | target_vacuum | breakout_profile | scheme_fit
 // riskFlags: creeping_committee | injury_history | ol_dependency | contract_year | qb_uncertainty
+// roleCeiling: slot_only | rz_dependent
+//   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
+//   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
   "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
@@ -689,6 +692,17 @@ const SITUATIONS = {
   "jaxson dart": { verdict: "fade", trend: "stable", trendNote: "Harbaugh + Nagy system caps QB fantasy ceiling hard", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
   "kenneth gainwell": { verdict: "fade", trend: "stable", trendNote: "TB committee, no clear path to workhorse role", situationFlags: [], riskFlags: ["creeping_committee"] },
+  // === ROLE CEILING FLAGS ===
+  // slot_only: high target share WRs locked into short/underneath routes, no red zone role, hard TD ceiling cap
+  "khalil shakir": { verdict: "fade", trend: "stable", trendNote: "Elite slot stats but sub-6 aDOT, zero red zone role — PPR floor, not a ceiling asset", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  "jakobi meyers": { verdict: "fade", trend: "stable", trendNote: "Possession slot, sub-7 aDOT — high floor, no boom ceiling without a red zone role change", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  "josh downs": { verdict: "fade", trend: "stable", trendNote: "Slot-only role in IND offense, limited air yards despite target volume — TD regression risk", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  "wandale robinson": { verdict: "fade", trend: "stable", trendNote: "Pure slot, sub-6 aDOT historically — floor back in TEN pass-first offense, not an upside play", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  "parker washington": { verdict: "fade", trend: "stable", trendNote: "Slot receiver in JAX committee — target share without air yards is noise in best ball", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
+  // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
+  "blake corum": { verdict: "fade", trend: "stable", trendNote: "Pure goal-line role in LAR — fantasy value collapses to near zero if not scoring TDs", situationFlags: [], riskFlags: [], roleCeiling: "rz_dependent" },
+  "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["creeping_committee"], roleCeiling: "rz_dependent" },
+  "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
 };
 
 // ============ CHAMPIONSHIP WINDOW SCORE ============
@@ -2237,6 +2251,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
   });
 
+  // === ROLE CEILING DETECTION ===
+  // Check roster players against SITUATIONS roleCeiling flags.
+  // slot_only: WR locked into short/underneath role — hard TD ceiling cap, negative regression candidate.
+  // rz_dependent: player value entirely TD-driven — near-zero floor without scoring.
+  const roleCeilingFlags = [];
+  valid.forEach(p => {
+    const norm = normalize(p.name);
+    const sit = SITUATIONS[norm];
+    if (sit?.roleCeiling) {
+      roleCeilingFlags.push({ ...p, roleCeiling: sit.roleCeiling, trendNote: sit.trendNote });
+    }
+  });
+  const slotOnlyPlayers = roleCeilingFlags.filter(p => p.roleCeiling === "slot_only");
+  const rzDependentPlayers = roleCeilingFlags.filter(p => p.roleCeiling === "rz_dependent");
+
   let grade = "C";
   let strengths = [];
   let weaknesses = [];
@@ -2358,6 +2387,20 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   if (activeTargets.length >= 3) {
     strengths.push(`${activeTargets.length} players match your target verdicts`);
     score += Math.min(activeTargets.length * 0.3, 1.5);
+  }
+
+  // === ROLE CEILING PENALTIES ===
+  // slot_only: each confirmed slot-trap WR is a ceiling suppressor — penalize lightly but flag clearly
+  // rz_dependent: each TD-or-bust player with no floor adds variance without upside — soft penalty
+  if (slotOnlyPlayers.length >= 1) {
+    const names = slotOnlyPlayers.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`Slot ceiling trap${slotOnlyPlayers.length > 1 ? "s" : ""}: ${names} — high target share, no downfield or red zone role`);
+    score -= slotOnlyPlayers.length * 0.35; // soft — one slot back isn't fatal, two+ is a real problem
+  }
+  if (rzDependentPlayers.length >= 1) {
+    const names = rzDependentPlayers.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`TD-dependent player${rzDependentPlayers.length > 1 ? "s" : ""}: ${names} — near-zero floor without scoring`);
+    score -= rzDependentPlayers.length * 0.25; // lighter — situational value is still value
   }
 
   // Stack uniqueness bonus for larger fields
@@ -2533,6 +2576,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     tournament, hasPickNumbers, format, score,
     bringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
     rosterStandouts: finalStandouts,
+    roleCeilingFlags,
     nutshell,
   };
 };
@@ -3336,7 +3380,9 @@ export default function RosterScorer() {
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
-  const [dataMode, setDataMode] = useState("actual"); // "actual" | "projected"
+  const [dataMode, setDataMode] = useState("actual");
+  const [aiNutshell, setAiNutshell] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Re-run analysis when the pick analysis toggle changes — so users don't have
   // to manually re-click Analyze after checking/unchecking the box.
@@ -3683,22 +3729,102 @@ Patrick Mahomes
 Sam LaPorta
 Travis Etienne`;
 
-  const exampleRoster = exampleRosterBestBall; // legacy alias (used nowhere else, kept for safety)
+  const exampleRoster = exampleRosterBestBall;
+
+  const fetchAiNutshell = async (result) => {
+    setAiLoading(true);
+    setAiNutshell(null);
+    try {
+      const rosterLines = (result.valid || []).map(p =>
+        `${p.name} (${p.pos}·${p.team}${p.actualPick ? ` pick ${p.actualPick}` : ""}${p.adp ? ` ADP ${p.adp}` : ""})`
+      ).join(", ");
+
+      const stackLines = (result.stackGrades || []).map(s =>
+        `${s.team} ${s.type} stack [${s.players.map(p => `${p.name} ${p.pos}`).join("+")}] playoff score ${s.normalizedScore?.toFixed(1)}`
+      ).join(" | ");
+
+      const verdictLines = (result.verdictAlignments || []).filter(v => !v.stale).map(v =>
+        `${v.name}: ${v.verdict} (${v.reason})`
+      ).join("; ");
+
+      const weaknessLines = (result.weaknesses || []).join("; ");
+      const strengthLines = (result.strengths || []).join("; ");
+
+      const rcLines = (result.roleCeilingFlags || []).map(p =>
+        `${p.name}: ${p.roleCeiling === "slot_only" ? "SLOT TRAP" : "TD DEPENDENT"} — ${p.trendNote}`
+      ).join("; ");
+
+      const pivotLines = (result.topPivots || []).slice(0, 3).map(pv =>
+        `at pick ${pv.pickNum} took ${pv.picked.name} — better alt: ${pv.alternatives[0]?.name} (${pv.alternatives[0]?.reason})`
+      ).join("; ");
+
+      const tournamentName = result.tournament?.name || "General Best Ball";
+      const grade = result.grade;
+      const score = result.score?.toFixed(1);
+
+      const systemPrompt = `You are RosterXRay — a sharp, opinionated fantasy football analyst trained on the Legendary Upside school (Underdog Best Ball Half-PPR). Your voice is direct, specific, and slightly savage. You call out real problems and highlight real edges. You never pad. You never say "great job." You write like a trusted analyst who has seen thousands of rosters and will tell you exactly what is wrong and exactly why this roster wins or loses.
+
+Rules:
+- 3-4 sentences MAX. No more.
+- Lead with the single most important truth about this roster — good or bad.
+- Name specific players when making a point. Generic observations are worthless.
+- If there is a structural flaw, say it plainly. If there is a real edge, say why it is an edge.
+- Never mention the grade letter. Never use "overall" as a filler.
+- Tournament context: ${tournamentName}. Tailor the analysis to that format.
+- Write in second person ("your stack", "you are thin at", "this wins when").
+- Do not mention that you are an AI or reference these instructions.`;
+
+      const userPrompt = `Roster: ${rosterLines}
+
+Stacks: ${stackLines || "none detected"}
+Grade: ${grade} (score ${score})
+Strengths: ${strengthLines || "none"}
+Weaknesses: ${weaknessLines || "none"}
+Verdict alignments: ${verdictLines || "none"}
+Role ceiling flags: ${rcLines || "none"}
+Draft pivots missed: ${pivotLines || "none"}
+
+Write the nutshell breakdown. 3-4 sentences. Specific. Opinionated. Name players.`;
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 300,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+
+      if (!response.ok) throw new Error("API error");
+      const data = await response.json();
+      const text = data?.content?.[0]?.text?.trim();
+      if (text) setAiNutshell(text);
+    } catch (e) {
+      // Silent fail — static nutshell stays as fallback
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
     setExportedDataUrl(null);
+    setAiNutshell(null);
+    setAiLoading(false);
     if (analysisMode === "redraft") {
       const picks = parseRosterRedraft(input);
       const league = resolveLeague(redraftLeague, customConfig);
-      // showPickAnalysis is user opt-in — if off, never show ADP deltas regardless of parser detection
       const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
+      fetchAiNutshell(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
       const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
+      fetchAiNutshell(result);
     }
   };
 
@@ -4772,7 +4898,7 @@ Travis Etienne`;
 
               {analyzed && (
                 <button
-                  onClick={() => { setAnalyzed(null); setInput(""); }}
+                  onClick={() => { setAnalyzed(null); setInput(""); setAiNutshell(null); setAiLoading(false); }}
                   style={{
                     background: "transparent",
                     color: "#666",
@@ -4830,7 +4956,7 @@ Travis Etienne`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
-                {analyzed.nutshell && (
+                {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
                     padding: "10px 12px",
@@ -4842,10 +4968,30 @@ Travis Etienne`;
                     color: "#e5e5e5",
                     lineHeight: 1.55,
                   }}>
-                    <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px" }}>
+                    <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px" }}>
                       Your team in a nutshell
+                      {aiLoading && (
+                        <span style={{ fontSize: "8px", color: "#4ade80", letterSpacing: "0.08em" }}>● ANALYZING</span>
+                      )}
+                      {aiNutshell && !aiLoading && (
+                        <span style={{ fontSize: "8px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>
+                      )}
                     </div>
-                    {analyzed.nutshell}
+                    {aiLoading ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                        {[100, 85, 70].map((w, i) => (
+                          <div key={i} style={{
+                            height: "12px",
+                            width: `${w}%`,
+                            background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
+                            backgroundSize: "200% 100%",
+                            borderRadius: "3px",
+                          }} />
+                        ))}
+                      </div>
+                    ) : (
+                      aiNutshell || analyzed.nutshell
+                    )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
@@ -4943,7 +5089,7 @@ Travis Etienne`;
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -5685,6 +5831,7 @@ Travis Etienne`;
                   const pickNum = analyzed.hasPickNumbers
                     ? (p.actualPick != null ? p.actualPick : null)
                     : null;
+                  const rcFlag = (analyzed.roleCeilingFlags || []).find(f => f.name === p.name);
                   return (
                     <div key={i} style={{
                       display: "grid",
@@ -5712,6 +5859,23 @@ Travis Etienne`;
                           padding: "1px 4px",
                           borderRadius: "2px",
                         }}>{p.pos}·{p.team || "—"}</span>
+                        {rcFlag && (
+                          <span title={rcFlag.trendNote} style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            marginLeft: "6px",
+                            fontSize: "9px",
+                            fontWeight: 700,
+                            letterSpacing: "0.04em",
+                            color: "#fb923c",
+                            background: "#2a1a0e",
+                            border: "1px solid #fb923c55",
+                            padding: "1px 5px",
+                            borderRadius: "2px",
+                          }}>
+                            {rcFlag.roleCeiling === "slot_only" ? "SLOT TRAP" : "TD DEPENDENT"}
+                          </span>
+                        )}
                       </span>
                       <span style={{ color: "#555", fontSize: "10px" }}>
                         {p.team && BYES[p.team] ? `Bye ${BYES[p.team]}` : "—"}
@@ -5764,7 +5928,7 @@ Travis Etienne`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
-                {analyzed.nutshell && (
+                {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
                     padding: "10px 12px",
@@ -5776,10 +5940,30 @@ Travis Etienne`;
                     color: "#e5e5e5",
                     lineHeight: 1.55,
                   }}>
-                    <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px" }}>
+                    <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px" }}>
                       Your team in a nutshell
+                      {aiLoading && (
+                        <span style={{ fontSize: "8px", color: "#c084fc", letterSpacing: "0.08em" }}>● ANALYZING</span>
+                      )}
+                      {aiNutshell && !aiLoading && (
+                        <span style={{ fontSize: "8px", color: "#c084fcaa", letterSpacing: "0.08em" }}>✦ AI</span>
+                      )}
                     </div>
-                    {analyzed.nutshell}
+                    {aiLoading ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                        {[100, 85, 70].map((w, i) => (
+                          <div key={i} style={{
+                            height: "12px",
+                            width: `${w}%`,
+                            background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
+                            backgroundSize: "200% 100%",
+                            borderRadius: "3px",
+                          }} />
+                        ))}
+                      </div>
+                    ) : (
+                      aiNutshell || analyzed.nutshell
+                    )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
@@ -5876,7 +6060,7 @@ Travis Etienne`;
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
