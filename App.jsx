@@ -3034,12 +3034,14 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     score -= 1 * depthPenaltyScale * wrPenaltyMult * sfDepthRelief;
   }
 
-  // 3b. Bench depth floor — 1 backup per position is the realistic floor for standard redraft
-  // Math.floor(benchSize / 4) gives floor=1 for 6-bench leagues, floor=2 for 8-bench leagues
+  // 3b. Bench depth floor — measured against dedicated starter slots only
+  // FLEX is already accounted for in lineup construction; don't double-count it here
   const benchSize = league.benchSize || 6;
   const benchFloor = Math.max(1, Math.floor(benchSize / 4));
-  const rbBench = depthAnalysis.RB.count - rbNeeded;
-  const wrBench = depthAnalysis.WR.count - wrNeeded;
+  const rbStarterSlots = league.lineup.RB || 2;
+  const wrStarterSlots = league.lineup.WR || 2;
+  const rbBench = depthAnalysis.RB.count - rbStarterSlots;
+  const wrBench = depthAnalysis.WR.count - wrStarterSlots;
   if (depthPenaltyScale >= 0.85) {
     if (rbBench < benchFloor && depthAnalysis.RB.count >= rbNeeded) {
       weaknesses.push(`Shallow RB bench — ${Math.max(0, rbBench)} backup(s), floor is ${benchFloor}`);
