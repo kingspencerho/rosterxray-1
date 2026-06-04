@@ -3499,6 +3499,33 @@ export default function RosterScorer() {
   const [aiLineupNotes, setAiLineupNotes] = useState({});
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
 
+  // === ADMIN PANEL STATE ===
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminAuthed, setAdminAuthed] = useState(false);
+  const [adminAuthError, setAdminAuthError] = useState(false);
+  const [adminNews, setAdminNews] = useState({});
+  const [adminNewsLoaded, setAdminNewsLoaded] = useState(false);
+  const [adminPlayerName, setAdminPlayerName] = useState("");
+  const [adminNewsText, setAdminNewsText] = useState("");
+  const [adminSaving, setAdminSaving] = useState(false);
+  const [adminVerifying, setAdminVerifying] = useState(false);
+  const [adminVerifyResult, setAdminVerifyResult] = useState(null);
+  const [adminSaveSuccess, setAdminSaveSuccess] = useState(false);
+  const [adminError, setAdminError] = useState(null);
+  const [kvNews, setKvNews] = useState({});
+
+  // Load KV news on mount — merges with hardcoded RECENT_NEWS, KV takes priority
+  React.useEffect(() => {
+    fetch("/api/news-get")
+      .then(r => r.ok ? r.json() : { news: {} })
+      .then(data => setKvNews(data.news || {}))
+      .catch(() => {});
+  }, []);
+
+  // Merged news — KV overrides hardcoded for same keys
+  const mergedNews = { ...RECENT_NEWS, ...kvNews };
+
   // Re-run analysis when the pick analysis toggle changes — so users don't have
   // to manually re-click Analyze after checking/unchecking the box.
   const { useEffect } = React;
@@ -3991,11 +4018,11 @@ Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye wee
         return parts.join(" · ");
       })() : "";
 
-      // === RECENT NEWS CONTEXT — roster-filtered ===
+      // === RECENT NEWS CONTEXT — roster-filtered (KV overrides hardcoded) ===
       const newsContext = (result.valid || [])
         .map(p => {
           const key = normalize(p.name);
-          return RECENT_NEWS[key] ? `${p.name}: ${RECENT_NEWS[key]}` : null;
+          return mergedNews[key] ? `${p.name}: ${mergedNews[key]}` : null;
         })
         .filter(Boolean)
         .join("\n");
@@ -7521,6 +7548,203 @@ Analyze this best ball roster. Return JSON only.`;
           })()}
         </div>
       </div>
+
+      {/* ===== ADMIN PANEL — hidden, accessible via ?admin=true ===== */}
+      {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("admin") === "true" && (() => {
+
+        const handleAdminAuth = () => {
+          // Auth is verified server-side on save — client just tracks session state
+          if (adminPassword.trim().length > 0) {
+            setAdminAuthed(true);
+            setAdminAuthError(false);
+            // Load current KV news into admin view
+            fetch("/api/news-get")
+              .then(r => r.json())
+              .then(d => { setAdminNews(d.news || {}); setAdminNewsLoaded(true); })
+              .catch(() => setAdminNews({}));
+          } else {
+            setAdminAuthError(true);
+          }
+        };
+
+        const handleVerify = async () => {
+          if (!adminPlayerName.trim() || !adminNewsText.trim()) return;
+          setAdminVerifying(true);
+          setAdminVerifyResult(null);
+          setAdminError(null);
+          try {
+            const r = await fetch("/api/news-set", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: adminPassword, action: "verify", playerName: adminPlayerName.trim(), newsText: adminNewsText.trim() }),
+            });
+            const d = await r.json();
+            if (r.ok) setAdminVerifyResult(d);
+            else setAdminError(d.error || "Verification failed");
+          } catch { setAdminError("Network error"); }
+          finally { setAdminVerifying(false); }
+        };
+
+        const handleSave = async () => {
+          if (!adminPlayerName.trim() || !adminNewsText.trim()) return;
+          setAdminSaving(true);
+          setAdminSaveSuccess(false);
+          setAdminError(null);
+          try {
+            const r = await fetch("/api/news-set", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: adminPassword, action: "save", playerName: adminPlayerName.trim(), newsText: adminNewsText.trim() }),
+            });
+            const d = await r.json();
+            if (r.ok) {
+              setAdminNews(d.news || {});
+              setKvNews(d.news || {});
+              setAdminPlayerName("");
+              setAdminNewsText("");
+              setAdminVerifyResult(null);
+              setAdminSaveSuccess(true);
+              setTimeout(() => setAdminSaveSuccess(false), 3000);
+            } else {
+              setAdminError(d.error || "Save failed");
+            }
+          } catch { setAdminError("Network error"); }
+          finally { setAdminSaving(false); }
+        };
+
+        const handleDelete = async (key) => {
+          setAdminError(null);
+          try {
+            const r = await fetch("/api/news-set", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: adminPassword, action: "delete", playerName: key }),
+            });
+            const d = await r.json();
+            if (r.ok) { setAdminNews(d.news || {}); setKvNews(d.news || {}); }
+            else setAdminError(d.error || "Delete failed");
+          } catch { setAdminError("Network error"); }
+        };
+
+        const panel = { position: "fixed", inset: 0, background: "#0a0a0a", zIndex: 9999, overflowY: "auto", padding: "32px 24px", fontFamily: "'IBM Plex Mono', monospace", color: "#e0e0e0" };
+        const label = { fontSize: "10px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px", display: "block" };
+        const input_ = { width: "100%", background: "#111", border: "1px solid #222", borderRadius: "4px", padding: "10px 12px", color: "#e0e0e0", fontSize: "13px", fontFamily: "inherit", outline: "none", boxSizing: "border-box" };
+        const btn = (color) => ({ background: color || "#22c55e", border: "none", borderRadius: "4px", padding: "10px 18px", color: "#000", fontSize: "12px", fontWeight: 700, fontFamily: "inherit", cursor: "pointer", letterSpacing: "0.08em" });
+
+        return (
+          <div style={panel}>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", borderBottom: "1px solid #1a1a1a", paddingBottom: "16px" }}>
+              <div>
+                <div style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "0.15em", color: "#fafafa" }}>ROSTER X-RAY</div>
+                <div style={{ fontSize: "10px", color: "#444", letterSpacing: "0.1em", marginTop: "2px" }}>ADMIN · NEWS MANAGER</div>
+              </div>
+              <a href={window.location.pathname} style={{ fontSize: "11px", color: "#444", textDecoration: "none" }}>← Exit Admin</a>
+            </div>
+
+            {!adminAuthed ? (
+              /* Login */
+              <div style={{ maxWidth: "360px" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "20px" }}>Enter your admin password to continue.</div>
+                <label style={label}>Password</label>
+                <input
+                  style={{ ...input_, marginBottom: "12px", ...(adminAuthError ? { borderColor: "#f87171" } : {}) }}
+                  type="password"
+                  value={adminPassword}
+                  onChange={e => { setAdminPassword(e.target.value); setAdminAuthError(false); }}
+                  onKeyDown={e => e.key === "Enter" && handleAdminAuth()}
+                  placeholder="Enter password"
+                />
+                {adminAuthError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>Incorrect password</div>}
+                <button style={btn()} onClick={handleAdminAuth}>Unlock</button>
+              </div>
+            ) : (
+              <div style={{ maxWidth: "600px" }}>
+
+                {/* Add / Edit entry */}
+                <div style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: "6px", padding: "20px", marginBottom: "24px" }}>
+                  <div style={{ fontSize: "11px", color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px", fontWeight: 700 }}>Add / Update Player News</div>
+
+                  <label style={label}>Player Name</label>
+                  <input style={{ ...input_, marginBottom: "12px" }} type="text" value={adminPlayerName} onChange={e => setAdminPlayerName(e.target.value)} placeholder="e.g. Christian McCaffrey" />
+
+                  <label style={label}>News (one sentence)</label>
+                  <textarea
+                    style={{ ...input_, marginBottom: "12px", minHeight: "72px", resize: "vertical" }}
+                    value={adminNewsText}
+                    onChange={e => setAdminNewsText(e.target.value)}
+                    placeholder="e.g. McCaffrey injured in practice, out 7 weeks — opens workload for Kaelon Black and Jordan James."
+                  />
+
+                  {/* Verify result */}
+                  {adminVerifyResult && (
+                    <div style={{ background: adminVerifyResult.plausible ? "#0d2a18" : "#2a0a0a", border: `1px solid ${adminVerifyResult.plausible ? "#22c55e33" : "#f8717133"}`, borderRadius: "4px", padding: "12px", marginBottom: "12px" }}>
+                      <div style={{ fontSize: "11px", fontWeight: 700, color: adminVerifyResult.plausible ? "#4ade80" : "#f87171", marginBottom: "6px" }}>
+                        {adminVerifyResult.plausible ? "✓ Looks plausible" : "⚠ Potential issue"}
+                      </div>
+                      {adminVerifyResult.concern && <div style={{ fontSize: "11px", color: "#fb923c", marginBottom: "8px" }}>{adminVerifyResult.concern}</div>}
+                      {(adminVerifyResult.affectedPlayers || []).length > 0 && (
+                        <div>
+                          <div style={{ fontSize: "10px", color: "#666", marginBottom: "4px", letterSpacing: "0.08em" }}>ALSO AFFECTED:</div>
+                          {adminVerifyResult.affectedPlayers.map((p, i) => (
+                            <div key={i} style={{ fontSize: "11px", color: "#a3e635", marginBottom: "2px" }}>
+                              {p} — <span style={{ color: "#888" }}>{(adminVerifyResult.affectedReasons || [])[i] || ""}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {adminError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>{adminError}</div>}
+                  {adminSaveSuccess && <div style={{ fontSize: "11px", color: "#4ade80", marginBottom: "10px" }}>✓ Saved — live immediately</div>}
+
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button style={btn("#facc15")} onClick={handleVerify} disabled={adminVerifying}>
+                      {adminVerifying ? "Verifying…" : "Verify First"}
+                    </button>
+                    <button style={btn()} onClick={handleSave} disabled={adminSaving}>
+                      {adminSaving ? "Saving…" : "Save to KV"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Current entries */}
+                <div style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: "6px", padding: "20px" }}>
+                  <div style={{ fontSize: "11px", color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px", fontWeight: 700 }}>
+                    Current Entries ({Object.keys({ ...RECENT_NEWS, ...adminNews }).length})
+                  </div>
+                  <div style={{ fontSize: "10px", color: "#444", marginBottom: "12px" }}>KV entries override hardcoded. Hardcoded entries shown in grey.</div>
+
+                  {Object.entries({ ...RECENT_NEWS, ...adminNews }).map(([key, val]) => {
+                    const isKv = adminNews.hasOwnProperty(key);
+                    return (
+                      <div key={key} style={{ borderBottom: "1px solid #151515", padding: "10px 0", display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: isKv ? "#a3e635" : "#444", marginBottom: "3px" }}>
+                            {key} {isKv ? <span style={{ fontSize: "9px", color: "#22c55e" }}>KV</span> : <span style={{ fontSize: "9px", color: "#333" }}>hardcoded</span>}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#666", lineHeight: 1.5 }}>{val}</div>
+                        </div>
+                        {isKv && (
+                          <button
+                            onClick={() => handleDelete(key)}
+                            style={{ background: "none", border: "1px solid #2a1a1a", borderRadius: "3px", color: "#f87171", fontSize: "10px", padding: "3px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "inherit" }}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
     </div>
   );
 }
