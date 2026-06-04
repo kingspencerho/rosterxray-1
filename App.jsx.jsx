@@ -717,13 +717,13 @@ const SITUATIONS = {
   "quinshon judkins": { verdict: "TARGET", trend: "stable", trendNote: "Young back in CLE committee — upside if Mitchell slips", situationFlags: ["breakout_profile"], riskFlags: ["creeping_committee"] },
   "bhayshul tuten": { verdict: "TARGET", trend: "stable", trendNote: "Best back in JAX room after last year's breakout flashes", situationFlags: ["committee_breaker"], riskFlags: [] },
   // Risk/fade situations
-  "chuba hubbard": { verdict: "fade", trend: "falling", trendNote: "Brooks returning, 3.8 YPC, ADP rising wrong way", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "chuba hubbard": { verdict: "fade", trend: "stable", trendNote: "CAR lead back by default with Dowdle gone — but Brooks returning and Trevor Etienne provide real competition; 3.8 YPC and lost starting job in 2025 are hard to ignore", situationFlags: [], riskFlags: ["creeping_committee"] },
   "rj harvey": { verdict: "fade", trend: "falling", trendNote: "Pass-pro issues, ADP rising into the mistake zone", situationFlags: [], riskFlags: ["creeping_committee", "ol_dependency"] },
   "jk dobbins": { verdict: "fade", trend: "falling", trendNote: "Two major knee surgeries, Harvey clearly ahead in depth chart", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
   "tony pollard": { verdict: "fade", trend: "falling", trendNote: "31 years old, Cam Ward era TEN is pass-first now", situationFlags: [], riskFlags: ["contract_year"] },
   "tyler allgeier": { verdict: "fade", trend: "stable", trendNote: "Three-way committee, Brissett QB, 36.1% run rate is brutal", situationFlags: [], riskFlags: ["creeping_committee", "qb_uncertainty"] },
   "breece hall": { verdict: "fade", trend: "falling", trendNote: "Contract narrative + NYJ rebuild = role uncertainty", situationFlags: [], riskFlags: ["contract_year", "creeping_committee"] },
-  "david montgomery": { verdict: "fade", trend: "falling", trendNote: "HOU added competition, age concern at 28", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "david montgomery": { verdict: "TARGET", trend: "stable", trendNote: "HOU bellcow — 2yr/$16.5M deal replaces Mixon as RB1, traded assets confirm org commitment; age 29 is the only real risk flag", situationFlags: ["scheme_fit"], riskFlags: ["injury_history"] },
   "d'andre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
   "dandre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
   "derrick henry": { verdict: "TARGET", trend: "stable", trendNote: "Has defied the age cliff every season — BAL run-heavy with soft W16-17 closing schedule", situationFlags: ["scheme_fit"], riskFlags: [] },
@@ -753,8 +753,49 @@ const SITUATIONS = {
   "parker washington": { verdict: "fade", trend: "stable", trendNote: "Slot receiver in JAX committee — target share without air yards is noise in best ball", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
   "blake corum": { verdict: "fade", trend: "stable", trendNote: "Pure goal-line role in LAR — fantasy value collapses to near zero if not scoring TDs", situationFlags: [], riskFlags: [], roleCeiling: "rz_dependent" },
-  "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["creeping_committee"], roleCeiling: "rz_dependent" },
+  "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
   "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
+  // === ADDITIONAL COMMITTEE RB FLAGS (2026) ===
+  "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy now HC at PIT — run-heavy system suits Warren's receiving back profile, but Dowdle added as real competition", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  "rico dowdle": { verdict: "fade", trend: "stable", trendNote: "Added to PIT committee — 1300+ scrimmage yards each of past two seasons, McCarthy history, real threat to Warren workload", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "kaytron allen": { verdict: "TARGET", trend: "stable", trendNote: "WAS run-heavy under Quinn, new OC Blough — scheme continuity intact, lottery at ADP, but crowded backfield with White/Ford/Croskey-Merritt competing", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+
+  "jacory croskey merritt": { verdict: "fade", trend: "stable", trendNote: "WAS committee back — four-way competition in a run-heavy scheme limits any single back's upside", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "tyjae spears": { verdict: "fade", trend: "falling", trendNote: "TEN committee with Pollard — injury-plagued, career-low attempts in 2025, no role clarity expected in 2026", situationFlags: [], riskFlags: ["confirmed_committee", "injury_history"] },
+  "rhamondre stevenson": { verdict: "fade", trend: "falling", trendNote: "NE committee with Henderson — clock ticking on his role as Henderson projects as the long-term RB1", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "treveyon henderson": { verdict: "TARGET", trend: "rising", trendNote: "NE RB1 ceiling is real — Drake Maye offense is ascending and Henderson is the long-term answer, Stevenson's clock is ticking", situationFlags: ["breakout_profile"], riskFlags: [] },
+  "josh jacobs": { verdict: "fade", trend: "falling", trendNote: "GB arrest situation June 2026 — legal issues create real availability risk, downgrade significantly if he misses time", situationFlags: [], riskFlags: ["injury_history", "contract_year"] },
+  // === ADDITIONAL COMMITTEE RB GAPS (2026) ===
+  "dylan sampson": { verdict: "fade", trend: "stable", trendNote: "CLE committee — best-case 70% of a putrid offense's backfield touches; upside severely capped by team situation", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "braelon allen": { verdict: "fade", trend: "stable", trendNote: "NYJ committee with Hall — when Hall misses time splits evenly with Isaiah Davis, no workhorse upside as standalone", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "isaiah davis": { verdict: "fade", trend: "stable", trendNote: "NYJ depth behind Hall and Allen — three-way committee with no clear role definition", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "david montgomery": { verdict: "TARGET", trend: "stable", trendNote: "HOU bellcow — 2yr/$16.5M deal replaces Mixon as RB1, traded assets confirm org commitment; age 29 is the only real risk flag", situationFlags: ["scheme_fit"], riskFlags: ["injury_history"] },
+  "woody marks": { verdict: "fade", trend: "stable", trendNote: "HOU committee with Montgomery — functional rookie (911 scrimmage yards) but 3.6 YPC limits standalone upside; passing-down role only", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "jerome ford": { verdict: "fade", trend: "stable", trendNote: "WAS committee depth — part of four-way competition with Allen/White/Croskey-Merritt, no defined role", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "jaleel mclaughlin": { verdict: "fade", trend: "stable", trendNote: "DEN depth behind Dobbins/Harvey/Coleman — four-way committee, essentially a practice squad candidate", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "audric estime": { verdict: "fade", trend: "falling", trendNote: "DEN — no longer relevant in 2026 backfield; Coleman/Harvey/Dobbins are the room", situationFlags: [], riskFlags: ["creeping_committee"] },
+  // JAX — both Tuten and Rodriguez are targets in Liam Coen offense, but genuine committee risk
+  "chris rodriguez": { verdict: "TARGET", trend: "stable", trendNote: "JAX committee with Tuten in elite Liam Coen offense — real carries and workhorse path if Tuten slips; ADP value makes the risk worthwhile", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  "lequint allen": { verdict: "fade", trend: "stable", trendNote: "JAX makeshift committee — neither Allen nor Rodriguez has locked a lead role; value is situational", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  // TEN — Singleton is a target despite competition; mediocre alternatives keep the path open
+  "nicholas singleton": { verdict: "TARGET", trend: "stable", trendNote: "TEN dart despite Pollard/Spears competition — Cam Ward era offense needs a receiving back, Singleton's pass-catching profile fits; competition is mediocre enough to trust the path at his ADP cost", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: ["creeping_committee"] },
+  // TB — three-way committee risk; Irving is the lead but Tucker (goal line) and Gainwell (passing downs) carve into ceiling
+  "bucky irving": { verdict: "TARGET", trend: "stable", trendNote: "TB lead back but genuine committee risk — Tucker takes short-yardage/goal-line work, Gainwell handles passing downs; Irving's ceiling tied to TD equity he doesn't fully own", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  "sean tucker": { verdict: "fade", trend: "stable", trendNote: "TB goal-line specialist — carves into Irving's TD equity but has no standalone value without a score; pure TD-or-bust", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
+  // CAR — Hubbard gets another shot with Dowdle gone but Brooks and Trevor Etienne lurk
+  "chuba hubbard": { verdict: "fade", trend: "stable", trendNote: "CAR lead back by default with Dowdle gone — but Brooks returning and Trevor Etienne provide real competition; 3.8 YPC and lost starting job in 2025 are hard to ignore", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "chris brooks": { verdict: "fade", trend: "stable", trendNote: "CAR committee threat to Hubbard — returning back with committee upside if Hubbard regresses again", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "trevor etienne": { verdict: "fade", trend: "stable", trendNote: "CAR depth — younger option lurking behind Hubbard, contingent value only until a starter misses time", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  // MIN — Jones/Mason committee, Claiborne rookie adds another layer
+  "demond claiborne": { verdict: "fade", trend: "stable", trendNote: "MIN rookie dart — drafted into Jones/Mason committee, could carve a role but competition is real; contingent value only at current ADP", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "ty chandler": { verdict: "fade", trend: "stable", trendNote: "MIN committee back — no defined role, pure handcuff depth behind Jones", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  // DEN — clarified role structure: Coleman is the upside play, Harvey is limited to passing work, Dobbins is injury risk
+  "jk dobbins": { verdict: "fade", trend: "falling", trendNote: "DEN — two major knee surgeries, injury risk is real; Coleman is the primary upside play if Dobbins misses time", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
+  "rj harvey": { verdict: "fade", trend: "falling", trendNote: "DEN — limited to passing-down work due to pass-pro issues; not a workhorse path, 3.7 YPC confirms efficiency ceiling", situationFlags: [], riskFlags: ["creeping_committee", "ol_dependency"] },
+  "kenneth walker": { verdict: "TARGET", trend: "rising", trendNote: "Super Bowl MVP, 3yr/$43M KC deal — clear workhorse intent, Mahomes return adds passing game upside, Demercado is receiving depth only", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "kenneth walker iii": { verdict: "TARGET", trend: "rising", trendNote: "Super Bowl MVP, 3yr/$43M KC deal — clear workhorse intent, Mahomes return adds passing game upside, Demercado is receiving depth only", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "lequint allen": { verdict: "fade", trend: "stable", trendNote: "JAX makeshift committee with Tuten — neither back eclipsed 68.0 PFF rushing grade in 2025, no lead-back clarity", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "javonte williams": { verdict: "fade", trend: "stable", trendNote: "DAL 3yr/$24M re-sign — lead back role but Cowboys rebuilding offense, Parsons/Diggs gone, bottom-5 defense means game scripts could be ugly", situationFlags: [], riskFlags: ["creeping_committee"] },
 };
 
 // ============ CHAMPIONSHIP WINDOW SCORE ============
@@ -1699,7 +1740,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
     if (l.includes("roster construction") && l.includes("fits superflex")) return "clean Superflex build";
     if (l.includes("game stack(s) with bring-back")) return "bring-back game stacks";
     if (l.includes("orphan(s) with strong playoff")) return "solo picks with strong matchups";
-    if (l.includes("match your target verdicts") || l.includes("players match your target")) return "confirmed target picks";
+    if (l.includes("players in strong situations")) return "strong situation picks";
     if (l.includes("sharp/leverage stack")) return "field-leverage stacks";
     if (l.includes("adp value pick")) return "real ADP value grabs";
     if (l.includes("hidden gem")) return "underpriced elite-matchup picks";
@@ -1722,7 +1763,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
     if (l.includes("only") && l.includes("qb") && l.includes("sf requires")) return "not enough QBs for SF";
     if (l.includes("significant reaches")) return "multiple ADP reaches";
     if (l.includes("orphans with no matchup or value edge")) return "wasted solo picks";
-    if (l.includes("match your fade verdicts")) return null; // suppress — covered by weak link callout
+    // (fade verdict suppression removed — fade strings no longer appear in output)
 
     // Redraft weaknesses
     if (l.includes("weak starting lineup")) return "a weak starting lineup";
@@ -1839,7 +1880,7 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
   } else if (weakLinkPlayer?.name && (grade === "C" || grade === "C+" || grade === "D")) {
     const last = weakLinkPlayer.name.split(" ").slice(-1)[0];
     verdict = mode === "bestball"
-      ? `${last} is a drag — a reach on a faded player. That pick caps the ceiling.`
+      ? `${last} is a drag — a reach at a price that caps the ceiling.`
       : `${last} is the weak link — a reach on a contested role that costs lineup flexibility.`;
 
   // --- Grade + score-band defaults ---
@@ -2527,16 +2568,37 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     score -= noEdgeOrphans.length * 0.2;
   }
 
-  // Verdict alignment penalties — only for current verdicts (not stale)
+  // Verdict alignment — fade is analyst opinion only, not a universal scoring penalty.
+  // Fades surface as AI context and weakness notes but do NOT penalize the score.
+  // Only objective situation flags (confirmed_committee, qb_uncertainty, roleCeiling) drive penalties.
   const activeFades = verdictAlignments.filter(v => !v.stale && (v.verdict === "fade" || v.verdict === "HARD FADE"));
   const activeTargets = verdictAlignments.filter(v => !v.stale && (v.verdict === "TARGET" || v.verdict.includes("TARGET")));
   if (activeFades.length >= 2) {
-    weaknesses.push(`${activeFades.length} player(s) match your fade verdicts`);
-    score -= activeFades.length * 0.4;
+    // Note only — no score penalty. Fade = analyst opinion, not objective roster flaw.
+    weaknesses.push(`${activeFades.length} player(s) with situational concerns`);
   }
   if (activeTargets.length >= 3) {
-    strengths.push(`${activeTargets.length} players match your target verdicts`);
+    strengths.push(`${activeTargets.length} players in strong situations`);
     score += Math.min(activeTargets.length * 0.3, 1.5);
+  }
+
+  // === CONFIRMED COMMITTEE PENALTY ===
+  // confirmed_committee = RB with genuinely split touches and no defined lead role.
+  // Objective situation fact — penalizes any roster regardless of analyst opinion.
+  // creeping_committee = emerging competition threat but starter is currently defined — no penalty.
+  const confirmedCommitteeRBs = valid.filter(p => {
+    if (p.pos !== "RB") return false;
+    const sit = SITUATIONS[normalize(p.name)];
+    return sit?.riskFlags?.includes("confirmed_committee");
+  });
+  if (confirmedCommitteeRBs.length >= 2) {
+    const names = confirmedCommitteeRBs.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`${confirmedCommitteeRBs.length} RB(s) in confirmed committees: ${names} — no defined lead role, ceiling capped`);
+    score -= Math.min(confirmedCommitteeRBs.length * 0.25, 1.0); // cap at -1.0 total
+  } else if (confirmedCommitteeRBs.length === 1) {
+    const name = confirmedCommitteeRBs[0].name.split(" ").slice(-1)[0];
+    weaknesses.push(`${name} in confirmed committee — touches genuinely split, no workhorse path`);
+    score -= 0.2;
   }
 
   // === ROLE CEILING PENALTIES ===
@@ -2553,7 +2615,23 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     score -= rzDependentPlayers.length * 0.25; // lighter — situational value is still value
   }
 
-  // Stack uniqueness bonus for larger fields
+  // === QB UNCERTAINTY PENALTY ===
+  // QBs with qb_uncertainty riskFlag get a direct stack discount.
+  // Fade verdict no longer carries a score penalty (analyst opinion only).
+  // This is the sole objective penalty for uncertain QB situations — -0.3 per affected stack.
+  const uncertainQBStacks = qualifiedStackGrades.filter(stack => {
+    if (!stack.hasQB) return false;
+    const qb = stack.players.find(p => p.pos === "QB");
+    if (!qb) return false;
+    const key = normalize(qb.name);
+    const sit = SITUATIONS[key];
+    return sit?.riskFlags?.includes("qb_uncertainty");
+  });
+  if (uncertainQBStacks.length >= 1) {
+    const names = uncertainQBStacks.map(s => s.team).join(", ");
+    weaknesses.push(`QB uncertainty in ${names} stack${uncertainQBStacks.length > 1 ? "s" : ""} — starting role unconfirmed`);
+    score -= uncertainQBStacks.length * 0.3;
+  }
   if (tournamentKey === "bbm7" || tournamentKey === "puppy") {
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
