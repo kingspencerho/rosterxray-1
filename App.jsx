@@ -734,6 +734,16 @@ const SITUATIONS = {
   "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  // === QB UNCERTAINTY FLAGS ===
+  // These suppress stack credit and cap pass-catcher ceilings via qb_uncertainty risk flag
+  "michael penix": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "michael penix jr": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "tua tagovailoa": { verdict: "fade", trend: "stable", trendNote: "Signed with ATL, competing with Penix for starting role — new team, unproven situation, no longer on MIA", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "aaron rodgers": { verdict: "fade", trend: "falling", trendNote: "Age 42 in 2026, injury history real concern — Howard and Allar capable of pushing for snaps if Rodgers struggles early", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
+  "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "deshaun watson": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Sanders — one of worst EPA/dropback marks last two seasons, lead only if Sanders misses camp", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
+  "jacoby brissett": { verdict: "fade", trend: "stable", trendNote: "ARI holdout situation heading into 2026 camp — contract dispute creates genuine Week 1 availability uncertainty", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   // === ROLE CEILING FLAGS ===
   // slot_only: high target share WRs locked into short/underneath routes, no red zone role, hard TD ceiling cap
   "khalil shakir": { verdict: "fade", trend: "stable", trendNote: "Elite slot stats but sub-6 aDOT, zero red zone role — PPR floor, not a ceiling asset", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
