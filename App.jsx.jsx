@@ -2357,16 +2357,68 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   let strengths = [];
   let weaknesses = [];
 
+  // === STACK QUALITY DISCOUNT ===
+  // A stack is only as good as its weakest structural piece.
+  // Discount stacks where the QB is a fade/speculative or the only pass catcher is a sub-200 dart.
+  // This prevents weak stacks from receiving full architecture credit.
+  const qualifyStack = (stack) => {
+    if (!stack.hasQB) return { qualified: true, discount: 0, reason: null };
+
+    // Find the QB in the stack
+    const qbPlayer = stack.players.find(p => p.pos === "QB");
+    const passCatchers = stack.players.filter(p => p.pos !== "QB");
+
+    // Check 1: QB is a fade or hard fade verdict
+    const qbKey = qbPlayer ? normalize(qbPlayer.name) : null;
+    const qbSit = qbKey ? SITUATIONS[qbKey] : null;
+    const qbIsFade = qbSit && (qbSit.verdict === "fade" || qbSit.verdict === "HARD FADE");
+
+    // Check 2: Only one pass catcher and they are ADP 200+
+    const onlyDartPasser = passCatchers.length === 1 && passCatchers[0].adp >= 200;
+
+    // Check 3: All pass catchers have roleCeiling flags (slot trap / TD dependent)
+    const allCeilingSuppressed = passCatchers.length > 0 &&
+      passCatchers.every(p => {
+        const key = normalize(p.name);
+        return SITUATIONS[key]?.roleCeiling === "slot_only" || SITUATIONS[key]?.roleCeiling === "rz_dependent";
+      });
+
+    if (qbIsFade) return { qualified: false, discount: 0.5, reason: "fade QB anchor" };
+    if (onlyDartPasser) return { qualified: false, discount: 0.6, reason: "only pass catcher is a sub-200 dart" };
+    if (allCeilingSuppressed) return { qualified: false, discount: 0.7, reason: "all pass catchers have role ceiling flags" };
+
+    return { qualified: true, discount: 1.0, reason: null };
+  };
+
+  // Apply quality multiplier to each stack's normalized score
+  const qualifiedStackGrades = stackGrades.map(stack => {
+    const { qualified, discount, reason } = qualifyStack(stack);
+    const effectiveScore = qualified ? stack.normalizedScore : stack.normalizedScore * discount;
+    return { ...stack, normalizedScore: effectiveScore, qualityDiscount: !qualified, discountReason: reason };
+  });
+
   // === STACK QUALITY ANALYSIS (tournament-aware) ===
-  const primaryStacks = stackGrades.filter(s => s.hasQB);
+  const primaryStacks = qualifiedStackGrades.filter(s => s.hasQB);
   const goodStacks = primaryStacks.filter(s => s.normalizedScore >= 10);
   const eliteStacks = primaryStacks.filter(s => s.normalizedScore >= 12);
 
-  // Multi-stack architecture bonus — having 3+ primary QB stacks is structurally valuable
-  if (primaryStacks.length >= 3) {
-    strengths.push(`${primaryStacks.length} primary QB stacks — strong roster architecture`);
-  } else if (primaryStacks.length === 2) {
+  // Multi-stack architecture bonus — only count stacks that passed quality check
+  const qualifiedPrimaryStacks = primaryStacks.filter(s => !s.qualityDiscount);
+  const discountedStacks = primaryStacks.filter(s => s.qualityDiscount);
+
+  if (qualifiedPrimaryStacks.length >= 3) {
+    strengths.push(`${qualifiedPrimaryStacks.length} primary QB stacks — strong roster architecture`);
+  } else if (qualifiedPrimaryStacks.length === 2) {
     strengths.push(`2 primary QB stacks built`);
+  } else if (qualifiedPrimaryStacks.length === 1) {
+    strengths.push(`1 primary QB stack built`);
+  }
+
+  // Flag discounted stacks as a weakness so the user understands why
+  if (discountedStacks.length >= 2) {
+    weaknesses.push(`${discountedStacks.length} stacks underbuilt — ${discountedStacks.map(s => `${s.team} (${s.discountReason})`).join(", ")}`);
+  } else if (discountedStacks.length === 1) {
+    weaknesses.push(`${discountedStacks[0].team} stack underbuilt — ${discountedStacks[0].discountReason}`);
   }
 
   if (eliteStacks.length >= 1) {
@@ -2428,10 +2480,12 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   // === GRADE CALCULATION ===
   // Stack quality is the dominant signal — weighted heaviest
+  // Only qualified stacks receive full credit; discounted stacks contribute at reduced rate
   let score = 0;
-  score += primaryStacks.length * 0.8;        // baseline: having stacks is good
-  score += goodStacks.length * 1.2;           // quality stacks
-  score += eliteStacks.length * 1.5;          // elite stacks bonus
+  score += qualifiedPrimaryStacks.length * 0.8;          // qualified stacks: full baseline credit
+  score += discountedStacks.length * 0.3;                // underbuilt stacks: minimal credit
+  score += goodStacks.length * 1.2;                      // quality stacks
+  score += eliteStacks.length * 1.5;                     // elite stacks bonus
   score -= majorIssues.length * 1.0;          // major construction issues
   score -= minorIssues.length * 0.3;          // minor issues
   score += adpScoreImpact;                    // capped ADP contribution
@@ -2858,6 +2912,9 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   const benchSchedules = bench.filter(p => p.team).map(buildScheduleEntry);
 
   // === PLAYOFF SCHEDULE STRENGTH (specific weeks based on league config) ===
+  // Week weights: W17 is championship week — weighted heaviest
+  const playoffWeekWeights = { 0: 1.0, 1: 1.2, 2: 1.8 }; // index: W15=0, W16=1, W17=2
+
   const playoffMatchups = allStarters.map(player => {
     const fullSchedule = FULL_SCHEDULE[player.team] || [];
     const playoffMatches = league.playoffWeeks.map(wk => {
@@ -2866,8 +2923,14 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
       return { week: wk, opp, ...m };
     });
+    // Raw total (unweighted) — used for display chip colors
     const totalScore = playoffMatches.reduce((sum, m) => sum + m.score, 0);
-    return { ...player, playoffMatches, totalScore };
+    // Weighted total — W17 counts 1.8x, W16 1.2x, W15 1.0x
+    const weightedTotal = playoffMatches.reduce((sum, m, i) => sum + m.score * (playoffWeekWeights[i] || 1.0), 0);
+    // Normalize weighted total back to 0-15 scale for consistent thresholds
+    const maxWeightedPossible = 5 * (1.0 + 1.2 + 1.8); // 5 * 4.0 = 20
+    const normalizedWeighted = (weightedTotal / maxWeightedPossible) * 15;
+    return { ...player, playoffMatches, totalScore, normalizedWeighted };
   });
 
   // === BYE WEEK ANALYSIS (CRITICAL for redraft) ===
@@ -3189,17 +3252,35 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     }
   }
 
-  // 7. Playoff schedule strength
-  const eliteStarterPlayoffs = playoffMatchups.filter(p => p.totalScore >= 11);
-  const tougholoffStarters = playoffMatchups.filter(p => p.totalScore <= 6);
-  if (eliteStarterPlayoffs.length >= 3) {
-    strengths.push(`${eliteStarterPlayoffs.length} starters with elite playoff schedule`);
-    score += 1;
-  }
-  if (tougholoffStarters.length >= 3) {
-    weaknesses.push(`${tougholoffStarters.length} starters with brutal playoff schedule`);
+  // 7. Playoff schedule strength — sliding scale, position-weighted, W17-aware
+  const posWeightsPlayoff = { QB: 1.2, RB: 1.0, WR: 1.0, TE: 0.8 };
+
+  // Position-weighted average of normalizedWeighted scores across all starters
+  const playoffWeightedSum = playoffMatchups.reduce((sum, p) => {
+    const pw = posWeightsPlayoff[p.pos] || 1.0;
+    return sum + p.normalizedWeighted * pw;
+  }, 0);
+  const playoffWeightTotal = playoffMatchups.reduce((sum, p) => sum + (posWeightsPlayoff[p.pos] || 1.0), 0);
+  const playoffAvg = playoffWeightTotal > 0 ? playoffWeightedSum / playoffWeightTotal : 0;
+
+  // Sliding scale — granular reward/penalty based on overall playoff window quality
+  if (playoffAvg >= 10.5) {
+    strengths.push(`Elite playoff schedule across the roster — W17 championship window is a weapon`);
+    score += 1.5;
+  } else if (playoffAvg >= 9.0) {
+    strengths.push(`Strong playoff schedule — majority of starters have soft W15-17 slates`);
+    score += 1.0;
+  } else if (playoffAvg >= 7.5) {
+    strengths.push(`Decent playoff schedule — some soft spots in the championship window`);
+    score += 0.5;
+  } else if (playoffAvg < 4.5) {
+    weaknesses.push(`Brutal playoff schedule — starters face tough W15-17 matchups across the board`);
+    score -= 1.0;
+  } else if (playoffAvg < 6.0) {
+    weaknesses.push(`Difficult playoff schedule — limited upside weeks when it matters most`);
     score -= 0.5;
   }
+  // 6.0-7.5 = neutral, no strength or weakness added
 
   // 8. Regular season schedule strength — weighted against starter quality
   // Elite players (low ADP) overcome tough schedules better than mediocre ones
