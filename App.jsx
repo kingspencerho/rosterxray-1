@@ -3514,6 +3514,10 @@ export default function RosterScorer() {
   const [adminSaveSuccess, setAdminSaveSuccess] = useState(false);
   const [adminError, setAdminError] = useState(null);
   const [kvNews, setKvNews] = useState({});
+  const [adminImportText, setAdminImportText] = useState("");
+  const [adminImporting, setAdminImporting] = useState(false);
+  const [adminImportSuccess, setAdminImportSuccess] = useState(false);
+  const [adminImportError, setAdminImportError] = useState(null);
 
   // Load KV news on mount — merges with hardcoded RECENT_NEWS, KV takes priority
   React.useEffect(() => {
@@ -7626,6 +7630,48 @@ Analyze this best ball roster. Return JSON only.`;
           } catch { setAdminError("Network error"); }
         };
 
+        const handleExport = () => {
+          const kvOnly = adminNews;
+          const blob = new Blob([JSON.stringify(kvOnly, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `rosterxray-news-backup-${new Date().toISOString().slice(0,10)}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+
+        const handleImport = async () => {
+          setAdminImportError(null);
+          setAdminImportSuccess(false);
+          let parsed;
+          try {
+            parsed = JSON.parse(adminImportText);
+          } catch {
+            setAdminImportError("Invalid JSON — check your backup file format.");
+            return;
+          }
+          setAdminImporting(true);
+          try {
+            const r = await fetch("/api/news-set", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: adminPassword, action: "import", importData: parsed }),
+            });
+            const d = await r.json();
+            if (r.ok) {
+              setAdminNews(d.news || {});
+              setKvNews(d.news || {});
+              setAdminImportText("");
+              setAdminImportSuccess(true);
+              setTimeout(() => setAdminImportSuccess(false), 3000);
+            } else {
+              setAdminImportError(d.error || "Import failed");
+            }
+          } catch { setAdminImportError("Network error"); }
+          finally { setAdminImporting(false); }
+        };
+
         const panel = { position: "fixed", inset: 0, background: "#0a0a0a", zIndex: 9999, overflowY: "auto", padding: "32px 24px", fontFamily: "'IBM Plex Mono', monospace", color: "#e0e0e0" };
         const label = { fontSize: "10px", color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px", display: "block" };
         const input_ = { width: "100%", background: "#111", border: "1px solid #222", borderRadius: "4px", padding: "10px 12px", color: "#e0e0e0", fontSize: "13px", fontFamily: "inherit", outline: "none", boxSizing: "border-box" };
@@ -7737,6 +7783,37 @@ Analyze this best ball roster. Return JSON only.`;
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Export / Import backup */}
+                <div style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: "6px", padding: "20px", marginTop: "16px" }}>
+                  <div style={{ fontSize: "11px", color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px", fontWeight: 700 }}>Backup & Restore</div>
+                  <div style={{ fontSize: "11px", color: "#555", marginBottom: "16px", lineHeight: 1.6 }}>
+                    Export saves all KV entries as a JSON file. Import restores from a backup — paste the JSON contents below. Always export before uploading a new news-set.js.
+                  </div>
+                  <button
+                    style={{ ...btn("#3b82f6"), marginBottom: "20px" }}
+                    onClick={handleExport}
+                    disabled={Object.keys(adminNews).length === 0}
+                  >
+                    ↓ Export Backup ({Object.keys(adminNews).length} KV entries)
+                  </button>
+                  <label style={label}>Restore from Backup (paste JSON)</label>
+                  <textarea
+                    style={{ ...input_, minHeight: "80px", resize: "vertical", marginBottom: "10px", fontSize: "11px" }}
+                    value={adminImportText}
+                    onChange={e => { setAdminImportText(e.target.value); setAdminImportError(null); }}
+                    placeholder='{"player name": "news sentence", ...}'
+                  />
+                  {adminImportError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "8px" }}>{adminImportError}</div>}
+                  {adminImportSuccess && <div style={{ fontSize: "11px", color: "#4ade80", marginBottom: "8px" }}>✓ Restored — all entries live</div>}
+                  <button
+                    style={btn("#f59e0b")}
+                    onClick={handleImport}
+                    disabled={adminImporting || !adminImportText.trim()}
+                  >
+                    {adminImporting ? "Restoring…" : "↑ Restore from Backup"}
+                  </button>
                 </div>
 
               </div>
