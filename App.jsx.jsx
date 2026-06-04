@@ -2072,20 +2072,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const maxWeighted = 5 * weights.reduce((a, b) => a + b, 0);
     const normalized = (weightedScore / maxWeighted) * 15;
 
-    // Classification
-    // Strong Matchups: peak Good+ week AND solid overall score
-    // One-Week Spike: one elite week but weak overall — informational, not a true window
-    // Decent Matchups: no single great week but consistent softness
-    // No Edge: no meaningful playoff matchup advantage
+    // Classification — based on count of Good/Elite weeks in W15-17
+    // Elite Window:    3 good/elite weeks
+    // Strong Matchups: 2 good/elite weeks
+    // Soft Spot:       1 good/elite week
+    // No Edge:         0 good/elite weeks
+    const goodWeekCount = matchups.filter(m => m.score >= 4).length;
     let tier, color;
-    if (peakScore >= 4 && normalized >= 7) {
-      tier = "Strong Matchups";
+    if (goodWeekCount >= 3) {
+      tier = "Elite Window";
       color = "elite";
-    } else if (peakScore >= 4 && normalized < 7) {
-      tier = "One-Week Spike";
-      color = "neutral";
-    } else if (normalized >= 8) {
-      tier = "Decent Matchups";
+    } else if (goodWeekCount === 2) {
+      tier = "Strong Matchups";
+      color = "solid";
+    } else if (goodWeekCount === 1) {
+      tier = "Soft Spot";
       color = "neutral";
     } else {
       tier = "No Edge";
@@ -2451,9 +2452,8 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   }
 
   // Orphan analysis
-  // Fix 3: steepened no-edge penalty from flat -0.6 to -0.2 per orphan
   const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge");
-  const strongOrphans = orphans.filter(o => o.tier === "Strong Matchups");
+  const strongOrphans = orphans.filter(o => o.tier === "Elite Window" || o.tier === "Strong Matchups");
   if (strongOrphans.length >= 2) {
     strengths.push(`${strongOrphans.length} orphan(s) with strong playoff matchups`);
     score += 0.5;
@@ -5689,9 +5689,19 @@ Analyze this best ball roster. Return JSON only.`;
                           <span style={{
                             display: "inline-block",
                             fontSize: "9px",
-                            color: o.tier === "One-Week Spike" ? "#f59e0b" : s.text,
-                            background: o.tier === "One-Week Spike" ? "#1a120044" : `${s.text}15`,
-                            border: `1px solid ${o.tier === "One-Week Spike" ? "#f59e0b44" : s.text + "44"}`,
+                            color: o.tier === "Elite Window" ? "#4ade80"
+                                 : o.tier === "Strong Matchups" ? "#a3e635"
+                                 : o.tier === "Soft Spot" ? "#facc15"
+                                 : "#fb923c",
+                            background: o.tier === "Elite Window" ? "#4ade8015"
+                                      : o.tier === "Strong Matchups" ? "#a3e63515"
+                                      : o.tier === "Soft Spot" ? "#facc1515"
+                                      : "#fb923c15",
+                            border: `1px solid ${
+                              o.tier === "Elite Window" ? "#4ade8044"
+                            : o.tier === "Strong Matchups" ? "#a3e63544"
+                            : o.tier === "Soft Spot" ? "#facc1544"
+                            : "#fb923c44"}`,
                             fontWeight: 700,
                             letterSpacing: "0.08em",
                             padding: "1px 7px",
@@ -5701,7 +5711,7 @@ Analyze this best ball roster. Return JSON only.`;
                             {o.tier}
                           </span>
                           {/* Hidden Gem badge — elite matchups at late-round price */}
-                          {o.tier === "Strong Matchups" && o.adp >= 100 &&
+                          {(o.tier === "Elite Window" || o.tier === "Strong Matchups") && o.adp >= 100 &&
                            (o.matchups || []).reduce((sum, m) => sum + m.score, 0) >= 12 && (
                             <span style={{
                               display: "inline-block",
