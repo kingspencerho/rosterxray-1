@@ -104,14 +104,11 @@ Return valid JSON only:
       const key = playerName.toLowerCase().trim();
       existing[key] = newsText.trim();
 
-      // Write back
-      const setRes = await fetch(`${kvUrl}/set/recent_news`, {
+      // Write back — Upstash REST: value goes in URL, not body
+      const encoded = encodeURIComponent(JSON.stringify(existing));
+      const setRes = await fetch(`${kvUrl}/set/recent_news/${encoded}`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${kvToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(JSON.stringify(existing)),
+        headers: { Authorization: `Bearer ${kvToken}` },
       });
 
       if (!setRes.ok) return res.status(500).json({ error: "KV write failed" });
@@ -142,13 +139,11 @@ Return valid JSON only:
       const key = playerName.toLowerCase().trim();
       delete existing[key];
 
-      const setRes = await fetch(`${kvUrl}/set/recent_news`, {
+      // Write back — Upstash REST: value goes in URL, not body
+      const encoded = encodeURIComponent(JSON.stringify(existing));
+      const setRes = await fetch(`${kvUrl}/set/recent_news/${encoded}`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${kvToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(JSON.stringify(existing)),
+        headers: { Authorization: `Bearer ${kvToken}` },
       });
 
       if (!setRes.ok) return res.status(500).json({ error: "KV write failed" });
