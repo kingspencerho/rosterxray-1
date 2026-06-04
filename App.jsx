@@ -5220,8 +5220,8 @@ Analyze this best ball roster. Return JSON only.`;
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
                 Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
               </div>
-              <div style={{ fontSize: "10px", color: "#4a4a4a", letterSpacing: "0.04em", marginTop: "6px" }}>
-                For best results: upload all roster screens · 18 players (best ball) · 15 players (redraft)
+              <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "6px" }}>
+                For best results: upload all roster screens · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
               </div>
             </div>
 
@@ -5544,7 +5544,7 @@ Analyze this best ball roster. Return JSON only.`;
                     color: "#f59e0b",
                     letterSpacing: "0.03em",
                   }}>
-                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · 15 players (redraft)
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
                   </div>
                 )}
                 {(analyzed.nutshell || aiLoading) && (
@@ -6539,7 +6539,7 @@ Analyze this best ball roster. Return JSON only.`;
                     color: "#f59e0b",
                     letterSpacing: "0.03em",
                   }}>
-                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · 15 players (redraft)
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
                   </div>
                 )}
                 {(analyzed.nutshell || aiLoading) && (
