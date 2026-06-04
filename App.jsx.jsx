@@ -37,7 +37,7 @@ const ADP_DATA = {
   "george pickens": { adp: 25.3, pos: "WR", team: "DAL" },
   "nico collins": { adp: 25.8, pos: "WR", team: "HOU" },
   "josh jacobs": { adp: 26.5, pos: "RB", team: "GB" },
-  "aj brown": { adp: 27.5, pos: "WR", team: "PHI" },
+  "aj brown": { adp: 27.5, pos: "WR", team: "NE" },
   "josh allen": { adp: 30.2, pos: "QB", team: "BUF" },
   "breece hall": { adp: 30.3, pos: "RB", team: "NYJ" },
   "travis etienne jr": { adp: 31.2, pos: "RB", team: "NO" },
@@ -714,14 +714,13 @@ const SITUATIONS = {
   "luther burden": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward WR1 starter role in CHI", situationFlags: ["breakout_profile", "target_vacuum"], riskFlags: [] },
   "eli stowers": { verdict: "TARGET", trend: "stable", trendNote: "AJ Brown to NE strengthens PHI TE target share — buy window open", situationFlags: ["target_vacuum"], riskFlags: [] },
   "jonah coleman": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward every-down role as Harvey struggles in pass pro", situationFlags: ["committee_breaker", "scheme_fit"], riskFlags: [] },
-  "quinshon judkins": { verdict: "TARGET", trend: "stable", trendNote: "Young back in CLE committee — upside if Mitchell slips", situationFlags: ["breakout_profile"], riskFlags: ["creeping_committee"] },
+  "quinshon judkins": { verdict: "TARGET", trend: "rising", trendNote: "CLE bell cow — Mitchell depth chart situation resolved, Judkins locked in as lead back with full workhorse path", situationFlags: ["breakout_profile"], riskFlags: [] },
   "bhayshul tuten": { verdict: "TARGET", trend: "stable", trendNote: "Best back in JAX room after last year's breakout flashes", situationFlags: ["committee_breaker"], riskFlags: [] },
   // Risk/fade situations
-  "chuba hubbard": { verdict: "fade", trend: "stable", trendNote: "CAR lead back by default with Dowdle gone — but Brooks returning and Trevor Etienne provide real competition; 3.8 YPC and lost starting job in 2025 are hard to ignore", situationFlags: [], riskFlags: ["creeping_committee"] },
   "rj harvey": { verdict: "fade", trend: "falling", trendNote: "Pass-pro issues, ADP rising into the mistake zone", situationFlags: [], riskFlags: ["creeping_committee", "ol_dependency"] },
   "jk dobbins": { verdict: "fade", trend: "falling", trendNote: "Two major knee surgeries, Harvey clearly ahead in depth chart", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
   "tony pollard": { verdict: "fade", trend: "falling", trendNote: "31 years old, Cam Ward era TEN is pass-first now", situationFlags: [], riskFlags: ["contract_year"] },
-  "tyler allgeier": { verdict: "fade", trend: "stable", trendNote: "Three-way committee, Brissett QB, 36.1% run rate is brutal", situationFlags: [], riskFlags: ["creeping_committee", "qb_uncertainty"] },
+  "tyler allgeier": { verdict: "fade", trend: "stable", trendNote: "Three-way committee, Brissett QB, 36.1% run rate is brutal", situationFlags: [], riskFlags: ["creeping_committee"] },
   "breece hall": { verdict: "fade", trend: "falling", trendNote: "Contract narrative + NYJ rebuild = role uncertainty", situationFlags: [], riskFlags: ["contract_year", "creeping_committee"] },
   "david montgomery": { verdict: "TARGET", trend: "stable", trendNote: "HOU bellcow — 2yr/$16.5M deal replaces Mixon as RB1, traded assets confirm org commitment; age 29 is the only real risk flag", situationFlags: ["scheme_fit"], riskFlags: ["injury_history"] },
   "d'andre swift": { verdict: "fade", trend: "falling", trendNote: "No bell-cow role in CHI committee", situationFlags: [], riskFlags: ["creeping_committee"] },
@@ -730,8 +729,8 @@ const SITUATIONS = {
   "christian mccaffrey": { verdict: "fade", trend: "falling", trendNote: "Injury history the real concern — missed significant 2024 time, SF scheme unchanged under Shanahan", situationFlags: [], riskFlags: ["injury_history"] },
   "malik nabers": { verdict: "fade", trend: "falling", trendNote: "2nd knee cleanup, Week 1 uncertain — freshness risk", situationFlags: [], riskFlags: ["injury_history"] },
   "rashee rice": { verdict: "fade", trend: "falling", trendNote: "30-day jail sentence, misses OTAs, chemistry concern", situationFlags: [], riskFlags: ["injury_history"] },
-  "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "BAL brutal playoff schedule + new HC Minter/OC Doyle = scheme uncertainty ceiling risk in 2026", situationFlags: [], riskFlags: ["qb_uncertainty"] },
-  "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
+  "lamar jackson": { verdict: "fade", trend: "stable", trendNote: "BAL brutal playoff schedule + new HC Minter/OC Doyle = scheme uncertainty ceiling risk in 2026", situationFlags: [], riskFlags: [] },
+  "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: [] },
   "mike washington": { verdict: "fade", trend: "stable", trendNote: "Combine fraud, 10 career fumbles, no NFL tape", situationFlags: [], riskFlags: ["creeping_committee"] },
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   // === QB UNCERTAINTY FLAGS ===
@@ -739,7 +738,7 @@ const SITUATIONS = {
   "michael penix": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "michael penix jr": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "tua tagovailoa": { verdict: "fade", trend: "stable", trendNote: "Signed with ATL, competing with Penix for starting role — new team, unproven situation, no longer on MIA", situationFlags: [], riskFlags: ["qb_uncertainty"] },
-  "aaron rodgers": { verdict: "fade", trend: "falling", trendNote: "Age 42 in 2026, injury history real concern — Howard and Allar capable of pushing for snaps if Rodgers struggles early", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
+  "aaron rodgers": { verdict: "fade", trend: "falling", trendNote: "Age 42 in 2026, injury history real concern — Howard and Allar capable of pushing for snaps if Rodgers struggles early", situationFlags: [], riskFlags: ["injury_history"] },
   "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "deshaun watson": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Sanders — one of worst EPA/dropback marks last two seasons, lead only if Sanders misses camp", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
@@ -773,7 +772,6 @@ const SITUATIONS = {
   "woody marks": { verdict: "fade", trend: "stable", trendNote: "HOU committee with Montgomery — functional rookie (911 scrimmage yards) but 3.6 YPC limits standalone upside; passing-down role only", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "jerome ford": { verdict: "fade", trend: "stable", trendNote: "WAS committee depth — part of four-way competition with Allen/White/Croskey-Merritt, no defined role", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "jaleel mclaughlin": { verdict: "fade", trend: "stable", trendNote: "DEN depth behind Dobbins/Harvey/Coleman — four-way committee, essentially a practice squad candidate", situationFlags: [], riskFlags: ["confirmed_committee"] },
-  "audric estime": { verdict: "fade", trend: "falling", trendNote: "DEN — no longer relevant in 2026 backfield; Coleman/Harvey/Dobbins are the room", situationFlags: [], riskFlags: ["creeping_committee"] },
   // JAX — both Tuten and Rodriguez are targets in Liam Coen offense, but genuine committee risk
   "chris rodriguez": { verdict: "TARGET", trend: "stable", trendNote: "JAX committee with Tuten in elite Liam Coen offense — real carries and workhorse path if Tuten slips; ADP value makes the risk worthwhile", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   "lequint allen": { verdict: "fade", trend: "stable", trendNote: "JAX makeshift committee — neither Allen nor Rodriguez has locked a lead role; value is situational", situationFlags: [], riskFlags: ["confirmed_committee"] },
@@ -795,7 +793,11 @@ const SITUATIONS = {
   "kenneth walker": { verdict: "TARGET", trend: "rising", trendNote: "Super Bowl MVP, 3yr/$43M KC deal — clear workhorse intent, Mahomes return adds passing game upside, Demercado is receiving depth only", situationFlags: ["scheme_fit"], riskFlags: [] },
   "kenneth walker iii": { verdict: "TARGET", trend: "rising", trendNote: "Super Bowl MVP, 3yr/$43M KC deal — clear workhorse intent, Mahomes return adds passing game upside, Demercado is receiving depth only", situationFlags: ["scheme_fit"], riskFlags: [] },
   "lequint allen": { verdict: "fade", trend: "stable", trendNote: "JAX makeshift committee with Tuten — neither back eclipsed 68.0 PFF rushing grade in 2025, no lead-back clarity", situationFlags: [], riskFlags: ["confirmed_committee"] },
-  "javonte williams": { verdict: "fade", trend: "stable", trendNote: "DAL 3yr/$24M re-sign — lead back role but Cowboys rebuilding offense, Parsons/Diggs gone, bottom-5 defense means game scripts could be ugly", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "javonte williams": { verdict: "TARGET", trend: "stable", trendNote: "DAL 3yr/$24M re-sign — bell cow with bottom-5 defense generating positive game scripts; Malik Davis and Jaydon Blue competing for RB2 role behind him", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "malik davis": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Jaydon Blue — neither back has locked a role behind Javonte; pure handcuff/committee depth", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "jaydon blue": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Malik Davis — younger option with pass-catching upside, but no defined role until one separates in camp", situationFlags: [], riskFlags: ["creeping_committee"] },
+  "eli heidenreich": { verdict: "fade", trend: "stable", trendNote: "PIT third RB behind Warren and Dowdle — drafted for passing situations and gadget work, no standalone value without injuries ahead of him", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "carson beck": { verdict: "fade", trend: "stable", trendNote: "ARI backup QB behind Brissett — contingent value only if holdout persists deep into camp; monitor Brissett contract situation before drafting", situationFlags: [], riskFlags: ["qb_uncertainty"] },
 };
 
 // ============ CHAMPIONSHIP WINDOW SCORE ============
@@ -966,7 +968,7 @@ const ADP_YAHOO = {
   "josh allen": { adp: 26.0, pos: "QB", team: "BUF" },
   "chris olave": { adp: 27.0, pos: "WR", team: "NO" },
   "derrick henry": { adp: 28.0, pos: "RB", team: "BAL" },
-  "aj brown": { adp: 29.0, pos: "WR", team: "PHI" },
+  "aj brown": { adp: 29.0, pos: "WR", team: "NE" },
   "lamar jackson": { adp: 30.0, pos: "QB", team: "BAL" },
   "josh jacobs": { adp: 31.0, pos: "RB", team: "GB" },
   "tetairoa mcmillan": { adp: 32.0, pos: "WR", team: "CAR" },
@@ -1300,7 +1302,7 @@ const OFFSEASON_ADJ_2026 = {
   CIN: { wr: -1.5, rb: -1.0, te: -1.0, note: "Lou Anarumo back, secondary upgraded" },
   BAL: { wr: -1.0, rb: -0.5, te: -0.5, note: "Minter DC promotion, Humphrey healthy" },
   CAR: { wr: +1.5, rb: +1.0, te: +1.0, note: "Lost Brian Burns, thin secondary" },
-  LAR: { wr: +1.0, rb: +0.5, te: +0.5, note: "Verse traded to CLE, pass rush weakened" },
+  LAR: { wr: -1.0, rb: -0.5, te: -0.5, note: "Myles Garrett arrived (Verse + picks), pass rush upgraded — tougher matchup" },
   CLE: { wr: -1.0, rb: -0.5, te: -0.5, note: "Verse arrival strengthens pass rush" },
   NYG: { wr: +1.5, rb: +1.0, te: +1.0, note: "Rebuilding D, bottom-5 projection" },
   WAS: { wr: +1.0, rb: +0.5, te: +0.5, note: "Full rebuild, Payne age concern" },
@@ -5218,6 +5220,9 @@ Analyze this best ball roster. Return JSON only.`;
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
                 Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
               </div>
+              <div style={{ fontSize: "10px", color: "#4a4a4a", letterSpacing: "0.04em", marginTop: "6px" }}>
+                For best results: upload all roster screens · 18 players (best ball) · 15 players (redraft)
+              </div>
             </div>
 
             {/* Image previews */}
@@ -5528,6 +5533,20 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
+                {analyzed.valid.length < 8 && (
+                  <div style={{
+                    marginTop: "10px",
+                    padding: "8px 12px",
+                    background: "#1a1200",
+                    border: "1px solid #7c5c00",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    color: "#f59e0b",
+                    letterSpacing: "0.03em",
+                  }}>
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · 15 players (redraft)
+                  </div>
+                )}
                 {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
@@ -6509,6 +6528,20 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
+                {analyzed.valid.length < 8 && (
+                  <div style={{
+                    marginTop: "10px",
+                    padding: "8px 12px",
+                    background: "#1a1200",
+                    border: "1px solid #7c5c00",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    color: "#f59e0b",
+                    letterSpacing: "0.03em",
+                  }}>
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · 15 players (redraft)
+                  </div>
+                )}
                 {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
