@@ -156,5 +156,29 @@ Return valid JSON only:
     }
   }
 
+  // === ACTION: import — restore full backup to KV ===
+  if (action === "import") {
+    const { importData } = req.body;
+    if (!importData || typeof importData !== "object") {
+      return res.status(400).json({ error: "Missing or invalid importData" });
+    }
+
+    try {
+      const encoded = encodeURIComponent(JSON.stringify(importData));
+      const setRes = await fetch(`${kvUrl}/set/recent_news/${encoded}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${kvToken}` },
+      });
+
+      if (!setRes.ok) return res.status(500).json({ error: "KV write failed" });
+
+      return res.status(200).json({ success: true, news: importData });
+
+    } catch (err) {
+      console.error("import error:", err);
+      return res.status(500).json({ error: "Import failed" });
+    }
+  }
+
   return res.status(400).json({ error: "Invalid action" });
 }
