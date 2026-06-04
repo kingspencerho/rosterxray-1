@@ -5533,7 +5533,7 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
-                {analyzed.valid.length < 8 && (
+                {analyzed.valid.length < 10 && (
                   <div style={{
                     marginTop: "10px",
                     padding: "8px 12px",
@@ -6528,7 +6528,7 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
-                {analyzed.valid.length < 8 && (
+                {analyzed.valid.length < 10 && (
                   <div style={{
                     marginTop: "10px",
                     padding: "8px 12px",
