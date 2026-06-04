@@ -3407,6 +3407,72 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     }
   }
 
+  // === SITUATION-BASED PENALTIES (redraft) ===
+  // Mirrors best ball logic — objective situation flags only, no analyst opinion penalties.
+
+  // Verdict alignments — note only, no score penalty
+  const rdVerdictAlignments = [];
+  valid.forEach(p => {
+    const sit = SITUATIONS[normalize(p.name)];
+    if (sit?.verdict) rdVerdictAlignments.push({ name: p.name, verdict: sit.verdict, stale: false });
+  });
+  const rdActiveFades = rdVerdictAlignments.filter(v => v.verdict === "fade" || v.verdict === "HARD FADE");
+  const rdActiveTargets = rdVerdictAlignments.filter(v => v.verdict === "TARGET" || v.verdict.includes("TARGET"));
+  if (rdActiveFades.length >= 2) {
+    weaknesses.push(`${rdActiveFades.length} player(s) with situational concerns`);
+  }
+  if (rdActiveTargets.length >= 3) {
+    strengths.push(`${rdActiveTargets.length} players in strong situations`);
+    score += Math.min(rdActiveTargets.length * 0.3, 1.5);
+  }
+
+  // Confirmed committee RBs — objective penalty
+  const rdConfirmedCommitteeRBs = valid.filter(p => {
+    if (p.pos !== "RB") return false;
+    const sit = SITUATIONS[normalize(p.name)];
+    return sit?.riskFlags?.includes("confirmed_committee");
+  });
+  if (rdConfirmedCommitteeRBs.length >= 2) {
+    const names = rdConfirmedCommitteeRBs.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`${rdConfirmedCommitteeRBs.length} RB(s) in confirmed committees: ${names} — no defined lead role, ceiling capped`);
+    score -= Math.min(rdConfirmedCommitteeRBs.length * 0.25, 1.0);
+  } else if (rdConfirmedCommitteeRBs.length === 1) {
+    const name = rdConfirmedCommitteeRBs[0].name.split(" ").slice(-1)[0];
+    weaknesses.push(`${name} in confirmed committee — touches genuinely split, no workhorse path`);
+    score -= 0.2;
+  }
+
+  // Role ceiling flags — slot_only and rz_dependent
+  const rdRoleCeilingFlags = valid.map(p => {
+    const sit = SITUATIONS[normalize(p.name)];
+    return sit?.roleCeiling ? { ...p, roleCeiling: sit.roleCeiling } : null;
+  }).filter(Boolean);
+  const rdSlotOnly = rdRoleCeilingFlags.filter(p => p.roleCeiling === "slot_only");
+  const rdRzDependent = rdRoleCeilingFlags.filter(p => p.roleCeiling === "rz_dependent");
+  if (rdSlotOnly.length >= 1) {
+    const names = rdSlotOnly.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`Slot ceiling trap${rdSlotOnly.length > 1 ? "s" : ""}: ${names} — high target share, no downfield or red zone role`);
+    score -= rdSlotOnly.length * 0.35;
+  }
+  if (rdRzDependent.length >= 1) {
+    const names = rdRzDependent.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`TD-dependent player${rdRzDependent.length > 1 ? "s" : ""}: ${names} — near-zero floor without scoring`);
+    score -= rdRzDependent.length * 0.25;
+  }
+
+  // QB uncertainty — penalize any QB on roster with unconfirmed starting role
+  // In redraft this matters more than best ball — floor is critical
+  const rdUncertainQBs = valid.filter(p => {
+    if (p.pos !== "QB") return false;
+    const sit = SITUATIONS[normalize(p.name)];
+    return sit?.riskFlags?.includes("qb_uncertainty");
+  });
+  if (rdUncertainQBs.length >= 1) {
+    const names = rdUncertainQBs.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
+    weaknesses.push(`QB uncertainty: ${names} — starting role unconfirmed, floor at risk`);
+    score -= rdUncertainQBs.length * 0.4; // slightly heavier than BB — floor matters more in redraft
+  }
+
   // Convert to grade — normalized by league difficulty
   // Larger leagues and superflex formats have shallower player pools;
   // the same raw score means more in a 14-team SF than a 10-team standard
