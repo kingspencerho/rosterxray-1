@@ -3972,10 +3972,26 @@ Wan'Dale Robinson`;
         `${p.name}: ${p.delta > 0 ? `+${Math.round(p.delta)} value` : `${Math.round(p.delta)} reach`}`
       ).join("; ");
 
+      // === SITUATIONS CONTEXT — app data takes full priority over AI training knowledge ===
+      // For every roster player with a SITUATIONS entry, pass their trendNote directly.
+      // This prevents the AI from substituting stale training knowledge for data we already have.
+      const situationsContext = (result.valid || [])
+        .map(p => {
+          const key = normalize(p.name);
+          const sit = SITUATIONS[key];
+          return sit?.trendNote ? `${p.name}: ${sit.trendNote}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === SYSTEM PROMPT ===
       const systemPrompt = `You are RosterXRay — a sharp, opinionated fantasy football analyst. Your voice is direct, specific, and slightly savage. You write like a trusted analyst who has seen thousands of rosters.
 
-You have full knowledge of every NFL player's 2025 season performance, role, situation, ADP context, and 2026 outlook. Use that knowledge actively. Context and narrative matter as much as raw stats.
+CRITICAL DATA PRIORITY — follow this exactly, no exceptions:
+1. "Player situations" in the user prompt = verified app data. Treat as ground truth. Never contradict it.
+2. "Recent news" in the user prompt = breaking news override. Treat as ground truth. Never contradict it.
+3. Your training knowledge = fallback only, for players not covered by 1 or 2 above.
+If a player appears in situations or recent news, use ONLY that data for their role, team, and situation. Do not blend in your own knowledge about that player.
 
 FORMAT: Return valid JSON only. No markdown, no explanation outside the JSON.
 {
@@ -4042,7 +4058,8 @@ Playoff matchups: ${playoffLines || "none"}
 Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
-${newsContext ? `\nRecent news (override training data with these facts):\n${newsContext}` : ""}
+${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
+${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
         : `Roster: ${rosterLines}
 Stacks: ${stackLines || "none"}
@@ -4055,7 +4072,8 @@ Pivot candidates: ${pivotForPrompt || "none"}
 Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
-${newsContext ? `\nRecent news (override training data with these facts):\n${newsContext}` : ""}
+${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
+${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
 
       const response = await fetch("/api/analyze", {
