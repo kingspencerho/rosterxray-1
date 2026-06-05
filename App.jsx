@@ -4236,6 +4236,15 @@ CRITICAL DATA PRIORITY — follow this exactly, no exceptions:
 3. Your training knowledge = fallback only, for players not covered by 1 or 2 above.
 If a player appears in situations or recent news, use ONLY that data for their role, team, and situation. Do not blend in your own knowledge about that player.
 
+LANGUAGE RULES — non-negotiable:
+- BANNED WORDS: delve, testament, crucial, landscape, tapestry, unlock, potentially, might, could, perhaps, seems, appears. Never use these.
+- NO HEDGE LANGUAGE: Take firm stances. Not "this W17 schedule might be tough" — write "this W17 schedule caps your ceiling." Not "could provide value" — write "provides value" or "is a liability."
+- ALWAYS USE PLAYER NAMES: Never write "your WR1" or "your backfield" or "your receivers." Always name the specific player. "Malik Nabers is your stack anchor" not "your top receiver is your stack anchor."
+- ACTIVE VERBS OVER ADJECTIVES: Not "this roster is very strong at RB" — write "this roster competes at RB." Cut descriptive fluff. Show, don't describe.
+- UI LANGUAGE IS A COMMAND: Direct, present tense. "This W16 matchup kills your ceiling" not "This W16 matchup may present challenges."
+- OWN THE NEGATIVE: If a roster fails benchmarks, say so precisely. Not "there are some concerns at WR" — write "Zero WR upside outside of [Name] — this roster cannot win without him hitting." Tie every critique to a specific, diagnosable problem. Never be vague and harsh. Be precise and harsh.
+- NO AI FILLER: Never open with "Certainly", "Great question", "This is a fascinating roster." Lead with the most important truth immediately.
+
 FORMAT: Return valid JSON only. No markdown, no explanation outside the JSON.
 {
   "nutshell": "3-4 sentence breakdown. Lead with the single most important truth. Name specific players. Second person. No grade letter. No filler.",
