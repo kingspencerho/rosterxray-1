@@ -3791,11 +3791,20 @@ export default function RosterScorer() {
     }
   }, [showPickAnalysis, input]);
 
-  // Lock body scroll while hero is visible — unlock on collapse or post-analysis
+  // Lock scroll while hero is visible — fires immediately on mount to prevent race condition
+  // Locks both document.documentElement and body to cover all mobile browsers
   useEffect(() => {
     const shouldLock = !heroCollapsed && !analyzed;
-    document.body.style.overflow = shouldLock ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    const lock = () => {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    };
+    const unlock = () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+    if (shouldLock) { lock(); } else { unlock(); }
+    return () => { unlock(); };
   }, [heroCollapsed, analyzed]);
   const exportCardRef = React.useRef(null);
 
@@ -4515,6 +4524,7 @@ Analyze this best ball roster. Return JSON only.`;
       fontFamily: "'IBM Plex Mono', 'JetBrains Mono', monospace",
       padding: "24px 24px 0 24px",
       margin: 0,
+      overflow: (!heroCollapsed && !analyzed) ? "hidden" : "visible",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
