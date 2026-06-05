@@ -742,7 +742,7 @@ const SITUATIONS = {
   "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "deshaun watson": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Sanders — one of worst EPA/dropback marks last two seasons, lead only if Sanders misses camp", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
-  "jacoby brissett": { verdict: "fade", trend: "stable", trendNote: "ARI holdout situation heading into 2026 camp — contract dispute creates genuine Week 1 availability uncertainty", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "jacoby brissett": { verdict: "fade", trend: "falling", trendNote: "ARI active contract holdout — missing OTAs, Beck pushing for starting role; if holdout extends into camp Brissett loses the job; even if resolved he starts as the Week 1 QB but the leash is short", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   // === ROLE CEILING FLAGS ===
   // slot_only: high target share WRs locked into short/underneath routes, no red zone role, hard TD ceiling cap
   "khalil shakir": { verdict: "fade", trend: "stable", trendNote: "Elite slot stats but sub-6 aDOT, zero red zone role — PPR floor, not a ceiling asset", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
@@ -756,6 +756,7 @@ const SITUATIONS = {
   "malik washington": { verdict: "fade", trend: "falling", trendNote: "MIA slot with 5.2 aDOT in 2025 — now facing competition from three rookie WRs plus Atwell and Tolbert in Willis run-first offense; volume entirely schemed", situationFlags: [], riskFlags: ["creeping_committee"], roleCeiling: "slot_only" },
   "christian kirk": { verdict: "fade", trend: "falling", trendNote: "Age 30 WR3 in SF behind Evans and Pearsall — career slot profile, Shanahan run-heavy, Stribling 2nd-round pick adds further role pressure", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
+  "brandin cooks": { verdict: "fade", trend: "falling", trendNote: "Unsigned FA as of June 2026 — 24 catches/279 yards/0 TDs in 2025 split between NO and BUF; BUF added DJ Moore and drafted Skyler Bell, no clear landing spot; do not draft until team confirmed", situationFlags: [], riskFlags: ["injury_history"] },
   "blake corum": { verdict: "hold", trend: "rising", trendNote: "LAR volume committee back — earned 30-35% snap share in final 5 weeks of 2025 with real red zone equity (5 TDs in 4-game stretch); Kyren Williams is still RB1 but Corum has standalone boom-week upside when workload spikes; Garrett arrival helps clock-kill role", situationFlags: [], riskFlags: ["creeping_committee"] },
   "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
   "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
@@ -802,7 +803,7 @@ const SITUATIONS = {
   "malik davis": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Jaydon Blue — neither back has locked a role behind Javonte; pure handcuff/committee depth", situationFlags: [], riskFlags: ["creeping_committee"] },
   "jaydon blue": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Malik Davis — younger option with pass-catching upside, but no defined role until one separates in camp", situationFlags: [], riskFlags: ["creeping_committee"] },
   "eli heidenreich": { verdict: "fade", trend: "stable", trendNote: "PIT third RB behind Warren and Dowdle — drafted for passing situations and gadget work, no standalone value without injuries ahead of him", situationFlags: [], riskFlags: ["confirmed_committee"] },
-  "carson beck": { verdict: "fade", trend: "stable", trendNote: "ARI backup QB behind Brissett — contingent value only if holdout persists deep into camp; monitor Brissett contract situation before drafting", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "carson beck": { verdict: "hold", trend: "rising", trendNote: "ARI 2026 3rd-round pick with real starting path — Brissett in contract holdout heading into camp, Beck has high draft capital and is actively competing for Week 1 starts, not just an injury contingency; ARI WR room (Harrison, McBride) becomes legitimate if Beck wins the job", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
 };
 
 // ============ CHAMPIONSHIP WINDOW SCORE ============
