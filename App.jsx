@@ -804,6 +804,7 @@ const SITUATIONS = {
   "jaydon blue": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Malik Davis — younger option with pass-catching upside, but no defined role until one separates in camp", situationFlags: [], riskFlags: ["creeping_committee"] },
   "eli heidenreich": { verdict: "fade", trend: "stable", trendNote: "PIT third RB behind Warren and Dowdle — drafted for passing situations and gadget work, no standalone value without injuries ahead of him", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "carson beck": { verdict: "hold", trend: "rising", trendNote: "ARI 2026 3rd-round pick with real starting path — Brissett in contract holdout heading into camp, Beck has high draft capital and is actively competing for Week 1 starts, not just an injury contingency; ARI WR room (Harrison, McBride) becomes legitimate if Beck wins the job", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
+  "darnell washington": { verdict: "hold", trend: "rising", trendNote: "PIT TE2 locked in — 4yr/$42M extension signals org commitment; Jonnu Smith and Connor Heyward gone as free agents, leaving only Freiermuth as competition for reps; 31/364/1 line in 2025 on 43 targets, primarily a run-blocking TE with growing pass volume in McCarthy offense", situationFlags: ["scheme_fit"], riskFlags: [] },
 };
 
 // ============ CHAMPIONSHIP WINDOW SCORE ============
@@ -1201,7 +1202,7 @@ const ADP_YAHOO = {
   "carson beck": { adp: 270.0, pos: "QB", team: "ARI" },
   "jahan dotson": { adp: 271.0, pos: "WR", team: "ATL" },
   "lequint allen": { adp: 272.0, pos: "RB", team: "JAX" },
-  "darnell washington": { adp: 273.0, pos: "TE", team: "PIT" },
+  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "chris brooks": { adp: 274.0, pos: "RB", team: "GB" },
   "ty johnson": { adp: 275.0, pos: "RB", team: "BUF" },
   "oscar delp": { adp: 276.0, pos: "TE", team: "NO" },
