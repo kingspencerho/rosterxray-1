@@ -608,7 +608,7 @@ const TEAM_CHALK = {
 const RECENT_NEWS = {
   "travis etienne": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
   "travis etienne jr": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
-  "alvin kamara": "Kamara lost his starting job in NO — Etienne signed a 2yr/$14M deal and is now RB1.",
+  "alvin kamara": "Kamara lost his starting job in NO — Travis Etienne signed a 2yr/$14M deal and is the RB1. Kamara is a handcuff at best.",
   "wandale robinson": "Robinson moved to TEN where Carnell Tate (2026 draft pick) is the clear WR1, limiting Robinson's ceiling.",
   "carnell tate": "Tate was drafted by TEN in 2026 and is projected as their WR1, ahead of Robinson on the depth chart.",
   "aj brown": "AJ Brown was traded to NE (2028 1st + 2027 5th), leaving PHI — no longer on PHI.",
@@ -651,8 +651,7 @@ const VERDICTS = {
   "jaylen warren": { verdict: "TARGET", date: "2026-06-03", reason: "RB17 in 2025, PPR-friendly, McCarthy HC brings run-heavy identity to PIT", confidence: "HIGH" },
   "eli stowers": { verdict: "TARGET (2027)", date: "2026-05-19", reason: "Buy now at ADP 195, TE1 job 2027 when Goedert gone", confidence: "MEDIUM-HIGH" },
   // 2026 role-concern fades — filtered from pivot recommendations
-  "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
-  "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
+  "alvin kamara": { verdict: "HARD FADE", date: "2026-05-26", reason: "Travis Etienne signed as lead back, Kamara entering twilight", confidence: "HIGH" },
   "david montgomery": { verdict: "fade", date: "2026-05-26", reason: "HOU added competition, age concern at 28", confidence: "MEDIUM" },
   "d'andre swift": { verdict: "fade", date: "2026-05-26", reason: "Committee back in CHI, no clear bell-cow role", confidence: "MEDIUM" },
   "breece hall": { verdict: "fade", date: "2026-05-26", reason: "Contract narrative, NYJ rebuild, role uncertainty", confidence: "MEDIUM" },
