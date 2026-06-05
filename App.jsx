@@ -3731,6 +3731,7 @@ export default function RosterScorer() {
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
+  const [heroCollapsed, setHeroCollapsed] = useState(false);
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
   const [dataMode, setDataMode] = useState("actual");
@@ -4243,7 +4244,7 @@ LANGUAGE RULES — non-negotiable:
 - ACTIVE VERBS OVER ADJECTIVES: Not "this roster is very strong at RB" — write "this roster competes at RB." Cut descriptive fluff. Show, don't describe.
 - UI LANGUAGE IS A COMMAND: Direct, present tense. "This W16 matchup kills your ceiling" not "This W16 matchup may present challenges."
 - OWN THE NEGATIVE: If a roster fails benchmarks, say so precisely. Not "there are some concerns at WR" — write "Zero WR upside outside of [Name] — this roster cannot win without him hitting." Tie every critique to a specific, diagnosable problem. Never be vague and harsh. Be precise and harsh.
-- NO AI FILLER: Never open with "Certainly", "Great question", "This is a fascinating roster." Lead with the most important truth immediately.
+- NO GENDERED PRONOUNS: Never use he/she/him/her/his/hers for any player. Always use the player's name or "they/them." "Concepcion runs a clean route tree" not "she runs a clean route tree."
 
 FORMAT: Return valid JSON only. No markdown, no explanation outside the JSON.
 {
@@ -4602,7 +4603,214 @@ Analyze this best ball roster. Return JSON only.`;
           45%      { opacity: 0.15; }
           55%      { opacity: 0.15; }
         }
+
+        /* ── Hero section ── */
+        .hero-section {
+          overflow: hidden;
+          max-height: 700px;
+          opacity: 1;
+          transition: max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+                      opacity 0.4s ease,
+                      margin 0.45s ease,
+                      padding 0.45s ease;
+        }
+        .hero-section.collapsed {
+          max-height: 0;
+          opacity: 0;
+          margin-bottom: 0 !important;
+        }
+
+        .hero-see-flicker {
+          animation: dyingLight 6s ease-out forwards, hum 3.8s ease-in-out 6s infinite;
+        }
+
+        .hero-cta-btn {
+          transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+        .hero-cta-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 28px rgba(74, 222, 128, 0.28);
+          filter: brightness(1.08);
+        }
+        .hero-cta-btn:active {
+          transform: translateY(0px);
+          box-shadow: 0 2px 10px rgba(74, 222, 128, 0.18);
+        }
+
+        .hero-pills {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          gap: 8px;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 28px;
+        }
+        .hero-pill {
+          transition: border-color 0.2s ease, background 0.2s ease;
+          white-space: nowrap;
+          cursor: default;
+        }
+        .hero-pill:hover {
+          border-color: #4ade8066;
+          background: #0d2a18;
+        }
+
+        .hero-scanline {
+          pointer-events: none;
+          position: absolute;
+          inset: 0;
+          background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(0,0,0,0.06) 3px,
+            rgba(0,0,0,0.06) 4px
+          );
+          border-radius: 8px;
+        }
+
+        @media (max-width: 640px) {
+          .hero-headline { font-size: 54px !important; }
+          .hero-see { font-size: 54px !important; }
+          .hero-inner-pad { padding: 32px 18px 28px !important; }
+          .hero-headline-wrap { margin-bottom: 20px !important; }
+          .hero-pills {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+            margin-bottom: 22px;
+          }
+          .hero-pill { white-space: normal; text-align: left; }
+          .hero-cta-btn { width: 100% !important; }
+        }
       `}</style>
+
+      {/* ── Hero Section ── */}
+      <div
+        className={`hero-section${heroCollapsed || analyzed ? " collapsed" : ""}`}
+        style={{ maxWidth: "1100px", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", position: "relative" }}
+      >
+        <div style={{
+          position: "relative",
+          background: "#0d0d0d",
+          border: "1px solid #1e1e1e",
+          borderRadius: "8px",
+          padding: "44px 36px 36px",
+          textAlign: "center",
+          overflow: "hidden",
+        }} className="hero-inner-pad">
+          {/* Scanline texture */}
+          <div className="hero-scanline" />
+
+          {/* Ambient green glow — top center */}
+          <div style={{
+            position: "absolute",
+            top: "-60px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "420px",
+            height: "180px",
+            background: "radial-gradient(ellipse at center, rgba(74,222,128,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Headline */}
+          <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
+            <span
+              className="hero-headline"
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: "76px",
+                letterSpacing: "0.04em",
+                color: "#fafafa",
+                display: "block",
+                lineHeight: 1,
+              }}
+            >
+              DON'T JUST DRAFT.
+            </span>
+            <span
+              className="hero-see hero-see-flicker"
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: "76px",
+                letterSpacing: "0.04em",
+                background: "linear-gradient(90deg, #4ade80 0%, #a8ffcc 40%, #ffffff 60%, #4ade80 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                backgroundSize: "200% auto",
+                display: "block",
+                lineHeight: 1,
+              }}
+            >
+              SEE.
+            </span>
+          </div>
+
+          {/* Proof points */}
+          <div className="hero-pills" style={{ position: "relative", zIndex: 1 }}>
+            {[
+              { label: "No login. No league sync.", rest: " Just a screenshot.", border: "#60c8f5", check: "#60c8f5" },
+              { label: "Expert-level breakdown.", rest: " No generic output.", border: "#4ade80", check: "#4ade80" },
+              { label: "Maps your W15–17 playoff stacks.", rest: " Instantly.", border: "#a855f7", check: "#a855f7" },
+            ].map(({ label, rest, border, check }, i) => (
+              <div
+                key={i}
+                className="hero-pill"
+                style={{
+                  border: `1px solid ${border}55`,
+                  borderRadius: "4px",
+                  padding: "7px 12px",
+                  fontSize: "11px",
+                  letterSpacing: "0.03em",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  background: "#111",
+                }}
+              >
+                <span style={{ color: check, marginRight: "6px" }}>✓</span>
+                <span style={{ color: check, fontWeight: 700 }}>{label}</span>
+                <span style={{ color: "#666" }}>{rest}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <button
+              className="hero-cta-btn"
+              onClick={() => {
+                setHeroCollapsed(true);
+                setTimeout(() => {
+                  document.getElementById("roster-app-start")?.scrollIntoView({ behavior: "smooth" });
+                }, 300);
+              }}
+              style={{
+                background: "#4ade80",
+                color: "#0a0a0a",
+                border: "none",
+                borderRadius: "4px",
+                padding: "16px 40px",
+                fontSize: "14px",
+                fontWeight: 700,
+                fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                textTransform: "uppercase",
+              }}
+            >
+              Grade My Roster →
+            </button>
+            <div style={{ marginTop: "14px", fontSize: "10px", color: "#444", letterSpacing: "0.08em", fontFamily: "'IBM Plex Mono', monospace" }}>
+              FREE · NO ACCOUNT · BEST BALL · REDRAFT
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll anchor for CTA button */}
+      <div id="roster-app-start" />
 
       {/* Header */}
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
@@ -5616,7 +5824,7 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
 
                 {/* Grading explainer toggle */}
-                <div style={{ marginTop: "12px" }}>
+                <div style={{ marginTop: "12px", marginBottom: "16px" }}>
                   <button
                     onClick={() => setGradeExplainerOpen(o => !o)}
                     style={{
@@ -5659,16 +5867,12 @@ Analyze this best ball roster. Return JSON only.`;
                           <span style={{ fontSize: "10px", color: "#666", lineHeight: 1.4 }}>{f.note}</span>
                         </div>
                       ))}
+                      <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #1a1a1a", fontSize: "10px", color: "#444", lineHeight: 1.5, fontStyle: "italic" }}>
+                        Grades are based on available ADP and situation data. AI analysis can miss recent news — always verify before your draft.
+                      </div>
                     </div>
                   )}
-                </div>
-
-                <div style={{
-                  marginTop: "14px",
-                  paddingTop: "12px",
-                  borderTop: "1px solid #1a1a1a",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
@@ -6638,7 +6842,7 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
 
                 {/* Grading explainer toggle — redraft */}
-                <div style={{ marginTop: "12px" }}>
+                <div style={{ marginTop: "12px", marginBottom: "16px" }}>
                   <button
                     onClick={() => setGradeExplainerOpen(o => !o)}
                     style={{
@@ -6681,15 +6885,12 @@ Analyze this best ball roster. Return JSON only.`;
                           <span style={{ fontSize: "10px", color: "#666", lineHeight: 1.4 }}>{f.note}</span>
                         </div>
                       ))}
+                      <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #1a1a1a", fontSize: "10px", color: "#444", lineHeight: 1.5, fontStyle: "italic" }}>
+                        Grades are based on available ADP and situation data. AI analysis can miss recent news — always verify before your draft.
+                      </div>
                     </div>
                   )}
-                </div>
-                <div style={{
-                  marginTop: "14px",
-                  paddingTop: "12px",
-                  borderTop: "1px solid #2a2040",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
