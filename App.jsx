@@ -3732,6 +3732,7 @@ export default function RosterScorer() {
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
   const [heroCollapsed, setHeroCollapsed] = useState(false);
+  const [appReady, setAppReady] = useState(false);
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
   const [dataMode, setDataMode] = useState("actual");
@@ -3789,6 +3790,13 @@ export default function RosterScorer() {
       setAnalyzed(analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected"));
     }
   }, [showPickAnalysis, input]);
+
+  // Lock body scroll while hero is visible — unlock on collapse or post-analysis
+  useEffect(() => {
+    const shouldLock = !heroCollapsed && !analyzed;
+    document.body.style.overflow = shouldLock ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [heroCollapsed, analyzed]);
   const exportCardRef = React.useRef(null);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
@@ -4671,8 +4679,7 @@ Analyze this best ball roster. Return JSON only.`;
         }
 
         @media (max-width: 640px) {
-          .hero-headline { font-size: 54px !important; }
-          .hero-see { font-size: 54px !important; }
+          .hero-headline-wrap div { font-size: 42px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 32px 18px 28px !important; }
           .hero-headline-wrap { margin-bottom: 20px !important; }
           .hero-pills {
@@ -4689,7 +4696,7 @@ Analyze this best ball roster. Return JSON only.`;
       {/* ── Hero Section ── */}
       <div
         className={`hero-section${heroCollapsed || analyzed ? " collapsed" : ""}`}
-        style={{ maxWidth: "1100px", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", position: "relative" }}
+        style={{ maxWidth: "1100px", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", position: "relative", minHeight: heroCollapsed || analyzed ? "0" : "100vh", display: "flex", alignItems: "center" }}
       >
         <div style={{
           position: "relative",
@@ -4717,36 +4724,21 @@ Analyze this best ball roster. Return JSON only.`;
 
           {/* Headline */}
           <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
-            <span
-              className="hero-headline"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: "76px",
-                letterSpacing: "0.04em",
-                color: "#fafafa",
-                display: "block",
-                lineHeight: 1,
-              }}
-            >
-              DON'T JUST DRAFT.
-            </span>
-            <span
-              className="hero-see hero-see-flicker"
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: "76px",
-                letterSpacing: "0.04em",
-                background: "linear-gradient(90deg, #4ade80 0%, #a8ffcc 40%, #ffffff 60%, #4ade80 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                backgroundSize: "200% auto",
-                display: "block",
-                lineHeight: 1,
-              }}
-            >
-              SEE.
-            </span>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap" }}>
+              <span
+                className="hero-see-flicker"
+                style={{
+                  background: "linear-gradient(90deg, #4ade80 0%, #a8ffcc 40%, #ffffff 60%, #4ade80 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  backgroundSize: "200% auto",
+                }}
+              >
+                DIAGNOSE
+              </span>
+              <span style={{ color: "#fafafa" }}> YOUR DRAFT.</span>
+            </div>
           </div>
 
           {/* Proof points */}
@@ -4783,8 +4775,9 @@ Analyze this best ball roster. Return JSON only.`;
               onClick={() => {
                 setHeroCollapsed(true);
                 setTimeout(() => {
-                  document.getElementById("roster-app-start")?.scrollIntoView({ behavior: "smooth" });
-                }, 300);
+                  setAppReady(true);
+                  window.scrollTo({ top: 0, behavior: "instant" });
+                }, 560);
               }}
               style={{
                 background: "#4ade80",
@@ -4830,7 +4823,7 @@ Analyze this best ball roster. Return JSON only.`;
             }}>
               ROSTER{" "}
               <span
-                className="xray-gradient-flicker"
+                className={appReady ? "xray-gradient-flicker" : ""}
                 style={{
                   background: "linear-gradient(90deg, #60c8f5 0%, #a8e8ff 25%, #ffffff 50%, #a8e8ff 75%, #60c8f5 100%)",
                   WebkitBackgroundClip: "text",
