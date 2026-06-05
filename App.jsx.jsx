@@ -5700,19 +5700,46 @@ Analyze this best ball roster. Return JSON only.`;
                       ↩ New Analysis
                     </button>
                   </div>
-                  {exportedDataUrl && (
+                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "You think you crushed the draft. The math says otherwise.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
                         src={exportedDataUrl}
                         alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "8px" }}
+                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
                       />
-                      <div style={{ fontSize: "11px", color: "#555", lineHeight: 1.6 }}>
-                        📱 <span style={{ color: "#888" }}>iOS:</span> Long-press the image → <strong style={{ color: "#aaa" }}>Add to Photos</strong> or <strong style={{ color: "#aaa" }}>Save to Files</strong><br />
-                        💻 <span style={{ color: "#888" }}>Desktop:</span> Right-click → <strong style={{ color: "#aaa" }}>Save Image As</strong>
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        {navigator.share && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const blob = await (await fetch(exportedDataUrl)).blob();
+                                const file = new File([blob], "roster-xray.png", { type: "image/png" });
+                                await navigator.share({ title: `My Roster X-Ray — ${analyzed.grade}`, text: `I graded my best ball roster on Roster X-Ray. Check yours: rosterxray.com`, files: [file] });
+                              } catch(e) { /* dismissed */ }
+                            }}
+                            style={{ flex: 1, minWidth: "120px", background: "#4ade8022", border: "1px solid #4ade8055", borderRadius: "4px", padding: "8px 12px", color: "#4ade80", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                          >
+                            📤 Share
+                          </button>
+                        )}
+                        <a
+                          href={exportedDataUrl}
+                          download="roster-xray.png"
+                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid #333", borderRadius: "4px", padding: "8px 12px", color: "#888", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          ⬇ Save Image
+                        </a>
+                        <a
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — best ball roster graded, stacks mapped, matchups checked. rosterxray.com`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          𝕏 Post to X
+                        </a>
                       </div>
                     </div>
-                  )}
+                  );})()}
                 </div>
               </div>
             </div>
@@ -6694,19 +6721,46 @@ Analyze this best ball roster. Return JSON only.`;
                       ↩ New Analysis
                     </button>
                   </div>
-                  {exportedDataUrl && (
+                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "You think you crushed the draft. The math says otherwise.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
                         src={exportedDataUrl}
                         alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "8px" }}
+                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
                       />
-                      <div style={{ fontSize: "11px", color: "#555", lineHeight: 1.6 }}>
-                        📱 <span style={{ color: "#888" }}>iOS:</span> Long-press the image → <strong style={{ color: "#aaa" }}>Add to Photos</strong> or <strong style={{ color: "#aaa" }}>Save to Files</strong><br />
-                        💻 <span style={{ color: "#888" }}>Desktop:</span> Right-click → <strong style={{ color: "#aaa" }}>Save Image As</strong>
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        {navigator.share && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const blob = await (await fetch(exportedDataUrl)).blob();
+                                const file = new File([blob], "roster-xray.png", { type: "image/png" });
+                                await navigator.share({ title: `My Roster X-Ray — ${analyzed.grade}`, text: `I graded my redraft roster on Roster X-Ray. Check yours: rosterxray.com`, files: [file] });
+                              } catch(e) { /* dismissed */ }
+                            }}
+                            style={{ flex: 1, minWidth: "120px", background: "#c084fc22", border: "1px solid #c084fc55", borderRadius: "4px", padding: "8px 12px", color: "#c084fc", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                          >
+                            📤 Share
+                          </button>
+                        )}
+                        <a
+                          href={exportedDataUrl}
+                          download="roster-xray.png"
+                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid #333", borderRadius: "4px", padding: "8px 12px", color: "#888", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          ⬇ Save Image
+                        </a>
+                        <a
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — redraft roster graded, matchups checked, weaknesses flagged. rosterxray.com`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          𝕏 Post to X
+                        </a>
                       </div>
                     </div>
-                  )}
+                  );})()}
                 </div>
               </div>
             </div>
