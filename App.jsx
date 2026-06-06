@@ -4677,26 +4677,27 @@ Analyze this best ball roster. Return JSON only.`;
 
         /* Scan wipe — DIAGNOSE revealed by a sweeping highlight, like an X-ray passing over */
         @keyframes scanWipe {
-          0%   { background-position: -100% center; }
-          60%  { background-position: 100% center; }
-          100% { background-position: 100% center; }
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
         }
         .hero-diagnose-scan {
+          display: inline-block;
           background: linear-gradient(
             90deg,
             #4ade80 0%,
-            #4ade80 30%,
-            #a8ffcc 45%,
-            #ffffff 50%,
-            #a8ffcc 55%,
-            #4ade80 70%,
+            #4ade80 20%,
+            #ffffff 40%,
+            #a8ffcc 50%,
+            #ffffff 60%,
+            #4ade80 80%,
             #4ade80 100%
           );
-          background-size: 250% auto;
+          background-size: 400% 100%;
+          background-position: -200% center;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          animation: scanWipe 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: scanWipe 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards, hum 3.8s ease-in-out 2.6s infinite;
         }
 
         .hero-cta-btn {
@@ -4792,18 +4793,7 @@ Analyze this best ball roster. Return JSON only.`;
           {/* Headline */}
           <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap" }}>
-              <span
-                className="hero-diagnose-scan"
-                style={{
-                  background: "linear-gradient(90deg, #4ade80 0%, #a8ffcc 40%, #ffffff 60%, #4ade80 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  backgroundSize: "200% auto",
-                }}
-              >
-                DIAGNOSE
-              </span>
+              <span className="hero-diagnose-scan">DIAGNOSE</span>
               <span style={{ color: "#fafafa" }}> YOUR DRAFT.</span>
             </div>
           </div>
