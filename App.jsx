@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import React, { useState, useMemo } from 'react';
 
 // ============ DATA ============
@@ -4559,6 +4560,7 @@ Analyze this best ball roster. Return JSON only.`;
       margin: 0,
       overflow: (!heroCollapsed && !analyzed) ? "hidden" : "visible",
     }}>
+      <Analytics />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
 
