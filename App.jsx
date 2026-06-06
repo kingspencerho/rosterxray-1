@@ -4765,17 +4765,18 @@ Analyze this best ball roster. Return JSON only.`;
 
         /* Landscape phone — wide but short, pills overflow horizontally */
         @media (max-height: 500px) and (orientation: landscape) {
-          .hero-headline-wrap div { font-size: 38px !important; white-space: nowrap !important; }
+          .hero-headline-wrap div { font-size: 52px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
-          .hero-headline-wrap { margin-bottom: 14px !important; }
+          .hero-headline-wrap { margin-bottom: 12px !important; }
           .hero-pills {
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
             gap: 5px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
+            max-width: 100%;
           }
-          .hero-pill { white-space: normal; text-align: left; font-size: 10px !important; padding: 5px 10px !important; }
-          .hero-cta-btn { padding: 12px 24px !important; }
+          .hero-pill { white-space: nowrap; text-align: center; font-size: 9px !important; padding: 4px 8px !important; }
+          .hero-cta-btn { padding: 10px 24px !important; font-size: 18px !important; }
         }
       `}</style>
 
