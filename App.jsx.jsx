@@ -3830,11 +3830,15 @@ export default function RosterScorer() {
     const shouldLock = !heroCollapsed && !analyzed;
     const lock = () => {
       document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.height = "100%";
       document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
     };
     const unlock = () => {
       document.documentElement.style.overflow = "";
+      document.documentElement.style.height = "";
       document.body.style.overflow = "";
+      document.body.style.height = "";
     };
     if (shouldLock) { lock(); } else { unlock(); }
     return () => { unlock(); };
