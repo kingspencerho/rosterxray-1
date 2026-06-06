@@ -4721,6 +4721,9 @@ Analyze this best ball roster. Return JSON only.`;
           justify-content: center;
           align-items: center;
           margin-bottom: 28px;
+          max-width: 680px;
+          margin-left: auto;
+          margin-right: auto;
         }
         .hero-pill {
           transition: border-color 0.2s ease, background 0.2s ease;
@@ -4759,12 +4762,27 @@ Analyze this best ball roster. Return JSON only.`;
           .hero-pill { white-space: normal; text-align: left; }
           .hero-cta-btn { width: 100% !important; }
         }
+
+        /* Landscape phone — wide but short, pills overflow horizontally */
+        @media (max-height: 500px) and (orientation: landscape) {
+          .hero-headline-wrap div { font-size: 38px !important; white-space: nowrap !important; }
+          .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
+          .hero-headline-wrap { margin-bottom: 14px !important; }
+          .hero-pills {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            margin-bottom: 14px;
+          }
+          .hero-pill { white-space: normal; text-align: left; font-size: 10px !important; padding: 5px 10px !important; }
+          .hero-cta-btn { padding: 12px 24px !important; }
+        }
       `}</style>
 
       {/* ── Hero Section ── */}
       <div
         className={`hero-section${heroCollapsed || analyzed ? " collapsed" : ""}`}
-        style={{ maxWidth: "1100px", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", position: "relative", minHeight: heroCollapsed || analyzed ? "0" : "100vh", display: "flex", alignItems: "center" }}
+        style={{ maxWidth: "1100px", width: "100%", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", marginTop: heroCollapsed || analyzed ? "0" : "-24px", position: "relative", minHeight: heroCollapsed || analyzed ? "0" : "calc(100dvh - 0px)", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         <div style={{
           position: "relative",
@@ -4774,6 +4792,8 @@ Analyze this best ball roster. Return JSON only.`;
           padding: "44px 36px 36px",
           textAlign: "center",
           overflow: "hidden",
+          width: "100%",
+          maxWidth: "760px",
         }} className="hero-inner-pad">
           {/* Scanline texture */}
           <div className="hero-scanline" />
@@ -4826,7 +4846,7 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
 
           {/* CTA */}
-          <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
             <button
               className="hero-cta-btn"
               onClick={() => {
@@ -4848,6 +4868,8 @@ Analyze this best ball roster. Return JSON only.`;
                 letterSpacing: "0.1em",
                 cursor: "pointer",
                 textTransform: "uppercase",
+                width: "100%",
+                maxWidth: "400px",
               }}
             >
               Grade My Roster →
