@@ -75,7 +75,7 @@ const ADP_DATA = {
   "carnell tate": { adp: 60.7, pos: "WR", team: "TEN" },
   "jordyn tyson": { adp: 62.5, pos: "WR", team: "NO" },
   "joe burrow": { adp: 63.5, pos: "QB", team: "CIN" },
-  "brian thomas": { adp: 64.8, pos: "WR", team: "JAX" },
+  "brian thomas": { adp: 63.0, pos: "WR", team: "JAX" },
   "jayden daniels": { adp: 65.6, pos: "QB", team: "WAS" },
   "tyler warren": { adp: 66.7, pos: "TE", team: "IND" },
   "marvin harrison": { adp: 67.4, pos: "WR", team: "ARI" },
@@ -197,7 +197,7 @@ const ADP_DATA = {
   "germie bernard": { adp: 182.5, pos: "WR", team: "PIT" },
   "emmett johnson": { adp: 183.0, pos: "RB", team: "KC" },
   "ryan flournoy": { adp: 183.1, pos: "WR", team: "DAL" },
-  "mike washington": { adp: 184.2, pos: "RB", team: "LV" },
+  "mike washington": { adp: 192.0, pos: "RB", team: "LV" },
   "cade otton": { adp: 185.4, pos: "TE", team: "TB" },
   "tre harris": { adp: 185.4, pos: "WR", team: "LAC" },
   "aaron rodgers": { adp: 187.5, pos: "QB", team: "PIT" },
@@ -390,7 +390,7 @@ const ADP_SUPERFLEX = {
   "kyle monangai": { adp: 107, pos: "RB", team: "CHI" },
   "aaron rodgers": { adp: 108, pos: "QB", team: "PIT" },
   "dalton kincaid": { adp: 109, pos: "TE", team: "BUF" },
-  "brian thomas": { adp: 110, pos: "WR", team: "JAX" },
+  "brian thomas": { adp: 63.0, pos: "WR", team: "JAX" },
   "btj": { adp: 110, pos: "WR", team: "JAX" },
   "kenneth gainwell": { adp: 111, pos: "RB", team: "TB" },
   "michael wilson": { adp: 112, pos: "WR", team: "ARI" },
@@ -470,7 +470,7 @@ const ADP_SUPERFLEX = {
   "denzel boston": { adp: 183, pos: "WR", team: "CLE" },
   "deebo samuel": { adp: 184, pos: "WR", team: "WAS" },
   "terrance ferguson": { adp: 185, pos: "TE", team: "LAR" },
-  "mike washington": { adp: 186, pos: "RB", team: "LV" },
+  "mike washington": { adp: 192.0, pos: "RB", team: "LV" },
   "greg dulcich": { adp: 187, pos: "TE", team: "MIA" },
   "tre tucker": { adp: 188, pos: "WR", team: "LV" },
   "braelon allen": { adp: 189, pos: "RB", team: "NYJ" },
@@ -1037,7 +1037,7 @@ const ADP_YAHOO = {
   "trevor lawrence": { adp: 87.0, pos: "QB", team: "JAX" },
   "kyle pitts": { adp: 88.0, pos: "TE", team: "ATL" },
   "dak prescott": { adp: 89.0, pos: "QB", team: "DAL" },
-  "brian thomas jr": { adp: 90.0, pos: "WR", team: "JAX" },
+  "brian thomas jr": { adp: 63.0, pos: "WR", team: "JAX" },
   "btj": { adp: 90.0, pos: "WR", team: "JAX" },
   "ricky pearsall": { adp: 91.0, pos: "WR", team: "SF" },
   "kyle monangai": { adp: 92.0, pos: "RB", team: "CHI" },
@@ -1101,7 +1101,7 @@ const ADP_YAHOO = {
   "deebo samuel": { adp: 150.0, pos: "WR", team: "-" },
   "emanuel wilson": { adp: 151.0, pos: "RB", team: "SEA" },
   "cj stroud": { adp: 152.0, pos: "QB", team: "HOU" },
-  "mike washington jr": { adp: 153.0, pos: "RB", team: "LV" },
+  "mike washington jr": { adp: 192.0, pos: "RB", team: "LV" },
   "alvin kamara": { adp: 154.0, pos: "RB", team: "NO" },
   "james conner": { adp: 155.0, pos: "RB", team: "ARI" },
   "omar cooper jr": { adp: 156.0, pos: "WR", team: "NYJ" },
@@ -1217,6 +1217,34 @@ const ADP_YAHOO = {
   "demond claiborne": { adp: 289.0, pos: "RB", team: "MIN" },
   "theo johnson": { adp: 299.0, pos: "TE", team: "NYG" },
   "adam randall": { adp: 300.0, pos: "RB", team: "BAL" },
+  // Deep tail dart throws — recognition coverage only
+  "odell beckham": { adp: 242.0, pos: "WR", team: "NYG" },
+  "odell beckham jr": { adp: 242.0, pos: "WR", team: "NYG" },
+  "jatavion sanders": { adp: 251.0, pos: "TE", team: "CAR" },
+  "eli raridon": { adp: 258.0, pos: "TE", team: "NE" },
+  "elijah arroyo": { adp: 261.0, pos: "TE", team: "SEA" },
+  "bryce lance": { adp: 267.0, pos: "WR", team: "NO" },
+  "jalen tolbert": { adp: 268.0, pos: "WR", team: "MIA" },
+  "savion williams": { adp: 271.0, pos: "WR", team: "GB" },
+  "xavier legette": { adp: 274.0, pos: "WR", team: "CAR" },
+  "kyle williams": { adp: 279.0, pos: "WR", team: "NE" },
+  "devontez walker": { adp: 280.0, pos: "WR", team: "BAL" },
+  "mack hollins": { adp: 281.0, pos: "WR", team: "NE" },
+  "justin joly": { adp: 282.0, pos: "TE", team: "DEN" },
+  "jalen royals": { adp: 284.0, pos: "WR", team: "KC" },
+  "devin neal": { adp: 286.0, pos: "RB", team: "NO" },
+  "kavontae turpin": { adp: 288.0, pos: "WR", team: "DAL" },
+  "max klare": { adp: 289.0, pos: "TE", team: "LAR" },
+  "tahj brooks": { adp: 290.0, pos: "RB", team: "CIN" },
+  "jj mccarthy": { adp: 291.0, pos: "QB", team: "MIN" },
+  "j.j. mccarthy": { adp: 291.0, pos: "QB", team: "MIN" },
+  "jordan whittington": { adp: 292.0, pos: "WR", team: "LAR" },
+  "olamide zaccheaus": { adp: 293.0, pos: "WR", team: "ATL" },
+  "demario douglas": { adp: 295.0, pos: "WR", team: "NE" },
+  "calvin austin": { adp: 296.0, pos: "WR", team: "NYG" },
+  "tez johnson": { adp: 297.0, pos: "WR", team: "TB" },
+  "emari demercado": { adp: 298.0, pos: "RB", team: "KC" },
+  "nick westbrook-ikhine": { adp: 299.0, pos: "WR", team: "IND" },
 };
 
 const FULL_SCHEDULE = {
@@ -1978,6 +2006,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
   });
 
+  // Detect roster size — 20-player rosters (e.g. Big Board) get scaled benchmarks
+  const rosterSize = valid.length;
+  const is20Round = rosterSize >= 19; // 19+ matched = 20-round draft
+
   // ADP deltas — calibrated thresholds per format
   // Underdog standard: large sample, tight distribution → flag at ±15
   // 4for4 SF: smaller sample, wider distribution → flag at ±25 (and value cap at +35)
@@ -2000,16 +2032,16 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // Superflex 20-round: needs more QBs, can spread RB/WR wider
   const benchmarks = format === "superflex"
     ? {
-        QB: { min: 3, max: 5, msg: `${posCounts.QB} QB (SF target 3-5)` },
-        RB: { min: 4, max: 8, msg: `${posCounts.RB} RB (SF target 4-8)` },
-        WR: { min: 5, max: 10, msg: `${posCounts.WR} WR (SF target 5-10)` },
+        QB: { min: 3, max: 6, msg: `${posCounts.QB} QB (SF target 3-6)` },
+        RB: { min: 4, max: 9, msg: `${posCounts.RB} RB (SF target 4-9)` },
+        WR: { min: 5, max: 11, msg: `${posCounts.WR} WR (SF target 5-11)` },
         TE: { min: 1, max: 3, msg: `${posCounts.TE} TE (SF target 1-3)` },
       }
     : {
-        WR: { min: 5, max: 8, msg: `${posCounts.WR} WR (target 5-8)` },
-        RB: { min: 4, max: 7, msg: `${posCounts.RB} RB (target 4-7)` },
-        TE: { min: 1, max: 3, msg: `${posCounts.TE} TE (target 1-3)` },
-        QB: { min: 2, max: 3, msg: `${posCounts.QB} QB (target 2-3)` },
+        WR: { min: 5, max: is20Round ? 10 : 8, msg: `${posCounts.WR} WR (target 5-${is20Round ? 10 : 8})` },
+        RB: { min: 4, max: is20Round ? 9 : 7, msg: `${posCounts.RB} RB (target 4-${is20Round ? 9 : 7})` },
+        TE: { min: 1, max: is20Round ? 4 : 3, msg: `${posCounts.TE} TE (target 1-${is20Round ? 4 : 3})` },
+        QB: { min: 2, max: is20Round ? 4 : 3, msg: `${posCounts.QB} QB (target 2-${is20Round ? 4 : 3})` },
       };
   const benchmarkIssues = [];
   Object.entries(benchmarks).forEach(([pos, b]) => {
@@ -4643,6 +4675,30 @@ Analyze this best ball roster. Return JSON only.`;
           animation: dyingLight 6s ease-out forwards, hum 3.8s ease-in-out 6s infinite;
         }
 
+        /* Scan wipe — DIAGNOSE revealed by a sweeping highlight, like an X-ray passing over */
+        @keyframes scanWipe {
+          0%   { background-position: -100% center; }
+          60%  { background-position: 100% center; }
+          100% { background-position: 100% center; }
+        }
+        .hero-diagnose-scan {
+          background: linear-gradient(
+            90deg,
+            #4ade80 0%,
+            #4ade80 30%,
+            #a8ffcc 45%,
+            #ffffff 50%,
+            #a8ffcc 55%,
+            #4ade80 70%,
+            #4ade80 100%
+          );
+          background-size: 250% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: scanWipe 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
         .hero-cta-btn {
           transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
         }
@@ -4737,7 +4793,7 @@ Analyze this best ball roster. Return JSON only.`;
           <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap" }}>
               <span
-                className="hero-see-flicker"
+                className="hero-diagnose-scan"
                 style={{
                   background: "linear-gradient(90deg, #4ade80 0%, #a8ffcc 40%, #ffffff 60%, #4ade80 100%)",
                   WebkitBackgroundClip: "text",
@@ -4796,10 +4852,10 @@ Analyze this best ball roster. Return JSON only.`;
                 border: "none",
                 borderRadius: "4px",
                 padding: "16px 40px",
-                fontSize: "14px",
-                fontWeight: 700,
-                fontFamily: "'IBM Plex Mono', monospace",
-                letterSpacing: "0.08em",
+                fontSize: "22px",
+                fontWeight: 400,
+                fontFamily: "'Bebas Neue', sans-serif",
+                letterSpacing: "0.1em",
                 cursor: "pointer",
                 textTransform: "uppercase",
               }}
@@ -5190,6 +5246,7 @@ Analyze this best ball roster. Return JSON only.`;
                   >
                     <option value="1">1 QB</option>
                     <option value="2">2 QB (SF)</option>
+                    <option value="3">3 QB</option>
                   </select>
                 </div>
 
@@ -5211,6 +5268,8 @@ Analyze this best ball roster. Return JSON only.`;
                   >
                     <option value="1">1 RB</option>
                     <option value="2">2 RB</option>
+                    <option value="3">3 RB</option>
+                    <option value="4">4 RB</option>
                   </select>
                 </div>
 
@@ -5232,6 +5291,8 @@ Analyze this best ball roster. Return JSON only.`;
                   >
                     <option value="2">2 WR</option>
                     <option value="3">3 WR</option>
+                    <option value="4">4 WR</option>
+                    <option value="5">5 WR</option>
                   </select>
                 </div>
 
@@ -5253,6 +5314,7 @@ Analyze this best ball roster. Return JSON only.`;
                   >
                     <option value="1">1 TE</option>
                     <option value="2">2 TE</option>
+                    <option value="3">3 TE</option>
                   </select>
                 </div>
 
@@ -5275,6 +5337,9 @@ Analyze this best ball roster. Return JSON only.`;
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
                   </select>
                 </div>
 
@@ -5296,6 +5361,8 @@ Analyze this best ball roster. Return JSON only.`;
                   >
                     <option value="0">0</option>
                     <option value="1">1 (QB/RB/WR/TE)</option>
+                    <option value="2">2 (QB/RB/WR/TE)</option>
+                    <option value="3">3 (QB/RB/WR/TE)</option>
                   </select>
                 </div>
 
@@ -5448,7 +5515,7 @@ Analyze this best ball roster. Return JSON only.`;
                 Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
               </div>
               <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "6px" }}>
-                For best results: upload all roster screens · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
+                For best results: upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
               </div>
             </div>
 
@@ -5771,7 +5838,7 @@ Analyze this best ball roster. Return JSON only.`;
                     color: "#f59e0b",
                     letterSpacing: "0.03em",
                   }}>
-                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
                   </div>
                 )}
                 {(analyzed.nutshell || aiLoading) && (
@@ -6789,7 +6856,7 @@ Analyze this best ball roster. Return JSON only.`;
                     color: "#f59e0b",
                     letterSpacing: "0.03em",
                   }}>
-                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · 18 players (best ball) · full roster for redraft · K/DEF auto-filtered
+                    ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
                   </div>
                 )}
                 {(analyzed.nutshell || aiLoading) && (
