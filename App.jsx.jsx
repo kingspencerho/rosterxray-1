@@ -6054,7 +6054,7 @@ Analyze this best ball roster. Return JSON only.`;
                           ⬇ Save Image
                         </a>
                         <a
-                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — ${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
@@ -7072,7 +7072,7 @@ Analyze this best ball roster. Return JSON only.`;
                           ⬇ Save Image
                         </a>
                         <a
-                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — ${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
