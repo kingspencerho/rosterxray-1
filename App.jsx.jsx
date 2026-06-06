@@ -4550,7 +4550,7 @@ Analyze this best ball roster. Return JSON only.`;
   );
 
   return (
-    <div className="app-content" style={{
+    <div style={{
       minHeight: "100vh",
       background: "#0a0a0a",
       color: "#e5e5e5",
@@ -4784,11 +4784,6 @@ Analyze this best ball roster. Return JSON only.`;
             transform-origin: top left;
             width: 161.3%;
           }
-          .hero-section {
-            transform: scale(1.613);
-            transform-origin: top left;
-            width: 62%;
-          }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
@@ -4912,6 +4907,7 @@ Analyze this best ball roster. Return JSON only.`;
       {/* Scroll anchor for CTA button */}
       <div id="roster-app-start" />
 
+      <div className="app-content">
       {/* Header */}
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{
@@ -8499,6 +8495,7 @@ Analyze this best ball roster. Return JSON only.`;
         );
       })()}
 
+      </div>{/* end app-content */}
     </div>
   );
 }
