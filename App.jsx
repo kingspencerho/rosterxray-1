@@ -4776,13 +4776,13 @@ Analyze this best ball roster. Return JSON only.`;
           }
         }
 
-        /* Landscape phone — scale down main app content, hero handled separately */
+        /* Landscape phone — scale down main app content only, not hero */
         @media (max-height: 500px) and (orientation: landscape) {
-          body { zoom: 0.75; }
+          body { zoom: 1; }
+          .app-content { zoom: 0.72; transform-origin: top left; }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
-          .hero-section { zoom: 1.333; }
           .hero-headline-wrap div { font-size: 52px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
           .hero-headline-wrap { margin-bottom: 12px !important; }
@@ -4904,7 +4904,7 @@ Analyze this best ball roster. Return JSON only.`;
       <div id="roster-app-start" />
 
       {/* Header */}
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+      <div className="app-content" style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{
           borderBottom: "1px solid #222",
           paddingBottom: "16px",
