@@ -4779,7 +4779,11 @@ Analyze this best ball roster. Return JSON only.`;
         /* Landscape phone — scale down main app content only, not hero */
         @media (max-height: 500px) and (orientation: landscape) {
           body { zoom: 1; }
-          .app-content { zoom: 0.72; transform-origin: top left; }
+          .app-content {
+            transform: scale(0.72);
+            transform-origin: top left;
+            width: 138.9%;
+          }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
