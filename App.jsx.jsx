@@ -4666,9 +4666,14 @@ Analyze this best ball roster. Return JSON only.`;
                       padding 0.45s ease;
         }
         .hero-section.collapsed {
-          max-height: 0;
+          max-height: 0 !important;
+          min-height: 0 !important;
           opacity: 0;
           margin-bottom: 0 !important;
+          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                      min-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                      opacity 0.3s ease,
+                      margin 0.4s ease;
         }
 
         .hero-see-flicker {
@@ -4767,16 +4772,17 @@ Analyze this best ball roster. Return JSON only.`;
         /* Desktop — ensure hero fills viewport and centers correctly */
         @media (min-width: 641px) and (min-height: 501px) {
           .hero-section {
-            min-height: calc(100dvh - 48px) !important;
+            min-height: 100dvh !important;
           }
         }
 
         /* Landscape phone — scale down main app content, hero handled separately */
         @media (max-height: 500px) and (orientation: landscape) {
-          body { font-size: 11px; }
+          body { zoom: 0.75; }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
+          .hero-section { zoom: 1.333; }
           .hero-headline-wrap div { font-size: 52px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
           .hero-headline-wrap { margin-bottom: 12px !important; }
@@ -4795,7 +4801,7 @@ Analyze this best ball roster. Return JSON only.`;
       {/* ── Hero Section ── */}
       <div
         className={`hero-section${heroCollapsed || analyzed ? " collapsed" : ""}`}
-        style={{ maxWidth: "1100px", width: "100%", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", marginTop: heroCollapsed || analyzed ? "0" : "-24px", position: "relative", minHeight: heroCollapsed || analyzed ? "0" : "calc(100dvh - 0px)", display: "flex", alignItems: "center", justifyContent: "center" }}
+        style={{ maxWidth: "1100px", width: "100%", margin: "0 auto", marginBottom: heroCollapsed || analyzed ? "0" : "32px", marginTop: heroCollapsed || analyzed ? "0" : "-24px", position: "relative", minHeight: heroCollapsed || analyzed ? "0" : "calc(100dvh - 24px)", display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         <div style={{
           position: "relative",
