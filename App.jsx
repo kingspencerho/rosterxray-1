@@ -4780,9 +4780,9 @@ Analyze this best ball roster. Return JSON only.`;
         @media (max-height: 500px) and (orientation: landscape) {
           body { zoom: 1; }
           .app-content {
-            transform: scale(0.72);
+            transform: scale(0.62);
             transform-origin: top left;
-            width: 138.9%;
+            width: 161.3%;
           }
         }
 
