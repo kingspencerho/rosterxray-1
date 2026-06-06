@@ -4715,20 +4715,21 @@ Analyze this best ball roster. Return JSON only.`;
 
         .hero-pills {
           display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
+          flex-direction: column;
           gap: 8px;
           justify-content: center;
-          align-items: center;
+          align-items: stretch;
           margin-bottom: 28px;
-          max-width: 680px;
+          max-width: 520px;
           margin-left: auto;
           margin-right: auto;
+          width: 100%;
         }
         .hero-pill {
           transition: border-color 0.2s ease, background 0.2s ease;
-          white-space: nowrap;
+          white-space: normal;
           cursor: default;
+          text-align: left;
         }
         .hero-pill:hover {
           border-color: #4ade8066;
@@ -4763,7 +4764,18 @@ Analyze this best ball roster. Return JSON only.`;
           .hero-cta-btn { width: 100% !important; }
         }
 
-        /* Landscape phone — wide but short, pills overflow horizontally */
+        /* Desktop — ensure hero fills viewport and centers correctly */
+        @media (min-width: 641px) and (min-height: 501px) {
+          .hero-section {
+            min-height: calc(100dvh - 48px) !important;
+          }
+        }
+
+        /* Landscape phone — scale down main app content, hero handled separately */
+        @media (max-height: 500px) and (orientation: landscape) {
+          body { font-size: 11px; }
+        }
+
         @media (max-height: 500px) and (orientation: landscape) {
           .hero-headline-wrap div { font-size: 52px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
