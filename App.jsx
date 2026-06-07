@@ -217,6 +217,7 @@ const ADP_DATA = {
   "braelon allen": { adp: 200.7, pos: "RB", team: "NYJ" },
   "ray davis": { adp: 203.1, pos: "RB", team: "BUF" },
   "malik washington": { adp: 203.2, pos: "WR", team: "MIA" },
+  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "terrance ferguson": { adp: 205.4, pos: "TE", team: "LAR" },
   "kaelon black": { adp: 206.4, pos: "RB", team: "SF" },
   "mike gesicki": { adp: 207.8, pos: "TE", team: "CIN" },
@@ -509,6 +510,7 @@ const ADP_SUPERFLEX = {
   "adonai mitchell": { adp: 220, pos: "WR", team: "NYJ" },
   "ted hurst": { adp: 221, pos: "WR", team: "TB" },
   "malik washington": { adp: 222, pos: "WR", team: "MIA" },
+  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "theo johnson": { adp: 223, pos: "TE", team: "NYG" },
   "zachariah branch": { adp: 224, pos: "WR", team: "ATL" },
   "jaylen wright": { adp: 225, pos: "RB", team: "MIA" },
@@ -1220,6 +1222,8 @@ const ADP_YAHOO = {
   // Deep tail dart throws — recognition coverage only
   "odell beckham": { adp: 242.0, pos: "WR", team: "NYG" },
   "odell beckham jr": { adp: 242.0, pos: "WR", team: "NYG" },
+  // Suffix aliases
+  "luther burden iii": { adp: 46.0, pos: "WR", team: "CHI" },
   "jatavion sanders": { adp: 251.0, pos: "TE", team: "CAR" },
   "eli raridon": { adp: 258.0, pos: "TE", team: "NE" },
   "elijah arroyo": { adp: 261.0, pos: "TE", team: "SEA" },
@@ -1398,8 +1402,9 @@ const findPlayer = (name, format = "standard") => {
   const initialMatch = norm.match(/^([a-z])\s+(.+)$/);
   if (initialMatch) {
     const initial = initialMatch[1];
-    const restWords = initialMatch[2].split(" ");
-    const last = restWords[restWords.length - 1];
+    // Strip trailing suffixes (jr, sr, ii, iii, iv) before last-name lookup
+    const nameParts = initialMatch[2].split(" ").filter(w => !/^(jr|sr|ii|iii|iv)$/.test(w));
+    const last = nameParts[nameParts.length - 1];
     const idx = getLastNameIndex(table);
     const candidates = (idx[last] || []).filter(c => c.key.split(" ")[0][0] === initial);
     if (candidates.length > 0) {
@@ -3756,6 +3761,8 @@ export default function RosterScorer() {
   const [dragOver, setDragOver] = useState(false);
   const [mode, setMode] = useState("paste"); // "upload" | "paste" — paste leads (reliable path; upload requires API)
   const [tournament, setTournament] = useState("main");
+  const [tournamentDropdownOpen, setTournamentDropdownOpen] = useState(false);
+  const [redraftDropdownOpen, setRedraftDropdownOpen] = useState(false);
   const [analysisMode, setAnalysisMode] = useState("bestball"); // "bestball" | "redraft"
   const [redraftLeague, setRedraftLeague] = useState("yahoo_std");
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
@@ -3830,11 +3837,15 @@ export default function RosterScorer() {
     const shouldLock = !heroCollapsed && !analyzed;
     const lock = () => {
       document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.height = "100%";
       document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
     };
     const unlock = () => {
       document.documentElement.style.overflow = "";
+      document.documentElement.style.height = "";
       document.body.style.overflow = "";
+      document.body.style.height = "";
     };
     if (shouldLock) { lock(); } else { unlock(); }
     return () => { unlock(); };
@@ -4550,7 +4561,7 @@ Analyze this best ball roster. Return JSON only.`;
   );
 
   return (
-    <div className="app-content" style={{
+    <div style={{
       minHeight: "100vh",
       background: "#0a0a0a",
       color: "#e5e5e5",
@@ -4784,11 +4795,6 @@ Analyze this best ball roster. Return JSON only.`;
             transform-origin: top left;
             width: 161.3%;
           }
-          .hero-section {
-            transform: scale(1.613);
-            transform-origin: top left;
-            width: 62%;
-          }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
@@ -4912,6 +4918,7 @@ Analyze this best ball roster. Return JSON only.`;
       {/* Scroll anchor for CTA button */}
       <div id="roster-app-start" />
 
+      <div className="app-content">
       {/* Header */}
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{
@@ -4966,17 +4973,17 @@ Analyze this best ball roster. Return JSON only.`;
                 background: analysisMode === "bestball" ? "#0d3320" : "#0f0f0f",
                 border: `1px solid ${analysisMode === "bestball" ? "#22c55e" : "#222"}`,
                 borderRadius: "4px",
-                padding: "14px 16px",
+                padding: "9px 12px",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 textAlign: "left",
               }}
             >
-              <div style={{ fontSize: "13px", color: analysisMode === "bestball" ? "#4ade80" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
+              <div style={{ fontSize: "12px", color: analysisMode === "bestball" ? "#4ade80" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
                 🏆 Best Ball Tournament
               </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Find your stacks · exploit playoff matchups · win
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "3px" }}>
+                stacks · playoff matchups
               </div>
             </button>
             <button
@@ -4985,17 +4992,17 @@ Analyze this best ball roster. Return JSON only.`;
                 background: analysisMode === "redraft" ? "#1e1a3a" : "#0f0f0f",
                 border: `1px solid ${analysisMode === "redraft" ? "#a855f7" : "#222"}`,
                 borderRadius: "4px",
-                padding: "14px 16px",
+                padding: "9px 12px",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 textAlign: "left",
               }}
             >
-              <div style={{ fontSize: "13px", color: analysisMode === "redraft" ? "#c084fc" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
+              <div style={{ fontSize: "12px", color: analysisMode === "redraft" ? "#c084fc" : "#fafafa", fontWeight: 600, letterSpacing: "0.02em" }}>
                 💰 Redraft League
               </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Weekly matchups · money on the line · don't blow it
+              <div style={{ fontSize: "10px", color: "#666", marginTop: "3px" }}>
+                weekly lineup · money leagues
               </div>
             </button>
           </div>
@@ -5006,49 +5013,63 @@ Analyze this best ball roster. Return JSON only.`;
           <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
             Data Mode
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          {/* Segmented pill toggle */}
+          <div style={{
+            display: "inline-flex",
+            background: "#0a0a0a",
+            border: "1px solid #222",
+            borderRadius: "6px",
+            padding: "3px",
+            gap: "2px",
+          }}>
             <button
               onClick={() => { setDataMode("actual"); setAnalyzed(null); }}
               style={{
-                background: dataMode === "actual" ? "#0d1f33" : "#0f0f0f",
-                border: `1px solid ${dataMode === "actual" ? "#22d3ee" : "#222"}`,
-                borderRadius: "4px", padding: "12px 14px",
-                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                background: dataMode === "actual" ? "#0d1f33" : "transparent",
+                border: `1px solid ${dataMode === "actual" ? "#22d3ee" : "transparent"}`,
+                borderRadius: "4px",
+                padding: "6px 14px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: dataMode === "actual" ? "#22d3ee" : "#666",
+                letterSpacing: "0.03em",
+                transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}
             >
-              <div style={{ fontSize: "13px", color: dataMode === "actual" ? "#22d3ee" : "#fafafa", fontWeight: 600 }}>
-                📊 2025 Data
-              </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Real stats from last season
-              </div>
+              📊 2025 Data
             </button>
             <button
               onClick={() => { setDataMode("projected"); setAnalyzed(null); }}
               style={{
-                background: dataMode === "projected" ? "#1a1200" : "#0f0f0f",
-                border: `1px solid ${dataMode === "projected" ? "#f59e0b" : "#222"}`,
-                borderRadius: "4px", padding: "12px 14px",
-                cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                background: dataMode === "projected" ? "#1a1200" : "transparent",
+                border: `1px solid ${dataMode === "projected" ? "#f59e0b" : "transparent"}`,
+                borderRadius: "4px",
+                padding: "6px 14px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: dataMode === "projected" ? "#fbbf24" : "#666",
+                letterSpacing: "0.03em",
+                transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}
             >
-              <div style={{ fontSize: "13px", color: dataMode === "projected" ? "#fbbf24" : "#fafafa", fontWeight: 600 }}>
-                🔮 2026 Est.
-              </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Adjusted for offseason moves
-              </div>
+              🔮 2026 Est.
             </button>
           </div>
           {dataMode === "projected" && (
             <div style={{
-              marginTop: "8px", padding: "8px 12px",
+              marginTop: "8px", padding: "6px 10px",
               background: "#1a1200", border: "1px solid #f59e0b55",
-              borderRadius: "4px", display: "flex", alignItems: "flex-start", gap: "8px",
+              borderRadius: "4px", display: "flex", alignItems: "flex-start", gap: "6px",
             }}>
-              <span style={{ fontSize: "12px", flexShrink: 0 }}>⚠️</span>
+              <span style={{ fontSize: "11px", flexShrink: 0 }}>⚠️</span>
               <div style={{ fontSize: "10px", color: "#d97706", lineHeight: 1.5 }}>
-                <strong>Estimated mode</strong> — matchup ratings reflect projected 2026 defensive changes based on offseason moves. These are not real stats. Switch to <strong>2025 Data</strong> for ground truth.
+                Projected 2026 defensive adjustments — not real stats. Switch to <strong>2025 Data</strong> for ground truth.
               </div>
             </div>
           )}
@@ -5056,57 +5077,109 @@ Analyze this best ball roster. Return JSON only.`;
 
         {/* Tournament selector — Best Ball only */}
         {analysisMode === "bestball" && (
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "20px", position: "relative" }}>
           <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
             Tournament Structure
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "6px" }}>
-            {Object.entries(TOURNAMENTS).map(([key, t]) => (
-              <button
-                key={key}
-                onClick={() => {
-                  setTournament(key);
-                  if (analyzed) {
-                    const fmt = TOURNAMENTS[key].format || "standard";
-                    const picks = parseRoster(input, fmt);
-                    const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
-                    setAnalyzed(result);
-                  }
-                }}
-                style={{
-                  background: tournament === key ? "#0d3320" : "#0f0f0f",
-                  border: `1px solid ${tournament === key ? "#22c55e" : "#222"}`,
-                  borderRadius: "4px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontFamily: "inherit",
-                  transition: "all 0.15s",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
-                  <span style={{
-                    fontSize: "12px",
-                    color: tournament === key ? "#4ade80" : "#fafafa",
-                    fontWeight: 600,
-                    letterSpacing: "0.02em",
-                  }}>
-                    {t.name}
-                  </span>
-                  <span style={{ fontSize: "9px", color: "#666", letterSpacing: "0.05em" }}>
-                    {t.entries}
-                  </span>
-                </div>
-                <div style={{ fontSize: "10px", color: "#666", marginTop: "4px", lineHeight: 1.4 }}>
-                  {t.format === "superflex" ? (
-                    <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
-                  ) : (
-                    <>W15·{t.weights[0]}x  W16·{t.weights[1]}x  W17·{t.weights[2]}x</>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
+
+          {/* Dropdown trigger */}
+          <button
+            onClick={() => setTournamentDropdownOpen(o => !o)}
+            style={{
+              width: "100%",
+              background: "#0f0f0f",
+              border: "1px solid #22c55e",
+              borderRadius: tournamentDropdownOpen ? "4px 4px 0 0" : "4px",
+              padding: "10px 14px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              transition: "border-radius 0.1s",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+              <span style={{ fontSize: "12px", color: "#4ade80", fontWeight: 700, letterSpacing: "0.05em" }}>
+                {TOURNAMENTS[tournament].name}
+              </span>
+              <span style={{ fontSize: "10px", color: "#555" }}>
+                {TOURNAMENTS[tournament].format === "superflex"
+                  ? <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
+                  : <>W15·{TOURNAMENTS[tournament].weights[0]}x · W16·{TOURNAMENTS[tournament].weights[1]}x · W17·{TOURNAMENTS[tournament].weights[2]}x</>
+                }
+              </span>
+            </div>
+            <span style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.05em" }}>
+              {tournamentDropdownOpen ? "▲" : "▼"}
+            </span>
+          </button>
+
+          {/* Dropdown options */}
+          {tournamentDropdownOpen && (
+            <div style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              background: "#0a0a0a",
+              border: "1px solid #22c55e",
+              borderTop: "none",
+              borderRadius: "0 0 4px 4px",
+              zIndex: 50,
+              overflow: "hidden",
+            }}>
+              {Object.entries(TOURNAMENTS).map(([key, t], idx, arr) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setTournament(key);
+                    setTournamentDropdownOpen(false);
+                    if (analyzed) {
+                      const fmt = TOURNAMENTS[key].format || "standard";
+                      const picks = parseRoster(input, fmt);
+                      const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
+                      setAnalyzed(result);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    background: tournament === key ? "#0d3320" : "transparent",
+                    border: "none",
+                    borderBottom: idx < arr.length - 1 ? "1px solid #1a1a1a" : "none",
+                    padding: "10px 14px",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    transition: "background 0.1s",
+                  }}
+                  onMouseEnter={e => { if (tournament !== key) e.currentTarget.style.background = "#111"; }}
+                  onMouseLeave={e => { if (tournament !== key) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <span style={{ fontSize: "12px", color: tournament === key ? "#4ade80" : "#ccc", fontWeight: 600, letterSpacing: "0.02em" }}>
+                      {t.name}
+                    </span>
+                    <span style={{ fontSize: "10px", color: "#555" }}>
+                      {t.format === "superflex"
+                        ? <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
+                        : <>W15·{t.weights[0]}x · W16·{t.weights[1]}x · W17·{t.weights[2]}x</>
+                      }
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "9px", color: "#555" }}>{t.entries}</span>
+                    {tournament === key && <span style={{ fontSize: "10px", color: "#4ade80" }}>✓</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Note below */}
           <div style={{ fontSize: "10px", color: "#555", marginTop: "6px", letterSpacing: "0.03em" }}>
             {TOURNAMENTS[tournament].note}
           </div>
@@ -5120,84 +5193,134 @@ Analyze this best ball roster. Return JSON only.`;
             League Configuration
           </div>
 
-          {/* Quick preset buttons + Custom toggle */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "6px" }}>
-            {Object.entries(REDRAFT_LEAGUES).map(([key, l]) => (
-              <button
-                key={key}
-                onClick={() => {
-                  setRedraftLeague(key);
-                  setCustomExpanded(false);
-                  if (analyzed) {
-                    const picks = parseRosterRedraft(input);
-                    const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers, dataMode === "projected");
-                    setAnalyzed(result);
-                  }
-                }}
-                style={{
-                  background: redraftLeague === key ? "#1e1a3a" : "#0f0f0f",
-                  border: `1px solid ${redraftLeague === key ? "#a855f7" : "#222"}`,
-                  borderRadius: "4px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontFamily: "inherit",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
-                  <span style={{
-                    fontSize: "12px",
-                    color: redraftLeague === key ? "#c084fc" : "#fafafa",
-                    fontWeight: 600,
-                  }}>
-                    {l.name}
-                  </span>
-                  <span style={{ fontSize: "9px", color: "#666" }}>
-                    {l.scoring}
-                  </span>
-                </div>
-                <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                  {Object.entries(l.lineup).filter(([, c]) => c > 0).map(([p, c]) => `${c}${p}`).join(" · ")}
-                </div>
-              </button>
-            ))}
-            {/* Custom button */}
+          {/* Dropdown trigger */}
+          <div style={{ position: "relative" }}>
             <button
-              onClick={() => {
-                setRedraftLeague("custom");
-                setCustomExpanded(true);
-                if (analyzed) {
-                  const picks = parseRosterRedraft(input);
-                  const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers, dataMode === "projected");
-                  setAnalyzed(result);
-                }
-              }}
+              onClick={() => setRedraftDropdownOpen(o => !o)}
               style={{
-                background: redraftLeague === "custom" ? "#1e1a3a" : "#0f0f0f",
-                border: `1px solid ${redraftLeague === "custom" ? "#a855f7" : "#222"}`,
-                borderRadius: "4px",
-                padding: "10px 12px",
+                width: "100%",
+                background: "#0f0f0f",
+                border: "1px solid #a855f7",
+                borderRadius: redraftDropdownOpen ? "4px 4px 0 0" : "4px",
+                padding: "10px 14px",
                 cursor: "pointer",
-                textAlign: "left",
                 fontFamily: "inherit",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                transition: "border-radius 0.1s",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
-                <span style={{
-                  fontSize: "12px",
-                  color: redraftLeague === "custom" ? "#c084fc" : "#fafafa",
-                  fontWeight: 600,
-                }}>
-                  ⚙ Custom
+              <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                <span style={{ fontSize: "12px", color: "#c084fc", fontWeight: 700, letterSpacing: "0.05em" }}>
+                  {redraftLeague === "custom" ? "⚙ Custom" : REDRAFT_LEAGUES[redraftLeague].name}
                 </span>
-                <span style={{ fontSize: "9px", color: "#666" }}>
-                  {customExpanded ? "▼" : "▶"}
+                <span style={{ fontSize: "10px", color: "#555" }}>
+                  {redraftLeague === "custom"
+                    ? "custom lineup"
+                    : REDRAFT_LEAGUES[redraftLeague].scoring + " · " + Object.entries(REDRAFT_LEAGUES[redraftLeague].lineup).filter(([, c]) => c > 0).map(([p, c]) => `${c}${p}`).join("/")}
                 </span>
               </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-                Build your own league · match your exact setup
-              </div>
+              <span style={{ fontSize: "10px", color: "#c084fc" }}>
+                {redraftDropdownOpen ? "▲" : "▼"}
+              </span>
             </button>
+
+            {/* Dropdown options */}
+            {redraftDropdownOpen && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                background: "#0a0a0a",
+                border: "1px solid #a855f7",
+                borderTop: "none",
+                borderRadius: "0 0 4px 4px",
+                zIndex: 50,
+                overflow: "hidden",
+              }}>
+                {Object.entries(REDRAFT_LEAGUES).map(([key, l], idx, arr) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setRedraftLeague(key);
+                      setCustomExpanded(false);
+                      setRedraftDropdownOpen(false);
+                      if (analyzed) {
+                        const picks = parseRosterRedraft(input);
+                        const result = analyzeRedraft(picks, REDRAFT_LEAGUES[key], picks.hasPickNumbers, dataMode === "projected");
+                        setAnalyzed(result);
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      background: redraftLeague === key ? "#1e1a3a" : "transparent",
+                      border: "none",
+                      borderBottom: "1px solid #1a1a1a",
+                      padding: "10px 14px",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      textAlign: "left",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={e => { if (redraftLeague !== key) e.currentTarget.style.background = "#111"; }}
+                    onMouseLeave={e => { if (redraftLeague !== key) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                      <span style={{ fontSize: "12px", color: redraftLeague === key ? "#c084fc" : "#ccc", fontWeight: 600 }}>
+                        {l.name}
+                      </span>
+                      <span style={{ fontSize: "10px", color: "#555" }}>
+                        {l.scoring} · {Object.entries(l.lineup).filter(([, c]) => c > 0).map(([p, c]) => `${c}${p}`).join("/")}
+                      </span>
+                    </div>
+                    {redraftLeague === key && <span style={{ fontSize: "10px", color: "#c084fc" }}>✓</span>}
+                  </button>
+                ))}
+                {/* Custom option */}
+                <button
+                  onClick={() => {
+                    setRedraftLeague("custom");
+                    setCustomExpanded(true);
+                    setRedraftDropdownOpen(false);
+                    if (analyzed) {
+                      const picks = parseRosterRedraft(input);
+                      const result = analyzeRedraft(picks, buildLeagueFromConfig(customConfig), picks.hasPickNumbers, dataMode === "projected");
+                      setAnalyzed(result);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    background: redraftLeague === "custom" ? "#1e1a3a" : "transparent",
+                    border: "none",
+                    padding: "10px 14px",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    transition: "background 0.1s",
+                  }}
+                  onMouseEnter={e => { if (redraftLeague !== "custom") e.currentTarget.style.background = "#111"; }}
+                  onMouseLeave={e => { if (redraftLeague !== "custom") e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <span style={{ fontSize: "12px", color: redraftLeague === "custom" ? "#c084fc" : "#ccc", fontWeight: 600 }}>
+                      ⚙ Custom
+                    </span>
+                    <span style={{ fontSize: "10px", color: "#555" }}>
+                      build your own lineup
+                    </span>
+                  </div>
+                  {redraftLeague === "custom" && <span style={{ fontSize: "10px", color: "#c084fc" }}>✓</span>}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Selected league context line */}
@@ -5552,10 +5675,10 @@ Analyze this best ball roster. Return JSON only.`;
                 Drop your roster screenshot — see what your league-mates can't
               </div>
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
+                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot · <span style={{ color: "#a855f7" }}>Yahoo tip:</span> go to League tab → press Draft button for full names
               </div>
               <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "6px" }}>
-                For best results: upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
+                <span style={{ color: "#a855f7" }}>For best results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
               </div>
             </div>
 
@@ -5675,7 +5798,7 @@ Analyze this best ball roster. Return JSON only.`;
                 📋 How to paste your roster (15 sec)
               </div>
               <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN.</div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "#666" }}>Yahoo: League → Draft shows full names.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "#888" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "#4ade80", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze.</div>
               </div>
@@ -6024,7 +6147,7 @@ Analyze this best ball roster. Return JSON only.`;
                       ↩ New Analysis
                     </button>
                   </div>
-                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "You think you crushed the draft. The math says otherwise.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
+                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
                         src={exportedDataUrl}
@@ -6054,7 +6177,7 @@ Analyze this best ball roster. Return JSON only.`;
                           ⬇ Save Image
                         </a>
                         <a
-                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — best ball roster graded, stacks mapped, matchups checked. rosterxray.com`)}`}
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
@@ -7042,7 +7165,7 @@ Analyze this best ball roster. Return JSON only.`;
                       ↩ New Analysis
                     </button>
                   </div>
-                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "You think you crushed the draft. The math says otherwise.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
+                  {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
                         src={exportedDataUrl}
@@ -7072,7 +7195,7 @@ Analyze this best ball roster. Return JSON only.`;
                           ⬇ Save Image
                         </a>
                         <a
-                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${_hook} ${analyzed.grade} on Roster X-Ray — redraft roster graded, matchups checked, weaknesses flagged. rosterxray.com`)}`}
+                          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
@@ -8499,6 +8622,7 @@ Analyze this best ball roster. Return JSON only.`;
         );
       })()}
 
+      </div>{/* end app-content */}
     </div>
   );
 }
