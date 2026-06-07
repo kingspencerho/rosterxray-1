@@ -217,6 +217,7 @@ const ADP_DATA = {
   "braelon allen": { adp: 200.7, pos: "RB", team: "NYJ" },
   "ray davis": { adp: 203.1, pos: "RB", team: "BUF" },
   "malik washington": { adp: 203.2, pos: "WR", team: "MIA" },
+  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "terrance ferguson": { adp: 205.4, pos: "TE", team: "LAR" },
   "kaelon black": { adp: 206.4, pos: "RB", team: "SF" },
   "mike gesicki": { adp: 207.8, pos: "TE", team: "CIN" },
@@ -509,6 +510,7 @@ const ADP_SUPERFLEX = {
   "adonai mitchell": { adp: 220, pos: "WR", team: "NYJ" },
   "ted hurst": { adp: 221, pos: "WR", team: "TB" },
   "malik washington": { adp: 222, pos: "WR", team: "MIA" },
+  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "theo johnson": { adp: 223, pos: "TE", team: "NYG" },
   "zachariah branch": { adp: 224, pos: "WR", team: "ATL" },
   "jaylen wright": { adp: 225, pos: "RB", team: "MIA" },
@@ -1220,6 +1222,8 @@ const ADP_YAHOO = {
   // Deep tail dart throws — recognition coverage only
   "odell beckham": { adp: 242.0, pos: "WR", team: "NYG" },
   "odell beckham jr": { adp: 242.0, pos: "WR", team: "NYG" },
+  // Suffix aliases
+  "luther burden iii": { adp: 46.0, pos: "WR", team: "CHI" },
   "jatavion sanders": { adp: 251.0, pos: "TE", team: "CAR" },
   "eli raridon": { adp: 258.0, pos: "TE", team: "NE" },
   "elijah arroyo": { adp: 261.0, pos: "TE", team: "SEA" },
@@ -1398,8 +1402,9 @@ const findPlayer = (name, format = "standard") => {
   const initialMatch = norm.match(/^([a-z])\s+(.+)$/);
   if (initialMatch) {
     const initial = initialMatch[1];
-    const restWords = initialMatch[2].split(" ");
-    const last = restWords[restWords.length - 1];
+    // Strip trailing suffixes (jr, sr, ii, iii, iv) before last-name lookup
+    const nameParts = initialMatch[2].split(" ").filter(w => !/^(jr|sr|ii|iii|iv)$/.test(w));
+    const last = nameParts[nameParts.length - 1];
     const idx = getLastNameIndex(table);
     const candidates = (idx[last] || []).filter(c => c.key.split(" ")[0][0] === initial);
     if (candidates.length > 0) {
@@ -3756,6 +3761,7 @@ export default function RosterScorer() {
   const [dragOver, setDragOver] = useState(false);
   const [mode, setMode] = useState("paste"); // "upload" | "paste" — paste leads (reliable path; upload requires API)
   const [tournament, setTournament] = useState("main");
+  const [tournamentDropdownOpen, setTournamentDropdownOpen] = useState(false);
   const [analysisMode, setAnalysisMode] = useState("bestball"); // "bestball" | "redraft"
   const [redraftLeague, setRedraftLeague] = useState("yahoo_std");
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
@@ -5056,57 +5062,109 @@ Analyze this best ball roster. Return JSON only.`;
 
         {/* Tournament selector — Best Ball only */}
         {analysisMode === "bestball" && (
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "20px", position: "relative" }}>
           <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
             Tournament Structure
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "6px" }}>
-            {Object.entries(TOURNAMENTS).map(([key, t]) => (
-              <button
-                key={key}
-                onClick={() => {
-                  setTournament(key);
-                  if (analyzed) {
-                    const fmt = TOURNAMENTS[key].format || "standard";
-                    const picks = parseRoster(input, fmt);
-                    const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
-                    setAnalyzed(result);
-                  }
-                }}
-                style={{
-                  background: tournament === key ? "#0d3320" : "#0f0f0f",
-                  border: `1px solid ${tournament === key ? "#22c55e" : "#222"}`,
-                  borderRadius: "4px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontFamily: "inherit",
-                  transition: "all 0.15s",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
-                  <span style={{
-                    fontSize: "12px",
-                    color: tournament === key ? "#4ade80" : "#fafafa",
-                    fontWeight: 600,
-                    letterSpacing: "0.02em",
-                  }}>
-                    {t.name}
-                  </span>
-                  <span style={{ fontSize: "9px", color: "#666", letterSpacing: "0.05em" }}>
-                    {t.entries}
-                  </span>
-                </div>
-                <div style={{ fontSize: "10px", color: "#666", marginTop: "4px", lineHeight: 1.4 }}>
-                  {t.format === "superflex" ? (
-                    <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
-                  ) : (
-                    <>W15·{t.weights[0]}x  W16·{t.weights[1]}x  W17·{t.weights[2]}x</>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
+
+          {/* Dropdown trigger */}
+          <button
+            onClick={() => setTournamentDropdownOpen(o => !o)}
+            style={{
+              width: "100%",
+              background: "#0f0f0f",
+              border: "1px solid #22c55e",
+              borderRadius: tournamentDropdownOpen ? "4px 4px 0 0" : "4px",
+              padding: "10px 14px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              transition: "border-radius 0.1s",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+              <span style={{ fontSize: "12px", color: "#4ade80", fontWeight: 700, letterSpacing: "0.05em" }}>
+                {TOURNAMENTS[tournament].name}
+              </span>
+              <span style={{ fontSize: "10px", color: "#555" }}>
+                {TOURNAMENTS[tournament].format === "superflex"
+                  ? <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
+                  : <>W15·{TOURNAMENTS[tournament].weights[0]}x · W16·{TOURNAMENTS[tournament].weights[1]}x · W17·{TOURNAMENTS[tournament].weights[2]}x</>
+                }
+              </span>
+            </div>
+            <span style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.05em" }}>
+              {tournamentDropdownOpen ? "▲" : "▼"}
+            </span>
+          </button>
+
+          {/* Dropdown options */}
+          {tournamentDropdownOpen && (
+            <div style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              right: 0,
+              background: "#0a0a0a",
+              border: "1px solid #22c55e",
+              borderTop: "none",
+              borderRadius: "0 0 4px 4px",
+              zIndex: 50,
+              overflow: "hidden",
+            }}>
+              {Object.entries(TOURNAMENTS).map(([key, t], idx, arr) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setTournament(key);
+                    setTournamentDropdownOpen(false);
+                    if (analyzed) {
+                      const fmt = TOURNAMENTS[key].format || "standard";
+                      const picks = parseRoster(input, fmt);
+                      const result = analyzeRoster(picks, key, picks.hasPickNumbers, dataMode === "projected");
+                      setAnalyzed(result);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    background: tournament === key ? "#0d3320" : "transparent",
+                    border: "none",
+                    borderBottom: idx < arr.length - 1 ? "1px solid #1a1a1a" : "none",
+                    padding: "10px 14px",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    transition: "background 0.1s",
+                  }}
+                  onMouseEnter={e => { if (tournament !== key) e.currentTarget.style.background = "#111"; }}
+                  onMouseLeave={e => { if (tournament !== key) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <span style={{ fontSize: "12px", color: tournament === key ? "#4ade80" : "#ccc", fontWeight: 600, letterSpacing: "0.02em" }}>
+                      {t.name}
+                    </span>
+                    <span style={{ fontSize: "10px", color: "#555" }}>
+                      {t.format === "superflex"
+                        ? <span style={{ color: "#a855f7" }}>SUPERFLEX · 4for4 ADP</span>
+                        : <>W15·{t.weights[0]}x · W16·{t.weights[1]}x · W17·{t.weights[2]}x</>
+                      }
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "9px", color: "#555" }}>{t.entries}</span>
+                    {tournament === key && <span style={{ fontSize: "10px", color: "#4ade80" }}>✓</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Note below */}
           <div style={{ fontSize: "10px", color: "#555", marginTop: "6px", letterSpacing: "0.03em" }}>
             {TOURNAMENTS[tournament].note}
           </div>
@@ -5552,10 +5610,10 @@ Analyze this best ball roster. Return JSON only.`;
                 Drop your roster screenshot — see what your league-mates can't
               </div>
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot
+                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot · <span style={{ color: "#a855f7" }}>Yahoo tip:</span> go to League tab → press Draft button for full names
               </div>
               <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "6px" }}>
-                For best results: upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
+                <span style={{ color: "#a855f7" }}>For best results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
               </div>
             </div>
 
@@ -5675,7 +5733,7 @@ Analyze this best ball roster. Return JSON only.`;
                 📋 How to paste your roster (15 sec)
               </div>
               <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN.</div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "#666" }}>Yahoo: League → Draft shows full names.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "#888" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "#4ade80", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze.</div>
               </div>
