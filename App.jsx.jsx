@@ -4656,6 +4656,14 @@ Analyze this best ball roster. Return JSON only.`;
           0%, 100% { box-shadow: 0 0 0px 0px rgba(74, 222, 128, 0); }
           50%       { box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.25); }
         }
+        /* Analyze button glow — mirrors upload tab, active when input has text */
+        .analyze-glow {
+          animation: analyzeGlow 1.8s ease-in-out infinite;
+        }
+        @keyframes analyzeGlow {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(34, 211, 238, 0); }
+          50%       { box-shadow: 0 0 22px 6px rgba(34, 211, 238, 0.55); }
+        }
         /* Strobe dot — used on ANALYZING and Extracting states */
         .strobe-dot {
           animation: strobeDot 1.1s ease-in-out infinite;
@@ -5675,10 +5683,13 @@ Analyze this best ball roster. Return JSON only.`;
                 Drop your roster screenshot — see what your league-mates can't
               </div>
               <div style={{ fontSize: "11px", color: "#666", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN · works with any screenshot · <span style={{ color: "#a855f7" }}>Yahoo tip:</span> go to League tab → press Draft button for full names
+                Underdog · Yahoo · Sleeper · ESPN
               </div>
-              <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "6px" }}>
-                <span style={{ color: "#a855f7" }}>For best results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
+              <div style={{ fontSize: "11px", color: "#888", letterSpacing: "0.04em", marginTop: "4px" }}>
+                <span style={{ color: "#a855f7", fontWeight: 700 }}>Yahoo Tip:</span> go to League tab → press Draft button for full names
+              </div>
+              <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.04em", marginTop: "4px" }}>
+                <span style={{ color: "#a855f7", fontWeight: 700 }}>For Best Results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
               </div>
             </div>
 
@@ -5742,19 +5753,22 @@ Analyze this best ball roster. Return JSON only.`;
               <button
                 onClick={extractFromImages}
                 disabled={uploadedImages.length === 0 || extracting}
+                className={uploadedImages.length > 0 && !extracting ? "analyze-glow" : ""}
                 style={{
-                  background: "#4ade80",
+                  background: uploadedImages.length > 0 && !extracting ? "#22d3ee" : "#1a3a3a",
                   color: "#0a0a0a",
                   border: "none",
-                  padding: "10px 24px",
+                  padding: "12px 24px",
                   fontSize: "12px",
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontFamily: "inherit",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   cursor: uploadedImages.length > 0 && !extracting ? "pointer" : "not-allowed",
                   opacity: uploadedImages.length > 0 && !extracting ? 1 : 0.4,
                   borderRadius: "3px",
+                  width: "100%",
+                  maxWidth: "400px",
                 }}
               >
                 {extracting ? <span><span className="strobe-dot" style={{ marginRight: "5px" }}>●</span>Extracting…</span> : "Extract & Analyze →"}
@@ -5829,7 +5843,7 @@ Analyze this best ball roster. Return JSON only.`;
                 flexWrap: "wrap",
               }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: "10px", color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>
+                  <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px", fontWeight: 700 }}>
                     First time?
                   </div>
                   <div style={{ fontSize: "13px", color: "#cfcfcf", lineHeight: 1.4 }}>
@@ -5912,19 +5926,22 @@ Analyze this best ball roster. Return JSON only.`;
               <button
                 onClick={handleAnalyze}
                 disabled={!input.trim()}
+                className={input.trim() ? "analyze-glow" : ""}
                 style={{
-                  background: "#4ade80",
+                  background: input.trim() ? "#22d3ee" : "#1a3a3a",
                   color: "#0a0a0a",
                   border: "none",
-                  padding: "10px 24px",
+                  padding: "12px 24px",
                   fontSize: "12px",
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontFamily: "inherit",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   cursor: input.trim() ? "pointer" : "not-allowed",
                   opacity: input.trim() ? 1 : 0.4,
                   borderRadius: "3px",
+                  width: "100%",
+                  maxWidth: "400px",
                 }}
               >
                 Analyze →
