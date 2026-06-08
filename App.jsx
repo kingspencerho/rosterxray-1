@@ -4974,7 +4974,15 @@ Analyze this best ball roster. Return JSON only.`;
           <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
             Analysis Mode
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}
+            onTouchStart={e => { e.currentTarget._touchStartX = e.touches[0].clientX; }}
+            onTouchEnd={e => {
+              const dx = e.changedTouches[0].clientX - (e.currentTarget._touchStartX || 0);
+              if (dx < -50 && analysisMode !== "redraft") { setAnalysisMode("redraft"); setAnalyzed(null); setInput(""); setExportedDataUrl(null); }
+              if (dx > 50 && analysisMode !== "bestball") { setAnalysisMode("bestball"); setAnalyzed(null); setInput(""); setExportedDataUrl(null); }
+            }}
+          >
             <button
               onClick={() => { setAnalysisMode("bestball"); setAnalyzed(null); setInput(""); setExportedDataUrl(null); }}
               style={{
@@ -5814,14 +5822,7 @@ Analyze this best ball roster. Return JSON only.`;
               <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "#666" }}>Yahoo: League → Draft shows full names.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "#888" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
-                <div><span style={{ color: "#4ade80", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze.</div>
-              </div>
-              <div style={{ fontSize: "11px", color: "#888", marginTop: "9px", paddingTop: "8px", borderTop: "1px solid #1e3a28", lineHeight: 1.6 }}>
-                <span style={{ color: "#aaa", fontWeight: 600 }}>Best format:</span> one player per line, pick number at the end —
-                <div style={{ marginTop: "4px", fontFamily: "inherit", color: "#7dd3a8", background: "#0a140e", borderRadius: "3px", padding: "6px 9px" }}>
-                  Jayden Daniels 64<br/>Bijan Robinson 2<br/>Nico Collins 19
-                </div>
-                <span style={{ color: "#666" }}>Pick numbers are optional — names alone still work (you just won't get ADP value/reach flags).</span>
+                <div><span style={{ color: "#4ade80", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "#666" }}>Pick numbers optional.</span></div>
               </div>
             </div>
             {/* === EMPTY-STATE CTA ===
