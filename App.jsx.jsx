@@ -4654,7 +4654,7 @@ Analyze this best ball roster. Return JSON only.`;
         }
         @keyframes tabGlow {
           0%, 100% { box-shadow: 0 0 0px 0px rgba(74, 222, 128, 0); }
-          50%       { box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.25); }
+          50%       { box-shadow: 0 0 18px 5px rgba(74, 222, 128, 0.5); }
         }
         /* Analyze button glow — mirrors upload tab, active when input has text */
         .analyze-glow {
