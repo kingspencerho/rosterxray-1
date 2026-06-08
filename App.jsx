@@ -642,7 +642,11 @@ const VERDICTS = {
   "jadarian price": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital, run-first scheme, Charbonnet ACL", confidence: "HIGH" },
   "kc concepcion": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital at R5 ADP, WR1 role, vacated targets", confidence: "HIGH" },
   "carnell tate": { verdict: "TARGET", date: "2026-05-19", reason: "R1 capital, WR1 role confirmed, refined route runner", confidence: "HIGH" },
-  "kyler murray": { verdict: "TARGET", date: "2026-05-19", reason: "Top-5 QB ceiling at QB17 IF wins job. MIN W16-17 elite", confidence: "HIGH (conditional)" },
+  "kyler murray": { verdict: "TARGET", date: "2026-06-07", reason: "Heavy favorite to win the MIN starting job per reports — not confirmed yet but high probability. MIN W16-17 playoff window is elite. Top-5 QB ceiling at a significant ADP discount if he wins the job.", confidence: "MEDIUM-HIGH" },
+  "justin jefferson": { verdict: "TARGET", date: "2026-06-07", reason: "Elite WR1 regardless of QB — Jefferson creates separation at a rate that transcends scheme. Kyler Murray (heavy favorite for MIN job) is a significant ceiling upgrade over Darnold. If Murray wins the job, Jefferson becomes a top-3 overall pick.", confidence: "HIGH" },
+  "jordan addison": { verdict: "TARGET", date: "2026-06-07", reason: "MIN WR2 with real upside tied directly to the QB situation. Kyler Murray heavily favored to start — if confirmed, Addison's ceiling jumps materially as a field-stretcher in a pass-volume offense. QB situation unresolved but trending right.", confidence: "MEDIUM" },
+  "tj hockenson": { verdict: "hold", date: "2026-06-07", reason: "Returning from ACL — health is the primary question, not scheme fit. If healthy, Murray's strong TE usage history (McBride in ARI) is a real upside signal. ADP reflects the injury discount; worth the dart if he's fully cleared at camp.", confidence: "MEDIUM" },
+  "t.j. hockenson": { verdict: "hold", date: "2026-06-07", reason: "Returning from ACL — health is the primary question, not scheme fit. If healthy, Murray's strong TE usage history (McBride in ARI) is a real upside signal. ADP reflects the injury discount; worth the dart if he's fully cleared at camp.", confidence: "MEDIUM" },
   "tyler shough": { verdict: "TARGET", date: "2026-06-03", reason: "Closed 2025 with 22+ PPG in last 3 starts, locked NO job, ADP reflects real momentum", confidence: "MEDIUM-HIGH" },
   "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
@@ -661,6 +665,12 @@ const VERDICTS = {
   "stefon diggs": { verdict: "HARD FADE", date: "2026-05-26", reason: "Free agent, no team, effectively retired", confidence: "HIGH" },
   "christian mccaffrey": { verdict: "hold", date: "2026-06-04", reason: "Elite talent but injury fragility is a real ADP risk at this price", confidence: "MEDIUM" },
   "cmc": { verdict: "hold", date: "2026-06-04", reason: "Elite talent but injury fragility is a real ADP risk at this price", confidence: "MEDIUM" },
+  "travis hunter": { verdict: "TARGET", date: "2026-06-07", reason: "JAX offense is established — Liam Coen's second year brings real continuity; Hunter's route tree and target share are no longer unproven. Legitimate WR2 upside with QB1 chemistry built.", confidence: "MEDIUM-HIGH" },
+  "brian thomas": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
+  "brian thomas jr": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
+  "trevor lawrence": { verdict: "TARGET", date: "2026-06-07", reason: "Coen year 2 removes the offensive system uncertainty that capped Lawrence in 2025. Full offseason in the scheme, established WR room with Thomas and Hunter — QB upside is real if health holds.", confidence: "MEDIUM-HIGH" },
+  "jj mccarthy": { verdict: "fade", date: "2026-06-07", reason: "Kyler Murray is the heavy favorite for the MIN starting job per reports — McCarthy is effectively the backup until proven otherwise. No standalone redraft value. Handcuff only if you hold Murray.", confidence: "HIGH" },
+  "j.j. mccarthy": { verdict: "fade", date: "2026-06-07", reason: "Kyler Murray is the heavy favorite for the MIN starting job per reports — McCarthy is effectively the backup until proven otherwise. No standalone redraft value. Handcuff only if you hold Murray.", confidence: "HIGH" },
 };
 
 // ============ 2026 NFL COACHING REFERENCE (verified June 2026) ============
