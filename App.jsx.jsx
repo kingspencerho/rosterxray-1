@@ -631,6 +631,7 @@ const RECENT_NEWS = {
   "michael penix jr": "Recovering from torn ACL — limits competition with Tua for ATL starting job. Contingent value only.",
   "drake london": "ATL WR1 in confirmed 2026 offense with Tua as heavy favorite for starting job. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks.",
   "zachariah branch": "ATL dart WR with same three-week soft window as London. Near-free at ADP 198. Tua as heavy favorite starter unlocks the entire ATL stack.",
+  "oscar delp": "NO drafted Delp as a developmental TE2 behind Juwan Johnson. 6-5/245, 4.49 40, 38-inch vertical — legitimate athleticism. Kittle comp per Saints Wire. Different skill set from Johnson (blocker/receiver vs. gadget/red zone) means complementary deployment is plausible in Shough's play-action system. Free dart in three soft playoff weeks.",
 };
 
 // Player verdicts from memory — date-stamped for freshness check
@@ -680,6 +681,7 @@ const VERDICTS = {
   "jordyn tyson": { verdict: "TARGET", date: "2026-06-10", reason: "8th overall pick, immediate WR2 role in confirmed Shough offense. NO W15-17 all soft. R1 capital at mid-round ADP — real discount.", confidence: "MEDIUM-HIGH" },
   "drake london": { verdict: "TARGET", date: "2026-06-10", reason: "ATL WR1 with Tua as heavy favorite for starting role. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks. Best non-NO window player at his ADP.", confidence: "HIGH" },
   "zachariah branch": { verdict: "TARGET", date: "2026-06-10", reason: "ATL dart WR in three-week soft window at near-free ADP 198. Same schedule as London — W15 @WAS, W16 vs TB, W17 vs NO. Free lottery ticket if Tua wins job.", confidence: "SPECULATIVE" },
+  "oscar delp": { verdict: "TARGET", date: "2026-06-10", reason: "NO drafted Delp (R2/R3 capital) as TE2 behind Juwan Johnson. 6-5/245, 4.49 40, Kittle comp per Saints Wire. Complementary skill set — blocker/receiver vs. Johnson's gadget/red zone role. Shough play-action scheme targets middle of field. Real target path at near-free ADP in three soft playoff weeks.", confidence: "SPECULATIVE" },
   "tua tagovailoa": { verdict: "TARGET", date: "2026-06-10", reason: "Signed with ATL as heavy favorite — Penix recovering from torn ACL. ATL W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks at ~207 ADP. Near-free QB dart with clean window. Confirm starter at camp.", confidence: "MEDIUM-HIGH" },
   "brian thomas": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "brian thomas jr": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
