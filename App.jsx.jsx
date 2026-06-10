@@ -623,6 +623,14 @@ const RECENT_NEWS = {
   "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
   "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
   "myles garrett": "Garrett was traded to LAR (Jared Verse + 2027 1st + picks), no longer on CLE.",
+  "tyler shough": "Saints officially confirmed Shough as franchise QB for 2026. Offensive Rookie of the Year 2025. Saints spent second-most on offense in free agency to support him — Etienne, Edwards, Fant all signed. No camp battle.",
+  "chris olave": "Locked in as Shough WR1 in confirmed Saints offense. Jordyn Tyson (8th overall pick) is WR2. Full target share clarity.",
+  "jordyn tyson": "Drafted 8th overall by NO as Shough's primary weapon. Immediate WR2 role in confirmed 2026 Saints offense with Olave as WR1.",
+  "tua tagovailoa": "Signed with ATL as heavy favorite for starting job. Michael Penix recovering from torn ACL limits competition. ATL W15-17 all soft matchups. Three-week soft window at near-free ADP. Confirm at camp.",
+  "michael penix": "Recovering from torn ACL — limits competition with Tua for ATL starting job. Contingent value only.",
+  "michael penix jr": "Recovering from torn ACL — limits competition with Tua for ATL starting job. Contingent value only.",
+  "drake london": "ATL WR1 in confirmed 2026 offense with Tua as heavy favorite for starting job. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks.",
+  "zachariah branch": "ATL dart WR with same three-week soft window as London. Near-free at ADP 198. Tua as heavy favorite starter unlocks the entire ATL stack.",
 };
 
 // Player verdicts from memory — date-stamped for freshness check
@@ -649,7 +657,7 @@ const VERDICTS = {
   "jordan addison": { verdict: "TARGET", date: "2026-06-07", reason: "MIN WR2 with real upside tied directly to the QB situation. Kyler Murray heavily favored to start — if confirmed, Addison's ceiling jumps materially as a field-stretcher in a pass-volume offense. QB situation unresolved but trending right.", confidence: "MEDIUM" },
   "tj hockenson": { verdict: "hold", date: "2026-06-07", reason: "Returning from ACL — health is the primary question, not scheme fit. If healthy, Murray's strong TE usage history (McBride in ARI) is a real upside signal. ADP reflects the injury discount; worth the dart if he's fully cleared at camp.", confidence: "MEDIUM" },
   "t.j. hockenson": { verdict: "hold", date: "2026-06-07", reason: "Returning from ACL — health is the primary question, not scheme fit. If healthy, Murray's strong TE usage history (McBride in ARI) is a real upside signal. ADP reflects the injury discount; worth the dart if he's fully cleared at camp.", confidence: "MEDIUM" },
-  "tyler shough": { verdict: "TARGET", date: "2026-06-03", reason: "Closed 2025 with 22+ PPG in last 3 starts, locked NO job, ADP reflects real momentum", confidence: "MEDIUM-HIGH" },
+  "tyler shough": { verdict: "TARGET", date: "2026-06-10", reason: "Confirmed NO franchise QB for 2026 — Saints officially committed, built entire offense around him. Offensive Rookie of the Year 2025, 250.7 pass yds/gm in starts (would rank 6th in NFL). Saints spent second-most on offense in free agency: Etienne, Edwards, Fant. No camp battle — the job is his.", confidence: "HIGH" },
   "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
   "harold fannin": { verdict: "TARGET", date: "2026-06-03", reason: "72/731/6 as rookie, 31% target share, Monken now HC brings same pass-heavy identity as HC", confidence: "HIGH" },
@@ -668,6 +676,11 @@ const VERDICTS = {
   "christian mccaffrey": { verdict: "hold", date: "2026-06-04", reason: "Elite talent but injury fragility is a real ADP risk at this price", confidence: "MEDIUM" },
   "cmc": { verdict: "hold", date: "2026-06-04", reason: "Elite talent but injury fragility is a real ADP risk at this price", confidence: "MEDIUM" },
   "travis hunter": { verdict: "TARGET", date: "2026-06-07", reason: "JAX offense is established — Liam Coen's second year brings real continuity; Hunter's route tree and target share are no longer unproven. Legitimate WR2 upside with QB1 chemistry built.", confidence: "MEDIUM-HIGH" },
+  "chris olave": { verdict: "TARGET", date: "2026-06-10", reason: "Confirmed NO WR1 in fully committed Shough offense. Tyson as WR2 absorbs some targets but Olave remains the primary. Three soft playoff weeks — W15 @TB, W16 vs ARI, W17 @ATL.", confidence: "HIGH" },
+  "jordyn tyson": { verdict: "TARGET", date: "2026-06-10", reason: "8th overall pick, immediate WR2 role in confirmed Shough offense. NO W15-17 all soft. R1 capital at mid-round ADP — real discount.", confidence: "MEDIUM-HIGH" },
+  "drake london": { verdict: "TARGET", date: "2026-06-10", reason: "ATL WR1 with Tua as heavy favorite for starting role. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks. Best non-NO window player at his ADP.", confidence: "HIGH" },
+  "zachariah branch": { verdict: "TARGET", date: "2026-06-10", reason: "ATL dart WR in three-week soft window at near-free ADP 198. Same schedule as London — W15 @WAS, W16 vs TB, W17 vs NO. Free lottery ticket if Tua wins job.", confidence: "SPECULATIVE" },
+  "tua tagovailoa": { verdict: "TARGET", date: "2026-06-10", reason: "Signed with ATL as heavy favorite — Penix recovering from torn ACL. ATL W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks at ~207 ADP. Near-free QB dart with clean window. Confirm starter at camp.", confidence: "MEDIUM-HIGH" },
   "brian thomas": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "brian thomas jr": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "trevor lawrence": { verdict: "TARGET", date: "2026-06-07", reason: "Coen year 2 removes the offensive system uncertainty that capped Lawrence in 2025. Full offseason in the scheme, established WR room with Thomas and Hunter — QB upside is real if health holds.", confidence: "MEDIUM-HIGH" },
@@ -749,9 +762,9 @@ const SITUATIONS = {
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   // === QB UNCERTAINTY FLAGS ===
   // These suppress stack credit and cap pass-catcher ceilings via qb_uncertainty risk flag
-  "michael penix": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
-  "michael penix jr": { verdict: "fade", trend: "stable", trendNote: "ATL QB competition with Tua Tagovailoa — starting role unconfirmed, treat as contingent play until camp settles", situationFlags: [], riskFlags: ["qb_uncertainty"] },
-  "tua tagovailoa": { verdict: "fade", trend: "stable", trendNote: "Signed with ATL, competing with Penix for starting role — new team, unproven situation, no longer on MIA", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "michael penix": { verdict: "fade", date: "2026-06-10", reason: "Recovering from torn ACL — limits his ability to compete with Tua Tagovailoa for ATL starting job. Contingent value only; if Penix wins job same ATL three-week soft window applies but health risk is real.", confidence: "SPECULATIVE" },
+  "michael penix jr": { verdict: "fade", date: "2026-06-10", reason: "Recovering from torn ACL — limits his ability to compete with Tua Tagovailoa for ATL starting job. Contingent value only; if Penix wins job same ATL three-week soft window applies but health risk is real.", confidence: "SPECULATIVE" },
+  "tua tagovailoa": { verdict: "TARGET", date: "2026-06-10", reason: "Signed with ATL as heavy favorite for starting job — Penix recovering from torn ACL limits competition. ATL W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks at near-free ADP. Confirm starter at camp before stacking.", confidence: "MEDIUM-HIGH" },
   "aaron rodgers": { verdict: "fade", trend: "falling", trendNote: "Age 42 in 2026, injury history real concern — Howard and Allar capable of pushing for snaps if Rodgers struggles early", situationFlags: [], riskFlags: ["injury_history"] },
   "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
