@@ -622,7 +622,7 @@ const RECENT_NEWS = {
   "eli stowers": "Stowers won the Mackey Award in 2025; with Goedert as bridge and AJ Brown gone from PHI, his TE1 path accelerated.",
   "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
   "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
-  "myles garrett": "Garrett was traded to LAR (Jared Verse + 2027 1st + picks), no longer on CLE.",
+  "myles garrett": "Garrett was traded from CLE to LAR. CLE received Jared Verse + 2027 1st + picks in return. Pass rush remains elite at CLE via Verse. LAR upgraded significantly.",
   "tyler shough": "Saints officially confirmed Shough as franchise QB for 2026. Offensive Rookie of the Year 2025. Saints spent second-most on offense in free agency to support him — Etienne, Edwards, Fant all signed. No camp battle.",
   "chris olave": "Locked in as Shough WR1 in confirmed Saints offense. Jordyn Tyson (8th overall pick) is WR2. Full target share clarity.",
   "jordyn tyson": "Drafted 8th overall by NO as Shough's primary weapon. Immediate WR2 role in confirmed 2026 Saints offense with Olave as WR1.",
@@ -1373,12 +1373,13 @@ const OFFSEASON_ADJ_2026 = {
   BAL: { wr: -1.0, rb: -0.5, te: -0.5, note: "Minter DC promotion, Humphrey healthy" },
   CAR: { wr: +1.5, rb: +1.0, te: +1.0, note: "Lost Brian Burns, thin secondary" },
   LAR: { wr: -1.0, rb: -0.5, te: -0.5, note: "Myles Garrett arrived (Verse + picks), pass rush upgraded — tougher matchup" },
-  CLE: { wr: -1.0, rb: -0.5, te: -0.5, note: "Verse arrival strengthens pass rush" },
+  CLE: { wr: -1.5, rb: -1.0, te: -1.0, note: "Jared Verse arrived from LAR in Myles Garrett trade — pass rush remains elite, defense doesn't regress despite losing Garrett" },
   NYG: { wr: +1.5, rb: +1.0, te: +1.0, note: "Rebuilding D, bottom-5 projection" },
   WAS: { wr: +1.0, rb: +0.5, te: +0.5, note: "Full rebuild, Payne age concern" },
   KC:  { wr: -0.5, rb: -0.5, te: -0.5, note: "Spagnuolo continuity, secondary intact" },
   JAX: { wr: -1.0, rb: -0.5, te: -0.5, note: "New DC, cap space used on defense" },
   DAL: { wr: +2.0, rb: +1.5, te: +1.5, note: "Parsons + Diggs gone, bottom-3 projection" },
+  GB:  { wr: -1.5, rb: -1.0, te: -1.0, note: "Micah Parsons arrived and healthy by 2026 — top-10 defense projection when active" },
 };
 
 const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
