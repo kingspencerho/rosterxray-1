@@ -1368,6 +1368,79 @@ const COACHING_ADJ = {
   TEN: { all: +1.0, note: "Saleh needs time, bottom-5" },
 };
 
+// 2026 NFL Playoff Week Game Totals — Early-season reference (Yahoo Sports, May 24 2026)
+// ⚠️ Subject to change throughout season — use as directional reference only
+// Format: [spread (home perspective), total]
+const PLAYOFF_GAME_TOTALS = {
+  W15: [
+    { away: "DAL", home: "LAR", spread: -5.5, total: 52.5, note: "Highest W15 total" },
+    { away: "CHI", home: "BUF", spread: -3.5, total: 51.5, note: "2nd highest W15" },
+    { away: "SF",  home: "LAC", spread: -2.5, total: 47.5 },
+    { away: "IND", home: "TEN", spread: -1.5, total: 47.5 },
+    { away: "CIN", home: "CAR", spread: -2.5, total: 47.5 },
+    { away: "ATL", home: "WAS", spread: -3.5, total: 46.5 },
+    { away: "DET", home: "MIN", spread: -1.5, total: 46.5 },
+    { away: "BAL", home: "PIT", spread: -2.5, total: 45.5 },
+    { away: "MIA", home: "GB",  spread: -10.5, total: 45.5 },
+    { away: "NO",  home: "TB",  spread: -3.5, total: 45.5 },
+    { away: "NE",  home: "KC",  spread: -2.5, total: 45.5 },
+    { away: "SEA", home: "PHI", spread: -1.5, total: 43.5 },
+    { away: "JAX", home: "HOU", spread: -3.0, total: 43.5 },
+    { away: "NYJ", home: "ARI", spread: -1.5, total: 41.5 },
+    { away: "DEN", home: "LV",  spread: -4.5, total: 41.5 },
+    { away: "CLE", home: "NYG", spread: -4.5, total: 40.5 },
+  ],
+  W16: [
+    { away: "CIN", home: "IND", spread: -1.5, total: 52.5, note: "Highest W16 total" },
+    { away: "JAX", home: "DAL", spread: -2.5, total: 51.5, note: "2nd highest W16" },
+    { away: "NYG", home: "DET", spread: -5.5, total: 48.5, note: "3rd highest W16" },
+    { away: "LAR", home: "SEA", spread: -1.5, total: 47.5, note: "Divisional — elevated ceiling" },
+    { away: "GB",  home: "CHI", spread: -1.5, total: 47.5 },
+    { away: "BUF", home: "DEN", spread: -1.5, total: 46.5 },
+    { away: "WAS", home: "MIN", spread: -2.5, total: 46.5 },
+    { away: "SF",  home: "KC",  spread: -2.5, total: 46.5 },
+    { away: "TB",  home: "ATL", spread: -1.5, total: 45.5 },
+    { away: "LAC", home: "MIA", spread: -7.0, total: 44.5 },
+    { away: "ARI", home: "NO",  spread: -5.5, total: 44.5 },
+    { away: "CLE", home: "BAL", spread: -9.5, total: 43.5 },
+    { away: "TEN", home: "LV",  spread: -1.5, total: 42.5 },
+    { away: "NE",  home: "NYJ", spread: -6.5, total: 41.5 },
+    { away: "CAR", home: "PIT", spread: -3.5, total: 41.5 },
+    { away: "HOU", home: "PHI", spread: -2.5, total: 41.5, note: "Lowest major W16 total — PHI D suppresses scoring" },
+  ],
+  W17: [
+    { away: "BAL", home: "CIN", spread: -1.5, total: 51.5, note: "Highest W17 total — championship ceiling game" },
+    { away: "NYG", home: "DAL", spread: -4.5, total: 49.5, note: "Tied 2nd highest W17" },
+    { away: "DET", home: "CHI", spread: -1.5, total: 49.5, note: "Tied 2nd highest W17" },
+    { away: "WAS", home: "JAX", spread: -3.5, total: 48.5 },
+    { away: "LAR", home: "TB",  spread: -3.5, total: 48.5 },
+    { away: "BUF", home: "MIA", spread: -7.5, total: 47.5 },
+    { away: "KC",  home: "LAC", spread: -1.5, total: 45.5 },
+    { away: "PHI", home: "SF",  spread: -1.5, total: 45.5 },
+    { away: "NO",  home: "ATL", spread: -1.5, total: 44.5 },
+    { away: "IND", home: "CLE", spread: -1.5, total: 43.5 },
+    { away: "DEN", home: "NE",  spread: -2.5, total: 42.5 },
+    { away: "PIT", home: "TEN", spread: -1.5, total: 42.5 },
+    { away: "LV",  home: "ARI", spread: -1.5, total: 42.5 },
+    { away: "HOU", home: "GB",  spread: -2.5, total: 42.5 },
+    { away: "SEA", home: "CAR", spread: -5.5, total: 42.5 },
+    { away: "MIN", home: "NYJ", spread: -3.5, total: 40.5 },
+  ],
+};
+
+// Game environment label — uses PLAYOFF_GAME_TOTALS to surface o/u context on playoff chips
+// Competitive override: spread ≤ 3 AND total ≥ 46 → "COMPETITIVE" (elevates ceiling despite avg EPA)
+// ⚠️ Early-season lines — subject to change. Labels are directional, not scoring inputs.
+const getGameEnvironmentLabel = (oppRaw, week) => {
+  const weekKey = `W${week}`;
+  const games = PLAYOFF_GAME_TOTALS[weekKey];
+  if (!games) return null;
+  const opp = oppRaw.replace("@", "").trim().toUpperCase();
+  const game = games.find(g => g.away === opp || g.home === opp);
+  if (!game) return null;
+  return { total: game.total };
+};
+
 // 2026 offseason projection adjustments — position-specific deltas
 // Applied ONLY when user selects "2026 Est." mode. Not real data — estimates based on roster moves.
 // Positive delta = easier matchup (defense got worse), negative = harder (defense improved).
@@ -2100,7 +2173,15 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     stack.players.forEach(player => {
       const opps = PLAYOFFS[stack.team] || [];
       opps.forEach((opp, wkIdx) => {
-        const m = getMatchupTier(opp, player.pos, useProjected);
+        let m = getMatchupTier(opp, player.pos, useProjected);
+        // Competitive balance boost: pick'em (|spread| ≤ 3) AND high-scoring (total ≥ 46)
+        // Parity between two good offenses elevates ceiling — raw FPA undersells this environment
+        const wk = [15, 16, 17][wkIdx];
+        const oppClean = opp.replace("@", "").trim().toUpperCase();
+        const gameData = wk ? (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean) : null;
+        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m.score === 2) {
+          m = { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
+        }
         weekScores[wkIdx] += m.score;
         weekDetails[wkIdx].push({ name: player.name, pos: player.pos, ...m });
       });
@@ -3090,6 +3171,16 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       const opp = fullSchedule[wk - 1];
       if (!opp || opp === "BYE") return { week: wk, opp: "BYE", score: 0, tier: "BYE", color: "wall" };
       const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
+      // Competitive balance boost: pick'em game (|spread| ≤ 3) AND high-scoring (total ≥ 46)
+      // Two evenly-matched offenses elevate both ceilings — raw FPA undersells this environment
+      // Hard → Even only: pick'em (|spread| ≤ 2) AND high-scoring (total ≥ 49)
+      // Prevents hard matchups from being penalized as walls in true shootout environments
+      // Does not boost Even or above — preserves tier variety
+      const oppClean = opp.replace("@", "").trim().toUpperCase();
+      const gameData = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean);
+      if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m && m.score === 2) {
+        return { week: wk, opp, ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
+      }
       return { week: wk, opp, ...m };
     });
     // Raw total (unweighted) — used for display chip colors
@@ -7478,15 +7569,28 @@ Analyze this best ball roster. Return JSON only.`;
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
                         {p.playoffMatches.map((m, j) => {
                           const s = tierStyle(m.color);
+                          const env = getGameEnvironmentLabel(m.opp, m.week);
                           return (
-                            <span key={j} style={{
-                              fontSize: "10px",
-                              color: s.text,
-                              fontWeight: 500,
-                              whiteSpace: "nowrap",
-                            }}>
-                              W{m.week} {m.opp}·<span style={{ fontWeight: 700 }}>{m.tier}</span>
-                            </span>
+                            <div key={j} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                              <span style={{
+                                fontSize: "10px",
+                                color: s.text,
+                                fontWeight: 500,
+                                whiteSpace: "nowrap",
+                              }}>
+                                W{m.week} {m.opp}·<span style={{ fontWeight: 700 }}>{m.tier}</span>
+                              </span>
+                              {env && (
+                                <span style={{
+                                  fontSize: "8px",
+                                  color: "#6b7a8d",
+                                  fontWeight: 500,
+                                  letterSpacing: "0.03em",
+                                }}>
+                                  O/U {env.total}
+                                </span>
+                              )}
+                            </div>
                           );
                         })}
                       </div>
