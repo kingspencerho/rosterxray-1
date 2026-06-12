@@ -538,7 +538,7 @@ const ADP_SUPERFLEX = {
 const TOURNAMENTS = {
   main: { name: "General", entries: "4,500", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
-  puppy: { name: "The Puppy", entries: "225k", weights: [1, 2, 1.5], note: "W16 is the kill shot · survive to W17 or go home", format: "standard" },
+  puppy: { name: "The Puppy", entries: "225k", weights: [2, 2, 1.5], note: "W15 (1/10) and W16 (1/5) are both steep cuts — survive both to reach the W17 final", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
 
@@ -2640,10 +2640,17 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   // Tournament-specific peak-week bonuses
   if (tournamentKey === "puppy") {
-    // The Puppy: W16 kill shot — reward stacks with strong W16 specifically
+    // The Puppy: W15 (1/10) and W16 (1/5) are both steep cuts — check both for elite ceiling
+    const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
     const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    if (w15Elite.length >= 1) {
+      strengths.push(`${w15Elite.length} stack(s) with elite W15 ceiling (1/10 cut)`);
+    }
     if (w16Elite.length >= 1) {
-      strengths.push(`${w16Elite.length} stack(s) with elite W16 kill-shot ceiling`);
+      strengths.push(`${w16Elite.length} stack(s) with elite W16 kill-shot ceiling (1/5 cut)`);
+    }
+    if (w15Elite.length === 0 && primaryStacks.length > 0) {
+      weaknesses.push(`No primary stack has elite W15 ceiling — the steepest cut (1/10) of the tournament may be the hardest to clear`);
     }
   } else if (tournamentKey === "bbm7") {
     // BBM VII: W15 spike — reward stacks with strong W15
