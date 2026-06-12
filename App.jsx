@@ -816,7 +816,6 @@ const SITUATIONS = {
   "jaleel mclaughlin": { verdict: "fade", trend: "stable", trendNote: "DEN depth behind Dobbins/Harvey/Coleman — four-way committee, essentially a practice squad candidate", situationFlags: [], riskFlags: ["confirmed_committee"] },
   // JAX — both Tuten and Rodriguez are targets in Liam Coen offense, but genuine committee risk
   "chris rodriguez": { verdict: "TARGET", trend: "stable", trendNote: "JAX committee with Tuten in elite Liam Coen offense — real carries and workhorse path if Tuten slips; ADP value makes the risk worthwhile", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
-  "lequint allen": { verdict: "fade", trend: "stable", trendNote: "JAX makeshift committee — neither Allen nor Rodriguez has locked a lead role; value is situational", situationFlags: [], riskFlags: ["confirmed_committee"] },
   // TEN — Singleton is a target despite competition; mediocre alternatives keep the path open
   "nicholas singleton": { verdict: "TARGET", trend: "stable", trendNote: "TEN dart despite Pollard/Spears competition — Cam Ward era offense needs a receiving back, Singleton's pass-catching profile fits; competition is mediocre enough to trust the path at his ADP cost", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: ["creeping_committee"] },
   // TB — three-way committee risk; Irving is the lead but Tucker (goal line) and Gainwell (passing downs) carve into ceiling
@@ -1428,7 +1427,44 @@ const PLAYOFF_GAME_TOTALS = {
   ],
 };
 
-// Game environment label — uses PLAYOFF_GAME_TOTALS to surface o/u context on playoff chips
+// === GAME SELECTION MATRIX (2026 Playoff Schedule) ===
+// From Correlated_Alpha_Build_Pro.md. Highlights specific game nodes for AI context:
+// - highPace: pace/efficiency-driven shootout candidates — Macro Volume Multipliers should
+//   override raw matchup grades for these games (neutral-script pace, PPP, PROE > defensive rank).
+// - hiddenVolatility: games that look quiet on paper but carry real ceiling/script-break risk —
+//   worth flagging in bring-back and standout notes even if FPA looks average.
+// AI-prompt context only — does not affect scoring, surfaced via aiNutshell/bringBackNotes/standoutDetails.
+const GAME_SELECTION_MATRIX = {
+  W15: {
+    highPace: ["DET@MIN", "SF@LAC", "SEA@PHI", "BAL@PIT"],
+    hiddenVolatility: ["IND@TEN", "ARI@NYJ"],
+  },
+  W16: {
+    highPace: ["HOU@PHI", "KC@SF", "BUF@DEN"],
+    hiddenVolatility: ["CHI@GB", "LV@TEN"],
+  },
+  W17: {
+    highPace: ["BAL@CIN", "BUF@MIA", "HOU@GB", "SF@PHI", "DET@CHI"],
+    hiddenVolatility: ["SEA@CAR", "IND@CLE"],
+  },
+};
+
+// Look up whether a given matchup (team + opponent string like "@MIN" or "MIN") falls into
+// a Game Selection Matrix node for the given playoff week. Returns null or { type, label }.
+const getGameSelectionNode = (team, oppRaw, week) => {
+  const wk = GAME_SELECTION_MATRIX[`W${week}`];
+  if (!wk) return null;
+  const opp = (oppRaw || "").replace("@", "").trim().toUpperCase();
+  const t = (team || "").toUpperCase();
+  const pairKey = [t, opp].sort().join("@");
+  const matches = (list) => list.some(node => {
+    const [a, b] = node.split("@");
+    return [a, b].sort().join("@") === pairKey;
+  });
+  if (matches(wk.highPace)) return { type: "highPace", label: "High-Pace Target" };
+  if (matches(wk.hiddenVolatility)) return { type: "hiddenVolatility", label: "Hidden Volatility Pivot" };
+  return null;
+};
 // Competitive override: spread ≤ 3 AND total ≥ 46 → "COMPETITIVE" (elevates ceiling despite avg EPA)
 // ⚠️ Early-season lines — subject to change. Labels are directional, not scoring inputs.
 const getGameEnvironmentLabel = (oppRaw, week) => {
@@ -4446,16 +4482,25 @@ Wan'Dale Robinson`;
 
       // === STANDOUT CONTEXT for prompt ===
       const standoutsForPrompt = !isRedraft
-        ? (result.rosterStandouts || []).map(s =>
-            `${s.player.name} (${s.player.pos}·${s.player.team}) — label: ${s.label}`
-          ).join(" | ")
+        ? (result.rosterStandouts || []).map(s => {
+            const opps = PLAYOFFS[s.player.team] || [];
+            const nodeTags = opps.map((opp, i) => {
+              const node = getGameSelectionNode(s.player.team, opp, 15 + i);
+              return node ? `W${15+i}:${node.label}` : null;
+            }).filter(Boolean);
+            const nodeStr = nodeTags.length ? ` [${nodeTags.join(", ")}]` : "";
+            return `${s.player.name} (${s.player.pos}·${s.player.team}) — label: ${s.label}${nodeStr}`;
+          }).join(" | ")
         : "";
 
       // === BRING-BACK CONTEXT ===
       const bringBackForPrompt = !isRedraft
-        ? (result.bringBacks || []).map(bb =>
-            `${bb.week} ${bb.teamA?.team || bb.stackTeam} vs ${bb.teamB?.team || bb.opponent}: ${(bb.allPieces || [...(bb.stackPieces||[]), ...(bb.bringBackPieces||[])]).map(p => `${p.name} ${p.pos}`).join(", ")}`
-          ).join(" | ")
+        ? (result.bringBacks || []).map(bb => {
+            const weekNum = bb.week?.replace("W", "");
+            const node = getGameSelectionNode(bb.teamA?.team || bb.stackTeam, bb.teamB?.team || bb.opponent, weekNum);
+            const nodeTag = node ? ` [${node.label}]` : "";
+            return `${bb.week} ${bb.teamA?.team || bb.stackTeam} vs ${bb.teamB?.team || bb.opponent}${nodeTag}: ${(bb.allPieces || [...(bb.stackPieces||[]), ...(bb.bringBackPieces||[])]).map(p => `${p.name} ${p.pos}`).join(", ")}`;
+          }).join(" | ")
         : "";
 
       // === LINEUP CONFIDENCE CONTEXT (redraft) ===
@@ -4496,6 +4541,25 @@ CRITICAL DATA PRIORITY — follow this exactly, no exceptions:
 2. "Recent news" in the user prompt = breaking news override. Treat as ground truth. Never contradict it.
 3. Your training knowledge = fallback only, for players not covered by 1 or 2 above.
 If a player appears in situations or recent news, use ONLY that data for their role, team, and situation. Do not blend in your own knowledge about that player.
+
+AMBIGUOUS BACKFIELD FILTER — apply whenever discussing a low-cost RB in an unresolved or committee backfield (riskFlags includes creeping_committee or confirmed_committee, or no clear lead-back role):
+Score the back against these 3 criteria:
+1. Financial Signal: real guaranteed money or premium draft capital invested in this player specifically (not just the team's backfield in general).
+2. Scheme Fit: verified zone-running scheme deployment or a high-PROE offense that creates pass-catching/receiving-back volume.
+3. Vulnerable Incumbent: the back ahead of them on the depth chart carries real injury risk, is in the RB age-decline zone (28+), or has a declining efficiency trend.
+2-of-3 met = legitimate dart worth rostering at the price — say so plainly. 0-1 met = the ambiguity is real risk, not opportunity — call it what it is, a depth piece with no clear path. Use this to sharpen pivotNotes, standoutDetails, and benchMoveNotes for any committee RB — don't just describe the committee, score it.
+
+CONDITIONAL FORCED STACKING / REACH MATRIX — apply to pivotNotes when the alternative is a stack-fit pick (stackFit: true) AND adpDelta is significantly negative (the alt normally goes well before this pick — i.e. taking it here is a reach):
+1. High Scarcity (elite TE, or QB in a stack-completing slot): a 1+ round reach (adpDelta roughly -12 or beyond) is justified — say the reach is worth it, the loop won't survive to the next pick.
+2. High Volatility (WR completing a correlated loop): a 0.5-1 round reach (adpDelta roughly -6 to -12) is justified only if it locks in real correlation — say so if it qualifies, otherwise call it a stretch.
+3. Low Scarcity (deep RB/WR pools, replaceable role): do NOT endorse the reach — the position is deep enough that a correlated piece returns naturally. If adpDelta is this negative for a low-scarcity position, say the hold was the better play and this pivot reaches too far for what it buys.
+If the alt isn't a meaningful reach (adpDelta near 0 or positive), this matrix doesn't apply — just evaluate the swap on matchups/correlation as usual.
+
+MACRO VOLUME MULTIPLIERS & FUNNEL FILTER — apply when evaluating any playoff game tagged with a Game Selection Matrix label in bringBackNotes or standoutDetails:
+- "High-Pace Target" games: override the raw defensive matchup tier with pace/efficiency reasoning — these are shootout candidates where neutral-script pace, points-per-play, and a positive PROE offense matter more than the opponent's raw defensive rank. Treat these as ceiling games even if the FPA tier looks merely average.
+- "Hidden Volatility Pivot" games: these look quiet on paper but carry real script-break risk — flag the volatility explicitly (a game that could go either way is not a "safe, boring matchup," it's a coin-flip ceiling spot).
+- Funnel Filter (apply using your own knowledge of 2025-26 defenses, independent of the matrix tags): if a defense is a "pass funnel" — stout against the run but soft against the pass — flag that as a reason a pass-catcher's matchup is better than its raw FPA tier suggests, since that defense forces additional passing volume.
+If a game has no Game Selection Matrix tag, evaluate it on matchup tier and competitive balance as normal — these tags are additive context, not a replacement for the core matchup read.
 
 LANGUAGE RULES — non-negotiable:
 - BANNED WORDS: delve, testament, crucial, landscape, tapestry, unlock, potentially, might, could, perhaps, seems, appears. Never use these.
