@@ -4173,10 +4173,14 @@ const fileToBase64 = (file) => new Promise((resolve, reject) => {
           type: "text",
           text: `These are screenshots of a fantasy football best ball draft roster (likely Underdog, Yahoo, Sleeper, or similar).
 
-Extract every player name from the roster. Return ONLY a JSON array of player name strings in draft order if pick numbers are visible. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
+Extract every player name from the roster, in draft order. For each player, also look for a "Pick" number — the overall draft slot they were selected at.
+
+Underdog roster screens typically show three numbers per player: Bye (1-18), ADP (often decimal, e.g. 96.4), and Pick (integer, the actual draft slot, often explicitly labeled "Pick"). Only extract the Pick number — do NOT use Bye or ADP. If a column is explicitly labeled "Pick", use that value. If no Pick number/label is visible for a player, omit it — never guess or substitute ADP/Bye for Pick.
+
+Return ONLY a JSON array of strings, one per player, in draft order. Each string is the player's full name, followed by a space and the Pick number if one was found (e.g. "Adam Randall 194"), or just the name if no Pick number was visible (e.g. "Caleb Williams"). No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
 
 Example output exactly:
-["Bijan Robinson","Tetairoa McMillan","Trey McBride","Caleb Williams"]
+["Bijan Robinson 2","Tetairoa McMillan 7","Trey McBride 13","Caleb Williams"]
 
 Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. Deduplicate if the same player appears twice.`
         }
