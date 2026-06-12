@@ -2742,17 +2742,55 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     score += qbBringBacks.length * 0.35;
   }
 
+  // === LATE-ROUND EDGE AUDIT (picks 180+) ===
+  // Consolidate naked RB / no-edge orphan / missing W17 bring-back flags into one line per
+  // late pick so the same player doesn't trigger multiple separate weaknesses or penalties.
+  const LATE_PICK_THRESHOLD = 180;
+  const lateFlaggedNames = new Set();
+  const lateAuditLines = [];
+
+  if (hasPickNumbers) {
+    valid.forEach(p => {
+      if (!p.actualPick || p.actualPick < LATE_PICK_THRESHOLD) return;
+
+      const flagParts = [];
+
+      const orphanMatch = orphans.find(o => o.name === p.name);
+      if (orphanMatch && orphanMatch.tier === "No Edge") flagParts.push("No Edge orphan");
+
+      const isUninsulatedNaked = uninsulatedNakedRBs.some(rb => rb.name === p.name);
+      if (isUninsulatedNaked) flagParts.push("naked RB, no scheme/volume signal");
+
+      const inW17BringBack = mergedBringBacks.some(bb =>
+        bb.week === "W17" && (bb.allPieces || []).some(piece => piece.name === p.name)
+      );
+      if (!inW17BringBack) flagParts.push("lacks W17 bring-back correlation");
+
+      if (flagParts.length > 0) {
+        lateFlaggedNames.add(p.name);
+        lateAuditLines.push(`${p.name} (${p.actualPick}) — ${flagParts.join(" and ")}`);
+      }
+    });
+  }
+
+  if (lateAuditLines.length > 0) {
+    lateAuditLines.forEach(line => weaknesses.push(`Late-round edge check: ${line}`));
+    score -= Math.min(lateAuditLines.length * 0.15, 0.6);
+  }
+
   // Naked RB Insulation — RBs with no stacking loop need standalone volume/scheme signal
-  if (uninsulatedNakedRBs.length > 0) {
+  // (late-pick RBs already covered by the audit above are excluded to avoid double-penalizing)
+  const genericUninsulatedNakedRBs = uninsulatedNakedRBs.filter(rb => !lateFlaggedNames.has(rb.name));
+  if (genericUninsulatedNakedRBs.length > 0) {
     weaknesses.push(
-      `${uninsulatedNakedRBs.length} naked RB(s) without standalone volume/scheme signal: ` +
-      `${uninsulatedNakedRBs.map(rb => rb.name).join(", ")} — no stacking loop, ceiling capped`
+      `${genericUninsulatedNakedRBs.length} naked RB(s) without standalone volume/scheme signal: ` +
+      `${genericUninsulatedNakedRBs.map(rb => rb.name).join(", ")} — no stacking loop, ceiling capped`
     );
-    score -= Math.min(uninsulatedNakedRBs.length * 0.15, 0.6);
+    score -= Math.min(genericUninsulatedNakedRBs.length * 0.15, 0.6);
   }
 
   // Orphan analysis
-  const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge");
+  const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge" && !lateFlaggedNames.has(o.name));
   const strongOrphans = orphans.filter(o => o.tier === "Elite Window" || o.tier === "Strong Matchups");
   if (strongOrphans.length >= 2) {
     strengths.push(`${strongOrphans.length} orphan(s) with strong playoff matchups`);
