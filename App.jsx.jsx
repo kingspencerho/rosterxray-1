@@ -2119,6 +2119,23 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
   });
 
+  // === NAKED RB INSULATION CHECK ===
+  // A "naked" RB has no QB from their team on the roster — no stacking loop.
+  // Insulation = SITUATIONS flags signaling real standalone volume (target_vacuum / scheme_fit / breakout_profile / committee_breaker)
+  const nakedRBs = valid.filter(p => {
+    if (p.pos !== "RB") return false;
+    const teamHasQB = (teamGroups[p.team] || []).some(t => t.pos === "QB");
+    return !teamHasQB;
+  });
+
+  const uninsulatedNakedRBs = nakedRBs.filter(rb => {
+    const sit = SITUATIONS[normalize(rb.name)];
+    const flags = sit?.situationFlags || [];
+    const hasInsulation = flags.includes("scheme_fit") || flags.includes("target_vacuum")
+      || flags.includes("breakout_profile") || flags.includes("committee_breaker");
+    return !hasInsulation;
+  });
+
   // Detect roster size — 20-player rosters (e.g. Big Board) get scaled benchmarks
   const rosterSize = valid.length;
   const is20Round = rosterSize >= 19; // 19+ matched = 20-round draft
@@ -2723,6 +2740,15 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   if (qbBringBacks.length >= 1) {
     strengths.push(`${qbBringBacks.length} game stack(s) with bring-back correlation`);
     score += qbBringBacks.length * 0.35;
+  }
+
+  // Naked RB Insulation — RBs with no stacking loop need standalone volume/scheme signal
+  if (uninsulatedNakedRBs.length > 0) {
+    weaknesses.push(
+      `${uninsulatedNakedRBs.length} naked RB(s) without standalone volume/scheme signal: ` +
+      `${uninsulatedNakedRBs.map(rb => rb.name).join(", ")} — no stacking loop, ceiling capped`
+    );
+    score -= Math.min(uninsulatedNakedRBs.length * 0.15, 0.6);
   }
 
   // Orphan analysis
