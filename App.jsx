@@ -2749,29 +2749,27 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const lateFlaggedNames = new Set();
   const lateAuditLines = [];
 
-  if (hasPickNumbers) {
-    valid.forEach(p => {
-      if (!p.actualPick || p.actualPick < LATE_PICK_THRESHOLD) return;
+  valid.forEach(p => {
+    if (!p.actualPick || p.actualPick < LATE_PICK_THRESHOLD) return;
 
-      const flagParts = [];
+    const flagParts = [];
 
-      const orphanMatch = orphans.find(o => o.name === p.name);
-      if (orphanMatch && orphanMatch.tier === "No Edge") flagParts.push("No Edge orphan");
+    const orphanMatch = orphans.find(o => o.name === p.name);
+    if (orphanMatch && orphanMatch.tier === "No Edge") flagParts.push("No Edge orphan");
 
-      const isUninsulatedNaked = uninsulatedNakedRBs.some(rb => rb.name === p.name);
-      if (isUninsulatedNaked) flagParts.push("naked RB, no scheme/volume signal");
+    const isUninsulatedNaked = uninsulatedNakedRBs.some(rb => rb.name === p.name);
+    if (isUninsulatedNaked) flagParts.push("naked RB, no scheme/volume signal");
 
-      const inW17BringBack = mergedBringBacks.some(bb =>
-        bb.week === "W17" && (bb.allPieces || []).some(piece => piece.name === p.name)
-      );
-      if (!inW17BringBack) flagParts.push("lacks W17 bring-back correlation");
+    const inW17BringBack = mergedBringBacks.some(bb =>
+      bb.week === "W17" && (bb.allPieces || []).some(piece => piece.name === p.name)
+    );
+    if (!inW17BringBack) flagParts.push("lacks W17 bring-back correlation");
 
-      if (flagParts.length > 0) {
-        lateFlaggedNames.add(p.name);
-        lateAuditLines.push(`${p.name} (${p.actualPick}) — ${flagParts.join(" and ")}`);
-      }
-    });
-  }
+    if (flagParts.length > 0) {
+      lateFlaggedNames.add(p.name);
+      lateAuditLines.push(`${p.name} (${p.actualPick}) — ${flagParts.join(" and ")}`);
+    }
+  });
 
   if (lateAuditLines.length > 0) {
     lateAuditLines.forEach(line => weaknesses.push(`Late-round edge check: ${line}`));
