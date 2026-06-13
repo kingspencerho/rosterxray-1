@@ -2168,9 +2168,17 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const uninsulatedNakedRBs = nakedRBs.filter(rb => {
     const sit = SITUATIONS[normalize(rb.name)];
     const flags = sit?.situationFlags || [];
+    const riskFlags = sit?.riskFlags || [];
     const hasInsulation = flags.includes("scheme_fit") || flags.includes("target_vacuum")
       || flags.includes("breakout_profile") || flags.includes("committee_breaker");
-    return !hasInsulation;
+    if (hasInsulation) return false;
+    // Default insulation: a top-36 ADP RB (clear starter-tier draft capital) with no SITUATIONS
+    // entry and no committee risk flag is presumed to have a locked role. Without this, any
+    // bell-cow RB that simply hasn't been manually added to SITUATIONS gets a false "no signal"
+    // flag (e.g. Jonathan Taylor, Kyren Williams before their entries existed).
+    const hasCommitteeRisk = riskFlags.includes("creeping_committee") || riskFlags.includes("confirmed_committee");
+    if (!sit && rb.adp <= 36 && !hasCommitteeRisk) return false;
+    return true;
   });
 
   // Detect roster size — 20-player rosters (e.g. Big Board) get scaled benchmarks
