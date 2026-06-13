@@ -2177,7 +2177,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     // bell-cow RB that simply hasn't been manually added to SITUATIONS gets a false "no signal"
     // flag (e.g. Jonathan Taylor, Kyren Williams before their entries existed).
     const hasCommitteeRisk = riskFlags.includes("creeping_committee") || riskFlags.includes("confirmed_committee");
-    if (!sit && rb.adp <= 36 && !hasCommitteeRisk) return false;
+    if (rb.adp <= 36 && !hasCommitteeRisk) return false;
     return true;
   });
 
