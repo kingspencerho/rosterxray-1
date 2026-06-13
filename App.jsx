@@ -4468,9 +4468,14 @@ Wan'Dale Robinson`;
 
       // === REDRAFT CONTEXT ===
       const playoffLines = isRedraft
-        ? (result.playoffMatchups || []).slice(0, 5).map(p =>
-            `${p.name} (${p.pos}): W15 ${p.w15?.tier || "—"} W16 ${p.w16?.tier || "—"} W17 ${p.w17?.tier || "—"}`
-          ).join("; ")
+        ? (result.playoffMatchups || []).slice(0, 6).map(p => {
+            const matchStr = (p.playoffMatches || []).map(m => {
+              const node = getGameSelectionNode(p.team, m.opp, m.week);
+              const nodeTag = node ? ` [${node.type === "highPace" ? "High-Pace" : "Hidden-Vol"}]` : "";
+              return `W${m.week} ${m.tier || "—"}${m.opp ? ` vs ${m.opp.replace("@","")}` : ""}${nodeTag}`;
+            }).join(", ");
+            return `${p.name} (${p.pos}·${p.team}): ${matchStr}`;
+          }).join("; ")
         : "";
 
       // === PIVOT CONTEXT for prompt ===
@@ -4598,7 +4603,12 @@ gradeModifier rules:
 
 Never reference internal numbers the user cannot see. Plain language only.
 
-Mode: ${isRedraft ? "REDRAFT — focus on floor, schedule, lineup depth, bye weeks, injury insurance. The league structure is provided in the user prompt — use it to calibrate expectations. In a superflex league 3 QBs is correct roster construction, not a problem. In a 14-team league shallow depth is expected. Never penalize correct format-specific construction. Skip pivotNotes, standoutDetails, bringBackNotes — return empty objects for those." : `BEST BALL (${tournamentName}) — focus on ceiling, stacks, playoff window, boom/bust variance. Skip lineupNotes and benchMoveNotes — return empty objects for those.`}`;
+Mode: ${isRedraft ? `REDRAFT — focus on floor, schedule, lineup depth, bye weeks, injury insurance. The league structure is provided in the user prompt — use it to calibrate expectations. In a superflex league 3 QBs is correct roster construction, not a problem. In a 14-team league shallow depth is expected. Never penalize correct format-specific construction. Skip pivotNotes, standoutDetails, bringBackNotes — return empty objects for those.
+
+Apply these frameworks where relevant:
+- AMBIGUOUS BACKFIELD FILTER: for any bench RB in a committee/unresolved backfield, score the 2-of-3 (financial signal, scheme fit, vulnerable incumbent) and use it in benchMoveNotes — 2-of-3 = real stash, 0-1 = dead roster spot.
+- MACRO VOLUME / FUNNEL: for lineupNotes start/sit calls, weight pace/PPP/PROE and pass-funnel defenses over raw matchup tier — a "Hard" matchup against a pass funnel can still be a start for a pass-catcher.
+- GAME SELECTION MATRIX: W15-17 games tagged High-Pace Target or Hidden Volatility Pivot in the prompt should be called out explicitly in lineupNotes for that week — these are the games that decide the championship, treat them with extra weight regardless of raw matchup tier.` : `BEST BALL (${tournamentName}) — focus on ceiling, stacks, playoff window, boom/bust variance. Skip lineupNotes and benchMoveNotes — return empty objects for those.`}`;
 
       // === LEAGUE CONTEXT for AI prompt ===
       const leagueContext = isRedraft ? (() => {
@@ -4799,6 +4809,51 @@ Analyze this best ball roster. Return JSON only.`;
     };
     return map[pos] || { text: "#888", border: "#444", bg: "#1a1a1a" };
   };
+
+  // Highlight player names (full name or last name) inside a strength/weakness
+  // string with a consistent bright color, so names pop out of the colored
+  // body text instead of blending into a wall of green/orange.
+  const highlightPlayerNames = (text, players) => {
+    if (!players || players.length === 0) return text;
+    const names = new Set();
+    players.forEach(p => {
+      if (!p?.name) return;
+      names.add(p.name);
+      const parts = p.name.split(" ");
+      if (parts.length > 1) names.add(parts[parts.length - 1]);
+    });
+    const sorted = [...names].filter(n => n.length > 2).sort((a, b) => b.length - a.length);
+    if (sorted.length === 0) return text;
+    const escaped = sorted.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const pattern = new RegExp(`\\b(${escaped.join("|")})\\b`, "g");
+    const segments = text.split(pattern);
+    return segments.map((seg, i) =>
+      names.has(seg)
+        ? <span key={i} style={{ color: "#22d3ee", fontWeight: 700 }}>{seg}</span>
+        : seg
+    );
+  };
+
+  // Strength/weakness row — replaces the old cramped bulleted <ul><li> list with
+  // breathing room between items and an accent-colored left border per item,
+  // matching the card styling used elsewhere in the app. Body text is tinted
+  // toward the accent color (at reduced opacity) so it reads as colored without
+  // glowing as loud as the full-saturation accent; player names cut through in cyan.
+  const InsightRow = ({ text, color, players }) => (
+    <div style={{
+      background: "#0a0a0a",
+      border: `1px solid ${color}33`,
+      borderLeft: `3px solid ${color}`,
+      borderRadius: "3px",
+      padding: "7px 10px",
+      marginBottom: "6px",
+      fontSize: "12px",
+      lineHeight: 1.55,
+      color: `${color}b3`,
+    }}>
+      {highlightPlayerNames(text, players)}
+    </div>
+  );
 
   // Reusable color-key legend so any-skill users learn the matchup scale once.
   // Green = great matchup for your player, red = brutal.
@@ -5379,7 +5434,7 @@ Analyze this best ball roster. Return JSON only.`;
             }}
           >
             <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-              <span style={{ fontSize: "12px", color: "#4ade80", fontWeight: 700, letterSpacing: "0.05em" }}>
+              <span style={{ fontSize: "12px", color: "#22d3ee", fontWeight: 700, letterSpacing: "0.05em" }}>
                 {TOURNAMENTS[tournament].name}
               </span>
               <span style={{ fontSize: "10px", color: "#555" }}>
@@ -5491,7 +5546,7 @@ Analyze this best ball roster. Return JSON only.`;
               }}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-                <span style={{ fontSize: "12px", color: "#c084fc", fontWeight: 700, letterSpacing: "0.05em" }}>
+                <span style={{ fontSize: "12px", color: "#22d3ee", fontWeight: 700, letterSpacing: "0.05em" }}>
                   {redraftLeague === "custom" ? "⚙ Custom" : REDRAFT_LEAGUES[redraftLeague].name}
                 </span>
                 <span style={{ fontSize: "10px", color: "#555" }}>
@@ -6079,13 +6134,13 @@ Analyze this best ball roster. Return JSON only.`;
               padding: "12px 14px",
               marginBottom: "12px",
             }}>
-              <div style={{ fontSize: "11px", color: "#4ade80", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
+              <div style={{ fontSize: "11px", color: "#22d3ee", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
                 📋 How to paste your roster (15 sec)
               </div>
               <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "#666" }}>Yahoo: League → Draft shows full names.</span></div>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "#4ade80", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "#888" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
-                <div><span style={{ color: "#4ade80", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "#666" }}>Pick numbers optional.</span></div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "#22d3ee", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "#666" }}>Yahoo: League → Draft shows full names.</span></div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "#22d3ee", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "#888" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
+                <div><span style={{ color: "#22d3ee", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "#666" }}>Pick numbers optional.</span></div>
               </div>
             </div>
             {/* === EMPTY-STATE CTA ===
@@ -6323,18 +6378,18 @@ Analyze this best ball roster. Return JSON only.`;
                     )}
                   </div>
                 )}
-                <div style={{ marginTop: "12px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
+                <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
                   <div>
-                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase" }}>Strengths</div>
-                    <ul style={{ margin: "4px 0 0", padding: "0 0 0 16px", fontSize: "12px", color: "#a3e635" }}>
-                      {analyzed.strengths.length > 0 ? analyzed.strengths.map((s, i) => <li key={i}>{s}</li>) : <li style={{ color: "#555" }}>None identified</li>}
-                    </ul>
+                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
+                    {analyzed.strengths.length > 0
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      : <InsightRow text="None identified" color="#555" players={analyzed.valid} />}
                   </div>
                   <div>
-                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase" }}>Weaknesses</div>
-                    <ul style={{ margin: "4px 0 0", padding: "0 0 0 16px", fontSize: "12px", color: "#fb923c" }}>
-                      {analyzed.weaknesses.length > 0 ? analyzed.weaknesses.map((w, i) => <li key={i}>{w}</li>) : <li style={{ color: "#555" }}>None flagged</li>}
-                    </ul>
+                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
+                    {analyzed.weaknesses.length > 0
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      : <InsightRow text="None flagged" color="#555" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -6634,7 +6689,7 @@ Analyze this best ball roster. Return JSON only.`;
                         }}>🔥 CEILING GAME</span>
                       ) : bb.hasQB && (
                         <span style={{
-                          color: "#4ade80", fontWeight: 700, background: "#0d3320",
+                          color: "#22d3ee", fontWeight: 700, background: "#0d3320",
                           border: "1px solid #22c55e66", borderRadius: "3px",
                           padding: "1px 7px", fontSize: "9px",
                         }}>★ QB GAME STACK</span>
@@ -7341,18 +7396,18 @@ Analyze this best ball roster. Return JSON only.`;
                     )}
                   </div>
                 )}
-                <div style={{ marginTop: "12px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
+                <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
                   <div>
-                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase" }}>Strengths</div>
-                    <ul style={{ margin: "4px 0 0", padding: "0 0 0 16px", fontSize: "12px", color: "#a3e635" }}>
-                      {analyzed.strengths.length > 0 ? analyzed.strengths.map((s, i) => <li key={i}>{s}</li>) : <li style={{ color: "#555" }}>None identified</li>}
-                    </ul>
+                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
+                    {analyzed.strengths.length > 0
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      : <InsightRow text="None identified" color="#555" players={analyzed.valid} />}
                   </div>
                   <div>
-                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase" }}>Weaknesses</div>
-                    <ul style={{ margin: "4px 0 0", padding: "0 0 0 16px", fontSize: "12px", color: "#fb923c" }}>
-                      {analyzed.weaknesses.length > 0 ? analyzed.weaknesses.map((w, i) => <li key={i}>{w}</li>) : <li style={{ color: "#555" }}>None flagged</li>}
-                    </ul>
+                    <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
+                    {analyzed.weaknesses.length > 0
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      : <InsightRow text="None flagged" color="#555" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -7995,7 +8050,7 @@ Analyze this best ball roster. Return JSON only.`;
                   Which starters to lock in and who to consider sitting — based on matchup tiers when you have options at that position.
                 </p>
                 <div style={{ display: "flex", gap: "14px", fontSize: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
-                  <span><span style={{ color: "#4ade80", fontWeight: 700 }}>▲ Start</span> <span style={{ color: "#555" }}>— great matchup, lock them in</span></span>
+                  <span><span style={{ color: "#22d3ee", fontWeight: 700 }}>▲ Start</span> <span style={{ color: "#555" }}>— great matchup, lock them in</span></span>
                   <span><span style={{ color: "#f87171", fontWeight: 700 }}>▼ Sit?</span> <span style={{ color: "#555" }}>— tough matchup, bench if you have options</span></span>
                 </div>
                 {analyzed.lineupConfidencePreview.map((wk, i) => (
