@@ -793,6 +793,7 @@ const SITUATIONS = {
   "christian kirk": { verdict: "fade", trend: "falling", trendNote: "Age 30 WR3 in SF behind Evans and Pearsall — career slot profile, Shanahan run-heavy, Stribling 2nd-round pick adds further role pressure", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
   "brandin cooks": { verdict: "fade", trend: "falling", trendNote: "Unsigned FA as of June 2026 — 24 catches/279 yards/0 TDs in 2025 split between NO and BUF; BUF added DJ Moore and drafted Skyler Bell, no clear landing spot; do not draft until team confirmed", situationFlags: [], riskFlags: ["injury_history"] },
+  "kyren williams": { verdict: "hold", trend: "stable", trendNote: "Locked LAR RB1/bell-cow regardless of QB stack — Corum is committee depth, not a threat to lead role", situationFlags: ["scheme_fit"], riskFlags: [] },
   "blake corum": { verdict: "hold", trend: "rising", trendNote: "LAR volume committee back — earned 30-35% snap share in final 5 weeks of 2025 with real red zone equity (5 TDs in 4-game stretch); Kyren Williams is still RB1 but Corum has standalone boom-week upside when workload spikes; Garrett arrival helps clock-kill role", situationFlags: [], riskFlags: ["creeping_committee"] },
   "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
   "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
@@ -2697,13 +2698,13 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
     const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
     if (w15Elite.length >= 1) {
-      strengths.push(`${w15Elite.length} stack(s) with elite W15 ceiling (1/10 cut)`);
+      strengths.push(`${w15Elite.length} stack(s) primed for the toughest playoff cutoff (Week 15)`);
     }
     if (w16Elite.length >= 1) {
-      strengths.push(`${w16Elite.length} stack(s) with elite W16 kill-shot ceiling (1/5 cut)`);
+      strengths.push(`${w16Elite.length} stack(s) primed for the Week 16 cutoff`);
     }
     if (w15Elite.length === 0 && primaryStacks.length > 0) {
-      weaknesses.push(`No primary stack has elite W15 ceiling — the steepest cut (1/10) of the tournament may be the hardest to clear`);
+      weaknesses.push(`None of your primary stacks are built for the toughest playoff cutoff (Week 15) — that round may be the hardest to survive`);
     }
   } else if (tournamentKey === "bbm7") {
     // BBM VII: W15 spike — reward stacks with strong W15
@@ -2796,10 +2797,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const isUninsulatedNaked = uninsulatedNakedRBs.some(rb => rb.name === p.name);
     if (isUninsulatedNaked) flagParts.push("naked RB, no scheme/volume signal");
 
-    const inW17BringBack = mergedBringBacks.some(bb =>
-      bb.week === "W17" && (bb.allPieces || []).some(piece => piece.name === p.name)
+    const inAnyBringBack = mergedBringBacks.some(bb =>
+      (bb.allPieces || []).some(piece => piece.name === p.name)
     );
-    if (!inW17BringBack) flagParts.push("lacks W17 bring-back correlation");
+    if (!inAnyBringBack) flagParts.push("isn\'t part of any of your game-stacks for the playoffs");
 
     if (flagParts.length > 0) {
       lateFlaggedNames.add(p.name);
@@ -2816,9 +2817,9 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // (late-pick RBs already covered by the audit above are excluded to avoid double-penalizing)
   const genericUninsulatedNakedRBs = uninsulatedNakedRBs.filter(rb => !lateFlaggedNames.has(rb.name));
   if (genericUninsulatedNakedRBs.length > 0) {
+    const names = genericUninsulatedNakedRBs.map(rb => rb.name).join(" and ");
     weaknesses.push(
-      `${genericUninsulatedNakedRBs.length} naked RB(s) without standalone volume/scheme signal: ` +
-      `${genericUninsulatedNakedRBs.map(rb => rb.name).join(", ")} — no stacking loop, ceiling capped`
+      `${names} ${genericUninsulatedNakedRBs.length > 1 ? "don't" : "doesn't"} have a clear path to a workhorse role and aren't part of a QB stack — their upside depends entirely on volume that isn't locked down yet`
     );
     score -= Math.min(genericUninsulatedNakedRBs.length * 0.15, 0.6);
   }
@@ -2827,11 +2828,11 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const noEdgeOrphans = orphans.filter(o => o.tier === "No Edge" && !lateFlaggedNames.has(o.name));
   const strongOrphans = orphans.filter(o => o.tier === "Elite Window" || o.tier === "Strong Matchups");
   if (strongOrphans.length >= 2) {
-    strengths.push(`${strongOrphans.length} orphan(s) with strong playoff matchups`);
+    strengths.push(`${strongOrphans.length} bench piece(s) with no QB stack but a strong playoff schedule`);
     score += 0.5;
   }
   if (noEdgeOrphans.length >= 3) {
-    weaknesses.push(`${noEdgeOrphans.length} orphans with no matchup or value edge`);
+    weaknesses.push(`${noEdgeOrphans.length} bench piece(s) with no QB stack and no standout matchup either`);
     score -= noEdgeOrphans.length * 0.2;
   }
 
@@ -2873,7 +2874,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // rz_dependent: each TD-or-bust player with no floor adds variance without upside — soft penalty
   if (slotOnlyPlayers.length >= 1) {
     const names = slotOnlyPlayers.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
-    weaknesses.push(`Slot ceiling trap${slotOnlyPlayers.length > 1 ? "s" : ""}: ${names} — high target share, no downfield or red zone role`);
+    weaknesses.push(`${names} ${slotOnlyPlayers.length > 1 ? "have" : "has"} a limited role — gets targets but not the kind that tend to score`);
     score -= slotOnlyPlayers.length * 0.35; // soft — one slot back isn't fatal, two+ is a real problem
   }
   if (rzDependentPlayers.length >= 1) {
@@ -2902,7 +2903,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   if (tournamentKey === "bbm7" || tournamentKey === "puppy") {
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
-      strengths.push(`${leverageStacks.length} sharp/leverage stack(s) for large field`);
+      strengths.push(`${leverageStacks.length} under-the-radar stack(s) — good differentiation if the field is large`);
       score += leverageStacks.length * 0.4;
     }
   }
@@ -3728,7 +3729,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   const rdRzDependent = rdRoleCeilingFlags.filter(p => p.roleCeiling === "rz_dependent");
   if (rdSlotOnly.length >= 1) {
     const names = rdSlotOnly.map(p => p.name.split(" ").slice(-1)[0]).join(", ");
-    weaknesses.push(`Slot ceiling trap${rdSlotOnly.length > 1 ? "s" : ""}: ${names} — high target share, no downfield or red zone role`);
+    weaknesses.push(`${names} ${rdSlotOnly.length > 1 ? "have" : "has"} a limited role — gets targets but not the kind that tend to score`);
     score -= rdSlotOnly.length * 0.35;
   }
   if (rdRzDependent.length >= 1) {
