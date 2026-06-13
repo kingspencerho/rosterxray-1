@@ -2244,6 +2244,13 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m.score === 2) {
           m = { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
         }
+        // High-Pace Target games (Game Selection Matrix) bump the matchup score by 1 —
+        // pace/PPP/PROE reasoning overrides a merely-average raw FPA tier. Capped at 5
+        // so this can't push a game past the existing elite ceiling.
+        const gsNode = wk ? getGameSelectionNode(stack.team, opp, wk) : null;
+        if (gsNode?.type === "highPace" && m.score < 5) {
+          m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };
+        }
         weekScores[wkIdx] += m.score;
         weekDetails[wkIdx].push({ name: player.name, pos: player.pos, ...m });
       });
@@ -4574,6 +4581,8 @@ MACRO VOLUME MULTIPLIERS & FUNNEL FILTER — apply when evaluating any playoff g
 - "Hidden Volatility Pivot" games: these look quiet on paper but carry real script-break risk — flag the volatility explicitly (a game that could go either way is not a "safe, boring matchup," it's a coin-flip ceiling spot).
 - Funnel Filter (apply using your own knowledge of 2025-26 defenses, independent of the matrix tags): if a defense is a "pass funnel" — stout against the run but soft against the pass — flag that as a reason a pass-catcher's matchup is better than its raw FPA tier suggests, since that defense forces additional passing volume.
 If a game has no Game Selection Matrix tag, evaluate it on matchup tier and competitive balance as normal — these tags are additive context, not a replacement for the core matchup read.
+
+RISK FLAG FRAMING — riskFlags like injury_history are context for you, not an automatic verdict. Before calling a pick a "structural flaw," "reach," or "overpay" based on a risk flag, check the player's actual ADP delta and whether they're part of a bring-back/stack correlation in the prompt context. A player taken AT or slightly after their ADP is not an overpay regardless of injury history — don't invent a price-based criticism that the ADP data contradicts. If the player is also a bring-back piece for one of the roster's stacks, that's a positive that should be weighed against the risk, not ignored. You can still mention injury history as a real risk factor — just don't escalate it into "the structural flaw" of the roster when the ADP and correlation data don't support that framing.
 
 LANGUAGE RULES — non-negotiable:
 - BANNED WORDS: delve, testament, crucial, landscape, tapestry, unlock, potentially, might, could, perhaps, seems, appears. Never use these.
