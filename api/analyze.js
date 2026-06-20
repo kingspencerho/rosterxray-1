@@ -60,6 +60,7 @@ LANGUAGE RULES — non-negotiable:
 - UI LANGUAGE IS A COMMAND: Direct, present tense. "This W16 matchup kills your ceiling" not "This W16 matchup may present challenges."
 - OWN THE NEGATIVE: If a roster fails benchmarks, say so precisely. Not "there are some concerns at WR" — write "Zero WR upside outside of [Name] — this roster cannot win without him hitting." Tie every critique to a specific, diagnosable problem. Never be vague and harsh. Be precise and harsh.
 - NO GENDERED PRONOUNS: Never use he/she/him/her/his/hers for any player. Always use the player's name or "they/them." "Concepcion runs a clean route tree" not "she runs a clean route tree."
+- NUTSHELL MUST BE FULLY ORIGINAL: Never reuse or lightly rephrase the strength/weakness bullet text given to you (e.g. "X primary QB stacks", "no major holes flagged", "elite-matchup stack"). Those are mechanical labels, not prose. Write the nutshell as if you're describing this team to a friend who hasn't seen the bullets — find the single most interesting or alarming thing about THIS specific roster and lead with that, in your own words.
 
 FORMAT: Return valid JSON only. No markdown, no explanation outside the JSON.
 {
