@@ -132,6 +132,7 @@ const ADP_DATA = {
   "george kittle": { adp: 116.7, pos: "TE", team: "SF" },
   "wandale robinson": { adp: 117.4, pos: "WR", team: "TEN" },
   "kenneth gainwell": { adp: 117.6, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 117.6, pos: "RB", team: "TB" },
   "aaron jones": { adp: 120.0, pos: "RB", team: "MIN" },
   "jordan mason": { adp: 121.9, pos: "RB", team: "MIN" },
   "rachaad white": { adp: 122.9, pos: "RB", team: "WAS" },
@@ -396,6 +397,7 @@ const ADP_SUPERFLEX = {
   "brian thomas": { adp: 63.0, pos: "WR", team: "JAX" },
   "btj": { adp: 110, pos: "WR", team: "JAX" },
   "kenneth gainwell": { adp: 111, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 111, pos: "RB", team: "TB" },
   "michael wilson": { adp: 112, pos: "WR", team: "ARI" },
   "dallas goedert": { adp: 113, pos: "TE", team: "PHI" },
   "dk metcalf": { adp: 114, pos: "WR", team: "PIT" },
@@ -536,7 +538,7 @@ const ADP_SUPERFLEX = {
 
 // Tournament configurations — week weights for grade rollup
 const TOURNAMENTS = {
-  main: { name: "General", entries: "4,500", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
+  main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
   puppy: { name: "The Puppy", entries: "225k", weights: [2, 2, 1.5], note: "W15 (1/10) and W16 (1/5) are both steep cuts — survive both to reach the W17 final", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
@@ -624,6 +626,7 @@ const RECENT_NEWS = {
   "eli stowers": "Stowers won the Mackey Award in 2025; with Goedert as bridge and AJ Brown gone from PHI, his TE1 path accelerated.",
   "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
   "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
+  "kenny gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
   "myles garrett": "Garrett was traded from CLE to LAR. CLE received Jared Verse + 2027 1st + picks in return. Pass rush remains elite at CLE via Verse. LAR upgraded significantly.",
   "tyler shough": "Saints officially confirmed Shough as franchise QB for 2026. Offensive Rookie of the Year 2025. Saints spent second-most on offense in free agency to support him — Etienne, Edwards, Fant all signed. No camp battle.",
   "chris olave": "Locked in as Shough WR1 in confirmed Saints offense. Jordyn Tyson (8th overall pick) is WR2. Full target share clarity.",
@@ -769,6 +772,7 @@ const SITUATIONS = {
   "mike washington": { verdict: "TARGET", trend: "stable", trendNote: "Kubiak two-back system historically deploys even splits regardless of talent differential — Walker/Charbonnet SEA is the precedent. Jeanty injury risk real. LV W16 vs TEN and W17 @ARI are two soft playoff weeks. Combine fraud and fumble history are concerns but irrelevant at ~192 ADP in a scheme that manufactures RB2 opportunities.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   "kayshon boutte": { verdict: "TARGET", trend: "stable", trendNote: "Deep threat role survives AJ Brown arrival — distinct vertical speed profile doesn't compete with Brown's possession work or Doubs' slot role. Maye's downfield aggression means vertical shots are baked into the scheme. Role-specific dart, not a volume play. Best ball ceiling game: NE W15 @KC as bring-back for KC stacks — negative game script increases deep shot volume.", situationFlags: ["scheme_fit"], riskFlags: [] },
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  "kenny gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB contract signals real role — legitimate committee back alongside Bucky Irving; pass-catching upside in Robinson system", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   // === QB UNCERTAINTY FLAGS ===
   // These suppress stack credit and cap pass-catcher ceilings via qb_uncertainty risk flag
   "michael penix": { verdict: "fade", date: "2026-06-10", reason: "Recovering from torn ACL — limits his ability to compete with Tua Tagovailoa for ATL starting job. Contingent value only; if Penix wins job same ATL three-week soft window applies but health risk is real.", confidence: "SPECULATIVE" },
@@ -1089,6 +1093,7 @@ const ADP_YAHOO = {
   "jordan addison": { adp: 102.0, pos: "WR", team: "MIN" },
   "oronde gadsden": { adp: 103.0, pos: "TE", team: "LAC" },
   "kenneth gainwell": { adp: 104.0, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 104.0, pos: "RB", team: "TB" },
   "patrick mahomes": { adp: 105.0, pos: "QB", team: "KC" },
   "michael pittman jr": { adp: 106.0, pos: "WR", team: "PIT" },
   "dallas goedert": { adp: 107.0, pos: "TE", team: "PHI" },
