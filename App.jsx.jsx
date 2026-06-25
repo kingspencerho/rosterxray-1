@@ -4457,9 +4457,15 @@ Wan'Dale Robinson`;
       const isRedraft = result.mode === "redraft";
 
       // === SHARED CONTEXT ===
-      const rosterLines = (result.valid || []).map(p =>
-        `${p.name} (${p.pos}·${p.team}${p.actualPick ? ` pick ${p.actualPick}` : ""}${p.adp ? ` ADP ${p.adp}` : ""})`
-      ).join(", ");
+      const rosterLines = (result.valid || []).map(p => {
+        let deltaStr = "";
+        if (p.actualPick != null && p.adp != null) {
+          const d = p.actualPick - p.adp;
+          if (d >= 8) deltaStr = ` VALUE+${Math.round(d)}`;
+          else if (d <= -8) deltaStr = ` REACH${Math.round(d)}`;
+        }
+        return `${p.name} (${p.pos}·${p.team}${p.actualPick ? ` pick ${p.actualPick}` : ""}${p.adp ? ` ADP ${p.adp}` : ""}${deltaStr})`;
+      }).join(", ");
 
       const weaknessLines = (result.weaknesses || []).join("; ");
       const strengthLines = (result.strengths || []).join("; ");
