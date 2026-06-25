@@ -4054,6 +4054,10 @@ export default function RosterScorer() {
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
   const [gradeHistory, setGradeHistory] = useState([]);
   const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
+  const [shareLinkLoading, setShareLinkLoading] = useState(false);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
+  const [shareLinkError, setShareLinkError] = useState(false);
+  const [sharedView, setSharedView] = useState(false);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4194,6 +4198,63 @@ export default function RosterScorer() {
     };
     saveGradeEntry(snapshot);
   }, [aiLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Build a shareable link — stores the grade server-side, copies URL to clipboard
+  const handleCreateShareLink = async () => {
+    if (!analyzed || !analyzed.grade) return;
+    setShareLinkLoading(true);
+    setShareLinkError(false);
+    setShareLinkCopied(false);
+    try {
+      const snapshot = {
+        createdAt: Date.now(),
+        analysisMode,
+        tournament,
+        redraftLeague,
+        dataMode,
+        analyzed,
+        aiNutshell,
+        aiPivotNotes,
+        aiStandoutDetails,
+        aiBenchMoveNotes,
+        aiLineupNotes,
+        aiBringBackNotes,
+      };
+      const res = await fetch("/api/grade-save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ snapshot }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      const data = await res.json();
+      if (!data.id) throw new Error("no id");
+      const url = `${window.location.origin}/?g=${data.id}`;
+      await navigator.clipboard.writeText(url);
+      setShareLinkCopied(true);
+      setTimeout(() => setShareLinkCopied(false), 2500);
+    } catch (e) {
+      setShareLinkError(true);
+      setTimeout(() => setShareLinkError(false), 3000);
+    } finally {
+      setShareLinkLoading(false);
+    }
+  };
+
+  // Load a shared grade when the URL carries ?g=<id>
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("g");
+    if (!id || !/^[a-z0-9]{8}$/.test(id)) return;
+    fetch(`/api/grade-get?id=${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.snapshot) {
+          restoreGradeEntry(data.snapshot);
+          setSharedView(true);
+          setHeroCollapsed(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
   const resolveLeague = (leagueKey, cfg) => {
@@ -6367,6 +6428,19 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
         )}
 
+        {/* Shared-grade banner */}
+        {sharedView && analyzed && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", background: "#0d1a12", border: "1px solid #22c55e33", borderRadius: "6px", padding: "12px 16px", marginBottom: "16px" }}>
+            <span style={{ fontSize: "12px", color: "#86efac", fontWeight: 600 }}>👁 You're viewing a shared roster grade</span>
+            <button
+              onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
+              style={{ background: "linear-gradient(90deg, #16a34a, #22c55e)", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Grade your own roster →
+            </button>
+          </div>
+        )}
+
         {/* Output */}
         {analyzed && analyzed.mode !== "redraft" && (
           <div className="fade-in">
@@ -6542,6 +6616,27 @@ Analyze this best ball roster. Return JSON only.`;
                       }}
                     >
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
+                    </button>
+                    <button
+                      onClick={handleCreateShareLink}
+                      disabled={shareLinkLoading}
+                      style={{
+                        background: shareLinkCopied ? "#16331f" : "transparent",
+                        border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: shareLinkLoading ? "default" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
                     </button>
                     <button
                       onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
@@ -7560,6 +7655,27 @@ Analyze this best ball roster. Return JSON only.`;
                       }}
                     >
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
+                    </button>
+                    <button
+                      onClick={handleCreateShareLink}
+                      disabled={shareLinkLoading}
+                      style={{
+                        background: shareLinkCopied ? "#16331f" : "transparent",
+                        border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: shareLinkLoading ? "default" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
                     </button>
                     <button
                       onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
