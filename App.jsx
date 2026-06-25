@@ -5163,6 +5163,18 @@ Analyze this best ball roster. Return JSON only.`;
           .hero-pill { white-space: nowrap; text-align: center; font-size: 9px !important; padding: 4px 8px !important; }
           .hero-cta-btn { padding: 10px 24px !important; font-size: 18px !important; }
         }
+        @media (max-width: 480px) {
+          .grade-banner-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .playoff-week-grid {
+            grid-template-columns: 1fr !important;
+            gap: 6px !important;
+          }
+        }
       `}</style>
 
       {/* ── Hero Section ── */}
@@ -5255,7 +5267,7 @@ Analyze this best ball roster. Return JSON only.`;
                 cursor: "pointer",
                 textTransform: "uppercase",
                 width: "100%",
-                maxWidth: "400px",
+                maxWidth: "min(400px, 100%)",
               }}
             >
               Grade My Roster →
@@ -6160,7 +6172,7 @@ Analyze this best ball roster. Return JSON only.`;
                   opacity: uploadedImages.length > 0 && !extracting ? 1 : 0.4,
                   borderRadius: "3px",
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "min(400px, 100%)",
                 }}
               >
                 {extracting ? <span><span className="strobe-dot" style={{ marginRight: "5px" }}>●</span>Extracting…</span> : "Extract & Analyze →"}
@@ -6326,7 +6338,7 @@ Analyze this best ball roster. Return JSON only.`;
                   opacity: input.trim() ? 1 : 0.4,
                   borderRadius: "3px",
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "min(400px, 100%)",
                 }}
               >
                 Analyze →
@@ -6359,7 +6371,7 @@ Analyze this best ball roster. Return JSON only.`;
         {analyzed && analyzed.mode !== "redraft" && (
           <div className="fade-in">
             {/* Grade banner */}
-            <div style={{
+            <div className="grade-banner-grid" style={{
               display: "grid",
               gridTemplateColumns: "auto 1fr",
               gap: "24px",
@@ -6665,7 +6677,7 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
 
                     {/* Week grid */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                    <div className="playoff-week-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
                       {["W15", "W16", "W17"].map((wk, wkIdx) => {
                         const details = stack.weekDetails[wkIdx];
                         return (
@@ -6807,7 +6819,7 @@ Analyze this best ball roster. Return JSON only.`;
                   Players you drafted <span style={{ color: "#22d3ee", fontWeight: 600 }}>without any teammates</span>. Solo picks aren't automatically bad — what matters is their <span style={{ color: "#22d3ee", fontWeight: 600 }}>playoff matchup</span>. The chips below show each player's W15/W16/W17 difficulty.
                 </div>
                 <MatchupLegend />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
                   {analyzed.orphans.sort((a, b) => b.normalized - a.normalized).map((o, i) => {
                     const s = tierStyle(o.color);
                     return (
@@ -7377,7 +7389,7 @@ Analyze this best ball roster. Return JSON only.`;
         {analyzed && analyzed.mode === "redraft" && (
           <div className="fade-in">
             {/* Grade banner */}
-            <div style={{
+            <div className="grade-banner-grid" style={{
               display: "grid",
               gridTemplateColumns: "auto 1fr",
               gap: "24px",
