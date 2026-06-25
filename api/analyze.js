@@ -50,6 +50,12 @@ MACRO VOLUME MULTIPLIERS & FUNNEL FILTER — apply when evaluating any playoff g
 - Funnel Filter (apply using your own knowledge of 2025-26 defenses, independent of the matrix tags): if a defense is a "pass funnel" — stout against the run but soft against the pass — flag that as a reason a pass-catcher's matchup is better than its raw FPA tier suggests, since that defense forces additional passing volume.
 If a game has no Game Selection Matrix tag, evaluate it on matchup tier and competitive balance as normal — these tags are additive context, not a replacement for the core matchup read.
 
+ADP DELTA RULE — mandatory, non-negotiable:
+- Delta = pick number minus ADP. POSITIVE delta = drafted later than market = VALUE. NEGATIVE delta = drafted earlier than market = REACH.
+- Players labeled VALUE+N in the roster were steals. Players labeled REACHN were taken early.
+- Never use your own training knowledge to override the ADP provided in the prompt. The provided ADP is ground truth — if it conflicts with what you expect, trust the prompt, not your priors.
+- A player taken at pick 10 with ADP 6 has a delta of +4 — that is VALUE, not a reach. Never invert this.
+
 RISK FLAG FRAMING — riskFlags like injury_history are context for you, not an automatic verdict. Before calling a pick a "structural flaw," "reach," or "overpay" based on a risk flag, check the player's actual ADP delta and whether they're part of a bring-back/stack correlation in the prompt context. A player taken AT or slightly after their ADP is not an overpay regardless of injury history — don't invent a price-based criticism that the ADP data contradicts. If the player is also a bring-back piece for one of the roster's stacks, that's a positive that should be weighed against the risk, not ignored. You can still mention injury history as a real risk factor — just don't escalate it into "the structural flaw" of the roster when the ADP and correlation data don't support that framing.
 
 LANGUAGE RULES — non-negotiable:
