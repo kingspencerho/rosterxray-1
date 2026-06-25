@@ -4058,6 +4058,8 @@ export default function RosterScorer() {
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [shareLinkError, setShareLinkError] = useState(false);
   const [sharedView, setSharedView] = useState(false);
+  const [cachedShareUrl, setCachedShareUrl] = useState(null);
+  const [discordCopied, setDiscordCopied] = useState(false);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4229,6 +4231,7 @@ export default function RosterScorer() {
       const data = await res.json();
       if (!data.id) throw new Error("no id");
       const url = `${window.location.origin}/?g=${data.id}`;
+      setCachedShareUrl(url);
       await navigator.clipboard.writeText(url);
       setShareLinkCopied(true);
       setTimeout(() => setShareLinkCopied(false), 2500);
@@ -4237,6 +4240,64 @@ export default function RosterScorer() {
       setTimeout(() => setShareLinkError(false), 3000);
     } finally {
       setShareLinkLoading(false);
+    }
+  };
+
+  const handleCopyForDiscord = async () => {
+    if (!analyzed || !analyzed.grade) return;
+    setDiscordCopied(false);
+    try {
+      let url = cachedShareUrl;
+      if (!url) {
+        const snapshot = {
+          createdAt: Date.now(),
+          analysisMode,
+          tournament,
+          redraftLeague,
+          dataMode,
+          analyzed,
+          aiNutshell,
+          aiPivotNotes,
+          aiStandoutDetails,
+          aiBenchMoveNotes,
+          aiLineupNotes,
+          aiBringBackNotes,
+        };
+        const res = await fetch("/api/grade-save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ snapshot }),
+        });
+        if (!res.ok) throw new Error("save failed");
+        const data = await res.json();
+        if (!data.id) throw new Error("no id");
+        url = `${window.location.origin}/?g=${data.id}`;
+        setCachedShareUrl(url);
+      }
+      const top3 = (analyzed.valid || []).slice(0, 3).map(p => p.name.split(" ").slice(-1)[0]).join(" · ");
+      const primaryStack = analyzed.stackGrades && analyzed.stackGrades.length > 0 ? analyzed.stackGrades[0] : null;
+      let stackLine = "";
+      if (primaryStack) {
+        if (primaryStack.hasQB) {
+          const qb = primaryStack.players.find(p => p.pos === "QB");
+          const qbLast = qb ? qb.name.split(" ").slice(-1)[0] : "QB";
+          stackLine = `Primary stack: ${primaryStack.team} (${qbLast} + ${primaryStack.players.length - 1})`;
+        } else {
+          stackLine = `Primary stack: ${primaryStack.team} (${primaryStack.players.length} pieces)`;
+        }
+      }
+      const mode = analysisMode === "bestball" ? "Best Ball" : "Redraft";
+      const lines = [
+        `🏈 RosterXRay Grade: ${analyzed.grade} (${mode})`,
+        top3 ? `Top: ${top3}` : null,
+        stackLine || null,
+        `→ Full breakdown: ${url}`,
+      ].filter(Boolean);
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setDiscordCopied(true);
+      setTimeout(() => setDiscordCopied(false), 2500);
+    } catch (e) {
+      // silent fail — user still has the share link button
     }
   };
 
@@ -6639,7 +6700,27 @@ Analyze this best ball roster. Return JSON only.`;
                       {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
+                      onClick={handleCopyForDiscord}
+                      style={{
+                        background: discordCopied ? "#1a1233" : "transparent",
+                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: discordCopied ? "#a5b4fc" : "#818cf8",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                    </button>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -7678,7 +7759,27 @@ Analyze this best ball roster. Return JSON only.`;
                       {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
+                      onClick={handleCopyForDiscord}
+                      style={{
+                        background: discordCopied ? "#1a1233" : "transparent",
+                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: discordCopied ? "#a5b4fc" : "#818cf8",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                    </button>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
