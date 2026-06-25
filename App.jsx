@@ -4052,6 +4052,8 @@ export default function RosterScorer() {
   const [aiBenchMoveNotes, setAiBenchMoveNotes] = useState({});
   const [aiLineupNotes, setAiLineupNotes] = useState({});
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
+  const [gradeHistory, setGradeHistory] = useState([]);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4120,6 +4122,78 @@ export default function RosterScorer() {
     return () => { unlock(); };
   }, [heroCollapsed, analyzed]);
   const exportCardRef = React.useRef(null);
+
+  // === GRADE HISTORY ===
+  const HISTORY_KEY = "rosterxray_grade_history";
+  const MAX_HISTORY = 5;
+
+  const loadGradeHistory = () => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed;
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const saveGradeEntry = (snapshot) => {
+    try {
+      const existing = loadGradeHistory();
+      const next = [snapshot, ...existing].slice(0, MAX_HISTORY);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      setGradeHistory(next);
+    } catch (e) {
+      // localStorage full or unavailable — silently skip
+    }
+  };
+
+  const restoreGradeEntry = (entry) => {
+    setAnalyzed(entry.analyzed);
+    setAnalysisMode(entry.analysisMode);
+    setTournament(entry.tournament || "main");
+    setRedraftLeague(entry.redraftLeague || "yahoo_std");
+    setDataMode(entry.dataMode || "actual");
+    setAiNutshell(entry.aiNutshell || null);
+    setAiPivotNotes(entry.aiPivotNotes || {});
+    setAiStandoutDetails(entry.aiStandoutDetails || {});
+    setAiBenchMoveNotes(entry.aiBenchMoveNotes || {});
+    setAiLineupNotes(entry.aiLineupNotes || {});
+    setAiBringBackNotes(entry.aiBringBackNotes || {});
+    setAiLoading(false);
+    setExportedDataUrl(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Load saved grades from localStorage on mount
+  useEffect(() => {
+    setGradeHistory(loadGradeHistory());
+  }, []);
+
+  // Save completed grade when AI finishes loading
+  useEffect(() => {
+    if (aiLoading) return;
+    if (!analyzed || !analyzed.grade) return;
+    const picks = analyzed.picks || analyzed.valid || [];
+    const snapshot = {
+      id: Date.now(),
+      createdAt: Date.now(),
+      analysisMode,
+      tournament,
+      redraftLeague,
+      dataMode,
+      analyzed,
+      aiNutshell,
+      aiPivotNotes,
+      aiStandoutDetails,
+      aiBenchMoveNotes,
+      aiLineupNotes,
+      aiBringBackNotes,
+    };
+    saveGradeEntry(snapshot);
+  }, [aiLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
   const resolveLeague = (leagueKey, cfg) => {
@@ -5885,6 +5959,46 @@ Analyze this best ball roster. Return JSON only.`;
         </div>
         )}
 
+        {/* Recent Grades History Panel */}
+        {gradeHistory.length > 0 && (
+          <div style={{ marginBottom: "20px", border: "1px solid #1e1e1e", borderRadius: "6px", overflow: "hidden" }}>
+            <button
+              onClick={() => setHistoryPanelOpen(prev => !prev)}
+              style={{ width: "100%", background: "#0a0a0a", border: "none", borderBottom: historyPanelOpen ? "1px solid #1e1e1e" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+            >
+              <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>Recent Grades ({gradeHistory.length})</span>
+              <span style={{ fontSize: "10px", color: "#444" }}>{historyPanelOpen ? "▲" : "▼"}</span>
+            </button>
+            {historyPanelOpen && (
+              <div style={{ display: "flex", flexDirection: "row", overflowX: "auto" }}>
+                {gradeHistory.map((entry, idx) => {
+                  const picks = entry.analyzed.picks || entry.analyzed.valid || [];
+                  const topThree = picks.slice(0, 3).map(p => p.name || p.raw || "").filter(Boolean);
+                  const modeLabel = entry.analysisMode === "redraft"
+                    ? "Redraft"
+                    : (TOURNAMENTS[entry.tournament] ? TOURNAMENTS[entry.tournament].name : entry.tournament);
+                  const dateStr = new Date(entry.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return (
+                    <button
+                      key={entry.id}
+                      onClick={() => restoreGradeEntry(entry)}
+                      onMouseEnter={e => { e.currentTarget.style.background = "#141414"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "#0d0d0d"; }}
+                      style={{ flex: "0 0 auto", minWidth: "140px", background: "#0d0d0d", border: "none", borderRight: idx < gradeHistory.length - 1 ? "1px solid #1a1a1a" : "none", padding: "12px 14px", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
+                        <span style={{ fontSize: "10px", color: "#444" }}>{dateStr}</span>
+                      </div>
+                      <div style={{ fontSize: "9px", color: entry.analysisMode === "redraft" ? "#a855f7" : "#22c55e", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px", fontWeight: 700 }}>{modeLabel}</div>
+                      <div style={{ fontSize: "10px", color: "#555", lineHeight: 1.4 }}>{topThree.length > 0 ? topThree.join(" · ") : "—"}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid #222" }}>
