@@ -4461,8 +4461,9 @@ Wan'Dale Robinson`;
         let deltaStr = "";
         if (p.actualPick != null && p.adp != null) {
           const d = p.actualPick - p.adp;
-          if (d >= 8) deltaStr = ` VALUE+${Math.round(d)}`;
-          else if (d <= -8) deltaStr = ` REACH${Math.round(d)}`;
+          if (d >= 3) deltaStr = ` VALUE+${Math.round(d)}`;
+          else if (d <= -3) deltaStr = ` REACH${Math.round(d)}`;
+          else if (d > -3 && d < 3) deltaStr = ` AT-ADP`;
         }
         return `${p.name} (${p.pos}·${p.team}${p.actualPick ? ` pick ${p.actualPick}` : ""}${p.adp ? ` ADP ${p.adp}` : ""}${deltaStr})`;
       }).join(", ");
