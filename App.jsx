@@ -2408,8 +2408,8 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   const pivots = [];
   valid.forEach(player => {
-    if (!hasPickNumbers && !player.actualPick) return;
-    const pickNum = player.actualPick;
+    const pickNum = player.actualPick || Math.round(player.adp || 0) || null;
+    if (!pickNum) return;
     const pickADP = player.adp;
 
     // Find same-position alternatives within ±10 ADP that weren't drafted
@@ -6879,6 +6879,44 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             )}
+
+            {/* Playoff Window Preview */}
+            {(() => {
+              const allWithScores = [];
+              (analyzed.stackGrades || []).forEach(stack => {
+                const playerTotals = {};
+                (stack.weekDetails || []).forEach(weekArr => {
+                  (weekArr || []).forEach(p => {
+                    if (!playerTotals[p.name]) playerTotals[p.name] = { name: p.name, pos: p.pos, team: stack.team, score: 0 };
+                    playerTotals[p.name].score += p.score;
+                  });
+                });
+                Object.values(playerTotals).forEach(p => allWithScores.push(p));
+              });
+              (analyzed.orphans || []).forEach(p => {
+                const score = (p.matchups || []).reduce((sum, m) => sum + (m.score || 0), 0);
+                allWithScores.push({ name: p.name, pos: p.pos, team: p.team, score });
+              });
+              if (!allWithScores.length) return null;
+              allWithScores.sort((a, b) => b.score - a.score);
+              const top3 = allWithScores.slice(0, 3);
+              const concern = allWithScores[allWithScores.length - 1];
+              return (
+                <div style={{ marginBottom: "16px", padding: "12px 16px", background: "#0a0a0a", border: "1px solid #2d1f4a", borderLeft: "3px solid #7c3aed", borderRadius: "4px" }}>
+                  <div style={{ fontSize: "9px", color: "#7c3aed", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Playoff Window Preview · W15–W17</div>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: concern && concern.name !== top3[0].name ? "8px" : 0 }}>
+                    {top3.map((p, i) => (
+                      <div key={i} style={{ fontSize: "11px", color: "#a3e635", background: "#0a1a0a", border: "1px solid #22c55e33", borderRadius: "3px", padding: "4px 8px" }}>
+                        {p.name.split(" ").slice(-1)[0]} · {p.pos}
+                      </div>
+                    ))}
+                  </div>
+                  {concern && concern.name !== top3[0].name && (
+                    <div style={{ fontSize: "10px", color: "#fb923c" }}>Watch: {concern.name.split(" ").slice(-1)[0]} ({concern.pos}) — toughest playoff slate</div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Stacks */}
             <div style={{ marginBottom: "20px" }}>
