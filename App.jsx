@@ -4080,6 +4080,7 @@ export default function RosterScorer() {
   const [tradeGet, setTradeGet] = useState("");
   const [tradeResult, setTradeResult] = useState(null);
   const [tradeError, setTradeError] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4196,6 +4197,16 @@ export default function RosterScorer() {
   // Load saved grades from localStorage on mount
   useEffect(() => {
     setGradeHistory(loadGradeHistory());
+  }, []);
+
+  // Scroll to top button — show when near bottom of page
+  useEffect(() => {
+    const handleScroll = () => {
+      const nearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 200;
+      setShowScrollTop(nearBottom);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Save completed grade when AI finishes loading
@@ -6762,28 +6773,6 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "8px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
-                      onClick={handleExportCard}
-                      disabled={exportingCard}
-                      style={{
-                        background: exportingCard ? "#1a1a1a" : "linear-gradient(90deg, #1d4ed8, #2563eb)",
-                        border: "1px solid #3b82f644",
-                        borderRadius: "4px",
-                        padding: "8px 16px",
-                        color: exportingCard ? "#555" : "#93c5fd",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: "0.03em",
-                        cursor: exportingCard ? "default" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        boxShadow: exportingCard ? "none" : "0 0 12px #3b82f633",
-                      }}
-                    >
-                      {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
-                    </button>
-                    <button
                       onClick={handleCreateShareLink}
                       disabled={shareLinkLoading}
                       style={{
@@ -6802,27 +6791,7 @@ Analyze this best ball roster. Return JSON only.`;
                         gap: "6px",
                       }}
                     >
-                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
-                    </button>
-                    <button
-                      onClick={handleCopyForDiscord}
-                      style={{
-                        background: discordCopied ? "#1a1233" : "transparent",
-                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
-                        borderRadius: "4px",
-                        padding: "8px 16px",
-                        color: discordCopied ? "#a5b4fc" : "#818cf8",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: "0.03em",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                      {shareLinkLoading ? "Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "Copy Link"}
                     </button>
                     <button
                       onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
@@ -6839,7 +6808,14 @@ Analyze this best ball roster. Return JSON only.`;
                         cursor: "pointer",
                       }}
                     >
-                      ↩ New Analysis
+                      New Roster
+                    </button>
+                    <button
+                      onClick={handleExportCard}
+                      disabled={exportingCard}
+                      style={{ background: "none", border: "none", color: "#444", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em" }}
+                    >
+                      {exportingCard ? "generating…" : "export grade card"}
                     </button>
                   </div>
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
@@ -6906,30 +6882,25 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Playoff Window Preview */}
             {(() => {
               const allWithScores = [];
-              const pvWkLabels = ["W15", "W16", "W17"];
-              const pvChipStyle = (color) => {
-                if (color === "green") return { bg: "#0a1a0a", border: "#22c55e44", text: "#4ade80" };
-                if (color === "tough") return { bg: "#1a0a0a", border: "#ef444444", text: "#f87171" };
-                if (color === "red") return { bg: "#1a0a0a", border: "#ef444444", text: "#f87171" };
-                return { bg: "#111", border: "#33333355", text: "#666" };
-              };
               const pvInitialName = (name) => {
                 const parts = name.split(" ");
                 return parts.length > 1 ? `${parts[0][0]}. ${parts[parts.length - 1]}` : name;
               };
               (analyzed.stackGrades || []).forEach(stack => {
                 const playerWeeks = {};
+                const opps = PLAYOFFS[stack.team] || ["?","?","?"];
                 (stack.weekDetails || []).forEach((weekArr, wkIdx) => {
                   (weekArr || []).forEach(p => {
                     if (!playerWeeks[p.name]) playerWeeks[p.name] = { name: p.name, pos: p.pos, team: stack.team, score: 0, weeks: [null, null, null] };
                     playerWeeks[p.name].score += (p.score || 0);
-                    playerWeeks[p.name].weeks[wkIdx] = { color: p.color, tier: p.tier };
+                    playerWeeks[p.name].weeks[wkIdx] = { color: p.color, tier: p.tier, opp: opps[wkIdx] };
                   });
                 });
                 Object.values(playerWeeks).forEach(p => allWithScores.push(p));
               });
               (analyzed.orphans || []).forEach(p => {
-                const weeks = (p.matchups || []).map(m => ({ color: m.color, tier: m.tier }));
+                const opps = PLAYOFFS[p.team] || ["?","?","?"];
+                const weeks = (p.matchups || []).map((m, i) => ({ color: m.color, tier: m.tier, opp: opps[i] }));
                 const score = (p.matchups || []).reduce((sum, m) => sum + (m.score || 0), 0);
                 allWithScores.push({ name: p.name, pos: p.pos, team: p.team, score, weeks });
               });
@@ -6953,12 +6924,11 @@ Analyze this best ball roster. Return JSON only.`;
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < top.length - 1 ? "1px solid #111" : "none" }}>
                           <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
                           <div style={{ display: "flex", gap: "3px" }}>
-                            {pvWkLabels.map((lbl, wi) => {
+                            {[0,1,2].map(wi => {
                               const w = p.weeks ? p.weeks[wi] : null;
-                              const c = pvChipStyle(w?.color);
                               return (
-                                <div key={wi} style={{ fontSize: "8px", fontWeight: 700, padding: "2px 5px", borderRadius: "3px", background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>
-                                  {lbl}
+                                <div key={wi} style={{ ...wkChipStyle(w?.color || "neutral"), width: "30px", fontSize: "8px" }}>
+                                  {(w?.opp || "?").replace("@","").slice(0,3)}
                                 </div>
                               );
                             })}
@@ -6973,12 +6943,11 @@ Analyze this best ball roster. Return JSON only.`;
                           <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < watchPlayers.length - 1 ? "1px solid #111" : "none" }}>
                             <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
                             <div style={{ display: "flex", gap: "3px" }}>
-                              {pvWkLabels.map((lbl, wi) => {
+                              {[0,1,2].map(wi => {
                                 const w = p.weeks ? p.weeks[wi] : null;
-                                const c = pvChipStyle(w?.color);
                                 return (
-                                  <div key={wi} style={{ fontSize: "8px", fontWeight: 700, padding: "2px 5px", borderRadius: "3px", background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>
-                                    {lbl}
+                                  <div key={wi} style={{ ...wkChipStyle(w?.color || "neutral"), width: "30px", fontSize: "8px" }}>
+                                    {(w?.opp || "?").replace("@","").slice(0,3)}
                                   </div>
                                 );
                               })}
@@ -7910,28 +7879,6 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "8px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
-                      onClick={handleExportCard}
-                      disabled={exportingCard}
-                      style={{
-                        background: exportingCard ? "#1a1a1a" : "linear-gradient(90deg, #1d4ed8, #2563eb)",
-                        border: "1px solid #3b82f644",
-                        borderRadius: "4px",
-                        padding: "8px 16px",
-                        color: exportingCard ? "#555" : "#93c5fd",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: "0.03em",
-                        cursor: exportingCard ? "default" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        boxShadow: exportingCard ? "none" : "0 0 12px #3b82f633",
-                      }}
-                    >
-                      {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
-                    </button>
-                    <button
                       onClick={handleCreateShareLink}
                       disabled={shareLinkLoading}
                       style={{
@@ -7950,27 +7897,7 @@ Analyze this best ball roster. Return JSON only.`;
                         gap: "6px",
                       }}
                     >
-                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
-                    </button>
-                    <button
-                      onClick={handleCopyForDiscord}
-                      style={{
-                        background: discordCopied ? "#1a1233" : "transparent",
-                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
-                        borderRadius: "4px",
-                        padding: "8px 16px",
-                        color: discordCopied ? "#a5b4fc" : "#818cf8",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: "0.03em",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                      {shareLinkLoading ? "Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "Copy Link"}
                     </button>
                     <button
                       onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
@@ -7987,7 +7914,14 @@ Analyze this best ball roster. Return JSON only.`;
                         cursor: "pointer",
                       }}
                     >
-                      ↩ New Analysis
+                      New Roster
+                    </button>
+                    <button
+                      onClick={handleExportCard}
+                      disabled={exportingCard}
+                      style={{ background: "none", border: "none", color: "#444", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em" }}
+                    >
+                      {exportingCard ? "generating…" : "export grade card"}
                     </button>
                   </div>
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
@@ -8058,33 +7992,34 @@ Analyze this best ball roster. Return JSON only.`;
                   }}
                 >
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
-                    <span>⇄ Analyze a Trade</span>
-                    <span style={{ fontSize: "9px", color: "#6d28d9", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Instantly recalculates your grade →</span>
+                    <span>⇄ WHAT IF?</span>
+                    <span style={{ fontSize: "9px", color: "#6d28d9", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Swap players and see your new grade</span>
                   </div>
                   <span style={{ fontSize: "9px", color: "#6d28d9" }}>{tradeOpen ? "▲" : "▼"}</span>
                 </button>
                 {tradeOpen && (
                   <div style={{ padding: "14px 16px", borderTop: "1px solid #1a1a1a" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "6px" }}>
                       <div>
-                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You give</div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>Swap out</div>
                         <input
                           value={tradeGive}
                           onChange={e => { setTradeGive(e.target.value); setTradeResult(null); setTradeError(null); }}
-                          placeholder="e.g. DeVonta Smith"
+                          placeholder="e.g. Jefferson, Adams"
                           style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
                         />
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You get</div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>Swap in</div>
                         <input
                           value={tradeGet}
                           onChange={e => { setTradeGet(e.target.value); setTradeResult(null); setTradeError(null); }}
-                          placeholder="e.g. Jordan Addison"
+                          placeholder="e.g. Hill, Chase"
                           style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
                         />
                       </div>
                     </div>
+                    <div style={{ fontSize: "9px", color: "#444", marginBottom: "10px", letterSpacing: "0.03em" }}>Separate multiple players with a comma</div>
                     <button
                       onClick={handleTradeAnalysis}
                       style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
@@ -9619,6 +9554,33 @@ Analyze this best ball roster. Return JSON only.`;
       })()}
 
       </div>{/* end app-content */}
+
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "20px",
+            zIndex: 1000,
+            background: "#1a1a1a",
+            border: "1px solid #333",
+            borderRadius: "50%",
+            width: "40px",
+            height: "40px",
+            color: "#a78bfa",
+            fontSize: "18px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 12px #0007",
+          }}
+        >
+          ↑
+        </button>
+      )}
     </div>
   );
 }
