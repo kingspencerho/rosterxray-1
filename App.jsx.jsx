@@ -4893,7 +4893,7 @@ Analyze this best ball roster. Return JSON only.`;
           task: "grade",
           mode: isRedraft ? "redraft" : "bestball",
           tournamentName,
-          max_tokens: 1800,
+          max_tokens: 2200,
           messages: [{ role: "user", content: userPrompt }],
         }),
       });
