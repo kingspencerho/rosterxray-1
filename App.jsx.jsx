@@ -4060,6 +4060,11 @@ export default function RosterScorer() {
   const [sharedView, setSharedView] = useState(false);
   const [cachedShareUrl, setCachedShareUrl] = useState(null);
   const [discordCopied, setDiscordCopied] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [tradeGive, setTradeGive] = useState("");
+  const [tradeGet, setTradeGet] = useState("");
+  const [tradeResult, setTradeResult] = useState(null);
+  const [tradeError, setTradeError] = useState(null);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4299,6 +4304,53 @@ export default function RosterScorer() {
     } catch (e) {
       // silent fail — user still has the share link button
     }
+  };
+
+  const handleTradeAnalysis = () => {
+    if (!analyzed || analyzed.mode !== "redraft") return;
+    setTradeError(null);
+    setTradeResult(null);
+
+    const giveNames = tradeGive.split(",").map(s => normalize(s.trim())).filter(Boolean);
+    const getNames  = tradeGet.split(",").map(s => normalize(s.trim())).filter(Boolean);
+
+    if (!giveNames.length || !getNames.length) {
+      setTradeError("Enter at least one player on each side.");
+      return;
+    }
+
+    const givePlayers = [];
+    for (const gn of giveNames) {
+      const found = analyzed.valid.find(p => normalize(p.name) === gn || normalize(p.name).includes(gn));
+      if (!found) {
+        const displayGive = tradeGive.split(",").find(s => normalize(s.trim()) === gn)?.trim() || gn;
+        setTradeError(`"${displayGive}" not on your roster.`);
+        return;
+      }
+      givePlayers.push(found);
+    }
+
+    const getPlayers = [];
+    for (const gn of getNames) {
+      const key = Object.keys(ADP_DATA).find(k => k === gn || k.includes(gn));
+      if (!key) {
+        const displayGet = tradeGet.split(",").find(s => normalize(s.trim()) === gn)?.trim() || gn;
+        setTradeError(`Can't find "${displayGet}" — try a different spelling.`);
+        return;
+      }
+      const d = ADP_DATA[key];
+      const displayName = key.split(" ").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+      getPlayers.push({ name: displayName, pos: d.pos, team: d.team, adp: d.adp, pickNum: 99, notFound: false });
+    }
+
+    const giveSet = new Set(givePlayers.map(p => normalize(p.name)));
+    const modifiedPicks = [
+      ...analyzed.valid.filter(p => !giveSet.has(normalize(p.name))),
+      ...getPlayers,
+    ];
+
+    const league = resolveLeague(redraftLeague, customConfig);
+    setTradeResult(analyzeRedraft(modifiedPicks, league, false, dataMode === "projected"));
   };
 
   // Load a shared grade when the URL carries ?g=<id>
@@ -7869,6 +7921,104 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
+
+            {/* Trade Analyzer */}
+            {analyzed.mode === "redraft" && (
+              <div style={{ marginBottom: "16px", border: "1px solid #222", borderRadius: "4px" }}>
+                <button
+                  onClick={() => setTradeOpen(o => !o)}
+                  style={{
+                    width: "100%",
+                    background: tradeOpen ? "#0f0f0f" : "#0a0a0a",
+                    border: "none",
+                    borderRadius: tradeOpen ? "4px 4px 0 0" : "4px",
+                    padding: "12px 16px",
+                    color: "#a78bfa",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    fontFamily: "'Inter', sans-serif",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>⇄ Analyze a Trade</span>
+                  <span style={{ fontSize: "9px", color: "#6d28d9" }}>{tradeOpen ? "▲" : "▼"}</span>
+                </button>
+                {tradeOpen && (
+                  <div style={{ padding: "14px 16px", borderTop: "1px solid #1a1a1a" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You give</div>
+                        <input
+                          value={tradeGive}
+                          onChange={e => { setTradeGive(e.target.value); setTradeResult(null); setTradeError(null); }}
+                          placeholder="e.g. DeVonta Smith"
+                          style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                        />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You get</div>
+                        <input
+                          value={tradeGet}
+                          onChange={e => { setTradeGet(e.target.value); setTradeResult(null); setTradeError(null); }}
+                          placeholder="e.g. Jordan Addison"
+                          style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleTradeAnalysis}
+                      style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                    >
+                      Analyze Trade →
+                    </button>
+                    {tradeError && (
+                      <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "#fb923c", fontSize: "11px" }}>
+                        {tradeError}
+                      </div>
+                    )}
+                    {tradeResult && (() => {
+                      const scoreDelta = tradeResult.score - analyzed.score;
+                      const gradeUp = scoreDelta > 0;
+                      const newStrengths = tradeResult.strengths.filter(s => !analyzed.strengths.includes(s));
+                      const newWeaknesses = tradeResult.weaknesses.filter(w => !analyzed.weaknesses.includes(w));
+                      return (
+                        <div style={{ marginTop: "14px" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "10px" }}>
+                            <div style={{ padding: "12px", background: "#0a0a0a", border: "1px solid #222", borderRadius: "4px" }}>
+                              <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Before</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(analyzed.grade), lineHeight: 1 }}>{analyzed.grade}</div>
+                              <div style={{ fontSize: "11px", color: "#555", marginTop: "4px" }}>Score {analyzed.score.toFixed(1)}</div>
+                            </div>
+                            <div style={{ padding: "12px", background: "#0a0a0a", border: `1px solid ${gradeUp ? "#22c55e44" : "#ef444444"}`, borderRadius: "4px" }}>
+                              <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>After</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
+                              <div style={{ fontSize: "11px", color: gradeUp ? "#4ade80" : "#f87171", marginTop: "4px" }}>
+                                {gradeUp ? "+" : ""}{scoreDelta.toFixed(1)} pts
+                              </div>
+                            </div>
+                          </div>
+                          {(newStrengths.length > 0 || newWeaknesses.length > 0) && (
+                            <div style={{ fontSize: "12px" }}>
+                              {newStrengths.map((s, i) => (
+                                <div key={i} style={{ color: "#4ade80", marginBottom: "3px" }}>+ {s}</div>
+                              ))}
+                              {newWeaknesses.map((w, i) => (
+                                <div key={i} style={{ color: "#fb923c", marginBottom: "3px" }}>- {w}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Starting Lineup */}
             <div style={{ marginBottom: "20px" }}>
