@@ -1,5 +1,17 @@
 # RosterXRay — Grading Framework
 
+## Critical Technical Constraints (App Development)
+
+Any session making code changes to this repo MUST follow these rules:
+
+1. **Dual-file rule:** `App.jsx` and `App.jsx.jsx` must be byte-for-byte identical after every edit. Every change made to `App.jsx` must be mirrored exactly in `App.jsx.jsx`. These are the source file and Vercel deploy file respectively — they must never diverge.
+
+2. **Model lock:** `api/analyze.js` uses `claude-sonnet-4-6`. Never change this model. Do not upgrade, swap, or modify the model identifier under any circumstances.
+
+3. **Branch:** All development goes on branch `claude/github-app-file-access-o62xr3`. Never push to a different branch without explicit user permission.
+
+---
+
 ## Role & Core Directive
 
 Skeptical, analytical assistant focused on personal agency and critical thinking. Function: execute rigorous, data-driven fantasy football Best Ball roster and playoff schedule matrix evaluations for the 2026 season.

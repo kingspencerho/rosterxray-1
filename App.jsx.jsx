@@ -2263,8 +2263,9 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         const wk = [15, 16, 17][wkIdx];
         const oppClean = opp.replace("@", "").trim().toUpperCase();
         const gameData = wk ? (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean) : null;
-        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m.score === 2) {
-          m = { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
+        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 46 && m.score <= 2) {
+          const boostedScore = Math.min(m.score + 1, 3);
+          m = { ...m, tier: boostedScore >= 3 ? "Even" : "Hard", color: boostedScore >= 3 ? "neutral" : "tough", score: boostedScore, competitiveBoost: true };
         }
         // High-Pace Target games (Game Selection Matrix) bump the matchup score by 1 —
         // pace/PPP/PROE reasoning overrides a merely-average raw FPA tier. Capped at 5
@@ -2369,7 +2370,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   const orphans = valid.filter(p => !stackedPlayerNames.has(p.name)).map(p => {
     const opps = PLAYOFFS[p.team] || [];
-    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos, useProjected));
+    const matchups = opps.map((opp, i) => {
+      let m = getMatchupTier(opp, p.pos, useProjected);
+      const wk = [15, 16, 17][i];
+      const oppClean = opp.replace("@", "").trim().toUpperCase();
+      const gd = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean);
+      if (gd && Math.abs(gd.spread) <= 3 && gd.total >= 46 && m.score <= 2) {
+        const bs = Math.min(m.score + 1, 3);
+        m = { ...m, tier: bs >= 3 ? "Even" : "Hard", color: bs >= 3 ? "neutral" : "tough", score: bs, competitiveBoost: true };
+      }
+      const gsNode = getGameSelectionNode(p.team, opp, wk);
+      if (gsNode?.type === "highPace" && m.score < 5) {
+        m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };
+      }
+      return m;
+    });
     const w17 = matchups[2];
     const peakScore = Math.max(...matchups.map(m => m.score));
     const weightedScore = matchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
@@ -4855,6 +4870,14 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === LEAGUE CONTEXT (redraft only) ===
+      const leagueContext = isRedraft
+        ? (() => {
+            const lg = resolveLeague(redraftLeague, customConfig);
+            return lg ? `${lg.teamCount || 12}-team ${lg.name || lg.scoringFormat || "Half-PPR"}` : "Standard 12-team Half-PPR";
+          })()
+        : null;
+
       // === USER PROMPT ===
       const userPrompt = isRedraft
         ? `Roster: ${rosterLines}
@@ -6176,7 +6199,7 @@ Analyze this best ball roster. Return JSON only.`;
               onClick={() => setHistoryPanelOpen(prev => !prev)}
               style={{ width: "100%", background: "#0a0a0a", border: "none", borderBottom: historyPanelOpen ? "1px solid #1e1e1e" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
             >
-              <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>Recent Grades ({gradeHistory.length})</span>
+              <span style={{ fontSize: "10px", color: "#a78bfa", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>Recent Grades ({gradeHistory.length})</span>
               <span style={{ fontSize: "10px", color: "#444" }}>{historyPanelOpen ? "▲" : "▼"}</span>
             </button>
             {historyPanelOpen && (
@@ -6737,7 +6760,7 @@ Analyze this best ball roster. Return JSON only.`;
                       </div>
                     </div>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "8px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
@@ -6802,15 +6825,15 @@ Analyze this best ball roster. Return JSON only.`;
                       {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
                         borderRadius: "4px",
-                        padding: "8px 14px",
+                        padding: "8px 16px",
                         color: "#555",
-                        fontSize: "11px",
-                        fontWeight: 600,
+                        fontSize: "12px",
+                        fontWeight: 700,
                         fontFamily: "'Inter', sans-serif",
                         letterSpacing: "0.03em",
                         cursor: "pointer",
@@ -6883,37 +6906,88 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Playoff Window Preview */}
             {(() => {
               const allWithScores = [];
+              const pvWkLabels = ["W15", "W16", "W17"];
+              const pvChipStyle = (color) => {
+                if (color === "green") return { bg: "#0a1a0a", border: "#22c55e44", text: "#4ade80" };
+                if (color === "tough") return { bg: "#1a0a0a", border: "#ef444444", text: "#f87171" };
+                if (color === "red") return { bg: "#1a0a0a", border: "#ef444444", text: "#f87171" };
+                return { bg: "#111", border: "#33333355", text: "#666" };
+              };
+              const pvInitialName = (name) => {
+                const parts = name.split(" ");
+                return parts.length > 1 ? `${parts[0][0]}. ${parts[parts.length - 1]}` : name;
+              };
               (analyzed.stackGrades || []).forEach(stack => {
-                const playerTotals = {};
-                (stack.weekDetails || []).forEach(weekArr => {
+                const playerWeeks = {};
+                (stack.weekDetails || []).forEach((weekArr, wkIdx) => {
                   (weekArr || []).forEach(p => {
-                    if (!playerTotals[p.name]) playerTotals[p.name] = { name: p.name, pos: p.pos, team: stack.team, score: 0 };
-                    playerTotals[p.name].score += p.score;
+                    if (!playerWeeks[p.name]) playerWeeks[p.name] = { name: p.name, pos: p.pos, team: stack.team, score: 0, weeks: [null, null, null] };
+                    playerWeeks[p.name].score += (p.score || 0);
+                    playerWeeks[p.name].weeks[wkIdx] = { color: p.color, tier: p.tier };
                   });
                 });
-                Object.values(playerTotals).forEach(p => allWithScores.push(p));
+                Object.values(playerWeeks).forEach(p => allWithScores.push(p));
               });
               (analyzed.orphans || []).forEach(p => {
+                const weeks = (p.matchups || []).map(m => ({ color: m.color, tier: m.tier }));
                 const score = (p.matchups || []).reduce((sum, m) => sum + (m.score || 0), 0);
-                allWithScores.push({ name: p.name, pos: p.pos, team: p.team, score });
+                allWithScores.push({ name: p.name, pos: p.pos, team: p.team, score, weeks });
               });
               if (!allWithScores.length) return null;
               allWithScores.sort((a, b) => b.score - a.score);
-              const top3 = allWithScores.slice(0, 3);
-              const concern = allWithScores[allWithScores.length - 1];
+              const top = allWithScores.slice(0, 3);
+              const watchCandidates = allWithScores.filter(p => !top.find(t => t.name === p.name));
+              const watchPlayers = watchCandidates.slice(-Math.min(2, watchCandidates.length));
               return (
-                <div style={{ marginBottom: "16px", padding: "12px 16px", background: "#0a0a0a", border: "1px solid #2d1f4a", borderLeft: "3px solid #7c3aed", borderRadius: "4px" }}>
-                  <div style={{ fontSize: "9px", color: "#7c3aed", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Playoff Window Preview · W15–W17</div>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: concern && concern.name !== top3[0].name ? "8px" : 0 }}>
-                    {top3.map((p, i) => (
-                      <div key={i} style={{ fontSize: "11px", color: "#a3e635", background: "#0a1a0a", border: "1px solid #22c55e33", borderRadius: "3px", padding: "4px 8px" }}>
-                        {p.name.split(" ").slice(-1)[0]} · {p.pos}
-                      </div>
-                    ))}
+                <div style={{ marginBottom: "16px", background: "#0a0a0a", border: "1px solid #2d1f4a", borderRadius: "6px", padding: "16px 18px" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
+                    <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "#fafafa" }}>
+                      PLAYOFF WINDOW PREVIEW
+                    </h2>
+                    <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>W15–W17 playoff schedule</span>
                   </div>
-                  {concern && concern.name !== top3[0].name && (
-                    <div style={{ fontSize: "10px", color: "#fb923c" }}>Watch: {concern.name.split(" ").slice(-1)[0]} ({concern.pos}) — toughest playoff slate</div>
-                  )}
+                  <div style={{ display: "grid", gridTemplateColumns: watchPlayers.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
+                    <div>
+                      <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Best windows</div>
+                      {top.map((p, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < top.length - 1 ? "1px solid #111" : "none" }}>
+                          <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
+                          <div style={{ display: "flex", gap: "3px" }}>
+                            {pvWkLabels.map((lbl, wi) => {
+                              const w = p.weeks ? p.weeks[wi] : null;
+                              const c = pvChipStyle(w?.color);
+                              return (
+                                <div key={wi} style={{ fontSize: "8px", fontWeight: 700, padding: "2px 5px", borderRadius: "3px", background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>
+                                  {lbl}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {watchPlayers.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#fb923c", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Watch</div>
+                        {watchPlayers.map((p, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < watchPlayers.length - 1 ? "1px solid #111" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
+                            <div style={{ display: "flex", gap: "3px" }}>
+                              {pvWkLabels.map((lbl, wi) => {
+                                const w = p.weeks ? p.weeks[wi] : null;
+                                const c = pvChipStyle(w?.color);
+                                return (
+                                  <div key={wi} style={{ fontSize: "8px", fontWeight: 700, padding: "2px 5px", borderRadius: "3px", background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>
+                                    {lbl}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })()}
@@ -7834,7 +7908,7 @@ Analyze this best ball roster. Return JSON only.`;
                       </div>
                     </div>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "8px", flexWrap: "wrap", marginTop: "16px" }}>
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
@@ -7899,15 +7973,15 @@ Analyze this best ball roster. Return JSON only.`;
                       {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
                         borderRadius: "4px",
-                        padding: "8px 14px",
+                        padding: "8px 16px",
                         color: "#555",
-                        fontSize: "11px",
-                        fontWeight: 600,
+                        fontSize: "12px",
+                        fontWeight: 700,
                         fontFamily: "'Inter', sans-serif",
                         letterSpacing: "0.03em",
                         cursor: "pointer",
@@ -7962,17 +8036,17 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Trade Analyzer */}
             {analyzed.mode === "redraft" && (
-              <div style={{ marginBottom: "16px", border: "1px solid #222", borderRadius: "4px" }}>
+              <div style={{ marginBottom: "16px", border: "1px solid #6d28d9", borderLeft: "3px solid #7c3aed", borderRadius: "4px" }}>
                 <button
                   onClick={() => setTradeOpen(o => !o)}
                   style={{
                     width: "100%",
-                    background: tradeOpen ? "#0f0f0f" : "#0a0a0a",
+                    background: tradeOpen ? "#0d0a14" : "#09060f",
                     border: "none",
                     borderRadius: tradeOpen ? "4px 4px 0 0" : "4px",
                     padding: "12px 16px",
                     color: "#a78bfa",
-                    fontSize: "11px",
+                    fontSize: "12px",
                     fontWeight: 700,
                     fontFamily: "'Inter', sans-serif",
                     letterSpacing: "0.1em",
@@ -7983,7 +8057,10 @@ Analyze this best ball roster. Return JSON only.`;
                     justifyContent: "space-between",
                   }}
                 >
-                  <span>⇄ Analyze a Trade</span>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
+                    <span>⇄ Analyze a Trade</span>
+                    <span style={{ fontSize: "9px", color: "#6d28d9", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Instantly recalculates your grade →</span>
+                  </div>
                   <span style={{ fontSize: "9px", color: "#6d28d9" }}>{tradeOpen ? "▲" : "▼"}</span>
                 </button>
                 {tradeOpen && (
@@ -9035,7 +9112,8 @@ Analyze this best ball roster. Return JSON only.`;
                             {players.map((p, pi) => (
                               <div key={pi} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "3px 0 3px 10px", borderBottom: pi < players.length - 1 ? "1px solid #0d0d0d" : "none" }}>
                                 <span style={posChipStyle(p.pos)}>{p.pos}</span>
-                                <div style={{ flex: 1, fontSize: "11px", color: "#e0e0e0" }}>{p.name}</div>
+                                <div style={{ fontSize: "11px", color: "#e0e0e0", whiteSpace: "nowrap" }}>{p.name}</div>
+                                <div style={{ flex: 1, borderBottom: "1px dotted #252525", margin: "0 4px", alignSelf: "center" }} />
                                 <div style={{ display: "flex", gap: "2px" }}>
                                   {p.weeks.map((w, wi) => {
                                     const oppLabel = (w?.opp || "?").replace("@","");
