@@ -2408,8 +2408,8 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   const pivots = [];
   valid.forEach(player => {
-    if (!hasPickNumbers && !player.actualPick) return;
-    const pickNum = player.actualPick;
+    const pickNum = player.actualPick || Math.round(player.adp || 0) || null;
+    if (!pickNum) return;
     const pickADP = player.adp;
 
     // Find same-position alternatives within ±10 ADP that weren't drafted
@@ -4052,6 +4052,19 @@ export default function RosterScorer() {
   const [aiBenchMoveNotes, setAiBenchMoveNotes] = useState({});
   const [aiLineupNotes, setAiLineupNotes] = useState({});
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
+  const [gradeHistory, setGradeHistory] = useState([]);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
+  const [shareLinkLoading, setShareLinkLoading] = useState(false);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
+  const [shareLinkError, setShareLinkError] = useState(false);
+  const [sharedView, setSharedView] = useState(false);
+  const [cachedShareUrl, setCachedShareUrl] = useState(null);
+  const [discordCopied, setDiscordCopied] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [tradeGive, setTradeGive] = useState("");
+  const [tradeGet, setTradeGet] = useState("");
+  const [tradeResult, setTradeResult] = useState(null);
+  const [tradeError, setTradeError] = useState(null);
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -4120,6 +4133,241 @@ export default function RosterScorer() {
     return () => { unlock(); };
   }, [heroCollapsed, analyzed]);
   const exportCardRef = React.useRef(null);
+
+  // === GRADE HISTORY ===
+  const HISTORY_KEY = "rosterxray_grade_history";
+  const MAX_HISTORY = 5;
+
+  const loadGradeHistory = () => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed;
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const saveGradeEntry = (snapshot) => {
+    try {
+      const existing = loadGradeHistory();
+      const next = [snapshot, ...existing].slice(0, MAX_HISTORY);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      setGradeHistory(next);
+    } catch (e) {
+      // localStorage full or unavailable — silently skip
+    }
+  };
+
+  const restoreGradeEntry = (entry) => {
+    setAnalyzed(entry.analyzed);
+    setAnalysisMode(entry.analysisMode);
+    setTournament(entry.tournament || "main");
+    setRedraftLeague(entry.redraftLeague || "yahoo_std");
+    setDataMode(entry.dataMode || "actual");
+    setAiNutshell(entry.aiNutshell || null);
+    setAiPivotNotes(entry.aiPivotNotes || {});
+    setAiStandoutDetails(entry.aiStandoutDetails || {});
+    setAiBenchMoveNotes(entry.aiBenchMoveNotes || {});
+    setAiLineupNotes(entry.aiLineupNotes || {});
+    setAiBringBackNotes(entry.aiBringBackNotes || {});
+    setAiLoading(false);
+    setExportedDataUrl(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Load saved grades from localStorage on mount
+  useEffect(() => {
+    setGradeHistory(loadGradeHistory());
+  }, []);
+
+  // Save completed grade when AI finishes loading
+  useEffect(() => {
+    if (aiLoading) return;
+    if (!analyzed || !analyzed.grade) return;
+    const picks = analyzed.picks || analyzed.valid || [];
+    const snapshot = {
+      id: Date.now(),
+      createdAt: Date.now(),
+      analysisMode,
+      tournament,
+      redraftLeague,
+      dataMode,
+      analyzed,
+      aiNutshell,
+      aiPivotNotes,
+      aiStandoutDetails,
+      aiBenchMoveNotes,
+      aiLineupNotes,
+      aiBringBackNotes,
+    };
+    saveGradeEntry(snapshot);
+  }, [aiLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Build a shareable link — stores the grade server-side, copies URL to clipboard
+  const handleCreateShareLink = async () => {
+    if (!analyzed || !analyzed.grade) return;
+    setShareLinkLoading(true);
+    setShareLinkError(false);
+    setShareLinkCopied(false);
+    try {
+      const snapshot = {
+        createdAt: Date.now(),
+        analysisMode,
+        tournament,
+        redraftLeague,
+        dataMode,
+        analyzed,
+        aiNutshell,
+        aiPivotNotes,
+        aiStandoutDetails,
+        aiBenchMoveNotes,
+        aiLineupNotes,
+        aiBringBackNotes,
+      };
+      const res = await fetch("/api/grade-save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ snapshot }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      const data = await res.json();
+      if (!data.id) throw new Error("no id");
+      const url = `${window.location.origin}/?g=${data.id}`;
+      setCachedShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      setShareLinkCopied(true);
+      setTimeout(() => setShareLinkCopied(false), 2500);
+    } catch (e) {
+      setShareLinkError(true);
+      setTimeout(() => setShareLinkError(false), 3000);
+    } finally {
+      setShareLinkLoading(false);
+    }
+  };
+
+  const handleCopyForDiscord = async () => {
+    if (!analyzed || !analyzed.grade) return;
+    setDiscordCopied(false);
+    try {
+      let url = cachedShareUrl;
+      if (!url) {
+        const snapshot = {
+          createdAt: Date.now(),
+          analysisMode,
+          tournament,
+          redraftLeague,
+          dataMode,
+          analyzed,
+          aiNutshell,
+          aiPivotNotes,
+          aiStandoutDetails,
+          aiBenchMoveNotes,
+          aiLineupNotes,
+          aiBringBackNotes,
+        };
+        const res = await fetch("/api/grade-save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ snapshot }),
+        });
+        if (!res.ok) throw new Error("save failed");
+        const data = await res.json();
+        if (!data.id) throw new Error("no id");
+        url = `${window.location.origin}/?g=${data.id}`;
+        setCachedShareUrl(url);
+      }
+      const top3 = (analyzed.valid || []).slice(0, 3).map(p => p.name.split(" ").slice(-1)[0]).join(" · ");
+      const primaryStack = analyzed.stackGrades && analyzed.stackGrades.length > 0 ? analyzed.stackGrades[0] : null;
+      let stackLine = "";
+      if (primaryStack) {
+        if (primaryStack.hasQB) {
+          const qb = primaryStack.players.find(p => p.pos === "QB");
+          const qbLast = qb ? qb.name.split(" ").slice(-1)[0] : "QB";
+          stackLine = `Primary stack: ${primaryStack.team} (${qbLast} + ${primaryStack.players.length - 1})`;
+        } else {
+          stackLine = `Primary stack: ${primaryStack.team} (${primaryStack.players.length} pieces)`;
+        }
+      }
+      const mode = analysisMode === "bestball" ? "Best Ball" : "Redraft";
+      const lines = [
+        `🏈 RosterXRay Grade: ${analyzed.grade} (${mode})`,
+        top3 ? `Top: ${top3}` : null,
+        stackLine || null,
+        `→ Full breakdown: ${url}`,
+      ].filter(Boolean);
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setDiscordCopied(true);
+      setTimeout(() => setDiscordCopied(false), 2500);
+    } catch (e) {
+      // silent fail — user still has the share link button
+    }
+  };
+
+  const handleTradeAnalysis = () => {
+    if (!analyzed || analyzed.mode !== "redraft") return;
+    setTradeError(null);
+    setTradeResult(null);
+
+    const giveNames = tradeGive.split(",").map(s => normalize(s.trim())).filter(Boolean);
+    const getNames  = tradeGet.split(",").map(s => normalize(s.trim())).filter(Boolean);
+
+    if (!giveNames.length || !getNames.length) {
+      setTradeError("Enter at least one player on each side.");
+      return;
+    }
+
+    const givePlayers = [];
+    for (const gn of giveNames) {
+      const found = analyzed.valid.find(p => normalize(p.name) === gn || normalize(p.name).includes(gn));
+      if (!found) {
+        const displayGive = tradeGive.split(",").find(s => normalize(s.trim()) === gn)?.trim() || gn;
+        setTradeError(`"${displayGive}" not on your roster.`);
+        return;
+      }
+      givePlayers.push(found);
+    }
+
+    const getPlayers = [];
+    for (const gn of getNames) {
+      const key = Object.keys(ADP_DATA).find(k => k === gn || k.includes(gn));
+      if (!key) {
+        const displayGet = tradeGet.split(",").find(s => normalize(s.trim()) === gn)?.trim() || gn;
+        setTradeError(`Can't find "${displayGet}" — try a different spelling.`);
+        return;
+      }
+      const d = ADP_DATA[key];
+      const displayName = key.split(" ").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+      getPlayers.push({ name: displayName, pos: d.pos, team: d.team, adp: d.adp, pickNum: 99, notFound: false });
+    }
+
+    const giveSet = new Set(givePlayers.map(p => normalize(p.name)));
+    const modifiedPicks = [
+      ...analyzed.valid.filter(p => !giveSet.has(normalize(p.name))),
+      ...getPlayers,
+    ];
+
+    const league = resolveLeague(redraftLeague, customConfig);
+    setTradeResult(analyzeRedraft(modifiedPicks, league, false, dataMode === "projected"));
+  };
+
+  // Load a shared grade when the URL carries ?g=<id>
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("g");
+    if (!id || !/^[a-z0-9]{8}$/.test(id)) return;
+    fetch(`/api/grade-get?id=${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.snapshot) {
+          restoreGradeEntry(data.snapshot);
+          setSharedView(true);
+          setHeroCollapsed(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
   const resolveLeague = (leagueKey, cfg) => {
@@ -4207,10 +4455,29 @@ export default function RosterScorer() {
     });
   };
 
-const fileToBase64 = (file) => new Promise((resolve, reject) => {
+const compressAndEncode = (file) => new Promise((resolve, reject) => {
+    const MAX_SIDE = 1920;
+    const QUALITY = 0.85;
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
     reader.onerror = () => reject(new Error("File read failed"));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Image load failed"));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_SIDE || height > MAX_SIDE) {
+          if (width > height) { height = Math.round((height / width) * MAX_SIDE); width = MAX_SIDE; }
+          else { width = Math.round((width / height) * MAX_SIDE); height = MAX_SIDE; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", QUALITY);
+        resolve(dataUrl.split(",")[1]);
+      };
+      img.src = e.target.result;
+    };
     reader.readAsDataURL(file);
   });
 
@@ -4220,11 +4487,16 @@ const fileToBase64 = (file) => new Promise((resolve, reject) => {
       setExtractError("Only image files supported");
       return;
     }
+    const oversized = files.find(f => f.size > 15 * 1024 * 1024);
+    if (oversized) {
+      setExtractError("Image too large — try a screenshot instead of a full-resolution photo.");
+      return;
+    }
     setExtractError(null);
     const processed = await Promise.all(files.map(async (f) => ({
       name: f.name,
-      type: f.type,
-      data: await fileToBase64(f),
+      type: "image/jpeg",
+      data: await compressAndEncode(f),
       preview: URL.createObjectURL(f),
     })));
     setUploadedImages(prev => [...prev, ...processed]);
@@ -4621,7 +4893,7 @@ Analyze this best ball roster. Return JSON only.`;
           task: "grade",
           mode: isRedraft ? "redraft" : "bestball",
           tournamentName,
-          max_tokens: 1800,
+          max_tokens: 2200,
           messages: [{ role: "user", content: userPrompt }],
         }),
       });
@@ -5089,6 +5361,18 @@ Analyze this best ball roster. Return JSON only.`;
           .hero-pill { white-space: nowrap; text-align: center; font-size: 9px !important; padding: 4px 8px !important; }
           .hero-cta-btn { padding: 10px 24px !important; font-size: 18px !important; }
         }
+        @media (max-width: 480px) {
+          .grade-banner-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .playoff-week-grid {
+            grid-template-columns: 1fr !important;
+            gap: 6px !important;
+          }
+        }
       `}</style>
 
       {/* ── Hero Section ── */}
@@ -5181,7 +5465,7 @@ Analyze this best ball roster. Return JSON only.`;
                 cursor: "pointer",
                 textTransform: "uppercase",
                 width: "100%",
-                maxWidth: "400px",
+                maxWidth: "min(400px, 100%)",
               }}
             >
               Grade My Roster →
@@ -5885,6 +6169,46 @@ Analyze this best ball roster. Return JSON only.`;
         </div>
         )}
 
+        {/* Recent Grades History Panel */}
+        {gradeHistory.length > 0 && (
+          <div style={{ marginBottom: "20px", border: "1px solid #1e1e1e", borderRadius: "6px", overflow: "hidden" }}>
+            <button
+              onClick={() => setHistoryPanelOpen(prev => !prev)}
+              style={{ width: "100%", background: "#0a0a0a", border: "none", borderBottom: historyPanelOpen ? "1px solid #1e1e1e" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+            >
+              <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>Recent Grades ({gradeHistory.length})</span>
+              <span style={{ fontSize: "10px", color: "#444" }}>{historyPanelOpen ? "▲" : "▼"}</span>
+            </button>
+            {historyPanelOpen && (
+              <div style={{ display: "flex", flexDirection: "row", overflowX: "auto" }}>
+                {gradeHistory.map((entry, idx) => {
+                  const picks = entry.analyzed.picks || entry.analyzed.valid || [];
+                  const topThree = picks.slice(0, 3).map(p => p.name || p.raw || "").filter(Boolean);
+                  const modeLabel = entry.analysisMode === "redraft"
+                    ? "Redraft"
+                    : (TOURNAMENTS[entry.tournament] ? TOURNAMENTS[entry.tournament].name : entry.tournament);
+                  const dateStr = new Date(entry.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return (
+                    <button
+                      key={entry.id}
+                      onClick={() => restoreGradeEntry(entry)}
+                      onMouseEnter={e => { e.currentTarget.style.background = "#141414"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "#0d0d0d"; }}
+                      style={{ flex: "0 0 auto", minWidth: "140px", background: "#0d0d0d", border: "none", borderRight: idx < gradeHistory.length - 1 ? "1px solid #1a1a1a" : "none", padding: "12px 14px", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
+                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
+                        <span style={{ fontSize: "10px", color: "#444" }}>{dateStr}</span>
+                      </div>
+                      <div style={{ fontSize: "9px", color: entry.analysisMode === "redraft" ? "#a855f7" : "#22c55e", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px", fontWeight: 700 }}>{modeLabel}</div>
+                      <div style={{ fontSize: "10px", color: "#555", lineHeight: 1.4 }}>{topThree.length > 0 ? topThree.join(" · ") : "—"}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid #222" }}>
@@ -6002,6 +6326,12 @@ Analyze this best ball roster. Return JSON only.`;
             {extractError && (
               <div style={{ marginTop: "10px", padding: "10px 14px", background: "#2e1414", border: "1px solid #7c2d12", borderRadius: "4px", color: "#fb923c", fontSize: "12px" }}>
                 {extractError}
+                <button
+                  onClick={() => { setExtractError(null); setMode("paste"); }}
+                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "#fb923c", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                >
+                  Switch to Paste Text →
+                </button>
               </div>
             )}
 
@@ -6046,7 +6376,7 @@ Analyze this best ball roster. Return JSON only.`;
                   opacity: uploadedImages.length > 0 && !extracting ? 1 : 0.4,
                   borderRadius: "3px",
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "min(400px, 100%)",
                 }}
               >
                 {extracting ? <span><span className="strobe-dot" style={{ marginRight: "5px" }}>●</span>Extracting…</span> : "Extract & Analyze →"}
@@ -6212,7 +6542,7 @@ Analyze this best ball roster. Return JSON only.`;
                   opacity: input.trim() ? 1 : 0.4,
                   borderRadius: "3px",
                   width: "100%",
-                  maxWidth: "400px",
+                  maxWidth: "min(400px, 100%)",
                 }}
               >
                 Analyze →
@@ -6241,11 +6571,24 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
         )}
 
+        {/* Shared-grade banner */}
+        {sharedView && analyzed && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", background: "#0d1a12", border: "1px solid #22c55e33", borderRadius: "6px", padding: "12px 16px", marginBottom: "16px" }}>
+            <span style={{ fontSize: "12px", color: "#86efac", fontWeight: 600 }}>👁 You're viewing a shared roster grade</span>
+            <button
+              onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
+              style={{ background: "linear-gradient(90deg, #16a34a, #22c55e)", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Grade your own roster →
+            </button>
+          </div>
+        )}
+
         {/* Output */}
         {analyzed && analyzed.mode !== "redraft" && (
           <div className="fade-in">
             {/* Grade banner */}
-            <div style={{
+            <div className="grade-banner-grid" style={{
               display: "grid",
               gridTemplateColumns: "auto 1fr",
               gap: "24px",
@@ -6418,7 +6761,48 @@ Analyze this best ball roster. Return JSON only.`;
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
+                      onClick={handleCreateShareLink}
+                      disabled={shareLinkLoading}
+                      style={{
+                        background: shareLinkCopied ? "#16331f" : "transparent",
+                        border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: shareLinkLoading ? "default" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
+                    </button>
+                    <button
+                      onClick={handleCopyForDiscord}
+                      style={{
+                        background: discordCopied ? "#1a1233" : "transparent",
+                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: discordCopied ? "#a5b4fc" : "#818cf8",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                    </button>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -6496,6 +6880,44 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             )}
 
+            {/* Playoff Window Preview */}
+            {(() => {
+              const allWithScores = [];
+              (analyzed.stackGrades || []).forEach(stack => {
+                const playerTotals = {};
+                (stack.weekDetails || []).forEach(weekArr => {
+                  (weekArr || []).forEach(p => {
+                    if (!playerTotals[p.name]) playerTotals[p.name] = { name: p.name, pos: p.pos, team: stack.team, score: 0 };
+                    playerTotals[p.name].score += p.score;
+                  });
+                });
+                Object.values(playerTotals).forEach(p => allWithScores.push(p));
+              });
+              (analyzed.orphans || []).forEach(p => {
+                const score = (p.matchups || []).reduce((sum, m) => sum + (m.score || 0), 0);
+                allWithScores.push({ name: p.name, pos: p.pos, team: p.team, score });
+              });
+              if (!allWithScores.length) return null;
+              allWithScores.sort((a, b) => b.score - a.score);
+              const top3 = allWithScores.slice(0, 3);
+              const concern = allWithScores[allWithScores.length - 1];
+              return (
+                <div style={{ marginBottom: "16px", padding: "12px 16px", background: "#0a0a0a", border: "1px solid #2d1f4a", borderLeft: "3px solid #7c3aed", borderRadius: "4px" }}>
+                  <div style={{ fontSize: "9px", color: "#7c3aed", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>Playoff Window Preview · W15–W17</div>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: concern && concern.name !== top3[0].name ? "8px" : 0 }}>
+                    {top3.map((p, i) => (
+                      <div key={i} style={{ fontSize: "11px", color: "#a3e635", background: "#0a1a0a", border: "1px solid #22c55e33", borderRadius: "3px", padding: "4px 8px" }}>
+                        {p.name.split(" ").slice(-1)[0]} · {p.pos}
+                      </div>
+                    ))}
+                  </div>
+                  {concern && concern.name !== top3[0].name && (
+                    <div style={{ fontSize: "10px", color: "#fb923c" }}>Watch: {concern.name.split(" ").slice(-1)[0]} ({concern.pos}) — toughest playoff slate</div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Stacks */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
@@ -6551,7 +6973,7 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
 
                     {/* Week grid */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                    <div className="playoff-week-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
                       {["W15", "W16", "W17"].map((wk, wkIdx) => {
                         const details = stack.weekDetails[wkIdx];
                         return (
@@ -6693,7 +7115,7 @@ Analyze this best ball roster. Return JSON only.`;
                   Players you drafted <span style={{ color: "#22d3ee", fontWeight: 600 }}>without any teammates</span>. Solo picks aren't automatically bad — what matters is their <span style={{ color: "#22d3ee", fontWeight: 600 }}>playoff matchup</span>. The chips below show each player's W15/W16/W17 difficulty.
                 </div>
                 <MatchupLegend />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
                   {analyzed.orphans.sort((a, b) => b.normalized - a.normalized).map((o, i) => {
                     const s = tierStyle(o.color);
                     return (
@@ -7263,7 +7685,7 @@ Analyze this best ball roster. Return JSON only.`;
         {analyzed && analyzed.mode === "redraft" && (
           <div className="fade-in">
             {/* Grade banner */}
-            <div style={{
+            <div className="grade-banner-grid" style={{
               display: "grid",
               gridTemplateColumns: "auto 1fr",
               gap: "24px",
@@ -7436,7 +7858,48 @@ Analyze this best ball roster. Return JSON only.`;
                       {exportingCard ? "⏳ Generating…" : "📤 Share X-Ray"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
+                      onClick={handleCreateShareLink}
+                      disabled={shareLinkLoading}
+                      style={{
+                        background: shareLinkCopied ? "#16331f" : "transparent",
+                        border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: shareLinkLoading ? "default" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {shareLinkLoading ? "⏳ Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "🔗 Copy Share Link"}
+                    </button>
+                    <button
+                      onClick={handleCopyForDiscord}
+                      style={{
+                        background: discordCopied ? "#1a1233" : "transparent",
+                        border: `1px solid ${discordCopied ? "#818cf855" : "#818cf844"}`,
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        color: discordCopied ? "#a5b4fc" : "#818cf8",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: "0.03em",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {discordCopied ? "✓ Copied for Discord" : "💬 Copy for Discord"}
+                    </button>
+                    <button
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid #333",
@@ -7496,6 +7959,104 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
+
+            {/* Trade Analyzer */}
+            {analyzed.mode === "redraft" && (
+              <div style={{ marginBottom: "16px", border: "1px solid #222", borderRadius: "4px" }}>
+                <button
+                  onClick={() => setTradeOpen(o => !o)}
+                  style={{
+                    width: "100%",
+                    background: tradeOpen ? "#0f0f0f" : "#0a0a0a",
+                    border: "none",
+                    borderRadius: tradeOpen ? "4px 4px 0 0" : "4px",
+                    padding: "12px 16px",
+                    color: "#a78bfa",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    fontFamily: "'Inter', sans-serif",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>⇄ Analyze a Trade</span>
+                  <span style={{ fontSize: "9px", color: "#6d28d9" }}>{tradeOpen ? "▲" : "▼"}</span>
+                </button>
+                {tradeOpen && (
+                  <div style={{ padding: "14px 16px", borderTop: "1px solid #1a1a1a" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You give</div>
+                        <input
+                          value={tradeGive}
+                          onChange={e => { setTradeGive(e.target.value); setTradeResult(null); setTradeError(null); }}
+                          placeholder="e.g. DeVonta Smith"
+                          style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                        />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>You get</div>
+                        <input
+                          value={tradeGet}
+                          onChange={e => { setTradeGet(e.target.value); setTradeResult(null); setTradeError(null); }}
+                          placeholder="e.g. Jordan Addison"
+                          style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: "3px", padding: "7px 10px", color: "#e5e5e5", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleTradeAnalysis}
+                      style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                    >
+                      Analyze Trade →
+                    </button>
+                    {tradeError && (
+                      <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "#fb923c", fontSize: "11px" }}>
+                        {tradeError}
+                      </div>
+                    )}
+                    {tradeResult && (() => {
+                      const scoreDelta = tradeResult.score - analyzed.score;
+                      const gradeUp = scoreDelta > 0;
+                      const newStrengths = tradeResult.strengths.filter(s => !analyzed.strengths.includes(s));
+                      const newWeaknesses = tradeResult.weaknesses.filter(w => !analyzed.weaknesses.includes(w));
+                      return (
+                        <div style={{ marginTop: "14px" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "10px" }}>
+                            <div style={{ padding: "12px", background: "#0a0a0a", border: "1px solid #222", borderRadius: "4px" }}>
+                              <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Before</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(analyzed.grade), lineHeight: 1 }}>{analyzed.grade}</div>
+                              <div style={{ fontSize: "11px", color: "#555", marginTop: "4px" }}>Score {analyzed.score.toFixed(1)}</div>
+                            </div>
+                            <div style={{ padding: "12px", background: "#0a0a0a", border: `1px solid ${gradeUp ? "#22c55e44" : "#ef444444"}`, borderRadius: "4px" }}>
+                              <div style={{ fontSize: "9px", color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>After</div>
+                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
+                              <div style={{ fontSize: "11px", color: gradeUp ? "#4ade80" : "#f87171", marginTop: "4px" }}>
+                                {gradeUp ? "+" : ""}{scoreDelta.toFixed(1)} pts
+                              </div>
+                            </div>
+                          </div>
+                          {(newStrengths.length > 0 || newWeaknesses.length > 0) && (
+                            <div style={{ fontSize: "12px" }}>
+                              {newStrengths.map((s, i) => (
+                                <div key={i} style={{ color: "#4ade80", marginBottom: "3px" }}>+ {s}</div>
+                              ))}
+                              {newWeaknesses.map((w, i) => (
+                                <div key={i} style={{ color: "#fb923c", marginBottom: "3px" }}>- {w}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Starting Lineup */}
             <div style={{ marginBottom: "20px" }}>
@@ -7743,6 +8304,62 @@ Analyze this best ball roster. Return JSON only.`;
                 })}
               </div>
             </div>
+
+            {/* Weekly Matchup Spotlight — current week start/sit highlights */}
+            {(() => {
+              const seasonStart = new Date("2026-09-10");
+              const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+              const today = new Date();
+              const isPreSeason = today < seasonStart;
+              const spotlightWeek = isPreSeason
+                ? 1
+                : Math.min(18, Math.floor((today - seasonStart) / msPerWeek) + 1);
+              const weekLabel = isPreSeason ? `Week 1 Preview` : `Week ${spotlightWeek}`;
+              const schedules = analyzed.starterSchedules || [];
+              const weekMatchups = schedules.map(s => {
+                const m = (s.weeklyMatchups || []).find(w => w.week === spotlightWeek);
+                return m ? { name: s.name, pos: s.pos, team: s.team, ...m } : null;
+              }).filter(Boolean).filter(m => !m.isBye);
+              const starts = weekMatchups.filter(m => m.score >= 3).sort((a, b) => b.score - a.score).slice(0, 3);
+              const concerns = weekMatchups.filter(m => m.score <= 2).sort((a, b) => a.score - b.score).slice(0, 2);
+              if (weekMatchups.length === 0) return null;
+              return (
+                <div style={{ marginBottom: "24px", background: "#0a0f0a", border: "1px solid #1a2a1a", borderRadius: "6px", padding: "16px 18px" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
+                    <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "#fafafa" }}>
+                      {weekLabel.toUpperCase()} SPOTLIGHT
+                    </h2>
+                    <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                      {isPreSeason ? "season opener matchups" : "this week's matchups"}
+                    </span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: starts.length > 0 && concerns.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
+                    {starts.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Start with confidence</div>
+                        {starts.map((m, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < starts.length - 1 ? "1px solid #111" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{m.name} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
+                            <span style={{ fontSize: "11px", color: "#4ade80", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {concerns.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#f87171", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Tough matchup</div>
+                        {concerns.map((m, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < concerns.length - 1 ? "1px solid #111" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{m.name} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
+                            <span style={{ fontSize: "11px", color: "#f87171", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
