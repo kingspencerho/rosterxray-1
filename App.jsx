@@ -2263,8 +2263,9 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         const wk = [15, 16, 17][wkIdx];
         const oppClean = opp.replace("@", "").trim().toUpperCase();
         const gameData = wk ? (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean) : null;
-        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m.score === 2) {
-          m = { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
+        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 46 && m.score <= 2) {
+          const boostedScore = Math.min(m.score + 1, 3);
+          m = { ...m, tier: boostedScore >= 3 ? "Even" : "Hard", color: boostedScore >= 3 ? "neutral" : "tough", score: boostedScore, competitiveBoost: true };
         }
         // High-Pace Target games (Game Selection Matrix) bump the matchup score by 1 —
         // pace/PPP/PROE reasoning overrides a merely-average raw FPA tier. Capped at 5
@@ -2369,7 +2370,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
 
   const orphans = valid.filter(p => !stackedPlayerNames.has(p.name)).map(p => {
     const opps = PLAYOFFS[p.team] || [];
-    const matchups = opps.map((opp, i) => getMatchupTier(opp, p.pos, useProjected));
+    const matchups = opps.map((opp, i) => {
+      let m = getMatchupTier(opp, p.pos, useProjected);
+      const wk = [15, 16, 17][i];
+      const oppClean = opp.replace("@", "").trim().toUpperCase();
+      const gd = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean);
+      if (gd && Math.abs(gd.spread) <= 3 && gd.total >= 46 && m.score <= 2) {
+        const bs = Math.min(m.score + 1, 3);
+        m = { ...m, tier: bs >= 3 ? "Even" : "Hard", color: bs >= 3 ? "neutral" : "tough", score: bs, competitiveBoost: true };
+      }
+      const gsNode = getGameSelectionNode(p.team, opp, wk);
+      if (gsNode?.type === "highPace" && m.score < 5) {
+        m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };
+      }
+      return m;
+    });
     const w17 = matchups[2];
     const peakScore = Math.max(...matchups.map(m => m.score));
     const weightedScore = matchups.reduce((sum, m, i) => sum + m.score * weights[i], 0);
