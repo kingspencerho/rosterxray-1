@@ -4403,10 +4403,29 @@ export default function RosterScorer() {
     });
   };
 
-const fileToBase64 = (file) => new Promise((resolve, reject) => {
+const compressAndEncode = (file) => new Promise((resolve, reject) => {
+    const MAX_SIDE = 1920;
+    const QUALITY = 0.85;
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
     reader.onerror = () => reject(new Error("File read failed"));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Image load failed"));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_SIDE || height > MAX_SIDE) {
+          if (width > height) { height = Math.round((height / width) * MAX_SIDE); width = MAX_SIDE; }
+          else { width = Math.round((width / height) * MAX_SIDE); height = MAX_SIDE; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", QUALITY);
+        resolve(dataUrl.split(",")[1]);
+      };
+      img.src = e.target.result;
+    };
     reader.readAsDataURL(file);
   });
 
@@ -4416,11 +4435,16 @@ const fileToBase64 = (file) => new Promise((resolve, reject) => {
       setExtractError("Only image files supported");
       return;
     }
+    const oversized = files.find(f => f.size > 15 * 1024 * 1024);
+    if (oversized) {
+      setExtractError("Image too large — try a screenshot instead of a full-resolution photo.");
+      return;
+    }
     setExtractError(null);
     const processed = await Promise.all(files.map(async (f) => ({
       name: f.name,
-      type: f.type,
-      data: await fileToBase64(f),
+      type: "image/jpeg",
+      data: await compressAndEncode(f),
       preview: URL.createObjectURL(f),
     })));
     setUploadedImages(prev => [...prev, ...processed]);
@@ -6250,6 +6274,12 @@ Analyze this best ball roster. Return JSON only.`;
             {extractError && (
               <div style={{ marginTop: "10px", padding: "10px 14px", background: "#2e1414", border: "1px solid #7c2d12", borderRadius: "4px", color: "#fb923c", fontSize: "12px" }}>
                 {extractError}
+                <button
+                  onClick={() => { setExtractError(null); setMode("paste"); }}
+                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "#fb923c", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                >
+                  Switch to Paste Text →
+                </button>
               </div>
             )}
 
@@ -8086,6 +8116,62 @@ Analyze this best ball roster. Return JSON only.`;
                 })}
               </div>
             </div>
+
+            {/* Weekly Matchup Spotlight — current week start/sit highlights */}
+            {(() => {
+              const seasonStart = new Date("2026-09-10");
+              const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+              const today = new Date();
+              const isPreSeason = today < seasonStart;
+              const spotlightWeek = isPreSeason
+                ? 1
+                : Math.min(18, Math.floor((today - seasonStart) / msPerWeek) + 1);
+              const weekLabel = isPreSeason ? `Week 1 Preview` : `Week ${spotlightWeek}`;
+              const schedules = analyzed.starterSchedules || [];
+              const weekMatchups = schedules.map(s => {
+                const m = (s.weeklyMatchups || []).find(w => w.week === spotlightWeek);
+                return m ? { name: s.name, pos: s.pos, team: s.team, ...m } : null;
+              }).filter(Boolean).filter(m => !m.isBye);
+              const starts = weekMatchups.filter(m => m.score >= 3).sort((a, b) => b.score - a.score).slice(0, 3);
+              const concerns = weekMatchups.filter(m => m.score <= 2).sort((a, b) => a.score - b.score).slice(0, 2);
+              if (weekMatchups.length === 0) return null;
+              return (
+                <div style={{ marginBottom: "24px", background: "#0a0f0a", border: "1px solid #1a2a1a", borderRadius: "6px", padding: "16px 18px" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
+                    <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "#fafafa" }}>
+                      {weekLabel.toUpperCase()} SPOTLIGHT
+                    </h2>
+                    <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                      {isPreSeason ? "season opener matchups" : "this week's matchups"}
+                    </span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: starts.length > 0 && concerns.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
+                    {starts.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Start with confidence</div>
+                        {starts.map((m, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < starts.length - 1 ? "1px solid #111" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{m.name} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
+                            <span style={{ fontSize: "11px", color: "#4ade80", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {concerns.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#f87171", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Tough matchup</div>
+                        {concerns.map((m, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < concerns.length - 1 ? "1px solid #111" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{m.name} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
+                            <span style={{ fontSize: "11px", color: "#f87171", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
