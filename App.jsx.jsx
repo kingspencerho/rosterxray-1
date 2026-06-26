@@ -5136,6 +5136,18 @@ Analyze this best ball roster. Return JSON only.`;
     </div>
   );
 
+  const wkChipStyle = (color) => {
+    const map = {
+      elite:   { bg: "#0d2a18", color: "#4ade80" },
+      solid:   { bg: "#1a2a0a", color: "#a3e635" },
+      neutral: { bg: "#2a2000", color: "#facc15" },
+      tough:   { bg: "#2a1400", color: "#fb923c" },
+      wall:    { bg: "#2a0a0a", color: "#f87171" },
+    };
+    const c = map[color] || { bg: "#1a1a1a", color: "#444" };
+    return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
+  };
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -8951,17 +8963,6 @@ Analyze this best ball roster. Return JSON only.`;
               return { fontSize: "8px", fontWeight: 700, background: c.bg, border: `1px solid ${c.border}`, color: c.color, padding: "0", width: "26px", height: "16px", borderRadius: "2px", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
             };
 
-            const wkChipStyle = (color) => {
-              const map = {
-                elite:   { bg: "#0d2a18", color: "#4ade80" },
-                solid:   { bg: "#1a2a0a", color: "#a3e635" },
-                neutral: { bg: "#2a2000", color: "#facc15" },
-                tough:   { bg: "#2a1400", color: "#fb923c" },
-                wall:    { bg: "#2a0a0a", color: "#f87171" },
-              };
-              const c = map[color] || { bg: "#1a1a1a", color: "#444" };
-              return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
-            };
 
             const section = (children, extraStyle = {}) => ({
               padding: "8px 18px",
