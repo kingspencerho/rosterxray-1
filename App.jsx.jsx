@@ -5161,6 +5161,37 @@ Analyze this best ball roster. Return JSON only.`;
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
 
+        :root {
+          /* Surfaces (near-black, low -> high elevation) */
+          --bg-base: #0a0a0a;
+          --bg-surface: #0f0f0f;
+          --bg-raised: #1a1a1a;
+          --bg-inset: #111111;
+          /* Borders */
+          --border-subtle: #222222;
+          --border-default: #333333;
+          /* Text (primary -> dim) */
+          --text-primary: #fafafa;
+          --text-secondary: #888888;
+          --text-muted: #666666;
+          --text-dim: #555555;
+          /* Brand accents */
+          --accent-purple: #a78bfa;
+          --accent-purple-strong: #7c3aed;
+          --accent-cyan: #22d3ee;
+          /* Status / meaning palette */
+          --pos: #4ade80;
+          --pos-bright: #a3e635;
+          --caution: #facc15;
+          --warn: #fb923c;
+          --neg: #f87171;
+          --gold: #f59e0b;
+          /* Typography */
+          --font-display: 'Bebas Neue', 'Impact', sans-serif;
+          --font-body: 'Inter', system-ui, sans-serif;
+          --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+        }
+
         *, *::before, *::after { box-sizing: border-box; }
         html, body {
           margin: 0;
@@ -6922,19 +6953,19 @@ Analyze this best ball roster. Return JSON only.`;
               const watchCandidates = allWithScores.filter(p => !top.find(t => t.name === p.name));
               const watchPlayers = watchCandidates.slice(-Math.min(2, watchCandidates.length));
               return (
-                <div style={{ marginBottom: "16px", background: "#0a0a0a", border: "1px solid #2d1f4a", borderRadius: "6px", padding: "16px 18px" }}>
+                <div style={{ marginBottom: "16px", background: "var(--bg-base)", border: "1px solid #2d1f4a", borderRadius: "6px", padding: "16px 18px" }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
-                    <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "#fafafa" }}>
+                    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "var(--text-primary)" }}>
                       PLAYOFF WINDOW PREVIEW
                     </h2>
-                    <span style={{ fontSize: "10px", color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>W15–W17 playoff schedule</span>
+                    <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>W15–W17 playoff schedule</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: watchPlayers.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
                     <div>
-                      <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Best windows</div>
+                      <div style={{ fontSize: "10px", color: "var(--pos)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Best windows</div>
                       {top.map((p, i) => (
-                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < top.length - 1 ? "1px solid #111" : "none" }}>
-                          <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < top.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
+                          <span style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
                           <div style={{ display: "flex", gap: "3px" }}>
                             {[0,1,2].map(wi => {
                               const w = p.weeks ? p.weeks[wi] : null;
@@ -6950,10 +6981,10 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                     {watchPlayers.length > 0 && (
                       <div>
-                        <div style={{ fontSize: "10px", color: "#fb923c", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Watch</div>
+                        <div style={{ fontSize: "10px", color: "var(--warn)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Watch</div>
                         {watchPlayers.map((p, i) => (
-                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < watchPlayers.length - 1 ? "1px solid #111" : "none" }}>
-                            <span style={{ fontSize: "12px", color: "#e5e5e5", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "#555", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < watchPlayers.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
+                            <span style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>{pvInitialName(p.name)} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{p.pos}</span></span>
                             <div style={{ display: "flex", gap: "3px" }}>
                               {[0,1,2].map(wi => {
                                 const w = p.weeks ? p.weeks[wi] : null;
