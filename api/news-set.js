@@ -3,7 +3,41 @@
 // Password-gated — only accessible via admin panel
 // Supports: add, update, delete, verify (AI sanity check before save)
 
+import crypto from "crypto";
+
 export const config = { maxDuration: 30 };
+
+// Same fixed-window rate limiter pattern as api/analyze.js.
+async function checkRateLimit(kvUrl, kvToken, key, limit, windowSeconds) {
+  try {
+    const incrRes = await fetch(`${kvUrl}/incr/ratelimit:${key}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+    if (!incrRes.ok) return true;
+    const count = await incrRes.json();
+    if (count.result === 1) {
+      await fetch(`${kvUrl}/expire/ratelimit:${key}/${windowSeconds}`, {
+        headers: { Authorization: `Bearer ${kvToken}` },
+      });
+    }
+    return count.result <= limit;
+  } catch {
+    return true;
+  }
+}
+
+// Constant-time password comparison — avoids leaking match-length via timing.
+function safeCompare(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) {
+    // Still run a comparison of equal-length buffers so the response time
+    // doesn't trivially reveal a length mismatch.
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || "";
@@ -22,17 +56,22 @@ export default async function handler(req, res) {
 
   const { password, action, playerName, newsText, currentNews } = req.body;
 
-  // Auth check
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
   const kvUrl = process.env.KV_REST_API_URL;
   const kvToken = process.env.KV_REST_API_TOKEN;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (!kvUrl || !kvToken) {
     return res.status(500).json({ error: "KV not configured" });
+  }
+
+  // Rate limit auth attempts before checking the password, to blunt brute-force.
+  const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+  const rateOk = await checkRateLimit(kvUrl, kvToken, `admin-auth:${ip}`, 5, 60);
+  if (!rateOk) return res.status(429).json({ error: "Too many attempts — please wait" });
+
+  // Auth check — constant-time compare to avoid timing side-channels.
+  if (!password || !safeCompare(password, process.env.ADMIN_PASSWORD || "")) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   // === ACTION: verify — AI sanity check before saving ===

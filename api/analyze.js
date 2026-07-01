@@ -1,6 +1,28 @@
 // api/analyze.js
 export const config = { maxDuration: 60 };
 
+// Simple fixed-window rate limiter using the Upstash REST API already
+// provisioned for KV. No new dependency — matches the raw-fetch pattern
+// used across api/*.js. Returns true if the request should be allowed.
+async function checkRateLimit(kvUrl, kvToken, key, limit, windowSeconds) {
+  try {
+    const incrRes = await fetch(`${kvUrl}/incr/ratelimit:${key}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+    if (!incrRes.ok) return true; // fail open — don't block legit traffic on KV hiccups
+    const count = await incrRes.json();
+    if (count.result === 1) {
+      // first hit in this window — set expiry
+      await fetch(`${kvUrl}/expire/ratelimit:${key}/${windowSeconds}`, {
+        headers: { Authorization: `Bearer ${kvToken}` },
+      });
+    }
+    return count.result <= limit;
+  } catch {
+    return true; // fail open
+  }
+}
+
 // ============ SERVER-SIDE SYSTEM PROMPTS ============
 // These never leave the server. The client sends only `task` + the relevant
 // data payload — never the instructions themselves.
@@ -138,21 +160,28 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "API key not configured" });
+
+  const kvUrl = process.env.KV_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN;
+  if (kvUrl && kvToken) {
+    const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+    const allowed = await checkRateLimit(kvUrl, kvToken, `analyze:${ip}`, 20, 60);
+    if (!allowed) return res.status(429).json({ error: "Too many requests — please slow down" });
+  }
+
   try {
     const body = req.body;
 
     // === SERVER-SIDE SYSTEM PROMPT SELECTION ===
     // The client sends a `task` field instead of the actual system prompt text.
-    // This is the only change to the contract: client no longer controls `system`.
+    // The server ALWAYS selects the system prompt from the fixed prompts below —
+    // arbitrary client-supplied `system` text is never used, so this endpoint
+    // cannot be used as an open proxy for unrelated prompts.
     let systemPrompt;
     if (body.task === "extract") {
       systemPrompt = EXTRACTION_SYSTEM_PROMPT;
     } else if (body.task === "grade") {
       systemPrompt = buildGradingSystemPrompt(body.mode, body.tournamentName);
-    } else if (body.system) {
-      // Backward-compatible fallback (should not be relied on long-term) —
-      // allows old client builds to keep working during rollout.
-      systemPrompt = body.system;
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -165,7 +194,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         // UPDATED MODEL STRING BELOW
         model: "claude-sonnet-4-6",
-        max_tokens: body.max_tokens || 2000,
+        max_tokens: Math.min(body.max_tokens || 2000, 2200),
         messages: body.messages,
         ...(systemPrompt ? { system: systemPrompt } : {}),
       }),
