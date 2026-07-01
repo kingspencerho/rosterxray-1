@@ -4428,7 +4428,7 @@ export default function RosterScorer() {
       const cardHeight = card.scrollHeight;
 
       const canvas = await window.html2canvas(card, {
-        backgroundColor: "var(--bg-base)",
+        backgroundColor: "#0a0a0a",
         scale: 2,
         useCORS: true,
         logging: false,
@@ -6882,7 +6882,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
-                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
+                      style={{ background: "none", border: "none", color: "var(--accent-cyan)", fontSize: "11px", fontWeight: 600, cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
                     >
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
@@ -7988,7 +7988,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
-                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
+                      style={{ background: "none", border: "none", color: "var(--accent-cyan)", fontSize: "11px", fontWeight: 600, cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
                     >
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
