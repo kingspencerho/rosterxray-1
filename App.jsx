@@ -5145,7 +5145,7 @@ Analyze this best ball roster. Return JSON only.`;
       wall:    { bg: "#2a0a0a", color: "var(--neg)" },
     };
     const c = map[color] || { bg: "var(--bg-raised)", color: "var(--text-faint)" };
-    return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
+    return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "var(--font-mono)", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
   };
 
   return (
@@ -5153,7 +5153,7 @@ Analyze this best ball roster. Return JSON only.`;
       minHeight: "100vh",
       background: "var(--bg-base)",
       color: "var(--text-soft)",
-      fontFamily: "'IBM Plex Mono', 'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       padding: "24px 24px 0 24px",
       margin: 0,
       overflow: (!heroCollapsed && !analyzed) ? "hidden" : "visible",
@@ -5511,7 +5511,7 @@ Analyze this best ball roster. Return JSON only.`;
 
           {/* Headline */}
           <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
-            <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap", margin: 0, fontWeight: 400 }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap", margin: 0, fontWeight: 400 }}>
               <span className="hero-diagnose-scan">DIAGNOSE</span>
               <span style={{ color: "var(--text-primary)" }}> YOUR DRAFT.</span>
             </h1>
@@ -5533,7 +5533,7 @@ Analyze this best ball roster. Return JSON only.`;
                   padding: "7px 12px",
                   fontSize: "11px",
                   letterSpacing: "0.03em",
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "var(--font-mono)",
                   background: "var(--bg-inset)",
                 }}
               >
@@ -5563,7 +5563,7 @@ Analyze this best ball roster. Return JSON only.`;
                 padding: "16px 40px",
                 fontSize: "22px",
                 fontWeight: 400,
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 letterSpacing: "0.1em",
                 cursor: "pointer",
                 textTransform: "uppercase",
@@ -5573,7 +5573,7 @@ Analyze this best ball roster. Return JSON only.`;
             >
               Grade My Roster →
             </button>
-            <div style={{ marginTop: "14px", fontSize: "10px", color: "var(--text-faint)", letterSpacing: "0.08em", fontFamily: "'IBM Plex Mono', monospace" }}>
+            <div style={{ marginTop: "14px", fontSize: "10px", color: "var(--text-faint)", letterSpacing: "0.08em", fontFamily: "var(--font-mono)" }}>
               FREE · NO ACCOUNT · BEST BALL · REDRAFT
             </div>
           </div>
@@ -5593,7 +5593,7 @@ Analyze this best ball roster. Return JSON only.`;
         }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap" }}>
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif",
+              fontFamily: "var(--font-display)",
               fontSize: "50px",
               letterSpacing: "0.03em",
               margin: 0,
@@ -6300,7 +6300,7 @@ Analyze this best ball roster. Return JSON only.`;
                       style={{ flex: "0 0 auto", minWidth: "140px", background: "var(--bg-surface-alt)", border: "none", borderRight: idx < gradeHistory.length - 1 ? "1px solid var(--bg-raised)" : "none", padding: "12px 14px", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
                     >
                       <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
+                        <span style={{ fontFamily: "var(--font-display)", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
                         <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{dateStr}</span>
                       </div>
                       <div style={{ fontSize: "9px", color: entry.analysisMode === "redraft" ? "var(--accent-purple-mid)" : "var(--pos-solid)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px", fontWeight: 700 }}>{modeLabel}</div>
@@ -6431,7 +6431,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {extractError}
                 <button
                   onClick={() => { setExtractError(null); setMode("paste"); }}
-                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "var(--warn)", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "var(--warn)", fontSize: "11px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.05em", cursor: "pointer" }}
                 >
                   Switch to Paste Text →
                 </button>
@@ -6680,7 +6680,7 @@ Analyze this best ball roster. Return JSON only.`;
             <span style={{ fontSize: "12px", color: "#86efac", fontWeight: 600 }}>👁 You're viewing a shared roster grade</span>
             <button
               onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
-              style={{ background: "linear-gradient(90deg, #16a34a, var(--pos-solid))", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
+              style={{ background: "linear-gradient(90deg, #16a34a, var(--pos-solid))", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
             >
               Grade your own roster →
             </button>
@@ -6703,7 +6703,7 @@ Analyze this best ball roster. Return JSON only.`;
               marginBottom: "20px",
             }}>
               <div className="grade-pulse" style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "110px",
                 lineHeight: 1,
                 color: gradeColor(analyzed.grade),
@@ -6852,7 +6852,7 @@ Analyze this best ball roster. Return JSON only.`;
                         color: shareLinkCopied ? "var(--pos)" : shareLinkError ? "var(--neg)" : "var(--pos-solid)",
                         fontSize: "12px",
                         fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "var(--font-body)",
                         letterSpacing: "0.03em",
                         cursor: shareLinkLoading ? "default" : "pointer",
                         display: "flex",
@@ -6872,7 +6872,7 @@ Analyze this best ball roster. Return JSON only.`;
                         color: "var(--text-dim)",
                         fontSize: "12px",
                         fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "var(--font-body)",
                         letterSpacing: "0.03em",
                         cursor: "pointer",
                       }}
@@ -6882,7 +6882,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
-                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em" }}
+                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
                     >
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
@@ -6904,7 +6904,7 @@ Analyze this best ball roster. Return JSON only.`;
                                 await navigator.share({ title: `My Roster X-Ray — ${analyzed.grade}`, text: `I graded my best ball roster on Roster X-Ray. Check yours: rosterxray.com`, files: [file] });
                               } catch(e) { /* dismissed */ }
                             }}
-                            style={{ flex: 1, minWidth: "120px", background: "#4ade8022", border: "1px solid #4ade8055", borderRadius: "4px", padding: "8px 12px", color: "var(--pos)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                            style={{ flex: 1, minWidth: "120px", background: "#4ade8022", border: "1px solid #4ade8055", borderRadius: "4px", padding: "8px 12px", color: "var(--pos)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)" }}
                           >
                             📤 Share
                           </button>
@@ -6912,7 +6912,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -6920,7 +6920,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
@@ -7033,7 +7033,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Stacks */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -7064,7 +7064,7 @@ Analyze this best ball roster. Return JSON only.`;
                   }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
                       <div>
-                        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "22px", color: "var(--text-primary)", letterSpacing: "0.05em" }}>
+                        <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--text-primary)", letterSpacing: "0.05em" }}>
                           {stack.team}
                         </span>
                         <span style={{ marginLeft: "10px", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -7126,7 +7126,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.bringBacks.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7215,7 +7215,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.orphans.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7315,7 +7315,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.topPivots.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7351,18 +7351,18 @@ Analyze this best ball roster. Return JSON only.`;
                   }}>
                     {/* Picked player header */}
                     <div style={{ fontSize: "12px", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                      <span style={{ color: "var(--text-dim)", fontSize: "10px", fontFamily: "monospace" }}>Pick #{pivot.pickNum}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "10px", fontFamily: "var(--font-mono)" }}>Pick #{pivot.pickNum}</span>
                       <span style={{ color: "#ffffff", fontWeight: 700, fontSize: "13px" }}>{pivot.picked.name}</span>
                       <span style={{
                         fontSize: "9px", fontWeight: 700,
                         color: pivot.picked.pos === "QB" ? "var(--gold)" : pivot.picked.pos === "RB" ? "var(--accent-cyan)" : pivot.picked.pos === "WR" ? "var(--pos)" : "var(--accent-purple-light)",
                         background: pivot.picked.pos === "QB" ? "#f59e0b18" : pivot.picked.pos === "RB" ? "#22d3ee18" : pivot.picked.pos === "WR" ? "#4ade8018" : "#c084fc18",
                         border: `1px solid ${pivot.picked.pos === "QB" ? "#f59e0b44" : pivot.picked.pos === "RB" ? "#22d3ee44" : pivot.picked.pos === "WR" ? "#4ade8044" : "#c084fc44"}`,
-                        borderRadius: "3px", padding: "1px 5px", fontFamily: "monospace",
+                        borderRadius: "3px", padding: "1px 5px", fontFamily: "var(--font-mono)",
                       }}>{pivot.picked.pos}·{pivot.picked.team}</span>
-                      <span style={{ color: "var(--text-faint)", fontSize: "10px", fontFamily: "monospace" }}>ADP {pivot.picked.adp}</span>
+                      <span style={{ color: "var(--text-faint)", fontSize: "10px", fontFamily: "var(--font-mono)" }}>ADP {pivot.picked.adp}</span>
                     </div>
-                    <div style={{ fontSize: "9px", color: "var(--text-faint)", letterSpacing: "0.08em", marginBottom: "6px", textTransform: "uppercase", fontFamily: "monospace" }}>Pivot Options</div>
+                    <div style={{ fontSize: "9px", color: "var(--text-faint)", letterSpacing: "0.08em", marginBottom: "6px", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>Pivot Options</div>
                     {pivot.alternatives.map((alt, j) => {
                       const laymanReason = (() => {
                         if (alt.stackFit && alt.altSmash >= 2) {
@@ -7472,7 +7472,7 @@ Analyze this best ball roster. Return JSON only.`;
             {Object.keys(analyzed.byeMap).length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7546,7 +7546,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.stackGrades.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7590,7 +7590,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.rosterStandouts && analyzed.rosterStandouts.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -7649,7 +7649,7 @@ Analyze this best ball roster. Return JSON only.`;
             {showPickAnalysis && analyzed.hasPickNumbers && analyzed.adpFlags.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 12px",
@@ -7709,7 +7709,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Full roster */}
             <div>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -7809,7 +7809,7 @@ Analyze this best ball roster. Return JSON only.`;
               marginBottom: "20px",
             }}>
               <div className="grade-pulse" style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "110px",
                 lineHeight: 1,
                 color: gradeColor(analyzed.grade),
@@ -7958,7 +7958,7 @@ Analyze this best ball roster. Return JSON only.`;
                         color: shareLinkCopied ? "var(--pos)" : shareLinkError ? "var(--neg)" : "var(--pos-solid)",
                         fontSize: "12px",
                         fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "var(--font-body)",
                         letterSpacing: "0.03em",
                         cursor: shareLinkLoading ? "default" : "pointer",
                         display: "flex",
@@ -7978,7 +7978,7 @@ Analyze this best ball roster. Return JSON only.`;
                         color: "var(--text-dim)",
                         fontSize: "12px",
                         fontWeight: 700,
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "var(--font-body)",
                         letterSpacing: "0.03em",
                         cursor: "pointer",
                       }}
@@ -7988,7 +7988,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <button
                       onClick={handleExportCard}
                       disabled={exportingCard}
-                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em" }}
+                      style={{ background: "none", border: "none", color: "var(--text-faint)", fontSize: "10px", cursor: exportingCard ? "default" : "pointer", padding: "4px 0", fontFamily: "var(--font-body)", letterSpacing: "0.05em" }}
                     >
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
@@ -8010,7 +8010,7 @@ Analyze this best ball roster. Return JSON only.`;
                                 await navigator.share({ title: `My Roster X-Ray — ${analyzed.grade}`, text: `I graded my redraft roster on Roster X-Ray. Check yours: rosterxray.com`, files: [file] });
                               } catch(e) { /* dismissed */ }
                             }}
-                            style={{ flex: 1, minWidth: "120px", background: "#c084fc22", border: "1px solid #c084fc55", borderRadius: "4px", padding: "8px 12px", color: "var(--accent-purple-light)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                            style={{ flex: 1, minWidth: "120px", background: "#c084fc22", border: "1px solid #c084fc55", borderRadius: "4px", padding: "8px 12px", color: "var(--accent-purple-light)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)" }}
                           >
                             📤 Share
                           </button>
@@ -8018,7 +8018,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -8026,7 +8026,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
@@ -8051,7 +8051,7 @@ Analyze this best ball roster. Return JSON only.`;
                     color: "var(--accent-purple)",
                     fontSize: "12px",
                     fontWeight: 700,
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "var(--font-body)",
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -8075,7 +8075,7 @@ Analyze this best ball roster. Return JSON only.`;
                           value={tradeGive}
                           onChange={e => { setTradeGive(e.target.value); setTradeResult(null); setTradeError(null); }}
                           placeholder="e.g. Jefferson, Adams"
-                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
                         />
                       </div>
                       <div>
@@ -8084,14 +8084,14 @@ Analyze this best ball roster. Return JSON only.`;
                           value={tradeGet}
                           onChange={e => { setTradeGet(e.target.value); setTradeResult(null); setTradeError(null); }}
                           placeholder="e.g. Hill, Chase"
-                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "'Inter', sans-serif", boxSizing: "border-box", outline: "none" }}
+                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
                         />
                       </div>
                     </div>
                     <div style={{ fontSize: "9px", color: "var(--text-faint)", marginBottom: "10px", letterSpacing: "0.03em" }}>Separate multiple players with a comma</div>
                     <button
                       onClick={handleTradeAnalysis}
-                      style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                      style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.05em", cursor: "pointer" }}
                     >
                       Analyze Trade →
                     </button>
@@ -8110,12 +8110,12 @@ Analyze this best ball roster. Return JSON only.`;
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "10px" }}>
                             <div style={{ padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
                               <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Before</div>
-                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(analyzed.grade), lineHeight: 1 }}>{analyzed.grade}</div>
+                              <div style={{ fontFamily: "var(--font-display)", fontSize: "52px", color: gradeColor(analyzed.grade), lineHeight: 1 }}>{analyzed.grade}</div>
                               <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "4px" }}>Score {analyzed.score.toFixed(1)}</div>
                             </div>
                             <div style={{ padding: "12px", background: "var(--bg-base)", border: `1px solid ${gradeUp ? "#22c55e44" : "#ef444444"}`, borderRadius: "4px" }}>
                               <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>After</div>
-                              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
+                              <div style={{ fontFamily: "var(--font-display)", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
                               <div style={{ fontSize: "11px", color: gradeUp ? "var(--pos)" : "var(--neg)", marginTop: "4px" }}>
                                 {gradeUp ? "+" : ""}{scoreDelta.toFixed(1)} pts
                               </div>
@@ -8142,7 +8142,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Starting Lineup */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -8221,7 +8221,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Positional Depth */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 12px",
@@ -8256,7 +8256,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -8288,7 +8288,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Playoff Schedule */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -8343,7 +8343,7 @@ Analyze this best ball roster. Return JSON only.`;
                           color: scoreColor,
                           fontSize: "14px",
                           fontWeight: 700,
-                          fontFamily: "'Bebas Neue', sans-serif",
+                          fontFamily: "var(--font-display)",
                           letterSpacing: "0.03em",
                           flexShrink: 0,
                           marginLeft: "8px",
@@ -8407,7 +8407,7 @@ Analyze this best ball roster. Return JSON only.`;
               return (
                 <div style={{ marginBottom: "24px", background: "#0a0f0a", border: "1px solid #1a2a1a", borderRadius: "6px", padding: "16px 18px" }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
-                    <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "var(--text-primary)" }}>
+                    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "var(--text-primary)" }}>
                       {weekLabel.toUpperCase()} SPOTLIGHT
                     </h2>
                     <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -8445,7 +8445,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -8688,7 +8688,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.lineupConfidencePreview && analyzed.lineupConfidencePreview.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -8713,7 +8713,7 @@ Analyze this best ball roster. Return JSON only.`;
                   }}>
                     <div style={{
                       fontSize: "10px",
-                      fontFamily: "'Bebas Neue', sans-serif",
+                      fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       color: wk.week >= 15 ? "var(--accent-purple-light)" : "var(--text-dim)",
                       marginBottom: "6px",
@@ -8821,7 +8821,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Handcuffs */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -8861,7 +8861,7 @@ Analyze this best ball roster. Return JSON only.`;
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
                 <h2 style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
                   margin: "0 0 4px",
@@ -8896,7 +8896,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <span style={{ fontSize: "14px" }}>{alert.emoji}</span>
                         <span style={{
                           fontSize: "9px",
-                          fontFamily: "'Bebas Neue', sans-serif",
+                          fontFamily: "var(--font-display)",
                           letterSpacing: "0.08em",
                           color: urgencyBorder,
                           background: `${urgencyBorder}20`,
@@ -8932,7 +8932,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bench */}
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{
-                fontFamily: "'Bebas Neue', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
@@ -9004,7 +9004,7 @@ Analyze this best ball roster. Return JSON only.`;
             // Shared inline styles
             const secLabel = { fontSize: "8px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "7px", fontFamily: "'Inter', 'DM Sans', sans-serif", fontWeight: 600 };
             const row = { display: "flex", alignItems: "center", gap: "7px", padding: "3px 0", borderBottom: "1px solid var(--bg-surface-alt)", fontSize: "11px" };
-            const slotStyle = { fontSize: "9px", color: "var(--border-default)", width: "26px", flexShrink: 0, fontFamily: "monospace" };
+            const slotStyle = { fontSize: "9px", color: "var(--border-default)", width: "26px", flexShrink: 0, fontFamily: "var(--font-mono)" };
             const nameStyle = { color: "var(--text-soft-alt)", fontWeight: 500, flex: 1 };
             const teamStyle = { fontSize: "9px", color: "#3a3a3a" };
 
@@ -9097,7 +9097,7 @@ Analyze this best ball roster. Return JSON only.`;
                               {/* Fixed week column headers — dynamic based on league playoff weeks */}
                               <div style={{ display: "flex", gap: "2px", marginLeft: "auto" }}>
                                 {cardWkLabels.map(wk => (
-                                  <div key={wk} style={{ width: "30px", textAlign: "center", fontSize: "8px", color: "var(--text-dim)", fontFamily: "monospace", letterSpacing: "0.05em" }}>{wk}</div>
+                                  <div key={wk} style={{ width: "30px", textAlign: "center", fontSize: "8px", color: "var(--text-dim)", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>{wk}</div>
                                 ))}
                               </div>
                             </div>
@@ -9141,12 +9141,12 @@ Analyze this best ball roster. Return JSON only.`;
                               <div style={{ fontSize: "12px", flexShrink: 0, lineHeight: 1 }}>{s.icon}</div>
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px", flexWrap: "wrap" }}>
-                                  <div style={{ fontSize: "8px", color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "monospace" }}>{s.label}</div>
+                                  <div style={{ fontSize: "8px", color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>{s.label}</div>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
                                   <div style={{ fontSize: "10px", color: "var(--text-soft-alt)", fontWeight: 700, paddingLeft: "2px" }}>{s.player?.name}</div>
                                   {s.player?.pos && (
-                                    <div style={{ fontSize: "8px", fontWeight: 700, color: pc, background: pc + "18", border: "1px solid " + pc + "44", borderRadius: "3px", padding: "1px 4px", fontFamily: "monospace", flexShrink: 0 }}>
+                                    <div style={{ fontSize: "8px", fontWeight: 700, color: pc, background: pc + "18", border: "1px solid " + pc + "44", borderRadius: "3px", padding: "1px 4px", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
                                       {s.player.pos}{s.player.team ? "·" + s.player.team : ""}
                                     </div>
                                   )}
@@ -9200,7 +9200,7 @@ Analyze this best ball roster. Return JSON only.`;
                               {/* Tier label above out-of, both pinned to bottom of number */}
                               <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", alignSelf: "stretch", gap: "3px", paddingBottom: "3px" }}>
                                 <div style={{ fontFamily: "'Bebas Neue', 'Impact', sans-serif", fontSize: "20px", fontWeight: 900, color: cws.tierColor, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>{cws.tier}</div>
-                                <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "monospace", lineHeight: 1 }}>out of 10.0</div>
+                                <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)", lineHeight: 1 }}>out of 10.0</div>
                               </div>
                             </div>
                             {/* Component bars */}
@@ -9215,9 +9215,9 @@ Analyze this best ball roster. Return JSON only.`;
                               <div style={secLabel}>Playoff Threats</div>
                               <div style={{ display: "flex", gap: "2px" }}>
                                 {cardWkLabels.map(wk => (
-                                  <div key={wk} style={{ width: "28px", textAlign: "center", fontSize: "8px", color: "var(--text-dim)", fontFamily: "monospace" }}>{wk}</div>
+                                  <div key={wk} style={{ width: "28px", textAlign: "center", fontSize: "8px", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>{wk}</div>
                                 ))}
-                                <div style={{ width: "22px", textAlign: "right", fontSize: "8px", color: "var(--text-dim)", fontFamily: "monospace" }}>/10</div>
+                                <div style={{ width: "22px", textAlign: "right", fontSize: "8px", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>/10</div>
                               </div>
                             </div>
                             {[...(analyzed.playoffMatchups || [])]
@@ -9241,7 +9241,7 @@ Analyze this best ball roster. Return JSON only.`;
                                         );
                                       })}
                                     </div>
-                                    <div style={{ width: "22px", textAlign: "right", fontSize: "10px", fontWeight: 700, color: sc, fontFamily: "monospace", flexShrink: 0 }}>{score}</div>
+                                    <div style={{ width: "22px", textAlign: "right", fontSize: "10px", fontWeight: 700, color: sc, fontFamily: "var(--font-mono)", flexShrink: 0 }}>{score}</div>
                                   </div>
                                 );
                               })}
@@ -9262,7 +9262,7 @@ Analyze this best ball roster. Return JSON only.`;
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                       <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
                                         <div style={{ fontSize: "10px", color: "var(--text-soft-alt)", fontWeight: 700 }}>{s.name}</div>
-                                        <div style={{ fontSize: "7px", color: isRisk ? "var(--warn)" : "var(--pos)", background: isRisk ? "#fb923c15" : "#4ade8015", border: `1px solid ${isRisk ? "#fb923c40" : "#4ade8040"}`, borderRadius: "2px", padding: "1px 4px", fontFamily: "monospace", letterSpacing: "0.06em", flexShrink: 0 }}>
+                                        <div style={{ fontSize: "7px", color: isRisk ? "var(--warn)" : "var(--pos)", background: isRisk ? "#fb923c15" : "#4ade8015", border: `1px solid ${isRisk ? "#fb923c40" : "#4ade8040"}`, borderRadius: "2px", padding: "1px 4px", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", flexShrink: 0 }}>
                                           {isRisk ? "RISK" : "UPSIDE"}
                                         </div>
                                       </div>
@@ -9333,8 +9333,8 @@ Analyze this best ball roster. Return JSON only.`;
 
                 {/* Footer */}
                 <div style={{ padding: "8px 22px", display: "flex", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "monospace" }}>ROSTER X-RAY · 2026</div>
-                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "monospace" }}>{isBB ? "Underdog half-PPR" : "Yahoo half-PPR"} · ADP May 19</div>
+                  <div style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>ROSTER X-RAY · 2026</div>
+                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{isBB ? "Underdog half-PPR" : "Yahoo half-PPR"} · ADP May 19</div>
                 </div>
               </div>
             );
@@ -9461,7 +9461,7 @@ Analyze this best ball roster. Return JSON only.`;
           finally { setAdminImporting(false); }
         };
 
-        const panel = { position: "fixed", inset: 0, background: "var(--bg-base)", zIndex: 9999, overflowY: "auto", padding: "32px 24px", fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-soft-alt)" };
+        const panel = { position: "fixed", inset: 0, background: "var(--bg-base)", zIndex: 9999, overflowY: "auto", padding: "32px 24px", fontFamily: "var(--font-mono)", color: "var(--text-soft-alt)" };
         const label = { fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px", display: "block" };
         const input_ = { width: "100%", background: "var(--bg-inset)", border: "1px solid var(--border-subtle)", borderRadius: "4px", padding: "10px 12px", color: "var(--text-soft-alt)", fontSize: "13px", fontFamily: "inherit", outline: "none", boxSizing: "border-box" };
         const btn = (color) => ({ background: color || "var(--pos-solid)", border: "none", borderRadius: "4px", padding: "10px 18px", color: "#000", fontSize: "12px", fontWeight: 700, fontFamily: "inherit", cursor: "pointer", letterSpacing: "0.08em" });
