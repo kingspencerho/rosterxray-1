@@ -5165,27 +5165,39 @@ Analyze this best ball roster. Return JSON only.`;
           /* Surfaces (near-black, low -> high elevation) */
           --bg-base: #0a0a0a;
           --bg-surface: #0f0f0f;
+          --bg-surface-alt: #0d0d0d;
           --bg-raised: #1a1a1a;
+          --bg-elevated: #1e1e1e;
           --bg-inset: #111111;
           /* Borders */
           --border-subtle: #222222;
           --border-default: #333333;
+          --border-strong: #2a2a2a;
           /* Text (primary -> dim) */
           --text-primary: #fafafa;
           --text-secondary: #888888;
           --text-muted: #666666;
           --text-dim: #555555;
+          --text-faint: #444444;
+          --text-soft: #e5e5e5;
+          --text-soft-alt: #e0e0e0;
           /* Brand accents */
           --accent-purple: #a78bfa;
           --accent-purple-strong: #7c3aed;
+          --accent-purple-light: #c084fc;
+          --accent-purple-mid: #a855f7;
           --accent-cyan: #22d3ee;
+          --info-blue: #60a5fa;
           /* Status / meaning palette */
           --pos: #4ade80;
+          --pos-solid: #22c55e;
           --pos-bright: #a3e635;
           --caution: #facc15;
+          --caution-alt: #fbbf24;
           --warn: #fb923c;
           --neg: #f87171;
           --gold: #f59e0b;
+          --pink: #f472b6;
           /* Typography */
           --font-display: 'Bebas Neue', 'Impact', sans-serif;
           --font-body: 'Inter', system-ui, sans-serif;
