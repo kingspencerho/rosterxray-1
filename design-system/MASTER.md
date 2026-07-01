@@ -24,47 +24,62 @@ The audit matched RosterXRay to three established styles — and the app already
 
 ## 3. Color tokens (semantic)
 
-Mapped from the app's actual most-used values, aligned to the audit's "Financial Dashboard /
-Developer Tool" dark palettes.
+Mapped from the app's actual most-used values. Full rollout complete — each token is an
+**exact rename** of its existing hex value (zero visual change), covering the ~27
+highest-frequency colors that accounted for the large majority of the original ~989 raw
+hex usages. Alpha-suffixed compound values (e.g. `#22d3ee44`, `#c084fc22`) remain literal
+by design — they're derived values (base color + baked-in opacity), not simple duplicates.
 
 ### Surfaces (near-black, low → high elevation)
-| Token | Hex | Replaces (count) |
-|---|---|---|
-| `--bg-base` | `#0a0a0a` | app background (#0a0a0a ×28) |
-| `--bg-surface` | `#0f0f0f` | cards (#0f0f0f ×25, #0d0d0d) |
-| `--bg-raised` | `#1a1a1a` | raised panels (#1a1a1a ×33, #1e1e1e, #161616) |
-| `--bg-inset` | `#111111` | inset wells (#111 ×15) |
+| Token | Hex |
+|---|---|
+| `--bg-base` | `#0a0a0a` |
+| `--bg-surface` | `#0f0f0f` |
+| `--bg-surface-alt` | `#0d0d0d` |
+| `--bg-raised` | `#1a1a1a` |
+| `--bg-elevated` | `#1e1e1e` |
+| `--bg-inset` | `#111111` |
 
 ### Borders
-| Token | Hex | Replaces |
-|---|---|---|
-| `--border-subtle` | `#222222` | hairlines (#222 ×19, #1a1a1a borders) |
-| `--border-default` | `#333333` | standard (#333 ×18, #2a2a2a ×14) |
+| Token | Hex |
+|---|---|
+| `--border-subtle` | `#222222` |
+| `--border-default` | `#333333` |
+| `--border-strong` | `#2a2a2a` |
 
 ### Text (primary → dim)
-| Token | Hex | Replaces (count) |
-|---|---|---|
-| `--text-primary` | `#fafafa` | headings/values (#fafafa ×56, #e5e5e5, #e0e0e0) |
-| `--text-secondary` | `#888888` | labels (#888 ×48, #aaa) |
-| `--text-muted` | `#666666` | captions (#666 ×71) |
-| `--text-dim` | `#555555` | de-emphasized (#555 ×56, #444 ×26) |
+| Token | Hex |
+|---|---|
+| `--text-primary` | `#fafafa` |
+| `--text-secondary` | `#888888` |
+| `--text-muted` | `#666666` |
+| `--text-dim` | `#555555` |
+| `--text-faint` | `#444444` |
+| `--text-soft` | `#e5e5e5` |
+| `--text-soft-alt` | `#e0e0e0` |
 
 ### Brand accents
 | Token | Hex | Use |
 |---|---|---|
 | `--accent-purple` | `#a78bfa` | primary brand accent, links, focus |
-| `--accent-purple-strong` | `#7c3aed` | purple borders/fills (#7c3aed, #a855f7, #c084fc) |
-| `--accent-cyan` | `#22d3ee` | secondary accent / "optimal" highlights (×49) |
+| `--accent-purple-strong` | `#7c3aed` | purple borders/fills, structural accents |
+| `--accent-purple-light` | `#c084fc` | secondary purple accent (trade analyzer, AI notes) |
+| `--accent-purple-mid` | `#a855f7` | secondary purple accent (chips, badges) |
+| `--accent-cyan` | `#22d3ee` | secondary accent / "optimal" highlights |
+| `--info-blue` | `#60a5fa` | informational accent |
 
 ### Status (matchup + grade semantics) — the meaning palette
 | Token | Hex | Meaning |
 |---|---|---|
-| `--pos` | `#4ade80` | positive: VALUE, good matchup, strength (×71) |
+| `--pos` | `#4ade80` | positive: VALUE, good matchup, strength |
+| `--pos-solid` | `#22c55e` | positive (solid/filled variant) |
 | `--pos-bright` | `#a3e635` | elite/solid matchup tier |
-| `--caution` | `#facc15` | neutral matchup (×19) |
-| `--warn` | `#fb923c` | watch / tough matchup (×21) |
-| `--neg` | `#f87171` | negative: REACH, wall matchup, weakness (×35) |
-| `--gold` | `#f59e0b` | admin / accent gold (×10) |
+| `--caution` | `#facc15` | neutral matchup |
+| `--caution-alt` | `#fbbf24` | neutral (alt variant) |
+| `--warn` | `#fb923c` | watch / tough matchup |
+| `--neg` | `#f87171` | negative: REACH, wall matchup, weakness |
+| `--gold` | `#f59e0b` | admin / accent gold |
+| `--pink` | `#f472b6` | miscellaneous accent |
 
 ### Chip tier pairs (bg / fg) — `wkChipStyle` map
 | Tier | bg token | fg token |
@@ -99,8 +114,11 @@ Type scale (data-dense): 8 / 9 / 10 / 11 / 12 / 14 / 20 / 24 / 52 / 76px (alread
 - [ ] Hover affordances also work for touch/keyboard.
 - [ ] Light/dark parity not required — app is dark-only by design.
 
-## 7. Rollout
-1. ✅ `:root` token block added to `App.jsx` `<style>`.
+## 7. Rollout — COMPLETE
+1. ✅ `:root` token block added to `App.jsx` `<style>` (27 color tokens + 3 font tokens).
 2. ✅ Pilot: Playoff Window Preview converted to `var(--token)`.
-3. ⏳ Incremental section-by-section conversion of remaining inline hex (separately approved).
-   Dual-file rule: every change mirrored to `App.jsx.jsx`.
+3. ✅ Full rollout across the rest of `App.jsx`, done in 5 batches by category (surfaces/borders,
+   text, brand accents, status colors, fonts) — ~1300 literal replacements total. Alpha-suffixed
+   values intentionally left as literals (out of scope — see Section 3 note).
+   Dual-file rule maintained: every change mirrored to `App.jsx.jsx`, brace-balance verified
+   after each batch.
