@@ -5,6 +5,25 @@
 
 export const config = { maxDuration: 15 };
 
+// Same fixed-window rate limiter pattern as api/analyze.js and api/news-set.js.
+async function checkRateLimit(kvUrl, kvToken, key, limit, windowSeconds) {
+  try {
+    const incrRes = await fetch(`${kvUrl}/incr/ratelimit:${key}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+    if (!incrRes.ok) return true;
+    const count = await incrRes.json();
+    if (count.result === 1) {
+      await fetch(`${kvUrl}/expire/ratelimit:${key}/${windowSeconds}`, {
+        headers: { Authorization: `Bearer ${kvToken}` },
+      });
+    }
+    return count.result <= limit;
+  } catch {
+    return true;
+  }
+}
+
 export default async function handler(req, res) {
   const origin = req.headers.origin || "";
   const allowed = [
@@ -25,6 +44,10 @@ export default async function handler(req, res) {
   if (!kvUrl || !kvToken) {
     return res.status(500).json({ error: "KV not configured" });
   }
+
+  const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+  const rateOk = await checkRateLimit(kvUrl, kvToken, `grade-save:${ip}`, 20, 60);
+  if (!rateOk) return res.status(429).json({ error: "Too many requests — please slow down" });
 
   const { snapshot } = req.body || {};
   if (!snapshot || typeof snapshot !== "object" || !snapshot.analyzed) {
