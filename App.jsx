@@ -5393,8 +5393,22 @@ Analyze this best ball roster. Return JSON only.`;
           border-radius: 8px;
         }
 
+        @media (prefers-reduced-motion: reduce) {
+          .hero-diagnose-scan {
+            animation: none;
+            background-position: 200% center;
+          }
+          .hero-cta-btn {
+            transition: box-shadow 0.15s ease, filter 0.15s ease;
+          }
+          .hero-cta-btn:hover,
+          .hero-cta-btn:active {
+            transform: none;
+          }
+        }
+
         @media (max-width: 640px) {
-          .hero-headline-wrap div { font-size: 42px !important; white-space: nowrap !important; }
+          .hero-headline-wrap h1 { font-size: 42px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 32px 18px 28px !important; }
           .hero-headline-wrap { margin-bottom: 20px !important; }
           .hero-pills {
@@ -5425,7 +5439,7 @@ Analyze this best ball roster. Return JSON only.`;
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
-          .hero-headline-wrap div { font-size: 52px !important; white-space: nowrap !important; }
+          .hero-headline-wrap h1 { font-size: 52px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 20px 24px 18px !important; width: 100% !important; box-sizing: border-box !important; }
           .hero-headline-wrap { margin-bottom: 12px !important; }
           .hero-pills {
@@ -5485,10 +5499,10 @@ Analyze this best ball roster. Return JSON only.`;
 
           {/* Headline */}
           <div className="hero-headline-wrap" style={{ position: "relative", zIndex: 1, marginBottom: "22px", lineHeight: 1 }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap" }}>
+            <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "76px", letterSpacing: "0.04em", lineHeight: 1, whiteSpace: "nowrap", margin: 0, fontWeight: 400 }}>
               <span className="hero-diagnose-scan">DIAGNOSE</span>
               <span style={{ color: "#fafafa" }}> YOUR DRAFT.</span>
-            </div>
+            </h1>
           </div>
 
           {/* Proof points */}
@@ -5566,7 +5580,7 @@ Analyze this best ball roster. Return JSON only.`;
           marginBottom: "24px",
         }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap" }}>
-            <h1 style={{
+            <div style={{
               fontFamily: "'Bebas Neue', sans-serif",
               fontSize: "50px",
               letterSpacing: "0.03em",
@@ -5587,7 +5601,7 @@ Analyze this best ball roster. Return JSON only.`;
               >
                 X-RAY
               </span>
-            </h1>
+            </div>
             <span style={{
               fontSize: "11px",
               color: "#aaa",
