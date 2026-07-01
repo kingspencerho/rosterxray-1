@@ -948,7 +948,7 @@ function calcChampionshipWindowScore(analyzed, adpSource) {
   const total = Math.round((comp1 + comp2 + comp3) * 2) / 2;
 
   const tier = total >= 9 ? "Elite" : total >= 7.5 ? "Contender" : total >= 6 ? "Competitive" : total >= 4.5 ? "Risky" : "Rebuild";
-  const tierColor = total >= 9 ? "#4ade80" : total >= 7.5 ? "#a3e635" : total >= 6 ? "#facc15" : total >= 4.5 ? "#fb923c" : "#f87171";
+  const tierColor = total >= 9 ? "var(--pos)" : total >= 7.5 ? "var(--pos-bright)" : total >= 6 ? "var(--caution)" : total >= 4.5 ? "var(--warn)" : "var(--neg)";
 
   // --- Feedback copy: 3 sentences, player-specific ---
   // Sort starters by playoff score — sentence 1 describes the BEST windows, not the average
@@ -5008,20 +5008,20 @@ Analyze this best ball roster. Return JSON only.`;
 
   const tierStyle = (color) => {
     const styles = {
-      elite: { bg: "#0d3320", border: "#22c55e", text: "#4ade80" },
-      solid: { bg: "#1e2a1a", border: "#84cc16", text: "#a3e635" },
-      neutral: { bg: "#2a2618", border: "#eab308", text: "#facc15" },
-      tough: { bg: "#2a1a18", border: "#f97316", text: "#fb923c" },
-      wall: { bg: "#2e1414", border: "#ef4444", text: "#f87171" },
+      elite: { bg: "#0d3320", border: "var(--pos-solid)", text: "var(--pos)" },
+      solid: { bg: "#1e2a1a", border: "#84cc16", text: "var(--pos-bright)" },
+      neutral: { bg: "#2a2618", border: "#eab308", text: "var(--caution)" },
+      tough: { bg: "#2a1a18", border: "#f97316", text: "var(--warn)" },
+      wall: { bg: "#2e1414", border: "#ef4444", text: "var(--neg)" },
     };
     return styles[color] || styles.neutral;
   };
 
   const gradeColor = (g) => {
-    if (g.startsWith("A")) return "#4ade80";
-    if (g.startsWith("B")) return "#a3e635";
-    if (g.startsWith("C")) return "#facc15";
-    return "#f87171";
+    if (g.startsWith("A")) return "var(--pos)";
+    if (g.startsWith("B")) return "var(--pos-bright)";
+    if (g.startsWith("C")) return "var(--caution)";
+    return "var(--neg)";
   };
 
   // Shared style for native select dropdowns in custom builder (mobile-friendly)
@@ -5048,7 +5048,7 @@ Analyze this best ball roster. Return JSON only.`;
   // three distinct "time slot" colors: weeks aren't good or bad, just different.
   const weekColor = (weekIdx) => {
     const palette = [
-      { text: "#60a5fa", border: "#3b82f6", bg: "#0e1a2e", label: "W15" }, // blue
+      { text: "var(--info-blue)", border: "#3b82f6", bg: "#0e1a2e", label: "W15" }, // blue
       { text: "var(--accent-purple-light)", border: "var(--accent-purple-mid)", bg: "#1a1030", label: "W16" }, // purple
       { text: "#2dd4bf", border: "#14b8a6", bg: "#0d2420", label: "W17" }, // teal
     ];
@@ -5060,9 +5060,9 @@ Analyze this best ball roster. Return JSON only.`;
   // wherever it appears, so a user scanning the page can group by position visually.
   const posColor = (pos) => {
     const map = {
-      QB: { text: "#fbbf24", border: "#f59e0b", bg: "#2a1f08" }, // amber
+      QB: { text: "var(--caution-alt)", border: "var(--gold)", bg: "#2a1f08" }, // amber
       RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" }, // cyan
-      WR: { text: "#f472b6", border: "#ec4899", bg: "#2a0e1e" }, // pink/magenta
+      WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" }, // pink/magenta
       TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
     };
     return map[pos] || { text: "var(--text-secondary)", border: "var(--text-faint)", bg: "var(--bg-raised)" };
@@ -5127,22 +5127,22 @@ Analyze this best ball roster. Return JSON only.`;
       alignItems: "center",
     }}>
       <span style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Matchup:</span>
-      <span style={{ color: "#4ade80", fontWeight: 600 }}>Smash</span>
-      <span style={{ color: "#a3e635", fontWeight: 600 }}>Good</span>
-      <span style={{ color: "#facc15", fontWeight: 600 }}>Even</span>
-      <span style={{ color: "#fb923c", fontWeight: 600 }}>Hard</span>
-      <span style={{ color: "#f87171", fontWeight: 600 }}>Avoid</span>
+      <span style={{ color: "var(--pos)", fontWeight: 600 }}>Smash</span>
+      <span style={{ color: "var(--pos-bright)", fontWeight: 600 }}>Good</span>
+      <span style={{ color: "var(--caution)", fontWeight: 600 }}>Even</span>
+      <span style={{ color: "var(--warn)", fontWeight: 600 }}>Hard</span>
+      <span style={{ color: "var(--neg)", fontWeight: 600 }}>Avoid</span>
       <span style={{ color: "var(--text-dim)" }}>· vs that week's opponent defense</span>
     </div>
   );
 
   const wkChipStyle = (color) => {
     const map = {
-      elite:   { bg: "#0d2a18", color: "#4ade80" },
-      solid:   { bg: "#1a2a0a", color: "#a3e635" },
-      neutral: { bg: "#2a2000", color: "#facc15" },
-      tough:   { bg: "#2a1400", color: "#fb923c" },
-      wall:    { bg: "#2a0a0a", color: "#f87171" },
+      elite:   { bg: "#0d2a18", color: "var(--pos)" },
+      solid:   { bg: "#1a2a0a", color: "var(--pos-bright)" },
+      neutral: { bg: "#2a2000", color: "var(--caution)" },
+      tough:   { bg: "#2a1400", color: "var(--warn)" },
+      wall:    { bg: "#2a0a0a", color: "var(--neg)" },
     };
     const c = map[color] || { bg: "var(--bg-raised)", color: "var(--text-faint)" };
     return { fontSize: "8px", fontWeight: 700, padding: "0", width: "28px", height: "16px", borderRadius: "2px", background: c.bg, color: c.color, fontFamily: "monospace", display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1, textAlign: "center", boxSizing: "border-box" };
@@ -5238,7 +5238,7 @@ Analyze this best ball roster. Return JSON only.`;
         .scroll-shadow::-webkit-scrollbar { width: 6px; }
         .scroll-shadow::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
         button:hover:not(:disabled) { filter: brightness(1.15); }
-        textarea:focus { outline: none; border-color: #4ade80 !important; }
+        textarea:focus { outline: none; border-color: var(--pos) !important; }
 
         /* Dying-light flicker — X-RAY only, plays once on load, irregular fluorescent tube */
         .xray-word-flicker {
@@ -5339,13 +5339,13 @@ Analyze this best ball roster. Return JSON only.`;
           display: inline-block;
           background: linear-gradient(
             90deg,
-            #4ade80 0%,
-            #4ade80 20%,
+            var(--pos) 0%,
+            var(--pos) 20%,
             #ffffff 40%,
             #a8ffcc 50%,
             #ffffff 60%,
-            #4ade80 80%,
-            #4ade80 100%
+            var(--pos) 80%,
+            var(--pos) 100%
           );
           background-size: 400% 100%;
           background-position: -200% center;
@@ -5521,7 +5521,7 @@ Analyze this best ball roster. Return JSON only.`;
           <div className="hero-pills" style={{ position: "relative", zIndex: 1 }}>
             {[
               { label: "No login. No league sync.", rest: " Just a screenshot.", border: "#60c8f5", check: "#60c8f5" },
-              { label: "Expert-level breakdown.", rest: " No generic output.", border: "#4ade80", check: "#4ade80" },
+              { label: "Expert-level breakdown.", rest: " No generic output.", border: "var(--pos)", check: "var(--pos)" },
               { label: "Maps your W15–17 playoff stacks.", rest: " Instantly.", border: "var(--accent-purple-mid)", check: "var(--accent-purple-mid)" },
             ].map(({ label, rest, border, check }, i) => (
               <div
@@ -5556,7 +5556,7 @@ Analyze this best ball roster. Return JSON only.`;
                 }, 560);
               }}
               style={{
-                background: "#4ade80",
+                background: "var(--pos)",
                 color: "var(--bg-base)",
                 border: "none",
                 borderRadius: "4px",
@@ -5644,7 +5644,7 @@ Analyze this best ball roster. Return JSON only.`;
               onClick={() => { setAnalysisMode("bestball"); setAnalyzed(null); setInput(""); setExportedDataUrl(null); }}
               style={{
                 background: analysisMode === "bestball" ? "#0d3320" : "var(--bg-surface)",
-                border: `1px solid ${analysisMode === "bestball" ? "#22c55e" : "var(--border-subtle)"}`,
+                border: `1px solid ${analysisMode === "bestball" ? "var(--pos-solid)" : "var(--border-subtle)"}`,
                 borderRadius: "4px",
                 padding: "9px 12px",
                 cursor: "pointer",
@@ -5652,7 +5652,7 @@ Analyze this best ball roster. Return JSON only.`;
                 textAlign: "left",
               }}
             >
-              <div style={{ fontSize: "12px", color: analysisMode === "bestball" ? "#4ade80" : "var(--text-primary)", fontWeight: 600, letterSpacing: "0.02em" }}>
+              <div style={{ fontSize: "12px", color: analysisMode === "bestball" ? "var(--pos)" : "var(--text-primary)", fontWeight: 600, letterSpacing: "0.02em" }}>
                 🏆 Best Ball Tournament
               </div>
               <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "3px" }}>
@@ -5718,14 +5718,14 @@ Analyze this best ball roster. Return JSON only.`;
               onClick={() => { setDataMode("projected"); setAnalyzed(null); }}
               style={{
                 background: dataMode === "projected" ? "#1a1200" : "transparent",
-                border: `1px solid ${dataMode === "projected" ? "#f59e0b" : "transparent"}`,
+                border: `1px solid ${dataMode === "projected" ? "var(--gold)" : "transparent"}`,
                 borderRadius: "4px",
                 padding: "6px 14px",
                 cursor: "pointer",
                 fontFamily: "inherit",
                 fontSize: "11px",
                 fontWeight: 600,
-                color: dataMode === "projected" ? "#fbbf24" : "var(--text-muted)",
+                color: dataMode === "projected" ? "var(--caution-alt)" : "var(--text-muted)",
                 letterSpacing: "0.03em",
                 transition: "all 0.15s",
                 whiteSpace: "nowrap",
@@ -5761,7 +5761,7 @@ Analyze this best ball roster. Return JSON only.`;
             style={{
               width: "100%",
               background: "var(--bg-surface)",
-              border: "1px solid #22c55e",
+              border: "1px solid var(--pos-solid)",
               borderRadius: tournamentDropdownOpen ? "4px 4px 0 0" : "4px",
               padding: "10px 14px",
               cursor: "pointer",
@@ -5783,7 +5783,7 @@ Analyze this best ball roster. Return JSON only.`;
                 }
               </span>
             </div>
-            <span style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "10px", color: "var(--pos)", letterSpacing: "0.05em" }}>
               {tournamentDropdownOpen ? "▲" : "▼"}
             </span>
           </button>
@@ -5796,7 +5796,7 @@ Analyze this best ball roster. Return JSON only.`;
               left: 0,
               right: 0,
               background: "var(--bg-base)",
-              border: "1px solid #22c55e",
+              border: "1px solid var(--pos-solid)",
               borderTop: "none",
               borderRadius: "0 0 4px 4px",
               zIndex: 50,
@@ -5833,7 +5833,7 @@ Analyze this best ball roster. Return JSON only.`;
                   onMouseLeave={e => { if (tournament !== key) e.currentTarget.style.background = "transparent"; }}
                 >
                   <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-                    <span style={{ fontSize: "12px", color: tournament === key ? "#4ade80" : "#ccc", fontWeight: 600, letterSpacing: "0.02em" }}>
+                    <span style={{ fontSize: "12px", color: tournament === key ? "var(--pos)" : "#ccc", fontWeight: 600, letterSpacing: "0.02em" }}>
                       {t.name}
                     </span>
                     <span style={{ fontSize: "10px", color: "var(--text-dim)" }}>
@@ -5845,7 +5845,7 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "9px", color: "var(--text-dim)" }}>{t.entries}</span>
-                    {tournament === key && <span style={{ fontSize: "10px", color: "#4ade80" }}>✓</span>}
+                    {tournament === key && <span style={{ fontSize: "10px", color: "var(--pos)" }}>✓</span>}
                   </div>
                 </button>
               ))}
@@ -6303,7 +6303,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
                         <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{dateStr}</span>
                       </div>
-                      <div style={{ fontSize: "9px", color: entry.analysisMode === "redraft" ? "var(--accent-purple-mid)" : "#22c55e", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px", fontWeight: 700 }}>{modeLabel}</div>
+                      <div style={{ fontSize: "9px", color: entry.analysisMode === "redraft" ? "var(--accent-purple-mid)" : "var(--pos-solid)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px", fontWeight: 700 }}>{modeLabel}</div>
                       <div style={{ fontSize: "10px", color: "var(--text-dim)", lineHeight: 1.4 }}>{topThree.length > 0 ? topThree.join(" · ") : "—"}</div>
                     </button>
                   );
@@ -6320,9 +6320,9 @@ Analyze this best ball roster. Return JSON only.`;
             className={!uploadTabClicked && mode !== "upload" ? "upload-tab-glow" : ""}
             style={{
               background: "transparent",
-              color: mode === "upload" ? "#4ade80" : "var(--text-muted)",
+              color: mode === "upload" ? "var(--pos)" : "var(--text-muted)",
               border: "none",
-              borderBottom: mode === "upload" ? "2px solid #4ade80" : "2px solid transparent",
+              borderBottom: mode === "upload" ? "2px solid var(--pos)" : "2px solid transparent",
               padding: "12px 18px",
               fontSize: "11px",
               fontFamily: "inherit",
@@ -6339,9 +6339,9 @@ Analyze this best ball roster. Return JSON only.`;
             onClick={() => setMode("paste")}
             style={{
               background: "transparent",
-              color: mode === "paste" ? "#4ade80" : "var(--text-muted)",
+              color: mode === "paste" ? "var(--pos)" : "var(--text-muted)",
               border: "none",
-              borderBottom: mode === "paste" ? "2px solid #4ade80" : "2px solid transparent",
+              borderBottom: mode === "paste" ? "2px solid var(--pos)" : "2px solid transparent",
               padding: "12px 18px",
               fontSize: "11px",
               fontFamily: "inherit",
@@ -6365,7 +6365,7 @@ Analyze this best ball roster. Return JSON only.`;
               onPaste={handlePaste}
               tabIndex={0}
               style={{
-                border: `2px dashed ${dragOver ? "#4ade80" : "var(--border-default)"}`,
+                border: `2px dashed ${dragOver ? "var(--pos)" : "var(--border-default)"}`,
                 background: dragOver ? "#0d1f14" : "var(--bg-surface-alt)",
                 borderRadius: "6px",
                 padding: "40px 20px",
@@ -6411,7 +6411,7 @@ Analyze this best ball roster. Return JSON only.`;
                         top: "4px",
                         right: "4px",
                         background: "rgba(0,0,0,0.8)",
-                        color: "#f87171",
+                        color: "var(--neg)",
                         border: "none",
                         borderRadius: "3px",
                         width: "22px",
@@ -6427,11 +6427,11 @@ Analyze this best ball roster. Return JSON only.`;
             )}
 
             {extractError && (
-              <div style={{ marginTop: "10px", padding: "10px 14px", background: "#2e1414", border: "1px solid #7c2d12", borderRadius: "4px", color: "#fb923c", fontSize: "12px" }}>
+              <div style={{ marginTop: "10px", padding: "10px 14px", background: "#2e1414", border: "1px solid #7c2d12", borderRadius: "4px", color: "var(--warn)", fontSize: "12px" }}>
                 {extractError}
                 <button
                   onClick={() => { setExtractError(null); setMode("paste"); }}
-                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "#fb923c", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
+                  style={{ display: "block", marginTop: "8px", background: "transparent", border: "1px solid #fb923c88", borderRadius: "3px", padding: "5px 10px", color: "var(--warn)", fontSize: "11px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.05em", cursor: "pointer" }}
                 >
                   Switch to Paste Text →
                 </button>
@@ -6514,7 +6514,7 @@ Analyze this best ball roster. Return JSON only.`;
             <div style={{
               background: "#0d1a12",
               border: "1px solid #1e3a28",
-              borderLeft: "3px solid #4ade80",
+              borderLeft: "3px solid var(--pos)",
               borderRadius: "5px",
               padding: "12px 14px",
               marginBottom: "12px",
@@ -6538,7 +6538,7 @@ Analyze this best ball roster. Return JSON only.`;
                 padding: "12px 14px",
                 background: "linear-gradient(135deg, #0a1a12, #0d2218)",
                 border: "1px solid #1e3a28",
-                borderLeft: "3px solid #4ade80",
+                borderLeft: "3px solid var(--pos)",
                 borderRadius: "5px",
                 display: "flex",
                 alignItems: "center",
@@ -6547,7 +6547,7 @@ Analyze this best ball roster. Return JSON only.`;
                 flexWrap: "wrap",
               }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px", fontWeight: 700 }}>
+                  <div style={{ fontSize: "10px", color: "var(--pos)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px", fontWeight: 700 }}>
                     First time?
                   </div>
                   <div style={{ fontSize: "13px", color: "#cfcfcf", lineHeight: 1.4 }}>
@@ -6611,9 +6611,9 @@ Analyze this best ball roster. Return JSON only.`;
               <div style={{
                 width: "16px",
                 height: "16px",
-                border: `2px solid ${showPickAnalysis ? "#4ade80" : "var(--text-faint)"}`,
+                border: `2px solid ${showPickAnalysis ? "var(--pos)" : "var(--text-faint)"}`,
                 borderRadius: "3px",
-                background: showPickAnalysis ? "#4ade80" : "transparent",
+                background: showPickAnalysis ? "var(--pos)" : "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -6680,7 +6680,7 @@ Analyze this best ball roster. Return JSON only.`;
             <span style={{ fontSize: "12px", color: "#86efac", fontWeight: 600 }}>👁 You're viewing a shared roster grade</span>
             <button
               onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
-              style={{ background: "linear-gradient(90deg, #16a34a, #22c55e)", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
+              style={{ background: "linear-gradient(90deg, #16a34a, var(--pos-solid))", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
             >
               Grade your own roster →
             </button>
@@ -6713,7 +6713,7 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
               <div>
                 <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                  Overall Ceiling Rating · <span style={{ color: "#4ade80" }}>{analyzed.tournament.name}</span>
+                  Overall Ceiling Rating · <span style={{ color: "var(--pos)" }}>{analyzed.tournament.name}</span>
                 </div>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "13px" }}>
                   <span><span style={{ color: "var(--text-muted)" }}>QB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.QB}</span></span>
@@ -6732,7 +6732,7 @@ Analyze this best ball roster. Return JSON only.`;
                     border: "1px solid #7c5c00",
                     borderRadius: "4px",
                     fontSize: "11px",
-                    color: "#f59e0b",
+                    color: "var(--gold)",
                     letterSpacing: "0.03em",
                   }}>
                     ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
@@ -6753,7 +6753,7 @@ Analyze this best ball roster. Return JSON only.`;
                     <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px" }}>
                       Your team in a nutshell
                       {aiLoading && (
-                        <span className="strobe-dot" style={{ fontSize: "8px", color: "#4ade80", letterSpacing: "0.08em" }}>● ANALYZING</span>
+                        <span className="strobe-dot" style={{ fontSize: "8px", color: "var(--pos)", letterSpacing: "0.08em" }}>● ANALYZING</span>
                       )}
                       {aiNutshell && !aiLoading && (
                         <span style={{ fontSize: "8px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>
@@ -6780,13 +6780,13 @@ Analyze this best ball roster. Return JSON only.`;
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="var(--pos-bright)" players={analyzed.valid} />)
                       : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="var(--warn)" players={analyzed.valid} />)
                       : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                 </div>
@@ -6824,10 +6824,10 @@ Analyze this best ball roster. Return JSON only.`;
                         Grade factors · Best Ball
                       </div>
                       {[
-                        { label: "Stacks", note: "QB + pass-catcher from same team. More stacks, better matchups = higher grade.", color: "#4ade80" },
-                        { label: "Construction", note: "Right position counts. Targets: 6–7 WR, 5–6 RB, 2–3 TE, 2–3 QB.", color: "#4ade80" },
-                        { label: "Playoff window", note: "W15–W17 opponent quality. Soft schedules rewarded, tough ones penalized.", color: "#4ade80" },
-                        { label: "Bring-backs", note: "Players from both sides of a playoff game. Shootouts help multiple roster spots.", color: "#4ade80" },
+                        { label: "Stacks", note: "QB + pass-catcher from same team. More stacks, better matchups = higher grade.", color: "var(--pos)" },
+                        { label: "Construction", note: "Right position counts. Targets: 6–7 WR, 5–6 RB, 2–3 TE, 2–3 QB.", color: "var(--pos)" },
+                        { label: "Playoff window", note: "W15–W17 opponent quality. Soft schedules rewarded, tough ones penalized.", color: "var(--pos)" },
+                        { label: "Bring-backs", note: "Players from both sides of a playoff game. Shootouts help multiple roster spots.", color: "var(--pos)" },
                         { label: "AI review", note: "An AI layer adjusts the grade based on player situations the formula can't see.", color: "var(--accent-cyan)" },
                       ].map((f, i) => (
                         <div key={i} style={{ display: "flex", gap: "8px", alignItems: "baseline", marginBottom: i < 4 ? "6px" : 0 }}>
@@ -6849,7 +6849,7 @@ Analyze this best ball roster. Return JSON only.`;
                         border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
                         borderRadius: "4px",
                         padding: "8px 16px",
-                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        color: shareLinkCopied ? "var(--pos)" : shareLinkError ? "var(--neg)" : "var(--pos-solid)",
                         fontSize: "12px",
                         fontWeight: 700,
                         fontFamily: "'Inter', sans-serif",
@@ -6904,7 +6904,7 @@ Analyze this best ball roster. Return JSON only.`;
                                 await navigator.share({ title: `My Roster X-Ray — ${analyzed.grade}`, text: `I graded my best ball roster on Roster X-Ray. Check yours: rosterxray.com`, files: [file] });
                               } catch(e) { /* dismissed */ }
                             }}
-                            style={{ flex: 1, minWidth: "120px", background: "#4ade8022", border: "1px solid #4ade8055", borderRadius: "4px", padding: "8px 12px", color: "#4ade80", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
+                            style={{ flex: 1, minWidth: "120px", background: "#4ade8022", border: "1px solid #4ade8055", borderRadius: "4px", padding: "8px 12px", color: "var(--pos)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
                           >
                             📤 Share
                           </button>
@@ -6941,7 +6941,7 @@ Analyze this best ball roster. Return JSON only.`;
                 marginBottom: "20px",
                 fontSize: "12px",
               }}>
-                <div style={{ color: "#fb923c", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>UNMATCHED</div>
+                <div style={{ color: "var(--warn)", fontWeight: 600, marginBottom: "4px", letterSpacing: "0.05em" }}>UNMATCHED</div>
                 <div style={{ color: "#a8a29e" }}>
                   {analyzed.picks.filter(p => p.notFound).map(p => p.raw).join(" · ")}
                 </div>
@@ -7053,7 +7053,7 @@ Analyze this best ball roster. Return JSON only.`;
               {analyzed.stackGrades.map((stack, idx) => {
                 const total = stack.normalizedScore;
                 const stackTier = total >= 12 ? "Elite" : total >= 10 ? "Strong" : total >= 8 ? "Neutral" : "Weak";
-                const stackColor = total >= 12 ? "#4ade80" : total >= 10 ? "#a3e635" : total >= 8 ? "#facc15" : "#f87171";
+                const stackColor = total >= 12 ? "var(--pos)" : total >= 10 ? "var(--pos-bright)" : total >= 8 ? "var(--caution)" : "var(--neg)";
                 return (
                   <div key={idx} style={{
                     background: "var(--bg-surface)",
@@ -7245,10 +7245,10 @@ Analyze this best ball roster. Return JSON only.`;
                           <span style={{
                             display: "inline-block",
                             fontSize: "9px",
-                            color: o.tier === "Elite Window" ? "#4ade80"
-                                 : o.tier === "Strong Matchups" ? "#a3e635"
-                                 : o.tier === "Soft Spot" ? "#facc15"
-                                 : "#fb923c",
+                            color: o.tier === "Elite Window" ? "var(--pos)"
+                                 : o.tier === "Strong Matchups" ? "var(--pos-bright)"
+                                 : o.tier === "Soft Spot" ? "var(--caution)"
+                                 : "var(--warn)",
                             background: o.tier === "Elite Window" ? "#4ade8015"
                                       : o.tier === "Strong Matchups" ? "#a3e63515"
                                       : o.tier === "Soft Spot" ? "#facc1515"
@@ -7328,16 +7328,16 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
                 {/* Upgrade tier legend */}
                 <div style={{ display: "flex", gap: "10px", fontSize: "9px", marginBottom: "12px", letterSpacing: "0.05em", flexWrap: "wrap" }}>
-                  <span style={{ color: "#4ade80", fontWeight: 600 }}>■ BIG UPGRADE</span>
-                  <span style={{ color: "#facc15", fontWeight: 600 }}>■ UPGRADE</span>
-                  <span style={{ color: "#60a5fa", fontWeight: 600 }}>■ SLIGHT</span>
+                  <span style={{ color: "var(--pos)", fontWeight: 600 }}>■ BIG UPGRADE</span>
+                  <span style={{ color: "var(--caution)", fontWeight: 600 }}>■ UPGRADE</span>
+                  <span style={{ color: "var(--info-blue)", fontWeight: 600 }}>■ SLIGHT</span>
                   <span style={{ color: "var(--border-default)" }}>· vs your actual pick's playoff matchups</span>
                 </div>
                 {analyzed.topPivots.map((pivot, idx) => {
                   // Determine best alt tier for card left border color
                   const bestAlt = pivot.alternatives[0];
-                  const cardAccent = bestAlt?.improvement >= 4 ? "#22c55e"
-                    : bestAlt?.improvement >= 2 ? "#f59e0b"
+                  const cardAccent = bestAlt?.improvement >= 4 ? "var(--pos-solid)"
+                    : bestAlt?.improvement >= 2 ? "var(--gold)"
                     : "var(--border-default)";
 
                   return (
@@ -7355,7 +7355,7 @@ Analyze this best ball roster. Return JSON only.`;
                       <span style={{ color: "#ffffff", fontWeight: 700, fontSize: "13px" }}>{pivot.picked.name}</span>
                       <span style={{
                         fontSize: "9px", fontWeight: 700,
-                        color: pivot.picked.pos === "QB" ? "#f59e0b" : pivot.picked.pos === "RB" ? "var(--accent-cyan)" : pivot.picked.pos === "WR" ? "#4ade80" : "var(--accent-purple-light)",
+                        color: pivot.picked.pos === "QB" ? "var(--gold)" : pivot.picked.pos === "RB" ? "var(--accent-cyan)" : pivot.picked.pos === "WR" ? "var(--pos)" : "var(--accent-purple-light)",
                         background: pivot.picked.pos === "QB" ? "#f59e0b18" : pivot.picked.pos === "RB" ? "#22d3ee18" : pivot.picked.pos === "WR" ? "#4ade8018" : "#c084fc18",
                         border: `1px solid ${pivot.picked.pos === "QB" ? "#f59e0b44" : pivot.picked.pos === "RB" ? "#22d3ee44" : pivot.picked.pos === "WR" ? "#4ade8044" : "#c084fc44"}`,
                         borderRadius: "3px", padding: "1px 5px", fontFamily: "monospace",
@@ -7393,10 +7393,10 @@ Analyze this best ball roster. Return JSON only.`;
                       })();
 
                       const upgradeTier = alt.improvement >= 4
-                        ? { label: "BETTER MATCHUPS", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
+                        ? { label: "BETTER MATCHUPS", color: "var(--pos)", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
                         : alt.improvement >= 2
-                        ? { label: "SOFTER SCHEDULE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
-                        : { label: "SLIGHT EDGE", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
+                        ? { label: "SOFTER SCHEDULE", color: "var(--gold)", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
+                        : { label: "SLIGHT EDGE", color: "var(--info-blue)", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
 
                       return (
                       <div key={j} style={{
@@ -7429,7 +7429,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                           {alt.stackFit && (
                             <span style={{
-                              background: "linear-gradient(90deg, #22c55e, #16a34a)",
+                              background: "linear-gradient(90deg, var(--pos-solid), #16a34a)",
                               color: "#03110a",
                               fontWeight: 800,
                               padding: "2px 7px",
@@ -7445,7 +7445,7 @@ Analyze this best ball roster. Return JSON only.`;
                             <span style={{
                               background: alt.brokenWeekLabel === "W16" ? "#2a0800" : "#1a0a00",
                               border: `1px solid ${alt.brokenWeekLabel === "W16" ? "#ef4444cc" : "#f97316aa"}`,
-                              color: alt.brokenWeekLabel === "W16" ? "#f87171" : "#f97316",
+                              color: alt.brokenWeekLabel === "W16" ? "var(--neg)" : "#f97316",
                               fontWeight: 800,
                               padding: "2px 7px",
                               borderRadius: "3px",
@@ -7508,7 +7508,7 @@ Analyze this best ball roster. Return JSON only.`;
                       }}>
                         <span style={{
                           fontSize: "12px",
-                          color: conflict ? "#fb923c" : "var(--text-secondary)",
+                          color: conflict ? "var(--warn)" : "var(--text-secondary)",
                           fontWeight: 600,
                           letterSpacing: "0.05em",
                         }}>
@@ -7534,7 +7534,7 @@ Analyze this best ball roster. Return JSON only.`;
                     );
                   })}
                   {analyzed.byeConflicts.length > 0 && (
-                    <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-strong)", fontSize: "10px", color: "#fb923c" }}>
+                    <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-strong)", fontSize: "10px", color: "var(--warn)" }}>
                       ⚠ Conflicts: {analyzed.byeConflicts.map(c => `${c.count} ${c.pos}s on bye ${c.week}`).join(" · ")}
                     </div>
                   )}
@@ -7561,7 +7561,7 @@ Analyze this best ball roster. Return JSON only.`;
                   {analyzed.stackGrades.map((stack, i) => {
                     const isLeverage = stack.uniqueness?.includes("Leverage");
                     const isChalk = stack.uniqueness?.includes("Chalk");
-                    const color = isLeverage ? "#4ade80" : isChalk ? "#fb923c" : "#facc15";
+                    const color = isLeverage ? "var(--pos)" : isChalk ? "var(--warn)" : "var(--caution)";
                     const bg = isLeverage ? "#0d3320" : isChalk ? "#2a1a18" : "#2a2618";
                     return (
                       <div key={i} style={{
@@ -7608,7 +7608,7 @@ Analyze this best ball roster. Return JSON only.`;
                       <div key={i} style={{
                         background: "#0d1a12",
                         border: "1px solid #1e3a28",
-                        borderLeft: "3px solid #4ade80",
+                        borderLeft: "3px solid var(--pos)",
                         borderRadius: "4px",
                         padding: "10px 12px",
                       }}>
@@ -7616,7 +7616,7 @@ Analyze this best ball roster. Return JSON only.`;
                           <span style={{ fontSize: "16px" }}>{s.icon}</span>
                           <span style={{
                             fontSize: "9px",
-                            color: "#4ade80",
+                            color: "var(--pos)",
                             fontWeight: 700,
                             letterSpacing: "0.1em",
                             textTransform: "uppercase",
@@ -7676,7 +7676,7 @@ Analyze this best ball roster. Return JSON only.`;
                       <span style={{ color: "var(--text-muted)", width: "32px" }}>#{p.actualPick}</span>
                       <span><span style={{ color: "var(--text-primary)" }}>{p.name}</span> <span style={{ color: "var(--text-dim)" }}>{p.pos} · {p.team}</span></span>
                       <span style={{
-                        color: p.delta > 0 ? "#4ade80" : "#fb923c",
+                        color: p.delta > 0 ? "var(--pos)" : "var(--warn)",
                         fontWeight: 600,
                         fontSize: "11px",
                         letterSpacing: "0.05em",
@@ -7769,7 +7769,7 @@ Analyze this best ball roster. Return JSON only.`;
                             fontSize: "9px",
                             fontWeight: 700,
                             letterSpacing: "0.04em",
-                            color: "#fb923c",
+                            color: "var(--warn)",
                             background: "#2a1a0e",
                             border: "1px solid #fb923c55",
                             padding: "1px 5px",
@@ -7838,7 +7838,7 @@ Analyze this best ball roster. Return JSON only.`;
                     border: "1px solid #7c5c00",
                     borderRadius: "4px",
                     fontSize: "11px",
-                    color: "#f59e0b",
+                    color: "var(--gold)",
                     letterSpacing: "0.03em",
                   }}>
                     ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
@@ -7886,13 +7886,13 @@ Analyze this best ball roster. Return JSON only.`;
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="var(--pos-bright)" players={analyzed.valid} />)
                       : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="var(--warn)" players={analyzed.valid} />)
                       : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                 </div>
@@ -7955,7 +7955,7 @@ Analyze this best ball roster. Return JSON only.`;
                         border: `1px solid ${shareLinkCopied ? "#22c55e55" : shareLinkError ? "#ef444455" : "#22c55e44"}`,
                         borderRadius: "4px",
                         padding: "8px 16px",
-                        color: shareLinkCopied ? "#4ade80" : shareLinkError ? "#f87171" : "#22c55e",
+                        color: shareLinkCopied ? "var(--pos)" : shareLinkError ? "var(--neg)" : "var(--pos-solid)",
                         fontSize: "12px",
                         fontWeight: 700,
                         fontFamily: "'Inter', sans-serif",
@@ -8096,7 +8096,7 @@ Analyze this best ball roster. Return JSON only.`;
                       Analyze Trade →
                     </button>
                     {tradeError && (
-                      <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "#fb923c", fontSize: "11px" }}>
+                      <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "var(--warn)", fontSize: "11px" }}>
                         {tradeError}
                       </div>
                     )}
@@ -8116,7 +8116,7 @@ Analyze this best ball roster. Return JSON only.`;
                             <div style={{ padding: "12px", background: "var(--bg-base)", border: `1px solid ${gradeUp ? "#22c55e44" : "#ef444444"}`, borderRadius: "4px" }}>
                               <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>After</div>
                               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
-                              <div style={{ fontSize: "11px", color: gradeUp ? "#4ade80" : "#f87171", marginTop: "4px" }}>
+                              <div style={{ fontSize: "11px", color: gradeUp ? "var(--pos)" : "var(--neg)", marginTop: "4px" }}>
                                 {gradeUp ? "+" : ""}{scoreDelta.toFixed(1)} pts
                               </div>
                             </div>
@@ -8124,10 +8124,10 @@ Analyze this best ball roster. Return JSON only.`;
                           {(newStrengths.length > 0 || newWeaknesses.length > 0) && (
                             <div style={{ fontSize: "12px" }}>
                               {newStrengths.map((s, i) => (
-                                <div key={i} style={{ color: "#4ade80", marginBottom: "3px" }}>+ {s}</div>
+                                <div key={i} style={{ color: "var(--pos)", marginBottom: "3px" }}>+ {s}</div>
                               ))}
                               {newWeaknesses.map((w, i) => (
-                                <div key={i} style={{ color: "#fb923c", marginBottom: "3px" }}>- {w}</div>
+                                <div key={i} style={{ color: "var(--warn)", marginBottom: "3px" }}>- {w}</div>
                               ))}
                             </div>
                           )}
@@ -8233,7 +8233,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {Object.entries(analyzed.depthAnalysis).map(([pos, d]) => {
                   const isWeak = d.depth < 1;
                   const isStrong = d.depth >= 3;
-                  const color = isWeak ? "#f87171" : isStrong ? "#4ade80" : "#facc15";
+                  const color = isWeak ? "var(--neg)" : isStrong ? "var(--pos)" : "var(--caution)";
                   return (
                     <div key={pos} style={{
                       background: "var(--bg-surface)",
@@ -8277,7 +8277,7 @@ Analyze this best ball roster. Return JSON only.`;
                     marginBottom: "6px",
                     fontSize: "12px",
                   }}>
-                    <span style={{ color: c.severity === "critical" ? "#f87171" : c.severity === "warning" ? "#facc15" : "var(--text-muted)", fontWeight: c.severity === "info" ? 400 : 600, letterSpacing: "0.05em" }}>
+                    <span style={{ color: c.severity === "critical" ? "var(--neg)" : c.severity === "warning" ? "var(--caution)" : "var(--text-muted)", fontWeight: c.severity === "info" ? 400 : 600, letterSpacing: "0.05em" }}>
                       {c.severity === "critical" ? "⚠ CRITICAL · " : c.severity === "warning" ? "⚠ " : "ℹ "}{c.msg}
                     </span>
                   </div>
@@ -8297,7 +8297,7 @@ Analyze this best ball roster. Return JSON only.`;
                 PLAYOFF SCHEDULE · STARTERS
               </h2>
               <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
-                The playoff weeks that <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "#4ade80", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "#f87171", fontWeight: 600 }}>red flag</span>.
+                The playoff weeks that <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "var(--pos)", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "var(--neg)", fontWeight: 600 }}>red flag</span>.
               </p>
               <MatchupLegend />
               <div style={{
@@ -8308,11 +8308,11 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 {analyzed.playoffMatchups.map((p, i) => {
                   const scoreOf10 = Math.round((p.totalScore / 15) * 10);
-                  const scoreColor = scoreOf10 >= 7 ? "#4ade80" : scoreOf10 <= 4 ? "#f87171" : "#facc15";
+                  const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--caution)";
                   const pc = (() => {
-                    if (p.pos === "QB") return { bg: "#fbbf2420", border: "#fbbf24", text: "#fbbf24" };
+                    if (p.pos === "QB") return { bg: "#fbbf2420", border: "var(--caution-alt)", text: "var(--caution-alt)" };
                     if (p.pos === "RB") return { bg: "#22d3ee20", border: "var(--accent-cyan)", text: "var(--accent-cyan)" };
-                    if (p.pos === "WR") return { bg: "#f472b620", border: "#f472b6", text: "#f472b6" };
+                    if (p.pos === "WR") return { bg: "#f472b620", border: "var(--pink)", text: "var(--pink)" };
                     return { bg: "#a78bfa20", border: "var(--accent-purple)", text: "var(--accent-purple)" };
                   })();
                   return (
@@ -8417,22 +8417,22 @@ Analyze this best ball roster. Return JSON only.`;
                   <div style={{ display: "grid", gridTemplateColumns: starts.length > 0 && concerns.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
                     {starts.length > 0 && (
                       <div>
-                        <div style={{ fontSize: "10px", color: "#4ade80", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Start with confidence</div>
+                        <div style={{ fontSize: "10px", color: "var(--pos)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Start with confidence</div>
                         {starts.map((m, i) => (
                           <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < starts.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
                             <span style={{ fontSize: "12px", color: "var(--text-soft)", fontWeight: 600 }}>{m.name} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
-                            <span style={{ fontSize: "11px", color: "#4ade80", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                            <span style={{ fontSize: "11px", color: "var(--pos)", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
                           </div>
                         ))}
                       </div>
                     )}
                     {concerns.length > 0 && (
                       <div>
-                        <div style={{ fontSize: "10px", color: "#f87171", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Tough matchup</div>
+                        <div style={{ fontSize: "10px", color: "var(--neg)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Tough matchup</div>
                         {concerns.map((m, i) => (
                           <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < concerns.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
                             <span style={{ fontSize: "12px", color: "var(--text-soft)", fontWeight: 600 }}>{m.name} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
-                            <span style={{ fontSize: "11px", color: "#f87171", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
+                            <span style={{ fontSize: "11px", color: "var(--neg)", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
                           </div>
                         ))}
                       </div>
@@ -8454,7 +8454,7 @@ Analyze this best ball roster. Return JSON only.`;
                 WEEKLY ROAD AHEAD
               </h2>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
-                Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "#4ade80" }}>smashable</span>; red weeks are <span style={{ color: "#f87171" }}>landmines</span>. The <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
+                Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "var(--pos)" }}>smashable</span>; red weeks are <span style={{ color: "var(--neg)" }}>landmines</span>. The <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
               </div>
               <MatchupLegend />
               <div style={{
@@ -8701,7 +8701,7 @@ Analyze this best ball roster. Return JSON only.`;
                 </p>
                 <div style={{ display: "flex", gap: "14px", fontSize: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
                   <span><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>▲ Start</span> <span style={{ color: "var(--text-dim)" }}>— great matchup, lock them in</span></span>
-                  <span><span style={{ color: "#f87171", fontWeight: 700 }}>▼ Sit?</span> <span style={{ color: "var(--text-dim)" }}>— tough matchup, bench if you have options</span></span>
+                  <span><span style={{ color: "var(--neg)", fontWeight: 700 }}>▼ Sit?</span> <span style={{ color: "var(--text-dim)" }}>— tough matchup, bench if you have options</span></span>
                 </div>
                 {analyzed.lineupConfidencePreview.map((wk, i) => (
                   <div key={i} style={{
@@ -8731,7 +8731,7 @@ Analyze this best ball roster. Return JSON only.`;
                           const pc = posColor(l.pos);
                           return (
                             <div key={j} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px", fontSize: "12px" }}>
-                              <span style={{ color: "#4ade80", fontSize: "10px", width: "14px", flexShrink: 0 }}>▲</span>
+                              <span style={{ color: "var(--pos)", fontSize: "10px", width: "14px", flexShrink: 0 }}>▲</span>
                               <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{l.name}</span>
                               <span style={{
                                 fontSize: "9px",
@@ -8744,7 +8744,7 @@ Analyze this best ball roster. Return JSON only.`;
                               }}>
                                 {l.pos}
                               </span>
-                              <span style={{ color: "#4ade80", fontSize: "10px" }}>
+                              <span style={{ color: "var(--pos)", fontSize: "10px" }}>
                                 vs {l.matchup.opp.replace("@","")} · {l.matchup.tier}
                               </span>
                             </div>
@@ -8759,7 +8759,7 @@ Analyze this best ball roster. Return JSON only.`;
                           return (
                             <div key={j} style={{ marginBottom: j < wk.concerns.length - 1 ? "6px" : 0 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: c.suggestion ? "4px" : "3px", fontSize: "12px" }}>
-                                <span style={{ color: "#f87171", fontSize: "10px", width: "14px", flexShrink: 0 }}>▼</span>
+                                <span style={{ color: "var(--neg)", fontSize: "10px", width: "14px", flexShrink: 0 }}>▼</span>
                                 <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{c.name}</span>
                                 <span style={{
                                   fontSize: "9px",
@@ -8772,7 +8772,7 @@ Analyze this best ball roster. Return JSON only.`;
                                 }}>
                                   {c.slot === "FLEX" || c.slot === "SFLEX" ? c.slot : c.pos}
                                 </span>
-                                <span style={{ color: "#f87171", fontSize: "10px" }}>
+                                <span style={{ color: "var(--neg)", fontSize: "10px" }}>
                                   vs {c.matchup.opp.replace("@","")} · {c.matchup.tier}
                                 </span>
                               </div>
@@ -8782,7 +8782,7 @@ Analyze this best ball roster. Return JSON only.`;
                                 return (
                                   <div style={{ paddingLeft: "20px" }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", marginBottom: "2px" }}>
-                                      <span style={{ color: "#60a5fa", fontSize: "9px", flexShrink: 0 }}>💡</span>
+                                      <span style={{ color: "var(--info-blue)", fontSize: "9px", flexShrink: 0 }}>💡</span>
                                       <span style={{ color: "#aaa" }}>
                                         <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{c.suggestion.name.split(" ").pop()}</span>
                                         {" "}
@@ -8795,7 +8795,7 @@ Analyze this best ball roster. Return JSON only.`;
                                           borderRadius: "2px",
                                         }}>{c.suggestion.pos}·{c.suggestion.team}</span>
                                         {" "}
-                                        <span style={{ color: "#60a5fa", fontSize: "10px" }}>
+                                        <span style={{ color: "var(--info-blue)", fontSize: "10px" }}>
                                           {c.suggestion.matchup.tier} matchup this week
                                         </span>
                                       </span>
@@ -8836,7 +8836,7 @@ Analyze this best ball roster. Return JSON only.`;
                 <div key={i} style={{
                   background: "var(--bg-surface)",
                   border: `1px solid ${h.hasHandcuff ? "#22c55e40" : "#f8717140"}`,
-                  borderLeft: `3px solid ${h.hasHandcuff ? "#22c55e" : "#f87171"}`,
+                  borderLeft: `3px solid ${h.hasHandcuff ? "var(--pos-solid)" : "var(--neg)"}`,
                   borderRadius: "3px",
                   padding: "8px 12px",
                   marginBottom: "6px",
@@ -8845,11 +8845,11 @@ Analyze this best ball roster. Return JSON only.`;
                   <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{h.rb.name}</span>
                   <span style={{ color: "var(--text-dim)", marginLeft: "6px" }}>({h.rb.team})</span>
                   {h.hasHandcuff ? (
-                    <span style={{ marginLeft: "10px", color: "#4ade80" }}>
+                    <span style={{ marginLeft: "10px", color: "var(--pos)" }}>
                       ✓ Handcuffed: {h.handcuff.name} <span style={{ color: "var(--text-dim)" }}>(ADP {h.handcuff.adp})</span>
                     </span>
                   ) : (
-                    <span style={{ marginLeft: "10px", color: "#f87171" }}>
+                    <span style={{ marginLeft: "10px", color: "var(--neg)" }}>
                       ⚠ No handcuff rostered
                     </span>
                   )}
@@ -8873,13 +8873,13 @@ Analyze this best ball roster. Return JSON only.`;
                   Your bench, broken down by role — <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>handcuffs</span> to lock in, <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>streamers</span> to rotate in on good matchups, and <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>bye-week fills</span> to plan around.
                 </p>
                 {analyzed.benchMoves.map((alert, i) => {
-                  const urgencyBorder = alert.urgency === "high" ? "#22c55e" : alert.urgency === "medium" ? "#60a5fa" : "var(--text-dim)";
+                  const urgencyBorder = alert.urgency === "high" ? "var(--pos-solid)" : alert.urgency === "medium" ? "var(--info-blue)" : "var(--text-dim)";
                   const urgencyBg = alert.urgency === "high" ? "#22c55e15" : alert.urgency === "medium" ? "#60a5fa10" : "var(--bg-surface)";
                   const pc = (() => {
                     const pos = alert.player.pos;
-                    if (pos === "QB") return { bg: "#fbbf2420", border: "#fbbf24", text: "#fbbf24" };
+                    if (pos === "QB") return { bg: "#fbbf2420", border: "var(--caution-alt)", text: "var(--caution-alt)" };
                     if (pos === "RB") return { bg: "#22d3ee20", border: "var(--accent-cyan)", text: "var(--accent-cyan)" };
-                    if (pos === "WR") return { bg: "#f472b620", border: "#f472b6", text: "#f472b6" };
+                    if (pos === "WR") return { bg: "#f472b620", border: "var(--pink)", text: "var(--pink)" };
                     return { bg: "#a78bfa20", border: "var(--accent-purple)", text: "var(--accent-purple)" };
                   })();
                   return (
@@ -8991,11 +8991,11 @@ Analyze this best ball roster. Return JSON only.`;
         >
           {analyzed && (() => {
             const isBB = analyzed.mode !== "redraft";
-            const gc = analyzed.grade === "A" || analyzed.grade === "A-" ? "#4ade80"
-              : analyzed.grade === "B+" || analyzed.grade === "B" ? "#a3e635"
-              : analyzed.grade === "C+" || analyzed.grade === "C" ? "#facc15"
-              : "#f87171";
-            const accentColor = isBB ? "#22c55e" : "var(--accent-purple-light)";
+            const gc = analyzed.grade === "A" || analyzed.grade === "A-" ? "var(--pos)"
+              : analyzed.grade === "B+" || analyzed.grade === "B" ? "var(--pos-bright)"
+              : analyzed.grade === "C+" || analyzed.grade === "C" ? "var(--caution)"
+              : "var(--neg)";
+            const accentColor = isBB ? "var(--pos-solid)" : "var(--accent-purple-light)";
 
             // Dynamic playoff week labels — respects W14-16 vs W15-17 league setting
             const cardPlayoffWeeks = isBB ? [15, 16, 17] : (analyzed.league?.playoffWeeks || [15, 16, 17]);
@@ -9010,9 +9010,9 @@ Analyze this best ball roster. Return JSON only.`;
 
             const posChipStyle = (pos) => {
               const map = {
-                QB: { bg: "#fbbf2418", border: "#fbbf2444", color: "#fbbf24" },
+                QB: { bg: "#fbbf2418", border: "#fbbf2444", color: "var(--caution-alt)" },
                 RB: { bg: "#22d3ee18", border: "#22d3ee44", color: "var(--accent-cyan)" },
-                WR: { bg: "#f472b618", border: "#f472b644", color: "#f472b6" },
+                WR: { bg: "#f472b618", border: "#f472b644", color: "var(--pink)" },
                 TE: { bg: "#a78bfa18", border: "#a78bfa44", color: "var(--accent-purple)" },
                 FLEX: { bg: "#94a3b818", border: "#94a3b844", color: "#94a3b8" },
               };
@@ -9059,10 +9059,10 @@ Analyze this best ball roster. Return JSON only.`;
                     {((analyzed.strengths || []).length > 0 || (analyzed.weaknesses || []).length > 0) && (
                       <div style={{ marginTop: "5px" }}>
                         {(analyzed.strengths || []).slice(0, 1).map((s, i) => (
-                          <div key={i} style={{ fontSize: "9px", color: "#4ade80", lineHeight: 1.4 }}>✓ {s}</div>
+                          <div key={i} style={{ fontSize: "9px", color: "var(--pos)", lineHeight: 1.4 }}>✓ {s}</div>
                         ))}
                         {(analyzed.weaknesses || []).slice(0, 1).map((w, i) => (
-                          <div key={i} style={{ fontSize: "9px", color: "#fb923c", lineHeight: 1.4 }}>⚠ {w}</div>
+                          <div key={i} style={{ fontSize: "9px", color: "var(--warn)", lineHeight: 1.4 }}>⚠ {w}</div>
                         ))}
                       </div>
                     )}
@@ -9128,7 +9128,7 @@ Analyze this best ball roster. Return JSON only.`;
                       <div style={section({})}>
                         <div style={secLabel}>Roster Standouts</div>
                         {(analyzed.rosterStandouts || []).map((s, i) => {
-                          const posColors = { QB: "#f59e0b", RB: "var(--accent-cyan)", WR: "#4ade80", TE: "var(--accent-purple-light)" };
+                          const posColors = { QB: "var(--gold)", RB: "var(--accent-cyan)", WR: "var(--pos)", TE: "var(--accent-purple-light)" };
                           const pc = posColors[s.player?.pos] || "var(--text-secondary)";
                           return (
                             <div key={i} style={{
@@ -9165,7 +9165,7 @@ Analyze this best ball roster. Return JSON only.`;
                     {(() => {
                       const cws = calcChampionshipWindowScore(analyzed, ADP_YAHOO);
                       if (!cws) return null;
-                      const posColors = { QB: "#f59e0b", RB: "var(--accent-cyan)", WR: "#4ade80", TE: "var(--accent-purple-light)" };
+                      const posColors = { QB: "var(--gold)", RB: "var(--accent-cyan)", WR: "var(--pos)", TE: "var(--accent-purple-light)" };
 
                       // Component bar helper
                       const compBar = (label, val, max, color) => (
@@ -9204,9 +9204,9 @@ Analyze this best ball roster. Return JSON only.`;
                               </div>
                             </div>
                             {/* Component bars */}
-                            {compBar("Schedule Quality", cws.comp1, 4, cws.comp1 >= 3.5 ? "#4ade80" : cws.comp1 >= 2.5 ? "#facc15" : "#f87171")}
-                            {compBar("Starter Caliber", cws.comp2, 4, cws.comp2 >= 3.5 ? "#4ade80" : cws.comp2 >= 2.5 ? "#facc15" : "#f87171")}
-                            {compBar("Roster Situations", cws.comp3, 2, cws.comp3 >= 1.5 ? "#4ade80" : cws.comp3 >= 1.0 ? "#facc15" : "#f87171")}
+                            {compBar("Schedule Quality", cws.comp1, 4, cws.comp1 >= 3.5 ? "var(--pos)" : cws.comp1 >= 2.5 ? "var(--caution)" : "var(--neg)")}
+                            {compBar("Starter Caliber", cws.comp2, 4, cws.comp2 >= 3.5 ? "var(--pos)" : cws.comp2 >= 2.5 ? "var(--caution)" : "var(--neg)")}
+                            {compBar("Roster Situations", cws.comp3, 2, cws.comp3 >= 1.5 ? "var(--pos)" : cws.comp3 >= 1.0 ? "var(--caution)" : "var(--neg)")}
                           </div>
 
                           {/* Playoff schedule chips — top 3 starters */}
@@ -9225,7 +9225,7 @@ Analyze this best ball roster. Return JSON only.`;
                               .slice(0, 3)
                               .map((p, i, arr) => {
                                 const score = Math.round((p.totalScore / 15) * 10);
-                                const sc = score >= 7 ? "#4ade80" : score <= 4 ? "#f87171" : "#facc15";
+                                const sc = score >= 7 ? "var(--pos)" : score <= 4 ? "var(--neg)" : "var(--caution)";
                                 const pc = posColors[p.pos] || "var(--text-secondary)";
                                 return (
                                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 0 4px 6px", borderBottom: i < arr.length - 1 ? "1px solid var(--bg-surface-alt)" : "none" }}>
@@ -9255,14 +9255,14 @@ Analyze this best ball roster. Return JSON only.`;
                                 const pc = posColors[(analyzed.valid || []).find(p => p.name === s.name)?.pos] || "var(--text-secondary)";
                                 const isRisk = s.risks.length > 0;
                                 const trendIcon = s.trend === "rising" ? "↑" : s.trend === "falling" ? "↓" : "→";
-                                const trendColor = s.trend === "rising" ? "#4ade80" : s.trend === "falling" ? "#f87171" : "var(--text-secondary)";
+                                const trendColor = s.trend === "rising" ? "var(--pos)" : s.trend === "falling" ? "var(--neg)" : "var(--text-secondary)";
                                 return (
                                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "6px", padding: "5px 0 5px 6px", borderBottom: i < Math.min(cws.situationNotes.length, 3) - 1 ? "1px solid var(--bg-surface-alt)" : "none" }}>
                                     <div style={{ fontSize: "10px", color: trendColor, flexShrink: 0, fontWeight: 700, paddingTop: "2px" }}>{trendIcon}</div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                       <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
                                         <div style={{ fontSize: "10px", color: "var(--text-soft-alt)", fontWeight: 700 }}>{s.name}</div>
-                                        <div style={{ fontSize: "7px", color: isRisk ? "#fb923c" : "#4ade80", background: isRisk ? "#fb923c15" : "#4ade8015", border: `1px solid ${isRisk ? "#fb923c40" : "#4ade8040"}`, borderRadius: "2px", padding: "1px 4px", fontFamily: "monospace", letterSpacing: "0.06em", flexShrink: 0 }}>
+                                        <div style={{ fontSize: "7px", color: isRisk ? "var(--warn)" : "var(--pos)", background: isRisk ? "#fb923c15" : "#4ade8015", border: `1px solid ${isRisk ? "#fb923c40" : "#4ade8040"}`, borderRadius: "2px", padding: "1px 4px", fontFamily: "monospace", letterSpacing: "0.06em", flexShrink: 0 }}>
                                           {isRisk ? "RISK" : "UPSIDE"}
                                         </div>
                                       </div>
@@ -9275,7 +9275,7 @@ Analyze this best ball roster. Return JSON only.`;
                           )}
 
                           {/* AI Breakdown — replaces static Scout Report */}
-                          <div style={{ ...section({}), background: "var(--bg-base)", borderLeft: `3px solid ${analyzed.grade === "A" || analyzed.grade === "A-" ? "#4ade80" : analyzed.grade === "B+" || analyzed.grade === "B" ? "#a3e635" : "#facc15"}`, paddingLeft: "15px" }}>
+                          <div style={{ ...section({}), background: "var(--bg-base)", borderLeft: `3px solid ${analyzed.grade === "A" || analyzed.grade === "A-" ? "var(--pos)" : analyzed.grade === "B+" || analyzed.grade === "B" ? "var(--pos-bright)" : "var(--caution)"}`, paddingLeft: "15px" }}>
                             <div style={{ ...secLabel, display: "flex", alignItems: "center", gap: "6px" }}>
                               X-Ray Breakdown
                               {aiNutshell && <span style={{ fontSize: "7px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>}
@@ -9464,7 +9464,7 @@ Analyze this best ball roster. Return JSON only.`;
         const panel = { position: "fixed", inset: 0, background: "var(--bg-base)", zIndex: 9999, overflowY: "auto", padding: "32px 24px", fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-soft-alt)" };
         const label = { fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px", display: "block" };
         const input_ = { width: "100%", background: "var(--bg-inset)", border: "1px solid var(--border-subtle)", borderRadius: "4px", padding: "10px 12px", color: "var(--text-soft-alt)", fontSize: "13px", fontFamily: "inherit", outline: "none", boxSizing: "border-box" };
-        const btn = (color) => ({ background: color || "#22c55e", border: "none", borderRadius: "4px", padding: "10px 18px", color: "#000", fontSize: "12px", fontWeight: 700, fontFamily: "inherit", cursor: "pointer", letterSpacing: "0.08em" });
+        const btn = (color) => ({ background: color || "var(--pos-solid)", border: "none", borderRadius: "4px", padding: "10px 18px", color: "#000", fontSize: "12px", fontWeight: 700, fontFamily: "inherit", cursor: "pointer", letterSpacing: "0.08em" });
 
         return (
           <div style={panel}>
@@ -9483,14 +9483,14 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "20px" }}>Enter your admin password to continue.</div>
                 <label style={label}>Password</label>
                 <input
-                  style={{ ...input_, marginBottom: "12px", ...(adminAuthError ? { borderColor: "#f87171" } : {}) }}
+                  style={{ ...input_, marginBottom: "12px", ...(adminAuthError ? { borderColor: "var(--neg)" } : {}) }}
                   type="password"
                   value={adminPassword}
                   onChange={e => { setAdminPassword(e.target.value); setAdminAuthError(false); }}
                   onKeyDown={e => e.key === "Enter" && handleAdminAuth()}
                   placeholder="Enter password"
                 />
-                {adminAuthError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>Incorrect password</div>}
+                {adminAuthError && <div style={{ fontSize: "11px", color: "var(--neg)", marginBottom: "10px" }}>Incorrect password</div>}
                 <button style={btn()} onClick={handleAdminAuth}>Unlock</button>
               </div>
             ) : (
@@ -9514,15 +9514,15 @@ Analyze this best ball roster. Return JSON only.`;
                   {/* Verify result */}
                   {adminVerifyResult && (
                     <div style={{ background: adminVerifyResult.plausible ? "#0d2a18" : "#2a0a0a", border: `1px solid ${adminVerifyResult.plausible ? "#22c55e33" : "#f8717133"}`, borderRadius: "4px", padding: "12px", marginBottom: "12px" }}>
-                      <div style={{ fontSize: "11px", fontWeight: 700, color: adminVerifyResult.plausible ? "#4ade80" : "#f87171", marginBottom: "6px" }}>
+                      <div style={{ fontSize: "11px", fontWeight: 700, color: adminVerifyResult.plausible ? "var(--pos)" : "var(--neg)", marginBottom: "6px" }}>
                         {adminVerifyResult.plausible ? "✓ Looks plausible" : "⚠ Potential issue"}
                       </div>
-                      {adminVerifyResult.concern && <div style={{ fontSize: "11px", color: "#fb923c", marginBottom: "8px" }}>{adminVerifyResult.concern}</div>}
+                      {adminVerifyResult.concern && <div style={{ fontSize: "11px", color: "var(--warn)", marginBottom: "8px" }}>{adminVerifyResult.concern}</div>}
                       {(adminVerifyResult.affectedPlayers || []).length > 0 && (
                         <div>
                           <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px", letterSpacing: "0.08em" }}>ALSO AFFECTED:</div>
                           {adminVerifyResult.affectedPlayers.map((p, i) => (
-                            <div key={i} style={{ fontSize: "11px", color: "#a3e635", marginBottom: "2px" }}>
+                            <div key={i} style={{ fontSize: "11px", color: "var(--pos-bright)", marginBottom: "2px" }}>
                               {p} — <span style={{ color: "var(--text-secondary)" }}>{(adminVerifyResult.affectedReasons || [])[i] || ""}</span>
                             </div>
                           ))}
@@ -9531,11 +9531,11 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   )}
 
-                  {adminError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "10px" }}>{adminError}</div>}
-                  {adminSaveSuccess && <div style={{ fontSize: "11px", color: "#4ade80", marginBottom: "10px" }}>✓ Saved — live immediately</div>}
+                  {adminError && <div style={{ fontSize: "11px", color: "var(--neg)", marginBottom: "10px" }}>{adminError}</div>}
+                  {adminSaveSuccess && <div style={{ fontSize: "11px", color: "var(--pos)", marginBottom: "10px" }}>✓ Saved — live immediately</div>}
 
                   <div style={{ display: "flex", gap: "10px" }}>
-                    <button style={btn("#facc15")} onClick={handleVerify} disabled={adminVerifying}>
+                    <button style={btn("var(--caution)")} onClick={handleVerify} disabled={adminVerifying}>
                       {adminVerifying ? "Verifying…" : "Verify First"}
                     </button>
                     <button style={btn()} onClick={handleSave} disabled={adminSaving}>
@@ -9556,15 +9556,15 @@ Analyze this best ball roster. Return JSON only.`;
                     return (
                       <div key={key} style={{ borderBottom: "1px solid #151515", padding: "10px 0", display: "flex", gap: "10px", alignItems: "flex-start" }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "11px", fontWeight: 700, color: isKv ? "#a3e635" : "var(--text-faint)", marginBottom: "3px" }}>
-                            {key} {isKv ? <span style={{ fontSize: "9px", color: "#22c55e" }}>KV</span> : <span style={{ fontSize: "9px", color: "var(--border-default)" }}>hardcoded</span>}
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: isKv ? "var(--pos-bright)" : "var(--text-faint)", marginBottom: "3px" }}>
+                            {key} {isKv ? <span style={{ fontSize: "9px", color: "var(--pos-solid)" }}>KV</span> : <span style={{ fontSize: "9px", color: "var(--border-default)" }}>hardcoded</span>}
                           </div>
                           <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>{val}</div>
                         </div>
                         {isKv && (
                           <button
                             onClick={() => handleDelete(key)}
-                            style={{ background: "none", border: "1px solid #2a1a1a", borderRadius: "3px", color: "#f87171", fontSize: "10px", padding: "3px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "inherit" }}
+                            style={{ background: "none", border: "1px solid #2a1a1a", borderRadius: "3px", color: "var(--neg)", fontSize: "10px", padding: "3px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "inherit" }}
                           >
                             Delete
                           </button>
@@ -9594,10 +9594,10 @@ Analyze this best ball roster. Return JSON only.`;
                     onChange={e => { setAdminImportText(e.target.value); setAdminImportError(null); }}
                     placeholder='{"player name": "news sentence", ...}'
                   />
-                  {adminImportError && <div style={{ fontSize: "11px", color: "#f87171", marginBottom: "8px" }}>{adminImportError}</div>}
-                  {adminImportSuccess && <div style={{ fontSize: "11px", color: "#4ade80", marginBottom: "8px" }}>✓ Restored — all entries live</div>}
+                  {adminImportError && <div style={{ fontSize: "11px", color: "var(--neg)", marginBottom: "8px" }}>{adminImportError}</div>}
+                  {adminImportSuccess && <div style={{ fontSize: "11px", color: "var(--pos)", marginBottom: "8px" }}>✓ Restored — all entries live</div>}
                   <button
-                    style={btn("#f59e0b")}
+                    style={btn("var(--gold)")}
                     onClick={handleImport}
                     disabled={adminImporting || !adminImportText.trim()}
                   >
