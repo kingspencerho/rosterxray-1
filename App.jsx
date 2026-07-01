@@ -5008,7 +5008,7 @@ Analyze this best ball roster. Return JSON only.`;
 
   const tierStyle = (color) => {
     const styles = {
-      elite: { bg: "#0d3320", border: "var(--pos-solid)", text: "var(--pos)" },
+      elite: { bg: "#0d3320", border: "#22c55e", text: "var(--pos)" },
       solid: { bg: "#1e2a1a", border: "#84cc16", text: "var(--pos-bright)" },
       neutral: { bg: "#2a2618", border: "#eab308", text: "var(--caution)" },
       tough: { bg: "#2a1a18", border: "#f97316", text: "var(--warn)" },
@@ -5049,7 +5049,7 @@ Analyze this best ball roster. Return JSON only.`;
   const weekColor = (weekIdx) => {
     const palette = [
       { text: "var(--info-blue)", border: "#3b82f6", bg: "#0e1a2e", label: "W15" }, // blue
-      { text: "var(--accent-purple-light)", border: "var(--accent-purple-mid)", bg: "#1a1030", label: "W16" }, // purple
+      { text: "var(--accent-purple-light)", border: "#a855f7", bg: "#1a1030", label: "W16" }, // purple
       { text: "#2dd4bf", border: "#14b8a6", bg: "#0d2420", label: "W17" }, // teal
     ];
     return palette[weekIdx] || palette[0];
@@ -5060,12 +5060,12 @@ Analyze this best ball roster. Return JSON only.`;
   // wherever it appears, so a user scanning the page can group by position visually.
   const posColor = (pos) => {
     const map = {
-      QB: { text: "var(--caution-alt)", border: "var(--gold)", bg: "#2a1f08" }, // amber
+      QB: { text: "var(--caution-alt)", border: "#f59e0b", bg: "#2a1f08" }, // amber
       RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" }, // cyan
       WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" }, // pink/magenta
       TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
     };
-    return map[pos] || { text: "var(--text-secondary)", border: "var(--text-faint)", bg: "var(--bg-raised)" };
+    return map[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
   };
 
   // Highlight player names (full name or last name) inside a strength/weakness
@@ -5521,8 +5521,8 @@ Analyze this best ball roster. Return JSON only.`;
           <div className="hero-pills" style={{ position: "relative", zIndex: 1 }}>
             {[
               { label: "No login. No league sync.", rest: " Just a screenshot.", border: "#60c8f5", check: "#60c8f5" },
-              { label: "Expert-level breakdown.", rest: " No generic output.", border: "var(--pos)", check: "var(--pos)" },
-              { label: "Maps your W15–17 playoff stacks.", rest: " Instantly.", border: "var(--accent-purple-mid)", check: "var(--accent-purple-mid)" },
+              { label: "Expert-level breakdown.", rest: " No generic output.", border: "#4ade80", check: "#4ade80" },
+              { label: "Maps your W15–17 playoff stacks.", rest: " Instantly.", border: "#a855f7", check: "#a855f7" },
             ].map(({ label, rest, border, check }, i) => (
               <div
                 key={i}
@@ -6780,14 +6780,14 @@ Analyze this best ball roster. Return JSON only.`;
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="var(--pos-bright)" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      : <InsightRow text="None identified" color="#555555" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="var(--warn)" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      : <InsightRow text="None flagged" color="#555555" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -7393,10 +7393,10 @@ Analyze this best ball roster. Return JSON only.`;
                       })();
 
                       const upgradeTier = alt.improvement >= 4
-                        ? { label: "BETTER MATCHUPS", color: "var(--pos)", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
+                        ? { label: "BETTER MATCHUPS", color: "#4ade80", bg: "#0a2018", border: "#22c55e55", rowBg: "#0d2318" }
                         : alt.improvement >= 2
-                        ? { label: "SOFTER SCHEDULE", color: "var(--gold)", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
-                        : { label: "SLIGHT EDGE", color: "var(--info-blue)", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
+                        ? { label: "SOFTER SCHEDULE", color: "#f59e0b", bg: "#221800", border: "#f59e0b55", rowBg: "#1a1400" }
+                        : { label: "SLIGHT EDGE", color: "#60a5fa", bg: "#0d1520", border: "#60a5fa33", rowBg: "#111418" };
 
                       return (
                       <div key={j} style={{
@@ -7886,14 +7886,14 @@ Analyze this best ball roster. Return JSON only.`;
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="var(--pos-bright)" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
+                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
+                      : <InsightRow text="None identified" color="#555555" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="var(--warn)" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
+                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
+                      : <InsightRow text="None flagged" color="#555555" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -8233,7 +8233,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {Object.entries(analyzed.depthAnalysis).map(([pos, d]) => {
                   const isWeak = d.depth < 1;
                   const isStrong = d.depth >= 3;
-                  const color = isWeak ? "var(--neg)" : isStrong ? "var(--pos)" : "var(--caution)";
+                  const color = isWeak ? "#f87171" : isStrong ? "#4ade80" : "#facc15";
                   return (
                     <div key={pos} style={{
                       background: "var(--bg-surface)",
@@ -8310,10 +8310,10 @@ Analyze this best ball roster. Return JSON only.`;
                   const scoreOf10 = Math.round((p.totalScore / 15) * 10);
                   const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--caution)";
                   const pc = (() => {
-                    if (p.pos === "QB") return { bg: "#fbbf2420", border: "var(--caution-alt)", text: "var(--caution-alt)" };
-                    if (p.pos === "RB") return { bg: "#22d3ee20", border: "var(--accent-cyan)", text: "var(--accent-cyan)" };
-                    if (p.pos === "WR") return { bg: "#f472b620", border: "var(--pink)", text: "var(--pink)" };
-                    return { bg: "#a78bfa20", border: "var(--accent-purple)", text: "var(--accent-purple)" };
+                    if (p.pos === "QB") return { bg: "#fbbf2420", border: "#fbbf24", text: "var(--caution-alt)" };
+                    if (p.pos === "RB") return { bg: "#22d3ee20", border: "#22d3ee", text: "var(--accent-cyan)" };
+                    if (p.pos === "WR") return { bg: "#f472b620", border: "#f472b6", text: "var(--pink)" };
+                    return { bg: "#a78bfa20", border: "#a78bfa", text: "var(--accent-purple)" };
                   })();
                   return (
                     <div key={i} style={{
@@ -8873,14 +8873,14 @@ Analyze this best ball roster. Return JSON only.`;
                   Your bench, broken down by role — <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>handcuffs</span> to lock in, <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>streamers</span> to rotate in on good matchups, and <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>bye-week fills</span> to plan around.
                 </p>
                 {analyzed.benchMoves.map((alert, i) => {
-                  const urgencyBorder = alert.urgency === "high" ? "var(--pos-solid)" : alert.urgency === "medium" ? "var(--info-blue)" : "var(--text-dim)";
+                  const urgencyBorder = alert.urgency === "high" ? "#22c55e" : alert.urgency === "medium" ? "#60a5fa" : "#555555";
                   const urgencyBg = alert.urgency === "high" ? "#22c55e15" : alert.urgency === "medium" ? "#60a5fa10" : "var(--bg-surface)";
                   const pc = (() => {
                     const pos = alert.player.pos;
-                    if (pos === "QB") return { bg: "#fbbf2420", border: "var(--caution-alt)", text: "var(--caution-alt)" };
-                    if (pos === "RB") return { bg: "#22d3ee20", border: "var(--accent-cyan)", text: "var(--accent-cyan)" };
-                    if (pos === "WR") return { bg: "#f472b620", border: "var(--pink)", text: "var(--pink)" };
-                    return { bg: "#a78bfa20", border: "var(--accent-purple)", text: "var(--accent-purple)" };
+                    if (pos === "QB") return { bg: "#fbbf2420", border: "#fbbf24", text: "var(--caution-alt)" };
+                    if (pos === "RB") return { bg: "#22d3ee20", border: "#22d3ee", text: "var(--accent-cyan)" };
+                    if (pos === "WR") return { bg: "#f472b620", border: "#f472b6", text: "var(--pink)" };
+                    return { bg: "#a78bfa20", border: "#a78bfa", text: "var(--accent-purple)" };
                   })();
                   return (
                     <div key={i} style={{
