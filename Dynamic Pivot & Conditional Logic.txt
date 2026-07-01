@@ -1,0 +1,38 @@
+Act as an expert data architect and fantasy football analyst. I need you to generate a comprehensive, modular Notion document layout for my Best Ball Playoff Target Games (Weeks 15–17). 
+
+This document must be structured for high scannability, using clear hierarchies, toggle lists, and database templates so that I can easily edit, expand, and inject new data as the season progresses.
+
+### DYNAMIC PIVOT & CONDITIONAL LOGIC (CRITICAL CONSTRAINT)
+The initial game buckets provided below are a baseline, NOT a static source of truth. You must build conditional logic rules directly into every section of this document. Specify that a game must be automatically downgraded, upgraded, or completely replaced if any of the following triggers occur:
+1. Efficiency/Pace Shift: If a team's actual neutral-script pace or Points Per Play drops below the league median, or if a coordinator change alters the pass-rate-over-expectation (PROE).
+2. Volume/Role Dilution: If a primary target's High-Value Touches (HVT) or snap share splits into a strict 50/50 committee without a clear financial/scheme signal.
+3. Total Volatility: If lines drop below a 44-point threshold or a defense demonstrates historic, slate-breaking suppression capabilities.
+
+Please build out the document text using the following structure:
+
+### I. Structural Framework & Core Rules
+(Create a callout box or toggle summarizing the core draft mandates: Forced Loops, the Elimination Filter for Week 15, and reserving picks 180+ strictly for Week 17 Bring-Backs. Include a "Pivot Trigger Checklist" here based on the conditional logic above.)
+
+### II. The Playoff Matrix (Master Table)
+Create a clean, markdown-formatted master table mapping out the key target games across Weeks 15, 16, and 17. Include columns for: Game, Week, Tier (High-Leverage vs. Hidden Upside), Projected Pace/Volume Note, and a mandatory column for "Pivot Triggers / Metrics to Watch" to flag when to abandon or swap the matchup.
+
+Use these initial game buckets as the baseline:
+- Week 15 High-Leverage: DET @ MIN, SF @ LAC, SEA @ PHI, BAL @ PIT
+- Week 15 Hidden Upside: IND @ TEN, ARI @ NYJ
+- Week 16 High-Leverage: HOU @ PHI, KC @ SF, BUF @ DEN
+- Week 16 Hidden Upside: CHI @ GB, LV @ TEN
+- Week 17 High-Leverage: BAL @ CIN, BUF @ MIA, HOU @ GB, SF vs PHI, DET @ CHI
+- Week 17 Hidden Upside: SEA @ CAR, IND @ CLE
+
+### III. Weekly Deep Dives & Living Notes
+For each of the three weeks (15, 16, 17), create a dedicated section. Inside each week, use Toggle Lists for every targeted game. Inside each toggle, provide:
+- **The Stacking Thesis:** Why we are forcing this environment based on current expectations.
+- **Primary Loop Targets:** Slots for the main QB/Pass-catcher stacks.
+- **Late-Round Bring-Back Options (180+):** Specific player archetypes or high-value touch targets to watch.
+- **The Pivot Condition:** A specific, customized metric or scenario (e.g., "If Team X drops below 60 plays/game, pivot to [Blank]") that invalidates this stack.
+- **[LIVING LOG] Updates & Shifting Context:** Leave this as a bulleted placeholder section where I can manually log injuries, depth chart adjustments, or coordinator changes later.
+
+### IV. Portfolio Risk & Exposure Tracker
+Create a template section with placeholders where I can log my own draft exposure percentages across these specific games to ensure I do not over-concentrate or over-optimize on a single game script when a pivot trigger is met.
+
+Keep the tone concise, analytical, and completely devoid of generic fluff or corporate jargon. Focus purely on actionable execution.

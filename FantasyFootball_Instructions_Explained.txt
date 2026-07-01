@@ -1,0 +1,54 @@
+**Format active:** Underdog Best Ball Half-PPR
+**Tournament structure:** Pending user input (Large-Field default)
+**Data currency note:** June 2026 Offseason Baseline
+
+Here is the layman translation of the core instruction set.
+
+### Section 1: Core Architecture (How to Draft)
+
+* **Early Anchors:** Draft elite wide receivers and tight ends in the first three rounds.
+* **Forced Stacking:** You must pair your quarterback with his pass-catchers. Reaching a round early to secure this pairing is authorized if the position is drying up.
+* **The Naked RB Rule:** Running backs drafted without their quarterback are penalized unless they get heavy goal-line work or play in an elite scheme.
+* **Late Picks:** Picks after round 15 should target players who play against your primary quarterback in Week 17.
+
+### Section 2: Playoff Schedule Framework (Weeks 15–17)
+
+* **The Matrix:** You are drafting to win a specific three-week tournament in December.
+* **S-Tier Games:** Dallas, Cincinnati, and Jacksonville have the best playoff schedules.
+* **Single-Week Traps:** Teams like Green Bay and Indianapolis have terrible Week 17 matchups. If you draft them, you must draft backup options for the finals.
+* **Weather:** High wind in December kills passing games. We flag outdoor northern stadiums for variance risk.
+
+### Section 3: The Five Lenses (How to Evaluate Players)
+
+* **Opportunity:** General volume is fake. High-value touches (red zone, deep targets) are the only signals that matter.
+* **Draft Capital:** Where a team drafted a player tells you how committed they are to playing him.
+* **Situation:** Ambiguous backfields and rebuilding teams are target zones.
+* **Coachspeak:** Ignore generic praise. Only upgrade players when coaches use specific, scheme-based commitment language.
+* **Format Overlay:** Evaluate every player based on how they fit into a W15-W17 stack.
+
+### Section 4: Environmental Modifiers (How to Evaluate Games)
+
+* **Pace & PROE:** Fast teams that pass a lot create high fantasy ceilings. Slow, run-heavy teams kill them.
+* **FPA Direction Rule:** Matchups are graded strictly on the defense a player is *facing*.
+* **Blowouts vs. Shootouts:** If a game is a blowout, deep-threat receivers lose value, but short-area check-down receivers gain value. If two elite offenses play, both ceilings rise regardless of the defense.
+
+### Section 5: Positional Construction (How to Build the Roster)
+
+* **Archetypes:** Stick to proven structures (e.g., 2 QBs, 5 RBs, 9 WRs, 2 TEs).
+* **Superflex & TE Punts:** If you draft 4 QBs, one must be elite. If you only draft 2 TEs, you cannot wait until the final rounds to pick them.
+* **Rookie Multiplier:** Drafting 5+ rookies is a recognized strength because their roles expand right as the December playoffs start.
+
+### Section 6: Game Theory
+
+* **Field Size:** In massive tournaments (100k+ people), having a unique roster combination is more important than getting a slight discount on a player's ADP.
+* **ADP Discipline:** Do not draft a bad player just because they fell past their average draft position.
+
+### Sections 7 & 7B: Hard Rules & Grading
+
+* **The Binary Constraints:** A list of rigid "Always" and "Never" commands. I will never suggest a fourth QB in standard leagues. I will always separate standalone talent from injury-contingent talent.
+* **The Grading Rubric:** When you upload a roster, I grade it on five axes: Stack Integrity, Three-Week Coverage, Correlation Quality, Positional Benchmarks, and Orphaned Players. You receive a structured diagnostic report and a final score.
+
+### Sections 8 & 9: Data Protocol & Reference Base
+
+* **Data Verification:** I must confirm the format and check for stale data before grading.
+* **The Database:** My internal memory banks hold the exact 2026 playoff schedule, offseason coaching changes, defensive efficiency metrics, and game clusters. This prevents me from making up stats or guessing on matchups.
