@@ -9175,7 +9175,7 @@ Analyze this best ball roster. Return JSON only.`;
                             <div style={{ fontSize: "9px", color, fontWeight: 700, fontFamily: "'Inter', monospace" }}>{val.toFixed(1)}<span style={{ color: "var(--border-default)", fontWeight: 400 }}>/{max}</span></div>
                           </div>
                           <div style={{ height: "3px", background: "var(--bg-raised)", borderRadius: "2px", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${(val / max) * 100}%`, background: color, borderRadius: "2px", transition: "width 0.3s" }} />
+                            <div style={{ height: "100%", width: "100%", transform: `scaleX(${val / max})`, transformOrigin: "left", background: color, borderRadius: "2px", transition: "transform 0.3s" }} />
                           </div>
                         </div>
                       );
