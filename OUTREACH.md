@@ -47,6 +47,8 @@ For each roster someone posts publicly:
 3. Drop the share link as the payoff — "here's the full breakdown"
 4. Value first, link second. Always.
 
+**Tag the channel:** before pasting a share link, append `&src=<channel>` (e.g. `&src=discord`, `&src=reddit`, `&src=twitter`) to the copied URL. Vercel Analytics captures the full URL including query string, so this is how you tell which channel actually converts without any extra tooling.
+
 ---
 
 ## Agent Research Workflow

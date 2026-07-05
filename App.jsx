@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 // ============ DATA ============
 
@@ -4074,7 +4075,6 @@ export default function RosterScorer() {
   const [shareLinkError, setShareLinkError] = useState(false);
   const [sharedView, setSharedView] = useState(false);
   const [cachedShareUrl, setCachedShareUrl] = useState(null);
-  const [discordCopied, setDiscordCopied] = useState(false);
   const [tradeOpen, setTradeOpen] = useState(false);
   const [tradeGive, setTradeGive] = useState("");
   const [tradeGet, setTradeGet] = useState("");
@@ -4271,64 +4271,6 @@ export default function RosterScorer() {
       setTimeout(() => setShareLinkError(false), 3000);
     } finally {
       setShareLinkLoading(false);
-    }
-  };
-
-  const handleCopyForDiscord = async () => {
-    if (!analyzed || !analyzed.grade) return;
-    setDiscordCopied(false);
-    try {
-      let url = cachedShareUrl;
-      if (!url) {
-        const snapshot = {
-          createdAt: Date.now(),
-          analysisMode,
-          tournament,
-          redraftLeague,
-          dataMode,
-          analyzed,
-          aiNutshell,
-          aiPivotNotes,
-          aiStandoutDetails,
-          aiBenchMoveNotes,
-          aiLineupNotes,
-          aiBringBackNotes,
-        };
-        const res = await fetch("/api/grade-save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ snapshot }),
-        });
-        if (!res.ok) throw new Error("save failed");
-        const data = await res.json();
-        if (!data.id) throw new Error("no id");
-        url = `${window.location.origin}/?g=${data.id}`;
-        setCachedShareUrl(url);
-      }
-      const top3 = (analyzed.valid || []).slice(0, 3).map(p => p.name.split(" ").slice(-1)[0]).join(" · ");
-      const primaryStack = analyzed.stackGrades && analyzed.stackGrades.length > 0 ? analyzed.stackGrades[0] : null;
-      let stackLine = "";
-      if (primaryStack) {
-        if (primaryStack.hasQB) {
-          const qb = primaryStack.players.find(p => p.pos === "QB");
-          const qbLast = qb ? qb.name.split(" ").slice(-1)[0] : "QB";
-          stackLine = `Primary stack: ${primaryStack.team} (${qbLast} + ${primaryStack.players.length - 1})`;
-        } else {
-          stackLine = `Primary stack: ${primaryStack.team} (${primaryStack.players.length} pieces)`;
-        }
-      }
-      const mode = analysisMode === "bestball" ? "Best Ball" : "Redraft";
-      const lines = [
-        `🏈 RosterXRay Grade: ${analyzed.grade} (${mode})`,
-        top3 ? `Top: ${top3}` : null,
-        stackLine || null,
-        `→ Full breakdown: ${url}`,
-      ].filter(Boolean);
-      await navigator.clipboard.writeText(lines.join("\n"));
-      setDiscordCopied(true);
-      setTimeout(() => setDiscordCopied(false), 2500);
-    } catch (e) {
-      // silent fail — user still has the share link button
     }
   };
 
@@ -5158,6 +5100,7 @@ Analyze this best ball roster. Return JSON only.`;
       margin: 0,
       overflow: (!heroCollapsed && !analyzed) ? "hidden" : "visible",
     }}>
+      <Analytics />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
 
@@ -6887,6 +6830,11 @@ Analyze this best ball roster. Return JSON only.`;
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
                   </div>
+                  {shareLinkCopied && (
+                    <div style={{ marginTop: "6px", fontSize: "10px", color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                      tip: add &src=discord (or reddit/twitter) to the link before pasting, to track clicks by channel
+                    </div>
+                  )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
@@ -7993,6 +7941,11 @@ Analyze this best ball roster. Return JSON only.`;
                       {exportingCard ? "generating…" : "export grade card"}
                     </button>
                   </div>
+                  {shareLinkCopied && (
+                    <div style={{ marginTop: "6px", fontSize: "10px", color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                      tip: add &src=discord (or reddit/twitter) to the link before pasting, to track clicks by channel
+                    </div>
+                  )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
                       <img
