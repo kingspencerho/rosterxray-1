@@ -177,11 +177,27 @@ export default async function handler(req, res) {
     // The server ALWAYS selects the system prompt from the fixed prompts below —
     // arbitrary client-supplied `system` text is never used, so this endpoint
     // cannot be used as an open proxy for unrelated prompts.
+    // Unknown tasks are rejected outright — without this, a request with no
+    // recognized task would still be forwarded to Anthropic (no system prompt),
+    // making the endpoint a free general-purpose proxy on our API key.
     let systemPrompt;
     if (body.task === "extract") {
       systemPrompt = EXTRACTION_SYSTEM_PROMPT;
     } else if (body.task === "grade") {
       systemPrompt = buildGradingSystemPrompt(body.mode, body.tournamentName);
+    } else {
+      return res.status(400).json({ error: "Unknown task" });
+    }
+
+    if (!Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > 10) {
+      return res.status(400).json({ error: "Invalid messages" });
+    }
+    // Image content (roster screenshots) is only legitimate for extraction.
+    if (body.task !== "extract") {
+      const hasImage = body.messages.some(
+        (m) => Array.isArray(m?.content) && m.content.some((c) => c?.type === "image")
+      );
+      if (hasImage) return res.status(400).json({ error: "Invalid messages" });
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {

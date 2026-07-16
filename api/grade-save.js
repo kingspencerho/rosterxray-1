@@ -54,6 +54,25 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing or invalid snapshot" });
   }
 
+  // The share surfaces (middleware.js meta tags, api/card.js image) render
+  // grade, analysisMode, and the top player names verbatim on our domain.
+  // Reject anything the app itself could never produce, so a hand-crafted
+  // snapshot can't turn rosterxray.com link previews into arbitrary copy.
+  const a = snapshot.analyzed;
+  if (typeof a.grade !== "string" || !/^[A-F][+-]?$/.test(a.grade)) {
+    return res.status(400).json({ error: "Missing or invalid snapshot" });
+  }
+  if (a.valid !== undefined) {
+    if (!Array.isArray(a.valid) || a.valid.length > 30 ||
+        a.valid.some((p) => p && typeof p.name === "string" && p.name.length > 50)) {
+      return res.status(400).json({ error: "Missing or invalid snapshot" });
+    }
+  }
+  if (snapshot.analysisMode !== undefined &&
+      (typeof snapshot.analysisMode !== "string" || snapshot.analysisMode.length > 20)) {
+    return res.status(400).json({ error: "Missing or invalid snapshot" });
+  }
+
   const payload = JSON.stringify(snapshot);
   // Size guard — prevents abuse and oversized KV writes
   if (payload.length > 200000) {
