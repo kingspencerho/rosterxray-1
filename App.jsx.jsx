@@ -1399,7 +1399,7 @@ const COACHING_ADJ = {
   CLE: { all: -1.0, note: "Schwartz gone, slight regression" },
   GB: { all: -1.5, note: "Parsons added, top-10 when healthy" },
   CHI: { all: +1.5, note: "Lost Allen/Greenard/Hargrave" },
-  DAL: { all: +2.0, note: "Parsons + Diggs gone, bottom-5" },
+  DAL: { all: +1.0, note: "HIGH CHURN — massive rebuild (Gary, Thompson, Caleb Downs, new DC Parker, 3-4 switch, ~7 new starters per ESPN May 2026). Still soft early but no longer bottom-3; 2025 FPA is low-confidence here" },
   WAS: { all: +1.5, note: "Full rebuild, stays bottom-5" },
   NYJ: { all: +1.0, note: "Improving but still bottom-8" },
   TEN: { all: +1.0, note: "Saleh needs time, bottom-5" },
@@ -1568,7 +1568,7 @@ const OFFSEASON_ADJ_2026 = {
   WAS: { wr: +1.0, rb: +0.5, te: +0.5, note: "Full rebuild, Payne age concern" },
   KC:  { wr: -0.5, rb: -0.5, te: -0.5, note: "Spagnuolo continuity, secondary intact" },
   JAX: { wr: -1.0, rb: -0.5, te: -0.5, note: "New DC, cap space used on defense" },
-  DAL: { wr: +2.0, rb: +1.5, te: +1.5, note: "Parsons + Diggs gone, bottom-3 projection" },
+  DAL: { wr: +1.0, rb: +0.75, te: +0.75, note: "HIGH CHURN — defense rebuilt (Gary, Thompson, Downs, new DC Parker, 3-4 switch). Soft-ish early with 7 new starters, no longer bottom-3 (ESPN May 2026); low confidence either direction" },
   GB:  { wr: -1.5, rb: -1.0, te: -1.0, note: "Micah Parsons arrived and healthy by 2026 — top-10 defense projection when active" },
 };
 
@@ -1960,21 +1960,29 @@ const getMatchupTier = (opponentTeam, pos, useProjected = false) => {
   const opp = opponentTeam.replace("@", "");
   let pts = FPA[pos]?.[opp];
   if (pts == null) return { tier: "—", score: 0, opp };
-  // apply coaching adjustment (always on)
+  // Adjustment sign convention (both tables): positive = defense got WORSE
+  // (allows more, softer matchup), negative = improved (tougher). FPA is
+  // points allowed, so adjustments ADD. `pts -= adj` here was a sign-inversion
+  // bug (fixed Jul 16 2026) that made improved defenses look softer and
+  // gutted defenses look tougher — contradicting the tables' own notes.
   const adj = COACHING_ADJ[opp];
-  if (adj) pts -= adj.all;
+  if (adj) pts += adj.all;
   // apply 2026 offseason layer (only in projected mode)
   if (useProjected) {
     const offAdj = OFFSEASON_ADJ_2026[opp];
     if (offAdj) {
       const delta = offAdj[pos.toLowerCase()];
-      if (delta != null) pts -= delta;
+      if (delta != null) pts += delta;
     }
   }
 
-  // Rank-based tiering using position-specific distribution
+  // Rank-based tiering using position-specific distribution.
+  // If adjustments push pts below the league minimum, findIndex returns -1
+  // (rank 0), which previously fell through to "Smash" — the exact opposite
+  // of a tougher-than-everyone defense. Clamp to worst rank instead.
   const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
-  const rank = allPts.findIndex(v => v <= pts) + 1;
+  const rankIdx = allPts.findIndex(v => v <= pts);
+  const rank = rankIdx === -1 ? allPts.length + 1 : rankIdx + 1;
 
   let tier, color, score;
   if (rank <= 8) { tier = "Smash"; color = "elite"; score = 5; }
@@ -3308,17 +3316,20 @@ const getMatchupScoreForOpponent = (opp, pos, useProjected = false) => {
   if (oppClean === "BYE") return null;
   let pts = FPA[pos]?.[oppClean];
   if (pts == null) return { score: 3, tier: "Unknown" };
+  // Same sign convention + Jul 16 2026 inversion fix as getMatchupTier.
   const adj = COACHING_ADJ[oppClean];
-  if (adj) pts -= adj.all;
+  if (adj) pts += adj.all;
   if (useProjected) {
     const offAdj = OFFSEASON_ADJ_2026[oppClean];
     if (offAdj) {
       const delta = offAdj[pos.toLowerCase()];
-      if (delta != null) pts -= delta;
+      if (delta != null) pts += delta;
     }
   }
   const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
-  const rank = allPts.findIndex(v => v <= pts) + 1;
+  const rankIdx = allPts.findIndex(v => v <= pts);
+  // Below-minimum pts = tougher than every defense — worst rank, not rank 0/Smash.
+  const rank = rankIdx === -1 ? allPts.length + 1 : rankIdx + 1;
   if (rank <= 8) return { score: 5, tier: "Smash", color: "elite" };
   if (rank <= 14) return { score: 4, tier: "Good", color: "solid" };
   if (rank <= 20) return { score: 3, tier: "Even", color: "neutral" };

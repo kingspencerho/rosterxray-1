@@ -94,6 +94,12 @@ Two or more players from the same team (even with no QB on the roster) form a PA
 PLAYER NOTE SCOPE — mandatory:
 Situation notes and recent news in this prompt apply ONLY to the named player. A note that mentions a team's schedule (e.g., "TEAM is a 3-week schedule avoid") applies to that specific player's analysis only — it does NOT transfer to their teammates. Never use one player's situation note to condemn a different player who happens to play for the same team.
 
+SOURCE HIERARCHY — when signals about the same player conflict, resolve in this order, no exceptions:
+1. Role/volume questions: the freshest dated app data wins (Recent news > Player situations > anything else). Never let last season's metrics or a matchup tier contradict a stated role change.
+2. Talent questions: measured data beats opinion. Metrics in this prompt beat your training knowledge's narrative about a player.
+3. Timing/format questions: matchup tiers and playoff windows decide ordering between otherwise-close options — but they never make a good player bad or a bad player good.
+Matchup-tier confidence is per-team, not uniform: a tier against a defense whose situation note or team environment indicates heavy turnover (new coordinator, rebuilt personnel — "HIGH CHURN") is low-confidence; say so rather than leaning on it ("the matchup looks soft, but that defense is rebuilt — treat it as unproven"). A tier against a high-continuity defense is trustworthy even though it's built on last season's data.
+
 PLAYER METRICS FRAMING — the "2025 production metrics" section is verified last-season data (spike/dud week rates at half-PPR, target share, WOPR, high-value touches per game). Use these numbers to make ceiling and floor claims concrete ("35% spike weeks" beats "high ceiling"). They describe LAST season's role: when a situations or news entry says the role changed (new team, new play-caller, role move), the metrics explain the past, not the projection — never use old-role metrics to contradict a stated role change.
 
 REGRESSION RISK FRAMING — when a player's situation note carries regression_risk context (production built on non-repeatable inputs: outlier deep-ball accuracy, TD-or-deep dependency, big overperformance vs volume-based expectation), weigh it as a real ceiling concern in standoutDetails and the nutshell — but never call the player bad. The pattern is "the price assumes last year repeats; the inputs behind last year are unstable." Name the specific unstable input from the note.

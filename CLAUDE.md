@@ -495,3 +495,32 @@ Before any analysis:
 - Example: ADP 6, picked at 10 — VALUE (+4). Never call this a reach.
 - Example: ADP 50, picked at 30 — REACH (-20).
 - Never use training knowledge of a player's ADP. The ADP in the prompt is ground truth.
+
+---
+
+## Source Hierarchy & Conflict Resolution (added Jul 16, 2026)
+
+Governs how competing signals get weighed in any player evaluation, breakout list, or grading decision — by AI sessions and by the app's own logic.
+
+### Two different questions — never conflate them
+- **Player-level** ("is he good / will he break out"): answered by role, opportunity, and talent inputs. Generated FROM these.
+- **Format-level** ("when do his points arrive / does it stack"): answered by the matchup engine (FPA + adjustments + playoff schedule). Used as a FILTER and sorter, never as a generator. A player never makes or misses a breakout/target list because of his December schedule; his ranking within a best-ball list may move because of it.
+
+### Conflict rules
+1. **Role/volume disputes** → the freshest DATED entry wins (SITUATIONS/RECENT_NEWS beat any analyst take or metric). Anything past the 30-45 day freshness rule loses to newer sourced information automatically.
+2. **Talent disputes** → measured data (percentiles, per-route/per-touch metrics) beats a single analyst's opinion. Multiple independent analysts converging (e.g., two different shops making the same call from different data) upgrades to strong signal.
+3. **Timing/format disputes** → the matchup engine wins, best ball only. Redraft season-long value ignores W15-17 tiers except for playoff-lineup planning.
+
+### Metric hierarchy (most → least predictive for projection)
+1. **Role/opportunity CHANGE** — vacated targets/alignment, confirmed role moves, draft capital, coaching scheme fit. Most causal, freshest.
+2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. (True YPRR/TPRR would slot here — no public routes data currently; WOPR + target share are the proxy.)
+3. **Talent-in-isolation** — charting success rates, prospect-model scores, breakout-age priors. Identifies who deserves volume before they get it.
+4. **Ceiling shape** — spike/usable/dud/nuclear week rates. Descriptive of last season; use for best-ball classification, not projection.
+5. **Matchup data (FPA)** — least stable input. Format decisions only.
+
+### Matchup-data confidence rule (per-team, not uniform)
+2025 FPA reliability depends on DEFENSIVE CONTINUITY, judged per team:
+- **High continuity** (same DC, scheme intact, core starters back — e.g. a KC/Spagnuolo situation): 2025 FPA stands at full confidence. Do NOT discount it just because it is "last year's data."
+- **High churn** (new DC, scheme change, 3+ new starters in the back seven, or a rebuilt front — e.g. DAL 2026: new DC, 3-4 switch, ~7 new starters): 2025 FPA is low-confidence. Apply the COACHING_ADJ/OFFSEASON_ADJ direction, mark the note "HIGH CHURN," and never let a Smash/Avoid tier from a high-churn defense be the deciding factor between two otherwise-close calls.
+- **Adjustment sign convention (both tables):** positive = defense got WORSE (softer matchup), negative = improved (tougher). Applied additively to FPA (`pts += adj`). A `pts -= adj` sign-inversion bug shipped until Jul 16, 2026 — if a matchup tier looks wrong against a table note, check the application sign first.
+- Every COACHING_ADJ / OFFSEASON_ADJ_2026 entry needs a sourced, dated note. An entry whose note is contradicted by newer verified reporting (as DAL's "bottom-3" was by the May 2026 rebuild reporting) must be updated before it is used in any published output.
