@@ -1,9 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { track } from '@vercel/analytics';
+// 2025 per-player production metrics (target share, WOPR, HVT/gm, spike/dud week
+// rates at half-PPR) built offline from nflverse pbp by scripts/build-player-metrics.py.
+// Descriptive of LAST season's roles — SITUATIONS/RECENT_NEWS override for role changes.
+import PLAYER_METRICS from './grading/data/player_metrics_2025.json';
 
 // ============ DATA ============
 
 // Underdog ADP Jun 24 2026 - top picks for fuzzy matching
+// ADP_UPDATED renders in the footer/data-vintage labels — bump it in the SAME edit
+// as every ADP refresh so users never see a stale (or wrong) data date again.
+const ADP_UPDATED = "Jun 24";
 const ADP_DATA = {
   "jahmyr gibbs": { adp: 1, pos: "RB", team: "DET" },
   "bijan robinson": { adp: 2, pos: "RB", team: "ATL" },
@@ -2247,6 +2255,11 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     // flag (e.g. Jonathan Taylor, Kyren Williams before their entries existed).
     const hasCommitteeRisk = riskFlags.includes("creeping_committee") || riskFlags.includes("confirmed_committee");
     if (rb.adp <= 36 && !hasCommitteeRisk) return false;
+    // Data-driven Gate 1 (HVT): 2025 red-zone targets + inside-10 carries per game.
+    // 1.5+ on this scale ≈ a real goal-line/receiving role (2025 leaders: Henry 2.47,
+    // Gibbs 2.18) — covers the ~400 players SITUATIONS curation doesn't reach.
+    const pm = PLAYER_METRICS[normalize(rb.name)];
+    if (pm && pm.hvt_pg >= 1.5 && !hasCommitteeRisk) return false;
     return true;
   });
 
@@ -2872,12 +2885,54 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     score += 0.5; // clean build + elite playoff window compound bonus
   }
 
-  // Bring-back bonus — game stacks are positively correlated
-  // Fix 1: reduced from +0.8 to +0.35 — bring-backs are correlated value, not a stack
-  const qbBringBacks = bringBacks.filter(b => b.hasQB && b.bringBackPieces.some(p => p.pos === "WR" || p.pos === "TE"));
-  if (qbBringBacks.length >= 1) {
-    strengths.push(`${qbBringBacks.length} game stack(s) with bring-back correlation`);
-    score += qbBringBacks.length * 0.35;
+  // Bring-back bonus — game stacks are positively correlated value, not stacks.
+  // Rebalanced Jul 16 2026 (audit): (1) counted per unique GAME via mergedBringBacks —
+  // the raw bringBacks list holds mirror pairs, so game-locks double-counted before;
+  // (2) quality-tiered — blowout-risk games (spread 7+, total < 44) earn reduced
+  // credit per framework Section 8; (3) capped at +1.05 total so bring-back volume,
+  // which is semi-automatic on multi-stack rosters, can't outscore an elite stack.
+  const qbBringBackGames = mergedBringBacks.filter(bb => {
+    const aQB = (bb.teamA?.players || []).some(p => p.pos === "QB");
+    const bQB = (bb.teamB?.players || []).some(p => p.pos === "QB");
+    const aPass = (bb.teamA?.players || []).some(p => p.pos === "WR" || p.pos === "TE");
+    const bPass = (bb.teamB?.players || []).some(p => p.pos === "WR" || p.pos === "TE");
+    return (aQB && bPass) || (bQB && aPass);
+  });
+  if (qbBringBackGames.length >= 1) {
+    let bringBackScore = 0;
+    qbBringBackGames.forEach(bb => {
+      const game = (PLAYOFF_GAME_TOTALS[bb.week] || []).find(g =>
+        [g.away, g.home].includes(bb.teamA?.team) && [g.away, g.home].includes(bb.teamB?.team)
+      );
+      const blowoutRisk = game && Math.abs(game.spread) >= 7 && game.total < 44;
+      bringBackScore += blowoutRisk ? 0.15 : 0.35;
+    });
+    strengths.push(`${qbBringBackGames.length} game stack(s) with bring-back correlation`);
+    score += Math.min(bringBackScore, 1.05);
+  }
+
+  // Unlooped QB penalty — a QB with zero same-team WR/TE on the roster is a broken
+  // loop (framework Section 8: hard penalty; absence of a bonus is not a penalty).
+  // Softened in superflex, where extra QBs carry standalone lineup value.
+  const unloopedQBs = valid.filter(q =>
+    q.pos === "QB" && !valid.some(p => p.team === q.team && (p.pos === "WR" || p.pos === "TE"))
+  );
+  if (unloopedQBs.length >= 1) {
+    weaknesses.push(`Unlooped QB${unloopedQBs.length > 1 ? "s" : ""}: ${unloopedQBs.map(q => q.name).join(", ")} — no pass catcher from their team on this roster, so their touchdowns only score once`);
+    score -= unloopedQBs.length * (format === "superflex" ? 0.3 : 0.75);
+  }
+
+  // Dead playoff week penalty — roster-level three-week coverage (framework Section 8:
+  // per-week scored penalty). Stack averages previously diluted a cold week across the
+  // other two; a week where NO stack clears a neutral matchup is an elimination risk.
+  if (stackGrades.length >= 1) {
+    [0, 1, 2].forEach(wkIdx => {
+      const bestWeekAvg = Math.max(...stackGrades.map(s => s.avgPerWeek[wkIdx]));
+      if (bestWeekAvg < 3) {
+        weaknesses.push(`W${15 + wkIdx} is a dead week — none of your stacks clears a neutral matchup, and that's an elimination round`);
+        score -= 0.75;
+      }
+    });
   }
 
   // === LATE-ROUND EDGE AUDIT (picks 180+) ===
@@ -4887,6 +4942,22 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === 2025 PRODUCTION METRICS CONTEXT ===
+      // Compact per-player line from the nflverse-built PLAYER_METRICS file. Descriptive
+      // of last season's roles — the AI must let situations/news override on role changes.
+      const metricsContext = (result.valid || [])
+        .map(p => {
+          const m = PLAYER_METRICS[normalize(p.name)];
+          if (!m || m.gp < 8) return null;
+          const bits = [`${Math.round(m.spike_rate * 100)}% spike wks (18+ half-PPR)`, `${Math.round(m.dud_rate * 100)}% duds`];
+          if (m.nuclear_rate >= 0.1) bits.push(`${Math.round(m.nuclear_rate * 100)}% nuclear (28+)`);
+          if (p.pos === "WR" || p.pos === "TE") bits.push(`${Math.round(m.tgt_sh * 100)}% tgt share, WOPR ${m.wopr}`);
+          if (p.pos === "RB") bits.push(`${m.hvt_pg} HVT/gm${m.expl_pct != null ? `, ${Math.round(m.expl_pct * 100)}% explosive carries` : ""}`);
+          return `${p.name}: ${bits.join(", ")}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === LEAGUE CONTEXT (redraft only) ===
       const leagueContext = isRedraft
         ? (() => {
@@ -4907,6 +4978,7 @@ Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -4922,6 +4994,7 @@ Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
@@ -4999,12 +5072,15 @@ Analyze this best ball roster. Return JSON only.`;
       const league = resolveLeague(redraftLeague, customConfig);
       const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
+      // Anonymous grade-distribution event — grade curve calibration (audit Jul 16 2026)
+      track("grade", { grade: result.grade, mode: "redraft", league: redraftLeague });
       fetchAiNutshell(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
       const picks = parseRoster(input, fmt);
       const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
+      track("grade", { grade: result.grade, mode: "bestball", tournament });
       fetchAiNutshell(result);
     }
   };
@@ -8989,7 +9065,7 @@ Analyze this best ball roster. Return JSON only.`;
           letterSpacing: "0.05em",
           textTransform: "uppercase",
         }}>
-          ADP: Underdog half-PPR May 19 · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections
+          ADP: Underdog half-PPR {ADP_UPDATED} · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections
         </div>
 
         {/* === HIDDEN EXPORT CARD (Option B — Reference Card) === */}
@@ -9353,7 +9429,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {/* Footer */}
                 <div style={{ padding: "8px 22px", display: "flex", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>ROSTER X-RAY · 2026</div>
-                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{isBB ? "Underdog half-PPR" : "Yahoo half-PPR"} · ADP May 19</div>
+                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{isBB ? "Underdog half-PPR" : "Yahoo half-PPR"} · ADP {ADP_UPDATED}</div>
                 </div>
               </div>
             );
