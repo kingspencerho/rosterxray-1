@@ -634,6 +634,9 @@ const RECENT_NEWS = {
   "malik nabers": "Nabers had a 2nd knee cleanup (scar tissue removal) in 2026 and Week 1 availability is uncertain.",
   "rashee rice": "Rice released from jail on schedule — on track for training camp. Missed OTAs but expected to be ready for Week 1. Monitor camp availability and chemistry reps with Mahomes early.",
   "luther burden": "Burden is trending toward the CHI WR1 starter role per 2026 camp reports.",
+  "james cook": "BUF beat reporting (Jul 2026) hints Pete Carmichael's arrival as OC means more designed receptions for Cook — the receiving role Joe Brady gave him in 2023 may return.",
+  "cam skattebo": "Skattebo (tightrope ankle surgery) declared full-go for training camp and Week 1 per July reports. Effectiveness early in the season is the open question, not availability.",
+  "emeka egbuka": "New OC Zac Robinson says Egbuka moves to the off-line Z/flanker role (Cooper Kupp's old role in this scheme) with Godwin working the slot — his natural college position after playing X out of position as a rookie.",
   "eli stowers": "Stowers won the Mackey Award in 2025; with Goedert as bridge and AJ Brown gone from PHI, his TE1 path accelerated.",
   "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
   "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
@@ -684,14 +687,14 @@ const VERDICTS = {
   "caleb williams": { verdict: "TARGET", date: "2026-05-19", reason: "Year 3 leap, Ben Johnson retained, best NFC stack anchor", confidence: "HIGH" },
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
   "harold fannin": { verdict: "TARGET", date: "2026-06-03", reason: "72/731/6 as rookie, 31% target share, Monken now HC brings same pass-heavy identity as HC", confidence: "HIGH" },
-  "cam skattebo": { verdict: "TARGET", date: "2026-05-19", reason: "Workhorse profile, Harbaugh run-heavy = volume", confidence: "HIGH" },
+  "cam skattebo": { verdict: "TARGET", date: "2026-07-15", reason: "NYG lead-back role is elite when healthy (all inside-10 carries + 15% target share in healthy games). Tightrope ankle recovery is priced into ADP; July reports say full-go for camp.", confidence: "MEDIUM-HIGH" },
   "kaytron allen": { verdict: "TARGET", date: "2026-06-03", reason: "Best late dart, WAS run-heavy, Quinn retained as HC", confidence: "LOTTERY" },
   "omarion hampton": { verdict: "TARGET", date: "2026-05-19", reason: "McDaniel zone-run scheme-perfect", confidence: "HIGH" },
   "jaylen warren": { verdict: "TARGET", date: "2026-06-03", reason: "RB17 in 2025, PPR-friendly, McCarthy HC brings run-heavy identity to PIT", confidence: "HIGH" },
   "eli stowers": { verdict: "TARGET (2027)", date: "2026-05-19", reason: "Buy now at ADP 195, TE1 job 2027 when Goedert gone", confidence: "MEDIUM-HIGH" },
   // 2026 role-concern fades — filtered from pivot recommendations
   "alvin kamara": { verdict: "fade", date: "2026-06-11", reason: "Etienne presumed lead, but Kamara retains passing-down/receiving role — near-free ADP gives standalone PPR floor regardless of correlation", confidence: "MEDIUM" },
-  "david montgomery": { verdict: "fade", date: "2026-05-26", reason: "HOU added competition, age concern at 28", confidence: "MEDIUM" },
+  "david montgomery": { verdict: "TARGET", date: "2026-07-15", reason: "Mixon-2024-style volume role in HOU: heavy rushing + goal-line share with only day-3 competition (Woody Marks). O-line (31st) and age are the caps — volume floor makes him fine at cost, not a fade.", confidence: "MEDIUM" },
   "d'andre swift": { verdict: "fade", date: "2026-05-26", reason: "Committee back in CHI, no clear bell-cow role", confidence: "MEDIUM" },
   "breece hall": { verdict: "fade", date: "2026-05-26", reason: "Contract narrative, NYJ rebuild, role uncertainty", confidence: "MEDIUM" },
   "derrick henry": { verdict: "TARGET", date: "2026-06-03", reason: "Defied age cliff every season, BAL run-heavy, W16 CLE and W17 @CIN are soft closes", confidence: "MEDIUM" },
@@ -737,7 +740,10 @@ const VERDICTS = {
 // ============ SITUATIONS — static, curated, freshness-gated ============
 // Used by Championship Window Score (Component 3) and share card feedback copy
 // situationFlags: committee_breaker | target_vacuum | breakout_profile | scheme_fit
-// riskFlags: creeping_committee | injury_history | ol_dependency | contract_year | qb_uncertainty
+// riskFlags: creeping_committee | injury_history | ol_dependency | contract_year | qb_uncertainty | regression_risk
+// regression_risk (added Jul 15 2026): last season's production leaned on a historically
+// non-repeatable input — e.g. outlier deep-ball accuracy, TD-or-deep dependency, or big
+// overperformance vs volume-based expectation. Context flag only, no score penalty.
 // roleCeiling: slot_only | rz_dependent
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
@@ -745,11 +751,13 @@ const SITUATIONS = {
   "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
   "saquon barkley": { verdict: "TARGET", trend: "stable", trendNote: "Workhorse with AJ Brown gone — even more targets now", situationFlags: ["target_vacuum"], riskFlags: [] },
-  "james cook": { verdict: "TARGET", trend: "stable", trendNote: "Bellcow in top-5 offense, no real competition", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "james cook": { verdict: "TARGET", trend: "rising", trendNote: "Bellcow in a top-6 implied offense with a top-3 O-line — RB6 ppg last year reads like his floor. Untapped receiving ceiling: new OC Carmichael fed Payton-tree backs for 18 years, and Joe Brady put Cook on a 63-target pace the last time he called plays without interference (2023)", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "emeka egbuka": { verdict: "TARGET", trend: "rising", trendNote: "Year-2 breakout candidate moving to his natural off-line Z/flanker role (the Kupp role) under new OC Zac Robinson — last year he was typecast at X out of position. Pre-hamstring rookie stretch was elite (WR3 through five weeks, 2.49 yards per route run); Godwin shifts to the slot", situationFlags: ["breakout_profile", "scheme_fit"], riskFlags: [] },
+  "jaxon smith njigba": { verdict: "HOLD", trend: "falling", trendNote: "Elite talent, but last year's WR1-overall season leaned on non-repeatable inputs: 26% of his fantasy points came on 16 deep play-action targets from the most accurate deep-ball QB season in five years, he averaged one red-zone target per game (fewest of any elite WR1), and he ran roughly 5 ppg above volume-based expectation. Kubiak's deep-PA design also left with him", situationFlags: [], riskFlags: ["regression_risk"] },
   "ashton jeanty": { verdict: "TARGET", trend: "rising", trendNote: "Early camp reports: workhorse usage from Day 1", situationFlags: ["breakout_profile"], riskFlags: [] },
   "devon achane": { verdict: "TARGET", trend: "stable", trendNote: "Elite pass-catcher in MIA offense, locked role — new staff inherits a featured weapon", situationFlags: ["scheme_fit"], riskFlags: [] },
-  "omarion hampton": { verdict: "TARGET", trend: "rising", trendNote: "McDaniel zone-run fit is elite — scheme match grade A+", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: [] },
-  "cam skattebo": { verdict: "TARGET", trend: "stable", trendNote: "Harbaugh run-heavy, Skattebo has workhorse ceiling", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "omarion hampton": { verdict: "TARGET", trend: "rising", trendNote: "Year-2 breakout bet with real bellcow evidence: 4 rookie games above 75% snap share and 80%+ of team inside-5 carries when on the field. McDaniel backfields have averaged 25+ expected fantasy points per game his whole career — the scheme feeds whoever wins this job, and Hampton's the favorite", situationFlags: ["scheme_fit", "breakout_profile"], riskFlags: [] },
+  "cam skattebo": { verdict: "TARGET", trend: "stable", trendNote: "NYG lead back — in his 5 healthy games above 50% snaps he owned 100% of backfield inside-10 carries with a 15% target share (~20 ppg pace). Tightrope ankle surgery is the real risk (that procedure has a poor next-season track record) but July reports say full-go for camp and the ADP already prices the injury in", situationFlags: ["scheme_fit"], riskFlags: ["injury_history"] },
   "jadarian price": { verdict: "TARGET", trend: "rising", trendNote: "R1 capital, Charbonnet ACL, run-first SEA scheme", situationFlags: ["breakout_profile", "scheme_fit"], riskFlags: [] },
   "kaytron allen": { verdict: "TARGET", trend: "stable", trendNote: "WAS run-heavy under Quinn, new OC Blough — scheme continuity intact, lottery at ADP", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy now HC at PIT — run-heavy system suits Warren's receiving back profile", situationFlags: ["scheme_fit"], riskFlags: [] },
@@ -1387,6 +1395,46 @@ const COACHING_ADJ = {
   WAS: { all: +1.5, note: "Full rebuild, stays bottom-5" },
   NYJ: { all: +1.0, note: "Improving but still bottom-8" },
   TEN: { all: +1.0, note: "Saleh needs time, bottom-5" },
+};
+
+// === TEAM ENVIRONMENT PRIORS (2026 preseason) ===
+// ippg: Vegas implied points per game — RotoWire look-ahead lines, Jun 24 2026
+//       (league range this season: ~18.3 to ~26.4; directionally reliable at team level).
+// oline: consolidated offensive line rank 1-32 — Sharp Football Analysis, Jun 30 2026.
+// Injected into the AI prompt as team-level context only — never a player verdict.
+// Refresh both once near final preseason cuts (labels stale after early Sep 2026).
+const TEAM_ENV = {
+  DET: { ippg: 26.35, oline: 14 }, CIN: { ippg: 26.03, oline: 28 }, BAL: { ippg: 26.01, oline: 24 },
+  LAR: { ippg: 25.87, oline: 5 },  DAL: { ippg: 25.79, oline: 17 }, BUF: { ippg: 25.71, oline: 3 },
+  SF:  { ippg: 25.28, oline: 7 },  GB:  { ippg: 25.22, oline: 27 }, SEA: { ippg: 25.00, oline: 9 },
+  CHI: { ippg: 24.56, oline: 6 },  KC:  { ippg: 24.50, oline: 23 }, PHI: { ippg: 23.91, oline: 2 },
+  NE:  { ippg: 23.59, oline: 15 }, LAC: { ippg: 23.56, oline: 8 },  TB:  { ippg: 23.34, oline: 4 },
+  IND: { ippg: 23.28, oline: 10 }, WAS: { ippg: 23.26, oline: 22 }, JAX: { ippg: 23.18, oline: 17 },
+  HOU: { ippg: 22.59, oline: 31 }, MIN: { ippg: 22.53, oline: 12 }, DEN: { ippg: 22.37, oline: 1 },
+  NYG: { ippg: 21.94, oline: 20 }, NO:  { ippg: 21.63, oline: 16 }, ATL: { ippg: 21.60, oline: 10 },
+  PIT: { ippg: 21.60, oline: 21 }, TEN: { ippg: 20.74, oline: 30 }, CAR: { ippg: 20.31, oline: 12 },
+  LV:  { ippg: 19.28, oline: 25 }, MIA: { ippg: 19.09, oline: 29 }, CLE: { ippg: 18.71, oline: 32 },
+  ARI: { ippg: 18.56, oline: 26 }, NYJ: { ippg: 18.32, oline: 19 },
+};
+
+// === 2026 PLAY-CALLER PROFILES (partial — sourced entries only) ===
+// Source: Ryan Heath play-caller article (Fantasy Points) + BDGE/Heath video, Jul 11 2026.
+// Key tendencies that measurably move fantasy output: at-snap motion (skill players avg
+// +43% fantasy points per route run on at-snap-motion plays), play-action/under-center
+// rate, pace, backfield expected-fantasy-points history. Only add teams with a sourced
+// read — an absent entry means "no reliable play-caller signal," not "neutral."
+const PLAYCALLER_PROFILES = {
+  LAC: { pc: "Mike McDaniel", isNew: true, tree: "McShanahan", note: "League-high at-snap motion, slow pace — efficiency concentrates in top 1-2 options and ices out secondary pieces. Career 25+ expected fantasy points per game to backfields (had two top-5 RBs at once in 2023)." },
+  LV:  { pc: "Clint Kubiak", isNew: true, tree: "Shanahan/Kubiak", note: "Heavy under-center + downfield play-action (top-5 producers on deep PA two straight years). Slow, run-heavy, true bellcow usage everywhere he's been. Has repeatedly overperformed weak O-line projections." },
+  SEA: { pc: "Brian Flory", isNew: true, tree: "Kubiak system (internal promote)", note: "Says he keeps last year's Super Bowl offense; wants MORE at-snap motion. Losing Kubiak's deep-PA design is the real risk — last year's passing efficiency is hard to repeat." },
+  DET: { pc: "Drew Petzing", isNew: true, tree: "Stefansky", note: "Elite run-game design (2nd in scramble-adjusted YPC last 5 seasons) — great for the lead back. Historically low motion; Campbell has stepped in before to force motion (Goff ~50% more efficient with dropback motion)." },
+  TB:  { pc: "Zac Robinson", isNew: true, tree: "McVay", note: "2nd-highest at-snap motion rate in the league; Baker is 2nd-best in ANY/A improvement on motion plays. Runs a Kupp-style off-line Z role as the offense's engine." },
+  PHI: { pc: "Sean Mannion", isNew: true, tree: "McVay/LaFleur", note: "First-time caller. Pushing under-center + middle-of-field play-action; Hurts is low-rate but high-efficiency over the middle. Watch for a GB-style 3-man WR route rotation behind the top two." },
+  ARI: { pc: "Mike LaFleur", isNew: true, tree: "Shanahan", note: "Creative personnel history (early pony-backfield adopter). Inherits a bottom-of-league implied total — efficiency bet, not volume bet." },
+  PIT: { pc: "Mike McCarthy", isNew: true, tree: "West Coast", note: "11-personnel base with Rodgers: quick game, curls/slants/hitches — favors short-area separators and Z/slot types over vertical X routes." },
+  BUF: { pc: "Joe Brady (HC) + Pete Carmichael (OC)", isNew: false, tree: "Payton (Carmichael)", note: "Brady keeps calling plays collaboratively. Carmichael spent 18 years feeding Payton-tree receiving backs — watch the RB target share." },
+  MIN: { pc: "Kevin O'Connell", isNew: false, tree: "McVay", note: "Downfield-heavy route tree (few slant/curl layups) — WR efficiency swings hard on QB deep-ball quality." },
+  WAS: { pc: "David Blough", isNew: true, tree: "Quinn staff continuity", note: "Scheme continuity under Quinn expected — run-heavy identity retained." },
 };
 
 // 2026 NFL Playoff Week Game Totals — Early-season reference (Yahoo Sports, May 24 2026)
@@ -4823,6 +4871,22 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === TEAM ENVIRONMENT + PLAY-CALLER CONTEXT ===
+      // One line per rostered team: Vegas implied PPG, O-line rank, and (when sourced)
+      // the 2026 play-caller profile. Team-level priors for the AI — never player verdicts.
+      const rosterTeams = [...new Set((result.valid || []).map(p => p.team).filter(Boolean))];
+      const teamContext = rosterTeams
+        .map(t => {
+          const env = TEAM_ENV[t];
+          const pcp = PLAYCALLER_PROFILES[t];
+          const bits = [];
+          if (env) bits.push(`implied ${env.ippg} PPG (league range ~18.3-26.4), O-line rank ${env.oline}/32`);
+          if (pcp) bits.push(`${pcp.isNew ? "NEW play-caller" : "play-caller"} ${pcp.pc} (${pcp.tree} tree) — ${pcp.note}`);
+          return bits.length ? `${t}: ${bits.join(" | ")}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === LEAGUE CONTEXT (redraft only) ===
       const leagueContext = isRedraft
         ? (() => {
@@ -4842,6 +4906,7 @@ Playoff matchups: ${playoffLines || "none"}
 Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
+${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -4856,6 +4921,7 @@ Pivot candidates: ${pivotForPrompt || "none"}
 Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
+${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
