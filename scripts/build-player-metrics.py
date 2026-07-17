@@ -61,7 +61,7 @@ def main(pbp_path, roster_path, out_path):
                 id_name[gid] = r.get("full_name") or ""
                 id_pos[gid] = r.get("position") or ""
 
-    tgt = defaultdict(int); rz_tgt = defaultdict(int); ez_tgt = defaultdict(int)
+    tgt = defaultdict(int); rec = defaultdict(int); rz_tgt = defaultdict(int); ez_tgt = defaultdict(int)
     airy = defaultdict(float)
     car = defaultdict(int); car10 = defaultdict(int); gz_car = defaultdict(int)
     team_tgt = defaultdict(int); team_airy = defaultdict(float)
@@ -95,6 +95,7 @@ def main(pbp_path, roster_path, out_path):
                     if ydl <= 20: rz_tgt[rec_id] += 1
                     if ay >= ydl: ez_tgt[rec_id] += 1
                     if r.get("complete_pass") == "1":
+                        rec[rec_id] += 1
                         yds = float(r.get("receiving_yards") or 0)
                         pts[(rec_id, gid)] += 0.5 + 0.1 * yds
                         if r.get("pass_touchdown") == "1":
@@ -147,6 +148,7 @@ def main(pbp_path, roster_path, out_path):
         out[normalize(name)] = {
             "pos": id_pos.get(pid, ""), "team": team, "gp": gp,
             "tgt": tgt[pid],
+            "rec": rec[pid],
             "tgt_sh": round(tgt_sh, 3),
             "ay_sh": round(ay_sh, 3),
             "wopr": round(1.5 * tgt_sh + 0.7 * ay_sh, 3),

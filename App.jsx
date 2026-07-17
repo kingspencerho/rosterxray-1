@@ -2899,24 +2899,58 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // (2) quality-tiered — blowout-risk games (spread 7+, total < 44) earn reduced
   // credit per framework Section 8; (3) capped at +1.05 total so bring-back volume,
   // which is semi-automatic on multi-stack rosters, can't outscore an elite stack.
-  const qbBringBackGames = mergedBringBacks.filter(bb => {
-    const aQB = (bb.teamA?.players || []).some(p => p.pos === "QB");
-    const bQB = (bb.teamB?.players || []).some(p => p.pos === "QB");
-    const aPass = (bb.teamA?.players || []).some(p => p.pos === "WR" || p.pos === "TE");
-    const bPass = (bb.teamB?.players || []).some(p => p.pos === "WR" || p.pos === "TE");
-    return (aQB && bPass) || (bQB && aPass);
+  // Per-game credit, tiered by what's coming back on the far side (framework Sec 8 +
+  // Receiving Back Stack Qualifier, wired Jul 16 2026):
+  //   WR/TE far side ............. 0.35 (0.15 in a blowout-risk game)
+  //   RB far side, 65+ rec 2025 .. 0.35 — elite receiving back, garbage-time exempt
+  //                                 (framework: no blowout reduction for this tier)
+  //   RB far side, 40-64 rec ..... 0.20 — real receiving role, reduced credit
+  //   RB far side, under 40 ...... 0    — standard back, game-level correlation too weak
+  //   Both sides have QBs ........ 0.35 game lock (0.15 in a blowout-risk game)
+  const qbBringBackGames = [];
+  let bringBackScore = 0;
+  mergedBringBacks.forEach(bb => {
+    const sideA = bb.teamA?.players || [];
+    const sideB = bb.teamB?.players || [];
+    const aQB = sideA.some(p => p.pos === "QB");
+    const bQB = sideB.some(p => p.pos === "QB");
+    if (!aQB && !bQB) return;
+    const game = (PLAYOFF_GAME_TOTALS[bb.week] || []).find(g =>
+      [g.away, g.home].includes(bb.teamA?.team) && [g.away, g.home].includes(bb.teamB?.team)
+    );
+    const blowoutRisk = game && Math.abs(game.spread) >= 7 && game.total < 44;
+    const farSideCredit = (farSide) => {
+      if (farSide.some(p => p.pos === "WR" || p.pos === "TE")) return blowoutRisk ? 0.15 : 0.35;
+      let best = 0;
+      farSide.filter(p => p.pos === "RB").forEach(p => {
+        const rec = PLAYER_METRICS[normalize(p.name)]?.rec || 0;
+        if (rec >= 65) best = Math.max(best, 0.35);
+        else if (rec >= 40) best = Math.max(best, 0.2);
+      });
+      return best;
+    };
+    let credit;
+    if (aQB && bQB) credit = blowoutRisk ? 0.15 : 0.35;
+    else if (aQB) credit = farSideCredit(sideB);
+    else credit = farSideCredit(sideA);
+    if (credit > 0) {
+      qbBringBackGames.push(bb);
+      bringBackScore += credit;
+    }
   });
   if (qbBringBackGames.length >= 1) {
-    let bringBackScore = 0;
-    qbBringBackGames.forEach(bb => {
-      const game = (PLAYOFF_GAME_TOTALS[bb.week] || []).find(g =>
-        [g.away, g.home].includes(bb.teamA?.team) && [g.away, g.home].includes(bb.teamB?.team)
-      );
-      const blowoutRisk = game && Math.abs(game.spread) >= 7 && game.total < 44;
-      bringBackScore += blowoutRisk ? 0.15 : 0.35;
-    });
     strengths.push(`${qbBringBackGames.length} game stack(s) with bring-back correlation`);
     score += Math.min(bringBackScore, 1.05);
+  }
+
+  // Partial-stack credit (framework Sec 8: "reduced credit relative to full loops
+  // but not penalized" — the credit half was never implemented until Jul 16 2026).
+  // A no-QB same-team cluster with a genuinely strong playoff window earns roughly
+  // half a primary stack's baseline, capped so partials can't out-score real loops.
+  const qualityPartialStacks = qualifiedStackGrades.filter(s => !s.hasQB && s.normalizedScore >= 10);
+  if (qualityPartialStacks.length >= 1) {
+    strengths.push(`${qualityPartialStacks.length} partial stack(s) (no QB) with a strong playoff window: ${qualityPartialStacks.map(s => s.team).join(", ")}`);
+    score += Math.min(qualityPartialStacks.length * 0.4, 0.8);
   }
 
   // Unlooped QB penalty — a QB with zero same-team WR/TE on the roster is a broken
