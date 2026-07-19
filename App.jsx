@@ -1579,6 +1579,14 @@ const OFFSEASON_ADJ_2026 = {
 
 const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
 
+// PLAYER_METRICS lookup tolerant of generational suffixes — nflverse roster
+// names often lack the Jr/III that ADP keys and user input carry (and vice
+// versa), which silently dropped metrics for e.g. "Michael Pittman Jr".
+const getMetrics = (name) => {
+  const key = normalize(name);
+  return PLAYER_METRICS[key] || PLAYER_METRICS[key.replace(/\s+(jr|sr|ii|iii|iv|v)$/, "")] || null;
+};
+
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
   const idx = {};
@@ -2271,7 +2279,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     // Data-driven Gate 1 (HVT): 2025 red-zone targets + inside-10 carries per game.
     // 1.5+ on this scale ≈ a real goal-line/receiving role (2025 leaders: Henry 2.47,
     // Gibbs 2.18) — covers the ~400 players SITUATIONS curation doesn't reach.
-    const pm = PLAYER_METRICS[normalize(rb.name)];
+    const pm = getMetrics(rb.name);
     if (pm && pm.hvt_pg >= 1.5 && !hasCommitteeRisk) return false;
     return true;
   });
@@ -2928,7 +2936,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       if (farSide.some(p => p.pos === "WR" || p.pos === "TE")) return blowoutRisk ? 0.15 : 0.35;
       let best = 0;
       farSide.filter(p => p.pos === "RB").forEach(p => {
-        const rec = PLAYER_METRICS[normalize(p.name)]?.rec || 0;
+        const rec = getMetrics(p.name)?.rec || 0;
         if (rec >= 65) best = Math.max(best, 0.35);
         else if (rec >= 40) best = Math.max(best, 0.2);
       });
@@ -4997,9 +5005,13 @@ Wan'Dale Robinson`;
       // of last season's roles — the AI must let situations/news override on role changes.
       const metricsContext = (result.valid || [])
         .map(p => {
-          const m = PLAYER_METRICS[normalize(p.name)];
+          const m = getMetrics(p.name);
           if (!m || m.gp < 8) return null;
           const bits = [`${Math.round(m.spike_rate * 100)}% spike wks (18+ half-PPR)`, `${Math.round(m.dud_rate * 100)}% duds`];
+          // Team change detected between the 2025 metrics and current roster data:
+          // every share/role number below is old-team context — say so up front so
+          // the AI never treats a vacated situation as a current constraint.
+          if (m.team && p.team && m.team !== p.team) bits.unshift(`CHANGED TEAMS (2025 data is from ${m.team} — old-role context only)`);
           if (m.nuclear_rate >= 0.1) bits.push(`${Math.round(m.nuclear_rate * 100)}% nuclear (28+)`);
           if (p.pos === "WR" || p.pos === "TE") bits.push(`${Math.round(m.tgt_sh * 100)}% tgt share (games played), WOPR ${m.wopr}${m.snap_sh != null ? `, ${Math.round(m.snap_sh * 100)}% snap share (route-participation proxy)` : ""}`);
           if (p.pos === "RB") bits.push(`${m.hvt_pg} HVT/gm${m.expl_pct != null ? `, ${Math.round(m.expl_pct * 100)}% explosive carries` : ""}`);
