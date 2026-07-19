@@ -513,7 +513,7 @@ Governs how competing signals get weighed in any player evaluation, breakout lis
 
 ### Metric hierarchy (most → least predictive for projection)
 1. **Role/opportunity CHANGE** — vacated targets/alignment, confirmed role moves, draft capital, coaching scheme fit. Most causal, freshest.
-2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. (True YPRR/TPRR would slot here — no public routes data currently; WOPR + target share are the proxy.)
+2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. Target/air-yard shares are computed over GAMES PLAYED (full-season denominators understated partial-season players until Jul 16, 2026). (True YPRR/TPRR and route participation would slot here — no public routes data exists, the NFL participation feed died after 2023; `snap_sh` in player_metrics is the route-participation proxy, and WOPR + target share proxy per-route volume. Volume ceiling = routes x TPRR, so a low snap/route share caps everything else — the Josh Downs gate.)
 3. **Talent-in-isolation** — charting success rates, prospect-model scores, breakout-age priors. Identifies who deserves volume before they get it.
 4. **Ceiling shape** — spike/usable/dud/nuclear week rates. Descriptive of last season; use for best-ball classification, not projection.
 5. **Matchup data (FPA)** — least stable input. Format decisions only.

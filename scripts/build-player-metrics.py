@@ -13,11 +13,18 @@ Inputs (download from nflverse-data releases, not committed):
   roster_2025.csv.gz        (release: rosters)
 
 Usage:
-  py -3.11 scripts/build-player-metrics.py <pbp.csv.gz> <roster.csv.gz> <out.json>
+  py -3.11 scripts/build-player-metrics.py <pbp.csv.gz> <roster.csv.gz> <out.json> [snap_counts.csv.gz]
 
 Metrics per player:
   gp             games with at least one target or carry
-  tgt, tgt_sh    total targets, share of team targets
+  tgt, tgt_sh    total targets, share of team targets IN GAMES THE PLAYER
+                 APPEARED (fixed Jul 16 2026 — full-season denominators
+                 understated injured/partial-season players, e.g. Garrett
+                 Wilson 2025 read 12.6% instead of his real in-game share)
+  snap_sh        avg offensive snap %% across played games (snap_counts data).
+                 PROXY for route participation — true route data is not public
+                 (NFL participation feed discontinued after 2023). For WR/TE,
+                 snap%% tracks routes closely; treat as the volume-ceiling gate
   ay_sh          share of team air yards
   wopr           1.5*tgt_sh + 0.7*ay_sh  (weighted opportunity)
   rz_tgt, ez_tgt red-zone (<=20 yl) and end-zone targets
@@ -51,7 +58,22 @@ def normalize(name):
     n = n.replace("-", " ")
     return re.sub(r"\s+", " ", n)
 
-def main(pbp_path, roster_path, out_path):
+def load_snap_share(snap_path):
+    # player full name (normalized) -> avg offensive snap % across REG games played
+    tot, n = {}, {}
+    with gzip.open(snap_path, "rt", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r.get("game_type") != "REG" or not r.get("offense_snaps"):
+                continue
+            if int(float(r["offense_snaps"])) <= 0:
+                continue
+            k = normalize(r["player"])
+            tot[k] = tot.get(k, 0.0) + float(r.get("offense_pct") or 0)
+            n[k] = n.get(k, 0) + 1
+    return {k: round(tot[k] / n[k], 3) for k in tot}
+
+
+def main(pbp_path, roster_path, out_path, snap_path=None):
     # gsis id -> (full name, position)
     id_name, id_pos = {}, {}
     with gzip.open(roster_path, "rt", encoding="utf-8") as f:
@@ -64,7 +86,9 @@ def main(pbp_path, roster_path, out_path):
     tgt = defaultdict(int); rec = defaultdict(int); rz_tgt = defaultdict(int); ez_tgt = defaultdict(int)
     airy = defaultdict(float)
     car = defaultdict(int); car10 = defaultdict(int); gz_car = defaultdict(int)
-    team_tgt = defaultdict(int); team_airy = defaultdict(float)
+    # Per-GAME team denominators, so a player's share only counts games he
+    # actually appeared in (see docstring — partial-season fix).
+    team_tgt_game = defaultdict(int); team_airy_game = defaultdict(float)
     pts = defaultdict(float)              # (player, game) -> half-PPR points
     games = defaultdict(set)              # player -> game ids
     team_of = {}
@@ -89,8 +113,8 @@ def main(pbp_path, roster_path, out_path):
                 ydl = r.get("yardline_100")
                 ydl = float(ydl) if ydl not in ("", "NA", None) else 100.0
                 if rec_id:
-                    tgt[rec_id] += 1; team_tgt[posteam] += 1
-                    airy[rec_id] += ay; team_airy[posteam] += max(ay, 0)
+                    tgt[rec_id] += 1; team_tgt_game[(posteam, gid)] += 1
+                    airy[rec_id] += ay; team_airy_game[(posteam, gid)] += max(ay, 0)
                     touch(rec_id, posteam)
                     if ydl <= 20: rz_tgt[rec_id] += 1
                     if ay >= ydl: ez_tgt[rec_id] += 1
@@ -131,6 +155,8 @@ def main(pbp_path, roster_path, out_path):
                 if fid and fid in games:
                     pts[(fid, gid)] -= 2
 
+    snap_sh = load_snap_share(snap_path) if snap_path else {}
+
     out = {}
     for pid, gset in games.items():
         name = id_name.get(pid)
@@ -140,8 +166,11 @@ def main(pbp_path, roster_path, out_path):
         if gp < 3 or (tgt[pid] + car[pid]) < 10:
             continue  # ponytail: skip sub-3-game / sub-10-touch noise rows
         team = team_of.get(pid, "")
-        t_tgt = team_tgt.get(team, 0) or 1
-        t_ay = team_airy.get(team, 0) or 1.0
+        # Denominators over the player's own games only. Midseason trades use
+        # the final team's per-game totals for old-team games — small error,
+        # acceptable; the alternative (per-play team tracking) isn't worth it.
+        t_tgt = sum(team_tgt_game.get((team, g), 0) for g in gset) or 1
+        t_ay = sum(team_airy_game.get((team, g), 0.0) for g in gset) or 1.0
         weekly = [pts.get((pid, g), 0.0) for g in gset]
         tgt_sh = tgt[pid] / t_tgt
         ay_sh = max(airy[pid], 0) / t_ay
@@ -152,6 +181,7 @@ def main(pbp_path, roster_path, out_path):
             "tgt_sh": round(tgt_sh, 3),
             "ay_sh": round(ay_sh, 3),
             "wopr": round(1.5 * tgt_sh + 0.7 * ay_sh, 3),
+            "snap_sh": snap_sh.get(normalize(name)),
             "rz_tgt": rz_tgt[pid], "ez_tgt": ez_tgt[pid],
             "gz_car": gz_car[pid],
             "hvt_pg": round((rz_tgt[pid] + gz_car[pid]) / gp, 2),
@@ -168,6 +198,6 @@ def main(pbp_path, roster_path, out_path):
     print(f"{len(out)} players written to {out_path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) not in (4, 5):
         sys.exit(__doc__)
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(*sys.argv[1:5])
