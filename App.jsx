@@ -560,6 +560,7 @@ const TOURNAMENTS = {
   main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
   puppy: { name: "The Puppy", entries: "225k", weights: [2, 2, 1.5], note: "W15 (1/10) and W16 (1/5) are both steep cuts — survive both to reach the W17 final", format: "standard" },
+  fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
 
@@ -2847,6 +2848,22 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     if (w15Elite.length >= 1) {
       strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling`);
     }
+  } else if (tournamentKey === "fastpuppy") {
+    // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.
+    // Every week needs its own spike stack. Check all three equally; a week with no
+    // elite-ceiling stack (primary OR partial) is a live elimination risk. Ceiling
+    // piled into one week is redundant — you only need to win each week once.
+    const weekLabels = ["Week 15", "Week 16", "Week 17"];
+    const spikeStacks = qualifiedStackGrades; // primaries + partials both spike
+    weekLabels.forEach((label, wk) => {
+      const elite = spikeStacks.filter(s => s.avgPerWeek[wk] >= 4);
+      if (elite.length >= 1) {
+        strengths.push(`${elite.length} spike stack(s) for the ${label} cut (${elite.map(s => s.team).join(", ")})`);
+      } else if (spikeStacks.length > 0) {
+        weaknesses.push(`No spike stack for the ${label} cut — in a 3-week gauntlet, a flat week is an elimination week`);
+        score -= 0.5;
+      }
+    });
   }
 
   if (goodStacks.length === 0 && primaryStacks.length > 0 && format !== "superflex") {
