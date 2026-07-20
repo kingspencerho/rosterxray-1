@@ -2829,6 +2829,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   }
 
   // Tournament-specific peak-week bonuses
+  let fastPuppyFlatWeeks = 0; // Fast Puppy: weeks with no spike stack (penalty applied after score init)
   if (tournamentKey === "puppy") {
     // The Puppy: W15 (1/10) and W16 (1/5) are both steep cuts — check both for elite ceiling
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
@@ -2853,6 +2854,8 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     // Every week needs its own spike stack. Check all three equally; a week with no
     // elite-ceiling stack (primary OR partial) is a live elimination risk. Ceiling
     // piled into one week is redundant — you only need to win each week once.
+    // NOTE: `score` isn't initialized until later — count flat weeks here, apply the
+    // penalty in the scoring block below (this branch runs before `let score = 0`).
     const weekLabels = ["Week 15", "Week 16", "Week 17"];
     const spikeStacks = qualifiedStackGrades; // primaries + partials both spike
     weekLabels.forEach((label, wk) => {
@@ -2861,7 +2864,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         strengths.push(`${elite.length} spike stack(s) for the ${label} cut (${elite.map(s => s.team).join(", ")})`);
       } else if (spikeStacks.length > 0) {
         weaknesses.push(`No spike stack for the ${label} cut — in a 3-week gauntlet, a flat week is an elimination week`);
-        score -= 0.5;
+        fastPuppyFlatWeeks += 1;
       }
     });
   }
@@ -2915,6 +2918,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   score -= majorIssues.length * 1.0;          // major construction issues
   score -= minorIssues.length * 0.3;          // minor issues
   score += adpScoreImpact;                    // capped ADP contribution
+  score -= fastPuppyFlatWeeks * 0.5;          // Fast Puppy: each flat cut week is an elimination risk
 
   // Fix 4: Playoff quality modifier — clean construction + elite windows = bonus
   const topStackHasEliteWindow = eliteStacks.length >= 1;
