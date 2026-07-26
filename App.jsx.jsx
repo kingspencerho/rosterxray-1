@@ -5,6 +5,21 @@ import { track } from '@vercel/analytics';
 // rates at half-PPR) built offline from nflverse pbp by scripts/build-player-metrics.py.
 // Descriptive of LAST season's roles — SITUATIONS/RECENT_NEWS override for role changes.
 import PLAYER_METRICS from './grading/data/player_metrics_2025.json';
+// 2025 per-touch EFFICIENCY, rushing and receiving as SEPARATE axes (fantasy
+// points over expected per carry / per target, plus NGS tracking ranks).
+// PLAYER_METRICS measures opportunity; this measures what was done with it.
+// Built by scripts/build-efficiency.py. The two axes are near-uncorrelated
+// for RBs (r=+0.09) — never collapse them into one number.
+import PLAYER_EFFICIENCY from './grading/data/player_efficiency_2025.json';
+// Season-long strength of schedule per team per position, plus the delta vs
+// the 2025 slate. Complements getMatchupTier, which is week-by-week only.
+// Built by scripts/build-sos.py. rank 1 = EASIEST (inverse of the internal
+// getMatchupTier rank — do not mix the two scales).
+import SOS from './grading/data/sos_2026.json';
+// Team scheme motion rates + per-receiver production split on motion snaps.
+// ⚠️ PLAY-level flag: the offense used motion, NOT that this player moved.
+// Built by scripts/build-motion.py. See that file's header before using.
+import MOTION from './grading/data/motion_2025.json';
 
 // ============ DATA ============
 
@@ -1589,6 +1604,16 @@ const getMetrics = (name) => {
   const key = normalize(name);
   return PLAYER_METRICS[key] || PLAYER_METRICS[key.replace(/\s+(jr|sr|ii|iii|iv|v)$/, "")] || null;
 };
+
+// Same suffix-tolerant lookup for the efficiency and motion tables. Both are
+// keyed with the identical normalize() the builders mirror, so one helper
+// serves both — a rookie or anyone below the volume gate returns null.
+const lookupBySuffix = (table, name) => {
+  const key = normalize(name);
+  return table[key] || table[key.replace(/\s+(jr|sr|ii|iii|iv|v)$/, "")] || null;
+};
+const getEfficiency = (name) => lookupBySuffix(PLAYER_EFFICIENCY.players, name);
+const getMotion = (name) => lookupBySuffix(MOTION.players, name);
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -5018,6 +5043,20 @@ Wan'Dale Robinson`;
           const bits = [];
           if (env) bits.push(`implied ${env.ippg} PPG (league range ~18.3-26.4), O-line rank ${env.oline}/32`);
           if (pcp) bits.push(`${pcp.isNew ? "NEW play-caller" : "play-caller"} ${pcp.pc} (${pcp.tree} tree) — ${pcp.note}`);
+          // Season SOS for only the positions this team actually supplies to the
+          // roster — a full 4-position dump per team is noise the AI ignores.
+          const teamPos = [...new Set((result.valid || []).filter(p => p.team === t).map(p => p.pos))];
+          const sosBits = teamPos
+            .map(pos => {
+              const s = SOS[pos]?.[t];
+              if (!s) return null;
+              const move = s.delta == null ? "" : `, ${s.delta > 0 ? "+" : ""}${s.delta} spots vs 2025`;
+              return `${pos} schedule ${s.rank}/32 (1=easiest)${move}`;
+            })
+            .filter(Boolean);
+          if (sosBits.length) bits.push(sosBits.join("; "));
+          const mt = MOTION.teams?.[t];
+          if (mt) bits.push(`${Math.round(mt.motion_tgt_rate * 100)}% of targets on motion snaps (league ${Math.round(MOTION._meta.league_motion_rate * 100)}%)`);
           return bits.length ? `${t}: ${bits.join(" | ")}` : null;
         })
         .filter(Boolean)
@@ -5043,6 +5082,31 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === 2025 EFFICIENCY CONTEXT ===
+      // The other half of metricsContext. That block says how much a player was
+      // given; this says what he did per touch. Rushing and receiving stay
+      // SEPARATE — collapsing them hides the exact split this was added to
+      // surface (a back can be a bottom-5 runner and the best receiving back
+      // alive). Ranks are within position, over volume-qualified players only.
+      const efficiencyContext = (result.valid || [])
+        .map(p => {
+          const e = getEfficiency(p.name);
+          const mo = getMotion(p.name);
+          if (!e && !mo) return null;
+          const bits = [];
+          if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry)`);
+          if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only)`);
+          if (e?.rec_eff_rank) bits.push(`receiving efficiency ${e.rec_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rec_eff_rank`]} (pts over expected per target)`);
+          // Only worth a line when the split is big enough to survive the
+          // play-level dilution described in build-motion.py.
+          if (mo && Math.abs(mo.ypt_lift_pct) >= 20) {
+            bits.push(`${mo.ypt_lift_pct > 0 ? "+" : ""}${mo.ypt_lift_pct}% yds/target on motion snaps (team-scheme split, NOT a player-level motion split)`);
+          }
+          return bits.length ? `${p.name}: ${bits.join(", ")}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === LEAGUE CONTEXT (redraft only) ===
       const leagueContext = isRedraft
         ? (() => {
@@ -5064,6 +5128,7 @@ Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -5080,6 +5145,7 @@ Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;

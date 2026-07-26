@@ -1,0 +1,926 @@
+{
+ "_meta": {
+  "target_season": 2026,
+  "prior_season": 2025,
+  "fpa_base_season": 2025,
+  "scoring": "half-PPR",
+  "rank_convention": "1 = easiest slate, 32 = hardest",
+  "delta": "prior_rank - target_rank; positive = schedule got easier",
+  "source": "nflverse via nflreadpy (load_player_stats, load_schedules)",
+  "caveat": "Defensive quality is held at the base season. High-churn defenses (see COACHING_ADJ) are low-confidence here for the same reason they are low-confidence in getMatchupTier."
+ },
+ "QB": {
+  "ARI": {
+   "rank": 14,
+   "prior_rank": 15,
+   "delta": 1,
+   "opp_fpa": 16.36
+  },
+  "ATL": {
+   "rank": 17,
+   "prior_rank": 25,
+   "delta": 8,
+   "opp_fpa": 16.28
+  },
+  "BAL": {
+   "rank": 15,
+   "prior_rank": 24,
+   "delta": 9,
+   "opp_fpa": 16.36
+  },
+  "BUF": {
+   "rank": 21,
+   "prior_rank": 12,
+   "delta": -9,
+   "opp_fpa": 15.98
+  },
+  "CAR": {
+   "rank": 19,
+   "prior_rank": 7,
+   "delta": -12,
+   "opp_fpa": 16.05
+  },
+  "CHI": {
+   "rank": 30,
+   "prior_rank": 13,
+   "delta": -17,
+   "opp_fpa": 15.44
+  },
+  "CIN": {
+   "rank": 12,
+   "prior_rank": 20,
+   "delta": 8,
+   "opp_fpa": 16.5
+  },
+  "CLE": {
+   "rank": 2,
+   "prior_rank": 1,
+   "delta": -1,
+   "opp_fpa": 17.18
+  },
+  "DAL": {
+   "rank": 9,
+   "prior_rank": 19,
+   "delta": 10,
+   "opp_fpa": 16.73
+  },
+  "DEN": {
+   "rank": 29,
+   "prior_rank": 11,
+   "delta": -18,
+   "opp_fpa": 15.59
+  },
+  "DET": {
+   "rank": 20,
+   "prior_rank": 8,
+   "delta": -12,
+   "opp_fpa": 16.01
+  },
+  "GB": {
+   "rank": 18,
+   "prior_rank": 6,
+   "delta": -12,
+   "opp_fpa": 16.21
+  },
+  "HOU": {
+   "rank": 6,
+   "prior_rank": 21,
+   "delta": 15,
+   "opp_fpa": 16.94
+  },
+  "IND": {
+   "rank": 10,
+   "prior_rank": 30,
+   "delta": 20,
+   "opp_fpa": 16.68
+  },
+  "JAX": {
+   "rank": 4,
+   "prior_rank": 26,
+   "delta": 22,
+   "opp_fpa": 16.96
+  },
+  "KC": {
+   "rank": 28,
+   "prior_rank": 22,
+   "delta": -6,
+   "opp_fpa": 15.67
+  },
+  "LAC": {
+   "rank": 26,
+   "prior_rank": 14,
+   "delta": -12,
+   "opp_fpa": 15.86
+  },
+  "LAR": {
+   "rank": 16,
+   "prior_rank": 23,
+   "delta": 7,
+   "opp_fpa": 16.3
+  },
+  "LV": {
+   "rank": 32,
+   "prior_rank": 28,
+   "delta": -4,
+   "opp_fpa": 15.25
+  },
+  "MIA": {
+   "rank": 27,
+   "prior_rank": 17,
+   "delta": -10,
+   "opp_fpa": 15.78
+  },
+  "MIN": {
+   "rank": 8,
+   "prior_rank": 3,
+   "delta": -5,
+   "opp_fpa": 16.8
+  },
+  "NE": {
+   "rank": 22,
+   "prior_rank": 4,
+   "delta": -18,
+   "opp_fpa": 15.96
+  },
+  "NO": {
+   "rank": 11,
+   "prior_rank": 5,
+   "delta": -6,
+   "opp_fpa": 16.52
+  },
+  "NYG": {
+   "rank": 5,
+   "prior_rank": 10,
+   "delta": 5,
+   "opp_fpa": 16.95
+  },
+  "NYJ": {
+   "rank": 31,
+   "prior_rank": 16,
+   "delta": -15,
+   "opp_fpa": 15.39
+  },
+  "PHI": {
+   "rank": 1,
+   "prior_rank": 2,
+   "delta": 1,
+   "opp_fpa": 17.69
+  },
+  "PIT": {
+   "rank": 24,
+   "prior_rank": 27,
+   "delta": 3,
+   "opp_fpa": 15.9
+  },
+  "SEA": {
+   "rank": 13,
+   "prior_rank": 18,
+   "delta": 5,
+   "opp_fpa": 16.39
+  },
+  "SF": {
+   "rank": 23,
+   "prior_rank": 29,
+   "delta": 6,
+   "opp_fpa": 15.96
+  },
+  "TB": {
+   "rank": 25,
+   "prior_rank": 31,
+   "delta": 6,
+   "opp_fpa": 15.88
+  },
+  "TEN": {
+   "rank": 3,
+   "prior_rank": 32,
+   "delta": 29,
+   "opp_fpa": 17.0
+  },
+  "WAS": {
+   "rank": 7,
+   "prior_rank": 9,
+   "delta": 2,
+   "opp_fpa": 16.81
+  }
+ },
+ "RB": {
+  "ARI": {
+   "rank": 24,
+   "prior_rank": 27,
+   "delta": 3,
+   "opp_fpa": 19.56
+  },
+  "ATL": {
+   "rank": 12,
+   "prior_rank": 7,
+   "delta": -5,
+   "opp_fpa": 20.05
+  },
+  "BAL": {
+   "rank": 14,
+   "prior_rank": 15,
+   "delta": 1,
+   "opp_fpa": 19.96
+  },
+  "BUF": {
+   "rank": 27,
+   "prior_rank": 5,
+   "delta": -22,
+   "opp_fpa": 19.44
+  },
+  "CAR": {
+   "rank": 31,
+   "prior_rank": 16,
+   "delta": -15,
+   "opp_fpa": 19.2
+  },
+  "CHI": {
+   "rank": 30,
+   "prior_rank": 9,
+   "delta": -21,
+   "opp_fpa": 19.38
+  },
+  "CIN": {
+   "rank": 26,
+   "prior_rank": 24,
+   "delta": -2,
+   "opp_fpa": 19.44
+  },
+  "CLE": {
+   "rank": 1,
+   "prior_rank": 6,
+   "delta": 5,
+   "opp_fpa": 20.56
+  },
+  "DAL": {
+   "rank": 6,
+   "prior_rank": 2,
+   "delta": -4,
+   "opp_fpa": 20.35
+  },
+  "DEN": {
+   "rank": 28,
+   "prior_rank": 11,
+   "delta": -17,
+   "opp_fpa": 19.43
+  },
+  "DET": {
+   "rank": 4,
+   "prior_rank": 14,
+   "delta": 10,
+   "opp_fpa": 20.43
+  },
+  "GB": {
+   "rank": 22,
+   "prior_rank": 8,
+   "delta": -14,
+   "opp_fpa": 19.7
+  },
+  "HOU": {
+   "rank": 13,
+   "prior_rank": 29,
+   "delta": 16,
+   "opp_fpa": 19.98
+  },
+  "IND": {
+   "rank": 15,
+   "prior_rank": 31,
+   "delta": 16,
+   "opp_fpa": 19.95
+  },
+  "JAX": {
+   "rank": 18,
+   "prior_rank": 22,
+   "delta": 4,
+   "opp_fpa": 19.8
+  },
+  "KC": {
+   "rank": 21,
+   "prior_rank": 26,
+   "delta": 5,
+   "opp_fpa": 19.72
+  },
+  "LAC": {
+   "rank": 25,
+   "prior_rank": 28,
+   "delta": 3,
+   "opp_fpa": 19.45
+  },
+  "LAR": {
+   "rank": 8,
+   "prior_rank": 23,
+   "delta": 15,
+   "opp_fpa": 20.18
+  },
+  "LV": {
+   "rank": 32,
+   "prior_rank": 30,
+   "delta": -2,
+   "opp_fpa": 19.03
+  },
+  "MIA": {
+   "rank": 16,
+   "prior_rank": 3,
+   "delta": -13,
+   "opp_fpa": 19.89
+  },
+  "MIN": {
+   "rank": 10,
+   "prior_rank": 18,
+   "delta": 8,
+   "opp_fpa": 20.11
+  },
+  "NE": {
+   "rank": 23,
+   "prior_rank": 1,
+   "delta": -22,
+   "opp_fpa": 19.67
+  },
+  "NO": {
+   "rank": 2,
+   "prior_rank": 4,
+   "delta": 2,
+   "opp_fpa": 20.48
+  },
+  "NYG": {
+   "rank": 11,
+   "prior_rank": 21,
+   "delta": 10,
+   "opp_fpa": 20.06
+  },
+  "NYJ": {
+   "rank": 29,
+   "prior_rank": 17,
+   "delta": -12,
+   "opp_fpa": 19.39
+  },
+  "PHI": {
+   "rank": 3,
+   "prior_rank": 12,
+   "delta": 9,
+   "opp_fpa": 20.46
+  },
+  "PIT": {
+   "rank": 17,
+   "prior_rank": 10,
+   "delta": -7,
+   "opp_fpa": 19.84
+  },
+  "SEA": {
+   "rank": 7,
+   "prior_rank": 19,
+   "delta": 12,
+   "opp_fpa": 20.23
+  },
+  "SF": {
+   "rank": 19,
+   "prior_rank": 25,
+   "delta": 6,
+   "opp_fpa": 19.78
+  },
+  "TB": {
+   "rank": 20,
+   "prior_rank": 13,
+   "delta": -7,
+   "opp_fpa": 19.74
+  },
+  "TEN": {
+   "rank": 9,
+   "prior_rank": 32,
+   "delta": 23,
+   "opp_fpa": 20.13
+  },
+  "WAS": {
+   "rank": 5,
+   "prior_rank": 20,
+   "delta": 15,
+   "opp_fpa": 20.43
+  }
+ },
+ "WR": {
+  "ARI": {
+   "rank": 16,
+   "prior_rank": 16,
+   "delta": 0,
+   "opp_fpa": 25.23
+  },
+  "ATL": {
+   "rank": 19,
+   "prior_rank": 31,
+   "delta": 12,
+   "opp_fpa": 24.94
+  },
+  "BAL": {
+   "rank": 18,
+   "prior_rank": 28,
+   "delta": 10,
+   "opp_fpa": 25.02
+  },
+  "BUF": {
+   "rank": 21,
+   "prior_rank": 29,
+   "delta": 8,
+   "opp_fpa": 24.82
+  },
+  "CAR": {
+   "rank": 20,
+   "prior_rank": 15,
+   "delta": -5,
+   "opp_fpa": 24.92
+  },
+  "CHI": {
+   "rank": 30,
+   "prior_rank": 4,
+   "delta": -26,
+   "opp_fpa": 24.21
+  },
+  "CIN": {
+   "rank": 8,
+   "prior_rank": 12,
+   "delta": 4,
+   "opp_fpa": 25.89
+  },
+  "CLE": {
+   "rank": 7,
+   "prior_rank": 3,
+   "delta": -4,
+   "opp_fpa": 26.01
+  },
+  "DAL": {
+   "rank": 9,
+   "prior_rank": 21,
+   "delta": 12,
+   "opp_fpa": 25.89
+  },
+  "DEN": {
+   "rank": 29,
+   "prior_rank": 14,
+   "delta": -15,
+   "opp_fpa": 24.24
+  },
+  "DET": {
+   "rank": 17,
+   "prior_rank": 8,
+   "delta": -9,
+   "opp_fpa": 25.06
+  },
+  "GB": {
+   "rank": 14,
+   "prior_rank": 5,
+   "delta": -9,
+   "opp_fpa": 25.47
+  },
+  "HOU": {
+   "rank": 2,
+   "prior_rank": 10,
+   "delta": 8,
+   "opp_fpa": 26.5
+  },
+  "IND": {
+   "rank": 15,
+   "prior_rank": 22,
+   "delta": 7,
+   "opp_fpa": 25.32
+  },
+  "JAX": {
+   "rank": 4,
+   "prior_rank": 26,
+   "delta": 22,
+   "opp_fpa": 26.4
+  },
+  "KC": {
+   "rank": 28,
+   "prior_rank": 6,
+   "delta": -22,
+   "opp_fpa": 24.33
+  },
+  "LAC": {
+   "rank": 31,
+   "prior_rank": 17,
+   "delta": -14,
+   "opp_fpa": 24.15
+  },
+  "LAR": {
+   "rank": 22,
+   "prior_rank": 18,
+   "delta": -4,
+   "opp_fpa": 24.77
+  },
+  "LV": {
+   "rank": 32,
+   "prior_rank": 23,
+   "delta": -9,
+   "opp_fpa": 23.47
+  },
+  "MIA": {
+   "rank": 24,
+   "prior_rank": 24,
+   "delta": 0,
+   "opp_fpa": 24.48
+  },
+  "MIN": {
+   "rank": 3,
+   "prior_rank": 1,
+   "delta": -2,
+   "opp_fpa": 26.46
+  },
+  "NE": {
+   "rank": 25,
+   "prior_rank": 20,
+   "delta": -5,
+   "opp_fpa": 24.45
+  },
+  "NO": {
+   "rank": 10,
+   "prior_rank": 13,
+   "delta": 3,
+   "opp_fpa": 25.71
+  },
+  "NYG": {
+   "rank": 6,
+   "prior_rank": 7,
+   "delta": 1,
+   "opp_fpa": 26.21
+  },
+  "NYJ": {
+   "rank": 27,
+   "prior_rank": 25,
+   "delta": -2,
+   "opp_fpa": 24.42
+  },
+  "PHI": {
+   "rank": 1,
+   "prior_rank": 2,
+   "delta": 1,
+   "opp_fpa": 27.3
+  },
+  "PIT": {
+   "rank": 26,
+   "prior_rank": 27,
+   "delta": 1,
+   "opp_fpa": 24.44
+  },
+  "SEA": {
+   "rank": 12,
+   "prior_rank": 11,
+   "delta": -1,
+   "opp_fpa": 25.5
+  },
+  "SF": {
+   "rank": 23,
+   "prior_rank": 19,
+   "delta": -4,
+   "opp_fpa": 24.68
+  },
+  "TB": {
+   "rank": 13,
+   "prior_rank": 32,
+   "delta": 19,
+   "opp_fpa": 25.49
+  },
+  "TEN": {
+   "rank": 5,
+   "prior_rank": 30,
+   "delta": 25,
+   "opp_fpa": 26.28
+  },
+  "WAS": {
+   "rank": 11,
+   "prior_rank": 9,
+   "delta": -2,
+   "opp_fpa": 25.69
+  }
+ },
+ "TE": {
+  "ARI": {
+   "rank": 25,
+   "prior_rank": 5,
+   "delta": -20,
+   "opp_fpa": 10.32
+  },
+  "ATL": {
+   "rank": 4,
+   "prior_rank": 2,
+   "delta": -2,
+   "opp_fpa": 11.16
+  },
+  "BAL": {
+   "rank": 2,
+   "prior_rank": 4,
+   "delta": 2,
+   "opp_fpa": 11.32
+  },
+  "BUF": {
+   "rank": 22,
+   "prior_rank": 7,
+   "delta": -15,
+   "opp_fpa": 10.38
+  },
+  "CAR": {
+   "rank": 17,
+   "prior_rank": 16,
+   "delta": -1,
+   "opp_fpa": 10.5
+  },
+  "CHI": {
+   "rank": 31,
+   "prior_rank": 24,
+   "delta": -7,
+   "opp_fpa": 10.12
+  },
+  "CIN": {
+   "rank": 8,
+   "prior_rank": 20,
+   "delta": 12,
+   "opp_fpa": 10.9
+  },
+  "CLE": {
+   "rank": 1,
+   "prior_rank": 3,
+   "delta": 2,
+   "opp_fpa": 11.49
+  },
+  "DAL": {
+   "rank": 15,
+   "prior_rank": 28,
+   "delta": 13,
+   "opp_fpa": 10.64
+  },
+  "DEN": {
+   "rank": 21,
+   "prior_rank": 26,
+   "delta": 5,
+   "opp_fpa": 10.4
+  },
+  "DET": {
+   "rank": 29,
+   "prior_rank": 23,
+   "delta": -6,
+   "opp_fpa": 10.28
+  },
+  "GB": {
+   "rank": 30,
+   "prior_rank": 17,
+   "delta": -13,
+   "opp_fpa": 10.23
+  },
+  "HOU": {
+   "rank": 14,
+   "prior_rank": 18,
+   "delta": 4,
+   "opp_fpa": 10.72
+  },
+  "IND": {
+   "rank": 10,
+   "prior_rank": 13,
+   "delta": 3,
+   "opp_fpa": 10.78
+  },
+  "JAX": {
+   "rank": 7,
+   "prior_rank": 6,
+   "delta": -1,
+   "opp_fpa": 10.96
+  },
+  "KC": {
+   "rank": 12,
+   "prior_rank": 31,
+   "delta": 19,
+   "opp_fpa": 10.75
+  },
+  "LAC": {
+   "rank": 22,
+   "prior_rank": 25,
+   "delta": 3,
+   "opp_fpa": 10.38
+  },
+  "LAR": {
+   "rank": 18,
+   "prior_rank": 8,
+   "delta": -10,
+   "opp_fpa": 10.43
+  },
+  "LV": {
+   "rank": 19,
+   "prior_rank": 27,
+   "delta": 8,
+   "opp_fpa": 10.41
+  },
+  "MIA": {
+   "rank": 24,
+   "prior_rank": 12,
+   "delta": -12,
+   "opp_fpa": 10.34
+  },
+  "MIN": {
+   "rank": 9,
+   "prior_rank": 21,
+   "delta": 12,
+   "opp_fpa": 10.78
+  },
+  "NE": {
+   "rank": 27,
+   "prior_rank": 15,
+   "delta": -12,
+   "opp_fpa": 10.3
+  },
+  "NO": {
+   "rank": 11,
+   "prior_rank": 10,
+   "delta": -1,
+   "opp_fpa": 10.77
+  },
+  "NYG": {
+   "rank": 13,
+   "prior_rank": 30,
+   "delta": 17,
+   "opp_fpa": 10.72
+  },
+  "NYJ": {
+   "rank": 32,
+   "prior_rank": 14,
+   "delta": -18,
+   "opp_fpa": 10.01
+  },
+  "PHI": {
+   "rank": 3,
+   "prior_rank": 29,
+   "delta": 26,
+   "opp_fpa": 11.28
+  },
+  "PIT": {
+   "rank": 5,
+   "prior_rank": 11,
+   "delta": 6,
+   "opp_fpa": 10.96
+  },
+  "SEA": {
+   "rank": 16,
+   "prior_rank": 1,
+   "delta": -15,
+   "opp_fpa": 10.52
+  },
+  "SF": {
+   "rank": 26,
+   "prior_rank": 9,
+   "delta": -17,
+   "opp_fpa": 10.32
+  },
+  "TB": {
+   "rank": 28,
+   "prior_rank": 22,
+   "delta": -6,
+   "opp_fpa": 10.28
+  },
+  "TEN": {
+   "rank": 6,
+   "prior_rank": 19,
+   "delta": 13,
+   "opp_fpa": 10.96
+  },
+  "WAS": {
+   "rank": 20,
+   "prior_rank": 32,
+   "delta": 12,
+   "opp_fpa": 10.4
+  }
+ },
+ "_fpa_computed": {
+  "QB": {
+   "LV": 16.03,
+   "SEA": 14.0,
+   "MIA": 18.16,
+   "CHI": 18.13,
+   "DEN": 14.2,
+   "CIN": 18.36,
+   "WAS": 19.53,
+   "NO": 14.0,
+   "LAR": 15.16,
+   "LAC": 12.58,
+   "BUF": 13.09,
+   "CAR": 13.82,
+   "KC": 15.08,
+   "NYJ": 19.95,
+   "DAL": 23.33,
+   "GB": 15.01,
+   "DET": 18.2,
+   "TB": 19.42,
+   "NYG": 18.22,
+   "JAX": 15.86,
+   "CLE": 13.31,
+   "MIN": 11.12,
+   "PIT": 18.79,
+   "IND": 16.9,
+   "TEN": 19.05,
+   "SF": 17.11,
+   "NE": 14.7,
+   "ATL": 16.32,
+   "ARI": 16.95,
+   "HOU": 12.79,
+   "PHI": 14.53,
+   "BAL": 17.68
+  },
+  "RB": {
+   "LV": 20.74,
+   "TB": 19.77,
+   "KC": 17.26,
+   "HOU": 17.88,
+   "LAR": 17.86,
+   "CHI": 19.19,
+   "DAL": 22.42,
+   "ARI": 24.08,
+   "NYJ": 26.16,
+   "CIN": 25.98,
+   "CLE": 19.85,
+   "JAX": 16.0,
+   "MIA": 22.45,
+   "DEN": 15.54,
+   "GB": 19.2,
+   "IND": 17.99,
+   "BAL": 20.39,
+   "LAC": 16.82,
+   "MIN": 17.96,
+   "DET": 17.61,
+   "SEA": 15.72,
+   "TEN": 19.82,
+   "ATL": 19.54,
+   "NE": 16.38,
+   "NYG": 23.46,
+   "SF": 20.82,
+   "NO": 19.07,
+   "PIT": 17.23,
+   "PHI": 20.93,
+   "CAR": 21.94,
+   "WAS": 23.78,
+   "BUF": 21.98
+  },
+  "WR": {
+   "TEN": 29.55,
+   "LAR": 26.0,
+   "MIA": 24.61,
+   "NO": 22.89,
+   "KC": 21.87,
+   "HOU": 21.29,
+   "CLE": 22.44,
+   "JAX": 25.06,
+   "TB": 25.61,
+   "SF": 26.25,
+   "CAR": 21.64,
+   "NE": 24.25,
+   "PIT": 28.97,
+   "NYJ": 25.08,
+   "BAL": 29.23,
+   "ATL": 28.07,
+   "SEA": 21.29,
+   "DEN": 21.18,
+   "DET": 29.94,
+   "CIN": 20.98,
+   "CHI": 30.03,
+   "NYG": 27.89,
+   "BUF": 21.64,
+   "LAC": 22.18,
+   "ARI": 24.58,
+   "WAS": 28.85,
+   "GB": 25.75,
+   "IND": 29.42,
+   "DAL": 33.25,
+   "PHI": 21.29,
+   "LV": 27.33,
+   "MIN": 19.34
+  },
+  "TE": {
+   "ATL": 8.08,
+   "LV": 8.03,
+   "PHI": 6.37,
+   "NYJ": 12.44,
+   "IND": 12.24,
+   "LAR": 10.42,
+   "DET": 11.08,
+   "CHI": 10.18,
+   "MIN": 8.45,
+   "NO": 9.86,
+   "SF": 11.91,
+   "NE": 10.95,
+   "NYG": 8.94,
+   "CLE": 9.61,
+   "CAR": 11.15,
+   "LAC": 8.39,
+   "WAS": 13.36,
+   "ARI": 13.79,
+   "DAL": 9.7,
+   "JAX": 11.72,
+   "TEN": 11.45,
+   "CIN": 17.45,
+   "MIA": 13.04,
+   "KC": 8.59,
+   "GB": 9.35,
+   "PIT": 13.49,
+   "DEN": 10.86,
+   "TB": 12.86,
+   "HOU": 9.72,
+   "BUF": 6.22,
+   "SEA": 11.62,
+   "BAL": 8.51
+  }
+ }
+}
