@@ -584,3 +584,36 @@ one public table Jul 26, 2026: same direction on 5 of 6 receivers,
 consistently smaller magnitudes, one sign flip. Treat as a screen, never as
 a citable figure, and never present a number from this file as a
 player-level motion split.
+
+---
+
+## Name Resolution Across ADP Tables (fixed Jul 26, 2026)
+
+`findPlayer` resolves a typed/pasted name against ONE of three tables
+(`ADP_DATA`, `ADP_SUPERFLEX`, `ADP_YAHOO`) chosen by format. The tables are
+sourced separately and **do not agree on player names**. Two bugs came out of
+that, both of which dropped a player silently (no error, he simply did not
+appear in the grade) and both of which reproduced in ONE format only:
+
+1. **Nickname vs legal name.** `ADP_DATA` keys `"chig okonkwo"`; `ADP_YAHOO`
+   keys `"chigoziem okonkwo"`. A two-word query with a differing first name
+   had no fallback (step 3 needs a single-letter initial, step 4 needs a
+   single word). Fixed by step 4b, which bridges same-last-name players when
+   the first names are PREFIX-compatible.
+2. **Suffixes poisoned the last-name index.** `buildLastNameIndex` filed
+   `"marvin harrison jr"` under `"jr"`, so the `"jr"` bucket was a junk drawer
+   and no suffixed player was reachable by surname. Broke fallback steps 3, 4
+   and 4b at once. Fixed by stripping suffixes before indexing.
+
+### Rules for anyone touching this code
+- **Prefix-compatible, never initial-compatible.** Step 4b requires one first
+  name to be a prefix of the other (min 3 chars). Loosening this to "same
+  first letter" would resolve `"mike washington"` (RB LV) to
+  `"malik washington"` (WR MIA). A wrong match grades the wrong player and is
+  strictly worse than a miss.
+- **Run the test after any change here:** `node scripts/test-findplayer.mjs`.
+  It sweeps every `ADP_DATA` name against every format, asserts zero
+  position-flipping resolutions, and exits non-zero on failure.
+- Adding a player to one ADP table and not the others is the usual cause of a
+  "the app doesn't recognize X" report. Check all three before assuming a
+  parser bug.

@@ -1619,7 +1619,13 @@ const getMotion = (name) => lookupBySuffix(MOTION.players, name);
 const buildLastNameIndex = (table) => {
   const idx = {};
   for (const key of Object.keys(table)) {
-    const parts = key.split(" ");
+    // Suffixes must not become the index key. "marvin harrison jr" was being
+    // filed under "jr" alongside every other Jr in the table, so a query for
+    // "Marvin Harrison" (how ADP_DATA and most platforms spell him) found
+    // nothing, and the "jr" bucket was a junk drawer that could return an
+    // unrelated player. Broke fallback steps 3, 4 and 4b at once for every
+    // suffixed player. Found Jul 26 2026 via the cross-table resolve sweep.
+    const parts = key.split(" ").filter(w => !/^(jr|sr|ii|iii|iv|v)$/.test(w));
     if (parts.length < 2) continue;
     const last = parts[parts.length - 1];
     if (!idx[last]) idx[last] = [];
@@ -1670,6 +1676,32 @@ const findPlayer = (name, format = "standard") => {
     const last = nameParts[nameParts.length - 1];
     const idx = getLastNameIndex(table);
     const candidates = (idx[last] || []).filter(c => c.key.split(" ")[0][0] === initial);
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => a.entry.adp - b.entry.adp);
+      return mk(candidates[0].key, candidates[0].entry, { ambiguous: candidates.length > 1 });
+    }
+  }
+
+  // 4b. Nickname / legal-name bridge (added Jul 26 2026).
+  // The ADP tables are sourced separately and do not agree on which name a
+  // player goes by: ADP_DATA/ADP_SUPERFLEX key "chig okonkwo" while ADP_YAHOO
+  // keys "chigoziem okonkwo". A two-word query whose FIRST name differs had no
+  // path through steps 1-4 (step 3 needs a single-letter initial, step 4 needs
+  // a single word), so the player silently vanished in one format only.
+  //
+  // Deliberately narrow: the first names must be PREFIX-compatible, not merely
+  // share an initial. "mike washington" must NOT resolve to "malik washington"
+  // (different player, different position) — sharing an initial is far too
+  // loose, and a wrong match grades the wrong player, which is worse than a
+  // miss. Truncation nicknames (Chig/Chigoziem, Cam/Cameron, Josh/Joshua) are
+  // prefixes and pass; unrelated names (Tank/Nathaniel) correctly do not.
+  if (normWords.length >= 2) {
+    const qParts = normWords.filter(w => !/^(jr|sr|ii|iii|iv|v)$/.test(w));
+    const qLast = qParts[qParts.length - 1];
+    const qFirst = qParts[0];
+    const prefixOk = (a, b) => a.length >= 3 && b.length >= 3 && (a.startsWith(b) || b.startsWith(a));
+    const candidates = (getLastNameIndex(table)[qLast] || [])
+      .filter(c => prefixOk(qFirst, c.key.split(" ")[0]));
     if (candidates.length > 0) {
       candidates.sort((a, b) => a.entry.adp - b.entry.adp);
       return mk(candidates[0].key, candidates[0].entry, { ambiguous: candidates.length > 1 });

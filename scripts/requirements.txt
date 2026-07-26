@@ -1,0 +1,8 @@
+# Python deps for the offline data builders in this folder.
+#   py -3.11 -m pip install -r scripts/requirements.txt
+#
+# nflreadpy is the nflverse-maintained Python port of nflreadr. It REPLACES
+# nfl_data_py, which upstream deprecated — do not reintroduce nfl_data_py.
+# Pulls play-by-play, player stats, schedules, snap counts, Next Gen Stats,
+# FTN charting and ffopportunity expected points.
+nflreadpy>=0.1.5
