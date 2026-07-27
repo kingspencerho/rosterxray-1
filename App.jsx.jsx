@@ -1597,23 +1597,56 @@ const OFFSEASON_ADJ_2026 = {
 
 const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
 
-// PLAYER_METRICS lookup tolerant of generational suffixes — nflverse roster
-// names often lack the Jr/III that ADP keys and user input carry (and vice
-// versa), which silently dropped metrics for e.g. "Michael Pittman Jr".
-const getMetrics = (name) => {
-  const key = normalize(name);
-  return PLAYER_METRICS[key] || PLAYER_METRICS[key.replace(/\s+(jr|sr|ii|iii|iv|v)$/, "")] || null;
+const SUFFIX_RE = /\s+(jr|sr|ii|iii|iv|v)$/;
+
+// Legal name in the data feed vs the name the market uses. nflverse ships the
+// name on the birth certificate; ADP tables ship the name on the jersey. Where
+// they disagree AND the two are not prefix-compatible, no generic matcher can
+// bridge them, so they are listed. Keys are normalized on both sides.
+// Found by sweeping every ADP entry against the metrics file (Jul 27 2026).
+const METRIC_NAME_ALIASES = {
+  "kenny gainwell": "kenneth gainwell",
 };
 
-// Same suffix-tolerant lookup for the efficiency and motion tables. Both are
-// keyed with the identical normalize() the builders mirror, so one helper
-// serves both — a rookie or anyone below the volume gate returns null.
-const lookupBySuffix = (table, name) => {
-  const key = normalize(name);
-  return table[key] || table[key.replace(/\s+(jr|sr|ii|iii|iv|v)$/, "")] || null;
+// Suffix-insensitive index, built once per table and cached.
+//
+// The old lookup only stripped a suffix from the QUERY, so it resolved
+// "Michael Pittman Jr" -> "michael pittman" but NOT the reverse. The metrics
+// files are keyed off nflverse, which carries suffixes the ADP tables drop, so
+// the reverse is the common direction: 11 players including Chris Rodriguez Jr,
+// Kenneth Walker III, Brian Thomas Jr and Marvin Harrison Jr silently returned
+// null and were reported as having no 2025 data at all.
+const _baseIndexCache = new Map();
+const getBaseIndex = (table) => {
+  if (!_baseIndexCache.has(table)) {
+    const idx = {};
+    for (const key of Object.keys(table)) {
+      const base = key.replace(SUFFIX_RE, "");
+      if (!(base in idx)) idx[base] = key;   // first wins; suffix collisions are rare
+    }
+    _baseIndexCache.set(table, idx);
+  }
+  return _baseIndexCache.get(table);
 };
-const getEfficiency = (name) => lookupBySuffix(PLAYER_EFFICIENCY.players, name);
-const getMotion = (name) => lookupBySuffix(MOTION.players, name);
+
+// Resolves in both directions: query-with-suffix against a bare key, and a bare
+// query against a key that carries one. Returns null for genuine absences
+// (rookies, anyone below a volume gate) — null means "no data", never "bad".
+const lookupPlayer = (table, name) => {
+  if (!table || !name) return null;
+  const key = normalize(name);
+  const aliased = METRIC_NAME_ALIASES[key];
+  if (aliased && table[aliased]) return table[aliased];
+  if (table[key]) return table[key];
+  const base = key.replace(SUFFIX_RE, "");
+  if (table[base]) return table[base];
+  const hit = getBaseIndex(table)[base];
+  return hit ? table[hit] : null;
+};
+
+const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
+const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
+const getMotion = (name) => lookupPlayer(MOTION.players, name);
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
