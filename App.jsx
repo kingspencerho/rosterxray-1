@@ -8596,7 +8596,7 @@ Analyze this best ball roster. Return JSON only.`;
                       onClick={handleTradeAnalysis}
                       style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.05em", cursor: "pointer" }}
                     >
-                      Analyze Trade →
+                      Analyze Swap →
                     </button>
                     {tradeError && (
                       <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "var(--warn)", fontSize: "11px" }}>
