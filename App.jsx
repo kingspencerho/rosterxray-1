@@ -5690,12 +5690,20 @@ Analyze this best ball roster. Return JSON only.`;
           --border-subtle: #222222;
           --border-default: #333333;
           --border-strong: #2a2a2a;
-          /* Text (primary -> dim) */
+          /* Text (primary -> dim)
+             Every step clears WCAG AA (4.5:1) against --bg-base #0a0a0f, with
+             the ladder measured Jul 27 2026. The old values did not: faint was
+             2.03:1, dim 2.65:1 and muted 3.44:1, which put the pick-number
+             checkbox label, the league-config subtitle and the Copy Link /
+             New Roster buttons below the readable floor on a phone.
+             Slightly cool-tinted to sit with the near-black base. If you
+             darken these, re-check the ratio — the gap between "subtle" and
+             "invisible" is about 15 points of lightness here. */
           --text-primary: #fafafa;
-          --text-secondary: #888888;
-          --text-muted: #666666;
-          --text-dim: #555555;
-          --text-faint: #444444;
+          --text-secondary: #b0b0bb;  /* 9.19:1 */
+          --text-muted: #9c9ca8;      /* 7.27:1 */
+          --text-dim: #8b8b97;        /* 5.87:1 */
+          --text-faint: #7a7a86;      /* 4.66:1 */
           --text-soft: #e5e5e5;
           --text-soft-alt: #e0e0e0;
           /* Brand accents */
@@ -5722,6 +5730,20 @@ Analyze this best ball roster. Return JSON only.`;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
+
+        /* Minimum tap target. Audited Jul 27 2026 at 375px: eleven controls
+           sat under 40px, the worst being the 2025/2026 data-mode toggles at
+           29px and Copy Link / New Roster at 33px. Apple's guidance is 44px.
+           Applied as a floor so buttons that are already big are untouched,
+           and centred so the label does not sit at the top of the new box.
+           Opt out with data-compact on the rare control where 44px would
+           break a dense inline layout. */
+        button:not([data-compact]) {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
         html, body {
           margin: 0;
           padding: 0;
@@ -7298,13 +7320,13 @@ Analyze this best ball roster. Return JSON only.`;
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
                       ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="#555555" players={analyzed.valid} />}
+                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
                       ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="#555555" players={analyzed.valid} />}
+                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -8409,13 +8431,13 @@ Analyze this best ball roster. Return JSON only.`;
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
                     {analyzed.strengths.length > 0
                       ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="#555555" players={analyzed.valid} />}
+                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                   <div>
                     <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
                     {analyzed.weaknesses.length > 0
                       ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="#555555" players={analyzed.valid} />}
+                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
                   </div>
                 </div>
 
@@ -8589,9 +8611,9 @@ Analyze this best ball roster. Return JSON only.`;
                 >
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
                     <span>⇄ WHAT IF?</span>
-                    <span style={{ fontSize: "9px", color: "#6d28d9", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Swap players and see your new grade</span>
+                    <span style={{ fontSize: "9px", color: "#a78bfa", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Swap players and see your new grade</span>
                   </div>
-                  <span style={{ fontSize: "9px", color: "#6d28d9" }}>{tradeOpen ? "▲" : "▼"}</span>
+                  <span style={{ fontSize: "9px", color: "#a78bfa" }}>{tradeOpen ? "▲" : "▼"}</span>
                 </button>
                 {tradeOpen && (
                   <div style={{ padding: "14px 16px", borderTop: "1px solid var(--bg-raised)" }}>
@@ -8896,7 +8918,7 @@ Analyze this best ball roster. Return JSON only.`;
                               {env && (
                                 <span style={{
                                   fontSize: "8px",
-                                  color: "#6b7a8d",
+                                  color: "#7d8fa5",
                                   fontWeight: 500,
                                   letterSpacing: "0.03em",
                                 }}>
