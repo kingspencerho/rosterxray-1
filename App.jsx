@@ -6295,6 +6295,9 @@ Analyze this best ball roster. Return JSON only.`;
                 cursor: "pointer",
                 fontFamily: "inherit",
                 textAlign: "left",
+                flexDirection: "column",
+                alignItems: "stretch",
+                justifyContent: "flex-start",
               }}
             >
               <div style={{ fontSize: "12px", color: analysisMode === "bestball" ? "var(--pos)" : "var(--text-primary)", fontWeight: 600, letterSpacing: "0.02em" }}>
@@ -6314,6 +6317,9 @@ Analyze this best ball roster. Return JSON only.`;
                 cursor: "pointer",
                 fontFamily: "inherit",
                 textAlign: "left",
+                flexDirection: "column",
+                alignItems: "stretch",
+                justifyContent: "flex-start",
               }}
             >
               <div style={{ fontSize: "12px", color: analysisMode === "redraft" ? "var(--accent-purple-light)" : "var(--text-primary)", fontWeight: 600, letterSpacing: "0.02em" }}>
@@ -6942,7 +6948,7 @@ Analyze this best ball roster. Return JSON only.`;
                       onClick={() => restoreGradeEntry(entry)}
                       onMouseEnter={e => { e.currentTarget.style.background = "#141414"; }}
                       onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface-alt)"; }}
-                      style={{ flex: "0 0 auto", minWidth: "140px", background: "var(--bg-surface-alt)", border: "none", borderRight: idx < gradeHistory.length - 1 ? "1px solid var(--bg-raised)" : "none", padding: "12px 14px", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+                      style={{ flex: "0 0 auto", minWidth: "140px", background: "var(--bg-surface-alt)", border: "none", borderRight: idx < gradeHistory.length - 1 ? "1px solid var(--bg-raised)" : "none", padding: "12px 14px", cursor: "pointer", textAlign: "left", fontFamily: "inherit", flexDirection: "column", alignItems: "stretch", justifyContent: "flex-start" }}
                     >
                       <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
                         <span style={{ fontFamily: "var(--font-display)", fontSize: "32px", lineHeight: 1, color: gradeColor(entry.analyzed.grade) }}>{entry.analyzed.grade}</span>
