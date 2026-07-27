@@ -1943,16 +1943,50 @@ const preprocessRoster = (text, format = "standard") => {
       }
     }
 
-    reconstructed.push({ name: player.name || nameRows[n].line, player, pick });
+    // === CAPTURE THE PLATFORM'S OWN ADP ===
+    // The paste already carries it. Underdog, Sleeper and Yahoo all print ADP
+    // next to the pick, and the block above already had to identify that token
+    // to tell it apart from the pick — it just threw it away afterwards.
+    //
+    // This matters because the built-in ADP_DATA is a dated snapshot and drafts
+    // happen later. Measured against a real Jul 26 roster: mean drift 5.1 picks,
+    // max 22.7. Flournoy read as a 26-pick REACH off the stale table when the
+    // platform had him going 3 picks EARLIER than his actual ADP. The delta
+    // formula was never wrong; the ADP fed into it was.
+    //
+    // The user's own platform is ground truth for the user's own draft.
+    let parsedAdp = null;
+    const labelledAdp = tokens.find(t =>
+      (t.lineHasAdp || t.followedByAdp) &&
+      !(t.lineHasPick || t.followedByPick) &&
+      !(t.lineHasBye || t.followedByBye)
+    );
+    if (labelledAdp && labelledAdp.v > 0 && labelledAdp.v <= 300) {
+      // Explicitly labelled ADP — trust it outright, including large moves.
+      parsedAdp = labelledAdp.v;
+    } else {
+      // Unlabelled: a decimal is an ADP in every export format seen so far
+      // (picks and byes are whole numbers). Guard it against the table anyway —
+      // if the parser grabbed the wrong number, a stale ADP beats a wrong one.
+      const dec = tokens.find(t => !t.isInt && t.v > 0 && t.v <= 300 && t.v !== pick);
+      if (dec && (player?.adp == null || Math.abs(dec.v - player.adp) <= 75)) parsedAdp = dec.v;
+    }
+
+    reconstructed.push({ name: player.name || nameRows[n].line, player, pick, parsedAdp });
   }
 
   // === ADP PLAUSIBILITY GUARD ===
   // A pick number differing from ADP by more than 80 is almost certainly a parser
   // artifact. Real drafts don't see 80+ pick deviations from ADP regularly.
   // Tighter now that pick selection uses closest-to-ADP logic above.
+  // Both guards below compare picks against ADP. Use the PARSED ADP when the
+  // roster supplied one — validating a real pick against a stale table number
+  // is how a correct pick gets thrown away.
+  const refAdp = (r) => (r.parsedAdp != null ? r.parsedAdp : r.player?.adp);
   reconstructed.forEach(r => {
-    if (r.pick != null && r.player?.adp != null) {
-      const diff = Math.abs(r.pick - r.player.adp);
+    const a = refAdp(r);
+    if (r.pick != null && a != null) {
+      const diff = Math.abs(r.pick - a);
       if (diff > 80) r.pick = null;
     }
   });
@@ -1972,7 +2006,7 @@ const preprocessRoster = (text, format = "standard") => {
     // Check 2: median ADP delta should be reasonable (<45 picks on average)
     // Catches systemic parser failures where wrong numbers are grabbed throughout
     const medianDiff = detectedPicks
-      .map(r => Math.abs(r.pick - (r.player?.adp || r.pick)))
+      .map(r => Math.abs(r.pick - (refAdp(r) || r.pick)))
       .sort((a, b) => a - b)[Math.floor(detectedPicks.length / 2)];
     const deltaConfidence = medianDiff < 45;
 
@@ -1993,9 +2027,17 @@ const parseRoster = (text, format = "standard") => {
     let detectedPickNumbers = false;
     const picks = pre.map((r, idx) => {
       if (r.pick != null) detectedPickNumbers = true;
+      // Override adp AT THE SOURCE rather than only in the delta calc, so every
+      // downstream consumer — reach/value flags, pivot candidates, value tiers,
+      // the AI prompt — sees the same number the user saw on their own draft
+      // board. tableAdp is kept so the UI can show the drift.
+      const useParsed = r.parsedAdp != null;
       return {
         ...r.player,
         name: r.player.name,
+        adp: useParsed ? r.parsedAdp : r.player.adp,
+        tableAdp: r.player.adp,
+        adpSource: useParsed ? "roster" : "table",
         pickNum: idx + 1,
         actualPick: r.pick != null ? r.pick : null,  // null = unknown, never fabricate from index
         raw: r.name,
@@ -9673,7 +9715,17 @@ Analyze this best ball roster. Return JSON only.`;
           letterSpacing: "0.05em",
           textTransform: "uppercase",
         }}>
-          ADP: Underdog half-PPR {ADP_UPDATED} · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections
+          {(() => {
+            // Say WHICH ADP produced the reach/value numbers. When the paste
+            // carried its own ADP we use that and the built-in snapshot is
+            // irrelevant, so printing its date would be actively misleading.
+            const v = analyzed?.valid || [];
+            const fromRoster = v.filter(p => p.adpSource === "roster").length;
+            if (fromRoster > 0 && fromRoster >= v.length / 2) {
+              return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections`;
+            }
+            return `ADP: Underdog half-PPR ${ADP_UPDATED} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections`;
+          })()}
         </div>
 
         {/* === HIDDEN EXPORT CARD (Option B — Reference Card) === */}

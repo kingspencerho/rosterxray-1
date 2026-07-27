@@ -617,3 +617,51 @@ appear in the grade) and both of which reproduced in ONE format only:
 - Adding a player to one ADP table and not the others is the usual cause of a
   "the app doesn't recognize X" report. Check all three before assuming a
   parser bug.
+
+---
+
+## ADP Source of Truth (fixed Jul 27, 2026)
+
+**The reach/value delta formula was never wrong. The ADP fed into it was.**
+
+`ADP_DATA` is a dated snapshot (`ADP_UPDATED`). Drafts happen later, and ADP
+moves. Measured against a real Jul 26 Underdog roster: mean drift 5.1 picks,
+max 22.7. Ryan Flournoy went at 157 with a live ADP of 160.4 — three picks of
+VALUE — and the app called him a 26-pick REACH by comparing against a stale
+183.1. This class of error had been reported repeatedly.
+
+### The rule
+**When the pasted roster carries its own ADP, that ADP wins.** The user's
+platform is ground truth for the user's own draft. Every export format the app
+accepts (Underdog, Sleeper, Yahoo) prints ADP beside the pick, and the parser
+already had to identify that token to distinguish it from the pick number — it
+just discarded it.
+
+`parseRoster` now sets, per player:
+- `adp` — the number actually used downstream (parsed if present, else table)
+- `tableAdp` — the built-in snapshot value, kept for reference
+- `adpSource` — `"roster"` or `"table"`
+
+The override happens AT THE SOURCE, not just in the delta calc, so reach/value
+flags, pivot candidates, value tiers and the AI prompt all see the same number
+the user saw on their draft board.
+
+### Trust levels when parsing
+- **Labelled ADP** (a value on an "ADP" line): trusted outright, including
+  large moves. A player's ADP genuinely can shift 40 spots.
+- **Unlabelled decimal**: accepted only within 75 picks of the table value.
+  Picks and byes are whole numbers, so a decimal is almost always ADP — but if
+  the parser grabbed the wrong token, a stale ADP beats a wrong one.
+
+### Do not regress these
+- The pick-plausibility guard and the median-delta confidence check BOTH compare
+  picks against ADP. They must use the parsed ADP (`refAdp()`), or a correct
+  pick gets discarded for disagreeing with a stale table.
+- The data-vintage footer must not print the snapshot date when roster ADP was
+  used. Naming a date that did not produce the numbers is worse than naming none.
+- Run `node scripts/test-adp-delta.mjs` after any change to parsing or delta
+  logic. It asserts the exact Flournoy case and the no-ADP fallback.
+
+### The snapshot is now a fallback, not the primary
+Refreshing `ADP_DATA` still helps users who type a plain list with no ADP. It is
+no longer the thing standing between a user and a correct delta.
