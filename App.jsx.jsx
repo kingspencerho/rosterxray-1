@@ -4823,24 +4823,34 @@ export default function RosterScorer() {
 
       await new Promise(r => setTimeout(r, 120));
 
-      const cardHeight = card.scrollHeight;
+      // Capture at the card's OWN width. The height is measured here, at the
+      // live element's width, but the clone used to be forced to 390px while
+      // the element is 420px — so every wrapped paragraph reflowed TALLER than
+      // the number we had already measured, and html2canvas cropped to that
+      // stale height. The bottom of the card (the footer line) was cut off,
+      // and the more the text wrapped the worse it got. Matching the widths
+      // means there is no reflow, so scrollHeight is the true render height.
+      const cardWidth = card.offsetWidth;
+      const cardHeight = card.scrollHeight + 2; // absorbs sub-pixel rounding at scale 2
 
       const canvas = await window.html2canvas(card, {
         backgroundColor: "#0a0a0a",
         scale: 2,
         useCORS: true,
         logging: false,
-        width: 390,
+        width: cardWidth,
         height: cardHeight,
-        windowWidth: 450,
+        windowWidth: cardWidth,
         windowHeight: cardHeight,
         onclone: (clonedDoc, clonedEl) => {
-          // In the cloned document, position at absolute 0,0 with no clipping
+          // In the cloned document, position at absolute 0,0 with no clipping.
+          // left MUST be 0: any offset pushes the right edge outside the
+          // capture box, which silently trims that many pixels off the side.
           clonedEl.style.position = "absolute";
           clonedEl.style.top = "0";
-          clonedEl.style.left = "10px";
+          clonedEl.style.left = "0";
           clonedEl.style.visibility = "visible";
-          clonedEl.style.width = "390px";
+          clonedEl.style.width = cardWidth + "px";
           clonedEl.style.margin = "0";
           clonedEl.style.padding = "0";
           // Ensure cloned doc body has no offset
