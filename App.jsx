@@ -4275,6 +4275,219 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   };
 };
 
+// ============ SCHEDULE IMAGE EXPORT ============
+// Draws the full 18-week schedule grid to a canvas and hands back a PNG blob.
+//
+// Why canvas and not a screenshot of the live DOM: on screen the grid is a
+// horizontally scrolling table with a sticky name column, so an html2canvas
+// style capture would either clip at the viewport or double-render the sticky
+// column. Drawing it directly also means all 18 weeks land in ONE image at
+// print resolution, which is the whole point of exporting it. Costs no new
+// dependency.
+//
+// Colors are the resolved hex of the same CSS variables tierStyle() uses on
+// screen — canvas cannot read var(). If the palette in the <style> block
+// changes, change it here too or the export silently drifts from the app.
+const EXPORT_TIER_COLORS = {
+  elite:   { bg: "#0d3320", border: "#22c55e", text: "#4ade80", label: "Smash" },
+  solid:   { bg: "#1e2a1a", border: "#84cc16", text: "#a3e635", label: "Good" },
+  neutral: { bg: "#2a2618", border: "#eab308", text: "#facc15", label: "Even" },
+  tough:   { bg: "#2a1a18", border: "#f97316", text: "#fb923c", label: "Hard" },
+  wall:    { bg: "#2e1414", border: "#ef4444", text: "#f87171", label: "Avoid" },
+};
+const EXPORT_BYE = { bg: "#141418", border: "#2a2a32", text: "#55555f" };
+
+const roundRect = (ctx, x, y, w, h, r) => {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+};
+
+const renderScheduleCanvas = ({ starters, bench, grade, subtitle, adpUpdated }) => {
+  const DPR = 2;                       // retina — the grid is dense, 1x reads muddy
+  const PAD = 30, NAME_W = 200, CELL_W = 46, CELL_H = 28, GAP = 4;
+  const ROW_H = 36, DIV_W = 12;        // DIV_W = the playoff separator gutter
+  const WEEKS = 18, PLAYOFF_START = 15;
+
+  const gridW = WEEKS * (CELL_W + GAP) + DIV_W;
+  const W = PAD * 2 + NAME_W + gridW;
+  const headerH = 96, colHeadH = 26, legendH = 54, footerH = 26;
+  const sectionH = 26;
+  const bodyH =
+    sectionH + starters.length * ROW_H +
+    (bench.length ? sectionH + bench.length * ROW_H : 0);
+  const H = headerH + colHeadH + bodyH + legendH + footerH + PAD;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(DPR, DPR);
+  const MONO = "'IBM Plex Mono','JetBrains Mono',ui-monospace,monospace";
+
+  ctx.fillStyle = "#0a0a0f";
+  ctx.fillRect(0, 0, W, H);
+
+  // --- header ---
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#c084fc";
+  ctx.font = `700 26px ${MONO}`;
+  ctx.fillText("ROSTERXRAY", PAD, PAD + 22);
+  const brandW = ctx.measureText("ROSTERXRAY").width;
+  ctx.fillStyle = "#55555f";
+  ctx.font = `400 13px ${MONO}`;
+  ctx.fillText("SEASON SCHEDULE", PAD + brandW + 12, PAD + 22);
+
+  if (grade) {
+    ctx.font = `700 34px ${MONO}`;
+    ctx.fillStyle = grade.startsWith("A") ? "#4ade80"
+      : grade.startsWith("B") ? "#a3e635"
+      : grade.startsWith("C") ? "#facc15" : "#f87171";
+    ctx.textAlign = "right";
+    ctx.fillText(grade, W - PAD, PAD + 26);
+    ctx.textAlign = "left";
+  }
+  if (subtitle) {
+    ctx.fillStyle = "#8a8a96";
+    ctx.font = `400 12px ${MONO}`;
+    ctx.fillText(subtitle, PAD, PAD + 44);
+  }
+  ctx.strokeStyle = "#2a1a3a";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD, headerH - 12);
+  ctx.lineTo(W - PAD, headerH - 12);
+  ctx.stroke();
+
+  // x position of a given week column (0-indexed), accounting for the gutter
+  const colX = (i) => PAD + NAME_W + i * (CELL_W + GAP) + (i + 1 >= PLAYOFF_START ? DIV_W : 0);
+
+  // --- week header ---
+  const chY = headerH + 14;
+  ctx.font = `600 11px ${MONO}`;
+  ctx.textAlign = "center";
+  for (let i = 0; i < WEEKS; i++) {
+    const wk = i + 1;
+    const isPlayoff = wk >= PLAYOFF_START && wk <= 17;
+    ctx.fillStyle = isPlayoff ? "#c084fc" : "#55555f";
+    ctx.fillText(`W${wk}`, colX(i) + CELL_W / 2, chY);
+  }
+  ctx.textAlign = "left";
+
+  // playoff separator, drawn full height of the grid body
+  const gridTop = headerH + colHeadH - 6;
+  const gridBottom = headerH + colHeadH + bodyH;
+  ctx.strokeStyle = "#4a2a6a";
+  ctx.beginPath();
+  ctx.moveTo(colX(PLAYOFF_START - 1) - GAP - DIV_W / 2, gridTop);
+  ctx.lineTo(colX(PLAYOFF_START - 1) - GAP - DIV_W / 2, gridBottom);
+  ctx.stroke();
+
+  // --- rows ---
+  let y = headerH + colHeadH;
+  const drawSection = (label) => {
+    ctx.fillStyle = "#55555f";
+    ctx.font = `600 10px ${MONO}`;
+    ctx.fillText(label, PAD, y + 16);
+    y += sectionH;
+  };
+  const drawRow = (s) => {
+    const cy = y + (ROW_H - CELL_H) / 2;
+    ctx.fillStyle = "#e8e8ef";
+    ctx.font = `600 13px ${MONO}`;
+    // Name and "POS · TEAM" sit on separate lines, so the name gets the whole
+    // column minus a gutter. Reserving width for the meta line here was what
+    // clipped "Christian Mccaffrey" to "Christian Mccaf…".
+    let nm = s.name || "";
+    while (ctx.measureText(nm).width > NAME_W - 16 && nm.length > 3) nm = nm.slice(0, -1);
+    if (nm !== s.name) nm += "…";
+    ctx.fillText(nm, PAD, cy + 12);
+    ctx.fillStyle = "#8a8a96";
+    ctx.font = `400 10px ${MONO}`;
+    ctx.fillText(`${s.pos} · ${s.team}`, PAD, cy + 24);
+
+    (s.weeklyMatchups || []).forEach((m, i) => {
+      if (i >= WEEKS) return;
+      const x = colX(i);
+      const c = m.isBye ? EXPORT_BYE : (EXPORT_TIER_COLORS[m.color] || EXPORT_TIER_COLORS.neutral);
+      ctx.fillStyle = c.bg;
+      roundRect(ctx, x, cy, CELL_W, CELL_H, 3);
+      ctx.fill();
+      ctx.strokeStyle = c.border;
+      ctx.lineWidth = 1;
+      roundRect(ctx, x + 0.5, cy + 0.5, CELL_W - 1, CELL_H - 1, 3);
+      ctx.stroke();
+      ctx.fillStyle = c.text;
+      ctx.font = `600 10px ${MONO}`;
+      ctx.textAlign = "center";
+      ctx.fillText(m.isBye ? "BYE" : String(m.opp), x + CELL_W / 2, cy + CELL_H / 2 + 4);
+      ctx.textAlign = "left";
+    });
+    y += ROW_H;
+  };
+
+  drawSection("STARTERS");
+  starters.forEach(drawRow);
+  if (bench.length) {
+    drawSection("BENCH");
+    bench.forEach(drawRow);
+  }
+
+  // --- legend ---
+  y += 16;
+  let lx = PAD;
+  ctx.font = `600 10px ${MONO}`;
+  Object.values(EXPORT_TIER_COLORS).forEach((c) => {
+    ctx.fillStyle = c.bg;
+    roundRect(ctx, lx, y, 16, 13, 2);
+    ctx.fill();
+    ctx.strokeStyle = c.border;
+    roundRect(ctx, lx + 0.5, y + 0.5, 15, 12, 2);
+    ctx.stroke();
+    ctx.fillStyle = c.text;
+    ctx.fillText(c.label, lx + 22, y + 11);
+    lx += 22 + ctx.measureText(c.label).width + 18;
+  });
+  ctx.fillStyle = "#c084fc";
+  ctx.fillText("W15–W17 = fantasy playoffs", lx + 4, y + 11);
+
+  // --- footer ---
+  ctx.fillStyle = "#55555f";
+  ctx.font = `400 10px ${MONO}`;
+  ctx.fillText(`rosterxray.com · matchup tiers from 2025 defensive data${adpUpdated ? ` · ADP ${adpUpdated}` : ""}`, PAD, H - PAD + 8);
+
+  return canvas;
+};
+
+// Save the canvas. On iOS/Android the Web Share sheet is the only route into
+// Photos or Messages, so prefer it when the platform will actually take a file
+// and fall back to a plain download on desktop.
+const saveScheduleImage = async (canvas, filename) => {
+  const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+  if (!blob) throw new Error("Could not render image");
+  const file = new File([blob], filename, { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "Season schedule" });
+      return "shared";
+    } catch (err) {
+      if (err && err.name === "AbortError") return "cancelled";
+      // fall through to download — share can fail on desktop Safari
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return "downloaded";
+};
+
 // ============ COMPONENT ============
 
 export default function RosterScorer() {
@@ -4294,6 +4507,8 @@ export default function RosterScorer() {
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
   const [customExpanded, setCustomExpanded] = useState(false);
   const [benchExpanded, setBenchExpanded] = useState(false);
+  // idle | working | saved | error — drives the export button label only
+  const [scheduleExport, setScheduleExport] = useState("idle");
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
@@ -8958,6 +9173,50 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
                 <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--bg-raised)", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
                   ← swipe to scroll all 18 weeks · <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>purple W15–W17</span> = playoff matchups · player names stay locked
+                </div>
+                {/* Export the WHOLE grid (starters + bench, all 18 weeks) as one
+                    PNG, regardless of what the bench toggle is currently showing —
+                    a partial export of a schedule is not useful to anyone. */}
+                <div style={{ padding: "8px 12px 2px" }}>
+                  <button
+                    onClick={async () => {
+                      setScheduleExport("working");
+                      try {
+                        const canvas = renderScheduleCanvas({
+                          starters: analyzed.starterSchedules || [],
+                          bench: analyzed.benchSchedules || [],
+                          grade: analyzed.grade,
+                          subtitle: `${(analyzed.starterSchedules || []).length} starters · ${(analyzed.benchSchedules || []).length} bench · generated ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+                          adpUpdated: ADP_UPDATED,
+                        });
+                        const res = await saveScheduleImage(canvas, `rosterxray-schedule-${new Date().toISOString().slice(0, 10)}.png`);
+                        setScheduleExport(res === "cancelled" ? "idle" : "saved");
+                        track("export_schedule", { mode: res });
+                      } catch (err) {
+                        setScheduleExport("error");
+                      }
+                      setTimeout(() => setScheduleExport("idle"), 2600);
+                    }}
+                    disabled={scheduleExport === "working"}
+                    style={{
+                      background: scheduleExport === "saved" ? "#0d3320" : "transparent",
+                      border: `1px solid ${scheduleExport === "saved" ? "#22c55e" : scheduleExport === "error" ? "#ef4444" : "#3a2a4a"}`,
+                      color: scheduleExport === "saved" ? "var(--pos)" : scheduleExport === "error" ? "var(--neg)" : "var(--accent-purple-light)",
+                      fontFamily: "inherit",
+                      fontSize: "10px",
+                      fontWeight: 600,
+                      letterSpacing: "0.08em",
+                      padding: "7px 13px",
+                      borderRadius: "3px",
+                      cursor: scheduleExport === "working" ? "wait" : "pointer",
+                      width: "100%",
+                    }}
+                  >
+                    {scheduleExport === "working" ? "RENDERING…"
+                      : scheduleExport === "saved" ? "✓ SAVED"
+                      : scheduleExport === "error" ? "COULD NOT SAVE — TRY AGAIN"
+                      : "↓ SAVE FULL SCHEDULE AS IMAGE"}
+                  </button>
                 </div>
               </div>
             </div>
