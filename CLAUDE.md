@@ -665,3 +665,54 @@ the user saw on their draft board.
 ### The snapshot is now a fallback, not the primary
 Refreshing `ADP_DATA` still helps users who type a plain list with no ADP. It is
 no longer the thing standing between a user and a correct delta.
+
+---
+
+## RB Air Yards, Team RB Air Yards & Dropback Conversion (added Jul 27, 2026)
+
+Fourth nflverse layer, from Ben Gretch's RB-air-yards framework (Stealing
+Signals, via the BDGE podcast Jul 27 2026). Built by `scripts/build-airyards.py`
+into `grading/data/airyards_2025.json`. **Context only — the numeric scoring
+engine is untouched. Verified by grading the same roster before and after: A
+(11.55) both times.**
+
+Source numbers were reproduced from nflverse before anything was built. His
+Stevenson "155 air yards, over 9 yards per target" came out 159 / 9.32; Woody
+Marks 5th on 36 targets, Kyren Williams 3rd and Michael Carter 7th all matched
+exactly.
+
+### Why `ay_sh` was not enough
+`player_metrics` stores air yards SHARE, which is near-zero for every RB and
+therefore discriminates nothing. What separates backs is their OWN aDOT.
+
+### aDOT is a yardage hole, not a small negative
+Most backs catch the ball BEHIND the line of scrimmage, so they must earn yards
+back before gaining any. 2025: Stevenson turned 37 targets into 345 yards at
++4.30 aDOT; Jeanty turned 73 targets into 346 at -1.42. Twice the volume, same
+output. When a back's receiving looks disappointing relative to targets, check
+aDOT before blaming the player.
+
+### Team RB air yards is a PLAY-CALLER property
+Not a player trait. David Johnson posted the best RB air yards season on record
+under Bruce Arians; Arians left, Mike McCoy arrived, and the usage never
+returned. So a team figure attached to a NEW play-caller describes the OLD
+staff — evidence about the scheme being replaced, not a forecast. Pairs with
+`PLAYCALLER_PROFILES`. 2025 range: SF +335 down to TB -168.
+
+### Dropback conversion constrains EVERY pass catcher
+`dropback_drain` is the share of dropbacks lost to sacks and scrambles, which
+never become a target for anyone. 2025 spread is large: LAR 4.8% against NYJ
+19.1%. Use it to temper target-based optimism on any player from a high-drain
+offence, and compound it with low pass volume rather than double-counting.
+
+### This is ceiling shape, not opportunity
+It identifies ACCESS to explosive plays, never expected volume. Per the source's
+own 60/40 framing it lives in the unexplained variance, so it sits beside
+spike/nuclear rates and BELOW role and volume in the Source Hierarchy. Never use
+a good aDOT to argue a back will get more targets.
+
+### Still missing: targets per route run
+TPRR — the source's "intent" metric, and its sharpest idea — needs routes run
+and stays paywalled. It is what shows James Cook's TPRR trailing his own
+backups, and Saquon's collapsing from 18%+ to 13.1% on arrival in Philadelphia.
+Do NOT substitute target share for it.

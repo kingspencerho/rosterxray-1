@@ -20,6 +20,11 @@ import SOS from './grading/data/sos_2026.json';
 // ⚠️ PLAY-level flag: the offense used motion, NOT that this player moved.
 // Built by scripts/build-motion.py. See that file's header before using.
 import MOTION from './grading/data/motion_2025.json';
+// RB aDOT + raw air yards, team RB air yards, and QB dropback conversion.
+// Built by scripts/build-airyards.py from the Ben Gretch RB-air-yards
+// framework. Identifies ACCESS to explosive plays, not expected volume —
+// sits beside spike/nuclear rates in ceiling shape, never above role/volume.
+import AIRYARDS from './grading/data/airyards_2025.json';
 
 // ============ DATA ============
 
@@ -1647,6 +1652,7 @@ const lookupPlayer = (table, name) => {
 const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
 const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
+const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -5413,6 +5419,19 @@ Wan'Dale Robinson`;
           if (sosBits.length) bits.push(sosBits.join("; "));
           const mt = MOTION.teams?.[t];
           if (mt) bits.push(`${Math.round(mt.motion_tgt_rate * 100)}% of targets on motion snaps (league ${Math.round(MOTION._meta.league_motion_rate * 100)}%)`);
+          // RB air yards is a PLAY-CALLER fingerprint, so it belongs on the team
+          // line next to the play-caller note, not on a player line. Only shown
+          // when the roster actually has a back on this team.
+          const ay = AIRYARDS.teams[t];
+          if (ay) {
+            const hasRB = (result.valid || []).some(p => p.team === t && p.pos === "RB");
+            if (hasRB && ay.rb_air_yards != null) {
+              bits.push(`${ay.rb_air_yards > 0 ? "+" : ""}${Math.round(ay.rb_air_yards)} team RB air yards (${ay.rb_air_rank}/32)${ay.rb_air_yards < 0 ? " — backs catch it BEHIND the line here" : ""}`);
+            }
+            if (ay.dropback_drain != null) {
+              bits.push(`${Math.round(ay.dropback_drain * 100)}% of dropbacks lost to sacks/scrambles (${ay.drain_rank}/32, 1=fewest) — fewer targets exist for everyone`);
+            }
+          }
           return bits.length ? `${t}: ${bits.join(" | ")}` : null;
         })
         .filter(Boolean)
@@ -5448,8 +5467,20 @@ Wan'Dale Robinson`;
         .map(p => {
           const e = getEfficiency(p.name);
           const mo = getMotion(p.name);
-          if (!e && !mo) return null;
+          const ay = p.pos === "RB" ? getAirYards(p.name) : null;
+          if (!e && !mo && !ay) return null;
           const bits = [];
+          // aDOT is the RB-specific line. A negative number is not a small
+          // negative — it means every catch starts behind the line of
+          // scrimmage and the back has to earn those yards back before
+          // gaining any, which is why two backs with identical target counts
+          // can produce wildly different receiving yards.
+          if (ay) {
+            bits.push(
+              `${ay.adot > 0 ? "+" : ""}${ay.adot} aDOT on ${ay.tgt} targets, ${ay.air_yards > 0 ? "+" : ""}${Math.round(ay.air_yards)} air yards (${ay.air_yards_rank}/${AIRYARDS._meta.qualified_rbs} among RBs), ${ay.ypt} yds/target` +
+              (ay.adot < 0 ? " — catches it behind the line, must earn yards back before gaining any" : "")
+            );
+          }
           if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry)`);
           if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only)`);
           if (e?.rec_eff_rank) bits.push(`receiving efficiency ${e.rec_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rec_eff_rank`]} (pts over expected per target)`);
