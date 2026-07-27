@@ -4275,6 +4275,26 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   };
 };
 
+// ============ CURRENT NFL WEEK ============
+// Season opener is the Thursday after Labor Day 2026.
+//
+// Parsed with an explicit time so it lands at LOCAL midnight. "2026-09-10"
+// on its own is parsed as UTC midnight, which is 5pm Sep 9 on the west
+// coast, so the week used to advance an evening early for anyone west of
+// UTC.
+const SEASON_START = new Date("2026-09-10T00:00:00");
+const FINAL_WEEK = 18;
+
+const getNflWeek = (now = new Date()) => {
+  if (now < SEASON_START) return { week: 1, inSeason: false };
+  const week = Math.floor((now - SEASON_START) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  // Past the final week the season is OVER. The old code clamped with
+  // Math.min(18, ...), which pinned the UI at "Week 18" from January
+  // straight through the following summer.
+  if (week > FINAL_WEEK) return { week: 1, inSeason: false };
+  return { week, inSeason: true };
+};
+
 // ============ SCHEDULE IMAGE EXPORT ============
 // Draws the full 18-week schedule grid to a canvas and hands back a PNG blob.
 //
@@ -4509,6 +4529,10 @@ export default function RosterScorer() {
   const [benchExpanded, setBenchExpanded] = useState(false);
   // idle | working | saved | error — drives the export button label only
   const [scheduleExport, setScheduleExport] = useState("idle");
+  // Selected week in the Lineup Confidence strip. null = follow the calendar
+  // (current week in season, W1 otherwise) so a fresh grade always opens on
+  // the week that matters without the user touching anything.
+  const [lcWeek, setLcWeek] = useState(null);
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
@@ -8889,61 +8913,6 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             </div>
 
-            {/* Weekly Matchup Spotlight — current week start/sit highlights */}
-            {(() => {
-              const seasonStart = new Date("2026-09-10");
-              const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-              const today = new Date();
-              const isPreSeason = today < seasonStart;
-              const spotlightWeek = isPreSeason
-                ? 1
-                : Math.min(18, Math.floor((today - seasonStart) / msPerWeek) + 1);
-              const weekLabel = isPreSeason ? `Week 1 Preview` : `Week ${spotlightWeek}`;
-              const schedules = analyzed.starterSchedules || [];
-              const weekMatchups = schedules.map(s => {
-                const m = (s.weeklyMatchups || []).find(w => w.week === spotlightWeek);
-                return m ? { name: s.name, pos: s.pos, team: s.team, ...m } : null;
-              }).filter(Boolean).filter(m => !m.isBye);
-              const starts = weekMatchups.filter(m => m.score >= 3).sort((a, b) => b.score - a.score).slice(0, 3);
-              const concerns = weekMatchups.filter(m => m.score <= 2).sort((a, b) => a.score - b.score).slice(0, 2);
-              if (weekMatchups.length === 0) return null;
-              return (
-                <div style={{ marginBottom: "24px", background: "#0a0f0a", border: "1px solid #1a2a1a", borderRadius: "6px", padding: "16px 18px" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "12px" }}>
-                    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", letterSpacing: "0.05em", margin: 0, color: "var(--text-primary)" }}>
-                      {weekLabel.toUpperCase()} SPOTLIGHT
-                    </h2>
-                    <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                      {isPreSeason ? "season opener matchups" : "this week's matchups"}
-                    </span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: starts.length > 0 && concerns.length > 0 ? "1fr 1fr" : "1fr", gap: "12px" }}>
-                    {starts.length > 0 && (
-                      <div>
-                        <div style={{ fontSize: "10px", color: "var(--pos)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▲ Start with confidence</div>
-                        {starts.map((m, i) => (
-                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < starts.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
-                            <span style={{ fontSize: "12px", color: "var(--text-soft)", fontWeight: 600 }}>{m.name} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
-                            <span style={{ fontSize: "11px", color: "var(--pos)", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {concerns.length > 0 && (
-                      <div>
-                        <div style={{ fontSize: "10px", color: "var(--neg)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, marginBottom: "6px" }}>▼ Tough matchup</div>
-                        {concerns.map((m, i) => (
-                          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: i < concerns.length - 1 ? "1px solid var(--bg-inset)" : "none" }}>
-                            <span style={{ fontSize: "12px", color: "var(--text-soft)", fontWeight: 600 }}>{m.name} <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}>{m.pos}</span></span>
-                            <span style={{ fontSize: "11px", color: "var(--neg)", fontWeight: 700 }}>vs {m.opp.replace("@", "")} {m.opp.startsWith("@") ? "(away)" : "(home)"}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
@@ -9232,48 +9201,180 @@ Analyze this best ball roster. Return JSON only.`;
             </div>
 
             {/* Lineup Confidence */}
-            {analyzed.lineupConfidencePreview && analyzed.lineupConfidencePreview.length > 0 && (
-              <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  LINEUP CONFIDENCE
-                </h2>
-                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 8px", maxWidth: "640px" }}>
-                  Which starters to lock in and who to consider sitting — based on matchup tiers when you have options at that position.
-                </p>
-                <div style={{ display: "flex", gap: "14px", fontSize: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
-                  <span><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>▲ Start</span> <span style={{ color: "var(--text-dim)" }}>— great matchup, lock them in</span></span>
-                  <span><span style={{ color: "var(--neg)", fontWeight: 700 }}>▼ Sit?</span> <span style={{ color: "var(--text-dim)" }}>— tough matchup, bench if you have options</span></span>
-                </div>
-                {analyzed.lineupConfidencePreview.map((wk, i) => (
-                  <div key={i} style={{
+            {/* === LINEUP CONFIDENCE — week chip strip + one panel ===
+                Replaces two sections that overlapped: a date-driven "Weekly
+                Spotlight" showing the current week, and a Lineup Confidence
+                list that stacked ALL 17 weeks vertically. The stack was 2254px,
+                28.6% of the whole page, holding ~4.5k characters — sparse, and
+                it made every week look equally urgent. The strip colours each
+                week by severity so the problem weeks are visible at a glance,
+                and the panel shows one week at a time. */}
+            {analyzed.lineupConfidencePreview && analyzed.lineupConfidencePreview.length > 0 && (() => {
+              const byWeek = {};
+              analyzed.lineupConfidencePreview.forEach(wk => { byWeek[wk.week] = wk; });
+              const weeks = Array.from({ length: 17 }, (_, i) => i + 1);
+              const nfl = getNflWeek();
+              // Default to the week the user is actually living in. Out of
+              // season there is no "this week", so open on W1.
+              const fallback = nfl.inSeason ? nfl.week : 1;
+              const active = lcWeek == null ? Math.min(fallback, 17) : lcWeek;
+              const wk = byWeek[active];
+              const sitCount = wk ? wk.concerns.length : 0;
+              const lockCount = wk ? wk.locks.length : 0;
+              const totalSits = analyzed.lineupConfidencePreview.reduce((n, w) => n + w.concerns.length, 0);
+              const worst = analyzed.lineupConfidencePreview
+                .filter(w => w.concerns.length > 0)
+                .sort((a, b) => b.concerns.length - a.concerns.length)[0];
+
+              return (
+                <div style={{ marginBottom: "20px" }}>
+                  <h2 style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "24px",
+                    letterSpacing: "0.05em",
+                    margin: "0 0 4px",
+                    color: "var(--text-primary)",
+                  }}>
+                    LINEUP CONFIDENCE
+                  </h2>
+                  <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+                    Who to lock in and who to consider sitting, week by week. Tap a week to see it.
+                    {worst && <> Your tightest week is <span style={{ color: "var(--neg)", fontWeight: 700 }}>W{worst.week}</span> with {worst.concerns.length} tough matchup{worst.concerns.length === 1 ? "" : "s"}.</>}
+                  </p>
+
+                  {/* Week strip — red = has a sit call, green = only locks, dim = nothing to decide */}
+                  <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "6px", marginBottom: "10px" }}>
+                    <div style={{ display: "flex", gap: "4px", alignItems: "stretch", minWidth: "min-content" }}>
+                      {weeks.map(w => {
+                        const d = byWeek[w];
+                        const sits = d ? d.concerns.length : 0;
+                        const locks = d ? d.locks.length : 0;
+                        const isActive = w === active;
+                        const isPlayoff = w >= 15;
+                        const isNow = nfl.inSeason && w === nfl.week;
+                        const tone = sits > 0
+                          ? { bg: "#2e1414", border: "#ef4444", text: "var(--neg)" }
+                          : locks > 0
+                            ? { bg: "#0d3320", border: "#22c55e", text: "var(--pos)" }
+                            : { bg: "var(--bg-surface)", border: "#2a2a32", text: "var(--text-dim)" };
+                        return (
+                          <React.Fragment key={w}>
+                            {w === 15 && <div style={{ width: "1px", background: "#4a2a6a", margin: "0 5px", alignSelf: "stretch", flexShrink: 0 }} />}
+                            <button
+                              onClick={() => setLcWeek(w)}
+                              aria-label={`Week ${w}${sits > 0 ? `, ${sits} tough matchup${sits === 1 ? "" : "s"}` : ""}`}
+                              aria-pressed={isActive}
+                              // Centre the opening week in the strip. In Week 12 the
+                              // panel would say WEEK 12 while the strip still showed
+                              // W1-W8, which reads as a broken control. Sets
+                              // scrollLeft directly rather than scrollIntoView, which
+                              // would also yank the page vertically. Runs once.
+                              ref={isActive ? (el) => {
+                                if (!el || el.dataset.centred) return;
+                                el.dataset.centred = "1";
+                                const scroller = el.parentElement && el.parentElement.parentElement;
+                                if (!scroller) return;
+                                const r = el.getBoundingClientRect();
+                                const s = scroller.getBoundingClientRect();
+                                scroller.scrollLeft += (r.left - s.left) - (s.width - r.width) / 2;
+                              } : undefined}
+                              style={{
+                                position: "relative",
+                                flexShrink: 0,
+                                minWidth: "44px",
+                                minHeight: "44px",
+                                justifyContent: "center",
+                                padding: "7px 6px 6px",
+                                background: isActive ? tone.bg : "transparent",
+                                border: `1px solid ${isActive ? tone.border : "#2a2a32"}`,
+                                borderRadius: "3px",
+                                cursor: "pointer",
+                                fontFamily: "var(--font-mono)",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: "3px",
+                              }}
+                            >
+                              <span style={{
+                                fontSize: "10px",
+                                fontWeight: isActive || isPlayoff ? 700 : 500,
+                                letterSpacing: "0.04em",
+                                color: isActive ? tone.text : isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)",
+                              }}>
+                                W{w}
+                              </span>
+                              {/* severity dot — the whole point of the strip: find the bad weeks without reading */}
+                              <span style={{
+                                width: sits > 0 ? "5px" : "4px",
+                                height: sits > 0 ? "5px" : "4px",
+                                borderRadius: "50%",
+                                background: sits > 0 ? "var(--neg)" : locks > 0 ? "var(--pos)" : "#2a2a32",
+                                display: "block",
+                              }} />
+                              {isNow && (
+                                <span style={{
+                                  position: "absolute",
+                                  top: "-1px",
+                                  right: "-1px",
+                                  width: "5px",
+                                  height: "5px",
+                                  borderRadius: "50%",
+                                  background: "var(--accent-cyan)",
+                                }} />
+                              )}
+                            </button>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "14px", fontSize: "10px", marginBottom: "10px", flexWrap: "wrap", color: "var(--text-dim)" }}>
+                    <span><span style={{ color: "var(--neg)", fontWeight: 700 }}>●</span> tough call</span>
+                    <span><span style={{ color: "var(--pos)", fontWeight: 700 }}>●</span> easy week</span>
+                    {nfl.inSeason && <span><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>●</span> this week</span>}
+                    <span style={{ color: "var(--accent-purple-light)" }}>W15-17 = playoffs</span>
+                    <span>{totalSits} tough matchup{totalSits === 1 ? "" : "s"} all season</span>
+                  </div>
+
+                  {/* Selected week panel */}
+                  <div style={{
                     background: "var(--bg-surface)",
                     border: "1px solid var(--bg-elevated)",
+                    borderLeft: `3px solid ${sitCount > 0 ? "var(--neg)" : lockCount > 0 ? "var(--pos-solid)" : "#2a2a32"}`,
                     borderRadius: "3px",
-                    padding: "8px 12px",
-                    marginBottom: "6px",
+                    padding: "12px 14px",
+                    minHeight: "72px",
                   }}>
                     <div style={{
-                      fontSize: "10px",
+                      fontSize: "11px",
                       fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
-                      color: wk.week >= 15 ? "var(--accent-purple-light)" : "var(--text-dim)",
-                      marginBottom: "6px",
+                      color: active >= 15 ? "var(--accent-purple-light)" : "var(--text-dim)",
+                      marginBottom: "8px",
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: "8px",
                     }}>
-                      WEEK {wk.week}{wk.week >= 15 ? " · PLAYOFFS" : ""}
+                      <span>WEEK {active}{active >= 15 ? " · PLAYOFFS" : ""}</span>
+                      {nfl.inSeason && active === nfl.week && <span style={{ fontSize: "9px", color: "var(--accent-cyan)", letterSpacing: "0.08em" }}>THIS WEEK</span>}
                     </div>
-                    {wk.week >= 15 && aiLineupNotes[`W${wk.week}`] && (
+
+                    {active >= 15 && aiLineupNotes[`W${active}`] && (
                       <div style={{ fontSize: "10px", color: "#c084fcaa", lineHeight: 1.5, marginBottom: "8px", paddingBottom: "6px", borderBottom: "1px solid var(--border-strong)", fontStyle: "italic" }}>
-                        {aiLineupNotes[`W${wk.week}`]}
+                        {aiLineupNotes[`W${active}`]}
                       </div>
                     )}
-                    {wk.locks.length > 0 && (
-                      <div style={{ marginBottom: wk.concerns.length > 0 ? "6px" : 0 }}>
+
+                    {!wk && (
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                        No start/sit calls this week — every starter is in a matchup you would not bench them for.
+                      </div>
+                    )}
+
+                    {wk && wk.locks.length > 0 && (
+                      <div style={{ marginBottom: wk.concerns.length > 0 ? "8px" : 0 }}>
                         {wk.locks.map((l, j) => {
                           const pc = posColor(l.pos);
                           return (
@@ -9299,12 +9400,13 @@ Analyze this best ball roster. Return JSON only.`;
                         })}
                       </div>
                     )}
-                    {wk.concerns.length > 0 && (
+
+                    {wk && wk.concerns.length > 0 && (
                       <div>
                         {wk.concerns.map((c, j) => {
                           const pc = posColor(c.pos);
                           return (
-                            <div key={j} style={{ marginBottom: j < wk.concerns.length - 1 ? "6px" : 0 }}>
+                            <div key={j} style={{ marginBottom: j < wk.concerns.length - 1 ? "8px" : 0 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: c.suggestion ? "4px" : "3px", fontSize: "12px" }}>
                                 <span style={{ color: "var(--neg)", fontSize: "10px", width: "14px", flexShrink: 0 }}>▼</span>
                                 <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{c.name}</span>
@@ -9325,7 +9427,6 @@ Analyze this best ball roster. Return JSON only.`;
                               </div>
                               {c.suggestion && (() => {
                                 const spc = posColor(c.suggestion.pos);
-                                const isCrossPos = c.suggestion.pos !== c.pos;
                                 return (
                                   <div style={{ paddingLeft: "20px" }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", marginBottom: "2px" }}>
@@ -9361,9 +9462,9 @@ Analyze this best ball roster. Return JSON only.`;
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {/* Handcuffs */}
             <div style={{ marginBottom: "20px" }}>
