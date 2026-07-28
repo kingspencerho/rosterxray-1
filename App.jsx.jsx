@@ -3433,6 +3433,89 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
   }
 
+  // ============ CEILING SHAPE LAYER (added Jul 28, 2026) ============
+  // The grade scored roster STRUCTURE almost exclusively — stacks, positional
+  // counts, construction flaws, ADP, committees. Nothing measured whether the
+  // players inside that structure actually spike. Two rosters with identical
+  // architecture graded identically even if one was full of 30%-spike players
+  // and the other of 10% guys. In best ball you win a week with a spike, so
+  // that was the largest blind spot in the model.
+  //
+  // Source Hierarchy placement: this is rank 4, ceiling shape, which the
+  // hierarchy sanctions explicitly — "descriptive of last season; use for
+  // best-ball classification, not projection." Scoring it as classification is
+  // the intended use. It stays capped well under structure for that reason.
+  //
+  // SEPARATE from advanceLayer on purpose. That layer scores the W1-14
+  // cumulative qualifying round; this scores single-week playoff ceiling. Per
+  // the PHI principle already in this file, a team can be a season-long target
+  // and a playoff avoid at once — the two must never be netted into one signal.
+  //
+  // POSITION-NORMALISED, and this is not optional. Raw spike rate is dominated
+  // by QBs: an 18+ half-PPR week is routine for a quarterback and hard for a
+  // receiver, so the draftable medians run QB 0.637 against WR 0.125. Scoring
+  // the raw number would have handed a bonus to any roster carrying three QBs
+  // for a reason unrelated to ceiling quality.
+  //
+  // Baselines are the median of (spike_rate + nuclear_rate) at that position
+  // among EVERY DRAFTED player clearing the gate. The population matters and
+  // the first attempt got it wrong: centring on ADP <= 150 gave every roster a
+  // systematic -0.05 because an 18-round roster necessarily contains later
+  // picks, so a median build scored negative by construction. Re-centred on the
+  // drafted pool the delta median is exactly 0.000, which is the property this
+  // needs — an average roster must score zero, not a small penalty. It also
+  // took the TE sample from 8 to 33.
+  //
+  // Nuclear is added to spike deliberately: nuclear (28+) is a subset of spike
+  // (18+), so the sum double-weights the huge weeks, and a pod is won by a huge
+  // week rather than a good one.
+  //
+  // KNOWN LIMIT, and the reason the cap is 0.5 rather than higher. These rates
+  // describe 2025 and nothing else. A player whose season was suppressed by
+  // circumstance rates as low-ceiling regardless of his outlook: Justin
+  // Jefferson is the sharp case, drafted around ADP 10 with a 0.000 blend
+  // because a 30% target share on an offence that could not score produced
+  // nine usable weeks and zero above 18. That is a real description of 2025,
+  // not a data fault — usable and dud rates move coherently with spike across
+  // the pool (spike>0 WRs average .502 usable / .221 dud, spike==0 average
+  // .342 / .303) — but it is emphatically NOT a projection.
+  //
+  // What keeps it safe is that this AVERAGES. One misleading player moves
+  // avgDelta by roughly 0.007 and the score by under 0.02. The layer reads
+  // roster-wide ceiling density, never an individual verdict, and nothing here
+  // should ever be quoted about a single player.
+  let ceilingLayer = null;
+  {
+    const CEIL_BASE = { QB: 0.530, RB: 0.235, WR: 0.091, TE: 0.059 };
+    // Gate first: a spike rate over four games or a 20% snap share is noise,
+    // and noise averaged across a roster is still noise.
+    const deltas = [];
+    valid.forEach(p => {
+      const m = getMetrics(p.name);
+      if (!m || m.spike_rate == null) return;
+      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      const base = CEIL_BASE[p.pos];
+      if (base == null) return;
+      deltas.push((m.spike_rate + (m.nuclear_rate || 0)) - base);
+    });
+    if (deltas.length >= 5) {
+      const avg = deltas.reduce((s, v) => s + v, 0) / deltas.length;
+      const ceilPts = Math.max(-0.5, Math.min(0.5, avg * 2.5));
+      score += ceilPts;
+      ceilingLayer = {
+        score: Math.round(ceilPts * 100) / 100,
+        avgDelta: Math.round(avg * 1000) / 1000,
+        qualified: deltas.length,
+        rostered: valid.length,
+      };
+      if (ceilPts >= 0.3) {
+        strengths.push(`Ceiling-heavy roster — qualifying players spike well above positional norms, which is how single playoff weeks get won`);
+      } else if (ceilPts <= -0.3) {
+        weaknesses.push(`Low ceiling shape — qualifying players spike below positional norms, so this roster needs volume or matchup to break a week rather than doing it on its own`);
+      }
+    }
+  }
+
   // Recalibrated thresholds — harder curve, more actionable grades
   // A ≥ 7.0, A- ≥ 5.5, B+ ≥ 3.5, B ≥ 2.0, C+ ≥ 0.5, C ≥ -1.0, D below
   if (score >= 7.0) grade = "A";
@@ -3601,7 +3684,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   return {
     valid, picks, posCounts, stacks, stackGrades, adpFlags, benchmarkIssues,
     grade, strengths, weaknesses, goodStacks, eliteStacks, primaryStacks,
-    tournament, hasPickNumbers, format, score, advanceLayer, seasonSchedules,
+    tournament, hasPickNumbers, format, score, advanceLayer, ceilingLayer, seasonSchedules,
     bringBacks: mergedBringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
     rosterStandouts: finalStandouts,
     roleCeilingFlags,

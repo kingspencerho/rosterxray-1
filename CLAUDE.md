@@ -919,3 +919,72 @@ that emits eleven of them, which is precisely how they accumulated over
 multiple sessions. `test-no-duplicate-keys.mjs` fails the run instead, and its
 header tells the next session the rule: keep the last occurrence, delete the
 earlier one.
+
+---
+
+## Ceiling Shape Layer (added Jul 28, 2026)
+
+Before this, the grade scored roster STRUCTURE almost exclusively — stacks,
+positional counts, construction flaws, ADP, committees. Of the metrics in
+`player_metrics_2025.json`, only two touched the score: `hvt_pg` (Naked RB gate)
+and `usable_rate` (advance layer). `spike_rate`, `nuclear_rate`, `tgt_sh`,
+`wopr`, `snap_sh`, `dud_rate` and `expl_pct` were shown to the AI and nothing
+else. Two rosters with identical architecture graded identically even if one was
+full of 30%-spike players and the other of 10% guys. In best ball a week is won
+with a spike, so that was the model's largest blind spot.
+
+**What it does.** Per rostered player clearing the gate, `(spike_rate +
+nuclear_rate) - positional median`. Average the deltas, multiply by 2.5, clamp
+to ±0.5. Best ball only — `analyzeRedraft` is untouched, because redraft rewards
+floor and this measures ceiling.
+
+**Baselines: `{QB: 0.530, RB: 0.235, WR: 0.091, TE: 0.059}`** — median blend at
+that position among every DRAFTED player clearing the gate (`gp >= 8`,
+`snap_sh >= 0.35`).
+
+### Three things that had to be right, and were wrong first
+
+1. **POSITION NORMALISATION IS NOT OPTIONAL.** Raw spike rate is dominated by
+   quarterbacks — an 18+ half-PPR week is routine for a QB and hard for a WR, so
+   the draftable medians run QB 0.530 against WR 0.091. Scoring the raw number
+   hands a bonus to any roster carrying three QBs for a reason unrelated to
+   ceiling. That bug would have looked like a working feature: grades move, they
+   just move for the wrong reason. `test-ceiling-layer.mjs` guards it.
+2. **THE BASELINE POPULATION DECIDES WHETHER THE LAYER IS BIASED.** First attempt
+   centred on ADP <= 150 and gave every roster a systematic -0.05, because an
+   18-round roster necessarily contains later picks — a median build scored
+   negative by construction. Re-centred on the full drafted pool the delta
+   median is exactly 0.000, which is the property this needs. It also took the
+   TE sample from 8 to 33.
+3. **IT MUST BE ABLE TO SATURATE AND TO SIT STILL.** Verified both: a
+   deliberately ceiling-max roster hits +0.5 and a ceiling-min roster -0.5,
+   while the two reference rosters land at +0.09 and +0.01. A layer that cannot
+   reach its cap is decorative; one that reaches it on ordinary rosters is
+   overtuned.
+
+### Known limit — read before quoting this about a player
+
+The rates describe 2025 and nothing else. Justin Jefferson carries a 0.000 blend
+at roughly ADP 10, because a 30% target share on an offence that could not score
+produced nine usable weeks and none above 18. That is a true description of last
+season, not a data fault — usable and dud move coherently with spike across the
+pool (spike>0 WRs average .502 usable / .221 dud; spike==0 average .342 / .303).
+It is not a projection.
+
+The layer is safe because it AVERAGES: one misleading player moves the score by
+under 0.02. Read it as roster-wide ceiling density, never as a verdict on an
+individual, and never quote it about one player.
+
+### Calibration (re-run `scripts/test-ceiling-layer.mjs` after any rebalance)
+
+```
+BBM Jul 28 draft   9.36 (A) -> 9.45 (A)   +0.09   avgDelta +0.036   13/18 qualified
+Jefferson build    7.13 (A) -> 7.14 (A)   +0.01   avgDelta +0.003   12/18 qualified
+ceiling-max synthetic                     +0.50   (saturates)
+ceiling-min synthetic                     -0.50   (saturates)
+elite-QB swap                             +0.13   (proportionate, no leak)
+```
+
+No letter grade moved on either reference roster. Cap 0.5 stays well under a
+single elite stack (1.5), keeping rank-4 ceiling shape below rank-1/2 structure
+in the Source Hierarchy.
