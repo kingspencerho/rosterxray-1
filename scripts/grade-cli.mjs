@@ -88,6 +88,7 @@ const out = {
     pieces: (bb.allPieces || []).map(p => `${p.name} ${p.pos}·${p.team}`),
     ceilingGame: bb.isCeilingGame || undefined,
   })),
+  advanceLayer: result.advanceLayer || undefined,
   orphans: (result.orphans || []).map(o => `${o.name} (${o.team}) ${o.tier}`),
   adpFlags: (result.adpFlags || []).map(p => `${p.name} ${p.delta > 0 ? "+" : ""}${Math.round(p.delta)}`),
 };
