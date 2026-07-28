@@ -776,6 +776,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "jonathan taylor": { verdict: "TARGET", trend: "stable", trendNote: "2025 rate stats understate him (noted Jul 28 2026): Daniel Jones tore through half a season then went down, and the whole IND offense sank with the backup — yet Taylor still posted a 35% nuclear-week rate, best of any RB. The spike profile is real and the QB constraint is resolved with Jones healthy for 2026. Thin receiving role (2.7 rec/g) is the honest cap in PPR formats", situationFlags: ["scheme_fit"], riskFlags: [] },
   "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
   "saquon barkley": { verdict: "TARGET", trend: "stable", trendNote: "Workhorse with AJ Brown gone — even more targets now", situationFlags: ["target_vacuum"], riskFlags: [] },
@@ -1659,6 +1660,34 @@ const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
 const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
+
+// === CEILING RANKINGS (informational only — never scored) ===
+// Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
+// as the tiebreaker. Draftable players only (present in ADP_DATA), 8+ games
+// so one hot month can't fake a profile. SOS season rank rides along so a
+// ceiling profile can be read against season-long sustainability. Computed
+// once at module load — all inputs are static imports.
+const CEILING_RANKINGS = (() => {
+  const out = { QB: [], RB: [], WR: [], TE: [] };
+  for (const [name, m] of Object.entries(PLAYER_METRICS)) {
+    if (!out[m.pos] || (m.gp || 0) < 8) continue;
+    const a = ADP_DATA[name];
+    if (!a) continue;
+    // nflverse player stats say "LA" for the Rams; the SOS build normalizes
+    // to "LAR". Align here or every Rams player shows a blank SOS.
+    const team = m.team === "LA" ? "LAR" : m.team;
+    out[m.pos].push({
+      name, team, adp: a.adp, gp: m.gp,
+      spike: m.spike_rate, nuclear: m.nuclear_rate,
+      sos: SOS[m.pos]?.[team]?.rank ?? null,
+    });
+  }
+  for (const pos of Object.keys(out)) {
+    out[pos].sort((x, y) => (y.spike - x.spike) || (y.nuclear - x.nuclear));
+    out[pos] = out[pos].slice(0, 10);
+  }
+  return out;
+})();
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -4861,6 +4890,8 @@ export default function RosterScorer() {
   const [scheduleExport, setScheduleExport] = useState("idle");
   // Best-ball season grid is deliberately secondary: collapsed until opened.
   const [bbScheduleOpen, setBbScheduleOpen] = useState(false);
+  // Ceiling rankings panel — informational, collapsed by default.
+  const [ceilingOpen, setCeilingOpen] = useState(false);
   // Selected week in the Lineup Confidence strip. null = follow the calendar
   // (current week in season, W1 otherwise) so a fresh grade always opens on
   // the week that matters without the user touching anything.
@@ -7238,6 +7269,58 @@ Analyze this best ball roster. Return JSON only.`;
             )}
           </div>
         )}
+
+        {/* === CEILING RANKINGS — informational panel (collapsed by default) ===
+            League-wide spike/nuclear leaderboard per position with season SOS
+            alongside. Pure reference: none of this feeds the score directly
+            (ceiling shape is scored per-roster elsewhere) — this exists so the
+            draft-prep question "who actually spikes?" has an in-app answer. */}
+        <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+          <button
+            onClick={() => setCeilingOpen(prev => !prev)}
+            style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: ceilingOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+          >
+            <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
+              Ceiling Rankings · Spike / Nuclear Weeks
+            </span>
+            <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{ceilingOpen ? "▲" : "▼"}</span>
+          </button>
+          {ceilingOpen && (
+            <div style={{ background: "var(--bg-surface)", padding: "12px 14px 10px" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px", maxWidth: "640px" }}>
+                How often each player posted a difference-maker week in 2025. <span style={{ color: "var(--pos)", fontWeight: 600 }}>Spike</span> = 18+ half-PPR points, <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>Nuclear</span> = 28+. SOS = 2026 season schedule rank, <span style={{ fontWeight: 600 }}>1 = easiest</span> of 32. Informational only — a spike profile is last season's shape, not a projection, and role changes override it.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
+                {["QB", "RB", "WR", "TE"].map(pos => {
+                  const pc = posColor(pos);
+                  return (
+                    <div key={pos} style={{ background: "var(--bg-inset)", border: "1px solid var(--bg-raised)", borderRadius: "4px", padding: "10px 12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "11px", color: pc.text, fontWeight: 700, letterSpacing: "0.1em" }}>{pos}</span>
+                        <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>SPIKE · NUKE · SOS</span>
+                      </div>
+                      {CEILING_RANKINGS[pos].map((p, i) => (
+                        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", borderBottom: i < CEILING_RANKINGS[pos].length - 1 ? "1px solid var(--bg-raised)" : "none", fontSize: "11px" }}>
+                          <span style={{ color: "var(--text-faint)", fontSize: "9px", width: "14px", flexShrink: 0, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textTransform: "capitalize" }}>
+                            {p.name}
+                            <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "9px", textTransform: "uppercase" }}> {p.team}{p.gp < 10 ? " ⚠" : ""}</span>
+                          </span>
+                          <span style={{ color: "var(--pos)", fontWeight: 700, fontSize: "10px", width: "34px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.spike * 100)}%</span>
+                          <span style={{ color: p.nuclear > 0 ? "var(--accent-purple-light)" : "var(--text-faint)", fontWeight: 600, fontSize: "10px", width: "30px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.nuclear * 100)}%</span>
+                          <span style={{ color: p.sos != null && p.sos <= 10 ? "var(--pos)" : p.sos != null && p.sos >= 23 ? "var(--neg)" : "var(--text-muted)", fontSize: "10px", width: "24px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{p.sos ?? "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "10px", letterSpacing: "0.03em", lineHeight: 1.5 }}>
+                ⚠ = under 10 games in 2025, small sample. 8-game minimum to appear. Rates are descriptive of last season at half-PPR thresholds — they rank ceiling access, not expected points.
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid var(--border-subtle)" }}>
