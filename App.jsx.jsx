@@ -3289,6 +3289,81 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     if (posCounts.QB < 2) score -= 3;
   }
 
+  // === ADVANCE RATE LAYER (added Jul 28 2026) ===
+  // The qualifying round (W1-14 cumulative, ~2-of-12 advance) is the single
+  // biggest filter in every large-field tournament, and nothing above this
+  // line scores it — every prior input is W15-17 derived. BBM research
+  // consensus: ADP value tracks regular-season advance rate, stacking tracks
+  // playoff win rate, and stacked builds gain advancement equity in BOTH
+  // phases — so this layer is capped at ±1.25 total to inform the grade,
+  // never to let a soft September rescue a stackless build (or vice versa).
+  // Tournaments can opt down via advanceWeight (default 1; 0 disables for
+  // playoff-only formats).
+  const advanceWeight = tournament?.advanceWeight ?? 1;
+  let advanceLayer = null;
+  if (advanceWeight > 0) {
+    // Core scorers: the 9 earliest picks — the players a cumulative
+    // qualifying round actually rides on. Best ball has no lineup, so ADP
+    // order is the closest stable proxy for expected weekly contribution.
+    const core = [...valid].sort((a, b) => (a.adp ?? 999) - (b.adp ?? 999)).slice(0, 9);
+    let schedPts = 0, usablePts = 0, byePts = 0;
+
+    // 1. W1-14 schedule strength — both directions, mirroring the redraft
+    // check. Tier scores average 3.125 by construction (rank-bucket sizes),
+    // so that is the neutral point.
+    const coreSchedAvgs = core.map(p => {
+      const sched = FULL_SCHEDULE[p.team] || [];
+      const scores = sched.slice(0, 14)
+        .map(opp => getMatchupScoreForOpponent(opp, p.pos, useProjected))
+        .filter(m => m && m.tier !== "Unknown")
+        .map(m => m.score);
+      return scores.length >= 10 ? scores.reduce((s, v) => s + v, 0) / scores.length : null;
+    }).filter(v => v != null);
+    if (coreSchedAvgs.length >= 6) {
+      const avg = coreSchedAvgs.reduce((s, v) => s + v, 0) / coreSchedAvgs.length;
+      schedPts = Math.max(-0.5, Math.min(0.5, (avg - 3.125) * 1.2));
+    }
+
+    // 2. Cumulative scoring proxy — core usable_rate (share of 2025 weeks at
+    // a startable half-PPR line). Centered on 0.53, the median for ADP<=120
+    // players in PLAYER_METRICS; scaled so the IQR (~0.41-0.71) maps inside
+    // the cap. Catches rosters that cannot out-score their pod for 14 weeks
+    // regardless of playoff geometry.
+    const usable = core.map(p => getMetrics(p.name)?.usable_rate).filter(v => v != null);
+    if (usable.length >= 5) {
+      const avgU = usable.reduce((s, v) => s + v, 0) / usable.length;
+      usablePts = Math.max(-0.5, Math.min(0.5, (avgU - 0.53) * 2));
+    }
+
+    // 3. Bye clustering — 4+ core scorers off in the same qualifying week is
+    // one near-dead week of cumulative points. Soft, one-way.
+    const byeCounts = {};
+    core.forEach(p => {
+      const wk = (FULL_SCHEDULE[p.team] || []).indexOf("BYE");
+      if (wk >= 0 && wk < 14) byeCounts[wk + 1] = (byeCounts[wk + 1] || 0) + 1;
+    });
+    const worstBye = Object.entries(byeCounts).sort((a, b) => b[1] - a[1])[0];
+    if (worstBye && worstBye[1] >= 4) byePts = -0.25;
+
+    const advScore = Math.max(-1.25, Math.min(1.25, (schedPts + usablePts + byePts))) * advanceWeight;
+    score += advScore;
+    advanceLayer = {
+      score: Math.round(advScore * 100) / 100,
+      schedPts: Math.round(schedPts * 100) / 100,
+      usablePts: Math.round(usablePts * 100) / 100,
+      byePts,
+      coreCount: core.length,
+    };
+    if (advScore >= 0.5) {
+      strengths.push(`Strong advance-rate profile — core scorers carry a soft W1-14 slate and bankable weekly output for the qualifying round`);
+    } else if (advScore <= -0.5) {
+      weaknesses.push(`Weak advance-rate profile — core scorers face a tough W1-14 slate or thin weekly output; this roster must survive the qualifying round before any playoff geometry pays`);
+    }
+    if (byePts < 0 && worstBye) {
+      weaknesses.push(`Advance-rate bye cluster: ${worstBye[1]} core scorers share the W${worstBye[0]} bye — one near-dead week of cumulative qualifying points`);
+    }
+  }
+
   // Recalibrated thresholds — harder curve, more actionable grades
   // A ≥ 7.0, A- ≥ 5.5, B+ ≥ 3.5, B ≥ 2.0, C+ ≥ 0.5, C ≥ -1.0, D below
   if (score >= 7.0) grade = "A";
@@ -3441,7 +3516,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   return {
     valid, picks, posCounts, stacks, stackGrades, adpFlags, benchmarkIssues,
     grade, strengths, weaknesses, goodStacks, eliteStacks, primaryStacks,
-    tournament, hasPickNumbers, format, score,
+    tournament, hasPickNumbers, format, score, advanceLayer,
     bringBacks: mergedBringBacks, orphans, topPivots, byeMap, byeConflicts, verdictAlignments,
     rosterStandouts: finalStandouts,
     roleCeilingFlags,

@@ -716,3 +716,43 @@ TPRR — the source's "intent" metric, and its sharpest idea — needs routes ru
 and stays paywalled. It is what shows James Cook's TPRR trailing his own
 backups, and Saquon's collapsing from 18%+ to 13.1% on arrival in Philadelphia.
 Do NOT substitute target share for it.
+
+---
+
+## Advance Rate Layer (added Jul 28, 2026)
+
+`analyzeRoster` (best ball) now scores the W1-14 qualifying round, which was
+previously unscored — every other scored input is W15-17 derived. The research
+basis (ETR / Legendary Upside BBM data): ADP value correlates with
+regular-season advance rate, stacking correlates with playoff win rate, and
+heavily-correlated builds gain advancement equity in BOTH phases (+21.5%
+regular season, +30.1% playoffs). Stacks therefore stay the dominant signal;
+this layer is a capped tiebreaker.
+
+### Components (total clamped to ±1.25, scaled by tournament advanceWeight)
+1. **W1-14 schedule strength** (±0.5): core scorers' average matchup-tier
+   score across the qualifying weeks, centered at the tier-construction mean
+   (3.125). Mirrors the redraft check, both directions — soft slates earn
+   credit, not just hard-slate penalties.
+2. **Cumulative scoring proxy** (±0.5): core `usable_rate` from
+   PLAYER_METRICS, centered at 0.53 (median for ADP<=120 players). Catches
+   rosters that cannot out-score their pod for 14 weeks regardless of playoff
+   geometry.
+3. **Bye clustering** (-0.25, one-way): 4+ core scorers sharing one W1-14 bye
+   is a near-dead week of cumulative points. Complements (does not replace)
+   the Zero-Zero 2QB/2TE bye tracker.
+
+"Core scorers" = the 9 earliest-ADP players. Best ball has no lineup; ADP
+order is the stable proxy for expected weekly contribution.
+
+### Rules
+- `TOURNAMENTS[key].advanceWeight` (default 1) scales the layer; set 0 for
+  playoff-only formats with no cumulative qualifying round.
+- The PHI principle: a team can be a season-long target and a playoff avoid
+  simultaneously. This layer credits the first without touching the second —
+  the two must never be netted into one signal upstream of the grade.
+- Never let this layer decide between a stacked and an unstacked build. The
+  cap exists so it cannot.
+- Calibration check (Jul 28): two reference rosters moved +0.24 / -0.09 with
+  no letter-grade change; a PHI-heavy synthetic earned the full +0.5 schedule
+  credit. Re-run this check after any rebalance.
