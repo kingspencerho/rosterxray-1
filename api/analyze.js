@@ -255,7 +255,14 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         // UPDATED MODEL STRING BELOW
         model: "claude-sonnet-4-6",
-        max_tokens: Math.min(body.max_tokens || 2000, 2200),
+        // Ceiling raised from 2200 to 6000 (Jul 27 2026). The grading contract
+        // asks for a nutshell, pivotNotes, one standoutDetail per player,
+        // bringBackNotes and lineupNotes — an 18-player best-ball roster hit the
+        // old 2200 cap EXACTLY and came back truncated mid-JSON, so the client's
+        // parse threw and silently fell back to the template summary. This is a
+        // ceiling, not an allocation: output tokens bill as used, so raising it
+        // costs nothing on responses that were already fitting.
+        max_tokens: Math.min(body.max_tokens || 2000, 6000),
         messages: body.messages,
         ...(systemPrompt ? { system: systemPrompt } : {}),
       }),

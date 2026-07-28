@@ -2181,6 +2181,42 @@ const getMatchupTier = (opponentTeam, pos, useProjected = false) => {
   return { tier, color, score, opp, pts: pts.toFixed(1), rank };
 };
 
+// ============ TRUNCATION-TOLERANT JSON PARSE ============
+// The grading response is one JSON object whose fields arrive in a fixed order,
+// `nutshell` first. When the model hits max_tokens the tail is cut off mid
+// string, so a STRICT JSON.parse throws and discards the whole payload —
+// including a complete, perfectly good nutshell sitting at the top of it.
+//
+// That is what produced "sometimes the full summary, sometimes the basic one"
+// (diagnosed Jul 27 2026 against the live site: HTTP 200, stop_reason
+// "max_tokens", output_tokens exactly at the cap, JSON cut mid-sentence inside
+// bringBackNotes). It was never a network failure and never random — it tracked
+// roster complexity, because an 18-player roster generates far more
+// standoutDetails and bringBackNotes than a small one.
+//
+// The cap has been raised, but a model can always run long, so parsing is now
+// tolerant by design: walk the text tracking string state and nesting depth,
+// remember the last offset where a TOP-LEVEL pair had just finished, cut there
+// and close the object. Whatever completed is kept; only the severed tail is
+// lost. If truncation hits inside the first field there is nothing to salvage
+// and this returns null, which correctly surfaces as a failure.
+const parseLooseJson = (text) => {
+  try { return JSON.parse(text); } catch { /* fall through to repair */ }
+  let depth = 0, inStr = false, esc = false, lastGood = -1;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (esc) { esc = false; continue; }
+    if (c === "\\") { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === "{" || c === "[") depth++;
+    else if (c === "}" || c === "]") { depth--; if (depth === 1) lastGood = i; }
+    else if (c === "," && depth === 1) lastGood = i - 1;
+  }
+  if (lastGood < 0) return null;
+  try { return JSON.parse(text.slice(0, lastGood + 1) + "}"); } catch { return null; }
+};
+
 // ============ NUTSHELL SUMMARY BUILDER ============
 // Converts the raw strengths/weaknesses arrays + grade into a 2-sentence
 // plain-English summary. Beginner-friendly, no jargon, anchored at the top
@@ -5687,7 +5723,11 @@ Analyze this best ball roster. Return JSON only.`;
           task: "grade",
           mode: isRedraft ? "redraft" : "bestball",
           tournamentName,
-          max_tokens: 2200,
+          // 2200 was not enough for a full 18-player roster: the response came
+          // back with stop_reason "max_tokens" and JSON severed mid-field. The
+          // server clamps this too (api/analyze.js), so BOTH have to move —
+          // raising only this one changes nothing.
+          max_tokens: 5000,
           messages: [{ role: "user", content: userPrompt }],
         }),
       });
@@ -5698,7 +5738,10 @@ Analyze this best ball roster. Return JSON only.`;
       if (!raw) throw new Error("Empty response");
 
       const clean = raw.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
+      // Tolerant on purpose — a response cut off by the token cap still carries
+      // a complete nutshell at the front. See parseLooseJson.
+      const parsed = parseLooseJson(clean);
+      if (!parsed) throw new Error("Unparseable response");
 
       // Set every field we did get BEFORE judging the response, so a missing
       // nutshell never costs us the notes that arrived alongside it.

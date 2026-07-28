@@ -853,6 +853,36 @@ did arrive — a missing nutshell no longer discards the notes beside it.
 `/api/analyze`, so the AI pass always fails in local preview. That is correct
 behavior, not a regression.
 
+### Root cause found Jul 27 2026, on the live site
+
+Making the failure visible immediately exposed what was causing it, and it was
+not a network fault. A production 18-player grade returned **HTTP 200** with
+`stop_reason: "max_tokens"` and `output_tokens` sitting exactly on the cap. The
+JSON was severed mid-sentence inside `bringBackNotes`, so `JSON.parse` threw and
+the catch discarded the entire payload — including a complete, high-quality
+`nutshell` at the very front of it.
+
+So "sometimes full, sometimes basic" was never random. It tracked ROSTER SIZE:
+more players means more `standoutDetails` and `bringBackNotes`, and an 18-man
+best-ball roster blew a 2200-token budget every time while a short roster fit.
+
+Two fixes, both needed:
+
+1. **The cap was clamped in TWO places.** `App.jsx` sent `max_tokens: 2200` and
+   `api/analyze.js` independently clamped with `Math.min(body.max_tokens, 2200)`.
+   Raising only the client would have changed nothing and looked like the fix
+   failed. Now 5000 requested, 6000 ceiling. This is a ceiling, not an
+   allocation — output tokens bill as used, so responses that already fit cost
+   the same.
+2. **`parseLooseJson` makes truncation survivable.** A model can always run
+   long, so the parse no longer treats a severed tail as total loss: it walks
+   the text tracking string state and nesting depth, cuts at the last completed
+   top-level pair, and closes the object. Everything complete is kept. If the
+   cut lands inside the first field there is nothing to salvage and it returns
+   null, which correctly surfaces as a failure. Pinned by
+   `scripts/test-loose-json.mjs`, including the escaped-quote case that would
+   otherwise desynchronize the walker.
+
 ## Duplicate Keys: fixed Jul 27, 2026 (was "known, not fixed" earlier the same day)
 
 App.jsx carried 11 duplicate keys — 5 in `ADP_DATA`, 6 in `SITUATIONS`. In a JS
