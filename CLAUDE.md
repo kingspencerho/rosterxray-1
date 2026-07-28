@@ -10,6 +10,27 @@ Any session making code changes to this repo MUST follow these rules:
 
 3. **Branch:** All development goes on branch `claude/github-app-file-access-o62xr3`. Never push to a different branch without explicit user permission.
 
+4. **THIS REPO IS PUBLIC (added Jul 27, 2026).** Everything committed here is readable
+   by anyone, permanently — deleting a file later does not remove it, because git
+   history keeps it and GitHub's API and forks cache independently. **App content only.**
+   Never commit job-search or interview material, recruiter or founder email addresses,
+   outreach or lead lists, pricing, client strategy, or any other personal-track
+   context, even when asked to "add context so other sessions are aligned." That
+   context belongs in the separate PRIVATE repo this folder sits inside
+   (`Claude-project-personal`), which already holds it. If a request would put personal
+   material in this repo, say so and put it in the private one instead.
+
+5. **This file is the app's context handoff.** There is no separate handoff doc and
+   there should not be one — dated handoffs go stale silently and the next session
+   cannot tell which is current. When you change grading logic, data layers, or a
+   hard rule, append it here in the SAME session as the change.
+
+**Repo layout, since the nesting confuses sessions:** this folder is an independent
+git repo living inside a different one. The parent (`Claude-project-personal`, private)
+ignores this folder entirely via an allowlist `.gitignore`, so the two never interfere.
+The parent's `/sync` skill does NOT touch this repo — app changes must be pulled and
+pushed here directly.
+
 ---
 
 ## Role & Core Directive
