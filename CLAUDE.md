@@ -777,3 +777,89 @@ order is the stable proxy for expected weekly contribution.
 - Calibration check (Jul 28): two reference rosters moved +0.24 / -0.09 with
   no letter-grade change; a PHI-heavy synthetic earned the full +0.5 schedule
   credit. Re-run this check after any rebalance.
+
+---
+
+## Silent-Drop Bugs and the Screenshot Path (added Jul 27, 2026)
+
+A player vanished from an 18-man best-ball upload while the UI reported
+"17/17 matched". Nothing errored. The audit found FOUR independent ways a
+player could disappear without a trace, plus one reason the loss stayed
+invisible. Guarded by `scripts/test-extraction-filters.mjs`.
+
+**The governing principle: a filtered name must never be silent.** Junk that
+reaches `notFound` costs one dismissable row a human can see. A name dropped
+by a filter costs a player out of the grade with no evidence it happened.
+When in doubt, let it through and show it.
+
+### 1. Dead hyphenated keys (data class, fixed at the lookup layer)
+`normalize()` turns a query's hyphens into spaces, but ADP keys are
+hand-entered and three kept theirs: ADP_SUPERFLEX `jaxon smith-njigba` and
+`jacory croskey-merritt`, ADP_YAHOO `nick westbrook-ikhine`. No query could
+produce those strings, so the keys were unreachable and those players
+resolved to null in that format only. `getBaseIndex` now normalizes the KEY
+as well as the query, so any key with a hyphen, apostrophe, period or odd
+casing resolves. Fixing the three keys by hand would have left the trap armed
+for the next hand-entered name.
+
+### 2. The position-header regex ate names starting "Te"
+`/^(QB|RB|WR|TE|Round|Pick|ADP|Bye)/i` had no boundary, so the TE branch
+matched Tee Higgins, Terry McLaurin, Tetairoa McMillan, Ted Hurst, Terrance
+Ferguson and Tez Johnson. Now anchored to the whole line
+(`\s*\d*$`) so it kills bare column headers and nothing else. Strategy 3 is a
+fallback path, so this only fired when the JSON array parse failed — which is
+exactly when nobody is looking.
+
+### 3. `preprocessRoster` discarded unresolved lines
+It kept only lines that resolved to a player; a name-shaped line that failed
+lookup was dropped entirely. The legacy parser had the right instinct — it
+pushes `notFound` — so preprocess now does the same via `.unresolved`.
+
+### 4. The match counter counted survivors
+`{valid.length}/{picks.length}` — both measured AFTER the drop, so a lost
+player still read "17/17". Fixed by 3 above: unresolved rows now land in
+`picks`, so the denominator tells the truth.
+
+### 5. The under-count warning floor was 10
+Best ball is a fixed 18 (20 superflex), but the warning only fired below 10,
+so 17-of-18 passed clean. Now format-aware for best ball. Redraft
+deliberately stays at 10 — league roster sizes genuinely vary there.
+
+### What was NOT the cause
+`findPlayer` resolved Cam Skattebo in all three formats, and every text paste
+format kept him. The reported miss came from the SCREENSHOT extraction step
+(`api/analyze.js` EXTRACTION_SYSTEM_PROMPT) — the model read 17 of 18 rows off
+the image. That is non-deterministic and not fixable in the parser. What is
+fixed is that it can no longer happen quietly.
+
+## The AI Nutshell Falls Back Silently (fixed Jul 27, 2026)
+
+`fetchAiNutshell` had three silent exits — a non-ok response, an empty body,
+and a JSON parse failure — all landing in `catch {}` with the comment "silent
+fail". The template `buildNutshell()` output then rendered in the same box
+with the same styling, so a failed AI pass was indistinguishable from a
+successful one except for a missing `✦ AI` badge. This is why the summary
+"sometimes renders full and sometimes basic".
+
+It was not only cosmetic: a failed call also skips `parsed.gradeModifier`,
+so the same roster could grade differently depending on whether a network
+call happened to succeed.
+
+Now tracked in `aiFailed` and surfaced as a `⚠ AI unavailable · retry`
+button that re-runs the pass. Partial responses still apply whatever fields
+did arrive — a missing nutshell no longer discards the notes beside it.
+
+**Expect this badge on localhost.** The Vite dev server does not serve
+`/api/analyze`, so the AI pass always fails in local preview. That is correct
+behavior, not a regression.
+
+## Known, Not Fixed: duplicate keys in the ADP and situation tables
+
+The build emits ~11 `Duplicate key` warnings (xavier worthy, michael pittman,
+kenneth gainwell, jonathon brooks, jk dobbins, rj harvey, jaylen warren,
+kaytron allen, david montgomery, jadarian price). The later literal silently
+wins, so some ADP values in use are not the ones a reader would find first
+(e.g. xavier worthy resolves to 110.0, not the 96 written above it). No
+player is dropped, so this is a data-accuracy issue rather than a silent-drop
+one. Left alone deliberately — deciding which value is correct is a data
+call, not a code call.

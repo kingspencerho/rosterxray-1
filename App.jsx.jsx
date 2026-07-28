@@ -1626,7 +1626,21 @@ const getBaseIndex = (table) => {
   if (!_baseIndexCache.has(table)) {
     const idx = {};
     for (const key of Object.keys(table)) {
-      const base = key.replace(SUFFIX_RE, "");
+      // Normalize the KEY, not only the query (fixed Jul 27 2026).
+      //
+      // normalize() turns every hyphen in a QUERY into a space, but table keys
+      // are hand-entered and three of them kept their hyphens:
+      // ADP_SUPERFLEX "jaxon smith-njigba" and "jacory croskey-merritt",
+      // ADP_YAHOO "nick westbrook-ikhine". No query could ever produce those
+      // strings, so the keys were dead — those players resolved to null in that
+      // format and vanished from the grade with no error.
+      //
+      // Fixing the three keys by hand would fix today and leave the trap armed
+      // for the next hand-entered name. Normalizing here kills the whole class:
+      // any key with a hyphen, apostrophe, period or stray casing now resolves.
+      const norm = normalize(key);
+      if (!(norm in idx)) idx[norm] = key;
+      const base = norm.replace(SUFFIX_RE, "");
       if (!(base in idx)) idx[base] = key;   // first wins; suffix collisions are rare
     }
     _baseIndexCache.set(table, idx);
@@ -1687,11 +1701,18 @@ const findPlayer = (name, format = "standard") => {
   else table = ADP_DATA;
 
   // Title-case a normalized DB key into a clean display name
-  const titleCase = (k) => k.split(" ").map(w => w.length <= 2 && /^(jr|sr|ii|iii|iv)$/.test(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  // Capitalize after a hyphen too, or a key that kept one renders "Smith-njigba".
+  const titleCase = (k) => k.split(" ").map(w => w.length <= 2 && /^(jr|sr|ii|iii|iv)$/.test(w) ? w.toUpperCase() : w.replace(/(^|-)([a-z])/g, (_, sep, c) => sep + c.toUpperCase())).join(" ");
   const mk = (key, entry, extra = {}) => ({ ...entry, name: titleCase(key), matchedKey: key, ...extra });
 
   // 1. Exact normalized match
   if (table[norm]) return mk(norm, table[norm]);
+
+  // 1b. Key-normalized match. Table keys are hand-entered and some carry
+  // punctuation that normalize() strips from the query, so an exact hit on
+  // table[norm] can miss a key that IS this player. See getBaseIndex.
+  const normHit = getBaseIndex(table)[norm];
+  if (normHit) return mk(normHit, table[normHit]);
 
   // 2a. Any key exactly equals query
   for (const key of Object.keys(table)) {
@@ -2023,6 +2044,22 @@ const preprocessRoster = (text, format = "standard") => {
     }
   }
 
+  // === SURFACE THE SILENT DROPS (added Jul 27 2026) ===
+  // Everything above keeps only lines that RESOLVED to a player. A line that
+  // looks exactly like a name but resolves to nothing was being discarded with
+  // no trace, and because the match counter reads valid/picks — both counted
+  // AFTER this point — a dropped player still showed "17/17 matched". The miss
+  // was invisible at every level of the UI.
+  //
+  // The legacy parser already had the right instinct: it pushes unresolved
+  // lines as notFound so a human sees them. Do the same here. A false positive
+  // costs one dismissable row; a false negative costs a player out of the grade.
+  const looksLikeName = (s) =>
+    /^[A-Z][a-zA-Z'.-]+(\s+[A-Z][a-zA-Z'.-]+)+$/.test(s.trim()) && s.trim().length <= 30;
+  reconstructed.unresolved = classified
+    .filter(c => c.type === "other" && looksLikeName(c.line))
+    .map(c => c.line);
+
   return reconstructed;
 };
 
@@ -2048,6 +2085,13 @@ const parseRoster = (text, format = "standard") => {
         actualPick: r.pick != null ? r.pick : null,  // null = unknown, never fabricate from index
         raw: r.name,
       };
+    });
+    // Name-shaped lines the preprocessor could not resolve ride along as
+    // notFound so they appear in the UI instead of vanishing. They carry no
+    // player data, so they never reach the grade — they only make the miss
+    // visible and keep the match counter honest.
+    (pre.unresolved || []).forEach((line, i) => {
+      picks.push({ name: line, raw: line, notFound: true, pickNum: picks.length + 1, actualPick: null });
     });
     picks.hasPickNumbers = detectedPickNumbers;
     return picks;
@@ -4720,6 +4764,12 @@ export default function RosterScorer() {
   const [dataMode, setDataMode] = useState("actual");
   const [aiNutshell, setAiNutshell] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  // The AI pass used to fail silently and fall through to the template nutshell,
+  // which renders in the same box with the same styling — so a failed call was
+  // indistinguishable from a successful one except for a missing "✦ AI" badge.
+  // That also silently skipped the grade modifier, meaning the same roster could
+  // grade differently depending on whether a network call happened to succeed.
+  const [aiFailed, setAiFailed] = useState(false);
   const [aiPivotNotes, setAiPivotNotes] = useState({});
   const [aiStandoutDetails, setAiStandoutDetails] = useState({});
   const [aiBenchMoveNotes, setAiBenchMoveNotes] = useState({});
@@ -5222,7 +5272,12 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
             /\s/.test(l) &&
             !l.includes(":") &&
             !l.includes("{") &&
-            !/^(QB|RB|WR|TE|Round|Pick|ADP|Bye)/i.test(l)
+            // Anchored to the WHOLE line (fixed Jul 27 2026). The old form had
+            // no boundary, so the TE branch matched any name starting "Te" and
+            // silently dropped Tee Higgins, Terry McLaurin, Tetairoa McMillan,
+            // Ted Hurst, Terrance Ferguson and Tez Johnson. This filter is meant
+            // to kill bare column headers ("TE", "Pick", "Bye 12"), not names.
+            !/^(QB|RB|WR|TE|Round|Pick|ADP|Bye)\s*\d*$/i.test(l)
           );
         if (extracted.length >= 5) players = extracted;
       }
@@ -5360,6 +5415,7 @@ Wan'Dale Robinson`;
   const fetchAiNutshell = async (result) => {
     setAiLoading(true);
     setAiNutshell(null);
+    setAiFailed(false);
     try {
       const isRedraft = result.mode === "redraft";
 
@@ -5650,12 +5706,14 @@ Analyze this best ball roster. Return JSON only.`;
       if (!response.ok) throw new Error("API error");
       const data = await response.json();
       const raw = data?.content?.[0]?.text?.trim();
-      if (!raw) return;
+      if (!raw) throw new Error("Empty response");
 
       const clean = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
 
-      if (parsed.nutshell) setAiNutshell(parsed.nutshell);
+      // Set every field we did get BEFORE judging the response, so a missing
+      // nutshell never costs us the notes that arrived alongside it.
+      if (parsed.nutshell) setAiNutshell(parsed.nutshell); else setAiFailed(true);
       if (parsed.pivotNotes && typeof parsed.pivotNotes === "object") setAiPivotNotes(parsed.pivotNotes);
       if (parsed.standoutDetails && typeof parsed.standoutDetails === "object") setAiStandoutDetails(parsed.standoutDetails);
       if (parsed.bringBackNotes && typeof parsed.bringBackNotes === "object") setAiBringBackNotes(parsed.bringBackNotes);
@@ -5688,7 +5746,10 @@ Analyze this best ball roster. Return JSON only.`;
         });
       }
     } catch (e) {
-      // Silent fail — static content stays as fallback
+      // The template nutshell still renders as a fallback, but the failure is
+      // no longer silent — see aiFailed. Silence was the actual bug: it made a
+      // dropped AI pass look identical to a successful one.
+      setAiFailed(true);
     } finally {
       setAiLoading(false);
     }
@@ -7400,7 +7461,7 @@ Analyze this best ball roster. Return JSON only.`;
 
               {analyzed && (
                 <button
-                  onClick={() => { setAnalyzed(null); setInput(""); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
+                  onClick={() => { setAnalyzed(null); setInput(""); setAiNutshell(null); setAiFailed(false); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); }}
                   style={{
                     background: "transparent",
                     color: "var(--text-muted)",
@@ -7426,7 +7487,7 @@ Analyze this best ball roster. Return JSON only.`;
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", background: "#0d1a12", border: "1px solid #22c55e33", borderRadius: "6px", padding: "12px 16px", marginBottom: "16px" }}>
             <span style={{ fontSize: "12px", color: "#86efac", fontWeight: 600 }}>👁 You're viewing a shared roster grade</span>
             <button
-              onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
+              onClick={() => { setSharedView(false); setAnalyzed(null); setAiNutshell(null); setAiFailed(false); setExportedDataUrl(null); window.history.replaceState(null, "", window.location.pathname); setHeroCollapsed(false); }}
               style={{ background: "linear-gradient(90deg, #16a34a, var(--pos-solid))", border: "none", borderRadius: "4px", padding: "8px 16px", color: "#04210f", fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.03em", cursor: "pointer", whiteSpace: "nowrap" }}
             >
               Grade your own roster →
@@ -7471,7 +7532,12 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
-                {analyzed.valid.length < 10 && (
+                {/* Best ball rosters are a FIXED size, so anything short means a
+                    player was missed — most often one the screenshot reader skipped.
+                    The old floor of 10 only caught catastrophic failures: a 17-of-18
+                    roster (the Jul 27 2026 Skattebo case) showed no warning at all,
+                    and the match counter read "17/17" because it counts survivors. */}
+                {analyzed.valid.length < (analyzed.format === "superflex" ? 20 : 18) && (
                   <div style={{
                     marginTop: "10px",
                     padding: "8px 12px",
@@ -7504,6 +7570,15 @@ Analyze this best ball roster. Return JSON only.`;
                       )}
                       {aiNutshell && !aiLoading && (
                         <span style={{ fontSize: "8px", color: "#4ade80aa", letterSpacing: "0.08em" }}>✦ AI</span>
+                      )}
+                      {aiFailed && !aiLoading && (
+                        <button
+                          onClick={() => analyzed && fetchAiNutshell(analyzed)}
+                          data-compact
+                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                        >
+                          ⚠ AI unavailable · retry
+                        </button>
                       )}
                     </div>
                     {aiLoading ? (
@@ -7610,7 +7685,7 @@ Analyze this best ball roster. Return JSON only.`;
                       {shareLinkLoading ? "Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "Copy Link"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiFailed(false); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid var(--border-default)",
@@ -8730,6 +8805,9 @@ Analyze this best ball roster. Return JSON only.`;
                     {analyzed.valid.length}/{analyzed.picks.length} matched
                   </span>
                 </div>
+                {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),
+                    so a fixed expectation would cry wolf. The match counter plus the
+                    notFound rows carry the signal here instead. */}
                 {analyzed.valid.length < 10 && (
                   <div style={{
                     marginTop: "10px",
@@ -8763,6 +8841,15 @@ Analyze this best ball roster. Return JSON only.`;
                       )}
                       {aiNutshell && !aiLoading && (
                         <span style={{ fontSize: "8px", color: "#c084fcaa", letterSpacing: "0.08em" }}>✦ AI</span>
+                      )}
+                      {aiFailed && !aiLoading && (
+                        <button
+                          onClick={() => analyzed && fetchAiNutshell(analyzed)}
+                          data-compact
+                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                        >
+                          ⚠ AI unavailable · retry
+                        </button>
                       )}
                     </div>
                     {aiLoading ? (
@@ -8869,7 +8956,7 @@ Analyze this best ball roster. Return JSON only.`;
                       {shareLinkLoading ? "Creating…" : shareLinkCopied ? "✓ Link Copied" : shareLinkError ? "✗ Try Again" : "Copy Link"}
                     </button>
                     <button
-                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
+                      onClick={() => { setAnalyzed(null); setInput(""); setExportedDataUrl(null); setUploadedImages([]); setAiNutshell(null); setAiFailed(false); setAiLoading(false); setAiPivotNotes({}); setAiStandoutDetails({}); setAiBenchMoveNotes({}); setAiLineupNotes({}); setAiBringBackNotes({}); setCachedShareUrl(null); setTradeOpen(false); setTradeGive(""); setTradeGet(""); setTradeResult(null); setTradeError(null); }}
                       style={{
                         background: "transparent",
                         border: "1px solid var(--border-default)",
