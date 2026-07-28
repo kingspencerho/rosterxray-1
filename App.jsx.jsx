@@ -776,6 +776,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "jonathan taylor": { verdict: "TARGET", trend: "stable", trendNote: "2025 rate stats understate him (noted Jul 28 2026): Daniel Jones tore through half a season then went down, and the whole IND offense sank with the backup — yet Taylor still posted a 35% nuclear-week rate, best of any RB. The spike profile is real and the QB constraint is resolved with Jones healthy for 2026. Thin receiving role (2.7 rec/g) is the honest cap in PPR formats", situationFlags: ["scheme_fit"], riskFlags: [] },
   "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
   "saquon barkley": { verdict: "TARGET", trend: "stable", trendNote: "Workhorse with AJ Brown gone — even more targets now", situationFlags: ["target_vacuum"], riskFlags: [] },
@@ -1034,206 +1035,210 @@ function calcChampionshipWindowScore(analyzed, adpSource) {
 
 // ============ REDRAFT DATA ============
 
+// Vintage: refreshed Jul 28 2026 for ADP <= ~135 from a live Yahoo draft-lobby
+// capture (10-team full-PPR cash league, user-supplied recording). Entries
+// deeper than ~135 retain the older snapshot — Yahoo lists mostly K/DEF there.
+// Note ADP_UPDATED ("Jun 24") describes the Underdog ADP_DATA snapshot only.
 const ADP_YAHOO = {
-  "jamarr chase": { adp: 1.0, pos: "WR", team: "CIN" },
-  "bijan robinson": { adp: 2.0, pos: "RB", team: "ATL" },
-  "jahmyr gibbs": { adp: 3.0, pos: "RB", team: "DET" },
-  "puka nacua": { adp: 4.0, pos: "WR", team: "LAR" },
-  "jaxon smith njigba": { adp: 5.0, pos: "WR", team: "SEA" },
-  "jsn": { adp: 5.0, pos: "WR", team: "SEA" },
-  "christian mccaffrey": { adp: 6.0, pos: "RB", team: "SF" },
-  "cmc": { adp: 6.0, pos: "RB", team: "SF" },
-  "ceedee lamb": { adp: 7.0, pos: "WR", team: "DAL" },
-  "jonathan taylor": { adp: 8.0, pos: "RB", team: "IND" },
-  "amon ra st brown": { adp: 9.0, pos: "WR", team: "DET" },
-  "arsb": { adp: 9.0, pos: "WR", team: "DET" },
-  "james cook": { adp: 10.0, pos: "RB", team: "BUF" },
-  "ashton jeanty": { adp: 11.0, pos: "RB", team: "LV" },
-  "justin jefferson": { adp: 12.0, pos: "WR", team: "MIN" },
-  "devon achane": { adp: 13.0, pos: "RB", team: "MIA" },
-  "achane": { adp: 13.0, pos: "RB", team: "MIA" },
-  "chase brown": { adp: 14.0, pos: "RB", team: "CIN" },
-  "saquon barkley": { adp: 15.0, pos: "RB", team: "PHI" },
-  "drake london": { adp: 16.0, pos: "WR", team: "ATL" },
-  "rashee rice": { adp: 17.0, pos: "WR", team: "KC" },
-  "brock bowers": { adp: 18.0, pos: "TE", team: "LV" },
-  "nico collins": { adp: 19.0, pos: "WR", team: "HOU" },
-  "omarion hampton": { adp: 20.0, pos: "RB", team: "LAC" },
-  "kenneth walker": { adp: 21.0, pos: "RB", team: "KC" },
-  "trey mcbride": { adp: 22.0, pos: "TE", team: "ARI" },
-  "george pickens": { adp: 23.0, pos: "WR", team: "DAL" },
-  "malik nabers": { adp: 24.0, pos: "WR", team: "NYG" },
-  "jeremiyah love": { adp: 25.0, pos: "RB", team: "ARI" },
-  "josh allen": { adp: 26.0, pos: "QB", team: "BUF" },
-  "chris olave": { adp: 27.0, pos: "WR", team: "NO" },
-  "derrick henry": { adp: 28.0, pos: "RB", team: "BAL" },
-  "aj brown": { adp: 29.0, pos: "WR", team: "NE" },
-  "lamar jackson": { adp: 30.0, pos: "QB", team: "BAL" },
-  "josh jacobs": { adp: 31.0, pos: "RB", team: "GB" },
-  "tetairoa mcmillan": { adp: 32.0, pos: "WR", team: "CAR" },
-  "devonta smith": { adp: 33.0, pos: "WR", team: "PHI" },
-  "tee higgins": { adp: 34.0, pos: "WR", team: "CIN" },
-  "drake maye": { adp: 35.0, pos: "QB", team: "NE" },
-  "colston loveland": { adp: 36.0, pos: "TE", team: "CHI" },
-  "garrett wilson": { adp: 37.0, pos: "WR", team: "NYJ" },
-  "kyren williams": { adp: 38.0, pos: "RB", team: "LAR" },
-  "travis etienne": { adp: 39.0, pos: "RB", team: "NO" },
-  "breece hall": { adp: 40.0, pos: "RB", team: "NYJ" },
-  "javonte williams": { adp: 41.0, pos: "RB", team: "DAL" },
-  "zay flowers": { adp: 42.0, pos: "WR", team: "BAL" },
-  "ladd mcconkey": { adp: 36.9, pos: "WR", team: "LAC" },
-  "davante adams": { adp: 44.0, pos: "WR", team: "LAR" },
-  "jaylen waddle": { adp: 45.0, pos: "WR", team: "DEN" },
-  "luther burden": { adp: 46.0, pos: "WR", team: "CHI" },
-  "joe burrow": { adp: 47.0, pos: "QB", team: "CIN" },
-  "terry mclaurin": { adp: 48.0, pos: "WR", team: "WAS" },
-  "bucky irving": { adp: 49.0, pos: "RB", team: "TB" },
-  "jameson williams": { adp: 50.0, pos: "WR", team: "DET" },
-  "cam skattebo": { adp: 51.0, pos: "RB", team: "NYG" },
-  "jayden daniels": { adp: 52.0, pos: "QB", team: "WAS" },
-  "emeka egbuka": { adp: 53.0, pos: "WR", team: "TB" },
-  "jalen hurts": { adp: 54.0, pos: "QB", team: "PHI" },
-  "treveyon henderson": { adp: 55.0, pos: "RB", team: "NE" },
-  "dandre swift": { adp: 56.0, pos: "RB", team: "CHI" },
-  "dj moore": { adp: 57.0, pos: "WR", team: "BUF" },
-  "christian watson": { adp: 58.0, pos: "WR", team: "GB" },
-  "tyler warren": { adp: 59.0, pos: "TE", team: "IND" },
-  "chuba hubbard": { adp: 60.0, pos: "RB", team: "CAR" },
-  "rome odunze": { adp: 61.0, pos: "WR", team: "CHI" },
-  "quinshon judkins": { adp: 62.0, pos: "RB", team: "CLE" },
-  "tucker kraft": { adp: 63.0, pos: "TE", team: "GB" },
-  "bhayshul tuten": { adp: 64.0, pos: "RB", team: "JAX" },
-  "carnell tate": { adp: 65.0, pos: "WR", team: "TEN" },
-  "mike evans": { adp: 66.0, pos: "WR", team: "SF" },
-  "david montgomery": { adp: 67.0, pos: "RB", team: "HOU" },
-  "justin herbert": { adp: 68.0, pos: "QB", team: "LAC" },
-  "jaxson dart": { adp: 69.0, pos: "QB", team: "NYG" },
-  "jaylen warren": { adp: 70.0, pos: "RB", team: "PIT" },
-  "jordyn tyson": { adp: 71.0, pos: "WR", team: "NO" },
-  "jadarian price": { adp: 72.0, pos: "RB", team: "SEA" },
-  "marvin harrison jr": { adp: 73.0, pos: "WR", team: "ARI" },
+  "jamarr chase": { adp: 3.1, pos: "WR", team: "CIN" },
+  "bijan robinson": { adp: 1.6, pos: "RB", team: "ATL" },
+  "jahmyr gibbs": { adp: 1.9, pos: "RB", team: "DET" },
+  "puka nacua": { adp: 4.5, pos: "WR", team: "LAR" },
+  "jaxon smith njigba": { adp: 6.0, pos: "WR", team: "SEA" },
+  "jsn": { adp: 6.0, pos: "WR", team: "SEA" },
+  "christian mccaffrey": { adp: 5.6, pos: "RB", team: "SF" },
+  "cmc": { adp: 5.6, pos: "RB", team: "SF" },
+  "ceedee lamb": { adp: 9.5, pos: "WR", team: "DAL" },
+  "jonathan taylor": { adp: 7.2, pos: "RB", team: "IND" },
+  "amon ra st brown": { adp: 8.8, pos: "WR", team: "DET" },
+  "arsb": { adp: 8.8, pos: "WR", team: "DET" },
+  "james cook": { adp: 9.9, pos: "RB", team: "BUF" },
+  "ashton jeanty": { adp: 13.2, pos: "RB", team: "LV" },
+  "justin jefferson": { adp: 12.1, pos: "WR", team: "MIN" },
+  "devon achane": { adp: 14.8, pos: "RB", team: "MIA" },
+  "achane": { adp: 14.8, pos: "RB", team: "MIA" },
+  "chase brown": { adp: 16.8, pos: "RB", team: "CIN" },
+  "saquon barkley": { adp: 14.0, pos: "RB", team: "PHI" },
+  "drake london": { adp: 17.0, pos: "WR", team: "ATL" },
+  "rashee rice": { adp: 33.7, pos: "WR", team: "KC" },
+  "brock bowers": { adp: 19.9, pos: "TE", team: "LV" },
+  "nico collins": { adp: 21.1, pos: "WR", team: "HOU" },
+  "omarion hampton": { adp: 18.7, pos: "RB", team: "LAC" },
+  "kenneth walker": { adp: 20.3, pos: "RB", team: "KC" },
+  "trey mcbride": { adp: 23.4, pos: "TE", team: "ARI" },
+  "george pickens": { adp: 22.3, pos: "WR", team: "DAL" },
+  "malik nabers": { adp: 34.2, pos: "WR", team: "NYG" },
+  "jeremiyah love": { adp: 26.6, pos: "RB", team: "ARI" },
+  "josh allen": { adp: 19.0, pos: "QB", team: "BUF" },
+  "chris olave": { adp: 31.5, pos: "WR", team: "NO" },
+  "derrick henry": { adp: 19.1, pos: "RB", team: "BAL" },
+  "aj brown": { adp: 26.8, pos: "WR", team: "NE" },
+  "lamar jackson": { adp: 33.6, pos: "QB", team: "BAL" },
+  "josh jacobs": { adp: 30.1, pos: "RB", team: "GB" },
+  "tetairoa mcmillan": { adp: 38.7, pos: "WR", team: "CAR" },
+  "devonta smith": { adp: 30.1, pos: "WR", team: "PHI" },
+  "tee higgins": { adp: 34.5, pos: "WR", team: "CIN" },
+  "drake maye": { adp: 44.7, pos: "QB", team: "NE" },
+  "colston loveland": { adp: 38.6, pos: "TE", team: "CHI" },
+  "garrett wilson": { adp: 46.6, pos: "WR", team: "NYJ" },
+  "kyren williams": { adp: 30.6, pos: "RB", team: "LAR" },
+  "travis etienne": { adp: 41.5, pos: "RB", team: "NO" },
+  "breece hall": { adp: 38.3, pos: "RB", team: "NYJ" },
+  "javonte williams": { adp: 35.7, pos: "RB", team: "DAL" },
+  "zay flowers": { adp: 41.3, pos: "WR", team: "BAL" },
+  "ladd mcconkey": { adp: 45.7, pos: "WR", team: "LAC" },
+  "davante adams": { adp: 48.4, pos: "WR", team: "LAR" },
+  "jaylen waddle": { adp: 47.3, pos: "WR", team: "DEN" },
+  "luther burden": { adp: 57.8, pos: "WR", team: "CHI" },
+  "joe burrow": { adp: 44.4, pos: "QB", team: "CIN" },
+  "terry mclaurin": { adp: 56.4, pos: "WR", team: "WAS" },
+  "bucky irving": { adp: 50.1, pos: "RB", team: "TB" },
+  "jameson williams": { adp: 63.1, pos: "WR", team: "DET" },
+  "cam skattebo": { adp: 42.3, pos: "RB", team: "NYG" },
+  "jayden daniels": { adp: 52.4, pos: "QB", team: "WAS" },
+  "emeka egbuka": { adp: 48.0, pos: "WR", team: "TB" },
+  "jalen hurts": { adp: 55.5, pos: "QB", team: "PHI" },
+  "treveyon henderson": { adp: 56.4, pos: "RB", team: "NE" },
+  "dandre swift": { adp: 50.6, pos: "RB", team: "CHI" },
+  "dj moore": { adp: 65.7, pos: "WR", team: "BUF" },
+  "christian watson": { adp: 70.8, pos: "WR", team: "GB" },
+  "tyler warren": { adp: 48.7, pos: "TE", team: "IND" },
+  "chuba hubbard": { adp: 68.4, pos: "RB", team: "CAR" },
+  "rome odunze": { adp: 70.3, pos: "WR", team: "CHI" },
+  "quinshon judkins": { adp: 54.7, pos: "RB", team: "CLE" },
+  "tucker kraft": { adp: 60.0, pos: "TE", team: "GB" },
+  "bhayshul tuten": { adp: 65.4, pos: "RB", team: "JAX" },
+  "carnell tate": { adp: 77.1, pos: "WR", team: "TEN" },
+  "mike evans": { adp: 65.8, pos: "WR", team: "SF" },
+  "david montgomery": { adp: 55.8, pos: "RB", team: "HOU" },
+  "justin herbert": { adp: 66.2, pos: "QB", team: "LAC" },
+  "jaxson dart": { adp: 74.7, pos: "QB", team: "NYG" },
+  "jaylen warren": { adp: 75.2, pos: "RB", team: "PIT" },
+  "jordyn tyson": { adp: 89.8, pos: "WR", team: "NO" },
+  "jadarian price": { adp: 66.5, pos: "RB", team: "SEA" },
+  "marvin harrison jr": { adp: 78.8, pos: "WR", team: "ARI" },
   "mhj": { adp: 73.0, pos: "WR", team: "ARI" },
-  "makai lemon": { adp: 74.0, pos: "WR", team: "PHI" },
-  "rico dowdle": { adp: 75.0, pos: "RB", team: "PIT" },
-  "alec pierce": { adp: 76.0, pos: "WR", team: "IND" },
-  "rj harvey": { adp: 77.0, pos: "RB", team: "DEN" },
-  "caleb williams": { adp: 78.0, pos: "QB", team: "CHI" },
-  "courtland sutton": { adp: 79.0, pos: "WR", team: "DEN" },
-  "harold fannin": { adp: 80.0, pos: "TE", team: "CLE" },
-  "michael wilson": { adp: 81.0, pos: "WR", team: "ARI" },
-  "dk metcalf": { adp: 82.0, pos: "WR", team: "PIT" },
-  "rhamondre stevenson": { adp: 83.0, pos: "RB", team: "NE" },
-  "sam laporta": { adp: 84.0, pos: "TE", team: "DET" },
-  "tony pollard": { adp: 85.0, pos: "RB", team: "TEN" },
-  "chris godwin": { adp: 86.0, pos: "WR", team: "TB" },
-  "trevor lawrence": { adp: 87.0, pos: "QB", team: "JAX" },
-  "kyle pitts": { adp: 88.0, pos: "TE", team: "ATL" },
-  "dak prescott": { adp: 89.0, pos: "QB", team: "DAL" },
-  "brian thomas jr": { adp: 63.0, pos: "WR", team: "JAX" },
+  "makai lemon": { adp: 97.1, pos: "WR", team: "PHI" },
+  "rico dowdle": { adp: 83.0, pos: "RB", team: "PIT" },
+  "alec pierce": { adp: 80.0, pos: "WR", team: "IND" },
+  "rj harvey": { adp: 93.0, pos: "RB", team: "DEN" },
+  "caleb williams": { adp: 72.3, pos: "QB", team: "CHI" },
+  "courtland sutton": { adp: 96.2, pos: "WR", team: "DEN" },
+  "harold fannin": { adp: 70.6, pos: "TE", team: "CLE" },
+  "michael wilson": { adp: 99.0, pos: "WR", team: "ARI" },
+  "dk metcalf": { adp: 86.7, pos: "WR", team: "PIT" },
+  "rhamondre stevenson": { adp: 85.8, pos: "RB", team: "NE" },
+  "sam laporta": { adp: 66.2, pos: "TE", team: "DET" },
+  "tony pollard": { adp: 88.6, pos: "RB", team: "TEN" },
+  "chris godwin": { adp: 98.1, pos: "WR", team: "TB" },
+  "trevor lawrence": { adp: 86.7, pos: "QB", team: "JAX" },
+  "kyle pitts": { adp: 74.1, pos: "TE", team: "ATL" },
+  "dak prescott": { adp: 77.4, pos: "QB", team: "DAL" },
+  "brian thomas jr": { adp: 89.0, pos: "WR", team: "JAX" },
   "btj": { adp: 90.0, pos: "WR", team: "JAX" },
-  "ricky pearsall": { adp: 91.0, pos: "WR", team: "SF" },
-  "kyle monangai": { adp: 92.0, pos: "RB", team: "CHI" },
-  "jk dobbins": { adp: 93.0, pos: "RB", team: "DEN" },
-  "parker washington": { adp: 94.0, pos: "WR", team: "JAX" },
-  "blake corum": { adp: 95.0, pos: "RB", team: "LAR" },
+  "ricky pearsall": { adp: 110.2, pos: "WR", team: "SF" },
+  "kyle monangai": { adp: 95.7, pos: "RB", team: "CHI" },
+  "jk dobbins": { adp: 100.9, pos: "RB", team: "DEN" },
+  "parker washington": { adp: 99.2, pos: "WR", team: "JAX" },
+  "blake corum": { adp: 97.9, pos: "RB", team: "LAR" },
   "jakobi meyers": { adp: 96.0, pos: "WR", team: "JAX" },
-  "kyler murray": { adp: 97.0, pos: "QB", team: "MIN" },
-  "jacory croskey merritt": { adp: 98.0, pos: "RB", team: "WAS" },
-  "bo nix": { adp: 99.0, pos: "QB", team: "DEN" },
-  "dalton kincaid": { adp: 100.0, pos: "TE", team: "BUF" },
-  "brock purdy": { adp: 101.0, pos: "QB", team: "SF" },
-  "jordan addison": { adp: 102.0, pos: "WR", team: "MIN" },
+  "kyler murray": { adp: 107.9, pos: "QB", team: "MIN" },
+  "jacory croskey merritt": { adp: 115.0, pos: "RB", team: "WAS" },
+  "bo nix": { adp: 101.4, pos: "QB", team: "DEN" },
+  "dalton kincaid": { adp: 98.4, pos: "TE", team: "BUF" },
+  "brock purdy": { adp: 100.4, pos: "QB", team: "SF" },
+  "jordan addison": { adp: 121.6, pos: "WR", team: "MIN" },
   "oronde gadsden": { adp: 103.0, pos: "TE", team: "LAC" },
-  "kenneth gainwell": { adp: 104.0, pos: "RB", team: "TB" },
+  "kenneth gainwell": { adp: 113.1, pos: "RB", team: "TB" },
   "kenny gainwell": { adp: 104.0, pos: "RB", team: "TB" },
-  "patrick mahomes": { adp: 105.0, pos: "QB", team: "KC" },
-  "michael pittman jr": { adp: 106.0, pos: "WR", team: "PIT" },
-  "dallas goedert": { adp: 107.0, pos: "TE", team: "PHI" },
-  "tyler allgeier": { adp: 108.0, pos: "RB", team: "ARI" },
-  "aaron jones": { adp: 109.0, pos: "RB", team: "MIN" },
-  "travis kelce": { adp: 110.0, pos: "TE", team: "KC" },
-  "josh downs": { adp: 111.0, pos: "WR", team: "IND" },
-  "wandale robinson": { adp: 112.0, pos: "WR", team: "TEN" },
+  "patrick mahomes": { adp: 94.9, pos: "QB", team: "KC" },
+  "michael pittman jr": { adp: 120.6, pos: "WR", team: "PIT" },
+  "dallas goedert": { adp: 104.7, pos: "TE", team: "PHI" },
+  "tyler allgeier": { adp: 129.4, pos: "RB", team: "ARI" },
+  "aaron jones": { adp: 117.2, pos: "RB", team: "MIN" },
+  "travis kelce": { adp: 95.6, pos: "TE", team: "KC" },
+  "josh downs": { adp: 122.5, pos: "WR", team: "IND" },
+  "wandale robinson": { adp: 129.9, pos: "WR", team: "TEN" },
   "jayden reed": { adp: 113.0, pos: "WR", team: "GB" },
-  "quentin johnston": { adp: 114.0, pos: "WR", team: "LAC" },
-  "jordan mason": { adp: 115.0, pos: "RB", team: "MIN" },
-  "rachaad white": { adp: 116.0, pos: "RB", team: "WAS" },
-  "jayden higgins": { adp: 117.0, pos: "WR", team: "HOU" },
-  "jake ferguson": { adp: 118.0, pos: "TE", team: "DAL" },
-  "zach charbonnet": { adp: 119.0, pos: "RB", team: "SEA" },
-  "isaiah likely": { adp: 120.0, pos: "TE", team: "NYG" },
-  "george kittle": { adp: 121.0, pos: "TE", team: "SF" },
-  "tyrone tracy": { adp: 122.0, pos: "RB", team: "NYG" },
+  "quentin johnston": { adp: 117.6, pos: "WR", team: "LAC" },
+  "jordan mason": { adp: 122.9, pos: "RB", team: "MIN" },
+  "rachaad white": { adp: 120.9, pos: "RB", team: "WAS" },
+  "jayden higgins": { adp: 134.4, pos: "WR", team: "HOU" },
+  "jake ferguson": { adp: 111.4, pos: "TE", team: "DAL" },
+  "zach charbonnet": { adp: 127.3, pos: "RB", team: "SEA" },
+  "isaiah likely": { adp: 108.8, pos: "TE", team: "NYG" },
+  "george kittle": { adp: 91.0, pos: "TE", team: "SF" },
+  "tyrone tracy": { adp: 130.3, pos: "RB", team: "NYG" },
   "chris rodriguez": { adp: 123.0, pos: "RB", team: "JAX" },
-  "jonathon brooks": { adp: 124.0, pos: "RB", team: "CAR" },
+  "jonathon brooks": { adp: 113.4, pos: "RB", team: "CAR" },
   "romeo doubs": { adp: 125.0, pos: "WR", team: "NE" },
   "jalen coker": { adp: 126.0, pos: "WR", team: "CAR" },
-  "malik willis": { adp: 127.0, pos: "QB", team: "MIA" },
-  "matthew stafford": { adp: 128.0, pos: "QB", team: "LAR" },
-  "xavier worthy": { adp: 129.0, pos: "WR", team: "KC" },
+  "malik willis": { adp: 122.1, pos: "QB", team: "MIA" },
+  "matthew stafford": { adp: 100.7, pos: "QB", team: "LAR" },
+  "xavier worthy": { adp: 127.5, pos: "WR", team: "KC" },
   "kc concepcion": { adp: 130.0, pos: "WR", team: "CLE" },
   "tyjae spears": { adp: 131.0, pos: "RB", team: "TEN" },
   "woody marks": { adp: 132.0, pos: "RB", team: "HOU" },
   "khalil shakir": { adp: 133.0, pos: "WR", team: "BUF" },
-  "matthew golden": { adp: 134.0, pos: "WR", team: "GB" },
-  "jonah coleman": { adp: 135.0, pos: "RB", team: "DEN" },
-  "jared goff": { adp: 136.0, pos: "QB", team: "DET" },
+  "matthew golden": { adp: 131.9, pos: "WR", team: "GB" },
+  "jonah coleman": { adp: 131.2, pos: "RB", team: "DEN" },
+  "jared goff": { adp: 115.9, pos: "QB", team: "DET" },
   "jordan love": { adp: 137.0, pos: "QB", team: "GB" },
   "keaton mitchell": { adp: 138.0, pos: "RB", team: "LAC" },
-  "tyler shough": { adp: 139.0, pos: "QB", team: "NO" },
+  "tyler shough": { adp: 129.2, pos: "QB", team: "NO" },
   "stefon diggs": { adp: 140.0, pos: "WR", team: "-" },
   "braelon allen": { adp: 141.0, pos: "RB", team: "NYJ" },
   "dylan sampson": { adp: 142.0, pos: "RB", team: "CLE" },
   "baker mayfield": { adp: 143.0, pos: "QB", team: "TB" },
-  "mark andrews": { adp: 144.0, pos: "TE", team: "BAL" },
-  "brenton strange": { adp: 145.0, pos: "TE", team: "JAX" },
+  "mark andrews": { adp: 114.9, pos: "TE", team: "BAL" },
+  "brenton strange": { adp: 127.2, pos: "TE", team: "JAX" },
   "brian robinson": { adp: 146.0, pos: "RB", team: "ATL" },
-  "isiah pacheco": { adp: 147.0, pos: "RB", team: "DET" },
-  "denzel boston": { adp: 148.0, pos: "WR", team: "CLE" },
+  "isiah pacheco": { adp: 127.6, pos: "RB", team: "DET" },
+  "denzel boston": { adp: 131.4, pos: "WR", team: "CLE" },
   "hunter henry": { adp: 149.0, pos: "TE", team: "NE" },
-  "deebo samuel": { adp: 150.0, pos: "WR", team: "-" },
+  "deebo samuel": { adp: 134.7, pos: "WR", team: "-" },
   "emanuel wilson": { adp: 151.0, pos: "RB", team: "SEA" },
-  "cj stroud": { adp: 152.0, pos: "QB", team: "HOU" },
+  "cj stroud": { adp: 127.2, pos: "QB", team: "HOU" },
   "mike washington jr": { adp: 192.0, pos: "RB", team: "LV" },
   "alvin kamara": { adp: 154.0, pos: "RB", team: "NO" },
-  "james conner": { adp: 155.0, pos: "RB", team: "ARI" },
-  "omar cooper jr": { adp: 156.0, pos: "WR", team: "NYJ" },
+  "james conner": { adp: 127.6, pos: "RB", team: "ARI" },
+  "omar cooper jr": { adp: 131.5, pos: "WR", team: "NYJ" },
   "tank bigsby": { adp: 157.0, pos: "RB", team: "PHI" },
   "bryce young": { adp: 158.0, pos: "QB", team: "CAR" },
   "brandon aiyuk": { adp: 159.0, pos: "WR", team: "SF" },
-  "juwan johnson": { adp: 160.0, pos: "TE", team: "NO" },
+  "juwan johnson": { adp: 131.1, pos: "TE", team: "NO" },
   "sam darnold": { adp: 161.0, pos: "QB", team: "SEA" },
-  "jalen mcmillan": { adp: 162.0, pos: "WR", team: "TB" },
+  "jalen mcmillan": { adp: 129.5, pos: "WR", team: "TB" },
   "jerry jeudy": { adp: 163.0, pos: "WR", team: "CLE" },
-  "cam ward": { adp: 164.0, pos: "QB", team: "TEN" },
-  "jauan jennings": { adp: 165.0, pos: "WR", team: "MIN" },
+  "cam ward": { adp: 127.4, pos: "QB", team: "TEN" },
+  "jauan jennings": { adp: 131.7, pos: "WR", team: "MIN" },
   "daniel jones": { adp: 166.0, pos: "QB", team: "IND" },
   "nicholas singleton": { adp: 167.0, pos: "RB", team: "TEN" },
-  "rashid shaheed": { adp: 168.0, pos: "WR", team: "SEA" },
+  "rashid shaheed": { adp: 130.1, pos: "WR", team: "SEA" },
   "adonai mitchell": { adp: 169.0, pos: "WR", team: "NYJ" },
   "kayshon boutte": { adp: 170.0, pos: "WR", team: "NE" },
   "kaytron allen": { adp: 171.0, pos: "RB", team: "WAS" },
   "ray davis": { adp: 172.0, pos: "RB", team: "BUF" },
   "emmett johnson": { adp: 173.0, pos: "RB", team: "KC" },
-  "kenyon sadiq": { adp: 174.0, pos: "TE", team: "NYJ" },
-  "chigoziem okonkwo": { adp: 175.0, pos: "TE", team: "WAS" },
+  "kenyon sadiq": { adp: 129.1, pos: "TE", team: "NYJ" },
+  "chigoziem okonkwo": { adp: 127.4, pos: "TE", team: "WAS" },
   "kimani vidal": { adp: 176.0, pos: "RB", team: "LAC" },
   "tyreek hill": { adp: 177.0, pos: "WR", team: "-" },
-  "tj hockenson": { adp: 178.0, pos: "TE", team: "MIN" },
+  "tj hockenson": { adp: 131.2, pos: "TE", team: "MIN" },
   "terrance ferguson": { adp: 179.0, pos: "TE", team: "LAR" },
   "jacoby brissett": { adp: 180.0, pos: "QB", team: "ARI" },
-  "antonio williams": { adp: 181.0, pos: "WR", team: "WAS" },
+  "antonio williams": { adp: 135.2, pos: "WR", team: "WAS" },
   "sean tucker": { adp: 182.0, pos: "RB", team: "TB" },
   "calvin ridley": { adp: 183.0, pos: "WR", team: "TEN" },
   "chris bell": { adp: 184.0, pos: "WR", team: "MIA" },
-  "dalton schultz": { adp: 185.0, pos: "TE", team: "HOU" },
+  "dalton schultz": { adp: 131.3, pos: "TE", team: "HOU" },
   "jack bech": { adp: 186.0, pos: "WR", team: "LV" },
   "eli stowers": { adp: 187.0, pos: "TE", team: "PHI" },
   "troy franklin": { adp: 189.0, pos: "WR", team: "DEN" },
   "tre tucker": { adp: 190.0, pos: "WR", team: "LV" },
   "tre harris": { adp: 167.5, pos: "WR", team: "LAC" },
   "jalen nailor": { adp: 192.0, pos: "WR", team: "LV" },
-  "isaac teslaa": { adp: 193.0, pos: "WR", team: "DET" },
+  "isaac teslaa": { adp: 120.1, pos: "WR", team: "DET" },
   "trey benson": { adp: 194.0, pos: "RB", team: "ARI" },
   "aj barner": { adp: 195.0, pos: "TE", team: "SEA" },
   "ryan flournoy": { adp: 196.0, pos: "WR", team: "DAL" },
@@ -1245,7 +1250,7 @@ const ADP_YAHOO = {
   "colby parkinson": { adp: 204.0, pos: "TE", team: "LAR" },
   "tank dell": { adp: 205.0, pos: "WR", team: "HOU" },
   "dezhaun stribling": { adp: 206.0, pos: "WR", team: "SF" },
-  "aaron rodgers": { adp: 207.0, pos: "QB", team: "PIT" },
+  "aaron rodgers": { adp: 118.4, pos: "QB", team: "PIT" },
   "pat freiermuth": { adp: 208.0, pos: "TE", team: "PIT" },
   "gunnar helm": { adp: 209.0, pos: "TE", team: "TEN" },
   "cooper kupp": { adp: 210.0, pos: "WR", team: "SEA" },
@@ -1257,7 +1262,7 @@ const ADP_YAHOO = {
   "justice hill": { adp: 216.0, pos: "RB", team: "BAL" },
   "malachi fields": { adp: 217.0, pos: "WR", team: "NYG" },
   "ted hurst": { adp: 218.0, pos: "WR", team: "TB" },
-  "travis hunter": { adp: 219.0, pos: "WR", team: "JAX" },
+  "travis hunter": { adp: 128.2, pos: "WR", team: "JAX" },
   "jaylin noel": { adp: 223.0, pos: "WR", team: "HOU" },
   "chimere dike": { adp: 226.0, pos: "WR", team: "TEN" },
   "elic ayomanor": { adp: 227.0, pos: "WR", team: "TEN" },
@@ -1282,7 +1287,7 @@ const ADP_YAHOO = {
   "malik washington": { adp: 254.0, pos: "WR", team: "MIA" },
   "tua tagovailoa": { adp: 255.0, pos: "QB", team: "ATL" },
   "kaelon black": { adp: 256.0, pos: "RB", team: "SF" },
-  "greg dulcich": { adp: 184.6, pos: "TE", team: "MIA" },
+  "greg dulcich": { adp: 134.2, pos: "TE", team: "MIA" },
   "deshaun watson": { adp: 260.0, pos: "QB", team: "CLE" },
   "michael penix jr": { adp: 261.0, pos: "QB", team: "ATL" },
   "keenan allen": { adp: 262.0, pos: "WR", team: "-" },
@@ -1314,7 +1319,7 @@ const ADP_YAHOO = {
   "odell beckham": { adp: 242.0, pos: "WR", team: "NYG" },
   "odell beckham jr": { adp: 242.0, pos: "WR", team: "NYG" },
   // Suffix aliases
-  "luther burden iii": { adp: 46.0, pos: "WR", team: "CHI" },
+  "luther burden iii": { adp: 57.8, pos: "WR", team: "CHI" },
   "jatavion sanders": { adp: 251.0, pos: "TE", team: "CAR" },
   "eli raridon": { adp: 258.0, pos: "TE", team: "NE" },
   "elijah arroyo": { adp: 261.0, pos: "TE", team: "SEA" },
@@ -1659,6 +1664,34 @@ const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
 const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
+
+// === CEILING RANKINGS (informational only — never scored) ===
+// Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
+// as the tiebreaker. Draftable players only (present in ADP_DATA), 8+ games
+// so one hot month can't fake a profile. SOS season rank rides along so a
+// ceiling profile can be read against season-long sustainability. Computed
+// once at module load — all inputs are static imports.
+const CEILING_RANKINGS = (() => {
+  const out = { QB: [], RB: [], WR: [], TE: [] };
+  for (const [name, m] of Object.entries(PLAYER_METRICS)) {
+    if (!out[m.pos] || (m.gp || 0) < 8) continue;
+    const a = ADP_DATA[name];
+    if (!a) continue;
+    // nflverse player stats say "LA" for the Rams; the SOS build normalizes
+    // to "LAR". Align here or every Rams player shows a blank SOS.
+    const team = m.team === "LA" ? "LAR" : m.team;
+    out[m.pos].push({
+      name, team, adp: a.adp, gp: m.gp,
+      spike: m.spike_rate, nuclear: m.nuclear_rate,
+      sos: SOS[m.pos]?.[team]?.rank ?? null,
+    });
+  }
+  for (const pos of Object.keys(out)) {
+    out[pos].sort((x, y) => (y.spike - x.spike) || (y.nuclear - x.nuclear));
+    out[pos] = out[pos].slice(0, 10);
+  }
+  return out;
+})();
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -4861,6 +4894,8 @@ export default function RosterScorer() {
   const [scheduleExport, setScheduleExport] = useState("idle");
   // Best-ball season grid is deliberately secondary: collapsed until opened.
   const [bbScheduleOpen, setBbScheduleOpen] = useState(false);
+  // Ceiling rankings panel — informational, collapsed by default.
+  const [ceilingOpen, setCeilingOpen] = useState(false);
   // Selected week in the Lineup Confidence strip. null = follow the calendar
   // (current week in season, W1 otherwise) so a fresh grade always opens on
   // the week that matters without the user touching anything.
@@ -7238,6 +7273,58 @@ Analyze this best ball roster. Return JSON only.`;
             )}
           </div>
         )}
+
+        {/* === CEILING RANKINGS — informational panel (collapsed by default) ===
+            League-wide spike/nuclear leaderboard per position with season SOS
+            alongside. Pure reference: none of this feeds the score directly
+            (ceiling shape is scored per-roster elsewhere) — this exists so the
+            draft-prep question "who actually spikes?" has an in-app answer. */}
+        <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+          <button
+            onClick={() => setCeilingOpen(prev => !prev)}
+            style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: ceilingOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+          >
+            <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
+              Ceiling Rankings · Spike / Nuclear Weeks
+            </span>
+            <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{ceilingOpen ? "▲" : "▼"}</span>
+          </button>
+          {ceilingOpen && (
+            <div style={{ background: "var(--bg-surface)", padding: "12px 14px 10px" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px", maxWidth: "640px" }}>
+                How often each player posted a difference-maker week in 2025. <span style={{ color: "var(--pos)", fontWeight: 600 }}>Spike</span> = 18+ half-PPR points, <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>Nuclear</span> = 28+. SOS = 2026 season schedule rank, <span style={{ fontWeight: 600 }}>1 = easiest</span> of 32. Informational only — a spike profile is last season's shape, not a projection, and role changes override it.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
+                {["QB", "RB", "WR", "TE"].map(pos => {
+                  const pc = posColor(pos);
+                  return (
+                    <div key={pos} style={{ background: "var(--bg-inset)", border: "1px solid var(--bg-raised)", borderRadius: "4px", padding: "10px 12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "11px", color: pc.text, fontWeight: 700, letterSpacing: "0.1em" }}>{pos}</span>
+                        <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>SPIKE · NUKE · SOS</span>
+                      </div>
+                      {CEILING_RANKINGS[pos].map((p, i) => (
+                        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", borderBottom: i < CEILING_RANKINGS[pos].length - 1 ? "1px solid var(--bg-raised)" : "none", fontSize: "11px" }}>
+                          <span style={{ color: "var(--text-faint)", fontSize: "9px", width: "14px", flexShrink: 0, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textTransform: "capitalize" }}>
+                            {p.name}
+                            <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "9px", textTransform: "uppercase" }}> {p.team}{p.gp < 10 ? " ⚠" : ""}</span>
+                          </span>
+                          <span style={{ color: "var(--pos)", fontWeight: 700, fontSize: "10px", width: "34px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.spike * 100)}%</span>
+                          <span style={{ color: p.nuclear > 0 ? "var(--accent-purple-light)" : "var(--text-faint)", fontWeight: 600, fontSize: "10px", width: "30px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.nuclear * 100)}%</span>
+                          <span style={{ color: p.sos != null && p.sos <= 10 ? "var(--pos)" : p.sos != null && p.sos >= 23 ? "var(--neg)" : "var(--text-muted)", fontSize: "10px", width: "24px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{p.sos ?? "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "10px", letterSpacing: "0.03em", lineHeight: 1.5 }}>
+                ⚠ = under 10 games in 2025, small sample. 8-game minimum to appear. Rates are descriptive of last season at half-PPR thresholds — they rank ceiling access, not expected points.
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid var(--border-subtle)" }}>
