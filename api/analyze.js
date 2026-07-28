@@ -177,7 +177,25 @@ gradeModifier rules:
 +1 = slight upside the score undersells
 0  = score is accurate
 -1 = one real flaw the score missed
--2 = significant structural problem the score missed
+(the code clamps the negative side at -1; do not return -2)
+
+WHAT THE MODIFIER IS FOR, AND THE ONE THING IT MUST NEVER BE. It exists for
+STRUCTURAL facts the formula could not see — a role change, a confirmed workload,
+a construction flaw, a stated situation. It must NEVER be justified by matchup
+quality, opponent strength, FPA, strength of schedule, or a playoff window. Those
+are already scored by the formula, deliberately capped there, and they sit at the
+BOTTOM of the Source Hierarchy above as format-only signals.
+
+This matters more than it looks: the modifier moves the score by up to +2.0 or
+-0.8, which is LARGER than the entire contribution matchup is permitted in the
+formula. Justifying it on a matchup would let a bottom-ranked signal move the
+grade further than the engine that owns that signal ever can. If your reason for
+a non-zero modifier contains the words matchup, schedule, opponent, defense, or
+window, the correct value is 0 — put that thought in lineupNotes or
+bringBackNotes instead, which is where format-level reads belong.
+
+Default to 0. A non-zero modifier needs a reason you could state as a fact about
+the roster's construction or a player's role, not a fact about who they play.
 
 Never reference internal numbers the user cannot see. Plain language only.
 
