@@ -853,13 +853,39 @@ did arrive — a missing nutshell no longer discards the notes beside it.
 `/api/analyze`, so the AI pass always fails in local preview. That is correct
 behavior, not a regression.
 
-## Known, Not Fixed: duplicate keys in the ADP and situation tables
+## Duplicate Keys: fixed Jul 27, 2026 (was "known, not fixed" earlier the same day)
 
-The build emits ~11 `Duplicate key` warnings (xavier worthy, michael pittman,
-kenneth gainwell, jonathon brooks, jk dobbins, rj harvey, jaylen warren,
-kaytron allen, david montgomery, jadarian price). The later literal silently
-wins, so some ADP values in use are not the ones a reader would find first
-(e.g. xavier worthy resolves to 110.0, not the 96 written above it). No
-player is dropped, so this is a data-accuracy issue rather than a silent-drop
-one. Left alone deliberately — deciding which value is correct is a data
-call, not a code call.
+App.jsx carried 11 duplicate keys — 5 in `ADP_DATA`, 6 in `SITUATIONS`. In a JS
+object literal the LAST declaration silently wins, so the file read one way and
+behaved another. Guarded by `scripts/test-no-duplicate-keys.mjs`.
+
+**How they got there.** `ADP_DATA` has an older hand-maintained block with
+integer ADPs (lines ~90-109 of the table) and a newer decimal import appended
+after it. The decimal block's range overlaps the integer block's, so five
+players ended up declared twice. `SITUATIONS` collected its duplicates the same
+way: notes appended in a later session below notes that already existed.
+
+**What the collisions actually cost.** Nothing at runtime — the later value was
+always the intended one. The cost was to anyone READING the file, including a
+future session: `xavier worthy` was written as adp 96 on one line and 110.0
+sixty lines down, and 110.0 was what graded. Two SITUATIONS pairs directly
+contradicted each other — `jk dobbins` read "Harvey clearly ahead in depth
+chart" in the dead copy and "Coleman is the primary upside play" in the live
+one, which are opposite conclusions about the same backfield.
+
+**The fix, and why it was safe.** Deleted the dead EARLIER entry in all 11
+pairs and kept the later. Because the later already won, this is
+behavior-preserving by construction — verified: all five affected ADP values
+resolve to exactly what they resolved to before (110.0 / 108.3 / 108.3 / 117.6
+/ 124.8), and a live 18-man grade returns the same A with 18/18 matched.
+
+Changing WHICH value wins would have been a real data decision needing a
+source. Deleting a dead line is not. If a value later proves wrong, that is a
+separate change with separate evidence.
+
+**Why a test and not just the build warning.** esbuild and vite both already
+warned about all 11, every single build. Nobody reads warnings in a 500KB file
+that emits eleven of them, which is precisely how they accumulated over
+multiple sessions. `test-no-duplicate-keys.mjs` fails the run instead, and its
+header tells the next session the rule: keep the last occurrence, delete the
+earlier one.
