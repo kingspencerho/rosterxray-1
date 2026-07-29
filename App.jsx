@@ -1829,7 +1829,29 @@ const parseRosterRedraft = (text) => {
 // lines. Strategy: anchor on lines that resolve to a real player; pull a nearby
 // pick number using the ADP DB as a cross-check to avoid grabbing ADP/bye by mistake.
 const preprocessRoster = (text, format = "standard") => {
-  const rawLines = text.split("\n").map(l => l.trim());
+  let rawLines = text.split("\n").map(l => l.trim());
+
+  // === YAHOO SHARE CARD (added Jul 28 2026) ===
+  // Yahoo's share function renders a lineup card whose rows read
+  //   "QB B. PURDY Thu 5:35PM @ LAR — 18.85"
+  // (pos tag, INITIALED name, kickoff day/time, opponent, PROJECTION).
+  // Two traps if parsed naively: the projection is a decimal that the
+  // unlabelled-ADP capture would swallow as ADP (14.61 for Pickens sits
+  // within the 75-pick guard of his table 23.5), and "5:35PM" sheds
+  // integer tokens that become ghost pick numbers. So: detect the format
+  // by shape (3+ matching rows), strip each row down to the bare name,
+  // and flag shareMode so pick/ADP extraction is skipped entirely —
+  // share cards carry neither.
+  const YAHOO_SHARE_ROW =
+    /^(qb|wr|rb|te|wrt|w\/r\/t|bn|ir|k|def|dst)\s+(.+?)\s+(mon|tue|wed|thu|fri|sat|sun)\s+\d{1,2}:\d{2}\s*(am|pm)?\s*(@|vs?)\s*[a-z]{2,3}\.?(\s*[—–-]+\s*\d+(\.\d+)?)?$/i;
+  const shareRows = rawLines.filter(l => YAHOO_SHARE_ROW.test(l));
+  const shareMode = shareRows.length >= 3;
+  if (shareMode) {
+    rawLines = rawLines.map(l => {
+      const m = l.match(YAHOO_SHARE_ROW);
+      return m ? m[2].trim() : l;
+    });
+  }
   // Junk tokens that appear in app dumps — never players
   const JUNK_LINE = /^(bye|adp|pick|pts|proj|final|starters?|bench|points|min|max|targets?|rec|yds|td|att|rush|pass|fg|pat|w\/?r\/?t|q\/?w\/?r\/?t|flex|def|dst|k|ir|total|today|yesterday)$/i;
   const POS_HEADER = /^(qb|rb|wr|te|k|def|dst|flex|bench|ir)$/i;
@@ -1889,6 +1911,13 @@ const preprocessRoster = (text, format = "standard") => {
     );
     const player = nameRows[n].player;
     const knownADP = player.adp;
+
+    // Share cards carry projections, not picks or ADP — any number a split
+    // Live Text line leaves behind is noise. Name only, nothing to extract.
+    if (shareMode) {
+      reconstructed.push({ name: player.name || nameRows[n].line, player, pick: null, parsedAdp: null });
+      continue;
+    }
 
     // === CONSERVATIVE, LABEL-AWARE PICK EXTRACTION ===
     // Underdog dump structure per player: Name, Team, Bye#, "Bye", ADP#, "ADP", Pick#, "Pick"
@@ -7536,7 +7565,7 @@ Analyze this best ball roster. Return JSON only.`;
                 📋 How to paste your roster (15 sec)
               </div>
               <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: League → Draft shows full names.</span></div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: League → Draft shows full names, or use the new Share button on your team page — the share image works too.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "var(--text-secondary)" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "var(--text-muted)" }}>Pick numbers optional.</span></div>
               </div>
