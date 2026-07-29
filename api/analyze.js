@@ -33,6 +33,8 @@ Extract every player name from the roster screenshot(s) provided, in draft order
 
 Underdog roster screens typically show three numbers per player: Bye (1-18), ADP (often decimal, e.g. 96.4), and Pick (integer, the actual draft slot, often explicitly labeled "Pick"). Only extract the Pick number — do NOT use Bye or ADP. If a column is explicitly labeled "Pick", use that value. If no Pick number/label is visible for a player, omit it — never guess or substitute ADP/Bye for Pick.
 
+Yahoo SHARE CARDS (purple "yahoo fantasy" branded lineup image, added 2026): rows read like "QB B. PURDY Thu 5:35PM @ LAR — 18.85". The right-hand decimal is a PROJECTION, never a Pick or ADP — ignore every number on these cards. First names are abbreviated to initials; extract the name exactly as shown (e.g. "B. Purdy") and nothing else from the row. A "BENCH" divider separates starters from bench — include both.
+
 Return ONLY a JSON array of strings, one per player, in draft order. Each string is the player's full name, followed by a space and the Pick number if one was found (e.g. "Adam Randall 194"), or just the name if no Pick number was visible (e.g. "Caleb Williams"). No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
 
 Example output exactly:

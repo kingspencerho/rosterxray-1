@@ -988,3 +988,27 @@ elite-QB swap                             +0.13   (proportionate, no leak)
 No letter grade moved on either reference roster. Cap 0.5 stays well under a
 single elite stack (1.5), keeping rank-4 ceiling shape below rank-1/2 structure
 in the Source Hierarchy.
+
+---
+
+## Yahoo Share Card Format (added Jul 28, 2026)
+
+Yahoo shipped a Share function that renders a branded lineup card. Rows read
+`QB B. PURDY Thu 5:35PM @ LAR — 18.85`: position tag, INITIALED name,
+kickoff day/time, opponent, projection. Both the paste path (via Live Text)
+and the screenshot path accept it.
+
+### The two traps, both guarded by scripts/test-yahoo-share.mjs
+1. **The trailing decimal is a PROJECTION, never ADP.** The unlabelled-ADP
+   capture would swallow it silently — 14.61 for Pickens sits inside the
+   75-pick sanity guard of his table ADP. `preprocessRoster` detects the card
+   by shape (3+ rows matching the share regex) and sets shareMode, which
+   skips pick AND ADP extraction entirely. Share cards carry neither.
+2. **Kickoff times shed integer tokens.** "5:35PM" parses as 5 and 35, and 35
+   would win the pick-candidate logic. Same shareMode flag kills it.
+
+Names arrive as initials ("B. PURDY") — resolution rides the existing
+initial-matching step of findPlayer, no new logic. K/DEF rows are stripped by
+the redraft KDST filter as before; in best ball mode they surface as visible
+notFound rows per the no-silent-drops principle. The extraction prompt in
+api/analyze.js documents the card for the screenshot path.
