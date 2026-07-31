@@ -303,6 +303,13 @@ const ADP_DATA = {
   "michael mayer": { adp: 215.5, pos: "TE", team: "LV" },
   "emari demercado": { adp: 215.9, pos: "RB", team: "KC" },
   "jahan dotson": { adp: 215.9, pos: "WR", team: "ATL" },
+  // Cyrus Allen (added Jul 29 2026): 2026 5th-rounder (176 ovr, Cincinnati), no
+  // established market yet. ADP here is a PLACEHOLDER at the deepest dart tier so
+  // findPlayer resolves him — not a sourced value. Safe: the Late-Round ADP
+  // Flattening Protocol (picks 160+) blocks any reach/value deduction at this
+  // depth, and roster-supplied ADP overrides the table anyway. Replace when a
+  // real ADP exists.
+  "cyrus allen": { adp: 215.9, pos: "WR", team: "KC" },
 };
 
 
@@ -567,6 +574,7 @@ const ADP_SUPERFLEX = {
   "jaydon blue": { adp: 236, pos: "RB", team: "DAL" },
   "malik davis": { adp: 237, pos: "RB", team: "DAL" },
   "ollie gordon": { adp: 237, pos: "RB", team: "MIA" },
+  "cyrus allen": { adp: 237, pos: "WR", team: "KC" },   // placeholder, see ADP_DATA note
   "eli heidenreich": { adp: 287, pos: "RB", team: "PIT" },
   "heidenreich": { adp: 287, pos: "RB", team: "PIT" },
 };
@@ -776,6 +784,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "cyrus allen": { verdict: "dart", trend: "rising", trendNote: "KC rookie WR, 2026 5th round (176 ovr, Cincinnati - 51/674/13 in 2025, a program single-season TD record and the Big 12 lead). Jul 29 2026: took first-team reps at the opening training-camp practice alongside Worthy/Thornton/Royals, with Andy Reid volunteering that Cyrus had a good day and Mahomes has some trust there - signal-grade language, not generic praise. Two honest caveats: those reps opened up partly because Rashee Rice (knee) left before 7-on-7s, and this is pre-Week-3 camp, where snaps reflect scheme evaluation rather than role. Contingent dart on a thin KC room with elite QB play; no standalone path confirmed", situationFlags: ["breakout_profile"], riskFlags: [] },
   "jonathan taylor": { verdict: "TARGET", trend: "stable", trendNote: "2025 rate stats understate him (noted Jul 28 2026): Daniel Jones tore through half a season then went down, and the whole IND offense sank with the backup — yet Taylor still posted a 35% nuclear-week rate, best of any RB. The spike profile is real and the QB constraint is resolved with Jones healthy for 2026. Thin receiving role (2.7 rec/g) is the honest cap in PPR formats", situationFlags: ["scheme_fit"], riskFlags: [] },
   "bijan robinson": { verdict: "TARGET", trend: "stable", trendNote: "Locked bell-cow, zero backfield competition", situationFlags: ["scheme_fit"], riskFlags: [] },
   "jahmyr gibbs": { verdict: "TARGET", trend: "stable", trendNote: "Co-lead with Montgomery but target share is elite", situationFlags: ["scheme_fit"], riskFlags: [] },
@@ -1345,6 +1354,7 @@ const ADP_YAHOO = {
   "tez johnson": { adp: 297.0, pos: "WR", team: "TB" },
   "emari demercado": { adp: 215.9, pos: "RB", team: "KC" },
   "nick westbrook-ikhine": { adp: 299.0, pos: "WR", team: "IND" },
+  "cyrus allen": { adp: 299.0, pos: "WR", team: "KC" },   // placeholder, see ADP_DATA note
 };
 
 const FULL_SCHEDULE = {
