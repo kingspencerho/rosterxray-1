@@ -584,6 +584,13 @@ const TOURNAMENTS = {
   main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
   puppy: { name: "The Puppy", entries: "225k", weights: [2, 2, 1.5], note: "W15 (1/10) and W16 (1/5) are both steep cuts — survive both to reach the W17 final", format: "standard" },
+  // Mini Schnauzer 2 (added Jul 31 2026). Structurally the inverse of Puppy: the
+  // weekly gates are the SOFTEST Underdog runs (W15 2-of-10 = 20%, W16 2-of-8 = 25%)
+  // while the 14-week qualifier (2-of-12 = 16.7%) is the hardest filter in the format.
+  // All 310 finalists are paid but the curve is steep at the top (1st $10k, top 10 take
+  // ~40% of the $100k), so EV concentrates almost entirely in W17 — hence the 2x.
+  // advanceWeight 1.5 because the cumulative R1 round eliminates 83% of the field.
+  schnauzer: { name: "Mini Schnauzer 2", entries: "37.2k", weights: [1.25, 1, 2], advanceWeight: 1.5, note: "Softest weekly cuts on Underdog (W15 2/10, W16 2/8) — the 14-week qualifier is the real filter, and W17's 310-seat final is where the money is", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
@@ -3132,6 +3139,16 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
     if (w15Elite.length >= 1) {
       strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling`);
+    }
+  } else if (tournamentKey === "schnauzer") {
+    // Mini Schnauzer 2: the W15/W16 gates are soft (20%, 25%), so a merely-adequate
+    // week survives them. W17 is the 310-seat final where the prize curve actually
+    // pays, so that is the week worth flagging in both directions.
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) built for the W17 championship round — where this format's prize curve pays`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — the W15/W16 cuts here are soft enough to survive, but the 310-seat final is where the money is`);
     }
   } else if (tournamentKey === "fastpuppy") {
     // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.

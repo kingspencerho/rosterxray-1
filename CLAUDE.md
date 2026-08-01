@@ -1012,3 +1012,43 @@ initial-matching step of findPlayer, no new logic. K/DEF rows are stripped by
 the redraft KDST filter as before; in best ball mode they surface as visible
 notFound rows per the no-silent-drops principle. The extraction prompt in
 api/analyze.js documents the card for the screenshot path.
+
+---
+
+## Mini Schnauzer 2 Tournament Config (added Jul 31, 2026)
+
+New Underdog format, added to `TOURNAMENTS` as key `schnauzer`. Inserted
+AFTER `puppy` deliberately: the dropdown renders `Object.entries(TOURNAMENTS)`
+in declaration order, and General / BBM VII / The Puppy stay the top three.
+
+### Structure (why the weights look nothing like Puppy's)
+37,200 entries, $3, 18 rounds, half-PPR with 4-point passing TDs (standard
+Underdog scoring, NOT the Frenchie's full PPR).
+
+| Round | Weeks | Group | Advance |
+|---|---|---|---|
+| R1 Qualifiers | W1-14 cumulative | 12 | 2 (16.7%) |
+| R2 Quarterfinal | W15 | 10 | 2 (20%) |
+| R3 Semifinal | W16 | 8 | 2 (25%) |
+| R4 Championship | W17 | 310 | 1 grand prize, all paid |
+
+**This is structurally the inverse of Puppy.** The weekly gates are the softest
+Underdog runs (Puppy cuts 1-of-10 then 1-of-5; this cuts 2-of-10 then 2-of-8),
+so a merely-adequate W15 or W16 survives. The 14-week qualifier is the hardest
+filter in the format, and EV concentrates in W17: all 310 finalists are paid,
+but 1st takes $10k and the top 10 take ~40% of the $100k pool.
+
+### Config values and their justification
+- `weights: [1.25, 1, 2]` — W17 doubled because that is where the prize curve
+  pays. W15 slightly over W16 because its gate is tighter (20% vs 25%).
+- `advanceWeight: 1.5` — the cumulative R1 round eliminates 83% of the field,
+  making it the format where the Advance Rate Layer matters most. Note the
+  clamp is applied BEFORE this multiplier, so the layer can swing ±1.875 here.
+- Deliberately NOT added to the `bbm7 || puppy` uniqueness-leverage branch:
+  37.2k is mid-field by the Field Size Overlay, not massive, so the uniqueness
+  premium does not apply.
+
+### Scoring branch
+`tournamentKey === "schnauzer"` flags W17 in both directions — a strength when
+any qualified stack grades W17 >= 4, a weakness when none does. Verified both
+paths fire.
