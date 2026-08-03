@@ -178,23 +178,98 @@ cannot see. Re-check all of these before any draft — camp status moves weekly.
 
 ---
 
-## Key 2026 Moves (re-validate if 30+ days old — offense current as of June 25, 2026)
+## Key 2026 Offensive Moves — re-validated Aug 3 2026
 
-**Defensive movement above was re-validated Aug 3 2026. The OFFENSIVE items in
-this list were not** — they still carry the June 25 stamp and are past the
-30-45 day freshness rule. Treat them as needing a check before use.
+Both halves of this file are now current as of Aug 3 2026. Re-validated against
+training-camp reporting from late July / early August. **Full per-player detail
+lives in `RECENT_NEWS` and `SITUATIONS` in `App.jsx`** — those are what the
+grader actually reads; this is the summary view. Update both or neither.
 
-- **AJ Brown:** PHI to NE
+### Verified unchanged
+- **AJ Brown:** PHI to NE confirmed (2028 1st + 2027 5th). Healthy, WR1 for Maye.
 - **Myles Garrett:** CLE to LAR (Jared Verse + picks to CLE)
-- **Malik Nabers:** ~~knee cleanup, Week 1 uncertain~~ **SUPERSEDED** — avoided
-  the PUP list, full practice reps. Verdict updated to TARGET (Aug 2026).
-- **Mahomes:** targeting Week 1 return from knee
-- **Rashee Rice:** 30-day jail, misses OTAs
-- **Luther Burden:** trending toward CHI WR1 starter role
-- **Eli Stowers (PHI TE):** Goedert bridge + AJ Brown gone + Hurts play-action scheme = TE1 path
-- **Jahan Dotson (ATL):** competing with Zachariah Branch for WR2 behind London. Role not confirmed.
-- **Jaylin Noel (HOU):** leading WR3 competition over Tank Dell (knee) and Hutchinson per June minicamp. HOU is a 3-week schedule avoid (JAX W15, @PHI W16, @GB W17). Verdict: FADE.
-- **Blake Corum (LAR):** complementary runner behind Kyren Williams (three-down lead back). Frequently functions as a bring-back piece in roster context.
-- **Kyren Williams (LAR):** confirmed three-down lead back.
-- **Emari Demercado (KC):** 1yr deal, passing-down specialist behind Kenneth Walker. Mahomes checkdown volume makes target share real. KC W15 vs NE (soft), W17 vs LAC (soft). Verdict: DART.
-- **Kenny Gainwell / Kenneth Gainwell (TB, RB):** 2yr/$14M deal, committee back alongside Bucky Irving.
+- **Kenneth Walker III (KC):** confirmed — 3yr/$43.05M, unambiguous RB1, SB LX MVP
+- **Kenny/Kenneth Gainwell (TB):** 2yr/$14M confirmed. Bowles states it plainly —
+  Irving is the 1A starter, Gainwell the 1B, used mainly as a RECEIVER in camp
+- **Blake Corum (LAR):** still complementary, but the most improved back in camp
+  ("a lot leaner, a lot more explosive" — Kyren). McVay praised him Aug 2
+
+### Corrected — these were wrong or incomplete
+- **Eli Stowers (PHI TE):** ~~TE1 path~~ **NOW WRONG — he is TE3.** Behind Goedert
+  AND Johnny Mundt, who takes first-team 12-personnel reps because new OC Mannion
+  pairs a blocking TE with a receiving TE. Stowers is not yet an NFL-caliber
+  blocker and lost spring reps to a leg injury. The premise was false: **Goedert
+  did not leave, A.J. Brown did.** 2027 thesis, not 2026.
+- **Kyren Williams (LAR):** ~~confirmed three-down lead back~~ **overstated.**
+  Starter yes; he took only **54%** of LAR RB carries in 2025 and McVay's framing
+  is explicitly committee. Pending 2027 FA with no extension.
+- **Rashee Rice (KC):** ~~jail, misses OTAs~~ — out Jun 16 and in camp, but the
+  legal item is no longer the main one. **May 2026 right-knee debridement**; running
+  routes well short of full speed, leaving practice early daily. No 2026 suspension
+  has been announced — treat further discipline as an unresolved RISK, not a ruling.
+- **Jaylin Noel (HOU):** role resolved **upward** — SI's camp depth chart lists him
+  a **STARTER** with Collins and Higgins. Outlets conflict; not settled. **The FADE
+  still stands and is purely schedule** (JAX W15, @PHI W16, @GB W17). Better player,
+  same dead window.
+- **Mahomes (KC):** ~~targeting Week 1~~ — understated. **Fully cleared** for camp,
+  practicing on consecutive days, no setbacks. Reid: doing "everything he normally does."
+- **Malik Nabers (NYG):** ~~knee cleanup, Week 1 uncertain~~ — **kept OFF PUP**,
+  which would have cost him four games. Verdict updated to TARGET.
+- **Jahan Dotson (ATL):** trending resolved — looked "clearly like the WR2" on camp
+  Day 4 over Branch and Zaccheaus. Not formally named. Compounded by an unresolved
+  ATL QB job.
+- **Luther Burden (CHI):** D.J. Moore was **traded to BUF**, so the vacancy is real,
+  but "WR1" remains an analyst projection, not a depth chart. Moore's targets split
+  three ways with Odunze and TE Loveland.
+- **Emari Demercado (KC):** hierarchy behind Walker confirmed. **The "1yr deal" term
+  could NOT be verified** — do not state it.
+
+---
+
+## Fantasy-playoff (W15-17) availability — the only December-risk cases found
+
+A dedicated search for return timelines landing inside Weeks 15-17 produced
+exactly one confirmed zero and two structural maybes. **No team has published a
+December return date for any offensive player.**
+
+- **Ricky Pearsall (SF): OUT FOR 2026.** Season-ending PCL surgery, placed on IR
+  Aug 1. The only confirmed W15-17 zero. Directly caused the Deebo re-signing.
+- **Zach Charbonnet (SEA):** PUP. ACL in the January playoff game, surgery Feb.
+  Macdonald said a Week 1 return looked unlikely; midseason is the reported
+  possibility with **no ETA**. Note the framing cuts BOTH ways for best ball —
+  Seattle is being deliberately patient "in the hopes that they get his best when
+  it matters most," which is the W15-17 window. Live variable, not a write-off.
+- **George Kittle (SF):** PUP, Achilles from the Jan 11 playoff win. Lynch calls
+  rehab "tremendous" and has not ruled out Week 1. Standard 8-12 month rehab puts
+  the outer edge around September. Re-check.
+
+Also inside the window from the defensive sweep: **Brian Branch (DET)**, Achilles,
+return unlikely before December.
+
+---
+
+## Contract hold-ins — availability risk with no injury
+
+The defining offseason story. Both reported to camp and are NOT practicing:
+- **Bijan Robinson (ATL)** — led the NFL in 2025 scrimmage yards; seeking to be the
+  highest-paid RB. Stefanski expects an amicable resolution.
+- **Jahmyr Gibbs (DET)** — same posture. Separately dealing with a minor back issue
+  from the conditioning test.
+- Benchmarks already set: **James Cook 4yr/$46M**, **Saquon Barkley 2yr/$41M**.
+
+---
+
+## Unresolved as of Aug 3 2026 — do NOT state a winner
+
+- **MIN QB:** Kyler Murray (released by ARI, signed MIN) vs J.J. McCarthy. Reporting
+  points in **opposite directions on the same days**. O'Connell has named no starter.
+- **CLE QB:** Deshaun Watson vs Shedeur Sanders, alternating first-team reps. Monken
+  says no decision needed until the opener.
+- **ATL QB:** Tua (back flare-up) vs Penix (ACL, not cleared for 11-on-11, ~4 weeks
+  from full clearance). Affects every ATL pass-catcher's stack value.
+- **LV QB:** Cousins named starter with No. 1 overall pick Mendoza behind him —
+  a structurally unstable "resolved."
+- **Chris Brazzell II (CAR):** SI says LCL tear, up to 8 weeks; CBS says season-ending
+  surgery. **Genuine outlet conflict, unresolved.** Verify before use.
+- **Xavier Worthy (KC):** left practice Aug 1 with a shoulder injury, possibly the
+  same one repaired in January. "Believed to be OK" is not a medical finding.
