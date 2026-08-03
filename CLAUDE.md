@@ -541,7 +541,8 @@ Governs how competing signals get weighed in any player evaluation, breakout lis
 
 ### Matchup-data confidence rule (per-team, not uniform)
 2025 FPA reliability depends on DEFENSIVE CONTINUITY, judged per team:
-- **High continuity** (same DC, scheme intact, core starters back — e.g. a KC/Spagnuolo situation): 2025 FPA stands at full confidence. Do NOT discount it just because it is "last year's data."
+- **High continuity** (same DC, scheme intact, core starters back — e.g. SEA 2026: Macdonald/Durde intact, exactly one defensive starter not back): 2025 FPA stands at full confidence. Do NOT discount it just because it is "last year's data."
+  - **The old example here was KC/Spagnuolo, and the Aug 3 2026 audit killed it.** Spagnuolo is in year 8 and the scheme is genuinely continuous, but KC lost FOUR defensive backs in one offseason — McDuffie (traded LAR), Watson (LAR), Cook (CIN), Joshua Williams (TEN). **Coordinator continuity and personnel continuity are separable, and this rule needs BOTH.** A team can be high-continuity on scheme and high-churn in one position group; grade the group, not the coaching staff. KC's run defense still qualifies; its pass defense does not.
 - **High churn** (new DC, scheme change, 3+ new starters in the back seven, or a rebuilt front — e.g. DAL 2026: new DC, 3-4 switch, ~7 new starters): 2025 FPA is low-confidence. Apply the COACHING_ADJ/OFFSEASON_ADJ direction, mark the note "HIGH CHURN," and never let a Smash/Avoid tier from a high-churn defense be the deciding factor between two otherwise-close calls.
 - **Adjustment sign convention (both tables):** positive = defense got WORSE (softer matchup), negative = improved (tougher). Applied additively to FPA (`pts += adj`). A `pts -= adj` sign-inversion bug shipped until Jul 16, 2026 — if a matchup tier looks wrong against a table note, check the application sign first.
 - Every COACHING_ADJ / OFFSEASON_ADJ_2026 entry needs a sourced, dated note. An entry whose note is contradicted by newer verified reporting (as DAL's "bottom-3" was by the May 2026 rebuild reporting) must be updated before it is used in any published output.
@@ -1052,3 +1053,84 @@ but 1st takes $10k and the top 10 take ~40% of the $100k pool.
 `tournamentKey === "schnauzer"` flags W17 in both directions — a strength when
 any qualified stack grades W17 >= 4, a weakness when none does. Verified both
 paths fire.
+
+---
+
+## Adjustment Coverage & the Aug 3 2026 Defensive Re-Validation
+
+Two problems, found together: the 2026 adjustment layer covered under half the
+league, and the notes it did cover had gone stale in ways nobody could see.
+
+### Coverage is now derived, not asserted
+`ADJ_COVERAGE` (App.jsx, below `OFFSEASON_ADJ_2026`) computes from `WIN_TOTALS`
+which teams carry an adjustment. Two different numbers, because the two tables
+apply differently:
+
+| Table | Applies in | Coverage |
+|---|---|---|
+| `COACHING_ADJ` | **BOTH data modes** | 9/32 |
+| `OFFSEASON_ADJ_2026` | projected mode only, position-specific | 32/32 |
+
+**`COACHING_ADJ` sitting outside the `useProjected` guard is the non-obvious
+part.** "2025 Data" is not untouched measured data — 9 teams carry a 2026
+coaching overlay in that mode. The UI said "ground truth" until Aug 3. If you
+add a team to `COACHING_ADJ`, you are changing the default-mode grade for every
+roster facing them; put pure 2026 personnel projection in `OFFSEASON_ADJ_2026`
+instead.
+
+**An absent entry means "no reliable signal," never "reviewed and confirmed
+unchanged."** The UI now states this distinction explicitly. Do not collapse it.
+
+### Seven notes were factually wrong
+All had the same shape as the stale-verdict problem: a judgement written once
+and never re-read against newer reporting. Recorded here because the failure
+mode recurs, not because the specific teams matter long-term.
+
+| Team | Was | Actually |
+|---|---|---|
+| CIN | "Lou Anarumo back" | **Al Golden**, year 2. Anarumo is IND's DC |
+| JAX | "New DC" | Campanile **year 2** — a continuity team, flipping FPA confidence from low to high |
+| CAR | "Lost Brian Burns" | Burns has been a **Giant since 2024**. CAR is B/R's No. 1 most-improved |
+| CHI | "Lost Allen/Greenard/Hargrave" | Dennis Allen is the **sitting DC**; the other two were **Vikings** |
+| KC | "secondary intact" | **Four DBs left**, including an All-Pro |
+| GB | "Parsons healthy by 2026" | **On PUP**, ACL, ~Week 6 return |
+| BAL | "Minter DC promotion" | Minter is the **HC** (hired from LAC); Weaver is the DC |
+
+**Four of the seven were wrong DC attributions.** `grading/data/defense.md` now
+carries an explicit 32-team DC table, including who actually calls the defense
+when it is not the DC (NYJ, TEN, MIA, TB). Inferring the coordinator from a
+prose note is what allowed this.
+
+### Rules this produced
+- **`App.jsx` and `grading/data/defense.md` are ONE source kept in sync by hand,
+  not two independent confirmations.** defense.md still read "DAL: bottom-5
+  (Parsons + Diggs gone)" for weeks after App.jsx was corrected, and every
+  session that read the markdown got the dead version. Update both or neither.
+- **Bump `ADJ_UPDATED` in the same edit that changes either table.** A stamp
+  naming a date that did not produce the numbers is worse than no stamp.
+- **Where direction is genuinely two-sided, keep the magnitude small and put the
+  uncertainty in the note.** SF, LV and LAC are ±0.25 with HIGH CHURN flags. An
+  honest small number beats a confident one nobody can defend.
+- **Encode SHAPE, not just level, when a defense is lopsided.** NYG is not
+  uniformly soft — elite edge over a bottom-tier DT room is a run funnel, so it
+  carries `rb: +1.5` against `wr: +0.75`. A flat "bottom-5" hid the part that
+  actually decides a start.
+- **Unverifiable claims get dropped, not carried.** WAS "Payne age concern" had
+  no 2026 sourcing behind it and is gone rather than preserved on momentum.
+
+### Calibration (re-run before trusting a rebalance)
+Two reference rosters, both modes, no letter grade moved:
+```
+ref1  2025  5.78 -> 5.79   2026e  5.71 -> 5.80
+ref2  2025  6.22 -> 6.22   2026e  6.15 -> 6.13
+```
+Tier probe confirmed the entries fire and in the correct direction: ARI and MIA
+WR move Even -> Good (softer), HOU/KC/NO/PHI RB move one tier tougher. Note that
+SEA and DEN are already floored at Avoid, so further negative adjustment cannot
+register — the tier scale, not the data, is the binding constraint there.
+
+### Still unverified — do not state as fact
+Vita Vea's (TB) trade request status; Harrison Smith's (MIN) retirement; JAX's
+top-5 tier, for which no 2026 source was found. **Brian Branch (DET) is the live
+one for best ball** — an Achilles tear with a return unlikely before December
+lands directly inside the W15-17 window.
