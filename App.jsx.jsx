@@ -1684,6 +1684,48 @@ const OFFSEASON_ADJ_2026 = {
   GB:  { wr: -1.5, rb: -1.0, te: -1.0, note: "Micah Parsons arrived and healthy by 2026 — top-10 defense projection when active" },
 };
 
+// Vintage of BOTH adjustment tables above. Bump in the SAME edit that changes
+// either table — a stale stamp is worse than no stamp, because it names a date
+// that did not produce the numbers.
+const ADJ_UPDATED = "Jun 25 2026";
+
+// === ADJUSTMENT COVERAGE (derived, never hand-counted) ===
+//
+// Why this exists (Aug 3 2026): the "2026 Est." toggle looked like it applied a
+// league-wide 2026 projection. It does not. Only 15 of 32 teams carry an entry
+// in either table; the other 17 silently fall through to raw 2025 FPA and are
+// presented identically to teams that were actually reviewed. A user reading a
+// Smash tier off an unadjusted defense had no way to tell it was un-updated
+// rather than confirmed-soft.
+//
+// TWO SEPARATE COVERAGE NUMBERS, because the two tables apply differently:
+//   COACHING_ADJ       applies in BOTH modes (it sits outside the useProjected
+//                      guard in getMatchupTier / getMatchupScoreForOpponent).
+//                      So "2025 Data" is 2025 FPA plus a coaching overlay on 9
+//                      teams — not untouched ground truth, despite the label.
+//   OFFSEASON_ADJ_2026 applies in projected mode ONLY, and is position-specific.
+//
+// Derived from WIN_TOTALS (the canonical 32-team list) so it cannot drift out of
+// sync the way a hardcoded "15/32" string would the moment a team is added.
+//
+// An absent entry means "no reliable signal for this team," NOT "confirmed
+// unchanged." Those are different claims and the UI must not merge them.
+const ADJ_COVERAGE = (() => {
+  const all = Object.keys(WIN_TOTALS).sort();
+  const coaching = new Set(Object.keys(COACHING_ADJ));
+  const offseason = new Set(Object.keys(OFFSEASON_ADJ_2026));
+  const either = new Set([...coaching, ...offseason]);
+  return {
+    total: all.length,
+    // projected mode: any adjustment from either table
+    projAdjusted: all.filter(t => either.has(t)),
+    projUnadjusted: all.filter(t => !either.has(t)),
+    // actual mode: coaching overlay only
+    actualAdjusted: all.filter(t => coaching.has(t)),
+    actualUnadjusted: all.filter(t => !coaching.has(t)),
+  };
+})();
+
 const normalize = (s) => s.toLowerCase().trim().replace(/[.,'']/g, "").replace(/-/g, " ").replace(/\s+/g, " ");
 
 const SUFFIX_RE = /\s+(jr|sr|ii|iii|iv|v)$/;
@@ -5034,6 +5076,7 @@ export default function RosterScorer() {
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
   const [dataMode, setDataMode] = useState("actual");
+  const [adjCoverageOpen, setAdjCoverageOpen] = useState(false);
   const [aiNutshell, setAiNutshell] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   // The AI pass used to fail silently and fall through to the template nutshell,
@@ -6821,18 +6864,73 @@ Analyze this best ball roster. Return JSON only.`;
               🔮 2026 Est.
             </button>
           </div>
-          {dataMode === "projected" && (
-            <div style={{
-              marginTop: "8px", padding: "6px 10px",
-              background: "#1a1200", border: "1px solid #f59e0b55",
-              borderRadius: "4px", display: "flex", alignItems: "flex-start", gap: "6px",
-            }}>
-              <span style={{ fontSize: "11px", flexShrink: 0 }}>⚠️</span>
-              <div style={{ fontSize: "10px", color: "#d97706", lineHeight: 1.5 }}>
-                Projected 2026 defensive adjustments — not real stats. Switch to <strong>2025 Data</strong> for ground truth.
+          {/* Coverage panel — shown in BOTH modes.
+              The old copy told the user projected mode was "not real stats" and
+              pointed at 2025 Data as "ground truth." Both halves were misleading:
+              projected mode only touches 15 of 32 teams, and 2025 Data carries a
+              coaching overlay on 9 teams. Neither mode is uniform, so both get a
+              coverage count and a list of exactly which teams were never reviewed. */}
+          {(() => {
+            const isProj = dataMode === "projected";
+            const adjusted = isProj ? ADJ_COVERAGE.projAdjusted : ADJ_COVERAGE.actualAdjusted;
+            const unadjusted = isProj ? ADJ_COVERAGE.projUnadjusted : ADJ_COVERAGE.actualUnadjusted;
+            const accent = isProj ? "#d97706" : "var(--text-muted)";
+            const bg = isProj ? "#1a1200" : "var(--bg-base)";
+            const border = isProj ? "#f59e0b55" : "var(--border-subtle)";
+            return (
+              <div style={{
+                marginTop: "8px", padding: "7px 10px",
+                background: bg, border: `1px solid ${border}`, borderRadius: "4px",
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                  <span style={{ fontSize: "11px", flexShrink: 0 }}>{isProj ? "⚠️" : "ℹ️"}</span>
+                  <div style={{ fontSize: "10px", color: accent, lineHeight: 1.5, flex: 1 }}>
+                    {isProj ? (
+                      <>Projected 2026 defensive adjustments — estimates, not measured stats.{" "}
+                      <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams adjusted</strong>; the
+                      other {unadjusted.length} fall through to raw 2025 FPA.</>
+                    ) : (
+                      <>2025 measured FPA, plus a 2026 coaching overlay on{" "}
+                      <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams</strong>. The other{" "}
+                      {unadjusted.length} are unmodified 2025 data.</>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "5px", paddingLeft: "17px", flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => setAdjCoverageOpen(o => !o)}
+                    style={{
+                      background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                      fontFamily: "inherit", fontSize: "9px", color: accent,
+                      textDecoration: "underline", letterSpacing: "0.02em", opacity: 0.85,
+                    }}
+                  >
+                    {adjCoverageOpen ? "hide" : "which teams?"}
+                  </button>
+                  <span style={{ fontSize: "9px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>
+                    adj. data {ADJ_UPDATED}
+                  </span>
+                </div>
+                {adjCoverageOpen && (
+                  <div style={{ marginTop: "7px", paddingLeft: "17px", fontSize: "9px", lineHeight: 1.7 }}>
+                    <div style={{ color: accent, marginBottom: "3px" }}>
+                      <strong>Adjusted ({adjusted.length}):</strong>{" "}
+                      <span style={{ fontFamily: "var(--font-mono)" }}>{adjusted.join(" ")}</span>
+                    </div>
+                    <div style={{ color: "var(--text-faint)" }}>
+                      <strong>No adjustment ({unadjusted.length}):</strong>{" "}
+                      <span style={{ fontFamily: "var(--font-mono)" }}>{unadjusted.join(" ")}</span>
+                    </div>
+                    <div style={{ color: "var(--text-faint)", marginTop: "5px", fontStyle: "italic", lineHeight: 1.6 }}>
+                      No adjustment means no reliable 2026 signal was recorded for that
+                      defense — not that it was reviewed and confirmed unchanged. Weigh
+                      tiers on these teams accordingly.
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* Tournament selector — Best Ball only */}
@@ -10420,10 +10518,14 @@ Analyze this best ball roster. Return JSON only.`;
             // irrelevant, so printing its date would be actively misleading.
             const v = analyzed?.valid || [];
             const fromRoster = v.filter(p => p.adpSource === "roster").length;
+            // "2026 coaching projections" alone read as league-wide. Name the
+            // count and the vintage — the adjustment covers under half the league.
+            const nAdj = (dataMode === "projected" ? ADJ_COVERAGE.projAdjusted : ADJ_COVERAGE.actualAdjusted).length;
+            const adjStr = `EPA adj: ${nAdj}/${ADJ_COVERAGE.total} teams · ${ADJ_UPDATED}`;
             if (fromRoster > 0 && fromRoster >= v.length / 2) {
-              return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections`;
+              return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: 2025 Rotowire · ${adjStr}`;
             }
-            return `ADP: Underdog half-PPR ${ADP_UPDATED} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · EPA adj: 2026 coaching projections`;
+            return `ADP: Underdog half-PPR ${ADP_UPDATED} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · ${adjStr}`;
           })()}
         </div>
 
