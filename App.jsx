@@ -454,7 +454,7 @@ const ADP_SUPERFLEX = {
   "brian thomas": { adp: 98, pos: "WR", team: "JAX" },
   "btj": { adp: 110.0, pos: "WR", team: "JAX" },
   "kenneth gainwell": { adp: 117, pos: "RB", team: "TB" },
-  "kenny gainwell": { adp: 111.0, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 117, pos: "RB", team: "TB" }, // same player — keep in sync with the line above
   "michael wilson": { adp: 128, pos: "WR", team: "ARI" },
   "dallas goedert": { adp: 118, pos: "TE", team: "PHI" },
   "dk metcalf": { adp: 114, pos: "WR", team: "PIT" },
@@ -483,7 +483,7 @@ const ADP_SUPERFLEX = {
   "wandale robinson": { adp: 131, pos: "WR", team: "TEN" },
   "wan'dale robinson": { adp: 131, pos: "WR", team: "TEN" },
   "ricky pearsall": { adp: 137, pos: "WR", team: "SF" },
-  "chig okonkwo": { adp: 138.0, pos: "TE", team: "WAS" },
+  "chig okonkwo": { adp: 127, pos: "TE", team: "WAS" }, // same player as "chigoziem okonkwo" below — keep in sync
   "josh downs": { adp: 126, pos: "WR", team: "IND" },
   "quentin johnston": { adp: 115, pos: "WR", team: "LAC" },
   "chris rodriguez": { adp: 145, pos: "RB", team: "JAX" },
@@ -1236,7 +1236,7 @@ const ADP_YAHOO = {
   "jordan addison": { adp: 121.6, pos: "WR", team: "MIN" },
   "oronde gadsden": { adp: 103.0, pos: "TE", team: "LAC" },
   "kenneth gainwell": { adp: 113.1, pos: "RB", team: "TB" },
-  "kenny gainwell": { adp: 104.0, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 113.1, pos: "RB", team: "TB" }, // same player — keep in sync with the line above
   "patrick mahomes": { adp: 94.9, pos: "QB", team: "KC" },
   "michael pittman jr": { adp: 120.6, pos: "WR", team: "PIT" },
   "dallas goedert": { adp: 104.7, pos: "TE", team: "PHI" },
