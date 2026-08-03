@@ -507,7 +507,7 @@ const ADP_SUPERFLEX = {
   "tyjae spears": { adp: 168, pos: "RB", team: "TEN" },
   "jalen coker": { adp: 167, pos: "WR", team: "CAR" },
   "isiah pacheco": { adp: 165, pos: "RB", team: "DET" },
-  "stefon diggs": { adp: 155, pos: "WR", team: "NE" },
+  "stefon diggs": { adp: 155, pos: "WR", team: "FA" }, // released by NE Mar 11 2026, still unsigned — "NE" here was his 2025 team
   "dylan sampson": { adp: 161, pos: "RB", team: "CLE" },
   "aj barner": { adp: 163, pos: "TE", team: "SEA" },
   "keaton mitchell": { adp: 147, pos: "RB", team: "LAC" },
@@ -1282,7 +1282,7 @@ const ADP_YAHOO = {
   "isiah pacheco": { adp: 127.6, pos: "RB", team: "DET" },
   "denzel boston": { adp: 131.4, pos: "WR", team: "CLE" },
   "hunter henry": { adp: 149.0, pos: "TE", team: "NE" },
-  "deebo samuel": { adp: 134.7, pos: "WR", team: "-" },
+  "deebo samuel": { adp: 134.7, pos: "WR", team: "SF" }, // signed with SF (Pearsall's vacated targets) — "-" predated the signing
   "emanuel wilson": { adp: 151.0, pos: "RB", team: "SEA" },
   "cj stroud": { adp: 127.2, pos: "QB", team: "HOU" },
   "mike washington jr": { adp: 192.0, pos: "RB", team: "LV" },
@@ -6014,6 +6014,52 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === OFF-ROSTER TEAMMATE CONTEXT (added Aug 3 2026) ===
+      //
+      // Why this exists: the AI called Tua Tagovailoa "the healthy starter" for
+      // MIAMI in a published nutshell. He signed with ATLANTA, and the app knew
+      // that — ADP_DATA has him at team "ATL" and RECENT_NEWS says so outright.
+      // The app simply never told the model, because EVERY other context block
+      // here is filtered to `result.valid` (players ON the roster). Tua was not
+      // on the roster, so the model reasoned about Malik Willis's depth chart
+      // from training knowledge, where Tua is still a Dolphin.
+      //
+      // The prompt made this worse than a silent gap: api/analyze.js used to say
+      // "your training knowledge applies ONLY to players not listed above,"
+      // which explicitly LICENSED the invention. Both halves are fixed — the
+      // rule now forbids asserting team/role for anyone absent, and this block
+      // supplies the facts so the model has a real answer instead of a gap.
+      //
+      // Scope is deliberately narrow: QBs only, and only for teams the roster
+      // actually touches. QB identity is the fact most often needed about a
+      // player who isn't rostered (every stack and every "who throws him the
+      // ball" question), and it is small — one line per team. Dumping full
+      // depth charts would bloat a prompt that already hit its token ceiling
+      // once (see the max_tokens note below).
+      // Match the table findPlayer resolved the roster against, or the QB list
+      // can disagree with the ADPs shown everywhere else on the page.
+      // analyzeRedraft does NOT set result.format (only analyzeRoster does), so
+      // check isRedraft FIRST — keying off format alone silently served the
+      // Underdog table to every redraft grade.
+      const qbTable = isRedraft ? ADP_YAHOO
+        : result.format === "superflex" ? ADP_SUPERFLEX
+        : ADP_DATA;
+      const teammateContext = rosterTeams
+        .map(t => {
+          const rosteredHere = new Set((result.valid || []).map(p => normalize(p.name)));
+          const qbs = Object.entries(qbTable)
+            .filter(([, v]) => v.pos === "QB" && v.team === t)
+            .sort((a, b) => (a[1].adp ?? 999) - (b[1].adp ?? 999))
+            .map(([k, v]) => {
+              const label = k.replace(/\b\w/g, c => c.toUpperCase());
+              const onRoster = rosteredHere.has(normalize(k)) ? " [on this roster]" : "";
+              return `${label} (ADP ${v.adp})${onRoster}`;
+            });
+          return qbs.length ? `${t} QBs: ${qbs.join(", ")}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 PRODUCTION METRICS CONTEXT ===
       // Compact per-player line from the nflverse-built PLAYER_METRICS file. Descriptive
       // of last season's roles — the AI must let situations/news override on role changes.
@@ -6091,6 +6137,7 @@ Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
@@ -6108,6 +6155,7 @@ Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}

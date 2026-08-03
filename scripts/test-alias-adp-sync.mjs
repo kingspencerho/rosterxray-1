@@ -1,8 +1,14 @@
 #!/usr/bin/env node
-// test-alias-adp-sync.mjs — fails when ONE player is listed twice in the same
-// ADP table under two spellings that carry DIFFERENT numbers.
+// test-alias-adp-sync.mjs — the ADP tables must not contradict themselves about
+// one player. Two invariants, both violated in production on Aug 3 2026:
 //
-// Why this exists (Aug 3 2026): three of these were live at once, and two were
+//   CHECK 1  same player listed twice in ONE table with different ADP
+//   CHECK 2  same player listed in TWO tables with a different team or position
+//
+// ---------------------------------------------------------------------------
+// CHECK 1 — duplicate spellings, divergent ADP
+//
+// Three of these were live at once, and two were
 // introduced by the Aug 2 ADP_SUPERFLEX refresh itself:
 //
 //   ADP_SUPERFLEX  "kenneth gainwell" 117    vs "kenny gainwell" 111.0
@@ -34,6 +40,26 @@
 // number onto the other key. Keep BOTH keys. Deleting one saves nothing and
 // costs a lookup for anyone who types that spelling.
 //
+// ---------------------------------------------------------------------------
+// CHECK 2 — cross-table team / position disagreement
+//
+// Added the same day, after the AI nutshell told a user that Tua Tagovailoa was
+// Miami's "healthy starter" months after he signed with Atlanta. That specific
+// bug was a PROMPT gap, not a data one (ADP_DATA correctly had him at ATL), but
+// auditing for it surfaced a genuine data version:
+//
+//   "stefon diggs"  ADP_DATA = FA   vs  ADP_SUPERFLEX = NE
+//
+// New England released Diggs on Mar 11 2026 and he is still unsigned, so FA was
+// right and the superflex table was carrying his 2025 team. `team` is not
+// cosmetic — it selects the opponent for every W15-17 matchup tier, so one
+// stale table grades a player against a schedule he will not play.
+//
+// Free-agent placeholders are NOT consistent across the tables ("FA" in one,
+// "-" in another). Both mean the same thing and are normalized here rather than
+// forced into one convention, because changing a placeholder is a data edit and
+// this file is a check.
+//
 // Run: node scripts/test-alias-adp-sync.mjs   (exits non-zero on failure)
 import { readFileSync } from "fs";
 
@@ -56,7 +82,10 @@ function parseTable(name) {
   const startLine = src.slice(0, src.indexOf(body)).split("\n").length;
   const out = [];
   body.split("\n").forEach((L, i) => {
-    const e = /^\s*"([^"]+)":\s*\{\s*adp:\s*([\d.]+),\s*pos:\s*"([A-Z]+)",\s*team:\s*"([A-Z]+)"/.exec(L);
+    // team is deliberately "[^\"]*" and not "[A-Z]+": free agents are stored as
+    // "FA" in one table and "-" in another, and an [A-Z]+ pattern skips the
+    // second silently — which is exactly how a placeholder mismatch would hide.
+    const e = /^\s*"([^"]+)":\s*\{\s*adp:\s*([\d.]+),\s*pos:\s*"([^"]*)",\s*team:\s*"([^"]*)"/.exec(L);
     if (e) out.push({ key: e[1], adp: parseFloat(e[2]), pos: e[3], team: e[4], line: startLine + i });
   });
   return out;
@@ -94,21 +123,71 @@ for (const tableName of TABLES) {
   }
 }
 
-if (fails.length === 0) {
-  console.log(`PASS  ${pairsChecked} same-player key pairs checked across ${TABLES.length} ADP tables — all ADPs agree`);
+// === CHECK 2: same player, two tables, different team or position ===
+// ADP legitimately differs between tables — they are different markets, that is
+// the whole point. Team and position do not: those are facts about the player,
+// and `team` drives every matchup tier the engine computes.
+const NO_TEAM = new Set(["FA", "-", "", "NA", "N/A"]);
+const normTeam = (t) => (NO_TEAM.has((t || "").toUpperCase()) ? "(free agent)" : (t || "").toUpperCase());
+
+const parsed = Object.fromEntries(TABLES.map(n => [n, parseTable(n)]));
+const byName = new Map();
+for (const [tableName, entries] of Object.entries(parsed)) {
+  for (const e of entries) {
+    const k = strip(e.key);
+    if (!byName.has(k)) byName.set(k, []);
+    byName.get(k).push({ ...e, table: tableName });
+  }
+}
+
+const crossFails = [];
+let namesChecked = 0;
+for (const [name, rows] of byName) {
+  // One row per table — a player listed twice in the SAME table is CHECK 1's job.
+  const perTable = new Map();
+  for (const r of rows) if (!perTable.has(r.table)) perTable.set(r.table, r);
+  if (perTable.size < 2) continue;
+  namesChecked++;
+  const list = [...perTable.values()];
+  const teams = new Set(list.map(r => normTeam(r.team)));
+  const poss = new Set(list.map(r => (r.pos || "").toUpperCase()));
+  if (teams.size > 1) crossFails.push({ name, field: "team", rows: list });
+  if (poss.size > 1) crossFails.push({ name, field: "pos", rows: list });
+}
+
+if (fails.length === 0 && crossFails.length === 0) {
+  console.log(`PASS  ${pairsChecked} same-player key pairs (ADP) + ${namesChecked} cross-table names (team/pos) — no contradictions`);
   process.exit(0);
 }
 
-console.log(`FAIL  ${fails.length} player(s) listed twice with DIFFERENT ADP:\n`);
-for (const f of fails) {
-  console.log(`  ${f.table}`);
-  console.log(`      "${f.a.key}"  adp ${f.a.adp}   L${f.a.line}`);
-  console.log(`      "${f.b.key}"  adp ${f.b.adp}   L${f.b.line}`);
-  console.log(`      ${f.a.pos} ${f.a.team} — delta ${Math.abs(f.a.adp - f.b.adp).toFixed(1)} picks`);
-  console.log();
+if (fails.length) {
+  console.log(`FAIL  ${fails.length} player(s) listed twice with DIFFERENT ADP:\n`);
+  for (const f of fails) {
+    console.log(`  ${f.table}`);
+    console.log(`      "${f.a.key}"  adp ${f.a.adp}   L${f.a.line}`);
+    console.log(`      "${f.b.key}"  adp ${f.b.adp}   L${f.b.line}`);
+    console.log(`      ${f.a.pos} ${f.a.team} — delta ${Math.abs(f.a.adp - f.b.adp).toFixed(1)} picks`);
+    console.log();
+  }
+  console.log("Copy the value from the NEWER source onto both keys (git blame the two");
+  console.log("lines to see which refresh wrote which). Keep both keys.");
+  console.log("If these are genuinely two different people, add the pair to");
+  console.log("DISTINCT_PLAYERS at the top of this file — with a comment saying why.\n");
 }
-console.log("Copy the value from the NEWER source onto both keys (git blame the two");
-console.log("lines to see which refresh wrote which). Keep both keys.");
-console.log("If these are genuinely two different people, add the pair to");
-console.log("DISTINCT_PLAYERS at the top of this file — with a comment saying why.");
+
+if (crossFails.length) {
+  console.log(`FAIL  ${crossFails.length} cross-table ${crossFails.length === 1 ? "disagreement" : "disagreements"} on team/position:\n`);
+  for (const f of crossFails) {
+    console.log(`  "${f.name}" — tables disagree on ${f.field.toUpperCase()}`);
+    for (const r of f.rows) {
+      console.log(`      ${r.table.padEnd(14)} ${f.field === "team" ? normTeam(r.team) : r.pos}   L${r.line}`);
+    }
+    console.log();
+  }
+  console.log("Team and position are facts about the player, not market opinions —");
+  console.log("they must match across tables. `team` picks the opponent for every");
+  console.log("W15-17 matchup tier, so a stale one grades a player against a");
+  console.log("schedule he will not play. Verify which is current, then fix the");
+  console.log("stale table (the newer refresh commit is usually the right one).");
+}
 process.exit(1);
