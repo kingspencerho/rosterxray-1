@@ -611,7 +611,26 @@ const ADP_SUPERFLEX = {
 const TOURNAMENTS = {
   main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
   bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
-  puppy: { name: "The Puppy", entries: "225k", weights: [2, 2, 1.5], note: "W15 (1/10) and W16 (1/5) are both steep cuts — survive both to reach the W17 final", format: "standard" },
+  // The Puppy 3 (2026 season, verified against the in-app rules Aug 5 2026).
+  // $5 entry · 225,000 entries · $1M prizes · 11.1% rake · 18 rounds · 12-man drafts
+  // · half-PPR, 4pt passing TD · roster QB1/RB2/WR3/TE1/FLEX1/BENCH10 · 150 max entries.
+  //
+  // Four rounds, and the group sizes are what set the weights:
+  //   R1 Qualifier  W1-14   12-man groups, 2 advance (16.7%)  225,000 -> 37,500
+  //   R2 Quarter    W15     10-man groups, 1 advance (10.0%)   37,500 ->  3,750
+  //   R3 Semi       W16      5-man groups, 1 advance (20.0%)    3,750 ->    750
+  //   R4 Final      W17     one 750-man group, all paid            750 ->      1
+  //
+  // TWO CORRECTIONS TO THE OLD ENTRY, both from reading the actual structure:
+  // 1. W15 and W16 were weighted EQUALLY at 2. They are not equal — W16 (1-of-5)
+  //    is exactly twice as easy to survive as W15 (1-of-10). W16 drops to 1.5.
+  // 2. W17 was the LOWEST weight at 1.5, but **75.6% of the $1M pool is paid to the
+  //    750 finalists** and the ladder is $5 -> $25 -> $400 -> $100k. Reaching W17 is
+  //    an 80x jump, the largest in the tournament, and once there the entire spread
+  //    from $400 to $100k is decided by that one week. W17 goes to 2.
+  // advanceWeight 1.5 matches schnauzer because the R1 qualifier is structurally
+  // IDENTICAL (12-man groups, 2 advance) and eliminates 83.3% of the field.
+  puppy: { name: "The Puppy 3", entries: "225k", weights: [2, 1.5, 2], advanceWeight: 1.5, note: "W15 (1/10) is the hardest weekly gate and W16 (1/5) is twice as survivable — but 75.6% of the $1M pool goes to the 750 who reach W17, so the final is where the money is decided", format: "standard" },
   // Mini Schnauzer 2 (added Jul 31 2026). Structurally the inverse of Puppy: the
   // weekly gates are the SOFTEST Underdog runs (W15 2-of-10 = 20%, W16 2-of-8 = 25%)
   // while the 14-week qualifier (2-of-12 = 16.7%) is the hardest filter in the format.
@@ -3344,17 +3363,27 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   // Tournament-specific peak-week bonuses
   let fastPuppyFlatWeeks = 0; // Fast Puppy: weeks with no spike stack (penalty applied after score init)
   if (tournamentKey === "puppy") {
-    // The Puppy: W15 (1/10) and W16 (1/5) are both steep cuts — check both for elite ceiling
+    // The Puppy 3: W15 (1-of-10) is the hardest gate, W16 (1-of-5) is twice as
+    // survivable, and W17 is a single 750-man group holding 75.6% of the prize pool.
+    // The old branch checked W15 and W16 and said NOTHING about W17 — which left the
+    // week that decides $400-vs-$100k completely unflagged in either direction.
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
     const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
     if (w15Elite.length >= 1) {
-      strengths.push(`${w15Elite.length} stack(s) primed for the toughest playoff cutoff (Week 15)`);
+      strengths.push(`${w15Elite.length} stack(s) primed for the toughest playoff cutoff (Week 15, 1-of-10)`);
     }
     if (w16Elite.length >= 1) {
-      strengths.push(`${w16Elite.length} stack(s) primed for the Week 16 cutoff`);
+      strengths.push(`${w16Elite.length} stack(s) primed for the Week 16 cutoff (1-of-5)`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — 75.6% of this format's prize pool is paid there`);
     }
     if (w15Elite.length === 0 && primaryStacks.length > 0) {
-      weaknesses.push(`None of your primary stacks are built for the toughest playoff cutoff (Week 15) — that round may be the hardest to survive`);
+      weaknesses.push(`None of your primary stacks are built for the toughest playoff cutoff (Week 15, 1-of-10) — that round eliminates 90% of the field`);
+    }
+    if (w17Elite.length === 0 && qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — reaching the 750-seat final is an 80x jump and 75.6% of the $1M pool is decided there`);
     }
   } else if (tournamentKey === "bbm7") {
     // BBM VII: W15 spike — reward stacks with strong W15
