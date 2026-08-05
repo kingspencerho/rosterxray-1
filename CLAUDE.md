@@ -161,7 +161,7 @@ Code extreme market bearishness on unknowns as asymmetric buying opportunities. 
 - Valid hedge corridors: SF @ LAC, IND @ TEN, CIN @ CAR.
 
 ### Week 16 — The Bridge Round
-- In Puppy (225k entries), W16 is the kill shot — highest weight of the three weeks in that format.
+- **CORRECTED Aug 5 2026.** This line used to read "in Puppy, W16 is the kill shot — highest weight of the three weeks." That was wrong twice over: The Puppy's W16 is a **1-of-5 (20%) gate, exactly twice as survivable as its W15 (1-of-10, 10%)**, and the code never weighted it highest either (it was tied with W15 at 2). W16 is the format's *easiest* weekly gate, not its kill shot. Verified against the in-app Puppy 3 rules.
 - S-Tier: CIN @ IND, JAX @ DAL.
 - Strong secondary: NYG @ DET, LAR @ SEA (SEA-side only), GB @ CHI (conditional on Parsons health).
 - Intentional head-to-head collisions of your own primary stacks are valid tactics to guarantee an advanced slot.
@@ -1134,3 +1134,59 @@ Vita Vea's (TB) trade request status; Harrison Smith's (MIN) retirement; JAX's
 top-5 tier, for which no 2026 source was found. **Brian Branch (DET) is the live
 one for best ball** — an Achilles tear with a return unlikely before December
 lands directly inside the W15-17 window.
+
+---
+
+## The Puppy 3 — structure verified Aug 5, 2026
+
+The `puppy` key now models Underdog's **Puppy 3** (2026 season), read off the in-app rules rather
+than inferred. $5 entry · 225,000 entries · $1M prizes · 11.1% rake · 18 rounds · 12-man drafts ·
+half-PPR with 4pt passing TDs · roster QB1/RB2/WR3/TE1/FLEX1/BENCH10 · 150 max entries.
+
+| Round | Weeks | Group | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 cumulative | 12 | **2 (16.7%)** | 225,000 → 37,500 |
+| R2 Quarterfinal | W15 | 10 | **1 (10.0%)** | 37,500 → 3,750 |
+| R3 Semifinal | W16 | 5 | **1 (20.0%)** | 3,750 → 750 |
+| R4 Championship | W17 | 750 | 1 grand prize, all paid | 750 → 1 |
+
+### The prize curve is what sets the weights
+
+**75.6% of the $1M pool ($755,000) is paid to the 750 entries that reach W17.** The ladder on a $5
+entry is `$5 → $25 → $400 → $100k`, so **surviving W16 into the final is an 80x jump — the single
+largest in the tournament** — and once there, the entire spread from $400 to $100k is decided by
+one week.
+
+### Two things the old config had wrong
+
+1. **W15 and W16 were weighted EQUALLY at 2.** They are not equal. W16 (1-of-5) is exactly twice as
+   survivable as W15 (1-of-10). W16 dropped to 1.5.
+2. **W17 carried the LOWEST weight (1.5)** despite holding three quarters of the money. It went to 2.
+
+Weights are now `[2, 1.5, 2]` — the hardest gate and the money week matter most, the middle gate is
+the easiest of the three. **`advanceWeight: 1.5`** was added to match `schnauzer`, because the R1
+qualifier is structurally IDENTICAL (12-man groups, 2 advance) and eliminates 83.3% of the field
+over fourteen weeks; it was previously unmodeled and defaulted to 1.
+
+### The scoring branch was silent on W17
+
+`tournamentKey === "puppy"` checked W15 and W16 and said **nothing** about W17 — leaving the week
+that decides $400-vs-$100k unflagged in both directions. It now flags W17 as a strength when any
+qualified stack grades ≥ 4 there, and as a weakness when none does, mirroring `schnauzer`.
+
+### ⚠️ Calibration — this one MOVED GRADES, unlike previous rebalances
+
+```
+ref1  puppy  5.79 (A-) -> 4.63 (B+)    -1.16
+ref2  puppy  5.02 (B+) -> 7.08 (A)     +2.06
+```
+
+**Both letter grades moved, and that is expected rather than alarming:** correcting a weight vector
+that was misaligned with the actual gate structure necessarily redistributes score between rosters
+with different weekly profiles. W16-heavy builds fall, W17-heavy builds rise. That is the intended
+direction. Other tournaments are untouched (`main`, `bbm7`, `schnauzer`, `fastpuppy` all identical
+before and after).
+
+If the swing proves too aggressive against real rosters, the conservative fallback is `[2, 1.5,
+1.75]`, which keeps both corrections but softens the W17 lift. **Re-run this calibration after any
+change here.**
