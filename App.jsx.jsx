@@ -294,6 +294,15 @@ const ADP_DATA = {
   "brenen thompson": { adp: 215.3, pos: "WR", team: "LAC" },
   "adam randall": { adp: 215.3, pos: "RB", team: "BAL" },
   "carson beck": { adp: 215.3, pos: "QB", team: "ARI" },
+  // 215.5 is a TIER placement, not a measured Underdog ADP — no Underdog number
+  // for him was available when this was added (Aug 5 2026). He is priced against
+  // this table's own deep-QB archetype: unresolved competitions and contingent
+  // starters (Beck 215.3 ARI, Cousins 215.2 LV, Sanders 214.6 CLE, Penix 213.3
+  // ATL). Added so the MIN hedge is draftable at all — without an ADP_DATA row
+  // he silently fails to resolve in Underdog best ball. A pasted roster carrying
+  // its own ADP overrides this per the ADP source-of-truth rule; replace with a
+  // real number the first time one appears on a board.
+  "jj mccarthy": { adp: 215.5, pos: "QB", team: "MIN" },
   "theo johnson": { adp: 215.4, pos: "TE", team: "NYG" },
   "andrei iosivas": { adp: 215.4, pos: "WR", team: "CIN" },
   "dj giddens": { adp: 215.4, pos: "RB", team: "IND" },
@@ -828,8 +837,8 @@ const VERDICTS = {
   "brian thomas": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "brian thomas jr": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "trevor lawrence": { verdict: "TARGET", date: "2026-06-07", reason: "Coen year 2 removes the offensive system uncertainty that capped Lawrence in 2025. Full offseason in the scheme, established WR room with Thomas and Hunter — QB upside is real if health holds.", confidence: "MEDIUM-HIGH" },
-  "jj mccarthy": { verdict: "fade", date: "2026-06-07", reason: "Kyler Murray is the heavy favorite for the MIN starting job per reports — McCarthy is effectively the backup until proven otherwise. No standalone redraft value. Handcuff only if you hold Murray.", confidence: "HIGH" },
-  "j.j. mccarthy": { verdict: "fade", date: "2026-06-07", reason: "Kyler Murray is the heavy favorite for the MIN starting job per reports — McCarthy is effectively the backup until proven otherwise. No standalone redraft value. Handcuff only if you hold Murray.", confidence: "HIGH" },
+  "jj mccarthy": { verdict: "hold", date: "2026-08-05", reason: "SUPERSEDES the Jun 7 'Murray is the heavy favorite' read, which camp reporting has outrun. As of Aug 4 2026 the MIN job is genuinely OPEN — O'Connell is running both QBs through first- AND second-team reps with no separation, and McCarthy took more full-offense snaps than Murray on Aug 1. Three years in the system is his case; a 2025 that got Murray signed is the case against. Contingent, not dead. Resolution expected by the Aug 30 cutdown.", confidence: "MEDIUM" },
+  "j.j. mccarthy": { verdict: "hold", date: "2026-08-05", reason: "SUPERSEDES the Jun 7 'Murray is the heavy favorite' read, which camp reporting has outrun. As of Aug 4 2026 the MIN job is genuinely OPEN — O'Connell is running both QBs through first- AND second-team reps with no separation, and McCarthy took more full-offense snaps than Murray on Aug 1. Three years in the system is his case; a 2025 that got Murray signed is the case against. Contingent, not dead. Resolution expected by the Aug 30 cutdown.", confidence: "MEDIUM" },
 };
 
 // ============ 2026 NFL COACHING REFERENCE (verified June 2026) ============
@@ -1005,6 +1014,15 @@ const SITUATIONS = {
   "eli heidenreich": { verdict: "fade", trend: "stable", trendNote: "PIT third RB behind Warren and Dowdle — drafted for passing situations and gadget work, no standalone value without injuries ahead of him", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "carson beck": { verdict: "hold", trend: "rising", trendNote: "ARI 2026 3rd-round pick with real starting path — Brissett in contract holdout heading into camp, Beck has high draft capital and is actively competing for Week 1 starts, not just an injury contingency; ARI WR room (Harrison, McBride) becomes legitimate if Beck wins the job", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "darnell washington": { verdict: "hold", trend: "rising", trendNote: "PIT TE2 locked in — 4yr/$42M extension signals org commitment; Jonnu Smith and Connor Heyward gone as free agents, leaving only Freiermuth as competition for reps; 31/364/1 line in 2025 on 43 targets, primarily a run-blocking TE with growing pass volume in McCarthy offense", situationFlags: ["scheme_fit"], riskFlags: [] },
+  // Both sides of the MIN competition carry qb_uncertainty deliberately. The
+  // engine's -0.3 stack penalty reads riskFlags off SITUATIONS, and until
+  // Aug 5 2026 Murray had a RECENT_NEWS entry but NO SITUATIONS row — so a
+  // four-piece Vikings stack built on an unresolved starter took ZERO penalty.
+  // Flagging only one side would leave the identical risk invisible on a
+  // McCarthy build. This is an AVAILABILITY risk, not a performance one: the
+  // loser does not play, so the loop breaks rather than merely weakening.
+  "kyler murray": { verdict: "hold", trend: "stable", trendNote: "OPEN COMPETITION with J.J. McCarthy, unresolved as of Aug 4 2026 and tied to the Aug 30 cutdown. O'Connell has met each QB individually and is running BOTH through first- and second-team reps. Murray led the first two days (16/22 in 11-on-11 vs McCarthy's 13/16) and edged a light Day 6, but McCarthy took more full-offense team snaps for the first time on Aug 1 and neither has separated. Murray is back from a foot injury; McCarthy has three years in this system and Murray was signed because McCarthy underperformed. TREAT AS AVAILABILITY RISK, NOT PERFORMANCE RISK — the loser does not play, so a Vikings stack built on the wrong one is unlooped, not just worse. Do not commit QB capital here until it resolves.", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
+  "jj mccarthy": { verdict: "hold", trend: "stable", trendNote: "Same unresolved MIN competition as Murray, from the other side. Three years in O'Connell's system is the real argument for him, and he has taken first-team reps including a snap-count edge on Aug 1 — but he also underperformed in 2025, which is why Murray is here, and Day 6 was inconsistent (three airmailed throws, an overthrown TD). Contingent value only, and worth noting as the cheaper half of the same bet: if you want Vikings pass-catcher exposure without the QB coin flip, rostering both sides is the hedge. Resolution expected by the Aug 30 roster deadline.", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "george holani": { verdict: "DART", trend: "rising", trendNote: "Took first-team reps through six full-squad practices ahead of BOTH first-rounder Jadarian Price and FA addition Emanuel Wilson (Brady Henderson, ESPN — 'biggest surprise of Seattle's offseason workouts'). The room is genuinely open: Walker left for KC, Charbonnet is on PUP with a January ACL and no stated return date. Pass-catching is his separator over Wilson. Contingency dart, NOT a standalone — Price is still the expected lead back and Holani's ceiling requires Price stumbling on pass protection or the Charbonnet timeline slipping. His 2025 line (4 games, 15% snap share) is too small to project from in either direction. Playoff slate is a genuine drag: W15 @PHI and W16 vs LAR are two of the toughest run defenses in the league after their offseasons, W17 @CAR is the only soft week.", situationFlags: ["committee_breaker"], riskFlags: ["depth_chart_competition", "role_dependent"] },
 };
 
