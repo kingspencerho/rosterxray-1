@@ -52,8 +52,15 @@ function buildGradingSystemPrompt(mode, tournamentName) {
 GROUND TRUTH LOCK — absolute priority order, no exceptions:
 1. "Recent news" in this prompt = real-time override. If a player appears here, their current situation IS exactly what this note says. Your training knowledge about this player does not apply. Do not blend, contradict, or supplement it.
 2. "Player situations" in this prompt = verified app data. Same rule — if a player appears here, use only this data for their role, team, and situation. Do not contradict it.
-3. Your training knowledge applies ONLY to players not listed in either section above.
+3. Your training knowledge applies ONLY to football REASONING — scheme concepts, defensive tendencies, how roles typically translate. It NEVER establishes a fact.
 Writing about a player in section 1 or 2 using information not from those sections is a hallucination. Do not do this.
+
+OFF-ROSTER PLAYERS — the rule that used to be missing here:
+This prompt only carries data for players ON the roster. That does NOT make your training knowledge authoritative for everyone else. It is roughly a year stale, so every player who changed teams in the last offseason is wrong in it.
+- Do NOT state which team an unlisted player is on, who a team's starter is, who is ahead of whom on a depth chart, or who a player is competing with, unless that fact appears somewhere in this prompt.
+- If the analysis needs a fact you were not given, write around it. Say "the starter," "the veteran ahead of him," "the incumbent" — a generic reference is always acceptable. Naming the wrong player is not.
+- The "Quarterbacks on the rostered teams" block, when present, is the app's current data. It overrides your training knowledge completely. If you expect a specific QB on one of those teams and he is not in that list, he is not on that team — do not mention him.
+This failure has shipped to users: the model called a quarterback a team's "healthy starter" months after he signed elsewhere, because he was not on the roster and the old version of this rule said training knowledge applied to him. An unnamed role is correct. A confidently named wrong player destroys trust in every other number on the page.
 
 AMBIGUOUS BACKFIELD FILTER — apply whenever discussing a low-cost RB in an unresolved or committee backfield (riskFlags includes creeping_committee or confirmed_committee, or no clear lead-back role):
 Score the back against these 3 criteria:

@@ -454,7 +454,7 @@ const ADP_SUPERFLEX = {
   "brian thomas": { adp: 98, pos: "WR", team: "JAX" },
   "btj": { adp: 110.0, pos: "WR", team: "JAX" },
   "kenneth gainwell": { adp: 117, pos: "RB", team: "TB" },
-  "kenny gainwell": { adp: 111.0, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 117, pos: "RB", team: "TB" }, // same player — keep in sync with the line above
   "michael wilson": { adp: 128, pos: "WR", team: "ARI" },
   "dallas goedert": { adp: 118, pos: "TE", team: "PHI" },
   "dk metcalf": { adp: 114, pos: "WR", team: "PIT" },
@@ -483,7 +483,7 @@ const ADP_SUPERFLEX = {
   "wandale robinson": { adp: 131, pos: "WR", team: "TEN" },
   "wan'dale robinson": { adp: 131, pos: "WR", team: "TEN" },
   "ricky pearsall": { adp: 137, pos: "WR", team: "SF" },
-  "chig okonkwo": { adp: 138.0, pos: "TE", team: "WAS" },
+  "chig okonkwo": { adp: 127, pos: "TE", team: "WAS" }, // same player as "chigoziem okonkwo" below — keep in sync
   "josh downs": { adp: 126, pos: "WR", team: "IND" },
   "quentin johnston": { adp: 115, pos: "WR", team: "LAC" },
   "chris rodriguez": { adp: 145, pos: "RB", team: "JAX" },
@@ -507,7 +507,7 @@ const ADP_SUPERFLEX = {
   "tyjae spears": { adp: 168, pos: "RB", team: "TEN" },
   "jalen coker": { adp: 167, pos: "WR", team: "CAR" },
   "isiah pacheco": { adp: 165, pos: "RB", team: "DET" },
-  "stefon diggs": { adp: 155, pos: "WR", team: "NE" },
+  "stefon diggs": { adp: 155, pos: "WR", team: "FA" }, // released by NE Mar 11 2026, still unsigned — "NE" here was his 2025 team
   "dylan sampson": { adp: 161, pos: "RB", team: "CLE" },
   "aj barner": { adp: 163, pos: "TE", team: "SEA" },
   "keaton mitchell": { adp: 147, pos: "RB", team: "LAC" },
@@ -726,20 +726,20 @@ const RECENT_NEWS = {
   "wandale robinson": "TEN. Verdict moved fade -> TARGET (Jul 31 2026). 2025 was a real alpha season: 92/1014/4 on a 29.8% target share with 26.8% air yards share, so the old slot-only framing was wrong. The TEN room is thinner than his ADP implies — Tate is an unproven rookie and Ridley posted 2.4 rec/g with a 0% spike rate in 2025. Soft slate (WR SOS 5th-easiest, +25 improvement; W15 Smash / W16 Good / W17 Good) supports the call but is not the basis for it. Open risks: new team, new QB, and a 12% spike rate — the profile is volume-first, not ceiling-first. Re-validate after camp confirms the pecking order.",
   "carnell tate": "Tate was drafted by TEN in 2026 and is projected as their WR1, ahead of Robinson on the depth chart.",
   "aj brown": "AJ Brown was traded to NE (2028 1st + 2027 5th), leaving PHI — no longer on PHI.",
-  "rashee rice": "Rice released from jail on schedule — on track for training camp. Missed OTAs but expected to be ready for Week 1. Monitor camp availability and chemistry reps with Mahomes early.",
+  "rashee rice": "KC — released from Dallas County Jail Jun 16 2026 after serving the full 30 days, and is in camp. THE LEGAL ITEM IS NO LONGER THE MAIN ONE: he had right-knee debridement surgery in May 2026 to remove loose bodies, and through camp has been running routes well short of full speed and leaving practice early each day for rehab (Ron Kopp Jr., late Jul 2026). Contract year. Note the six-game suspension he served was for 2025 — no 2026 NFL discipline has been announced, but outlets describe further probation-related discipline as a live RISK, not a ruling. Treat a 2026 suspension as unresolved, not scheduled.",
   "luther burden": "Burden is trending toward the CHI WR1 starter role per 2026 camp reports.",
   "james cook": "BUF beat reporting (Jul 2026) hints Pete Carmichael's arrival as OC means more designed receptions for Cook — the receiving role Joe Brady gave him in 2023 may return.",
   "cam skattebo": "Skattebo (tightrope ankle surgery) declared full-go for training camp and Week 1 per July reports. Effectiveness early in the season is the open question, not availability.",
   "emeka egbuka": "New OC Zac Robinson says Egbuka moves to the off-line Z/flanker role (Cooper Kupp's old role in this scheme) with Godwin working the slot — his natural college position after playing X out of position as a rookie.",
-  "eli stowers": "Stowers won the Mackey Award in 2025; with Goedert as bridge and AJ Brown gone from PHI, his TE1 path accelerated.",
+  "eli stowers": "PHI — BURIED, not ascending (Aug 2 2026). He is behind Dallas Goedert AND Johnny Mundt, who has been taking first-team 12-personnel reps because new OC Sean Mannion wants a blocking TE paired with a receiving TE; Stowers is 'more of a big receiver at this point' and not yet an NFL-caliber blocker. A spring leg injury cost him development reps and he was quiet at OTAs. The old TE1-path note rested on a FALSE PREMISE — Goedert did not leave, A.J. Brown did. Stowers is the successor once PHI moves on from Goedert, which has not happened. 2026 role is TE3.",
   "jonah coleman": "Coleman is DEN's top RB prospect — Payton compared him to Dobbins; Harvey inefficient (3.7 YPC) opens the door.",
   "kenneth gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
   "kenny gainwell": "Gainwell signed a 2yr/$14M deal with TB, signaling a real role — legitimate committee back alongside Bucky Irving.",
   "myles garrett": "Garrett was traded from CLE to LAR. CLE received Jared Verse + 2027 1st + picks in return. Pass rush remains elite at CLE via Verse. LAR upgraded significantly.",
   "tyler shough": "Saints officially confirmed Shough as franchise QB for 2026. Offensive Rookie of the Year 2025. Saints spent second-most on offense in free agency to support him — Etienne, Edwards, Fant all signed. No camp battle.",
   "jordyn tyson": "Drafted 8th overall by NO as Shough's primary weapon. Immediate WR2 role in confirmed 2026 Saints offense with Olave as WR1.",
-  "tua tagovailoa": "Signed with ATL as heavy favorite for starting job. Michael Penix recovering from torn ACL limits competition. ATL W15-17 all soft matchups. Three-week soft window at near-free ADP. Confirm at camp.",
-  "michael penix": "Recovering from torn ACL — limits competition with Tua for ATL starting job. Contingent value only.",
+  "tua tagovailoa": "ATL, not MIA — released by Miami and signed with Atlanta. Heavy favorite for the starting job; Penix's ACL recovery limits the competition. Missed the opening of camp with a back flare-up (Jul 29 2026), doing individual drills only; he called it precautionary and said he would 'likely' play if it were a game week, and outlets describe a return sooner rather than later. ATL W15-17 all soft matchups — three-week soft window at near-free ADP. Back issues warrant a re-check before drafting.",
+  "michael penix": "ATL — recovering from a torn left ACL (Week 11 2025 vs CAR, reconstructive surgery in November). Limited to individual drills and 7-on-7 to open camp and NOT cleared for 11-on-11; Penix himself said full clearance could be ~4 weeks out, near the end of August (AJC, Jul 2026). His own framing: 'I can't afford to have someone trip and fall on me right now.' Contingent value only — but the ATL QB job is genuinely unresolved until he is cleared, which affects every ATL pass-catcher's stack value.",
   "michael penix jr": "Recovering from torn ACL — limits competition with Tua for ATL starting job. Contingent value only.",
   "drake london": "ATL WR1 in confirmed 2026 offense with Tua as heavy favorite for starting job. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks.",
   "jahan dotson": "Dotson signed a 2yr/$15M deal with ATL to compete for the WR2 role behind London — Zachariah Branch (2026 draft pick) is the primary competition. Vacant WR room behind London means real opportunity, but the role isn't confirmed. Same three-week soft window (W15 @WAS, W16 vs TB, W17 vs NO) if he wins the job.",
@@ -748,7 +748,7 @@ const RECENT_NEWS = {
   "oscar delp": "NO drafted Delp as a developmental TE2 behind Juwan Johnson. 6-5/245, 4.49 40, 38-inch vertical — legitimate athleticism. Kittle comp per Saints Wire. Different skill set from Johnson (blocker/receiver vs. gadget/red zone) means complementary deployment is plausible in Shough's play-action system. Free dart in three soft playoff weeks.",
   "mike washington": "LV RB2 dart. Klint Kubiak historically deploys even two-back splits regardless of talent differential — Walker/Charbonnet SEA is the supporting precedent. Jeanty injury risk opens real volume. LV W16 vs TEN (soft) and W17 @ARI (soft) are two viable playoff weeks at near-free ADP.",
   "kayshon boutte": "AJ Brown arrival at NE crowds target share but Boutte's deep threat profile creates a distinct role that doesn't compete directly with Brown's intermediate/possession work. Maye's aggressive downfield tendency means vertical shots are part of the scheme regardless of Brown's presence. Boutte is a role-specific dart — not a volume play — who fires in games where Maye takes deep shots. NE W15 @KC is a legitimate bring-back game for KC stacks.",
-  "jaylin noel": "2025 third-rounder entering Year 2 with HOU competing for WR3 behind Collins and Higgins — currently leading that race over Tank Dell (knee) and Xavier Hutchinson per June 2026 mandatory minicamp reports. Connected with Stroud for multiple TDs in team drills. 26-292-2 as a rookie on 35 targets with 799 kick-return yards. HOU is a 3-week schedule avoid (JAX W15, @PHI W16, @GB W17) — real role ceiling but no viable playoff window.",
+  "jaylin noel": "HOU — the ROLE resolved UPWARD (Jul 2026): SI's camp depth chart lists him as a STARTER alongside Nico Collins and Jayden Higgins, with Tank Dell and Xavier Hutchinson as backups. Dell was NOT placed on PUP (so he is cleared) but was held out of full-team reps to open camp and is being brought along slowly after the Dec 2024 knee dislocation. OUTLET CONFLICT: other reporting still frames Dell as battling Noel and Hutchinson for WR3, and both framings are circulating in early August — do not treat the starter listing as settled. THE SCHEDULE VERDICT IS A SEPARATE AXIS AND STILL STANDS: HOU is a 3-week playoff avoid (JAX W15, @PHI W16, @GB W17). Better player, same dead window.",
 };
 
 // Player verdicts from memory — date-stamped for freshness check
@@ -871,7 +871,7 @@ const SITUATIONS = {
   "kc concepcion": { verdict: "TARGET", trend: "stable", trendNote: "R1 pick at WR5 ADP, vacated CLE target tree is massive", situationFlags: ["target_vacuum", "breakout_profile"], riskFlags: [] },
   "jadarian price": { verdict: "TARGET", trend: "rising", trendNote: "R1 capital + Charbonnet ACL = path to workhorse snaps", situationFlags: ["committee_breaker", "breakout_profile"], riskFlags: [] },
   "luther burden": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward WR1 starter role in CHI", situationFlags: ["breakout_profile", "target_vacuum"], riskFlags: [] },
-  "eli stowers": { verdict: "TARGET", trend: "stable", trendNote: "AJ Brown to NE strengthens PHI TE target share — buy window open", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "eli stowers": { verdict: "fade", trend: "falling", trendNote: "TE3 as of Aug 2 2026 — behind Goedert AND Johnny Mundt, who is taking first-team 12-personnel reps because new OC Mannion pairs a blocking TE with a receiving TE. Stowers is not yet an NFL-caliber blocker and lost spring development reps to a leg injury. The old TARGET rested on a false premise: Goedert did not leave, A.J. Brown did. Still the successor whenever PHI moves on from Goedert — that is a 2027 thesis, not a 2026 one.", situationFlags: [], riskFlags: ["role_competition"] },
   "eli raridon": { verdict: "SPECULATIVE", trend: "rising", trendNote: "3rd-round rookie (Notre Dame) with elite 6'6\"/245lb frame — immediately projects as Drake Maye's security blanket and Hooper target-share replacement. Hunter Henry is on a contract year; Hill signed as a blocker, not a receiver. Raridon's upside path is clear if Henry misses time or exits after 2026. Backup role in 2026, legitimate TE1 candidate from 2027. NE W16 @NYJ soft, W17 vs DEN soft — orphan window value if role expands.", situationFlags: ["breakout_profile", "scheme_fit"], riskFlags: ["depth_chart_competition"] },
   "jonah coleman": { verdict: "TARGET", trend: "rising", trendNote: "Camp reports trending toward every-down role as Harvey struggles in pass pro", situationFlags: ["committee_breaker", "scheme_fit"], riskFlags: [] },
   "quinshon judkins": { verdict: "TARGET", trend: "rising", trendNote: "CLE bell cow — Mitchell depth chart situation resolved, Judkins locked in as lead back with full workhorse path", situationFlags: ["breakout_profile"], riskFlags: [] },
@@ -893,7 +893,7 @@ const SITUATIONS = {
   // fragility risk is preserved in the note and in riskFlags rather than
   // expressed as a verdict.
   "malik nabers": { verdict: "TARGET", trend: "rising", trendNote: "Alpha usage confirmed before the injury: in his 4 games of 2025 he ran a 28.7% target share with a 0.761 WOPR — higher than Jefferson (0.697) or Chase (0.723) — plus 25% spike and 25% nuclear week rates. Small sample, but unambiguous about role. Health arc: torn right ACL + full lateral meniscus Week 4 (Sep 28 2025), repair in late Oct, then a second spring 2026 procedure to clear scar-tissue stiffness. Aug 2026 camp: AVOIDED the PUP list, took a full Day 1 practice, observers called him outstanding; no target date announced, workload evaluated daily. Two live risks that do not cancel the verdict: the Giants opening him on IR would cost Weeks 1-4, and his W15 draw (CLE, 30th vs WR, Verse added) is a wall in the week BBM weights double — his ceiling week is W17 vs DAL, the softest WR defense in the league. Target on role and talent; price the fragility, do not price him as a discount.", situationFlags: ["target_vacuum"], riskFlags: ["injury_history"] },
-  "rashee rice": { verdict: "hold", trend: "rising", trendNote: "Released from jail, on track for training camp — OTA miss is a real chemistry concern but not a red flag at ADP 28. Elite route runner in Mahomes offense; biggest risk is early-season rust, not availability. ADP has him discounted vs his role ceiling — reasonable value if he reports clean.", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "rashee rice": { verdict: "hold", trend: "stable", trendNote: "Out of jail Jun 16 and in camp, but the legal item is no longer the main one — May 2026 right-knee debridement has him running routes well short of full speed and leaving practice early daily for rehab. Elite route runner in a Mahomes offense that is itself fully cleared, and the ADP discount is real. Two unresolved overhangs, not one: knee ramp-up, and probation-related discipline that outlets call a RISK with no league ruling. Contract year.", situationFlags: ["scheme_fit"], riskFlags: ["injury_history"] },
   "lamar jackson": { verdict: "hold", trend: "stable", trendNote: "BAL playoff schedule is mixed — W15 @PIT tough, W16 CLE neutral, W17 @CIN soft (+0.12 EPA); new HC Minter/OC Doyle scheme uncertainty is the real ceiling risk, not the schedule", situationFlags: [], riskFlags: [] },
   "jaxson dart": { verdict: "TARGET", trend: "rising", trendNote: "NYG run-heavy limits QB ceiling but W17 @DAL is a real spike week — late-round leverage play at ADP discount", situationFlags: ["breakout_profile"], riskFlags: [] },
   "mike washington": { verdict: "TARGET", trend: "stable", trendNote: "Kubiak two-back system historically deploys even splits regardless of talent differential — Walker/Charbonnet SEA is the precedent. Jeanty injury risk real. LV W16 vs TEN and W17 @ARI are two soft playoff weeks. Combine fraud and fumble history are concerns but irrelevant at ~192 ADP in a scheme that manufactures RB2 opportunities.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
@@ -928,14 +928,14 @@ const SITUATIONS = {
   "wandale robinson": { verdict: "TARGET", trend: "rising", trendNote: "Alpha-tier 2025 volume that the market has not repriced: 92/1014/4 on a 29.8% target share, 26.8% air yards share and 0.64 WOPR — genuine downfield work, not a slot-only profile. Competition in TEN is thinner than the ADP implies: Tate is a rookie (premium capital, but unproven) and Ridley is coming off 2.4 rec/g with a 0% spike rate. Schedule is a bonus rather than the thesis: WR slate ranks 5th-easiest and improved 25 spots, with W15 Smash / W16 Good / W17 Good. Real risks stay live — new team, new QB in Ward, and a 12% spike rate means the volume floor has been higher than the ceiling. Target on volume and competition; re-validate once camp confirms the TEN pecking order.", situationFlags: ["target_vacuum"], riskFlags: [] },
   "parker washington": { verdict: "TARGET", trend: "rising", trendNote: "JAX WR1 breakout in 2025 — 65/954/6 with 19 catches of 20+ yards; perimeter YPRR (2.59) better than slot (1.87), Coen offense, Lawrence chemistry ascending", situationFlags: ["breakout_profile"], riskFlags: [] },
   "jahan dotson": { verdict: "DART", trend: "stable", trendNote: "2yr/$15M ATL deal puts him in competition with Zachariah Branch for WR2 behind London — role not confirmed. ATL WR room is genuinely vacant behind London so the opportunity is real, but Branch has draft capital working against Dotson. Contingent dart: wins the job = three-week soft window (W15 @WAS, W16 vs TB, W17 vs NO) at near-free ADP.", situationFlags: [], riskFlags: ["role_competition"] },
-  "jaylin noel": { verdict: "fade", trend: "stable", trendNote: "Leading HOU WR3 competition over Tank Dell (knee) and Hutchinson per June 2026 minicamp — Stroud connection is real (multiple TDs in team drills). Year 2 leap candidate with return specialist floor. Hard stop: HOU is a 3-week schedule avoid (JAX W15, @PHI W16, @GB W17). Real role with no playoff window. Do not draft in best ball formats targeting W15-17.", situationFlags: [], riskFlags: ["schedule_avoid"] },
+  "jaylin noel": { verdict: "fade", trend: "rising", trendNote: "ROLE improved, WINDOW did not — the two are separate axes and only one moved. SI's July camp depth chart lists him a STARTER with Collins and Higgins, Dell and Hutchinson behind; other outlets still call it an open WR3 battle, so it is not settled. Stroud connection is real. The fade is unchanged and is purely schedule: HOU draws JAX W15, @PHI W16, @GB W17 — a 3-week playoff avoid. Better player, same dead window. Redraft-relevant, best-ball irrelevant.", situationFlags: ["breakout_profile"], riskFlags: ["schedule_avoid"] },
   "demario douglas": { verdict: "fade", trend: "stable", trendNote: "NE check-down valve, sub-8 aDOT — YAC-dependent with zero air yards upside in Maye offense", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "tutu atwell": { verdict: "fade", trend: "stable", trendNote: "MIA gadget/speed role, sub-8 aDOT — no defined role and Willis run-first offense caps ceiling further", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "malik washington": { verdict: "fade", trend: "falling", trendNote: "MIA slot with 5.2 aDOT in 2025 — now facing competition from three rookie WRs plus Atwell and Tolbert in Willis run-first offense; volume entirely schemed", situationFlags: [], riskFlags: ["creeping_committee"], roleCeiling: "slot_only" },
   "christian kirk": { verdict: "fade", trend: "falling", trendNote: "Age 30 WR3 in SF behind Evans and Pearsall — career slot profile, Shanahan run-heavy, Stribling 2nd-round pick adds further role pressure", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
   "brandin cooks": { verdict: "fade", trend: "falling", trendNote: "Unsigned FA as of June 2026 — 24 catches/279 yards/0 TDs in 2025 split between NO and BUF; BUF added DJ Moore and drafted Skyler Bell, no clear landing spot; do not draft until team confirmed", situationFlags: [], riskFlags: ["injury_history"] },
-  "kyren williams": { verdict: "hold", trend: "stable", trendNote: "Locked LAR RB1/bell-cow regardless of QB stack — Corum is committee depth, not a threat to lead role", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "kyren williams": { verdict: "hold", trend: "stable", trendNote: "STARTER yes, bell-cow no — the old note overstated it. He took only 54% of LAR RB carries in 2025 and McVay's own framing is committee: 'They're both going to play... we're at our best when you're getting tight ends, receivers and multiple backs involved.' Corum is the most improved back in camp per Kyren himself ('a lot leaner, a lot more explosive') and McVay confirmed a good camp Aug 2. Kyren is also a pending 2027 FA with no extension, and Jarquez Hunter is competing for rotation share.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
   "blake corum": { verdict: "hold", trend: "rising", trendNote: "LAR volume committee back — earned 30-35% snap share in final 5 weeks of 2025 with real red zone equity (5 TDs in 4-game stretch); Kyren Williams is still RB1 but Corum has standalone boom-week upside when workload spikes; Garrett arrival helps clock-kill role", situationFlags: [], riskFlags: ["creeping_committee"] },
   "rachaad white": { verdict: "fade", trend: "stable", trendNote: "WAS committee back with no defined role — value is entirely situational, no TD equity locked in", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
   "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
@@ -1236,7 +1236,7 @@ const ADP_YAHOO = {
   "jordan addison": { adp: 121.6, pos: "WR", team: "MIN" },
   "oronde gadsden": { adp: 103.0, pos: "TE", team: "LAC" },
   "kenneth gainwell": { adp: 113.1, pos: "RB", team: "TB" },
-  "kenny gainwell": { adp: 104.0, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 113.1, pos: "RB", team: "TB" }, // same player — keep in sync with the line above
   "patrick mahomes": { adp: 94.9, pos: "QB", team: "KC" },
   "michael pittman jr": { adp: 120.6, pos: "WR", team: "PIT" },
   "dallas goedert": { adp: 104.7, pos: "TE", team: "PHI" },
@@ -1282,7 +1282,7 @@ const ADP_YAHOO = {
   "isiah pacheco": { adp: 127.6, pos: "RB", team: "DET" },
   "denzel boston": { adp: 131.4, pos: "WR", team: "CLE" },
   "hunter henry": { adp: 149.0, pos: "TE", team: "NE" },
-  "deebo samuel": { adp: 134.7, pos: "WR", team: "-" },
+  "deebo samuel": { adp: 134.7, pos: "WR", team: "SF" }, // signed with SF (Pearsall's vacated targets) — "-" predated the signing
   "emanuel wilson": { adp: 151.0, pos: "RB", team: "SEA" },
   "cj stroud": { adp: 127.2, pos: "QB", team: "HOU" },
   "mike washington jr": { adp: 192.0, pos: "RB", team: "LV" },
@@ -6014,6 +6014,52 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === OFF-ROSTER TEAMMATE CONTEXT (added Aug 3 2026) ===
+      //
+      // Why this exists: the AI called Tua Tagovailoa "the healthy starter" for
+      // MIAMI in a published nutshell. He signed with ATLANTA, and the app knew
+      // that — ADP_DATA has him at team "ATL" and RECENT_NEWS says so outright.
+      // The app simply never told the model, because EVERY other context block
+      // here is filtered to `result.valid` (players ON the roster). Tua was not
+      // on the roster, so the model reasoned about Malik Willis's depth chart
+      // from training knowledge, where Tua is still a Dolphin.
+      //
+      // The prompt made this worse than a silent gap: api/analyze.js used to say
+      // "your training knowledge applies ONLY to players not listed above,"
+      // which explicitly LICENSED the invention. Both halves are fixed — the
+      // rule now forbids asserting team/role for anyone absent, and this block
+      // supplies the facts so the model has a real answer instead of a gap.
+      //
+      // Scope is deliberately narrow: QBs only, and only for teams the roster
+      // actually touches. QB identity is the fact most often needed about a
+      // player who isn't rostered (every stack and every "who throws him the
+      // ball" question), and it is small — one line per team. Dumping full
+      // depth charts would bloat a prompt that already hit its token ceiling
+      // once (see the max_tokens note below).
+      // Match the table findPlayer resolved the roster against, or the QB list
+      // can disagree with the ADPs shown everywhere else on the page.
+      // analyzeRedraft does NOT set result.format (only analyzeRoster does), so
+      // check isRedraft FIRST — keying off format alone silently served the
+      // Underdog table to every redraft grade.
+      const qbTable = isRedraft ? ADP_YAHOO
+        : result.format === "superflex" ? ADP_SUPERFLEX
+        : ADP_DATA;
+      const teammateContext = rosterTeams
+        .map(t => {
+          const rosteredHere = new Set((result.valid || []).map(p => normalize(p.name)));
+          const qbs = Object.entries(qbTable)
+            .filter(([, v]) => v.pos === "QB" && v.team === t)
+            .sort((a, b) => (a[1].adp ?? 999) - (b[1].adp ?? 999))
+            .map(([k, v]) => {
+              const label = k.replace(/\b\w/g, c => c.toUpperCase());
+              const onRoster = rosteredHere.has(normalize(k)) ? " [on this roster]" : "";
+              return `${label} (ADP ${v.adp})${onRoster}`;
+            });
+          return qbs.length ? `${t} QBs: ${qbs.join(", ")}` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 PRODUCTION METRICS CONTEXT ===
       // Compact per-player line from the nflverse-built PLAYER_METRICS file. Descriptive
       // of last season's roles — the AI must let situations/news override on role changes.
@@ -6091,6 +6137,7 @@ Playoff lineup confidence: ${lineupConfidenceForPrompt || "none"}
 Bench moves: ${benchMovesForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
@@ -6108,6 +6155,7 @@ Standout players: ${standoutsForPrompt || "none"}
 Bring-back games: ${bringBackForPrompt || "none"}
 ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
+${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}

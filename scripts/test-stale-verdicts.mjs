@@ -66,7 +66,8 @@ const situations = new Map();
     if (!k) return;
     const verdict = /verdict:\s*"([^"]*)"/.exec(L)?.[1] ?? "";
     const trend = /trend:\s*"([^"]*)"/.exec(L)?.[1] ?? "";
-    situations.set(k[1], { verdict, trend, line: offset + i });
+    const riskFlags = /riskFlags:\s*\[([^\]]*)\]/.exec(L)?.[1] ?? "";
+    situations.set(k[1], { verdict, trend, riskFlags, line: offset + i });
   });
 }
 
@@ -122,10 +123,21 @@ for (const [player, sit] of situations) {
     continue;
   }
   // 4. The record contradicts itself: verdict and trend point opposite ways.
+  //
+  // EXCEPTION — schedule_avoid. `trend` tracks the PLAYER (role, opportunity);
+  // `verdict` is the draft call. Those normally move together, which is why
+  // this check exists. They come apart legitimately when the fade is driven by
+  // the W15-17 schedule rather than by the player: Jaylin Noel went from
+  // "competing for WR3" to a listed STARTER in Aug 2026 while HOU's playoff
+  // slate (JAX / @PHI / @GB) stayed a 3-week avoid. Rising role, unchanged
+  // fade. Forcing trend back to "stable" there would delete a true fact to
+  // satisfy a check, which is backwards — so the app's own schedule_avoid
+  // riskFlag is what licenses the divergence. Anything else still fires.
+  const scheduleDriven = /schedule_avoid/.test(sit.riskFlags);
   if (POSITIVE_VERDICT(sit.verdict) && sit.trend === "falling") {
     fails.push({ player, sit, n, why: `SITUATIONS is internally inconsistent: verdict "${sit.verdict}" with trend "falling"` });
-  } else if (NEGATIVE_VERDICT(sit.verdict) && sit.trend === "rising" && !/^hold$/i.test(sit.verdict)) {
-    fails.push({ player, sit, n, why: `SITUATIONS is internally inconsistent: verdict "${sit.verdict}" with trend "rising"` });
+  } else if (NEGATIVE_VERDICT(sit.verdict) && sit.trend === "rising" && !/^hold$/i.test(sit.verdict) && !scheduleDriven) {
+    fails.push({ player, sit, n, why: `SITUATIONS is internally inconsistent: verdict "${sit.verdict}" with trend "rising" (add the schedule_avoid riskFlag if the fade is purely a W15-17 schedule call and the player himself is improving)` });
   }
 }
 
