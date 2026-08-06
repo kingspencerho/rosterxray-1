@@ -648,6 +648,32 @@ const TOURNAMENTS = {
   // ~40% of the $100k), so EV concentrates almost entirely in W17 — hence the 2x.
   // advanceWeight 1.5 because the cumulative R1 round eliminates 83% of the field.
   schnauzer: { name: "Mini Schnauzer 2", entries: "37.2k", weights: [1.25, 1, 2], advanceWeight: 1.5, note: "Softest weekly cuts on Underdog (W15 2/10, W16 2/8) — the 14-week qualifier is the real filter, and W17's 310-seat final is where the money is", format: "standard" },
+  // The Pit Bull 2 (2026 season, read off the in-app rules Aug 6 2026).
+  // $20 entry · 28,080 entries · $500k prizes · 11% rake · 18 rounds · 12-man
+  // drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/BENCH10.
+  // MAX 10 ENTRIES — the lowest of any format here (Puppy allows 150), so this
+  // is a low-portfolio format where a single build carries real weight.
+  //
+  //   R1 Qualifier  W1-14  2,340 groups of 12, 2 advance (16.7%)  28,080 -> 4,680
+  //   R2 Quarter    W15      780 groups of  6, 1 advance (16.7%)   4,680 ->   780
+  //   R3 Semi       W16      156 groups of  5, 1 advance (20.0%)     780 ->   156
+  //   R4 Final      W17    one 156-person group                      156 ->     1
+  //
+  // ⚠️ UNDERDOG'S OWN RULES TEXT HAS A TYPO HERE — it says R3 is "156 6-person
+  // Groups." It is 156 FIVE-person groups: 780/156 = 5, the advancement line
+  // reads 1/5, and the group-size list says 5. Do not "correct" this to 6.
+  //
+  // WHY THE WEIGHTS SIT BETWEEN PUPPY AND SCHNAUZER: the gates are unusually
+  // FLAT at 16.7 / 16.7 / 20 — no single week is a kill shot, unlike Puppy's
+  // 10% W15. But the prize curve is the most top-heavy on the board: 77.5% of
+  // the pool goes to the 156 finalists and **53.4% goes to the top TEN**, versus
+  // 26.8% for Puppy's top ten. Same $100k first prize out of half the money.
+  // So reaching the final is worth 25x, and everything above that needs a
+  // monster W17 in a single 156-man group. W17 carries the load; W15 edges W16
+  // only because 16.7% is tighter than 20%.
+  // advanceWeight 1.5 matches puppy and schnauzer — the R1 qualifier is the
+  // same 12-man, 2-advance structure and eliminates 83.3% of the field.
+  pitbull: { name: "The Pit Bull 2", entries: "28.1k", weights: [1.5, 1.25, 2], advanceWeight: 1.5, note: "Flattest weekly gates on Underdog (W15 1/6, W16 1/5 — no kill-shot week), but the most top-heavy prize curve: 77.5% of the $500k reaches the 156-seat final and 53.4% goes to the top ten. Survive, then win W17 outright. Max 10 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
@@ -3421,6 +3447,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       strengths.push(`${w17Elite.length} stack(s) built for the W17 championship round — where this format's prize curve pays`);
     } else if (qualifiedStackGrades.length > 0) {
       weaknesses.push(`No stack has a live W17 window — the W15/W16 cuts here are soft enough to survive, but the 310-seat final is where the money is`);
+    }
+  } else if (tournamentKey === "pitbull") {
+    // The Pit Bull 2: gates are flat (16.7 / 16.7 / 20) so no single week is a
+    // kill shot — but 53.4% of the pool goes to the TOP TEN of a 156-man final,
+    // the most top-heavy curve on the board. Surviving is the easy part here;
+    // the money needs an outright W17 win, so that is the week worth flagging.
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    const anyWeak = qualifiedStackGrades.filter(s => Math.min(...s.avgPerWeek) <= 1);
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — 53.4% of this format's pool goes to the top ten of a 156-man group`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — the weekly gates here are survivable, but the money needs an outright win in the 156-seat final`);
+    }
+    if (anyWeak.length >= 1) {
+      weaknesses.push(`${anyWeak.length} stack(s) carry a wall week — with three near-identical gates (1/6, 1/5) you cannot punt a week and expect to reach the final`);
     }
   } else if (tournamentKey === "fastpuppy") {
     // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.

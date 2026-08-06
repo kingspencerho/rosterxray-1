@@ -1190,3 +1190,70 @@ before and after).
 If the swing proves too aggressive against real rosters, the conservative fallback is `[2, 1.5,
 1.75]`, which keeps both corrections but softens the W17 lift. **Re-run this calibration after any
 change here.**
+
+---
+
+## The Pit Bull 2 — added Aug 6, 2026
+
+Fourth Underdog format in `TOURNAMENTS`, key `pitbull`, read off the in-app rules. $20 entry ·
+28,080 entries · $500k prizes · 11% rake · 18 rounds · 12-man drafts · half-PPR with 4pt passing
+TDs · QB1/RB2/WR3/TE1/FLEX1/BENCH10.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 2,340 × 12 | 2 (16.7%) | 28,080 → 4,680 |
+| R2 Quarterfinal | W15 | 780 × 6 | 1 (**16.7%**) | 4,680 → 780 |
+| R3 Semifinal | W16 | 156 × 5 | 1 (20.0%) | 780 → 156 |
+| R4 Championship | W17 | one 156-man group | 1 grand prize, all paid | 156 → 1 |
+
+### ⚠️ Underdog's own rules text has a typo — do not "fix" it the wrong way
+
+The rules say R3 is *"156 6-person Groups."* **It is 156 FIVE-person groups.** 780/156 = 5, the
+advancement line reads `1/5`, and the group-size list says 5. Three independent confirmations
+against one prose slip.
+
+### Why the weights sit BETWEEN Puppy 3 and Schnauzer
+
+**The gates are unusually FLAT: 16.7 / 16.7 / 20.** No single week is a kill shot, unlike Puppy 3's
+10% W15. R1 and W15 have *identical* advance rates, which no other format here does.
+
+**But the prize curve is the most top-heavy on the board.** 77.5% of the pool reaches the 156
+finalists and **53.4% goes to the top TEN** — versus 26.8% for Puppy 3's top ten, out of half the
+money for the same $100k first prize. The ladder on a $20 entry is `$20 → $40 → $500 → $100k`:
+reaching the final is 25x, and everything above that requires winning a 156-man group outright.
+
+So: **surviving is the easy part here; winning W17 is the whole game.** Weights `[1.5, 1.25, 2]`.
+W15 edges W16 only because 16.7% is tighter than 20%.
+
+This completes a coherent ladder across the three group-stage formats, ordered by gate severity:
+
+```
+Puppy 3     [2,    1.5,  2]   gates 10.0 / 20.0   — hardest weekly cuts
+Pit Bull 2  [1.5,  1.25, 2]   gates 16.7 / 20.0   — flat, top-heavy prize
+Schnauzer   [1.25, 1,    2]   gates 20.0 / 25.0   — softest weekly cuts
+```
+
+All three carry `advanceWeight: 1.5`: the R1 qualifier is the same 12-man, 2-advance structure in
+each and eliminates 83.3% of the field over fourteen weeks.
+
+### Other notes
+
+- **Max 10 entries** — the lowest of any format here (Puppy allows 150). A low-portfolio format
+  where one build carries real weight, which argues against spray-and-pray construction.
+- **28,080 entries is MID-FIELD** by the Field Size Overlay (10k-100k), same bucket as Schnauzer —
+  so the uniqueness premium that governs BBM VII and Puppy does NOT apply. It is deliberately left
+  out of the `bbm7 || puppy` uniqueness-leverage branch.
+- The scoring branch flags W17 in both directions, plus a wall-week weakness: with three
+  near-identical gates you cannot punt a week and still reach the final.
+
+### Calibration — nothing else moved
+
+```
+                 main        puppy       schnauzer     pitbull (new)
+ref1        A- 5.79 =    B+ 4.63 =     B+ 4.63 =       B+ 4.63
+ref2        A- 6.22 =    A  7.08 =     A- 6.28 =       A- 6.28
+puppy3-live A  10.44 =   A  10.45 =    A  10.45 =      A  10.45
+```
+
+All nine pre-existing grades byte-identical before and after. Dropdown order preserved: General /
+BBM VII / The Puppy 3 stay the top three.
