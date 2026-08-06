@@ -83,6 +83,35 @@ const news = new Map();
   });
 }
 
+// --- VERDICTS: the THIRD prose layer, and the one this test used to miss ---
+//
+// Added Aug 5 2026 after three verdicts were found contradicting their own
+// newer RECENT_NEWS entries — kyler murray ("heavy favorite" vs an OPEN
+// competition), eli stowers ("buy now, TE1 in 2027" vs buried at TE3), and
+// travis hunter (a WR2 projection vs reporting that he plays mostly corner).
+// All three were missed by the SAME session that fixed their SITUATIONS rows,
+// which is exactly why this needs to be mechanical rather than remembered.
+//
+// The app self-protects at runtime: analyzeRoster marks a verdict `stale` past
+// 45 days and the prompt filters those out, so an aged wrong verdict is inert
+// rather than actively lying. That is why this check is scoped to CONTRADICTION
+// rather than age. Age alone is not a defect here — it is the designed expiry.
+// What IS a defect is a verdict that disagrees with fresher news, because the
+// moment someone refreshes the date without re-reading the content, it goes live.
+const verdicts = new Map();
+{
+  const body = tableBody("VERDICTS");
+  const offset = src.slice(0, src.indexOf(body)).split("\n").length;
+  body.split("\n").forEach((L, i) => {
+    const k = /^\s*"([^"]+)"\s*:\s*\{/.exec(L);
+    if (!k) return;
+    const verdict = /verdict:\s*"([^"]*)"/.exec(L)?.[1] ?? "";
+    const date = /date:\s*"([^"]*)"/.exec(L)?.[1] ?? "";
+    const reason = /reason:\s*"([^"]*)"/.exec(L)?.[1] ?? "";
+    verdicts.set(k[1], { verdict, date, reason, line: offset + i });
+  });
+}
+
 // Unambiguous signals only. Each must be a phrase that cannot reasonably appear
 // in a note arguing the opposite direction.
 const OUT = [
@@ -141,8 +170,34 @@ for (const [player, sit] of situations) {
   }
 }
 
+// === VERDICTS vs RECENT_NEWS ===
+// A dated verdict whose news entry is NEWER and points the other way. Only
+// fires when the news is genuinely more recent than the verdict, so a verdict
+// updated today against older news is fine.
+let verdictPairs = 0;
+for (const [player, v] of verdicts) {
+  const n = news.get(player);
+  if (!n || !v.date) continue;
+  verdictPairs++;
+  const blob = `${v.verdict} ${v.reason}`;
+
+  // The news says the role is contested/denied while the verdict asserts it is
+  // settled. "heavy favorite" / "confirmed" / "locked" are the tells.
+  const assertsSettled = /\b(heavy favorite|confirmed|locked|no competition|clear starter|won the job)\b/i.test(blob);
+  if (hit(n.text, ROLE_DENIED) && assertsSettled) {
+    fails.push({ player, sit: { verdict: v.verdict, line: v.line }, n,
+      why: `VERDICTS asserts a settled role ("${v.verdict}", ${v.date}) but RECENT_NEWS reports the role is contested or unresolved` });
+    continue;
+  }
+  // News says OUT, verdict still a buy.
+  if (hit(n.text, OUT) && POSITIVE_VERDICT(v.verdict)) {
+    fails.push({ player, sit: { verdict: v.verdict, line: v.line }, n,
+      why: `VERDICTS reads "${v.verdict}" (${v.date}) but RECENT_NEWS says the player is OUT` });
+  }
+}
+
 if (fails.length === 0) {
-  console.log(`PASS  ${situations.size} SITUATIONS entries checked against ${news.size} RECENT_NEWS entries — no stale verdicts`);
+  console.log(`PASS  ${situations.size} SITUATIONS + ${verdictPairs} VERDICTS entries checked against ${news.size} RECENT_NEWS entries — no contradictions`);
   process.exit(0);
 }
 
