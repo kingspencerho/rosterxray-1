@@ -620,7 +620,33 @@ const ADP_SUPERFLEX = {
 // Tournament configurations — week weights for grade rollup
 const TOURNAMENTS = {
   main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
-  bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
+  // Best Ball Mania VII (2026 season, read off the in-app rules Aug 6 2026 —
+  // this config was previously the thinnest on the board, inferred rather than
+  // sourced). $25 entry · 672,336 entries · $15M prizes · 10.8% rake · 18 rounds
+  // · 12-man drafts · half-PPR, 4pt passing TD · 150 max entries.
+  //
+  //   R1 Qualifier  W1-14  56,028 groups of 12, 2 advance (16.7%)  672,336 -> 112,056
+  //   R2 Quarter    W15     8,004 groups of 14, 1 advance ( 7.1%)  112,056 ->   8,004
+  //   R3 Semi       W16       667 groups of 12, 1 advance ( 8.3%)    8,004 ->     667
+  //   R4 Final      W17    one 667-person group                        667 ->       1
+  //
+  // TWO CORRECTIONS to the old [2, 1, 1]:
+  // 1. W16 was weighted at HALF of W15. It is a 1-of-12 (8.3%) gate against
+  //    W15's 1-of-14 (7.1%) — near-identical, and the two HARDEST weekly cuts
+  //    on this entire board. Both now carry maximum weight. This is the same
+  //    error that was corrected in puppy, in the opposite direction.
+  // 2. No advanceWeight, despite BBM being the ONLY format here with a SEPARATE
+  //    REGULAR-SEASON PRIZE POOL — the rules pay out on W1-14 before Round 2
+  //    even starts. The playoff breakdown sums to $13.48M of the advertised
+  //    $15M, so roughly $1.52M (10.1%) is paid for the qualifying round alone.
+  //    1.75 = the 1.5 the other 2/12 qualifiers earn, plus that standalone pool.
+  //
+  // W17 stays BELOW the other formats' 2 on purpose. Reaching this final is a
+  // 0.099% proposition from entry — 3.4x rarer than Puppy 3 and 5.6x rarer than
+  // Pit Bull 2 — so W17 matchup quality is worth materially less in expectation
+  // here even though the final holds 70.2% of the playoff pool and pays 148x
+  // just to arrive. The binding constraint is surviving two ~8% gates back to back.
+  bbm7: { name: "BBM VII", entries: "672.3k", weights: [2, 2, 1.5], advanceWeight: 1.75, note: "The two hardest weekly cuts anywhere — W15 1-of-14 and W16 1-of-12, back to back. Only format with a separate regular-season prize pool, so W1-14 pays on its own. Reaching the 667-seat final is a 0.099% shot but pays 148x", format: "standard" },
   // The Puppy 3 (2026 season, verified against the in-app rules Aug 5 2026).
   // $5 entry · 225,000 entries · $1M prizes · 11.1% rake · 18 rounds · 12-man drafts
   // · half-PPR, 4pt passing TD · roster QB1/RB2/WR3/TE1/FLEX1/BENCH10 · 150 max entries.
@@ -3433,10 +3459,23 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       weaknesses.push(`No stack has a live W17 window — reaching the 750-seat final is an 80x jump and 75.6% of the $1M pool is decided there`);
     }
   } else if (tournamentKey === "bbm7") {
-    // BBM VII: W15 spike — reward stacks with strong W15
+    // BBM VII: the two hardest weekly gates anywhere, back to back — W15 is
+    // 1-of-14 (7.1%) and W16 is 1-of-12 (8.3%). The old branch checked W15 only,
+    // which understated a W16 cut that is nearly as brutal. You must win BOTH
+    // outright, so a roster live in only one of them is not actually alive.
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    const bothWeeks = primaryStacks.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] >= 4);
     if (w15Elite.length >= 1) {
-      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling`);
+      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling — the 1-of-14 cut is the hardest gate in any format here`);
+    }
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) with W16 spike ceiling — 1-of-12, nearly as steep as W15`);
+    }
+    if (bothWeeks.length >= 1) {
+      strengths.push(`${bothWeeks.length} stack(s) live in BOTH W15 and W16 — you have to win the two cuts back to back, so this is what actually survives`);
+    } else if (primaryStacks.length > 0) {
+      weaknesses.push(`No stack clears both W15 and W16 — BBM makes you win a 1-of-14 and then a 1-of-12 consecutively, and a roster built for only one of them rarely sees the other`);
     }
   } else if (tournamentKey === "schnauzer") {
     // Mini Schnauzer 2: the W15/W16 gates are soft (20%, 25%), so a merely-adequate
