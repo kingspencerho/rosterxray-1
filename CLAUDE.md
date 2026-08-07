@@ -155,7 +155,7 @@ Code extreme market bearishness on unknowns as asymmetric buying opportunities. 
 
 ### Week 15 — The Opening Filter
 - Steepest cut in Puppy (1/10). Requires real ceiling, not survivability.
-- In BBM VII, W15 is the primary elimination round — W15 ceiling weight is highest in that format.
+- **CORRECTED Aug 6 2026.** This read "in BBM VII, W15 is the primary elimination round — W15 ceiling weight is highest in that format," which was true but misleadingly incomplete. BBM VII's W15 is **1-of-14 (7.1%)** and its **W16 is 1-of-12 (8.3%)** — near-identical, and the two hardest weekly cuts in any format on this board. W15 is not "the" elimination round there; **you have to win two of them back to back.** Verified against the in-app BBM VII rules.
 - W15 vs W16 relative weight is tournament-dependent. Confirm format before applying.
 - S-Tier anchor: DAL @ LAR. Secondary: CHI @ BUF.
 - Valid hedge corridors: SF @ LAC, IND @ TEN, CIN @ CAR.
@@ -1190,3 +1190,135 @@ before and after).
 If the swing proves too aggressive against real rosters, the conservative fallback is `[2, 1.5,
 1.75]`, which keeps both corrections but softens the W17 lift. **Re-run this calibration after any
 change here.**
+
+---
+
+## The Pit Bull 2 — added Aug 6, 2026
+
+Fourth Underdog format in `TOURNAMENTS`, key `pitbull`, read off the in-app rules. $20 entry ·
+28,080 entries · $500k prizes · 11% rake · 18 rounds · 12-man drafts · half-PPR with 4pt passing
+TDs · QB1/RB2/WR3/TE1/FLEX1/BENCH10.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 2,340 × 12 | 2 (16.7%) | 28,080 → 4,680 |
+| R2 Quarterfinal | W15 | 780 × 6 | 1 (**16.7%**) | 4,680 → 780 |
+| R3 Semifinal | W16 | 156 × 5 | 1 (20.0%) | 780 → 156 |
+| R4 Championship | W17 | one 156-man group | 1 grand prize, all paid | 156 → 1 |
+
+### ⚠️ Underdog's own rules text has a typo — do not "fix" it the wrong way
+
+The rules say R3 is *"156 6-person Groups."* **It is 156 FIVE-person groups.** 780/156 = 5, the
+advancement line reads `1/5`, and the group-size list says 5. Three independent confirmations
+against one prose slip.
+
+### Why the weights sit BETWEEN Puppy 3 and Schnauzer
+
+**The gates are unusually FLAT: 16.7 / 16.7 / 20.** No single week is a kill shot, unlike Puppy 3's
+10% W15. R1 and W15 have *identical* advance rates, which no other format here does.
+
+**But the prize curve is the most top-heavy on the board.** 77.5% of the pool reaches the 156
+finalists and **53.4% goes to the top TEN** — versus 26.8% for Puppy 3's top ten, out of half the
+money for the same $100k first prize. The ladder on a $20 entry is `$20 → $40 → $500 → $100k`:
+reaching the final is 25x, and everything above that requires winning a 156-man group outright.
+
+So: **surviving is the easy part here; winning W17 is the whole game.** Weights `[1.5, 1.25, 2]`.
+W15 edges W16 only because 16.7% is tighter than 20%.
+
+This completes a coherent ladder across the three group-stage formats, ordered by gate severity:
+
+```
+Puppy 3     [2,    1.5,  2]   gates 10.0 / 20.0   — hardest weekly cuts
+Pit Bull 2  [1.5,  1.25, 2]   gates 16.7 / 20.0   — flat, top-heavy prize
+Schnauzer   [1.25, 1,    2]   gates 20.0 / 25.0   — softest weekly cuts
+```
+
+All three carry `advanceWeight: 1.5`: the R1 qualifier is the same 12-man, 2-advance structure in
+each and eliminates 83.3% of the field over fourteen weeks.
+
+### Other notes
+
+- **Max 10 entries** — the lowest of any format here (Puppy allows 150). A low-portfolio format
+  where one build carries real weight, which argues against spray-and-pray construction.
+- **28,080 entries is MID-FIELD** by the Field Size Overlay (10k-100k), same bucket as Schnauzer —
+  so the uniqueness premium that governs BBM VII and Puppy does NOT apply. It is deliberately left
+  out of the `bbm7 || puppy` uniqueness-leverage branch.
+- The scoring branch flags W17 in both directions, plus a wall-week weakness: with three
+  near-identical gates you cannot punt a week and still reach the final.
+
+### Calibration — nothing else moved
+
+```
+                 main        puppy       schnauzer     pitbull (new)
+ref1        A- 5.79 =    B+ 4.63 =     B+ 4.63 =       B+ 4.63
+ref2        A- 6.22 =    A  7.08 =     A- 6.28 =       A- 6.28
+puppy3-live A  10.44 =   A  10.45 =    A  10.45 =      A  10.45
+```
+
+All nine pre-existing grades byte-identical before and after. Dropdown order preserved: General /
+BBM VII / The Puppy 3 stay the top three.
+
+---
+
+## Best Ball Mania VII — structure verified Aug 6, 2026
+
+The `bbm7` config was the thinnest on the board — inferred rather than sourced. Now read off the
+in-app rules. $25 entry · 672,336 entries · $15M prizes · 10.8% rake · 18 rounds · 12-man drafts ·
+half-PPR with 4pt passing TDs · 150 max entries · closes 9/9/26.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 56,028 × 12 | 2 (16.7%) | 672,336 → 112,056 |
+| R2 Quarterfinal | W15 | 8,004 × 14 | 1 (**7.1%**) | 112,056 → 8,004 |
+| R3 Semifinal | W16 | 667 × 12 | 1 (**8.3%**) | 8,004 → 667 |
+| R4 Championship | W17 | one 667-man group | 1 grand prize, all paid | 667 → 1 |
+
+### Two corrections to `[2, 1, 1]`
+
+1. **W16 was weighted at HALF of W15.** It is a **1-of-12 (8.3%)** gate against W15's **1-of-14
+   (7.1%)** — near-identical, and **the two hardest weekly cuts anywhere on this board.** Both now
+   carry maximum weight. Same class of error as the Puppy 3 fix, in the opposite direction.
+2. **No `advanceWeight`, despite BBM being the ONLY format here with a SEPARATE REGULAR-SEASON
+   PRIZE POOL.** The rules pay out on W1-14 *before Round 2 begins*. The playoff breakdown sums to
+   **$13,480,910** of the advertised $15M, so roughly **$1.52M (10.1%)** is paid for the qualifying
+   round alone. `advanceWeight: 1.75` = the 1.5 the other 2/12 qualifiers earn, plus that pool.
+
+### Why W17 stays BELOW the other formats' 2
+
+Reaching this final is a **0.099%** proposition from entry — **3.4x rarer than Puppy 3 and 5.6x
+rarer than Pit Bull 2** — so W17 matchup quality is worth materially less in expectation, even
+though the final holds **70.2% of the playoff pool** and pays **148x just to arrive** ($3,700 on a
+$25 entry, against $2M for first).
+
+**The binding constraint is surviving two ~8% gates back to back.** Weights `[2, 2, 1.5]`.
+
+### The complete ladder across all four group-stage formats
+
+```
+                weights        gates W15/W16    P(reach final)   advanceWeight
+BBM VII      [2,    2,    1.5]   7.1 / 8.3         0.099%           1.75
+Puppy 3      [2,    1.5,  2]    10.0 / 20.0        0.333%           1.5
+Pit Bull 2   [1.5,  1.25, 2]    16.7 / 20.0        0.556%           1.5
+Schnauzer    [1.25, 1,    2]    20.0 / 25.0          —              1.5
+```
+
+**BBM is the only one whose two weekly gates are both brutal and roughly equal.** Everywhere else
+the weeks are asymmetric, which is why every other format ends in a `2` on W17 and BBM does not.
+
+### Scoring branch
+
+The old branch rewarded W15 only. It now flags W15 and W16 separately, plus — the one that matters —
+a **strength for stacks live in BOTH** and a **weakness when none are**, since BBM makes you win the
+1-of-14 and then the 1-of-12 consecutively and a roster built for only one rarely sees the other.
+
+### Calibration — no letter grade moved
+
+```
+ref1    bbm7  A- 5.79 -> A- 5.84   +0.05
+ref2    bbm7  B+ 4.62 -> B+ 5.11   +0.49
+puppy3  bbm7  A  7.74 -> A  8.95   +1.21
+```
+
+Rosters with real W16 coverage rise, which is the intended direction — W16 was previously
+underweighted by half. `main`, `puppy`, `schnauzer`, `pitbull` and `fastpuppy` all verified
+identical before and after.

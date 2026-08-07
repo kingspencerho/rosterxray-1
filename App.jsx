@@ -620,7 +620,33 @@ const ADP_SUPERFLEX = {
 // Tournament configurations — week weights for grade rollup
 const TOURNAMENTS = {
   main: { name: "General", weights: [1, 1, 1], note: "Balanced format · ceiling and floor both matter · no bad picks", format: "standard" },
-  bbm7: { name: "BBM VII", entries: "672k", weights: [2, 1, 1], note: "W15 is everything · 1-of-14 advances · swing for the ceiling", format: "standard" },
+  // Best Ball Mania VII (2026 season, read off the in-app rules Aug 6 2026 —
+  // this config was previously the thinnest on the board, inferred rather than
+  // sourced). $25 entry · 672,336 entries · $15M prizes · 10.8% rake · 18 rounds
+  // · 12-man drafts · half-PPR, 4pt passing TD · 150 max entries.
+  //
+  //   R1 Qualifier  W1-14  56,028 groups of 12, 2 advance (16.7%)  672,336 -> 112,056
+  //   R2 Quarter    W15     8,004 groups of 14, 1 advance ( 7.1%)  112,056 ->   8,004
+  //   R3 Semi       W16       667 groups of 12, 1 advance ( 8.3%)    8,004 ->     667
+  //   R4 Final      W17    one 667-person group                        667 ->       1
+  //
+  // TWO CORRECTIONS to the old [2, 1, 1]:
+  // 1. W16 was weighted at HALF of W15. It is a 1-of-12 (8.3%) gate against
+  //    W15's 1-of-14 (7.1%) — near-identical, and the two HARDEST weekly cuts
+  //    on this entire board. Both now carry maximum weight. This is the same
+  //    error that was corrected in puppy, in the opposite direction.
+  // 2. No advanceWeight, despite BBM being the ONLY format here with a SEPARATE
+  //    REGULAR-SEASON PRIZE POOL — the rules pay out on W1-14 before Round 2
+  //    even starts. The playoff breakdown sums to $13.48M of the advertised
+  //    $15M, so roughly $1.52M (10.1%) is paid for the qualifying round alone.
+  //    1.75 = the 1.5 the other 2/12 qualifiers earn, plus that standalone pool.
+  //
+  // W17 stays BELOW the other formats' 2 on purpose. Reaching this final is a
+  // 0.099% proposition from entry — 3.4x rarer than Puppy 3 and 5.6x rarer than
+  // Pit Bull 2 — so W17 matchup quality is worth materially less in expectation
+  // here even though the final holds 70.2% of the playoff pool and pays 148x
+  // just to arrive. The binding constraint is surviving two ~8% gates back to back.
+  bbm7: { name: "BBM VII", entries: "672.3k", weights: [2, 2, 1.5], advanceWeight: 1.75, note: "The two hardest weekly cuts anywhere — W15 1-of-14 and W16 1-of-12, back to back. Only format with a separate regular-season prize pool, so W1-14 pays on its own. Reaching the 667-seat final is a 0.099% shot but pays 148x", format: "standard" },
   // The Puppy 3 (2026 season, verified against the in-app rules Aug 5 2026).
   // $5 entry · 225,000 entries · $1M prizes · 11.1% rake · 18 rounds · 12-man drafts
   // · half-PPR, 4pt passing TD · roster QB1/RB2/WR3/TE1/FLEX1/BENCH10 · 150 max entries.
@@ -648,6 +674,32 @@ const TOURNAMENTS = {
   // ~40% of the $100k), so EV concentrates almost entirely in W17 — hence the 2x.
   // advanceWeight 1.5 because the cumulative R1 round eliminates 83% of the field.
   schnauzer: { name: "Mini Schnauzer 2", entries: "37.2k", weights: [1.25, 1, 2], advanceWeight: 1.5, note: "Softest weekly cuts on Underdog (W15 2/10, W16 2/8) — the 14-week qualifier is the real filter, and W17's 310-seat final is where the money is", format: "standard" },
+  // The Pit Bull 2 (2026 season, read off the in-app rules Aug 6 2026).
+  // $20 entry · 28,080 entries · $500k prizes · 11% rake · 18 rounds · 12-man
+  // drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/BENCH10.
+  // MAX 10 ENTRIES — the lowest of any format here (Puppy allows 150), so this
+  // is a low-portfolio format where a single build carries real weight.
+  //
+  //   R1 Qualifier  W1-14  2,340 groups of 12, 2 advance (16.7%)  28,080 -> 4,680
+  //   R2 Quarter    W15      780 groups of  6, 1 advance (16.7%)   4,680 ->   780
+  //   R3 Semi       W16      156 groups of  5, 1 advance (20.0%)     780 ->   156
+  //   R4 Final      W17    one 156-person group                      156 ->     1
+  //
+  // ⚠️ UNDERDOG'S OWN RULES TEXT HAS A TYPO HERE — it says R3 is "156 6-person
+  // Groups." It is 156 FIVE-person groups: 780/156 = 5, the advancement line
+  // reads 1/5, and the group-size list says 5. Do not "correct" this to 6.
+  //
+  // WHY THE WEIGHTS SIT BETWEEN PUPPY AND SCHNAUZER: the gates are unusually
+  // FLAT at 16.7 / 16.7 / 20 — no single week is a kill shot, unlike Puppy's
+  // 10% W15. But the prize curve is the most top-heavy on the board: 77.5% of
+  // the pool goes to the 156 finalists and **53.4% goes to the top TEN**, versus
+  // 26.8% for Puppy's top ten. Same $100k first prize out of half the money.
+  // So reaching the final is worth 25x, and everything above that needs a
+  // monster W17 in a single 156-man group. W17 carries the load; W15 edges W16
+  // only because 16.7% is tighter than 20%.
+  // advanceWeight 1.5 matches puppy and schnauzer — the R1 qualifier is the
+  // same 12-man, 2-advance structure and eliminates 83.3% of the field.
+  pitbull: { name: "The Pit Bull 2", entries: "28.1k", weights: [1.5, 1.25, 2], advanceWeight: 1.5, note: "Flattest weekly gates on Underdog (W15 1/6, W16 1/5 — no kill-shot week), but the most top-heavy prize curve: 77.5% of the $500k reaches the 156-seat final and 53.4% goes to the top ten. Survive, then win W17 outright. Max 10 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
@@ -778,6 +830,9 @@ const RECENT_NEWS = {
   "mike washington": "LV RB2 dart. Klint Kubiak historically deploys even two-back splits regardless of talent differential — Walker/Charbonnet SEA is the supporting precedent. Jeanty injury risk opens real volume. LV W16 vs TEN (soft) and W17 @ARI (soft) are two viable playoff weeks at near-free ADP.",
   "kayshon boutte": "AJ Brown arrival at NE crowds target share but Boutte's deep threat profile creates a distinct role that doesn't compete directly with Brown's intermediate/possession work. Maye's aggressive downfield tendency means vertical shots are part of the scheme regardless of Brown's presence. Boutte is a role-specific dart — not a volume play — who fires in games where Maye takes deep shots. NE W15 @KC is a legitimate bring-back game for KC stacks.",
   "jaylin noel": "HOU — the ROLE resolved UPWARD (Jul 2026): SI's camp depth chart lists him as a STARTER alongside Nico Collins and Jayden Higgins, with Tank Dell and Xavier Hutchinson as backups. Dell was NOT placed on PUP (so he is cleared) but was held out of full-team reps to open camp and is being brought along slowly after the Dec 2024 knee dislocation. OUTLET CONFLICT: other reporting still frames Dell as battling Noel and Hutchinson for WR3, and both framings are circulating in early August — do not treat the starter listing as settled. THE SCHEDULE VERDICT IS A SEPARATE AXIS AND STILL STANDS: HOU is a 3-week playoff avoid (JAX W15, @PHI W16, @GB W17). Better player, same dead window.",
+  "carson beck": "ARI — STARTED THE HALL OF FAME GAME Aug 6 2026 and was the best player on the field in the first half: 15/19, 188 yards, 1 TD, 125.4 rating, one sack, two scoring drives, out at halftime with the game tied 17-17. Highlights were a 49-yard deep ball to Jalen Brooks (3-99 in the half) and a 5-yard TD fade to Simi Fehoko. Arm strength is the flagged question. CAR won 33-30 on Haynes King's walk-off 5-yard run. BUT THE JOB IS NOT OPEN: Brissett's holdout ended in late July on a reworked $15.5M/up-to-$21M deal and reporting has him starting Week 1 vs LAC, with HC LaFleur saying it benefits Beck to sit. Read this as a strong audition for a LATE-SEASON contingency, not a Week 1 threat.",
+  "jacoby brissett": "ARI — HOLDOUT RESOLVED (late Jul 2026). Reworked deal at $15.5M base with up to $21M in incentives, characterised as clear-cut starter money; he reported and is practising. As of Aug 6, the plan is for him to start Week 1 against the Chargers. Any note describing an ACTIVE holdout, missed OTAs, or Beck competing for the Week 1 job is stale — Beck's strong Hall of Fame start does not change the depth chart, and LaFleur has said sitting benefits Beck.",
+  "jonathan taylor": "IND — SIGNED A 2yr/$44M EXTENSION (up to $47M, $39M guaranteed) on Aug 6 2026, running through 2028. Reporting frames him as the undisputed lead option in the Colts backfield, which removes the contract-year overhang that sat on him all summer. This strengthens rather than changes the existing read: his 2025 rate stats were suppressed by the Daniel Jones injury sinking the whole offense, and the org has now paid him like a workhorse.",
   "george holani": "SEA — TAKING FIRST-TEAM REPS (Aug 1 2026). ESPN's Brady Henderson called him 'the biggest surprise of Seattle's offseason workouts': across six full-squad practices it was Holani, NOT first-round pick Jadarian Price or free-agent addition Emanuel Wilson, who tended to get the first crack with the No. 1 offense. THE ROOM OPENED UP COMPLETELY — Kenneth Walker III left for KC in free agency and Zach Charbonnet is on PUP with an ACL tear from the January playoff game, with a midseason return the reported possibility and NO stated ETA. Price is still expected to lead the backfield but has to prove pass protection and receiving first; Holani's edge over Wilson is specifically pass-catching (Wilson caught 15 balls for 99 yards in 2025). Career context: UDFA 2024, 3 carries as a rookie, 22-73 rushing plus 2-15 receiving in 2025 — so the 2025 metrics in this app are a 4-game, 15% snap-share sample and are NOISE, not a projection. Contingency profile, not a standalone: he is a live handcuff to a rookie lead back on a team whose top two backs from last season are both gone.",
 };
 
@@ -939,7 +994,7 @@ const SITUATIONS = {
   "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "deshaun watson": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Sanders — one of worst EPA/dropback marks last two seasons, lead only if Sanders misses camp", situationFlags: [], riskFlags: ["qb_uncertainty", "injury_history"] },
-  "jacoby brissett": { verdict: "fade", trend: "falling", trendNote: "ARI active contract holdout — missing OTAs, Beck pushing for starting role; if holdout extends into camp Brissett loses the job; even if resolved he starts as the Week 1 QB but the leash is short", situationFlags: [], riskFlags: ["qb_uncertainty"] },
+  "jacoby brissett": { verdict: "hold", trend: "stable", trendNote: "THE HOLDOUT IS OVER and the old fade rested entirely on it. He signed a reworked deal in late Jul 2026 — $15.5M base with up to $21M in incentives, described as clear-cut starter money — reported on time and is practising. Reporting as of the Aug 6 Hall of Fame game is explicit: the plan is for Brissett to start Week 1 against the Chargers. Beck is a 3rd-round rookie whom HC LaFleur wants to sit ('it benefits anyone in any position to be able to sit back'), so the leash is longer than the old note assumed. Low ceiling on a rebuilding offense, but he is the confirmed starter, not a fade.", situationFlags: [], riskFlags: [] },
   // === ROLE CEILING FLAGS ===
   // slot_only: high target share WRs locked into short/underneath routes, no red zone role, hard TD ceiling cap
   "khalil shakir": { verdict: "fade", trend: "stable", trendNote: "Elite slot stats but sub-6 aDOT, zero red zone role — PPR floor, not a ceiling asset", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
@@ -1012,7 +1067,7 @@ const SITUATIONS = {
   "malik davis": { verdict: "hold", date: "2026-06-07", reason: "Per RotoWire, Davis is the frontrunner for the DAL RB2 job behind Javonte Williams (252 carries in 2025). Posted 52 carries, 250 yards, 2 TDs as backup last season. Jaydon Blue and Phil Mafah still competing — situation to monitor at camp, not locked yet.", confidence: "MEDIUM", riskFlags: ["creeping_committee"] },
   "jaydon blue": { verdict: "fade", trend: "stable", trendNote: "DAL RB2 competition with Malik Davis — younger option with pass-catching upside, but no defined role until one separates in camp", situationFlags: [], riskFlags: ["creeping_committee"] },
   "eli heidenreich": { verdict: "fade", trend: "stable", trendNote: "PIT third RB behind Warren and Dowdle — drafted for passing situations and gadget work, no standalone value without injuries ahead of him", situationFlags: [], riskFlags: ["confirmed_committee"] },
-  "carson beck": { verdict: "hold", trend: "rising", trendNote: "ARI 2026 3rd-round pick with real starting path — Brissett in contract holdout heading into camp, Beck has high draft capital and is actively competing for Week 1 starts, not just an injury contingency; ARI WR room (Harrison, McBride) becomes legitimate if Beck wins the job", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty"] },
+  "carson beck": { verdict: "DART", trend: "rising", trendNote: "SEPARATE THE PLAYER FROM THE PATH — they moved opposite ways. The player is rising hard: he started the Aug 6 Hall of Fame game and went 15/19 for 188 yards and a TD, 125.4 rating, led two scoring drives and left at half tied 17-17, with a 49-yard strike to Jalen Brooks and a 5-yard TD fade to Simi Fehoko. Arm strength is the one flagged question. The PATH narrowed at the same time: the premise of the old note — Brissett holding out — is dead. Brissett signed for $15.5M with up to $21M and reporting says he starts Week 1, while LaFleur has said sitting benefits Beck. So this is a LATE-SEASON contingency on a 3rd-rounder (65th overall) if ARI collapses, not a Week 1 competition. ARI weapons (Harrison, McBride) only matter here if that contingency fires.", situationFlags: ["breakout_profile"], riskFlags: ["role_dependent"] },
   "darnell washington": { verdict: "hold", trend: "rising", trendNote: "PIT TE2 locked in — 4yr/$42M extension signals org commitment; Jonnu Smith and Connor Heyward gone as free agents, leaving only Freiermuth as competition for reps; 31/364/1 line in 2025 on 43 targets, primarily a run-blocking TE with growing pass volume in McCarthy offense", situationFlags: ["scheme_fit"], riskFlags: [] },
   // Both sides of the MIN competition carry qb_uncertainty deliberately. The
   // engine's -0.3 stack penalty reads riskFlags off SITUATIONS, and until
@@ -3407,10 +3462,23 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       weaknesses.push(`No stack has a live W17 window — reaching the 750-seat final is an 80x jump and 75.6% of the $1M pool is decided there`);
     }
   } else if (tournamentKey === "bbm7") {
-    // BBM VII: W15 spike — reward stacks with strong W15
+    // BBM VII: the two hardest weekly gates anywhere, back to back — W15 is
+    // 1-of-14 (7.1%) and W16 is 1-of-12 (8.3%). The old branch checked W15 only,
+    // which understated a W16 cut that is nearly as brutal. You must win BOTH
+    // outright, so a roster live in only one of them is not actually alive.
     const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    const bothWeeks = primaryStacks.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] >= 4);
     if (w15Elite.length >= 1) {
-      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling`);
+      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling — the 1-of-14 cut is the hardest gate in any format here`);
+    }
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) with W16 spike ceiling — 1-of-12, nearly as steep as W15`);
+    }
+    if (bothWeeks.length >= 1) {
+      strengths.push(`${bothWeeks.length} stack(s) live in BOTH W15 and W16 — you have to win the two cuts back to back, so this is what actually survives`);
+    } else if (primaryStacks.length > 0) {
+      weaknesses.push(`No stack clears both W15 and W16 — BBM makes you win a 1-of-14 and then a 1-of-12 consecutively, and a roster built for only one of them rarely sees the other`);
     }
   } else if (tournamentKey === "schnauzer") {
     // Mini Schnauzer 2: the W15/W16 gates are soft (20%, 25%), so a merely-adequate
@@ -3421,6 +3489,21 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       strengths.push(`${w17Elite.length} stack(s) built for the W17 championship round — where this format's prize curve pays`);
     } else if (qualifiedStackGrades.length > 0) {
       weaknesses.push(`No stack has a live W17 window — the W15/W16 cuts here are soft enough to survive, but the 310-seat final is where the money is`);
+    }
+  } else if (tournamentKey === "pitbull") {
+    // The Pit Bull 2: gates are flat (16.7 / 16.7 / 20) so no single week is a
+    // kill shot — but 53.4% of the pool goes to the TOP TEN of a 156-man final,
+    // the most top-heavy curve on the board. Surviving is the easy part here;
+    // the money needs an outright W17 win, so that is the week worth flagging.
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    const anyWeak = qualifiedStackGrades.filter(s => Math.min(...s.avgPerWeek) <= 1);
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — 53.4% of this format's pool goes to the top ten of a 156-man group`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — the weekly gates here are survivable, but the money needs an outright win in the 156-seat final`);
+    }
+    if (anyWeak.length >= 1) {
+      weaknesses.push(`${anyWeak.length} stack(s) carry a wall week — with three near-identical gates (1/6, 1/5) you cannot punt a week and expect to reach the final`);
     }
   } else if (tournamentKey === "fastpuppy") {
     // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.
