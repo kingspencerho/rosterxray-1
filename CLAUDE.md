@@ -1322,3 +1322,50 @@ puppy3  bbm7  A  7.74 -> A  8.95   +1.21
 Rosters with real W16 coverage rise, which is the intended direction — W16 was previously
 underweighted by half. `main`, `puppy`, `schnauzer`, `pitbull` and `fastpuppy` all verified
 identical before and after.
+
+---
+
+## Player Metrics Carry the OLD Team (found Aug 8, 2026)
+
+Updating Gainwell and Vidal surfaced a general trap. `player_metrics_2025.json`
+rows carry a `team` field, and for anyone who moved in the 2026 offseason that
+team is the team they PLAYED for, not the team they are on. Gainwell's row reads
+`team: PIT, rec: 73` while `ADP_DATA` correctly reads TB.
+
+That is not wrong — the framework asks for "prior full season" numbers — but two
+consumers read those numbers with no awareness the driver changed:
+
+- **Bring-back credit** (App.jsx, `farSideCredit`) reads `getMetrics(p.name).rec`
+  and awards the elite-receiving-back tier at `rec >= 65`, the reduced tier at
+  `rec >= 40`. A back who caught 73 passes for one staff earns full 0.35
+  correlation credit on a roster where he plays for a different staff.
+- **The Naked RB gate** reads `hvt_pg` the same way.
+
+The Receiving Back Stack Qualifier already says to re-validate when the specific
+QB or OC behind past volume changed. Nothing enforces it, and nothing can
+cheaply — whether a new role reproduces an old one is a judgement, not a
+threshold. **So the enforcement point is the prose layer.** When a player changed
+teams, say so in his RECENT_NEWS entry and state explicitly whether the tier
+should be treated as established or projected. Both Gainwell entries now do.
+
+Worth knowing before quoting any metric about a 2026 mover: check the row's
+`team` against the ADP table first. They disagree for every player who moved.
+
+### The two entries written the same day
+
+- **kenny gainwell / kenneth gainwell** — role is DEFINED and it is receiving,
+  not committee-runner. Zac Robinson uses him as the safety valve out of 21
+  personnel with Irving taking the carries. TARGET/rising held; added
+  `role_dependent` beside the existing `creeping_committee`. Both key spellings
+  updated in both tables — they are separate keys and `findPlayer` aliasing does
+  not cover SITUATIONS or RECENT_NEWS lookups, which are direct.
+- **kimani vidal** — first coverage in any prose layer. fade/falling. Third in a
+  three-deep LAC room behind a healthy Hampton and Keaton Mitchell, under a new
+  Mike McDaniel scheme, with active trade and final-cuts reporting. His 2025
+  production came under Greg Roman, who was fired.
+
+**Score impact: none, verified across all five tournaments** (main A- 6.52,
+puppy A 7.67, bbm7 A 7.64, schnauzer A 7.67, pitbull A- 6.47 — byte-identical
+before and after). Expected: `fade` is analyst opinion and carries no scored
+penalty by design, and `role_dependent` has no consumer. The value is in the AI
+prompt layer and the notes, which is where a role description belongs.
