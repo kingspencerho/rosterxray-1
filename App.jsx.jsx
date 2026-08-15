@@ -29,9 +29,34 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 // ============ DATA ============
 
 // Underdog ADP Jun 24 2026 - top picks for fuzzy matching
-// ADP_UPDATED renders in the footer/data-vintage labels — bump it in the SAME edit
-// as every ADP refresh so users never see a stale (or wrong) data date again.
-const ADP_UPDATED = "Jun 24";
+//
+// PER-TABLE VINTAGE (added Aug 15 2026). There are THREE ADP tables, sourced
+// separately, refreshed at different times. A single ADP_UPDATED stamp claimed
+// one date produced all three, which is the same class of error the data-vintage
+// footer rule already forbids: naming a date that did not produce the numbers is
+// worse than naming none.
+//
+// Bump the entry for the table you touched, in the SAME edit that touches it.
+// scripts/refresh-adp.py prints the exact source window to paste in here.
+const ADP_VINTAGE = {
+  standard:  { label: "Jun 24",  market: "Underdog half-PPR best ball" },
+  superflex: { label: "Jun 24",  market: "4for4 superflex" },
+  yahoo:     { label: "Jun 24",  market: "Yahoo half-PPR redraft" },
+};
+
+// Resolve which table actually produced a given result's numbers. findPlayer
+// picks the table off the same two fields, so this must stay in step with it.
+const adpVintageFor = (result) => {
+  if (!result) return ADP_VINTAGE.standard;
+  if (result.mode === "redraft") return ADP_VINTAGE.yahoo;
+  if (result.format === "superflex") return ADP_VINTAGE.superflex;
+  return ADP_VINTAGE.standard;
+};
+
+// Back-compat alias. Describes ADP_DATA ONLY — never print it beside a redraft
+// or superflex grade. Use adpVintageFor(analyzed) at any render site that can
+// show more than one format.
+const ADP_UPDATED = ADP_VINTAGE.standard.label;
 const ADP_DATA = {
   "jahmyr gibbs": { adp: 1, pos: "RB", team: "DET" },
   "bijan robinson": { adp: 2, pos: "RB", team: "ATL" },
@@ -1358,7 +1383,7 @@ function calcChampionshipWindowScore(analyzed, adpSource) {
 // Vintage: refreshed Jul 28 2026 for ADP <= ~135 from a live Yahoo draft-lobby
 // capture (10-team full-PPR cash league, user-supplied recording). Entries
 // deeper than ~135 retain the older snapshot — Yahoo lists mostly K/DEF there.
-// Note ADP_UPDATED ("Jun 24") describes the Underdog ADP_DATA snapshot only.
+// Note: this table has its own vintage — ADP_VINTAGE.yahoo, not ADP_UPDATED.
 const ADP_YAHOO = {
   "jamarr chase": { adp: 3.1, pos: "WR", team: "CIN" },
   "bijan robinson": { adp: 1.6, pos: "RB", team: "ATL" },
@@ -11007,7 +11032,11 @@ Analyze this best ball roster. Return JSON only.`;
             if (fromRoster > 0 && fromRoster >= v.length / 2) {
               return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: 2025 Rotowire · ${adjStr}`;
             }
-            return `ADP: Underdog half-PPR ${ADP_UPDATED} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · ${adjStr}`;
+            // Name the table that actually produced these numbers. This line
+            // said "Underdog half-PPR" unconditionally, so a redraft grade
+            // printed a best-ball market and a best-ball date.
+            const vin = adpVintageFor(analyzed);
+            return `ADP: ${vin.market} ${vin.label} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · ${adjStr}`;
           })()}
         </div>
 
@@ -11372,7 +11401,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {/* Footer */}
                 <div style={{ padding: "8px 22px", display: "flex", justifyContent: "space-between" }}>
                   <div style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>ROSTER X-RAY · 2026</div>
-                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{isBB ? "Underdog half-PPR" : "Yahoo half-PPR"} · ADP {ADP_UPDATED}</div>
+                  <div style={{ fontSize: "8px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{adpVintageFor(analyzed).market} · ADP {adpVintageFor(analyzed).label}</div>
                 </div>
               </div>
             );

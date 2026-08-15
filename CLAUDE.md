@@ -1450,3 +1450,80 @@ reference rosters.** An earlier note in this file predicted this fix would move
 grades; that was wrong. `tier` is display-only in the scoring path (`weekScores`
 sums `m.score`), and the only non-display consumer is a `tier !== "Unknown"`
 filter that a boost never triggers. The bug was a lying label, not a bad number.
+
+---
+
+## ADP Refresh Tooling & Per-Table Vintage (added Aug 15, 2026)
+
+Two related changes, from one measurement: an audit against a live market found
+**median drift 9.2 picks, mean 14.5, max 81.1** in `ADP_DATA` — roughly TRIPLE
+the 5.1 mean recorded in July. The roster-ADP override protects users who paste
+a board that carries ADP; it does nothing for a plain list or a screenshot,
+where the stale table is still the only number available.
+
+### `scripts/refresh-adp.py`
+
+Measures drift against Fantasy Football Calculator's free public JSON API
+(no auth, tested working). Returns a `meta` block naming the exact draft-date
+window, so the vintage is knowable instead of assumed.
+
+```
+python3 scripts/refresh-adp.py                        # report, ADP_DATA
+python3 scripts/refresh-adp.py --table yahoo          # report, redraft table
+python3 scripts/refresh-adp.py --table yahoo --apply  # write it
+```
+
+**REPORT BY DEFAULT, NEVER AUTO-APPLY.** ADP is a data decision with a source
+behind it. `--apply` is opt-in and still refuses two classes of move:
+`--max-move` (default 60 — a 60+ pick move is a story, not drift) and any row
+where the source's position or team disagrees with the table.
+
+**`--min-drafts` (default 20) exists because the thin samples are the trap.**
+Ja'Kobi Lane surfaced on 12 drafts. Those are frequently exactly the players
+whose price is moving, so the report shows them in their own section and
+refuses to apply them — set that number by hand, with a source.
+
+### THE SOURCE IS REDRAFT. TWO OF THE THREE TABLES ARE NOT.
+
+FFC is redraft half-PPR; `ADP_DATA` is Underdog best ball. Some of the reported
+gap is FORMAT, not staleness, and the script prints a warning banner saying so:
+
+- **Quarterbacks are the standing false positive.** Best ball drafts 2-3 QBs
+  with no streaming, so they go earlier by design. Love +41, Murray +36 and
+  Caleb Williams +27 in the first audit were correct behavior, not decay.
+- Best ball drafts upside earlier and floor later; redraft does the reverse for
+  early-down volume backs.
+
+`--table yahoo` is the only like-for-like comparison and the only one safe to
+bulk-apply. Treat `--table data` as directional: apply news-driven moves, not
+format artifacts.
+
+**Useful null result from the first run:** all 26 names present in the source
+and absent from `ADP_DATA` are K/DEF, which the app filters deliberately. There
+are no missing skill players in the source's top 221.
+
+### `ADP_VINTAGE` replaces the single `ADP_UPDATED` stamp
+
+There are three tables, sourced separately and refreshed at different times.
+One stamp claimed a single date produced all three. The footer was worse than
+inaccurate — it printed the literal string `"Underdog half-PPR ${ADP_UPDATED}"`
+**unconditionally**, so a REDRAFT grade named a best-ball market and a
+best-ball date. Same class of error the data-vintage rule already forbids.
+
+```js
+const ADP_VINTAGE = { standard: {...}, superflex: {...}, yahoo: {...} };
+const adpVintageFor = (result) => ...;   // mirrors findPlayer's table choice
+const ADP_UPDATED = ADP_VINTAGE.standard.label;  // back-compat, ADP_DATA ONLY
+```
+
+- **Bump the entry for the table you touched, in the same edit.** The refresh
+  script prints the exact source window to paste in.
+- **`adpVintageFor(analyzed)` must stay in step with `findPlayer`** — both pick
+  the table off `mode === "redraft"` and `format === "superflex"`. Change one,
+  change the other.
+- **Never print bare `ADP_UPDATED` at a render site that can show more than one
+  format.** It describes `ADP_DATA` and nothing else.
+
+Display-only: **7 tournament grades byte-identical before and after** on a
+reference roster (main 8.87, puppy 7.31, bbm7 7.33, schnauzer 8.91, pitbull
+8.91, boxer 10.35, frenchie 8.89).
