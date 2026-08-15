@@ -39,7 +39,7 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 // Bump the entry for the table you touched, in the SAME edit that touches it.
 // scripts/refresh-adp.py prints the exact source window to paste in here.
 const ADP_VINTAGE = {
-  standard:  { label: "Jun 24",  market: "Underdog half-PPR best ball" },
+  standard:  { label: "Aug 15",  market: "Underdog half-PPR best ball" },  // partial refresh: Lane, Bateman, Deebo, Wan'Dale corrected by hand. The rest of the table is still the Jun 24 snapshot — run scripts/refresh-adp.py --table data to see what else has moved.
   superflex: { label: "Jun 24",  market: "4for4 superflex" },
   yahoo:     { label: "Aug 15",  market: "redraft half-PPR" },  // refreshed from FFC, 2,429 drafts, Aug 10-15 2026
 };
@@ -187,7 +187,7 @@ const ADP_DATA = {
   "kc concepcion": { adp: 114.8, pos: "WR", team: "CLE" },
   "baker mayfield": { adp: 115.7, pos: "QB", team: "TB" },
   "george kittle": { adp: 116.7, pos: "TE", team: "SF" },
-  "wandale robinson": { adp: 117.4, pos: "WR", team: "TEN" },
+  "wandale robinson": { adp: 86.6, pos: "WR", team: "TEN" },  // Aug 15 2026: 117.4 -> 86.6. His verdict moved fade -> TARGET on Jul 31 and this number never followed — the prose was updated, the price was not.
   "kenneth gainwell": { adp: 117.6, pos: "RB", team: "TB" },
   "kenny gainwell": { adp: 117.6, pos: "RB", team: "TB" },
   "aaron jones": { adp: 120.0, pos: "RB", team: "MIN" },
@@ -244,7 +244,7 @@ const ADP_DATA = {
   "fernando mendoza": { adp: 167.2, pos: "QB", team: "LV" },
   "dylan sampson": { adp: 167.6, pos: "RB", team: "CLE" },
   "isaac teslaa": { adp: 168.9, pos: "WR", team: "DET" },
-  "deebo samuel": { adp: 170.1, pos: "WR", team: "SF" },
+  "deebo samuel": { adp: 97.3, pos: "WR", team: "SF" },  // Aug 15 2026: 170.1 -> 97.3. Stale by 73 picks because it predated his Aug 1 SF signing — RECENT_NEWS and ADP_YAHOO both had the signing, this table did not. Exactly the one-table-updated failure mode.
   "aj barner": { adp: 170.3, pos: "TE", team: "SEA" },
   "dalton schultz": { adp: 171.3, pos: "TE", team: "HOU" },
   "nicholas singleton": { adp: 173.9, pos: "RB", team: "TEN" },
@@ -542,8 +542,8 @@ const ADP_SUPERFLEX = {
   "brenton strange": { adp: 144, pos: "TE", team: "JAX" },
   "jordan mason": { adp: 129, pos: "RB", team: "MIN" },
   "jayden reed": { adp: 132, pos: "WR", team: "GB" },
-  "wandale robinson": { adp: 131, pos: "WR", team: "TEN" },
-  "wan'dale robinson": { adp: 131, pos: "WR", team: "TEN" },
+  "wandale robinson": { adp: 100, pos: "WR", team: "TEN" },  // Aug 15 2026: measured -31 live move applied to this table's scale
+  "wan'dale robinson": { adp: 100, pos: "WR", team: "TEN" },  // Aug 15 2026: kept in step with the no-apostrophe key above — test-alias-adp-sync caught this one drifting
   "ricky pearsall": { adp: 137, pos: "WR", team: "SF" },
   "chig okonkwo": { adp: 127, pos: "TE", team: "WAS" }, // same player as "chigoziem okonkwo" below — keep in sync
   "josh downs": { adp: 126, pos: "WR", team: "IND" },
@@ -592,7 +592,7 @@ const ADP_SUPERFLEX = {
   "brian robinson": { adp: 179, pos: "RB", team: "ATL" },
   "kaytron allen": { adp: 184, pos: "RB", team: "WAS" },
   "denzel boston": { adp: 178, pos: "WR", team: "CLE" },
-  "deebo samuel": { adp: 187, pos: "WR", team: "SF" },
+  "deebo samuel": { adp: 114, pos: "WR", team: "SF" },  // Aug 15 2026: measured -73 live move applied to this table's scale (post-SF-signing)
   "terrance ferguson": { adp: 157, pos: "TE", team: "LAR" },
   "eli raridon": { adp: 195.0, pos: "TE", team: "NE" },
   "mike washington": { adp: 206, pos: "RB", team: "LV" },
