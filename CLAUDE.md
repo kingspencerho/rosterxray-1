@@ -1450,3 +1450,133 @@ reference rosters.** An earlier note in this file predicted this fix would move
 grades; that was wrong. `tier` is display-only in the scoring path (`weekScores`
 sums `m.score`), and the only non-display consumer is a `tier !== "Unknown"`
 filter that a boost never triggers. The bug was a lying label, not a bad number.
+
+---
+
+## ADP Refresh Tooling & Per-Table Vintage (added Aug 15, 2026)
+
+Two related changes, from one measurement: an audit against a live market found
+**median drift 9.2 picks, mean 14.5, max 81.1** in `ADP_DATA` — roughly TRIPLE
+the 5.1 mean recorded in July. The roster-ADP override protects users who paste
+a board that carries ADP; it does nothing for a plain list or a screenshot,
+where the stale table is still the only number available.
+
+### `scripts/refresh-adp.py`
+
+Measures drift against Fantasy Football Calculator's free public JSON API
+(no auth, tested working). Returns a `meta` block naming the exact draft-date
+window, so the vintage is knowable instead of assumed.
+
+```
+python3 scripts/refresh-adp.py                        # report, ADP_DATA
+python3 scripts/refresh-adp.py --table yahoo          # report, redraft table
+python3 scripts/refresh-adp.py --table yahoo --apply  # write it
+```
+
+**REPORT BY DEFAULT, NEVER AUTO-APPLY.** ADP is a data decision with a source
+behind it. `--apply` is opt-in and still refuses two classes of move:
+`--max-move` (default 60 — a 60+ pick move is a story, not drift) and any row
+where the source's position or team disagrees with the table.
+
+**`--min-drafts` (default 20) exists because the thin samples are the trap.**
+Ja'Kobi Lane surfaced on 12 drafts. Those are frequently exactly the players
+whose price is moving, so the report shows them in their own section and
+refuses to apply them — set that number by hand, with a source.
+
+### THE SOURCE IS REDRAFT. TWO OF THE THREE TABLES ARE NOT.
+
+FFC is redraft half-PPR; `ADP_DATA` is Underdog best ball. Some of the reported
+gap is FORMAT, not staleness, and the script prints a warning banner saying so:
+
+- **Quarterbacks are the standing false positive.** Best ball drafts 2-3 QBs
+  with no streaming, so they go earlier by design. Love +41, Murray +36 and
+  Caleb Williams +27 in the first audit were correct behavior, not decay.
+- Best ball drafts upside earlier and floor later; redraft does the reverse for
+  early-down volume backs.
+
+`--table yahoo` is the only like-for-like comparison and the only one safe to
+bulk-apply. Treat `--table data` as directional: apply news-driven moves, not
+format artifacts.
+
+**Useful null result from the first run:** all 26 names present in the source
+and absent from `ADP_DATA` are K/DEF, which the app filters deliberately. There
+are no missing skill players in the source's top 221.
+
+### `ADP_VINTAGE` replaces the single `ADP_UPDATED` stamp
+
+There are three tables, sourced separately and refreshed at different times.
+One stamp claimed a single date produced all three. The footer was worse than
+inaccurate — it printed the literal string `"Underdog half-PPR ${ADP_UPDATED}"`
+**unconditionally**, so a REDRAFT grade named a best-ball market and a
+best-ball date. Same class of error the data-vintage rule already forbids.
+
+```js
+const ADP_VINTAGE = { standard: {...}, superflex: {...}, yahoo: {...} };
+const adpVintageFor = (result) => ...;   // mirrors findPlayer's table choice
+const ADP_UPDATED = ADP_VINTAGE.standard.label;  // back-compat, ADP_DATA ONLY
+```
+
+- **Bump the entry for the table you touched, in the same edit.** The refresh
+  script prints the exact source window to paste in.
+- **`adpVintageFor(analyzed)` must stay in step with `findPlayer`** — both pick
+  the table off `mode === "redraft"` and `format === "superflex"`. Change one,
+  change the other.
+- **Never print bare `ADP_UPDATED` at a render site that can show more than one
+  format.** It describes `ADP_DATA` and nothing else.
+
+Display-only: **7 tournament grades byte-identical before and after** on a
+reference roster (main 8.87, puppy 7.31, bbm7 7.33, schnauzer 8.91, pitbull
+8.91, boxer 10.35, frenchie 8.89).
+
+## The Cross-Format ADP Experiment (Aug 15, 2026) — READ BEFORE REFRESHING ADP_DATA
+
+`scripts/refresh-adp.py` compares against Fantasy Football Calculator, which is
+**REDRAFT**. `ADP_DATA` is **UNDERDOG BEST BALL**. All eight players flagged by
+that cross-format run were then checked against a real Underdog board:
+
+```
+player      pos  ADP_DATA  real UD  app err   redraft  reported  offset
+Stafford    QB     104.0    108.3     +4.3      75.2    -28.8     33.1
+Kyle Pitts  TE     108.0    103.2     -4.8      82.4    -25.6     20.8
+Aaron Jones RB     120.0    126.9     +6.9      98.2    -21.8     28.7
+Shakir      WR     127.0    131.0     +4.0     104.0    -23.0     27.0
+Kamara      RB     181.2    162.1    -19.1     147.3    -33.9     14.8
+Jeudy       WR     179.9    190.3    -10.4     133.7    -46.2     56.6  *
+Tank Dell   WR     196.7    179.3    +17.4     152.6    -44.1     26.7
+Ridley      WR     175.7    195.7    -20.0     133.8    -41.9     61.9  *
+```
+
+**1. Two of eight (*) would have moved the WRONG WAY.** The report said Jeudy
+and Ridley go earlier than the table; on a real Underdog board they go **later**.
+Bulk-applying would have shifted them 56.6 and 61.9 picks in the wrong
+direction. A "negative delta" therefore carries NO directional information for
+best ball. An earlier version of this file reasoned that a negative delta was
+where real news lived, because best ball should be the earlier market. That
+holds for rookies and upside profiles and INVERTS for veterans — **do not use
+it.**
+
+**2. The cross-format report overstates error by ~3x.** Mean reported gap 33.2
+picks against a mean real error of 10.9. `ADP_DATA` was much closer to the
+market than the run implied.
+
+**3. The offset is NOT a constant** — 14.8 to 61.9 picks across these eight. You
+cannot subtract a fixed correction to convert a redraft quote to a best-ball
+one. Late-round players diverge most, which is where a wrong number does the
+most damage because nothing else anchors the price.
+
+### The rule this produces
+- **`--table data` is a SCREEN FOR WHICH PLAYERS TO GO LOOK UP, nothing more.**
+  Never bulk-apply it. A number enters `ADP_DATA` only with a real best-ball
+  quote or a sourced news driver.
+- **`--table yahoo` is like-for-like** (redraft source, redraft table) and is the
+  only run safe to `--apply`. That refresh moved 67 values and fixed a real bug:
+  the app had been calling Rashee Rice at pick 12 a 22-pick REACH off a stale
+  33.7 when he goes at 14.4.
+- A screenshot of the user's own draft board is the highest-quality source
+  available for `ADP_DATA` and beats any scrape. Ask for it.
+
+**Playwright cannot reach these sites from the cloud sandbox** (Chromium gets
+`ERR_CONNECTION_RESET` through the agent proxy while curl gets 200s), and the
+best-ball ADP pages are client-rendered with subscriber-gated data endpoints —
+DraftSharks' `/adp/export` returns the app shell. Do not spend another session
+on a scraper without first checking that Chromium can reach an external host.
