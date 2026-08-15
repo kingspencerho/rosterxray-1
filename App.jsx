@@ -718,6 +718,58 @@ const TOURNAMENTS = {
   // advanceWeight 1.5 matches puppy and schnauzer — the R1 qualifier is the
   // same 12-man, 2-advance structure and eliminates 83.3% of the field.
   pitbull: { name: "The Pit Bull 2", entries: "28.1k", weights: [1.5, 1.25, 2], advanceWeight: 1.5, note: "Flattest weekly gates on Underdog (W15 1/6, W16 1/5 — no kill-shot week), but the most top-heavy prize curve: 77.5% of the $500k reaches the 156-seat final and 53.4% goes to the top ten. Survive, then win W17 outright. Max 10 entries", format: "standard" },
+  // The Frenchie 13 (added Aug 14 2026, read off the in-app rules).
+  // $6 entry · 9,432 entries · $50k prizes · 11.6% rake · 18 rounds · 12-man
+  // drafts · MAX 4 ENTRIES.
+  //
+  //   R1 Qualifier  W1-14  786 groups of 12, 3 advance (25.0%)  9,432 -> 2,358
+  //   R2 Quarter    W15    393 groups of  6, 2 advance (33.3%)  2,358 ->   786
+  //   R3 Semi       W16    131 groups of  6, 1 advance (16.7%)    786 ->   131
+  //   R4 Final      W17    one 131-person group                    131 ->     1
+  //
+  // ⚠️ TWO ERRORS IN UNDERDOG'S RULES TEXT, do not copy either:
+  //  1. The R2 line reads "393 entries in 2,358 6-person Groups" — the two
+  //     numbers are REVERSED. It is 2,358 entries in 393 groups (786x3=2,358,
+  //     2,358/6=393).
+  //  2. The R4 line reads "a single1, 31-person Group" — it is a single
+  //     131-PERSON group. The identical artifact appears in the Boxer rules
+  //     page, so it is a template bug on their side, not a one-off.
+  //
+  // THE ONE W16-MAX CONFIG ON THE BOARD, and the reason is structural: W16 is
+  // 1-of-6 (16.7%) while W15 is 2-of-6 (33.3%), so **W16 is exactly twice as
+  // hard as W15**. Every other format here makes W15 the tighter gate; this is
+  // the only inversion, so it is the only config where W15 < W16.
+  // W17 also carries 2: the final is 131 seats — the SMALLEST on the board —
+  // and 1st alone is $15k of $50k, a 30.0% first-prize share that is the most
+  // concentrated anywhere (Pit Bull and Boxer are 20%, BBM 13.3%, Puppy 10%).
+  // So this is the most winnable championship room in the portfolio.
+  // advanceWeight 1.25: R1 is 3-of-12 (25%), softer than the 2-of-12 (16.7%)
+  // that earns 1.5 elsewhere, and surviving it pays exactly the $6 entry back.
+  frenchie: { name: "The Frenchie 13", entries: "9.4k", weights: [1.25, 2, 2], advanceWeight: 1.25, note: "The only format where W16 is the kill shot — 1-of-6, exactly TWICE as hard as its 2-of-6 W15. Smallest final on the board at 131 seats and the most top-heavy first prize anywhere (1st = 30% of the pool). Coast W15, win W16 outright, then win a 131-man room. Max 4 entries", format: "standard" },
+  // The Boxer (added Aug 14 2026, read off the in-app rules).
+  // $18 entry · 6,240 entries · $100k prizes · 11% rake · 18 rounds · 12-man
+  // drafts · MAX 3 ENTRIES — the lowest portfolio of any format here.
+  //
+  //   R1 Qualifier  W1-14  520 groups of 12, 4 advance (33.3%)  6,240 -> 2,080
+  //   R2 Quarter    W15    416 groups of  5, 2 advance (40.0%)  2,080 ->   832
+  //   R3 Semi       W16    208 groups of  4, 2 advance (50.0%)    832 ->   416
+  //   R4 Final      W17    one 416-person group                    416 ->     1
+  //
+  // ⚠️ Same "a single1, 31-person Group" artifact in their rules text. It is a
+  // 416-SEAT final: the header says so, 832/2 = 416, and the prize table pays
+  // down to 416th.
+  //
+  // BY FAR THE SOFTEST GATES ON THE BOARD — every other format advances 2-of-12
+  // in R1; this advances 4-of-12, and W16 is a literal coin flip. P(reach final)
+  // is 6.67%, one in fifteen: 12x easier than Pit Bull and 67x easier than BBM.
+  // BUT ARRIVING IS WORTH ALMOST NOTHING. The ladder on $18 is $9 -> $18 -> $50,
+  // so surviving the 14-week qualifier LOSES money and clearing W15 is exact
+  // break-even. Meanwhile the top ten take 49.7% of the pool and 1st is 20%.
+  // Hence the most W17-tilted weights here and the LOWEST advanceWeight (0.75):
+  // a 33.3% R1 gate that repays half your entry barely deserves modeling.
+  // Deliberately NOT in the uniqueness-leverage branch — 6,240 entries is a
+  // small field, so best-player-available beats contrarian differentiation.
+  boxer: { name: "The Boxer", entries: "6.2k", weights: [1, 0.75, 2.5], advanceWeight: 0.75, note: "Softest gates anywhere (R1 4/12, W15 2/5, W16 2/4) — reaching the 416-seat final is 1-in-15, but surviving pays $9 on an $18 entry. Everything is W17 placement: top ten take 49.7% of the pool. Small field, so draft best-available over correlation. Max 3 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
@@ -813,7 +865,7 @@ const RECENT_NEWS = {
   "zach charbonnet": "SEA — on Active/PUP to open camp after a January ACL tear (surgery Feb 20 2026). WIDE timeline split: HC Mike Macdonald says Week 1 (Sept 9) is 'everything's possible,' while analyst projections say October or November. Treat the coach's version as the optimistic bound. Directly gates Jadarian Price's early-season workload.",
   "christian kirk": "SF — calf strain suffered in practice Jul 27 2026, out of team drills with no definitive return date. (Some outlets said hamstring; the dated first-reports say calf, and his documented hamstring history is the likely source of the confusion.) Extensive soft-tissue history with SF. Second SF WR domino behind Pearsall and the other half of the reason Deebo was signed — calf strains reinjure easily.",
   "makai lemon": "PHI rookie WR (1st round) — establishing himself as the team's No. 2 receiver, and returned from the hamstring that cost him OTAs declaring himself '100.0%' healthy for the Jul 28 report date. A gradual early-season ramp is expected. Role confirmed but phased; the post-A.J.-Brown target path in Philadelphia is genuinely open.",
-  "dezhaun stribling": "SF rookie WR (No. 33 overall) — role EXPANDING. Brock Purdy is publicly talking him up ('baller,' praising route running, fast playbook mastery, strength, separation) and he was reported 'looking good' in camp. He was drafted behind Evans, Pearsall and Kirk on the depth chart, and two of those three are now hurt (Pearsall out for the season, Kirk calf). Caveat: Deebo's Aug 1 signing partially offsets the opportunity.",
+  "dezhaun stribling": "SF rookie WR (No. 33 overall) — role EXPANDING. THE CURRENT SF RECEIVER ROOM IS MIKE EVANS, DEEBO SAMUEL, CHRISTIAN KIRK (calf) AND STRIBLING. Ricky Pearsall is NOT in it — he is on IR, out for all of 2026, and must never be described as competition for snaps or as someone whose absence would need to happen. His targets are already vacated and that vacancy is why Deebo was signed. Brock Purdy is publicly talking Stribling up ('baller,' praising route running, fast playbook mastery, strength, separation) and he was reported 'looking good' in camp. Read his path as: Evans and Deebo are ahead of him, Kirk is banged up, and the WR3 job is his to hold. Deebo's Aug 1 signing is the real offset to the Pearsall vacancy, not a reason to discount the role entirely. NOTE ON PHRASING, because this caused a live bug: an earlier version of this entry listed the DRAFT-DAY depth chart ('drafted behind Evans, Pearsall and Kirk') and corrected it in a trailing clause. The AI layer reproduced the list and dropped the correction, telling a user Stribling needed 'Evans or Pearsall to miss time.' State the current room affirmatively; never name an out player inside a present-tense depth chart even to correct it.",
   "bijan robinson": "ATL — HOLD-IN RESOLVED Aug 4-5 2026. Signed a three-year extension worth up to $75M ($66.75M base, $51M guaranteed, $37M at signing) that makes him the NFL's highest-paid running back by AAV, running through 2030. He reported to camp and sat out on-field work while negotiating; that is over. Led the NFL with 2,298 all-purpose yards in 2025. No remaining availability question — the earlier 'treat as noise' read was right and the noise has now cleared.",
   "jahmyr gibbs": "DET — contract HOLD-IN through Aug 2 2026, same posture as Bijan: reported to camp, sat out practices pending an extension after two straight 1,800+ scrimmage-yard seasons. Dan Campbell: 'at some point, it'll all get done.' DET holds his fifth-year option, so leverage favors the club. Noise, not signal.",
   "chris olave": "NO — signed a four-year extension worth up to $132M ($90M guaranteed, ~$33M AAV) on Jul 30 2026. GM Mickey Loomis acknowledged the concussion history and a 2025 pulmonary blood clot were 'an element' in talks. Coming off 100/1163/9 (WR12 half-PPR). Removes any trade or usage ambiguity — locked-in alpha, and the guarantee level signals full-season target commitment.",
@@ -875,6 +927,12 @@ const VERDICTS = {
   "tyler allgeier": { verdict: "fade", date: "2026-05-19", reason: "Three-way committee, Brissett QB, 36.1% run rate", confidence: "HIGH" },
   "mike washington": { verdict: "TARGET", date: "2026-06-10", reason: "Speculative dart at near-free ADP 192. Klint Kubiak historically deploys even two-back splits regardless of talent differential — Walker/Charbonnet split in SEA is the supporting precedent. Jeanty injury risk opens real volume. LV W16 vs TEN (soft) and W17 @ARI (soft) are two viable playoff weeks. Combine fraud and fumble history are real concerns but irrelevant at this price in a Kubiak scheme that manufactures opportunities.", confidence: "SPECULATIVE" },
   "rashee rice": { verdict: "TARGET", date: "2026-08-08", reason: "First dated verdict for him — the knee overhang has materially improved. Aug 5: first 11-on-11 work of camp, took contact and got straight back up, with KC reported comfortable letting him hit on that knee. Still a deliberate extended ramp-up rather than a clearance, and KC wants to see the rest of camp and the preseason. Elite route runner in a Mahomes offense with a 28.8% target share and 0.500 spike rate across his 2025 eight-game sample, priced at an ADP set off the worse picture. The second overhang has NOT moved and is not an injury question: probation-related discipline is a live RISK with no league ruling, so treat a 2026 suspension as unresolved rather than scheduled. Contract year.", confidence: "MEDIUM" },
+  // Pearsall carries a fade VERDICT specifically so the PIVOT ENGINE screens him out.
+  // That filter keys on VERDICTS fade/HARD FADE, and he had no VERDICTS row at all —
+  // so a season-ending IR player sitting at ADP 101 could be recommended to a user as
+  // an upgrade over a WR they actually drafted. Do not delete this to "clean up" a
+  // roster he is not on; the entry exists for the recommendation path, not the grade.
+  "ricky pearsall": { verdict: "fade", date: "2026-08-14", reason: "OUT FOR 2026 — season-ending PCL surgery on the right knee, placed on IR Aug 1. Same PCL that cost him 8 games in 2025, re-aggravated after two camp practices. Lynch expects a full 2027 recovery; PCL rehab runs 6-12 months. Undraftable this season at any price, and his ADP is stale market residue rather than a live valuation. His vacated targets caused the Deebo signing and lift Evans and Stribling.", confidence: "HIGH" },
   "kayshon boutte": { verdict: "TARGET", date: "2026-06-10", reason: "Role-specific deep threat dart at near-free ADP. AJ Brown arrival crowds volume but Boutte's vertical speed profile creates a distinct usage pattern that doesn't compete directly with Brown's intermediate/possession role or Doubs' slot work. Drake Maye's aggressive downfield tendency means vertical shots are part of the scheme regardless of Brown's presence — Boutte is the designated speed option on the outside. Not a weekly starter thesis. Best ball only needs 3-4 deep shot games. NE W15 @KC is the bring-back ceiling game for KC stacks — negative game script in that matchup actually increases Boutte's deep shot volume.", confidence: "SPECULATIVE" },
   "jaxson dart": { verdict: "TARGET", date: "2026-06-03", reason: "NYG run-heavy limits ceiling but W17 @DAL + DAL bottom-5 defense is a real spike week; late-round leverage play", confidence: "MEDIUM" },
   "ja'kobi lane": { verdict: "HARD FADE", date: "2026-05-19", reason: "BAL run-heaviest, Minter HC, WR targets suppressed", confidence: "HIGH" },
@@ -1018,6 +1076,7 @@ const SITUATIONS = {
   "tre harris": { verdict: "DART", trend: "rising", trendNote: "WR3 is effectively his — Keenan Allen gone, and the only competition for the No. 3 job is a 2025 fifth-rounder (Lambert-Smith) and a rookie (Thompson). Opens behind McConkey and Johnston, so the question is role size, not role security. McDaniel's praise is signal-grade but physical: 'a grown man... muscle and strength that will make him a matchup nightmare' — role confirmation on a mismatch profile, not a target-volume promise. His 2025 line (roughly 30 catches, 1 TD, 48.5% snap share, 8.4% target share, 0.000 spike, 81.2% dud) came under Greg Roman behind a wrecked offensive line and used mainly as a blocker; Roman was fired. Discount that baseline for the coordinator change, do not erase it. 2025 second-round capital plus a genuine scheme upgrade, third in the target pecking order.", situationFlags: ["scheme_fit"], riskFlags: ["depth_chart_competition"] },
   "david njoku": { verdict: "DART", trend: "stable", trendNote: "Cheap one-year LAC deal and a strong camp — separation, contested catches, mismatches on linebackers, 5.6 YAC since 2017 (third among TEs with 500+ targets). The binding constraint is the play caller, not the depth chart: McDaniel's Miami offenses were THIRD-TO-LAST in 12 personnel 2022-2025, and Miami went from the league's highest two-TE rate in 2021 to fifth-lowest in his first year. Three TEs share whatever is left — Gadsden II (49/664/3 as a rookie), Kolar (elite blocker, takes the in-line work) and Njoku. Free-roll dart at ADP 210+, never projectable stack depth, and do not treat the multi-TE-formation narrative as a role signal without a snap-count confirmation.", situationFlags: [], riskFlags: ["depth_chart_competition", "role_dependent"] },
   "kimani vidal": { verdict: "fade", trend: "falling", trendNote: "Third in a three-deep LAC room behind a healthy Omarion Hampton and free-agent signing Keaton Mitchell, in a Mike McDaniel scheme built for the speed profile Mitchell brings. Active trade and final-cuts candidate through Aug 2026. The 643-yard 2025 was produced under Greg Roman, who was fired after the wild-card loss. Contingent-only at ADP 210+ — the path is a trade to a thin backfield, not a role in LA. Not functional stack depth for a Herbert loop.", situationFlags: [], riskFlags: ["depth_chart_competition", "role_dependent"] },
+  "ricky pearsall": { verdict: "fade", trend: "falling", trendNote: "OUT FOR THE 2026 SEASON — season-ending PCL surgery, on IR since Aug 1. Not a monitor situation and not a stash: PCL recovery runs 6-12 months and Lynch\'s stated target is 2027. He must not appear in any depth-chart discussion of the SF receiver room as present or returning; the current room is Evans, Deebo, Kirk and Stribling. His ADP in these tables is stale market residue from before the injury.", situationFlags: [], riskFlags: ["injury_history"] },
   "kayshon boutte": { verdict: "TARGET", trend: "stable", trendNote: "Deep threat role survives AJ Brown arrival — distinct vertical speed profile doesn't compete with Brown's possession work or Doubs' slot role. Maye's downfield aggression means vertical shots are baked into the scheme. Role-specific dart, not a volume play. Best ball ceiling game: NE W15 @KC as bring-back for KC stacks — negative game script increases deep shot volume.", situationFlags: ["scheme_fit"], riskFlags: [] },
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB deal, and Aug 2026 camp confirmed the SHAPE of the role: Zac Robinson uses him as the receiving back and safety valve, not a rotational runner — Irving takes the bulk of carries. Primary receiving option from 21-personnel pony sets, aligned in the backfield and the slot; Robinson's ATL backs totaled 1,435 receiving yards over two seasons. Rushing volume is capped by Irving, so the value is target-driven and game-script sensitive. His 73-reception 2025 line is PIT data under a different QB and OC — re-validate the elite-receiving-back tier rather than assuming it carries.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee", "role_dependent"] },
   "kenny gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB deal, and Aug 2026 camp confirmed the SHAPE of the role: Zac Robinson uses him as the receiving back and safety valve, not a rotational runner — Irving takes the bulk of carries. Primary receiving option from 21-personnel pony sets, aligned in the backfield and the slot; Robinson's ATL backs totaled 1,435 receiving yards over two seasons. Rushing volume is capped by Irving, so the value is target-driven and game-script sensitive. His 73-reception 2025 line is PIT data under a different QB and OC — re-validate the elite-receiving-back tier rather than assuming it carries.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee", "role_dependent"] },
@@ -3557,6 +3616,36 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (anyWeak.length >= 1) {
       weaknesses.push(`${anyWeak.length} stack(s) carry a wall week — with three near-identical gates (1/6, 1/5) you cannot punt a week and expect to reach the final`);
+    }
+  } else if (tournamentKey === "frenchie") {
+    // The Frenchie 13: the ONLY format here where W16 is the kill shot. W16 is
+    // 1-of-6 (16.7%) against a 2-of-6 (33.3%) W15, so W16 is exactly twice as
+    // hard. Every other branch in this file flags W15 as the tight gate; this
+    // one deliberately does not, and a W15-only roster is the trap it catches.
+    // W17 is flagged too because the 131-seat final is the smallest on the board
+    // and 1st alone is 30% of the pool.
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) built for the W16 kill shot — 1-of-6, twice as hard as this format's W15`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears the W16 gate — W16 is 1-of-6 here and eliminates five of every six survivors, so a W15-built roster dies one week later`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 131-seat final — the smallest final on the board, and 1st alone is 30% of the pool`);
+    }
+  } else if (tournamentKey === "boxer") {
+    // The Boxer: softest gates anywhere (33.3 / 40.0 / 50.0), so survival is
+    // close to free and worth close to nothing — the ladder is $9 -> $18 -> $50
+    // on an $18 entry. Nearly all EV sits in W17 placement inside a 416-man
+    // final where the top ten take 49.7% of the pool. So this branch checks W17
+    // only, and deliberately has NO wall-week check: unlike Pit Bull's three
+    // near-identical gates, here you genuinely can punt a week and still advance.
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — the top ten take 49.7% of this format's pool and everything before W17 pays back less than your entry`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — the gates here are soft enough that you will likely reach the 416-seat final, but arriving pays $50 and only a top-ten week pays real money`);
     }
   } else if (tournamentKey === "fastpuppy") {
     // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.
