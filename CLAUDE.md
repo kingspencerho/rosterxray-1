@@ -1369,3 +1369,85 @@ puppy A 7.67, bbm7 A 7.64, schnauzer A 7.67, pitbull A- 6.47 — byte-identical
 before and after). Expected: `fade` is analyst opinion and carries no scored
 penalty by design, and `role_dependent` has no consumer. The value is in the AI
 prompt layer and the notes, which is where a role description belongs.
+
+---
+
+## The Boxer and The Frenchie 13 — added Aug 14, 2026
+
+Two new Underdog formats, read off their in-app rules. Both are **low-portfolio**
+(max 3 and max 4 entries) and both sit in **small fields**, so neither is in the
+`bbm7 || puppy` uniqueness-leverage branch.
+
+### The Frenchie 13 — the only W16-max config on the board
+
+$6 · 9,432 entries · $50k · 11.6% rake · 18 rounds · 12-man · max 4 entries.
+
+| Round | Week | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 | W1-14 | 786 x 12 | 3 (25.0%) | 9,432 → 2,358 |
+| R2 | W15 | 393 x 6 | 2 (33.3%) | 2,358 → 786 |
+| R3 | W16 | 131 x 6 | **1 (16.7%)** | 786 → 131 |
+| R4 | W17 | one 131-seat group | 1 | 131 → 1 |
+
+**W16 is exactly TWICE as hard as W15.** Every other format here makes W15 the
+tighter gate; this is the only inversion, and it is why `weights: [1.25, 2, 2]`
+is the only config where W15 < W16. W17 also carries 2 because the **131-seat
+final is the smallest on the board** and **1st alone is 30% of the pool** — the
+most concentrated first prize anywhere (Pit Bull and Boxer 20%, BBM 13.3%,
+Puppy 10%). `advanceWeight: 1.25`, below the 1.5 that 2-of-12 qualifiers earn,
+because R1 is 3-of-12 and surviving it pays back exactly the $6 entry.
+
+### The Boxer — the softest gates anywhere
+
+$18 · 6,240 entries · $100k · 11% rake · 18 rounds · 12-man · max 3 entries.
+
+| Round | Week | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 | W1-14 | 520 x 12 | **4 (33.3%)** | 6,240 → 2,080 |
+| R2 | W15 | 416 x 5 | 2 (40.0%) | 2,080 → 832 |
+| R3 | W16 | 208 x 4 | 2 (50.0%) | 832 → 416 |
+| R4 | W17 | one 416-seat group | 1 | 416 → 1 |
+
+**P(reach final) is 6.67%, one in fifteen** — 12x easier than Pit Bull, 67x
+easier than BBM. But **arriving is worth almost nothing**: the ladder on $18 is
+$9 → $18 → $50, so clearing the 14-week qualifier LOSES money. Meanwhile the top
+ten take 49.7%. Hence the most W17-tilted weights on the board (`[1, 0.75, 2.5]`)
+and the **lowest advanceWeight anywhere (0.75)**. Its scoring branch deliberately
+has NO wall-week check — unlike Pit Bull's three near-identical gates, here you
+genuinely can punt a week and still advance.
+
+### ⚠️ Underdog's rules text is wrong on both pages
+
+- **Frenchie R2** reads *"393 entries in 2,358 6-person Groups."* The numbers are
+  **REVERSED** — 2,358 entries in 393 groups (786x3=2,358; 2,358/6=393).
+- **Both pages** render the final as *"a single1, 31-person Group."* Frenchie is a
+  single **131**-person group; Boxer is **416**. This is a template bug on their
+  side, not a one-off — the Pit Bull page had its own separate typo ("156
+  6-person Groups" for 5-person). **Always recompute the ladder from the group
+  counts rather than trusting the prose.**
+
+### Calibration — no existing format moved
+
+All six pre-existing tournaments byte-identical on three reference rosters after
+the additions. Both new branches verified to fire in both directions except the
+Frenchie's W16-weakness path, which is structurally identical to the Boxer's
+(proven firing) but could not be triggered on a real roster — see below.
+
+### Found while testing: tier labels can understate the numeric score
+
+`avgPerWeek` is built from `m.score`, but the **high-pace boost increments
+`score` without updating `tier`**:
+
+```js
+if (gsNode?.type === "highPace" && m.score < 5) {
+  m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };  // tier unchanged
+}
+```
+
+So a stack can display `Even/Even/Even` for a week and still average 4.00 there.
+The competitive-balance boost above it DOES update `tier`; this one does not.
+Pre-existing and not introduced by this change, but it makes the stack week
+strings misleading and it is why a deliberately W16-dead synthetic roster still
+cleared the gate. Fix by setting `tier` from the boosted score the same way the
+competitive-balance branch does — left alone here because it would move grades
+and belongs in its own change.

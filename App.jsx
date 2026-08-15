@@ -718,6 +718,58 @@ const TOURNAMENTS = {
   // advanceWeight 1.5 matches puppy and schnauzer — the R1 qualifier is the
   // same 12-man, 2-advance structure and eliminates 83.3% of the field.
   pitbull: { name: "The Pit Bull 2", entries: "28.1k", weights: [1.5, 1.25, 2], advanceWeight: 1.5, note: "Flattest weekly gates on Underdog (W15 1/6, W16 1/5 — no kill-shot week), but the most top-heavy prize curve: 77.5% of the $500k reaches the 156-seat final and 53.4% goes to the top ten. Survive, then win W17 outright. Max 10 entries", format: "standard" },
+  // The Frenchie 13 (added Aug 14 2026, read off the in-app rules).
+  // $6 entry · 9,432 entries · $50k prizes · 11.6% rake · 18 rounds · 12-man
+  // drafts · MAX 4 ENTRIES.
+  //
+  //   R1 Qualifier  W1-14  786 groups of 12, 3 advance (25.0%)  9,432 -> 2,358
+  //   R2 Quarter    W15    393 groups of  6, 2 advance (33.3%)  2,358 ->   786
+  //   R3 Semi       W16    131 groups of  6, 1 advance (16.7%)    786 ->   131
+  //   R4 Final      W17    one 131-person group                    131 ->     1
+  //
+  // ⚠️ TWO ERRORS IN UNDERDOG'S RULES TEXT, do not copy either:
+  //  1. The R2 line reads "393 entries in 2,358 6-person Groups" — the two
+  //     numbers are REVERSED. It is 2,358 entries in 393 groups (786x3=2,358,
+  //     2,358/6=393).
+  //  2. The R4 line reads "a single1, 31-person Group" — it is a single
+  //     131-PERSON group. The identical artifact appears in the Boxer rules
+  //     page, so it is a template bug on their side, not a one-off.
+  //
+  // THE ONE W16-MAX CONFIG ON THE BOARD, and the reason is structural: W16 is
+  // 1-of-6 (16.7%) while W15 is 2-of-6 (33.3%), so **W16 is exactly twice as
+  // hard as W15**. Every other format here makes W15 the tighter gate; this is
+  // the only inversion, so it is the only config where W15 < W16.
+  // W17 also carries 2: the final is 131 seats — the SMALLEST on the board —
+  // and 1st alone is $15k of $50k, a 30.0% first-prize share that is the most
+  // concentrated anywhere (Pit Bull and Boxer are 20%, BBM 13.3%, Puppy 10%).
+  // So this is the most winnable championship room in the portfolio.
+  // advanceWeight 1.25: R1 is 3-of-12 (25%), softer than the 2-of-12 (16.7%)
+  // that earns 1.5 elsewhere, and surviving it pays exactly the $6 entry back.
+  frenchie: { name: "The Frenchie 13", entries: "9.4k", weights: [1.25, 2, 2], advanceWeight: 1.25, note: "The only format where W16 is the kill shot — 1-of-6, exactly TWICE as hard as its 2-of-6 W15. Smallest final on the board at 131 seats and the most top-heavy first prize anywhere (1st = 30% of the pool). Coast W15, win W16 outright, then win a 131-man room. Max 4 entries", format: "standard" },
+  // The Boxer (added Aug 14 2026, read off the in-app rules).
+  // $18 entry · 6,240 entries · $100k prizes · 11% rake · 18 rounds · 12-man
+  // drafts · MAX 3 ENTRIES — the lowest portfolio of any format here.
+  //
+  //   R1 Qualifier  W1-14  520 groups of 12, 4 advance (33.3%)  6,240 -> 2,080
+  //   R2 Quarter    W15    416 groups of  5, 2 advance (40.0%)  2,080 ->   832
+  //   R3 Semi       W16    208 groups of  4, 2 advance (50.0%)    832 ->   416
+  //   R4 Final      W17    one 416-person group                    416 ->     1
+  //
+  // ⚠️ Same "a single1, 31-person Group" artifact in their rules text. It is a
+  // 416-SEAT final: the header says so, 832/2 = 416, and the prize table pays
+  // down to 416th.
+  //
+  // BY FAR THE SOFTEST GATES ON THE BOARD — every other format advances 2-of-12
+  // in R1; this advances 4-of-12, and W16 is a literal coin flip. P(reach final)
+  // is 6.67%, one in fifteen: 12x easier than Pit Bull and 67x easier than BBM.
+  // BUT ARRIVING IS WORTH ALMOST NOTHING. The ladder on $18 is $9 -> $18 -> $50,
+  // so surviving the 14-week qualifier LOSES money and clearing W15 is exact
+  // break-even. Meanwhile the top ten take 49.7% of the pool and 1st is 20%.
+  // Hence the most W17-tilted weights here and the LOWEST advanceWeight (0.75):
+  // a 33.3% R1 gate that repays half your entry barely deserves modeling.
+  // Deliberately NOT in the uniqueness-leverage branch — 6,240 entries is a
+  // small field, so best-player-available beats contrarian differentiation.
+  boxer: { name: "The Boxer", entries: "6.2k", weights: [1, 0.75, 2.5], advanceWeight: 0.75, note: "Softest gates anywhere (R1 4/12, W15 2/5, W16 2/4) — reaching the 416-seat final is 1-in-15, but surviving pays $9 on an $18 entry. Everything is W17 placement: top ten take 49.7% of the pool. Small field, so draft best-available over correlation. Max 3 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
@@ -3564,6 +3616,36 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (anyWeak.length >= 1) {
       weaknesses.push(`${anyWeak.length} stack(s) carry a wall week — with three near-identical gates (1/6, 1/5) you cannot punt a week and expect to reach the final`);
+    }
+  } else if (tournamentKey === "frenchie") {
+    // The Frenchie 13: the ONLY format here where W16 is the kill shot. W16 is
+    // 1-of-6 (16.7%) against a 2-of-6 (33.3%) W15, so W16 is exactly twice as
+    // hard. Every other branch in this file flags W15 as the tight gate; this
+    // one deliberately does not, and a W15-only roster is the trap it catches.
+    // W17 is flagged too because the 131-seat final is the smallest on the board
+    // and 1st alone is 30% of the pool.
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) built for the W16 kill shot — 1-of-6, twice as hard as this format's W15`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears the W16 gate — W16 is 1-of-6 here and eliminates five of every six survivors, so a W15-built roster dies one week later`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 131-seat final — the smallest final on the board, and 1st alone is 30% of the pool`);
+    }
+  } else if (tournamentKey === "boxer") {
+    // The Boxer: softest gates anywhere (33.3 / 40.0 / 50.0), so survival is
+    // close to free and worth close to nothing — the ladder is $9 -> $18 -> $50
+    // on an $18 entry. Nearly all EV sits in W17 placement inside a 416-man
+    // final where the top ten take 49.7% of the pool. So this branch checks W17
+    // only, and deliberately has NO wall-week check: unlike Pit Bull's three
+    // near-identical gates, here you genuinely can punt a week and still advance.
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — the top ten take 49.7% of this format's pool and everything before W17 pays back less than your entry`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — the gates here are soft enough that you will likely reach the 416-seat final, but arriving pays $50 and only a top-ten week pays real money`);
     }
   } else if (tournamentKey === "fastpuppy") {
     // The Fast Puppy: W15, W16, W17 are three INDEPENDENT must-win single-week cuts.
