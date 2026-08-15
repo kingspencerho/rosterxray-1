@@ -1527,3 +1527,56 @@ const ADP_UPDATED = ADP_VINTAGE.standard.label;  // back-compat, ADP_DATA ONLY
 Display-only: **7 tournament grades byte-identical before and after** on a
 reference roster (main 8.87, puppy 7.31, bbm7 7.33, schnauzer 8.91, pitbull
 8.91, boxer 10.35, frenchie 8.89).
+
+## The Cross-Format ADP Experiment (Aug 15, 2026) — READ BEFORE REFRESHING ADP_DATA
+
+`scripts/refresh-adp.py` compares against Fantasy Football Calculator, which is
+**REDRAFT**. `ADP_DATA` is **UNDERDOG BEST BALL**. All eight players flagged by
+that cross-format run were then checked against a real Underdog board:
+
+```
+player      pos  ADP_DATA  real UD  app err   redraft  reported  offset
+Stafford    QB     104.0    108.3     +4.3      75.2    -28.8     33.1
+Kyle Pitts  TE     108.0    103.2     -4.8      82.4    -25.6     20.8
+Aaron Jones RB     120.0    126.9     +6.9      98.2    -21.8     28.7
+Shakir      WR     127.0    131.0     +4.0     104.0    -23.0     27.0
+Kamara      RB     181.2    162.1    -19.1     147.3    -33.9     14.8
+Jeudy       WR     179.9    190.3    -10.4     133.7    -46.2     56.6  *
+Tank Dell   WR     196.7    179.3    +17.4     152.6    -44.1     26.7
+Ridley      WR     175.7    195.7    -20.0     133.8    -41.9     61.9  *
+```
+
+**1. Two of eight (*) would have moved the WRONG WAY.** The report said Jeudy
+and Ridley go earlier than the table; on a real Underdog board they go **later**.
+Bulk-applying would have shifted them 56.6 and 61.9 picks in the wrong
+direction. A "negative delta" therefore carries NO directional information for
+best ball. An earlier version of this file reasoned that a negative delta was
+where real news lived, because best ball should be the earlier market. That
+holds for rookies and upside profiles and INVERTS for veterans — **do not use
+it.**
+
+**2. The cross-format report overstates error by ~3x.** Mean reported gap 33.2
+picks against a mean real error of 10.9. `ADP_DATA` was much closer to the
+market than the run implied.
+
+**3. The offset is NOT a constant** — 14.8 to 61.9 picks across these eight. You
+cannot subtract a fixed correction to convert a redraft quote to a best-ball
+one. Late-round players diverge most, which is where a wrong number does the
+most damage because nothing else anchors the price.
+
+### The rule this produces
+- **`--table data` is a SCREEN FOR WHICH PLAYERS TO GO LOOK UP, nothing more.**
+  Never bulk-apply it. A number enters `ADP_DATA` only with a real best-ball
+  quote or a sourced news driver.
+- **`--table yahoo` is like-for-like** (redraft source, redraft table) and is the
+  only run safe to `--apply`. That refresh moved 67 values and fixed a real bug:
+  the app had been calling Rashee Rice at pick 12 a 22-pick REACH off a stale
+  33.7 when he goes at 14.4.
+- A screenshot of the user's own draft board is the highest-quality source
+  available for `ADP_DATA` and beats any scrape. Ask for it.
+
+**Playwright cannot reach these sites from the cloud sandbox** (Chromium gets
+`ERR_CONNECTION_RESET` through the agent proxy while curl gets 200s), and the
+best-ball ADP pages are client-rendered with subscriber-gated data endpoints —
+DraftSharks' `/adp/export` returns the app shell. Do not spend another session
+on a scraper without first checking that Chromium can reach an external host.

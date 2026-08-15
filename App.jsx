@@ -249,11 +249,11 @@ const ADP_DATA = {
   "dalton schultz": { adp: 171.3, pos: "TE", team: "HOU" },
   "nicholas singleton": { adp: 173.9, pos: "RB", team: "TEN" },
   "brandon aiyuk": { adp: 175.3, pos: "WR", team: "SF" },
-  "calvin ridley": { adp: 175.7, pos: "WR", team: "TEN" },
+  "calvin ridley": { adp: 195.7, pos: "WR", team: "TEN" },  // Aug 15 2026: live Underdog board. The redraft source said 133.8 and would have moved him 61.9 picks the WRONG WAY.
   "jacoby brissett": { adp: 177.8, pos: "QB", team: "ARI" },
   "tank bigsby": { adp: 178.4, pos: "RB", team: "PHI" },
   "geno smith": { adp: 178.9, pos: "QB", team: "NYJ" },
-  "jerry jeudy": { adp: 179.9, pos: "WR", team: "CLE" },
+  "jerry jeudy": { adp: 190.3, pos: "WR", team: "CLE" },  // Aug 15 2026: live Underdog board. The redraft source said 133.7 and would have moved him 56.6 picks the WRONG WAY — he goes LATER in best ball, not earlier.
   "gunnar helm": { adp: 181.2, pos: "TE", team: "TEN" },
   "alvin kamara": { adp: 162.1, pos: "RB", team: "NO" },  // Aug 15 2026: live Underdog board, 181.2 -> 162.1. THE ONLY ONE OF THE FIVE THAT GENUINELY MOVED. Note the market still prices him well ahead of what this repo's Etienne note implies.
   "germie bernard": { adp: 198.8, pos: "WR", team: "PIT" }, // Aug 9 live board: 182.5 -> 198.8 (drifted down)
@@ -271,7 +271,7 @@ const ADP_DATA = {
   "eli stowers": { adp: 193.5, pos: "TE", team: "PHI" },
   "pat freiermuth": { adp: 194.7, pos: "TE", team: "PIT" },
   "tyreek hill": { adp: 195.7, pos: "WR", team: "FA" },
-  "tank dell": { adp: 196.7, pos: "WR", team: "HOU" },
+  "tank dell": { adp: 179.3, pos: "WR", team: "HOU" },  // Aug 15 2026: live Underdog board. Right direction from the redraft source but it overshot by 26.7 picks.
   "zachariah branch": { adp: 198.0, pos: "WR", team: "ATL" },
   "darnell mooney": { adp: 198.7, pos: "WR", team: "NYG" },
   "kayshon boutte": { adp: 200.1, pos: "WR", team: "NE" },
