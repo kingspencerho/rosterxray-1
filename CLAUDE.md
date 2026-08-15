@@ -1433,21 +1433,20 @@ the additions. Both new branches verified to fire in both directions except the
 Frenchie's W16-weakness path, which is structurally identical to the Boxer's
 (proven firing) but could not be triggered on a real roster — see below.
 
-### Found while testing: tier labels can understate the numeric score
+### FIXED Aug 14 2026: tier labels no longer understate the numeric score
 
-`avgPerWeek` is built from `m.score`, but the **high-pace boost increments
-`score` without updating `tier`**:
+`avgPerWeek` is built from `m.score`, and the two boost branches in the stack
+loop had drifted: the competitive-balance boost updated `tier` alongside
+`score`, the high-pace boost updated `score` ONLY. A stack could therefore
+display `Even/Even/Even` for a week whose `avgPerWeek` was 4.00 — every week
+string in the UI was a potential lie about the number driving the grade.
 
-```js
-if (gsNode?.type === "highPace" && m.score < 5) {
-  m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };  // tier unchanged
-}
-```
+Both branches now route through a single `tierFromScore(score)` helper defined
+directly under `getMatchupTier`, whose thresholds mirror that function's rank
+bands. Change both or neither.
 
-So a stack can display `Even/Even/Even` for a week and still average 4.00 there.
-The competitive-balance boost above it DOES update `tier`; this one does not.
-Pre-existing and not introduced by this change, but it makes the stack week
-strings misleading and it is why a deliberately W16-dead synthetic roster still
-cleared the gate. Fix by setting `tier` from the boosted score the same way the
-competitive-balance branch does — left alone here because it would move grades
-and belongs in its own change.
+**Grades did NOT move — 35 scores byte-identical across 7 tournaments x 5
+reference rosters.** An earlier note in this file predicted this fix would move
+grades; that was wrong. `tier` is display-only in the scoring path (`weekScores`
+sums `m.score`), and the only non-display consumer is a `tier !== "Unknown"`
+filter that a boost never triggers. The bug was a lying label, not a bad number.
