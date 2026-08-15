@@ -41,7 +41,7 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 const ADP_VINTAGE = {
   standard:  { label: "Jun 24",  market: "Underdog half-PPR best ball" },
   superflex: { label: "Jun 24",  market: "4for4 superflex" },
-  yahoo:     { label: "Jun 24",  market: "Yahoo half-PPR redraft" },
+  yahoo:     { label: "Aug 15",  market: "redraft half-PPR" },  // refreshed from FFC, 2,429 drafts, Aug 10-15 2026
 };
 
 // Resolve which table actually produced a given result's numbers. findPlayer
@@ -278,7 +278,7 @@ const ADP_DATA = {
   "sean tucker": { adp: 200.1, pos: "RB", team: "TB" },
   "braelon allen": { adp: 200.7, pos: "RB", team: "NYJ" },
   "ray davis": { adp: 203.1, pos: "RB", team: "BUF" },
-  "malik washington": { adp: 203.2, pos: "WR", team: "MIA" },
+  "malik washington": { adp: 153.2, pos: "WR", team: "MIA" },  // Aug 15 2026: 203.2 -> 153.2. Held back by refresh-adp's --max-move guard on a 20-draft sample, then applied by hand once the role change was sourced.
   "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
   "terrance ferguson": { adp: 205.4, pos: "TE", team: "LAR" },
   "eli raridon": { adp: 215.7, pos: "TE", team: "NE" },
@@ -633,7 +633,7 @@ const ADP_SUPERFLEX = {
   "mason taylor": { adp: 235, pos: "TE", team: "NYJ" },
   "adonai mitchell": { adp: 194, pos: "WR", team: "NYJ" },
   "ted hurst": { adp: 221.0, pos: "WR", team: "TB" },
-  "malik washington": { adp: 201, pos: "WR", team: "MIA" },
+  "malik washington": { adp: 151, pos: "WR", team: "MIA" },  // Aug 15 2026: measured -50 live move applied to this table's scale
   "darnell washington": { adp: 228, pos: "TE", team: "PIT" },
   "theo johnson": { adp: 236, pos: "TE", team: "NYG" },
   "zachariah branch": { adp: 219, pos: "WR", team: "ATL" },
@@ -914,6 +914,7 @@ const RECENT_NEWS = {
   "kirk cousins": "LV — NAMED THE STARTER as of camp 2026, with the team explicitly evaluating rookie Fernando Mendoza's readiness for regular-season opportunities. Named-starter clarity with a rookie-evaluation clause attached, so a mid-season change is a live risk for Las Vegas pass catchers in the W15-17 window.",
   "travis etienne": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
   "jakobi lane": "BAL \u2014 THE RUNAWAY STANDOUT of Baltimore's 2026 training camp. Third-round rookie WR out of USC, 22 years old. ESPN's Jamison Hensley, who has covered the franchise for 27 years, said he has never seen a rookie have a camp like this one; Lane produces a highlight catch essentially every day and a one-handed grab cleared 1.3 million views inside 24 hours. THE SIGNAL THAT MATTERS IS NOT THE HIGHLIGHTS: he is taking FIRST-TEAM REPS and building visible red-zone chemistry with Lamar Jackson, who sought him out after an 11-on-11 red-zone period for an extended one-on-one conversation. Rashod Bateman has been missing practice time, which is the specific opening Lane is walking through. MARKET HAS MOVED HARD: roughly a 21-23 spot climb in seven days, and this entry's ADP went 214.7 -> 162.7 on Aug 15 2026. THE PRIOR VERDICT HERE WAS HARD FADE, dated May 19, reasoning 'BAL run-heaviest, Minter HC, WR targets suppressed.' The team context was not wrong, but it was written before any of this and is retired. FORMAT NOTE FOR BEST BALL: Baltimore's W17 is @CIN, and Cincinnati grades AVOID against WR while grading SMASH against RB and TE. So Lane is a poor positional fit as a BAL bring-back into that specific game even though the game environment is the best on the board \u2014 want a Baltimore back or tight end there instead. Per Lens 4, these are pre-Week-3 preseason reps: treat as strong scheme-evaluation signal, not confirmed role. Re-check after preseason Week 3. BAL playoff slate: W15 @PIT, W16 vs CLE, W17 @CIN.",
+  "malik washington": "MIA \u2014 the de facto WR1 in Miami's 2026 camp and new starter Malik Willis's favorite target, taking most of the first-team reps. Third-year player out of Virginia, and now tied as the LONGEST-TENURED receiver on the roster, which says more about the room's turnover than about his age. The receiver room was rebuilt around him: Tyreek Hill and Jaylen Waddle are both gone (Waddle is a Bronco), and what remains behind Washington is largely inexperienced. WHY THE ADP MOVED 100 PICKS: this entry read fade/falling as recently as this summer and priced him at 254 in the redraft table. He is going at 153.2 in the live market. THE SPECIFIC CLAIM THAT BROKE: the old note capped him as a schemed slot receiver on a 5.2 aDOT. In camp he caught a 60-yard deep ball and added a 45-yard catch-and-run in the same session, both from Willis \u2014 chunk-play production the slot-only framing said was not in his game. HC Mike McDaniel has praised him publicly. WHAT KEEPS THIS SHORT OF A CONFIRMED BREAKOUT: Willis is an unproven starter, the offense projects run-first, and per Lens 4 these are pre-Week-3 reps, which are scheme evaluation rather than role confirmation. Re-check after preseason Week 3. MIA playoff slate: W15 @GB, W16 vs LAC, W17 vs BUF \u2014 the TE/WR matchups there grade poorly, so he is a season-long target well before he is a best-ball playoff piece.",
   "tyler allgeier": "ARI — listed as the No. 1 RB on Arizona's first unofficial depth chart (Aug 2026), with third-overall rookie Jeremiyah Love No. 2, James Conner 3rd, Trey Benson 4th. Signed from Atlanta in March on 2yr/$12.25M. THE ENTRY HERE UNTIL AUG 15 2026 SAID THE OPPOSITE and was wrong in three places, which is why the detail is spelled out: (1) 'three-way committee' — the room is four deep but Allgeier is on top of it, not buried in it; (2) 'Brissett QB' as a negative — Jacoby Brissett threw for a career-high 3,366 yards with 23 TD and 8 INT in 12 starts after Kyler Murray's foot injury, and was re-signed on a reworked 1yr/$15.5M deal that can reach $21M; (3) '36.1% run rate is brutal' — no 2026 source supports it, and new HC Mike LaFleur, whose OC is Nathaniel Hackett, comes from a Rams offense that led the NFL in both points and yards, with reporting describing a balanced scheme that spread the ball to six players in the first preseason game. WHAT ACTUALLY MATTERS FOR BEST BALL: 19 green-zone carries in 2025 on 16 targets. He is a pure short-yardage and goal-line body, so his value is touchdown equity, not volume — a TD-or-bust weekly profile. The standing risk is that Love was the No. 3 overall pick and clubs commonly leave a rookie second on the published chart until he wins the job outright, so treat the RB1 listing as evidence the handoff is not immediate rather than evidence it is not coming. ARI playoff slate: W15 vs NYJ, W16 @NO, W17 vs LV.",
   "travis etienne jr": "Etienne signed with NO on a 2yr/$14M deal, signaling he's taken Kamara's starting role.",
   "alvin kamara": "Etienne signed as presumed lead back, but Kamara remains central to NO (team captain, OTA appearance signals he's staying). Contract situation gives org incentive to use him in 2026. Likely retains passing-down/receiving role under Kellen Moore — reception-back floor intact even in reduced role.",
@@ -1159,7 +1160,7 @@ const SITUATIONS = {
   "jaylin noel": { verdict: "fade", trend: "rising", trendNote: "ROLE improved, WINDOW did not — the two are separate axes and only one moved. SI's July camp depth chart lists him a STARTER with Collins and Higgins, Dell and Hutchinson behind; other outlets still call it an open WR3 battle, so it is not settled. Stroud connection is real. The fade is unchanged and is purely schedule: HOU draws JAX W15, @PHI W16, @GB W17 — a 3-week playoff avoid. Better player, same dead window. Redraft-relevant, best-ball irrelevant.", situationFlags: ["breakout_profile"], riskFlags: ["schedule_avoid"] },
   "demario douglas": { verdict: "fade", trend: "stable", trendNote: "NE check-down valve, sub-8 aDOT — YAC-dependent with zero air yards upside in Maye offense", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   "tutu atwell": { verdict: "fade", trend: "stable", trendNote: "MIA gadget/speed role, sub-8 aDOT — no defined role and Willis run-first offense caps ceiling further", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
-  "malik washington": { verdict: "fade", trend: "falling", trendNote: "MIA slot with 5.2 aDOT in 2025 — now facing competition from three rookie WRs plus Atwell and Tolbert in Willis run-first offense; volume entirely schemed", situationFlags: [], riskFlags: ["creeping_committee"], roleCeiling: "slot_only" },
+  "malik washington": { verdict: "TARGET", trend: "rising", trendNote: "UPGRADED from fade/falling Aug 15 2026. He is MIAMI'S DE FACTO WR1 in camp and Malik Willis's most-targeted receiver, taking the bulk of first-team reps. Third year, and now tied as the longest-tenured receiver in the room. The old entry called him a schemed slot piece at 5.2 aDOT behind a crowded depth chart; camp has contradicted the aDOT half directly — he produced a 60-yard deep reception and a 45-yard catch-and-run from Willis in one session, which is chunk-play work the prior read said he could not do. roleCeiling slot_only is REMOVED because that was the specific claim the reporting broke. Kept honest: Willis is an unproven starter, the offense projects run-first, and these are pre-Week-3 preseason reps, so this is a role signal rather than a confirmed one. Re-check after preseason Week 3.", situationFlags: ["target_vacuum", "breakout_profile"], riskFlags: ["qb_uncertainty"] },
   "christian kirk": { verdict: "fade", trend: "falling", trendNote: "Age 30 WR3 in SF behind Evans and Pearsall — career slot profile, Shanahan run-heavy, Stribling 2nd-round pick adds further role pressure", situationFlags: [], riskFlags: [], roleCeiling: "slot_only" },
   // rz_dependent: players whose fantasy value is almost entirely TD-driven; near-zero floor without scoring
   "brandin cooks": { verdict: "fade", trend: "falling", trendNote: "Unsigned FA as of June 2026 — 24 catches/279 yards/0 TDs in 2025 split between NO and BUF; BUF added DJ Moore and drafted Skyler Bell, no clear landing spot; do not draft until team confirmed", situationFlags: [], riskFlags: ["injury_history"] },
@@ -1405,12 +1406,12 @@ const ADP_YAHOO = {
   "chase brown": { adp: 16.8, pos: "RB", team: "CIN" },
   "saquon barkley": { adp: 14.0, pos: "RB", team: "PHI" },
   "drake london": { adp: 17.0, pos: "WR", team: "ATL" },
-  "rashee rice": { adp: 33.7, pos: "WR", team: "KC" },
-  "brock bowers": { adp: 19.9, pos: "TE", team: "LV" },
+  "rashee rice": { adp: 14.4, pos: "WR", team: "KC" },  // ADP refresh 2026-08-15: 33.7 -> 14.4 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "brock bowers": { adp: 43.4, pos: "TE", team: "LV" },  // ADP refresh 2026-08-15: 19.9 -> 43.4 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "nico collins": { adp: 21.1, pos: "WR", team: "HOU" },
   "omarion hampton": { adp: 18.7, pos: "RB", team: "LAC" },
   "kenneth walker": { adp: 20.3, pos: "RB", team: "KC" },
-  "trey mcbride": { adp: 23.4, pos: "TE", team: "ARI" },
+  "trey mcbride": { adp: 41.9, pos: "TE", team: "ARI" },  // ADP refresh 2026-08-15: 23.4 -> 41.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "george pickens": { adp: 22.3, pos: "WR", team: "DAL" },
   "malik nabers": { adp: 34.2, pos: "WR", team: "NYG" },
   "jeremiyah love": { adp: 26.6, pos: "RB", team: "ARI" },
@@ -1418,19 +1419,19 @@ const ADP_YAHOO = {
   "chris olave": { adp: 31.5, pos: "WR", team: "NO" },
   "derrick henry": { adp: 19.1, pos: "RB", team: "BAL" },
   "aj brown": { adp: 26.8, pos: "WR", team: "NE" },
-  "lamar jackson": { adp: 33.6, pos: "QB", team: "BAL" },
+  "lamar jackson": { adp: 53.9, pos: "QB", team: "BAL" },  // ADP refresh 2026-08-15: 33.6 -> 53.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "josh jacobs": { adp: 30.1, pos: "RB", team: "GB" },
   "tetairoa mcmillan": { adp: 38.7, pos: "WR", team: "CAR" },
   "devonta smith": { adp: 30.1, pos: "WR", team: "PHI" },
   "tee higgins": { adp: 34.5, pos: "WR", team: "CIN" },
   "drake maye": { adp: 44.7, pos: "QB", team: "NE" },
-  "colston loveland": { adp: 38.6, pos: "TE", team: "CHI" },
-  "garrett wilson": { adp: 46.6, pos: "WR", team: "NYJ" },
+  "colston loveland": { adp: 61.6, pos: "TE", team: "CHI" },  // ADP refresh 2026-08-15: 38.6 -> 61.6 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "garrett wilson": { adp: 31, pos: "WR", team: "NYJ" },  // ADP refresh 2026-08-15: 46.6 -> 31.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "kyren williams": { adp: 30.6, pos: "RB", team: "LAR" },
   "travis etienne": { adp: 41.5, pos: "RB", team: "NO" },
   "breece hall": { adp: 38.3, pos: "RB", team: "NYJ" },
   "javonte williams": { adp: 35.7, pos: "RB", team: "DAL" },
-  "zay flowers": { adp: 41.3, pos: "WR", team: "BAL" },
+  "zay flowers": { adp: 24.8, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-15: 41.3 -> 24.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "ladd mcconkey": { adp: 45.7, pos: "WR", team: "LAC" },
   "davante adams": { adp: 48.4, pos: "WR", team: "LAR" },
   "jaylen waddle": { adp: 47.3, pos: "WR", team: "DEN" },
@@ -1438,110 +1439,110 @@ const ADP_YAHOO = {
   "joe burrow": { adp: 44.4, pos: "QB", team: "CIN" },
   "terry mclaurin": { adp: 56.4, pos: "WR", team: "WAS" },
   "bucky irving": { adp: 50.1, pos: "RB", team: "TB" },
-  "jameson williams": { adp: 63.1, pos: "WR", team: "DET" },
+  "jameson williams": { adp: 39.9, pos: "WR", team: "DET" },  // ADP refresh 2026-08-15: 63.1 -> 39.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "cam skattebo": { adp: 42.3, pos: "RB", team: "NYG" },
-  "jayden daniels": { adp: 52.4, pos: "QB", team: "WAS" },
+  "jayden daniels": { adp: 72.7, pos: "QB", team: "WAS" },  // ADP refresh 2026-08-15: 52.4 -> 72.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "emeka egbuka": { adp: 48.0, pos: "WR", team: "TB" },
-  "jalen hurts": { adp: 55.5, pos: "QB", team: "PHI" },
+  "jalen hurts": { adp: 76.2, pos: "QB", team: "PHI" },  // ADP refresh 2026-08-15: 55.5 -> 76.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "treveyon henderson": { adp: 56.4, pos: "RB", team: "NE" },
   "dandre swift": { adp: 50.6, pos: "RB", team: "CHI" },
-  "dj moore": { adp: 65.7, pos: "WR", team: "BUF" },
+  "dj moore": { adp: 49.4, pos: "WR", team: "BUF" },  // ADP refresh 2026-08-15: 65.7 -> 49.4 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "christian watson": { adp: 70.8, pos: "WR", team: "GB" },
-  "tyler warren": { adp: 48.7, pos: "TE", team: "IND" },
+  "tyler warren": { adp: 70, pos: "TE", team: "IND" },  // ADP refresh 2026-08-15: 48.7 -> 70.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "chuba hubbard": { adp: 68.4, pos: "RB", team: "CAR" },
-  "rome odunze": { adp: 70.3, pos: "WR", team: "CHI" },
+  "rome odunze": { adp: 45.1, pos: "WR", team: "CHI" },  // ADP refresh 2026-08-15: 70.3 -> 45.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "quinshon judkins": { adp: 54.7, pos: "RB", team: "CLE" },
-  "tucker kraft": { adp: 60.0, pos: "TE", team: "GB" },
+  "tucker kraft": { adp: 97.5, pos: "TE", team: "GB" },  // ADP refresh 2026-08-15: 60.0 -> 97.5 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "bhayshul tuten": { adp: 65.4, pos: "RB", team: "JAX" },
   "carnell tate": { adp: 77.1, pos: "WR", team: "TEN" },
   "mike evans": { adp: 65.8, pos: "WR", team: "SF" },
   "david montgomery": { adp: 55.8, pos: "RB", team: "HOU" },
-  "justin herbert": { adp: 66.2, pos: "QB", team: "LAC" },
-  "jaxson dart": { adp: 74.7, pos: "QB", team: "NYG" },
+  "justin herbert": { adp: 105.5, pos: "QB", team: "LAC" },  // ADP refresh 2026-08-15: 66.2 -> 105.5 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "jaxson dart": { adp: 110.9, pos: "QB", team: "NYG" },  // ADP refresh 2026-08-15: 74.7 -> 110.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jaylen warren": { adp: 75.2, pos: "RB", team: "PIT" },
   "jordyn tyson": { adp: 89.8, pos: "WR", team: "NO" },
   "jadarian price": { adp: 66.5, pos: "RB", team: "SEA" },
-  "marvin harrison jr": { adp: 78.8, pos: "WR", team: "ARI" },
+  "marvin harrison jr": { adp: 62.1, pos: "WR", team: "ARI" },  // ADP refresh 2026-08-15: 78.8 -> 62.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "mhj": { adp: 73.0, pos: "WR", team: "ARI" },
   "makai lemon": { adp: 97.1, pos: "WR", team: "PHI" },
   "rico dowdle": { adp: 83.0, pos: "RB", team: "PIT" },
-  "alec pierce": { adp: 80.0, pos: "WR", team: "IND" },
+  "alec pierce": { adp: 53.8, pos: "WR", team: "IND" },  // ADP refresh 2026-08-15: 80.0 -> 53.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "rj harvey": { adp: 93.0, pos: "RB", team: "DEN" },
-  "caleb williams": { adp: 72.3, pos: "QB", team: "CHI" },
-  "courtland sutton": { adp: 96.2, pos: "WR", team: "DEN" },
+  "caleb williams": { adp: 97.2, pos: "QB", team: "CHI" },  // ADP refresh 2026-08-15: 72.3 -> 97.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "courtland sutton": { adp: 59.3, pos: "WR", team: "DEN" },  // ADP refresh 2026-08-15: 96.2 -> 59.3 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "harold fannin": { adp: 70.6, pos: "TE", team: "CLE" },
-  "michael wilson": { adp: 99.0, pos: "WR", team: "ARI" },
-  "dk metcalf": { adp: 86.7, pos: "WR", team: "PIT" },
-  "rhamondre stevenson": { adp: 85.8, pos: "RB", team: "NE" },
-  "sam laporta": { adp: 66.2, pos: "TE", team: "DET" },
-  "tony pollard": { adp: 88.6, pos: "RB", team: "TEN" },
+  "michael wilson": { adp: 79.1, pos: "WR", team: "ARI" },  // ADP refresh 2026-08-15: 99.0 -> 79.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "dk metcalf": { adp: 62.8, pos: "WR", team: "PIT" },  // ADP refresh 2026-08-15: 86.7 -> 62.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "rhamondre stevenson": { adp: 70.8, pos: "RB", team: "NE" },  // ADP refresh 2026-08-15: 85.8 -> 70.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "sam laporta": { adp: 90.9, pos: "TE", team: "DET" },  // ADP refresh 2026-08-15: 66.2 -> 90.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "tony pollard": { adp: 66.7, pos: "RB", team: "TEN" },  // ADP refresh 2026-08-15: 88.6 -> 66.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "chris godwin": { adp: 98.1, pos: "WR", team: "TB" },
   "trevor lawrence": { adp: 86.7, pos: "QB", team: "JAX" },
   "kyle pitts": { adp: 74.1, pos: "TE", team: "ATL" },
   "dak prescott": { adp: 77.4, pos: "QB", team: "DAL" },
-  "brian thomas jr": { adp: 89.0, pos: "WR", team: "JAX" },
+  "brian thomas jr": { adp: 69.9, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-15: 89.0 -> 69.9 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "btj": { adp: 90.0, pos: "WR", team: "JAX" },
   "ricky pearsall": { adp: 110.2, pos: "WR", team: "SF" },
   "kyle monangai": { adp: 95.7, pos: "RB", team: "CHI" },
   "jk dobbins": { adp: 100.9, pos: "RB", team: "DEN" },
-  "parker washington": { adp: 99.2, pos: "WR", team: "JAX" },
-  "blake corum": { adp: 97.9, pos: "RB", team: "LAR" },
+  "parker washington": { adp: 66.5, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-15: 99.2 -> 66.5 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "blake corum": { adp: 121.2, pos: "RB", team: "LAR" },  // ADP refresh 2026-08-15: 97.9 -> 121.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jakobi meyers": { adp: 96.0, pos: "WR", team: "JAX" },
-  "kyler murray": { adp: 107.9, pos: "QB", team: "MIN" },
+  "kyler murray": { adp: 142.7, pos: "QB", team: "MIN" },  // ADP refresh 2026-08-15: 107.9 -> 142.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jacory croskey merritt": { adp: 115.0, pos: "RB", team: "WAS" },
-  "bo nix": { adp: 101.4, pos: "QB", team: "DEN" },
-  "dalton kincaid": { adp: 98.4, pos: "TE", team: "BUF" },
-  "brock purdy": { adp: 100.4, pos: "QB", team: "SF" },
-  "jordan addison": { adp: 121.6, pos: "WR", team: "MIN" },
+  "bo nix": { adp: 116.5, pos: "QB", team: "DEN" },  // ADP refresh 2026-08-15: 101.4 -> 116.5 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "dalton kincaid": { adp: 142.2, pos: "TE", team: "BUF" },  // ADP refresh 2026-08-15: 98.4 -> 142.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "brock purdy": { adp: 84.2, pos: "QB", team: "SF" },  // ADP refresh 2026-08-15: 100.4 -> 84.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "jordan addison": { adp: 91.2, pos: "WR", team: "MIN" },  // ADP refresh 2026-08-15: 121.6 -> 91.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "oronde gadsden": { adp: 103.0, pos: "TE", team: "LAC" },
   "kenneth gainwell": { adp: 113.1, pos: "RB", team: "TB" },
   "kenny gainwell": { adp: 113.1, pos: "RB", team: "TB" }, // same player — keep in sync with the line above
   "patrick mahomes": { adp: 94.9, pos: "QB", team: "KC" },
-  "michael pittman jr": { adp: 120.6, pos: "WR", team: "PIT" },
+  "michael pittman jr": { adp: 80.8, pos: "WR", team: "PIT" },  // ADP refresh 2026-08-15: 120.6 -> 80.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "dallas goedert": { adp: 104.7, pos: "TE", team: "PHI" },
-  "tyler allgeier": { adp: 129.4, pos: "RB", team: "ARI" },
-  "aaron jones": { adp: 117.2, pos: "RB", team: "MIN" },
-  "travis kelce": { adp: 95.6, pos: "TE", team: "KC" },
-  "josh downs": { adp: 122.5, pos: "WR", team: "IND" },
-  "wandale robinson": { adp: 129.9, pos: "WR", team: "TEN" },
-  "jayden reed": { adp: 113.0, pos: "WR", team: "GB" },
-  "quentin johnston": { adp: 117.6, pos: "WR", team: "LAC" },
+  "tyler allgeier": { adp: 159.1, pos: "RB", team: "ARI" },  // ADP refresh 2026-08-15: 129.4 -> 159.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "aaron jones": { adp: 98.2, pos: "RB", team: "MIN" },  // ADP refresh 2026-08-15: 117.2 -> 98.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "travis kelce": { adp: 124.8, pos: "TE", team: "KC" },  // ADP refresh 2026-08-15: 95.6 -> 124.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "josh downs": { adp: 91.2, pos: "WR", team: "IND" },  // ADP refresh 2026-08-15: 122.5 -> 91.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "wandale robinson": { adp: 86.6, pos: "WR", team: "TEN" },  // ADP refresh 2026-08-15: 129.9 -> 86.6 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "jayden reed": { adp: 89.8, pos: "WR", team: "GB" },  // ADP refresh 2026-08-15: 113.0 -> 89.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "quentin johnston": { adp: 83, pos: "WR", team: "LAC" },  // ADP refresh 2026-08-15: 117.6 -> 83.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jordan mason": { adp: 122.9, pos: "RB", team: "MIN" },
   "rachaad white": { adp: 120.9, pos: "RB", team: "WAS" },
   "jayden higgins": { adp: 134.4, pos: "WR", team: "HOU" },
-  "jake ferguson": { adp: 111.4, pos: "TE", team: "DAL" },
+  "jake ferguson": { adp: 146.1, pos: "TE", team: "DAL" },  // ADP refresh 2026-08-15: 111.4 -> 146.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "zach charbonnet": { adp: 127.3, pos: "RB", team: "SEA" },
-  "isaiah likely": { adp: 108.8, pos: "TE", team: "NYG" },
-  "george kittle": { adp: 91.0, pos: "TE", team: "SF" },
-  "tyrone tracy": { adp: 130.3, pos: "RB", team: "NYG" },
-  "chris rodriguez": { adp: 123.0, pos: "RB", team: "JAX" },
+  "isaiah likely": { adp: 137.6, pos: "TE", team: "NYG" },  // ADP refresh 2026-08-15: 108.8 -> 137.6 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "george kittle": { adp: 117.4, pos: "TE", team: "SF" },  // ADP refresh 2026-08-15: 91.0 -> 117.4 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "tyrone tracy": { adp: 153.8, pos: "RB", team: "NYG" },  // ADP refresh 2026-08-15: 130.3 -> 153.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "chris rodriguez": { adp: 157.8, pos: "RB", team: "JAX" },  // ADP refresh 2026-08-15: 123.0 -> 157.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jonathon brooks": { adp: 113.4, pos: "RB", team: "CAR" },
-  "romeo doubs": { adp: 125.0, pos: "WR", team: "NE" },
+  "romeo doubs": { adp: 109, pos: "WR", team: "NE" },  // ADP refresh 2026-08-15: 125.0 -> 109.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jalen coker": { adp: 126.0, pos: "WR", team: "CAR" },
   "malik willis": { adp: 122.1, pos: "QB", team: "MIA" },
-  "matthew stafford": { adp: 100.7, pos: "QB", team: "LAR" },
-  "xavier worthy": { adp: 127.5, pos: "WR", team: "KC" },
+  "matthew stafford": { adp: 75.2, pos: "QB", team: "LAR" },  // ADP refresh 2026-08-15: 100.7 -> 75.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "xavier worthy": { adp: 100.8, pos: "WR", team: "KC" },  // ADP refresh 2026-08-15: 127.5 -> 100.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "kc concepcion": { adp: 130.0, pos: "WR", team: "CLE" },
-  "tyjae spears": { adp: 131.0, pos: "RB", team: "TEN" },
+  "tyjae spears": { adp: 146, pos: "RB", team: "TEN" },  // ADP refresh 2026-08-15: 131.0 -> 146.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "woody marks": { adp: 132.0, pos: "RB", team: "HOU" },
-  "khalil shakir": { adp: 133.0, pos: "WR", team: "BUF" },
-  "matthew golden": { adp: 131.9, pos: "WR", team: "GB" },
+  "khalil shakir": { adp: 104, pos: "WR", team: "BUF" },  // ADP refresh 2026-08-15: 133.0 -> 104.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "matthew golden": { adp: 113.8, pos: "WR", team: "GB" },  // ADP refresh 2026-08-15: 131.9 -> 113.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jonah coleman": { adp: 131.2, pos: "RB", team: "DEN" },
   "jared goff": { adp: 115.9, pos: "QB", team: "DET" },
   "jordan love": { adp: 137.0, pos: "QB", team: "GB" },
   "keaton mitchell": { adp: 138.0, pos: "RB", team: "LAC" },
   "tyler shough": { adp: 129.2, pos: "QB", team: "NO" },
-  "stefon diggs": { adp: 140.0, pos: "WR", team: "WAS" }, // signed WAS Aug 5 2026
+  "stefon diggs": { adp: 96, pos: "WR", team: "WAS" },  // ADP refresh 2026-08-15: 140.0 -> 96.0 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "braelon allen": { adp: 141.0, pos: "RB", team: "NYJ" },
   "dylan sampson": { adp: 142.0, pos: "RB", team: "CLE" },
   "baker mayfield": { adp: 143.0, pos: "QB", team: "TB" },
-  "mark andrews": { adp: 114.9, pos: "TE", team: "BAL" },
-  "brenton strange": { adp: 127.2, pos: "TE", team: "JAX" },
+  "mark andrews": { adp: 136.7, pos: "TE", team: "BAL" },  // ADP refresh 2026-08-15: 114.9 -> 136.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "brenton strange": { adp: 159.5, pos: "TE", team: "JAX" },  // ADP refresh 2026-08-15: 127.2 -> 159.5 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "brian robinson": { adp: 146.0, pos: "RB", team: "ATL" },
-  "isiah pacheco": { adp: 127.6, pos: "RB", team: "DET" },
+  "isiah pacheco": { adp: 149.7, pos: "RB", team: "DET" },  // ADP refresh 2026-08-15: 127.6 -> 149.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "denzel boston": { adp: 131.4, pos: "WR", team: "CLE" },
   "hunter henry": { adp: 149.0, pos: "TE", team: "NE" },
-  "deebo samuel": { adp: 134.7, pos: "WR", team: "SF" }, // signed with SF (Pearsall's vacated targets) — "-" predated the signing
+  "deebo samuel": { adp: 97.3, pos: "WR", team: "SF" },  // ADP refresh 2026-08-15: 134.7 -> 97.3 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "emanuel wilson": { adp: 151.0, pos: "RB", team: "SEA" },
   "cj stroud": { adp: 127.2, pos: "QB", team: "HOU" },
   "mike washington jr": { adp: 192.0, pos: "RB", team: "LV" },
@@ -1552,9 +1553,9 @@ const ADP_YAHOO = {
   "bryce young": { adp: 158.0, pos: "QB", team: "CAR" },
   "brandon aiyuk": { adp: 159.0, pos: "WR", team: "SF" },
   "juwan johnson": { adp: 131.1, pos: "TE", team: "NO" },
-  "sam darnold": { adp: 161.0, pos: "QB", team: "SEA" },
+  "sam darnold": { adp: 145.8, pos: "QB", team: "SEA" },  // ADP refresh 2026-08-15: 161.0 -> 145.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jalen mcmillan": { adp: 129.5, pos: "WR", team: "TB" },
-  "jerry jeudy": { adp: 163.0, pos: "WR", team: "CLE" },
+  "jerry jeudy": { adp: 133.7, pos: "WR", team: "CLE" },  // ADP refresh 2026-08-15: 163.0 -> 133.7 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "cam ward": { adp: 127.4, pos: "QB", team: "TEN" },
   "jauan jennings": { adp: 131.7, pos: "WR", team: "MIN" },
   "daniel jones": { adp: 166.0, pos: "QB", team: "IND" },
@@ -1574,16 +1575,16 @@ const ADP_YAHOO = {
   "jacoby brissett": { adp: 180.0, pos: "QB", team: "ARI" },
   "antonio williams": { adp: 135.2, pos: "WR", team: "WAS" },
   "sean tucker": { adp: 182.0, pos: "RB", team: "TB" },
-  "calvin ridley": { adp: 183.0, pos: "WR", team: "TEN" },
+  "calvin ridley": { adp: 133.8, pos: "WR", team: "TEN" },  // ADP refresh 2026-08-15: 183.0 -> 133.8 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "chris bell": { adp: 184.0, pos: "WR", team: "MIA" },
   "dalton schultz": { adp: 131.3, pos: "TE", team: "HOU" },
   "jack bech": { adp: 186.0, pos: "WR", team: "LV" },
   "malik benson": { adp: 200.0, pos: "WR", team: "LV" }, // estimated, anchored to Bech — see ADP_DATA note
   "eli stowers": { adp: 187.0, pos: "TE", team: "PHI" },
   "troy franklin": { adp: 189.0, pos: "WR", team: "DEN" },
-  "tre tucker": { adp: 190.0, pos: "WR", team: "LV" },
+  "tre tucker": { adp: 135.4, pos: "WR", team: "LV" },  // ADP refresh 2026-08-15: 190.0 -> 135.4 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "tre harris": { adp: 167.5, pos: "WR", team: "LAC" },
-  "jalen nailor": { adp: 192.0, pos: "WR", team: "LV" },
+  "jalen nailor": { adp: 141.6, pos: "WR", team: "LV" },  // ADP refresh 2026-08-15: 192.0 -> 141.6 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "isaac teslaa": { adp: 120.1, pos: "WR", team: "DET" },
   "trey benson": { adp: 194.0, pos: "RB", team: "ARI" },
   "aj barner": { adp: 195.0, pos: "TE", team: "SEA" },
@@ -1594,12 +1595,12 @@ const ADP_YAHOO = {
   "darnell mooney": { adp: 202.0, pos: "WR", team: "NYG" },
   "fernando mendoza": { adp: 203.0, pos: "QB", team: "LV" },
   "colby parkinson": { adp: 204.0, pos: "TE", team: "LAR" },
-  "tank dell": { adp: 205.0, pos: "WR", team: "HOU" },
-  "dezhaun stribling": { adp: 206.0, pos: "WR", team: "SF" },
+  "tank dell": { adp: 152.6, pos: "WR", team: "HOU" },  // ADP refresh 2026-08-15: 205.0 -> 152.6 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
+  "dezhaun stribling": { adp: 146.1, pos: "WR", team: "SF" },  // ADP refresh 2026-08-15: 206.0 -> 146.1 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "aaron rodgers": { adp: 118.4, pos: "QB", team: "PIT" },
   "pat freiermuth": { adp: 208.0, pos: "TE", team: "PIT" },
   "gunnar helm": { adp: 209.0, pos: "TE", team: "TEN" },
-  "cooper kupp": { adp: 210.0, pos: "WR", team: "SEA" },
+  "cooper kupp": { adp: 151.2, pos: "WR", team: "SEA" },  // ADP refresh 2026-08-15: 210.0 -> 151.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "geno smith": { adp: 211.0, pos: "QB", team: "NYJ" },
   "jordan james": { adp: 212.0, pos: "RB", team: "SF" },
   "dontayvion wicks": { adp: 213.0, pos: "WR", team: "PHI" },
@@ -1608,7 +1609,7 @@ const ADP_YAHOO = {
   "justice hill": { adp: 216.0, pos: "RB", team: "BAL" },
   "malachi fields": { adp: 217.0, pos: "WR", team: "NYG" },
   "ted hurst": { adp: 218.0, pos: "WR", team: "TB" },
-  "travis hunter": { adp: 128.2, pos: "WR", team: "JAX" },
+  "travis hunter": { adp: 159.3, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-15: 128.2 -> 159.3 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "jaylin noel": { adp: 223.0, pos: "WR", team: "HOU" },
   "chimere dike": { adp: 226.0, pos: "WR", team: "TEN" },
   "elic ayomanor": { adp: 227.0, pos: "WR", team: "TEN" },
@@ -1621,7 +1622,7 @@ const ADP_YAHOO = {
   "kirk cousins": { adp: 234.0, pos: "QB", team: "LV" },
   "pat bryant": { adp: 236.0, pos: "WR", team: "DEN" },
   "evan engram": { adp: 237.0, pos: "TE", team: "DEN" },
-  "rashod bateman": { adp: 157.0, pos: "WR", team: "BAL" }, // Aug 15 2026: measured -81 live move applied to this table's scale
+  "rashod bateman": { adp: 133.2, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-15: 157.0 -> 133.2 (Half-PPR, 2,429 drafts, 2026-08-10 to 2026-08-15)
   "ollie gordon": { adp: 241.0, pos: "RB", team: "MIA" },
   "samaje perine": { adp: 242.0, pos: "RB", team: "CIN" },
   "skyler bell": { adp: 243.0, pos: "WR", team: "BUF" },
@@ -1630,7 +1631,7 @@ const ADP_YAHOO = {
   "dawson knox": { adp: 248.0, pos: "TE", team: "BUF" },
   "darius slayton": { adp: 249.0, pos: "WR", team: "NYG" },
   "cade otton": { adp: 252.0, pos: "TE", team: "TB" },
-  "malik washington": { adp: 254.0, pos: "WR", team: "MIA" },
+  "malik washington": { adp: 153.2, pos: "WR", team: "MIA" },  // Aug 15 2026: 254.0 -> 153.2, matching the live redraft market directly
   "tua tagovailoa": { adp: 255.0, pos: "QB", team: "ATL" },
   "kaelon black": { adp: 256.0, pos: "RB", team: "SF" },
   "greg dulcich": { adp: 134.2, pos: "TE", team: "MIA" },
