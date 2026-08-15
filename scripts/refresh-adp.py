@@ -29,6 +29,24 @@ FORMAT MISMATCH — READ THIS BEFORE TRUSTING A NUMBER
       - Redraft drafts early-down volume backs earlier and pass-catching
         specialists later.
 
+    MEASURED OFFSET (Aug 15 2026). Five held players were checked against a
+    live Underdog board rather than guessed at. For ESTABLISHED VETERANS the
+    redraft source ran ~20-29 picks EARLIER than real best-ball ADP, and FOUR
+    OF THE FIVE turned out to be pure format offset with the table already
+    correct to within 7 picks:
+
+        player     ADP_DATA   real UD   err    redraft   reported "drift"
+        Stafford     104.0     108.3   +4.3      75.2       -28.8
+        Aaron Jones  120.0     126.9   +6.9      98.2       -21.8
+        Shakir       127.0     131.0   +4.0     104.0       -23.0
+        Kyle Pitts   108.0     103.2   -4.8      82.4       -25.6
+        Kamara       181.2     162.1  -19.1     147.3       -33.9   <- real
+
+    So a 20-30 pick negative delta on a veteran RB/WR/TE is the EXPECTED
+    reading here and means nothing on its own. Do not treat direction alone
+    as evidence of staleness: it takes a NEWS DRIVER, or a real best-ball
+    quote, to justify writing a number into ADP_DATA.
+
     So: --table yahoo is a LIKE-FOR-LIKE comparison (redraft vs redraft) and
     can be applied with confidence. --table data is CROSS-FORMAT and should be
     treated as a directional signal — apply news-driven moves, not QB noise.

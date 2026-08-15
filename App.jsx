@@ -170,9 +170,9 @@ const ADP_DATA = {
   "jakobi meyers": { adp: 100, pos: "WR", team: "JAX" },
   "ricky pearsall": { adp: 101, pos: "WR", team: "SF" },
   "harold fannin": { adp: 102, pos: "TE", team: "CLE" },
-  "matthew stafford": { adp: 104, pos: "QB", team: "LAR" },
+  "matthew stafford": { adp: 108.3, pos: "QB", team: "LAR" },  // Aug 15 2026: read off a live Underdog board. The redraft source said 75.2 and flagged a -28.8 "anomaly" — it was the format offset, not staleness. This table was within 4.3 picks all along.
   "bo nix": { adp: 107, pos: "QB", team: "DEN" },
-  "kyle pitts": { adp: 108, pos: "TE", team: "ATL" },
+  "kyle pitts": { adp: 103.2, pos: "TE", team: "ATL" },  // Aug 15 2026: live Underdog board. Redraft source said 82.4 — format offset, not drift.
   "jared goff": { adp: 109, pos: "QB", team: "DET" },
   "matthew golden": { adp: 106.1, pos: "WR", team: "GB" },
   "kyler murray": { adp: 106.3, pos: "QB", team: "MIN" },
@@ -190,14 +190,14 @@ const ADP_DATA = {
   "wandale robinson": { adp: 86.6, pos: "WR", team: "TEN" },  // Aug 15 2026: 117.4 -> 86.6. His verdict moved fade -> TARGET on Jul 31 and this number never followed — the prose was updated, the price was not.
   "kenneth gainwell": { adp: 117.6, pos: "RB", team: "TB" },
   "kenny gainwell": { adp: 117.6, pos: "RB", team: "TB" },
-  "aaron jones": { adp: 120.0, pos: "RB", team: "MIN" },
+  "aaron jones": { adp: 126.9, pos: "RB", team: "MIN" },  // Aug 15 2026: live Underdog board. Redraft source said 98.2 — format offset, not drift.
   "jordan mason": { adp: 121.9, pos: "RB", team: "MIN" },
   "rachaad white": { adp: 122.9, pos: "RB", team: "WAS" },
   "jayden higgins": { adp: 123.9, pos: "WR", team: "HOU" },
   "jake ferguson": { adp: 124.3, pos: "TE", team: "DAL" },
   "travis kelce": { adp: 124.3, pos: "TE", team: "KC" },
   "jonathon brooks": { adp: 124.8, pos: "RB", team: "CAR" },
-  "khalil shakir": { adp: 127.0, pos: "WR", team: "BUF" },
+  "khalil shakir": { adp: 131.0, pos: "WR", team: "BUF" },  // Aug 15 2026: live Underdog board. Redraft source said 104.0 — format offset, not drift.
   "mark andrews": { adp: 127.3, pos: "TE", team: "BAL" },
   "tyrone tracy": { adp: 130.3, pos: "RB", team: "NYG" },
   "dalton kincaid": { adp: 131.3, pos: "TE", team: "BUF" },
@@ -255,7 +255,7 @@ const ADP_DATA = {
   "geno smith": { adp: 178.9, pos: "QB", team: "NYJ" },
   "jerry jeudy": { adp: 179.9, pos: "WR", team: "CLE" },
   "gunnar helm": { adp: 181.2, pos: "TE", team: "TEN" },
-  "alvin kamara": { adp: 181.2, pos: "RB", team: "NO" },
+  "alvin kamara": { adp: 162.1, pos: "RB", team: "NO" },  // Aug 15 2026: live Underdog board, 181.2 -> 162.1. THE ONLY ONE OF THE FIVE THAT GENUINELY MOVED. Note the market still prices him well ahead of what this repo's Etienne note implies.
   "germie bernard": { adp: 198.8, pos: "WR", team: "PIT" }, // Aug 9 live board: 182.5 -> 198.8 (drifted down)
   "emmett johnson": { adp: 183.0, pos: "RB", team: "KC" },
   "ryan flournoy": { adp: 183.1, pos: "WR", team: "DAL" },
@@ -577,7 +577,7 @@ const ADP_SUPERFLEX = {
   "gunnar helm": { adp: 169, pos: "TE", team: "TEN" },
   "kirk cousins": { adp: 174, pos: "QB", team: "LV" },
   "rashid shaheed": { adp: 166, pos: "WR", team: "SEA" },
-  "alvin kamara": { adp: 162, pos: "RB", team: "NO" },
+  "alvin kamara": { adp: 142.9, pos: "RB", team: "NO" },  // Aug 15 2026: measured -19.1 live move applied to this table's scale
   "cade otton": { adp: 172, pos: "TE", team: "TB" },
   "eli stowers": { adp: 203, pos: "TE", team: "PHI" },
   "jalen mcmillan": { adp: 171, pos: "WR", team: "TB" },
