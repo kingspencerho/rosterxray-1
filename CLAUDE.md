@@ -1580,3 +1580,67 @@ most damage because nothing else anchors the price.
 best-ball ADP pages are client-rendered with subscriber-gated data endpoints —
 DraftSharks' `/adp/export` returns the app shell. Do not spend another session
 on a scraper without first checking that Chromium can reach an external host.
+
+---
+
+## Cross-Table Coverage & Screenshot ADP (added Aug 16, 2026)
+
+Two guards, both closing the SILENT-DROP class rather than the wrong-value class.
+The existing ADP guards check that the three tables AGREE. Nothing checked that a
+player was PRESENT, and nothing checked that the screenshot path carried ADP at all.
+
+### `scripts/test-table-coverage.mjs` (guard 10)
+
+For every key in any of the three tables, ask `findPlayer` to resolve it in each
+format. A miss on a draftable player fails the run.
+
+**Why absence beats disagreement as a bug.** A disagreement prints two numbers and
+someone eventually notices one looks wrong. An absence prints NOTHING — the player
+drops out of the grade, no error is raised, and the match counter reads clean. Two
+shipped in one day (Aug 15) and BOTH were found by a real roster hitting them:
+Ja'Kobi Lane (absent from `ADP_SUPERFLEX`) and Elic Ayomanor (in `ADP_YAHOO` only,
+so invisible to best ball). The cause is structural and recurs: the three tables
+are sourced separately, so adding a player to one never forces the others.
+
+**`DRAFTABLE_MAX = 240` is the whole design.** `ADP_YAHOO` is a redraft table with
+a much deeper tail (306 entries against 273) — names at 260-300 no best-ball
+drafter reaches. Failing on those makes the guard noise, and a noisy guard gets
+ignored, which is exactly how eleven duplicate keys accumulated behind eleven build
+warnings. Deep tail names report as INFO and do not fail.
+
+The first run found **27 real gaps**, now filled. Fill values are estimates carried
+from the table the player WAS in, and that is safe *only* because `adpFlags`
+excludes `adp >= 200` from reach/value logic — for these players the number drives
+resolution and ordering, nothing else. Replace with a real quote when one appears.
+
+### Screenshot extraction now captures ADP (guard 11)
+
+The extractor was explicitly told to discard it: *"Only extract the Pick number —
+do NOT use Bye or ADP."* So every screenshot upload fell back to the built-in
+snapshot — the exact number the ADP Source of Truth rule says the user's own board
+should override. **Screenshots are how rosters actually arrive, so the stale-table
+problem landed hardest on the most-used path.**
+
+`EXTRACTION_SYSTEM_PROMPT` now returns `[{name, pick?, adp?}]` and the client
+renders each player as a five-line block.
+
+**THE BLOCK SHAPE IS NOT COSMETIC — verify before changing it.** `parseRoster` is
+built around Underdog's export, where the LABEL FOLLOWS THE VALUE. The obvious
+alternatives are silently wrong:
+
+```
+"Joe Burrow 84 ADP 68.4"          -> adp 84, pick null      BOTH WRONG
+"Joe Burrow 68.4 ADP 84 Pick"     -> not parsed at all
+name / "QB CIN" / bye / "Bye" /…  -> parses, but "QB CIN" rows become junk
+name / adp / "ADP" / pick / "Pick" -> CORRECT, zero junk rows
+```
+
+A swapped pick/ADP is **worse than no ADP**: it produces confident, precise, wrong
+reach/value flags on every player. `test-extraction-blocks.mjs` pins the working
+shape, asserts `adpSource === "roster"`, and asserts the known-bad single-line form
+is *still* broken — so nobody "simplifies" the emitter back into it silently.
+
+Strategies 2 and 3 in the client still emit bare strings and degrade to exactly the
+pre-Aug-16 behaviour (name + pick, table ADP). Only strategy 1 carries ADP.
+
+**Grades unchanged** — 7 tournaments byte-identical on the reference roster.
