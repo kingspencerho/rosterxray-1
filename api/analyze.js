@@ -29,16 +29,19 @@ async function checkRateLimit(kvUrl, kvToken, key, limit, windowSeconds) {
 
 const EXTRACTION_SYSTEM_PROMPT = `You are a precise data-extraction tool for fantasy football roster screenshots.
 
-Extract every player name from the roster screenshot(s) provided, in draft order. For each player, also look for a "Pick" number — the overall draft slot they were selected at.
+Extract every player from the roster screenshot(s) provided, in draft order. For each player capture three things: their name, their "Pick" number (the overall draft slot they were selected at), and their "ADP".
 
-Underdog roster screens typically show three numbers per player: Bye (1-18), ADP (often decimal, e.g. 96.4), and Pick (integer, the actual draft slot, often explicitly labeled "Pick"). Only extract the Pick number — do NOT use Bye or ADP. If a column is explicitly labeled "Pick", use that value. If no Pick number/label is visible for a player, omit it — never guess or substitute ADP/Bye for Pick.
+Underdog roster screens show three numbers per player, usually left to right with the label UNDERNEATH each one: Bye (integer 1-18), ADP (usually decimal, e.g. 96.4), and Pick (integer, the actual draft slot). Read the label under each number and assign it accordingly.
+- NEVER swap ADP and Pick. They are different fields and confusing them corrupts the analysis. If a column is labelled "Pick", that value is the pick. If a column is labelled "ADP", that value is the adp.
+- Bye is never a pick and never an adp. Discard it.
+- If a number is not visible or you are unsure which field it belongs to, OMIT that field rather than guessing. A missing field is recoverable; a wrong one is not.
 
-Yahoo SHARE CARDS (purple "yahoo fantasy" branded lineup image, added 2026): rows read like "QB B. PURDY Thu 5:35PM @ LAR — 18.85". The right-hand decimal is a PROJECTION, never a Pick or ADP — ignore every number on these cards. First names are abbreviated to initials; extract the name exactly as shown (e.g. "B. Purdy") and nothing else from the row. A "BENCH" divider separates starters from bench — include both.
+Yahoo SHARE CARDS (purple "yahoo fantasy" branded lineup image, added 2026): rows read like "QB B. PURDY Thu 5:35PM @ LAR — 18.85". The right-hand decimal is a PROJECTION, never a Pick or ADP — ignore every number on these cards and return name only, with no "pick" or "adp" key. First names are abbreviated to initials; extract the name exactly as shown (e.g. "B. Purdy") and nothing else from the row. A "BENCH" divider separates starters from bench — include both.
 
-Return ONLY a JSON array of strings, one per player, in draft order. Each string is the player's full name, followed by a space and the Pick number if one was found (e.g. "Adam Randall 194"), or just the name if no Pick number was visible (e.g. "Caleb Williams"). No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
+Return ONLY a JSON array of objects, one per player, in draft order. Each object has "name" (required, the player's full name as printed) plus optional "pick" and "adp" numbers. Omit a key entirely when that value was not visible — do not send null, 0 or a guess. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
 
 Example output exactly:
-["Bijan Robinson 2","Tetairoa McMillan 7","Trey McBride 13","Caleb Williams"]
+[{"name":"Bijan Robinson","pick":2,"adp":2.4},{"name":"Tetairoa McMillan","pick":7,"adp":9.1},{"name":"Trey McBride","pick":13},{"name":"Caleb Williams"}]
 
 Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. Deduplicate if the same player appears twice.`;
 

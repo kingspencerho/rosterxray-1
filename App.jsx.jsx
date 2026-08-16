@@ -293,6 +293,25 @@ const ADP_DATA = {
   "malachi fields": { adp: 210.0, pos: "WR", team: "NYG" },
   "troy franklin": { adp: 210.1, pos: "WR", team: "DEN" },
   "tory horton": { adp: 210.9, pos: "WR", team: "SEA" },
+  // --- Added Aug 16 2026 by the cross-table coverage audit -------------------
+  // Every player below already existed in ADP_SUPERFLEX and/or ADP_YAHOO and was
+  // UNREACHABLE in best ball, so a roster containing one silently lost a player.
+  // Values are ESTIMATES carried over from the table he was found in. That is
+  // safe here and only here: adpFlags excludes adp >= 200 from reach/value logic
+  // entirely, so for these players the number drives resolution and ordering and
+  // nothing else. Replace any of them with a real Underdog quote when you see one.
+  "trey benson": { adp: 200.0, pos: "RB", team: "ARI" },
+  "samaje perine": { adp: 224.0, pos: "RB", team: "CIN" },
+  "chimere dike": { adp: 226.0, pos: "WR", team: "TEN" },
+  "dawson knox": { adp: 229.0, pos: "TE", team: "BUF" },
+  "jaylen wright": { adp: 233.0, pos: "RB", team: "MIA" },
+  "mason taylor": { adp: 235.0, pos: "TE", team: "NYJ" },
+  "ollie gordon": { adp: 237.0, pos: "RB", team: "MIA" },
+  // Nickname keys. These exist in the other two tables, so a user typing "MHJ"
+  // or "BTJ" resolved everywhere EXCEPT best ball. Same ADP as the full name.
+  "mhj": { adp: 67, pos: "WR", team: "ARI" },
+  "btj": { adp: 62, pos: "WR", team: "JAX" },
+  // --------------------------------------------------------------------------
   "adonai mitchell": { adp: 160.4, pos: "WR", team: "NYJ" },  // Aug 15 2026: 210.9 -> 160.4. Verified driver: NYJ role jump, Geno chemistry, contract year.
   "kimani vidal": { adp: 212.1, pos: "RB", team: "LAC" },
   "jake tonges": { adp: 212.3, pos: "TE", team: "SF" },
@@ -374,6 +393,16 @@ const ADP_DATA = {
   // depth, and roster-supplied ADP overrides the table anyway. Replace when a
   // real ADP exists.
   "cyrus allen": { adp: 215.9, pos: "WR", team: "KC" },
+  // --- Cross-table coverage fill, Aug 16 2026 -------------------------------
+  // Each of these already existed in another ADP table and returned null here,
+  // so a roster in this format silently lost the player. Values are ESTIMATES:
+  // 1.10x carried across from superflex, where quarterbacks price much earlier.
+  // Safe because adpFlags excludes adp >= 200 from reach/value logic entirely —
+  // for these players the number drives resolution and ordering, nothing else.
+  // Replace any of them with a real quote for THIS format when you see one.
+  "justin fields": { adp: 250.8, pos: "QB", team: "KC" },
+  "mac jones": { adp: 249.7, pos: "QB", team: "SF" },
+  // -------------------------------------------------------------------------
 };
 
 
@@ -676,6 +705,32 @@ const ADP_SUPERFLEX = {
   "jaylin noel": { adp: 240, pos: "WR", team: "HOU" },
   "erick all": { adp: 242, pos: "TE", team: "CIN" }, // estimated tail placement — see ADP_DATA note
   "colbie young": { adp: 244, pos: "WR", team: "CIN" }, // added Aug 15 2026 — estimated tail placement, Iosivas is absent from this table so anchored to the CIN tail
+  // --- Cross-table coverage fill, Aug 16 2026 -------------------------------
+  // Each of these already existed in another ADP table and returned null here,
+  // so a roster in this format silently lost the player. Values are ESTIMATES:
+  // 1.10x the ADP_DATA value — the measured tail ratio across four known pairs (All 215.8->242, Benson 215.6->238, Young 215.9->244, Ayomanor 215.7->236).
+  // Safe because adpFlags excludes adp >= 200 from reach/value logic entirely —
+  // for these players the number drives resolution and ordering, nothing else.
+  // Replace any of them with a real quote for THIS format when you see one.
+  "adam randall": { adp: 236.8, pos: "RB", team: "BAL" },
+  "andrei iosivas": { adp: 236.9, pos: "WR", team: "CIN" },
+  "brenen thompson": { adp: 236.8, pos: "WR", team: "LAC" },
+  "caleb douglas": { adp: 236.5, pos: "WR", team: "MIA" },
+  "chimere dike": { adp: 248.6, pos: "WR", team: "TEN" },
+  "chris brazzell": { adp: 234.3, pos: "WR", team: "CAR" },
+  "devaughn vele": { adp: 237.1, pos: "WR", team: "NO" },
+  "dj giddens": { adp: 236.9, pos: "RB", team: "IND" },
+  "elijah sarratt": { adp: 229.5, pos: "WR", team: "BAL" },
+  "emari demercado": { adp: 237.5, pos: "RB", team: "KC" },
+  "jahan dotson": { adp: 237.5, pos: "WR", team: "ATL" },
+  "michael mayer": { adp: 237.1, pos: "TE", team: "LV" },
+  "oscar delp": { adp: 237.1, pos: "TE", team: "NO" },
+  "skyler bell": { adp: 235, pos: "WR", team: "BUF" },
+  "tez johnson": { adp: 237.5, pos: "WR", team: "TB" },
+  "tory horton": { adp: 232, pos: "WR", team: "SEA" },
+  "trey benson": { adp: 220, pos: "RB", team: "ARI" },
+  "zavion thomas": { adp: 236.9, pos: "WR", team: "CHI" },
+  // -------------------------------------------------------------------------
 };
 
 // Tournament configurations — week weights for grade rollup
@@ -1708,6 +1763,21 @@ const ADP_YAHOO = {
   "emari demercado": { adp: 215.9, pos: "RB", team: "KC" },
   "nick westbrook-ikhine": { adp: 299.0, pos: "WR", team: "IND" },
   "cyrus allen": { adp: 299.0, pos: "WR", team: "KC" },   // placeholder, see ADP_DATA note
+  // --- Cross-table coverage fill, Aug 16 2026 -------------------------------
+  // Each of these already existed in another ADP table and returned null here,
+  // so a roster in this format silently lost the player. Values are ESTIMATES:
+  // 1.15x carried across; this table's tail runs deeper.
+  // Safe because adpFlags excludes adp >= 200 from reach/value logic entirely —
+  // for these players the number drives resolution and ordering, nothing else.
+  // Replace any of them with a real quote for THIS format when you see one.
+  "brenen thompson": { adp: 247.6, pos: "WR", team: "LAC" },
+  "devaughn vele": { adp: 247.8, pos: "WR", team: "NO" },
+  "elijah sarratt": { adp: 239.9, pos: "WR", team: "BAL" },
+  "justin fields": { adp: 262.2, pos: "QB", team: "KC" },
+  "mac jones": { adp: 261, pos: "QB", team: "SF" },
+  "michael mayer": { adp: 247.8, pos: "TE", team: "LV" },
+  "zavion thomas": { adp: 247.7, pos: "WR", team: "CHI" },
+  // -------------------------------------------------------------------------
 };
 
 const FULL_SCHEDULE = {
@@ -6029,7 +6099,20 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
             .replace(/,(\s*[\]}])/g, "$1");
           const parsed = JSON.parse(cleaned);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            players = parsed.filter(p => typeof p === "string" && p.trim().length > 1);
+            // The extractor returns objects {name, pick?, adp?} as of Aug 16 2026,
+            // so a screenshot now carries the ADP the user actually saw instead of
+            // falling back to the built-in snapshot. Strings are still accepted
+            // because strategies 2 and 3 below produce them, and because an older
+            // cached response may still be string-shaped. Both normalise to the
+            // same object here so nothing downstream has to care which arrived.
+            players = parsed.map(p => {
+              if (typeof p === "string") return p.trim().length > 1 ? { name: p.trim() } : null;
+              if (p && typeof p === "object" && typeof p.name === "string" && p.name.trim().length > 1) {
+                const num = (v) => (typeof v === "number" && isFinite(v) && v > 0 ? v : undefined);
+                return { name: p.name.trim(), pick: num(p.pick), adp: num(p.adp) };
+              }
+              return null;
+            }).filter(Boolean);
           }
         } catch (e) { /* fall through */ }
       }
@@ -6044,7 +6127,7 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
           !s.toLowerCase().includes("example") &&
           !s.toLowerCase().includes("player name")
         );
-        if (filtered.length >= 5) players = filtered;
+        if (filtered.length >= 5) players = filtered.map(name => ({ name }));
       }
 
       // Strategy 3: line-by-line — look for capitalized name-like strings
@@ -6066,7 +6149,7 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
             // to kill bare column headers ("TE", "Pick", "Bye 12"), not names.
             !/^(QB|RB|WR|TE|Round|Pick|ADP|Bye)\s*\d*$/i.test(l)
           );
-        if (extracted.length >= 5) players = extracted;
+        if (extracted.length >= 5) players = extracted.map(name => ({ name }));
       }
 
       if (!players || players.length === 0) {
@@ -6082,7 +6165,8 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
         "sure", "i've", "i have", "below", "these are", "the player", "list of",
         "based on", "no player", "unable", "cannot", "could not",
       ];
-      players = players.filter(p => {
+      players = players.filter(entry => {
+        const p = entry.name;
         const low = p.toLowerCase().trim();
         // Drop sentences ending in a period (names don't, except "Jr." which we handle)
         if (/\.$/.test(low) && !/\bjr\.$|\bsr\.$|\bii\.$|\biii\.$/.test(low)) return false;
@@ -6099,10 +6183,28 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
         throw new Error("Extraction returned only non-player text — tap Show Debug Response to inspect, or try Paste Text mode");
       }
 
-      // Dedupe
-      players = [...new Set(players.map(p => p.trim()))];
+      // Dedupe by name — first occurrence wins, so the earliest (draft-order) row
+      // keeps its pick/adp.
+      const seenNames = new Set();
+      players = players.filter(p => {
+        const k = p.name.toLowerCase();
+        if (seenNames.has(k)) return false;
+        seenNames.add(k);
+        return true;
+      });
 
-      const newInput = players.join("\n");
+      // Emit the five-line block per player. This exact shape is what parseRoster
+      // reads correctly — VERIFIED, and the verification mattered: single-line
+      // forms like "Joe Burrow 84 ADP 68.4" parse with pick and ADP SWAPPED,
+      // which is worse than sending no ADP at all. Guarded by
+      // scripts/test-extraction-blocks.mjs. Players with no ADP fall back to
+      // "Name Pick", exactly what this path emitted before Aug 16 2026.
+      const newInput = players.map(p => {
+        if (p.adp != null && p.pick != null) return `${p.name}\n${p.adp}\nADP\n${p.pick}\nPick`;
+        if (p.adp != null) return `${p.name}\n${p.adp}\nADP`;
+        if (p.pick != null) return `${p.name} ${p.pick}`;
+        return p.name;
+      }).join("\n");
       setInput(newInput);
       setAiNutshell(null);
       setAiLoading(false);
