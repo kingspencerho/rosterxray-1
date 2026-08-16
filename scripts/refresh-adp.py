@@ -17,10 +17,22 @@ THE ONE RULE: REPORT BY DEFAULT, NEVER AUTO-APPLY.
     you read. It only edits App.jsx when you pass --apply, and even then it
     refuses moves it cannot justify (see --max-move and --min-drafts).
 
-FORMAT MISMATCH — READ THIS BEFORE TRUSTING A NUMBER
-    The source (Fantasy Football Calculator) is REDRAFT. ADP_DATA is UNDERDOG
-    BEST BALL. They are different markets, and some of the gap this reports is
-    format, not staleness:
+TWO SOURCES. PAIR THEM WITH THE RIGHT TABLE.
+    --source underdog  (DEFAULT)  bestballteambuilder.com, real Underdog BEST
+                                  BALL ADP, server-rendered so curl reaches it.
+                                  Validated Aug 16 2026 at 0.00 mean absolute
+                                  error against nine values read off a live
+                                  Underdog board. LIKE-FOR-LIKE with ADP_DATA.
+    --source ffc                  Fantasy Football Calculator, REDRAFT.
+                                  LIKE-FOR-LIKE with ADP_YAHOO only.
+
+    Only underdog+data and ffc+yahoo are like-for-like; the script computes that
+    from the pair and prints a warning banner for anything else.
+
+FORMAT MISMATCH — WHY MIXING THEM IS NOT A SMALL ERROR
+    Everything below was measured with the REDRAFT source against ADP_DATA, i.e.
+    the wrong pairing. It is kept because the failure is instructive and because
+    --source ffc --table data is still a command someone can type:
 
       - Best ball drafts QUARTERBACKS EARLIER (2-3 per roster, no streaming).
         A QB showing "+40" here is usually correct behavior, not decay.
@@ -61,28 +73,40 @@ FORMAT MISMATCH — READ THIS BEFORE TRUSTING A NUMBER
        which is exactly where a wrong number does the most damage because
        nothing else anchors the price.
 
-    CONCLUSION: --table data is a SCREEN FOR WHICH PLAYERS TO GO LOOK UP, and
-    nothing more. A number only goes into ADP_DATA with a real best-ball
-    quote or a sourced news driver behind it. Never bulk-apply this table.
+    THE SEQUEL, AND THE REASON THE DEFAULT CHANGED. On Aug 15 seven values were
+    written into ADP_DATA from the redraft source anyway, each with a real news
+    driver behind it. A driver justifies that a price MOVED; it never justifies
+    the MAGNITUDE. All seven were too early, and the Aug 16 like-for-like refresh
+    corrected them:
 
-    So: --table yahoo is a LIKE-FOR-LIKE comparison (redraft vs redraft) and
-    can be applied with confidence. --table data is CROSS-FORMAT and should be
-    treated as a directional signal — apply news-driven moves, not QB noise.
+      bateman 133.2->201.1  pierce 53.8->90.0  deebo 97.3->127.1
+      wandale 86.6->111.2   washington 153.2->174.7
+      pittman 80.8->99.4    lane 162.7->178.3
+
+    Deebo's real 127.1 was printed on a roster screenshot graded in the same
+    session. The right number was on screen and a redraft number went in.
+
+    CONCLUSION: with --source ffc, --table data is a SCREEN FOR WHICH PLAYERS TO
+    GO LOOK UP and nothing more — never bulk-apply it, and do not let a news
+    driver talk you into the number. With the default --source underdog it is
+    like-for-like and safe.
 
 USAGE
-    python3 scripts/refresh-adp.py                        # report, ADP_DATA
-    python3 scripts/refresh-adp.py --table yahoo          # report, redraft table
-    python3 scripts/refresh-adp.py --format ppr           # different source format
-    python3 scripts/refresh-adp.py --table yahoo --apply  # write it
-    python3 scripts/refresh-adp.py --out drift.md         # save the report
+    python3 scripts/refresh-adp.py                              # best ball, report
+    python3 scripts/refresh-adp.py --apply                      # best ball, write it
+    python3 scripts/refresh-adp.py --source ffc --table yahoo   # redraft, report
+    python3 scripts/refresh-adp.py --source ffc --table yahoo --apply
+    python3 scripts/refresh-adp.py --out drift.md               # save the report
 
     After --apply you MUST mirror and test:
         cp App.jsx App.jsx.jsx && npm test
 
-SOURCE
-    https://fantasyfootballcalculator.com/api/v1/adp/<format>?teams=12&year=<year>
-    Free, no auth. Returns a meta block with the exact draft-date window, so
-    the vintage is always knowable rather than assumed.
+SOURCES
+    underdog: https://www.bestballteambuilder.com/underdog-best-ball-average-draft-position
+              Server-rendered HTML table. No auth, no browser needed.
+    ffc:      https://fantasyfootballcalculator.com/api/v1/adp/<format>?teams=12&year=<year>
+              Free JSON, no auth, and it returns the exact draft-date window so
+              the vintage is knowable rather than assumed.
 """
 
 import argparse
@@ -90,6 +114,7 @@ import json
 import re
 import sys
 import urllib.request
+import html as html_mod
 from datetime import date
 from pathlib import Path
 
@@ -129,6 +154,65 @@ def fetch(fmt: str, year: int, teams: int) -> dict:
     if payload.get("status") != "Success":
         sys.exit(f"source returned status={payload.get('status')!r}")
     return payload
+
+
+UNDERDOG_URL = "https://www.bestballteambuilder.com/underdog-best-ball-average-draft-position"
+
+
+def fetch_underdog() -> dict:
+    """Real UNDERDOG BEST BALL ADP, scraped from a server-rendered table.
+
+    VALIDATED Aug 16 2026 against nine values read off the user's own Underdog
+    board: mean absolute error 0.00 picks across all nine. This is the same
+    market ADP_DATA is built from, which makes --table data a LIKE-FOR-LIKE
+    comparison for the first time and therefore safe to --apply.
+
+    Why scraping and not an API: every best-ball ADP site with an API gates it
+    behind a subscription, and Chromium cannot reach these hosts through the
+    agent proxy (ERR_CONNECTION_RESET) while curl gets 200s. This page renders
+    its table server-side, so a plain fetch is enough — no browser required.
+    Keep that in mind before reaching for Playwright again.
+    """
+    req = urllib.request.Request(UNDERDOG_URL, headers={
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
+    })
+    with urllib.request.urlopen(req, timeout=45) as r:
+        page = r.read().decode("utf8", "ignore")
+
+    def cells(row):
+        return [html_mod.unescape(re.sub(r"<[^>]+>", " ", c)).strip()
+                for c in re.findall(r"<t[dh][\s\S]*?</t[dh]>", row)]
+
+    best = []
+    for tm in re.finditer(r"<table[\s\S]*?</table>", page):
+        rows = re.findall(r"<tr[\s\S]*?</tr>", tm.group(0))
+        if len(rows) < 50:
+            continue
+        hdr = cells(rows[0])
+        try:
+            ai, pi = hdr.index("ADP"), hdr.index("Player")
+            posi = hdr.index("Position") if "Position" in hdr else hdr.index("POS")
+            ti = hdr.index("Team")
+        except ValueError:
+            continue
+        found = []
+        for row in rows[1:]:
+            c = cells(row)
+            if len(c) <= max(ai, pi, posi, ti):
+                continue
+            try:
+                adp = float(c[ai])
+            except ValueError:
+                continue
+            found.append({"name": c[pi], "adp": adp, "position": c[posi],
+                          "team": c[ti], "times_drafted": 9999})
+        if len(found) > len(best):
+            best = found
+    if len(best) < 100:
+        sys.exit(f"underdog source returned only {len(best)} rows — page shape probably changed")
+    return {"meta": {"type": "Underdog best ball", "total_drafts": 0,
+                     "start_date": "live", "end_date": date.today().isoformat()},
+            "players": best}
 
 
 ENTRY = re.compile(
@@ -175,8 +259,12 @@ def read_table(text: str, const_name: str):
 def main() -> int:
     ap = argparse.ArgumentParser(description="Measure ADP drift in App.jsx against a live market.")
     ap.add_argument("--table", choices=sorted(TABLES), default="data")
+    ap.add_argument("--source", choices=["underdog", "ffc"], default="underdog",
+                    help="underdog = real best-ball ADP (default, like-for-like with "
+                         "ADP_DATA). ffc = Fantasy Football Calculator, REDRAFT — "
+                         "like-for-like with ADP_YAHOO only.")
     ap.add_argument("--format", default="half-ppr",
-                    help="source format: half-ppr, ppr, standard, 2qb, dynasty")
+                    help="ffc only: half-ppr, ppr, standard, 2qb, dynasty")
     ap.add_argument("--year", type=int, default=date.today().year)
     ap.add_argument("--teams", type=int, default=12)
     ap.add_argument("--threshold", type=float, default=15.0,
@@ -192,9 +280,18 @@ def main() -> int:
     ap.add_argument("--out", help="write the markdown report to this path")
     args = ap.parse_args()
 
-    const_name, table_desc, comparability = TABLES[args.table]
+    const_name, table_desc, _ = TABLES[args.table]
 
-    payload = fetch(args.format, args.year, args.teams)
+    # Comparability is a property of the SOURCE/TABLE PAIR, not of the table
+    # alone. Getting this wrong is what made the Aug 15 cross-format run look
+    # like staleness — see the MEASURED OFFSET block at the top of this file.
+    LIKE_FOR_LIKE = {("underdog", "data"), ("ffc", "yahoo")}
+    like = (args.source, args.table) in LIKE_FOR_LIKE
+    comparability = ("LIKE-FOR-LIKE — safe to --apply" if like
+                     else f"CROSS-FORMAT ({args.source} source vs {table_desc} table) — "
+                          "screen only, never bulk-apply")
+
+    payload = fetch_underdog() if args.source == "underdog" else fetch(args.format, args.year, args.teams)
     meta = payload["meta"]
     src_rows = payload["players"]
     vintage = f"{meta['start_date']} to {meta['end_date']}"
@@ -208,6 +305,8 @@ def main() -> int:
         k = normalize(p["name"])
         if not k:
             continue
+        # The underdog source publishes no per-player draft count, so the thin
+        # sample floor cannot apply there; it ships 9999 as a sentinel.
         (thin if p.get("times_drafted", 0) < args.min_drafts else src)[k] = p
 
     moves, unmatched, thin_hits = [], [], []
@@ -240,8 +339,9 @@ def main() -> int:
     w(f"# ADP drift report — {const_name}")
     w("")
     w(f"- **Table:** `{const_name}` ({table_desc})")
-    w(f"- **Source:** Fantasy Football Calculator `{meta['type']}`, {args.teams}-team, "
-      f"**{meta['total_drafts']:,} drafts**, {vintage}")
+    src_name = "bestballteambuilder.com" if args.source == "underdog" else "Fantasy Football Calculator"
+    drafts = f"**{meta['total_drafts']:,} drafts**, " if meta["total_drafts"] else ""
+    w(f"- **Source:** {src_name} `{meta['type']}`, {drafts}{vintage}")
     w(f"- **Comparability:** {comparability}")
     w(f"- **Matched:** {matched} of {len(entries)} table entries "
       f"({len(unmatched)} not in source, {len(thin_hits)} below the {args.min_drafts}-draft floor)")
@@ -250,8 +350,8 @@ def main() -> int:
         w(f"- **Drift:** median {mid:.1f} · mean {sum(all_deltas)/len(all_deltas):.1f} "
           f"· max {all_deltas[-1]:.1f}")
     w("")
-    if args.table != "yahoo":
-        w("> **Cross-format warning.** The source is redraft; this table is not. "
+    if not like:
+        w("> **Cross-format warning.** The source and this table are different markets. "
           "Quarterback moves are the usual false positive — best ball drafts QBs "
           "earlier by design. Apply news-driven moves, not format artifacts.")
         w("")
