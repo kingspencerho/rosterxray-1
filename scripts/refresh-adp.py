@@ -90,6 +90,7 @@ import json
 import re
 import sys
 import urllib.request
+import html as html_mod
 from datetime import date
 from pathlib import Path
 
@@ -129,6 +130,65 @@ def fetch(fmt: str, year: int, teams: int) -> dict:
     if payload.get("status") != "Success":
         sys.exit(f"source returned status={payload.get('status')!r}")
     return payload
+
+
+UNDERDOG_URL = "https://www.bestballteambuilder.com/underdog-best-ball-average-draft-position"
+
+
+def fetch_underdog() -> dict:
+    """Real UNDERDOG BEST BALL ADP, scraped from a server-rendered table.
+
+    VALIDATED Aug 16 2026 against nine values read off the user's own Underdog
+    board: mean absolute error 0.00 picks across all nine. This is the same
+    market ADP_DATA is built from, which makes --table data a LIKE-FOR-LIKE
+    comparison for the first time and therefore safe to --apply.
+
+    Why scraping and not an API: every best-ball ADP site with an API gates it
+    behind a subscription, and Chromium cannot reach these hosts through the
+    agent proxy (ERR_CONNECTION_RESET) while curl gets 200s. This page renders
+    its table server-side, so a plain fetch is enough — no browser required.
+    Keep that in mind before reaching for Playwright again.
+    """
+    req = urllib.request.Request(UNDERDOG_URL, headers={
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
+    })
+    with urllib.request.urlopen(req, timeout=45) as r:
+        page = r.read().decode("utf8", "ignore")
+
+    def cells(row):
+        return [html_mod.unescape(re.sub(r"<[^>]+>", " ", c)).strip()
+                for c in re.findall(r"<t[dh][\s\S]*?</t[dh]>", row)]
+
+    best = []
+    for tm in re.finditer(r"<table[\s\S]*?</table>", page):
+        rows = re.findall(r"<tr[\s\S]*?</tr>", tm.group(0))
+        if len(rows) < 50:
+            continue
+        hdr = cells(rows[0])
+        try:
+            ai, pi = hdr.index("ADP"), hdr.index("Player")
+            posi = hdr.index("Position") if "Position" in hdr else hdr.index("POS")
+            ti = hdr.index("Team")
+        except ValueError:
+            continue
+        found = []
+        for row in rows[1:]:
+            c = cells(row)
+            if len(c) <= max(ai, pi, posi, ti):
+                continue
+            try:
+                adp = float(c[ai])
+            except ValueError:
+                continue
+            found.append({"name": c[pi], "adp": adp, "position": c[posi],
+                          "team": c[ti], "times_drafted": 9999})
+        if len(found) > len(best):
+            best = found
+    if len(best) < 100:
+        sys.exit(f"underdog source returned only {len(best)} rows — page shape probably changed")
+    return {"meta": {"type": "Underdog best ball", "total_drafts": 0,
+                     "start_date": "live", "end_date": date.today().isoformat()},
+            "players": best}
 
 
 ENTRY = re.compile(
@@ -175,8 +235,12 @@ def read_table(text: str, const_name: str):
 def main() -> int:
     ap = argparse.ArgumentParser(description="Measure ADP drift in App.jsx against a live market.")
     ap.add_argument("--table", choices=sorted(TABLES), default="data")
+    ap.add_argument("--source", choices=["underdog", "ffc"], default="underdog",
+                    help="underdog = real best-ball ADP (default, like-for-like with "
+                         "ADP_DATA). ffc = Fantasy Football Calculator, REDRAFT — "
+                         "like-for-like with ADP_YAHOO only.")
     ap.add_argument("--format", default="half-ppr",
-                    help="source format: half-ppr, ppr, standard, 2qb, dynasty")
+                    help="ffc only: half-ppr, ppr, standard, 2qb, dynasty")
     ap.add_argument("--year", type=int, default=date.today().year)
     ap.add_argument("--teams", type=int, default=12)
     ap.add_argument("--threshold", type=float, default=15.0,
@@ -192,9 +256,18 @@ def main() -> int:
     ap.add_argument("--out", help="write the markdown report to this path")
     args = ap.parse_args()
 
-    const_name, table_desc, comparability = TABLES[args.table]
+    const_name, table_desc, _ = TABLES[args.table]
 
-    payload = fetch(args.format, args.year, args.teams)
+    # Comparability is a property of the SOURCE/TABLE PAIR, not of the table
+    # alone. Getting this wrong is what made the Aug 15 cross-format run look
+    # like staleness — see the MEASURED OFFSET block at the top of this file.
+    LIKE_FOR_LIKE = {("underdog", "data"), ("ffc", "yahoo")}
+    like = (args.source, args.table) in LIKE_FOR_LIKE
+    comparability = ("LIKE-FOR-LIKE — safe to --apply" if like
+                     else f"CROSS-FORMAT ({args.source} source vs {table_desc} table) — "
+                          "screen only, never bulk-apply")
+
+    payload = fetch_underdog() if args.source == "underdog" else fetch(args.format, args.year, args.teams)
     meta = payload["meta"]
     src_rows = payload["players"]
     vintage = f"{meta['start_date']} to {meta['end_date']}"
@@ -208,6 +281,8 @@ def main() -> int:
         k = normalize(p["name"])
         if not k:
             continue
+        # The underdog source publishes no per-player draft count, so the thin
+        # sample floor cannot apply there; it ships 9999 as a sentinel.
         (thin if p.get("times_drafted", 0) < args.min_drafts else src)[k] = p
 
     moves, unmatched, thin_hits = [], [], []
@@ -240,8 +315,9 @@ def main() -> int:
     w(f"# ADP drift report — {const_name}")
     w("")
     w(f"- **Table:** `{const_name}` ({table_desc})")
-    w(f"- **Source:** Fantasy Football Calculator `{meta['type']}`, {args.teams}-team, "
-      f"**{meta['total_drafts']:,} drafts**, {vintage}")
+    src_name = "bestballteambuilder.com" if args.source == "underdog" else "Fantasy Football Calculator"
+    drafts = f"**{meta['total_drafts']:,} drafts**, " if meta["total_drafts"] else ""
+    w(f"- **Source:** {src_name} `{meta['type']}`, {drafts}{vintage}")
     w(f"- **Comparability:** {comparability}")
     w(f"- **Matched:** {matched} of {len(entries)} table entries "
       f"({len(unmatched)} not in source, {len(thin_hits)} below the {args.min_drafts}-draft floor)")
@@ -250,8 +326,8 @@ def main() -> int:
         w(f"- **Drift:** median {mid:.1f} · mean {sum(all_deltas)/len(all_deltas):.1f} "
           f"· max {all_deltas[-1]:.1f}")
     w("")
-    if args.table != "yahoo":
-        w("> **Cross-format warning.** The source is redraft; this table is not. "
+    if not like:
+        w("> **Cross-format warning.** The source and this table are different markets. "
           "Quarterback moves are the usual false positive — best ball drafts QBs "
           "earlier by design. Apply news-driven moves, not format artifacts.")
         w("")

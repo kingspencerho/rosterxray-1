@@ -1644,3 +1644,64 @@ Strategies 2 and 3 in the client still emit bare strings and degrade to exactly 
 pre-Aug-16 behaviour (name + pick, table ADP). Only strategy 1 carries ADP.
 
 **Grades unchanged** — 7 tournaments byte-identical on the reference roster.
+
+---
+
+## ADP_DATA Fully Refreshed From a Real Best-Ball Source (Aug 16, 2026)
+
+**`bestballteambuilder.com` publishes Underdog best-ball ADP in a SERVER-RENDERED
+table.** A plain `curl` reaches it. This is the like-for-like source the Aug 15
+experiment concluded was missing, and its absence is what forced every earlier
+`--table data` decision to be a cross-format guess.
+
+**Validated before use, against nine values read off a live Underdog board:
+mean absolute error 0.00 picks, max 0.0.** Sharp Football's table parses too and
+lands at 0.66 mean — good, but bestballteambuilder is exact.
+
+`scripts/refresh-adp.py` gained `--source underdog` (now the DEFAULT) alongside
+`--source ffc`. Comparability is computed from the SOURCE/TABLE PAIR rather than
+the table alone: `underdog+data` and `ffc+yahoo` are like-for-like; anything else
+prints the cross-format warning and should not be bulk-applied.
+
+### The refresh corrected 107 values — INCLUDING SEVEN OF MY OWN BAD WRITES
+
+Every Aug 15 `ADP_DATA` application that came from the redraft source was wrong,
+all in the same direction (too early), because a redraft quote does not transfer:
+
+```
+player               written Aug 15   real Underdog   error
+rashod bateman            133.2           201.1       +67.9
+alec pierce                53.8            90.0       +36.2
+deebo samuel               97.3           127.1       +29.8
+wandale robinson           86.6           111.2       +24.6
+malik washington          153.2           174.7       +21.5
+michael pittman jr         80.8            99.4       +18.6
+jakobi lane               162.7           178.3       +15.6
+```
+
+**Deebo is the one to learn from: his real ADP of 127.1 was printed on a user
+roster screenshot that had already been graded in the same session.** The correct
+number was on screen and a redraft number was written instead. "Verified news
+driver" justified that the price MOVED; it never justified the MAGNITUDE, and the
+two were conflated.
+
+**The rule stands and is now enforceable rather than aspirational:** a number
+enters `ADP_DATA` only from a best-ball source. Before, that rule had no source to
+point at. Now it does — run the refresh.
+
+### Result
+
+```
+                     median   mean    max
+before (cross-format)   7.8    10.5   61.9   <- and directionally unreliable
+after  (like-for-like)  0.3     1.0    8.3
+```
+
+`test-alias-adp-sync` caught three surname/nickname pairs the refresh left behind
+(`tuten`, `kenny gainwell`, `stribling`) — the refresh writes the spelling its
+SOURCE prints, so aliases lag every time. Expect this on every future run.
+
+**Grades did not move** — 7 tournaments byte-identical, because the reference
+roster carries its own ADP and the roster override outranks the table. That is
+the override working, not the refresh failing to bite: it bites on plain-text
+lists and on any screenshot whose ADP the extractor could not read.

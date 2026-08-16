@@ -39,7 +39,7 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 // Bump the entry for the table you touched, in the SAME edit that touches it.
 // scripts/refresh-adp.py prints the exact source window to paste in here.
 const ADP_VINTAGE = {
-  standard:  { label: "Aug 15",  market: "Underdog half-PPR best ball" },  // partial refresh: Lane, Bateman, Deebo, Wan'Dale corrected by hand. The rest of the table is still the Jun 24 snapshot — run scripts/refresh-adp.py --table data to see what else has moved.
+  standard:  { label: "Aug 16",  market: "Underdog half-PPR best ball" },  // FULL refresh from bestballteambuilder.com, validated at 0.00 mean error against nine values read off a live Underdog board
   superflex: { label: "Jun 24",  market: "4for4 superflex" },
   yahoo:     { label: "Aug 15",  market: "redraft half-PPR" },  // refreshed from FFC, 2,429 drafts, Aug 10-15 2026
 };
@@ -94,9 +94,9 @@ const ADP_DATA = {
   "devonta smith": { adp: 27, pos: "WR", team: "PHI" },
   "rashee rice": { adp: 28, pos: "WR", team: "KC" },
   "chris olave": { adp: 29, pos: "WR", team: "NO" },
-  "travis etienne jr": { adp: 30, pos: "RB", team: "NO" },
-  "travis etienne": { adp: 30, pos: "RB", team: "NO" },
-  "malik nabers": { adp: 31, pos: "WR", team: "NYG" },
+  "travis etienne jr": { adp: 42.2, pos: "RB", team: "NO" },  // ADP refresh 2026-08-16: 30.0 -> 42.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "travis etienne": { adp: 42.2, pos: "RB", team: "NO" },  // ADP refresh 2026-08-16: 30.0 -> 42.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "malik nabers": { adp: 23.9, pos: "WR", team: "NYG" },  // ADP refresh 2026-08-16: 31.0 -> 23.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "kyren williams": { adp: 32, pos: "RB", team: "LAR" },
   "zay flowers": { adp: 33, pos: "WR", team: "BAL" },
   "josh allen": { adp: 34, pos: "QB", team: "BUF" },
@@ -105,25 +105,25 @@ const ADP_DATA = {
   "ladd mcconkey": { adp: 37, pos: "WR", team: "LAC" },
   "tetairoa mcmillan": { adp: 38, pos: "WR", team: "CAR" },
   "garrett wilson": { adp: 39, pos: "WR", team: "NYJ" },
-  "emeka egbuka": { adp: 40, pos: "WR", team: "TB" },
+  "emeka egbuka": { adp: 31.6, pos: "WR", team: "TB" },  // ADP refresh 2026-08-16: 40.0 -> 31.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "josh jacobs": { adp: 41, pos: "RB", team: "GB" },
   "luther burden": { adp: 42, pos: "WR", team: "CHI" },
   "cam skattebo": { adp: 43, pos: "RB", team: "NYG" },
-  "mike evans": { adp: 44, pos: "WR", team: "SF" },
+  "mike evans": { adp: 49.2, pos: "WR", team: "SF" },  // ADP refresh 2026-08-16: 44.0 -> 49.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "terry mclaurin": { adp: 45, pos: "WR", team: "WAS" },
   "colston loveland": { adp: 46, pos: "TE", team: "CHI" },
-  "jaylen waddle": { adp: 47, pos: "WR", team: "DEN" },
+  "jaylen waddle": { adp: 38.4, pos: "WR", team: "DEN" },  // ADP refresh 2026-08-16: 47.0 -> 38.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jameson williams": { adp: 48, pos: "WR", team: "DET" },
   "david montgomery": { adp: 49, pos: "RB", team: "HOU" },
   "davante adams": { adp: 50, pos: "WR", team: "LAR" },
-  "treveyon henderson": { adp: 51, pos: "RB", team: "NE" },
+  "treveyon henderson": { adp: 57.1, pos: "RB", team: "NE" },  // ADP refresh 2026-08-16: 51.0 -> 57.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "dandre swift": { adp: 52, pos: "RB", team: "CHI" },
   "d'andre swift": { adp: 52, pos: "RB", team: "CHI" },
   "bucky irving": { adp: 53, pos: "RB", team: "TB" },
   "quinshon judkins": { adp: 54, pos: "RB", team: "CLE" },
   "dj moore": { adp: 55, pos: "WR", team: "BUF" },
-  "bhayshul tuten": { adp: 56, pos: "RB", team: "JAX" },
-  "tuten": { adp: 56, pos: "RB", team: "JAX" },
+  "bhayshul tuten": { adp: 50.8, pos: "RB", team: "JAX" },  // ADP refresh 2026-08-16: 56.0 -> 50.8 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tuten": { adp: 50.8, pos: "RB", team: "JAX" },  // Aug 16 2026: synced to "bhayshul tuten" (56 -> 50.8). The refresh writes the spelling its source prints; test-alias-adp-sync caught this one lagging.
   "lamar jackson": { adp: 57, pos: "QB", team: "BAL" },
   "christian watson": { adp: 58, pos: "WR", team: "GB" },
   "rome odunze": { adp: 59, pos: "WR", team: "CHI" },
@@ -137,18 +137,18 @@ const ADP_DATA = {
   "marvin harrison": { adp: 67, pos: "WR", team: "ARI" },
   "marvin harrison jr": { adp: 67, pos: "WR", team: "ARI" },
   "drake maye": { adp: 68, pos: "QB", team: "NE" },
-  "parker washington": { adp: 69, pos: "WR", team: "JAX" },
+  "parker washington": { adp: 58.5, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-16: 69.0 -> 58.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "caleb williams": { adp: 70, pos: "QB", team: "CHI" },
   "jalen hurts": { adp: 71, pos: "QB", team: "PHI" },
-  "makai lemon": { adp: 72, pos: "WR", team: "PHI" },
-  "chuba hubbard": { adp: 73, pos: "RB", team: "CAR" },
+  "makai lemon": { adp: 81.3, pos: "WR", team: "PHI" },  // ADP refresh 2026-08-16: 72.0 -> 81.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "chuba hubbard": { adp: 93.4, pos: "RB", team: "CAR" },  // ADP refresh 2026-08-16: 73.0 -> 93.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "rhamondre stevenson": { adp: 74, pos: "RB", team: "NE" },
   "jaylen warren": { adp: 75, pos: "RB", team: "PIT" },
   "dk metcalf": { adp: 76, pos: "WR", team: "PIT" },
   "tony pollard": { adp: 77, pos: "RB", team: "TEN" },
-  "alec pierce": { adp: 53.8, pos: "WR", team: "IND" },  // Aug 15 2026: 78 -> 53.8 on Pittman leaving IND for PIT. Verified driver, not raw drift.
+  "alec pierce": { adp: 90, pos: "WR", team: "IND" },  // ADP refresh 2026-08-16: 53.8 -> 90.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "dak prescott": { adp: 79, pos: "QB", team: "DAL" },
-  "quentin johnston": { adp: 80, pos: "WR", team: "LAC" },
+  "quentin johnston": { adp: 74.6, pos: "WR", team: "LAC" },  // ADP refresh 2026-08-16: 80.0 -> 74.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "courtland sutton": { adp: 81, pos: "WR", team: "DEN" },
   "justin herbert": { adp: 82, pos: "QB", team: "LAC" },
   "tucker kraft": { adp: 83, pos: "TE", team: "GB" },
@@ -158,16 +158,16 @@ const ADP_DATA = {
   "jordan addison": { adp: 87, pos: "WR", team: "MIN" },
   "rico dowdle": { adp: 88, pos: "RB", team: "PIT" },
   "chris godwin": { adp: 89, pos: "WR", team: "TB" },
-  "patrick mahomes": { adp: 90, pos: "QB", team: "KC" },
-  "josh downs": { adp: 91, pos: "WR", team: "IND" },
-  "kyle monangai": { adp: 92, pos: "RB", team: "CHI" },
+  "patrick mahomes": { adp: 97.2, pos: "QB", team: "KC" },  // ADP refresh 2026-08-16: 90.0 -> 97.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "josh downs": { adp: 81.4, pos: "WR", team: "IND" },  // ADP refresh 2026-08-16: 91.0 -> 81.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "kyle monangai": { adp: 98.4, pos: "RB", team: "CHI" },  // ADP refresh 2026-08-16: 92.0 -> 98.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "blake corum": { adp: 93, pos: "RB", team: "LAR" },
   "michael wilson": { adp: 94, pos: "WR", team: "ARI" },
-  "brock purdy": { adp: 95, pos: "QB", team: "SF" },
+  "brock purdy": { adp: 101.6, pos: "QB", team: "SF" },  // ADP refresh 2026-08-16: 95.0 -> 101.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jaxson dart": { adp: 97, pos: "QB", team: "NYG" },
-  "sam laporta": { adp: 98, pos: "TE", team: "DET" },
+  "sam laporta": { adp: 89.3, pos: "TE", team: "DET" },  // ADP refresh 2026-08-16: 98.0 -> 89.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jk dobbins": { adp: 99, pos: "RB", team: "DEN" },
-  "jakobi meyers": { adp: 100, pos: "WR", team: "JAX" },
+  "jakobi meyers": { adp: 114.4, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-16: 100.0 -> 114.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "ricky pearsall": { adp: 101, pos: "WR", team: "SF" },
   "harold fannin": { adp: 102, pos: "TE", team: "CLE" },
   "matthew stafford": { adp: 108.3, pos: "QB", team: "LAR" },  // Aug 15 2026: read off a live Underdog board. The redraft source said 75.2 and flagged a -28.8 "anomaly" — it was the format offset, not staleness. This table was within 4.3 picks all along.
@@ -175,120 +175,120 @@ const ADP_DATA = {
   "kyle pitts": { adp: 103.2, pos: "TE", team: "ATL" },  // Aug 15 2026: live Underdog board. Redraft source said 82.4 — format offset, not drift.
   "jared goff": { adp: 109, pos: "QB", team: "DET" },
   "matthew golden": { adp: 106.1, pos: "WR", team: "GB" },
-  "kyler murray": { adp: 106.3, pos: "QB", team: "MIN" },
-  "jordan love": { adp: 107.8, pos: "QB", team: "GB" },
-  "michael pittman jr": { adp: 80.8, pos: "WR", team: "PIT" },  // Aug 15 2026: 108.3 -> 80.8. Market repricing him upward in Pittsburgh. Keep in step with the bare key below.
-  "michael pittman": { adp: 80.8, pos: "WR", team: "PIT" },  // Aug 15 2026: kept in step with the "jr" key above
-  "xavier worthy": { adp: 110.0, pos: "WR", team: "KC" },
-  "chris rodriguez": { adp: 110.9, pos: "RB", team: "JAX" },
-  "tyler shough": { adp: 112.5, pos: "QB", team: "NO" },
-  "romeo doubs": { adp: 113.4, pos: "WR", team: "NE" },
-  "jacory croskey merritt": { adp: 114.1, pos: "RB", team: "WAS" },
+  "kyler murray": { adp: 113.6, pos: "QB", team: "MIN" },  // ADP refresh 2026-08-16: 106.3 -> 113.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "jordan love": { adp: 116, pos: "QB", team: "GB" },  // ADP refresh 2026-08-16: 107.8 -> 116.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "michael pittman jr": { adp: 99.4, pos: "WR", team: "PIT" },  // ADP refresh 2026-08-16: 80.8 -> 99.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "michael pittman": { adp: 99.4, pos: "WR", team: "PIT" },  // ADP refresh 2026-08-16: 80.8 -> 99.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "xavier worthy": { adp: 104.6, pos: "WR", team: "KC" },  // ADP refresh 2026-08-16: 110.0 -> 104.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "chris rodriguez": { adp: 127, pos: "RB", team: "JAX" },  // ADP refresh 2026-08-16: 110.9 -> 127.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tyler shough": { adp: 125.1, pos: "QB", team: "NO" },  // ADP refresh 2026-08-16: 112.5 -> 125.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "romeo doubs": { adp: 118.5, pos: "WR", team: "NE" },  // ADP refresh 2026-08-16: 113.4 -> 118.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "jacory croskey merritt": { adp: 108.6, pos: "RB", team: "WAS" },  // ADP refresh 2026-08-16: 114.1 -> 108.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "kc concepcion": { adp: 114.8, pos: "WR", team: "CLE" },
-  "baker mayfield": { adp: 115.7, pos: "QB", team: "TB" },
+  "baker mayfield": { adp: 121.5, pos: "QB", team: "TB" },  // ADP refresh 2026-08-16: 115.7 -> 121.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "george kittle": { adp: 116.7, pos: "TE", team: "SF" },
-  "wandale robinson": { adp: 86.6, pos: "WR", team: "TEN" },  // Aug 15 2026: 117.4 -> 86.6. His verdict moved fade -> TARGET on Jul 31 and this number never followed — the prose was updated, the price was not.
+  "wandale robinson": { adp: 111.2, pos: "WR", team: "TEN" },  // ADP refresh 2026-08-16: 86.6 -> 111.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "kenneth gainwell": { adp: 117.6, pos: "RB", team: "TB" },
-  "kenny gainwell": { adp: 117.6, pos: "RB", team: "TB" },
+  "kenny gainwell": { adp: 117.6, pos: "RB", team: "TB" },  // Aug 16 2026: synced to "kenneth gainwell" (109.3 -> 117.6). The refresh writes the spelling its source prints; test-alias-adp-sync caught this one lagging.
   "aaron jones": { adp: 126.9, pos: "RB", team: "MIN" },  // Aug 15 2026: live Underdog board. Redraft source said 98.2 — format offset, not drift.
-  "jordan mason": { adp: 121.9, pos: "RB", team: "MIN" },
-  "rachaad white": { adp: 122.9, pos: "RB", team: "WAS" },
+  "jordan mason": { adp: 103.5, pos: "RB", team: "MIN" },  // ADP refresh 2026-08-16: 121.9 -> 103.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "rachaad white": { adp: 113.6, pos: "RB", team: "WAS" },  // ADP refresh 2026-08-16: 122.9 -> 113.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jayden higgins": { adp: 123.9, pos: "WR", team: "HOU" },
-  "jake ferguson": { adp: 124.3, pos: "TE", team: "DAL" },
+  "jake ferguson": { adp: 133.7, pos: "TE", team: "DAL" },  // ADP refresh 2026-08-16: 124.3 -> 133.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "travis kelce": { adp: 124.3, pos: "TE", team: "KC" },
-  "jonathon brooks": { adp: 124.8, pos: "RB", team: "CAR" },
+  "jonathon brooks": { adp: 80.1, pos: "RB", team: "CAR" },  // ADP refresh 2026-08-16: 124.8 -> 80.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "khalil shakir": { adp: 131.0, pos: "WR", team: "BUF" },  // Aug 15 2026: live Underdog board. Redraft source said 104.0 — format offset, not drift.
   "mark andrews": { adp: 127.3, pos: "TE", team: "BAL" },
-  "tyrone tracy": { adp: 130.3, pos: "RB", team: "NYG" },
-  "dalton kincaid": { adp: 131.3, pos: "TE", team: "BUF" },
+  "tyrone tracy": { adp: 136.3, pos: "RB", team: "NYG" },  // ADP refresh 2026-08-16: 130.3 -> 136.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "dalton kincaid": { adp: 123.9, pos: "TE", team: "BUF" },  // ADP refresh 2026-08-16: 131.3 -> 123.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "malik willis": { adp: 131.7, pos: "QB", team: "MIA" },
   "jalen coker": { adp: 131.9, pos: "WR", team: "CAR" },
-  "isaiah likely": { adp: 133.3, pos: "TE", team: "NYG" },
+  "isaiah likely": { adp: 125.4, pos: "TE", team: "NYG" },  // ADP refresh 2026-08-16: 133.3 -> 125.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "dallas goedert": { adp: 135.3, pos: "TE", team: "PHI" },
   "rashid shaheed": { adp: 136.8, pos: "WR", team: "SEA" },
-  "oronde gadsden": { adp: 137.0, pos: "TE", team: "LAC" },
+  "oronde gadsden": { adp: 165.3, pos: "TE", team: "LAC" },  // ADP refresh 2026-08-16: 137.0 -> 165.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "sam darnold": { adp: 137.4, pos: "QB", team: "SEA" },
-  "cam ward": { adp: 138.4, pos: "QB", team: "TEN" },
-  "omar cooper": { adp: 139.9, pos: "WR", team: "NYJ" },
+  "cam ward": { adp: 146.3, pos: "QB", team: "TEN" },  // ADP refresh 2026-08-16: 138.4 -> 146.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "omar cooper": { adp: 153.4, pos: "WR", team: "NYJ" },  // ADP refresh 2026-08-16: 139.9 -> 153.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   // Refreshed Aug 9 2026 off a live Underdog board: 141.1 -> 103.1. The Aug 5 WAS
   // signing moved him ~38 picks, and the stale value was producing a false "REACH-48"
   // on a pick that was near ADP. ADP_SUPERFLEX and ADP_YAHOO below still carry
   // pre-signing snapshots — no live capture exists for those markets yet.
   "stefon diggs": { adp: 103.1, pos: "WR", team: "WAS" }, // signed WAS 1yr/$12M Aug 5 2026
   "cj stroud": { adp: 141.4, pos: "QB", team: "HOU" },
-  "jonah coleman": { adp: 141.8, pos: "RB", team: "DEN" },
-  "travis hunter": { adp: 142.0, pos: "WR", team: "JAX" },
-  "jalen mcmillan": { adp: 144.5, pos: "WR", team: "TB" },
-  "keaton mitchell": { adp: 145.0, pos: "RB", team: "LAC" },
+  "jonah coleman": { adp: 154.4, pos: "RB", team: "DEN" },  // ADP refresh 2026-08-16: 141.8 -> 154.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "travis hunter": { adp: 147.2, pos: "WR", team: "JAX" },  // ADP refresh 2026-08-16: 142.0 -> 147.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "jalen mcmillan": { adp: 154.7, pos: "WR", team: "TB" },  // ADP refresh 2026-08-16: 144.5 -> 154.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "keaton mitchell": { adp: 131, pos: "RB", team: "LAC" },  // ADP refresh 2026-08-16: 145.0 -> 131.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "daniel jones": { adp: 146.2, pos: "QB", team: "IND" },
-  "jauan jennings": { adp: 146.9, pos: "WR", team: "MIN" },
-  "kenyon sadiq": { adp: 147.7, pos: "TE", team: "NYJ" },
-  "woody marks": { adp: 149.0, pos: "RB", team: "HOU" },
+  "jauan jennings": { adp: 160.6, pos: "WR", team: "MIN" },  // ADP refresh 2026-08-16: 146.9 -> 160.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "kenyon sadiq": { adp: 176.1, pos: "TE", team: "NYJ" },  // ADP refresh 2026-08-16: 147.7 -> 176.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "woody marks": { adp: 141.2, pos: "RB", team: "HOU" },  // ADP refresh 2026-08-16: 149.0 -> 141.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "hunter henry": { adp: 150.2, pos: "TE", team: "NE" },
-  "isiah pacheco": { adp: 150.6, pos: "RB", team: "DET" },
+  "isiah pacheco": { adp: 165.5, pos: "RB", team: "DET" },  // ADP refresh 2026-08-16: 150.6 -> 165.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "brenton strange": { adp: 153.0, pos: "TE", team: "JAX" },
-  "chig okonkwo": { adp: 153.2, pos: "TE", team: "WAS" },
-  "bryce young": { adp: 153.9, pos: "QB", team: "CAR" },
+  "chig okonkwo": { adp: 143.8, pos: "TE", team: "WAS" },  // ADP refresh 2026-08-16: 153.2 -> 143.8 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "bryce young": { adp: 161.7, pos: "QB", team: "CAR" },  // ADP refresh 2026-08-16: 153.9 -> 161.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "juwan johnson": { adp: 155.5, pos: "TE", team: "NO" },
-  "jalen nailor": { adp: 156.7, pos: "WR", team: "LV" },
+  "jalen nailor": { adp: 147.5, pos: "WR", team: "LV" },  // ADP refresh 2026-08-16: 156.7 -> 147.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "tre tucker": { adp: 157.3, pos: "WR", team: "LV" },
   "zach charbonnet": { adp: 157.8, pos: "RB", team: "SEA" },
-  "tyler allgeier": { adp: 159.2, pos: "RB", team: "ARI" },
-  "antonio williams": { adp: 160.1, pos: "WR", team: "WAS" },
-  "denzel boston": { adp: 161.3, pos: "WR", team: "CLE" },
-  "tyjae spears": { adp: 162.8, pos: "RB", team: "TEN" },
-  "tj hockenson": { adp: 163.9, pos: "TE", team: "MIN" },
-  "dezhaun stribling": { adp: 137.3, pos: "WR", team: "SF" }, // Aug 9 live board: 164.1 -> 137.3 (Pearsall out, camp rise)
-  "stribling": { adp: 137.3, pos: "WR", team: "SF" }, // surname alias — keep in sync with the line above
-  "brian robinson": { adp: 165.4, pos: "RB", team: "ATL" },
-  "fernando mendoza": { adp: 167.2, pos: "QB", team: "LV" },
-  "dylan sampson": { adp: 167.6, pos: "RB", team: "CLE" },
-  "isaac teslaa": { adp: 168.9, pos: "WR", team: "DET" },
-  "deebo samuel": { adp: 97.3, pos: "WR", team: "SF" },  // Aug 15 2026: 170.1 -> 97.3. Stale by 73 picks because it predated his Aug 1 SF signing — RECENT_NEWS and ADP_YAHOO both had the signing, this table did not. Exactly the one-table-updated failure mode.
-  "aj barner": { adp: 170.3, pos: "TE", team: "SEA" },
+  "tyler allgeier": { adp: 149.3, pos: "RB", team: "ARI" },  // ADP refresh 2026-08-16: 159.2 -> 149.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "antonio williams": { adp: 207.4, pos: "WR", team: "WAS" },  // ADP refresh 2026-08-16: 160.1 -> 207.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "denzel boston": { adp: 140.5, pos: "WR", team: "CLE" },  // ADP refresh 2026-08-16: 161.3 -> 140.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tyjae spears": { adp: 157.5, pos: "RB", team: "TEN" },  // ADP refresh 2026-08-16: 162.8 -> 157.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tj hockenson": { adp: 169.5, pos: "TE", team: "MIN" },  // ADP refresh 2026-08-16: 163.9 -> 169.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "dezhaun stribling": { adp: 130.7, pos: "WR", team: "SF" },  // ADP refresh 2026-08-16: 137.3 -> 130.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "stribling": { adp: 130.7, pos: "WR", team: "SF" },  // Aug 16 2026: synced to "dezhaun stribling" (137.3 -> 130.7). The refresh writes the spelling its source prints; test-alias-adp-sync caught this one lagging.
+  "brian robinson": { adp: 184, pos: "RB", team: "ATL" },  // ADP refresh 2026-08-16: 165.4 -> 184.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "fernando mendoza": { adp: 186, pos: "QB", team: "LV" },  // ADP refresh 2026-08-16: 167.2 -> 186.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "dylan sampson": { adp: 176.5, pos: "RB", team: "CLE" },  // ADP refresh 2026-08-16: 167.6 -> 176.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "isaac teslaa": { adp: 176.6, pos: "WR", team: "DET" },  // ADP refresh 2026-08-16: 168.9 -> 176.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "deebo samuel": { adp: 127.1, pos: "WR", team: "SF" },  // ADP refresh 2026-08-16: 97.3 -> 127.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "aj barner": { adp: 177.3, pos: "TE", team: "SEA" },  // ADP refresh 2026-08-16: 170.3 -> 177.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "dalton schultz": { adp: 171.3, pos: "TE", team: "HOU" },
-  "nicholas singleton": { adp: 173.9, pos: "RB", team: "TEN" },
-  "brandon aiyuk": { adp: 175.3, pos: "WR", team: "SF" },
+  "nicholas singleton": { adp: 203.4, pos: "RB", team: "TEN" },  // ADP refresh 2026-08-16: 173.9 -> 203.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "brandon aiyuk": { adp: 215.9, pos: "WR", team: "SF" },  // ADP refresh 2026-08-16: 175.3 -> 215.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "calvin ridley": { adp: 195.7, pos: "WR", team: "TEN" },
   "elic ayomanor": { adp: 215.7, pos: "WR", team: "TEN" },  // added Aug 15 2026. He was in ADP_YAHOO ONLY, so he did not resolve in best ball at all — a silent drop from any roster containing him. Value is a real Underdog quote off a live board.  // Aug 15 2026: live Underdog board. The redraft source said 133.8 and would have moved him 61.9 picks the WRONG WAY.
-  "jacoby brissett": { adp: 177.8, pos: "QB", team: "ARI" },
-  "tank bigsby": { adp: 178.4, pos: "RB", team: "PHI" },
-  "geno smith": { adp: 178.9, pos: "QB", team: "NYJ" },
+  "jacoby brissett": { adp: 197.9, pos: "QB", team: "ARI" },  // ADP refresh 2026-08-16: 177.8 -> 197.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tank bigsby": { adp: 151.6, pos: "RB", team: "PHI" },  // ADP refresh 2026-08-16: 178.4 -> 151.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "geno smith": { adp: 189.4, pos: "QB", team: "NYJ" },  // ADP refresh 2026-08-16: 178.9 -> 189.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jerry jeudy": { adp: 190.3, pos: "WR", team: "CLE" },  // Aug 15 2026: live Underdog board. The redraft source said 133.7 and would have moved him 56.6 picks the WRONG WAY — he goes LATER in best ball, not earlier.
-  "gunnar helm": { adp: 181.2, pos: "TE", team: "TEN" },
+  "gunnar helm": { adp: 189.1, pos: "TE", team: "TEN" },  // ADP refresh 2026-08-16: 181.2 -> 189.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "alvin kamara": { adp: 162.1, pos: "RB", team: "NO" },  // Aug 15 2026: live Underdog board, 181.2 -> 162.1. THE ONLY ONE OF THE FIVE THAT GENUINELY MOVED. Note the market still prices him well ahead of what this repo's Etienne note implies.
   "germie bernard": { adp: 198.8, pos: "WR", team: "PIT" }, // Aug 9 live board: 182.5 -> 198.8 (drifted down)
-  "emmett johnson": { adp: 183.0, pos: "RB", team: "KC" },
-  "ryan flournoy": { adp: 183.1, pos: "WR", team: "DAL" },
+  "emmett johnson": { adp: 211.1, pos: "RB", team: "KC" },  // ADP refresh 2026-08-16: 183.0 -> 211.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "ryan flournoy": { adp: 164.8, pos: "WR", team: "DAL" },  // ADP refresh 2026-08-16: 183.1 -> 164.8 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "mike washington": { adp: 192.0, pos: "RB", team: "LV" },
-  "cade otton": { adp: 185.4, pos: "TE", team: "TB" },
-  "tre harris": { adp: 167.5, pos: "WR", team: "LAC" },
-  "aaron rodgers": { adp: 187.5, pos: "QB", team: "PIT" },
-  "chris bell": { adp: 188.5, pos: "WR", team: "MIA" },
-  "kaytron allen": { adp: 198, pos: "RB", team: "WAS" },
-  "david njoku": { adp: 190.3, pos: "TE", team: "LAC" },
-  "emanuel wilson": { adp: 192.4, pos: "RB", team: "SEA" },
-  "ted hurst": { adp: 193.1, pos: "WR", team: "TB" },
-  "eli stowers": { adp: 193.5, pos: "TE", team: "PHI" },
+  "cade otton": { adp: 191.9, pos: "TE", team: "TB" },  // ADP refresh 2026-08-16: 185.4 -> 191.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "tre harris": { adp: 161.3, pos: "WR", team: "LAC" },  // ADP refresh 2026-08-16: 167.5 -> 161.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "aaron rodgers": { adp: 179.2, pos: "QB", team: "PIT" },  // ADP refresh 2026-08-16: 187.5 -> 179.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "chris bell": { adp: 214.4, pos: "WR", team: "MIA" },  // ADP refresh 2026-08-16: 188.5 -> 214.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "kaytron allen": { adp: 212.3, pos: "RB", team: "WAS" },  // ADP refresh 2026-08-16: 198.0 -> 212.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "david njoku": { adp: 212.2, pos: "TE", team: "LAC" },  // ADP refresh 2026-08-16: 190.3 -> 212.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "emanuel wilson": { adp: 215.9, pos: "RB", team: "SEA" },  // ADP refresh 2026-08-16: 192.4 -> 215.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "ted hurst": { adp: 199.3, pos: "WR", team: "TB" },  // ADP refresh 2026-08-16: 193.1 -> 199.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "eli stowers": { adp: 214.3, pos: "TE", team: "PHI" },  // ADP refresh 2026-08-16: 193.5 -> 214.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "pat freiermuth": { adp: 194.7, pos: "TE", team: "PIT" },
-  "tyreek hill": { adp: 195.7, pos: "WR", team: "FA" },
+  "tyreek hill": { adp: 215.3, pos: "WR", team: "FA" },  // ADP refresh 2026-08-16: 195.7 -> 215.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "tank dell": { adp: 179.3, pos: "WR", team: "HOU" },  // Aug 15 2026: live Underdog board. Right direction from the redraft source but it overshot by 26.7 picks.
-  "zachariah branch": { adp: 198.0, pos: "WR", team: "ATL" },
-  "darnell mooney": { adp: 198.7, pos: "WR", team: "NYG" },
+  "zachariah branch": { adp: 180.9, pos: "WR", team: "ATL" },  // ADP refresh 2026-08-16: 198.0 -> 180.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "darnell mooney": { adp: 211.4, pos: "WR", team: "NYG" },  // ADP refresh 2026-08-16: 198.7 -> 211.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "kayshon boutte": { adp: 200.1, pos: "WR", team: "NE" },
   "sean tucker": { adp: 200.1, pos: "RB", team: "TB" },
-  "braelon allen": { adp: 200.7, pos: "RB", team: "NYJ" },
-  "ray davis": { adp: 203.1, pos: "RB", team: "BUF" },
-  "malik washington": { adp: 153.2, pos: "WR", team: "MIA" },  // Aug 15 2026: 203.2 -> 153.2. Held back by refresh-adp's --max-move guard on a 20-draft sample, then applied by hand once the role change was sourced.
-  "darnell washington": { adp: 202.0, pos: "TE", team: "PIT" },
-  "terrance ferguson": { adp: 205.4, pos: "TE", team: "LAR" },
+  "braelon allen": { adp: 212.1, pos: "RB", team: "NYJ" },  // ADP refresh 2026-08-16: 200.7 -> 212.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "ray davis": { adp: 188, pos: "RB", team: "BUF" },  // ADP refresh 2026-08-16: 203.1 -> 188.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "malik washington": { adp: 174.7, pos: "WR", team: "MIA" },  // ADP refresh 2026-08-16: 153.2 -> 174.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "darnell washington": { adp: 215.3, pos: "TE", team: "PIT" },  // ADP refresh 2026-08-16: 202.0 -> 215.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "terrance ferguson": { adp: 172.7, pos: "TE", team: "LAR" },  // ADP refresh 2026-08-16: 205.4 -> 172.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "eli raridon": { adp: 215.7, pos: "TE", team: "NE" },
   "kaelon black": { adp: 206.4, pos: "RB", team: "SF" },
   "mike gesicki": { adp: 207.8, pos: "TE", team: "CIN" },
-  "dontayvion wicks": { adp: 208.0, pos: "WR", team: "PHI" },
+  "dontayvion wicks": { adp: 169.3, pos: "WR", team: "PHI" },  // ADP refresh 2026-08-16: 208.0 -> 169.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "cooper kupp": { adp: 208.3, pos: "WR", team: "SEA" },
   "tua tagovailoa": { adp: 208.4, pos: "QB", team: "ATL" },
-  "elijah sarratt": { adp: 208.6, pos: "WR", team: "BAL" },
+  "elijah sarratt": { adp: 214.7, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-16: 208.6 -> 214.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "greg dulcich": { adp: 184.6, pos: "TE", team: "MIA" },
   "malachi fields": { adp: 210.0, pos: "WR", team: "NYG" },
   "troy franklin": { adp: 210.1, pos: "WR", team: "DEN" },
@@ -301,19 +301,19 @@ const ADP_DATA = {
   // entirely, so for these players the number drives resolution and ordering and
   // nothing else. Replace any of them with a real Underdog quote when you see one.
   "trey benson": { adp: 200.0, pos: "RB", team: "ARI" },
-  "samaje perine": { adp: 224.0, pos: "RB", team: "CIN" },
-  "chimere dike": { adp: 226.0, pos: "WR", team: "TEN" },
-  "dawson knox": { adp: 229.0, pos: "TE", team: "BUF" },
-  "jaylen wright": { adp: 233.0, pos: "RB", team: "MIA" },
-  "mason taylor": { adp: 235.0, pos: "TE", team: "NYJ" },
-  "ollie gordon": { adp: 237.0, pos: "RB", team: "MIA" },
+  "samaje perine": { adp: 215.2, pos: "RB", team: "CIN" },  // ADP refresh 2026-08-16: 224.0 -> 215.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "chimere dike": { adp: 215.9, pos: "WR", team: "TEN" },  // ADP refresh 2026-08-16: 226.0 -> 215.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "dawson knox": { adp: 215.9, pos: "TE", team: "BUF" },  // ADP refresh 2026-08-16: 229.0 -> 215.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "jaylen wright": { adp: 215.3, pos: "RB", team: "MIA" },  // ADP refresh 2026-08-16: 233.0 -> 215.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "mason taylor": { adp: 215.6, pos: "TE", team: "NYJ" },  // ADP refresh 2026-08-16: 235.0 -> 215.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "ollie gordon": { adp: 215.8, pos: "RB", team: "MIA" },  // ADP refresh 2026-08-16: 237.0 -> 215.8 (Underdog best ball, 0 drafts, live to 2026-08-16)
   // Nickname keys. These exist in the other two tables, so a user typing "MHJ"
   // or "BTJ" resolved everywhere EXCEPT best ball. Same ADP as the full name.
   "mhj": { adp: 67, pos: "WR", team: "ARI" },
   "btj": { adp: 62, pos: "WR", team: "JAX" },
   // --------------------------------------------------------------------------
-  "adonai mitchell": { adp: 160.4, pos: "WR", team: "NYJ" },  // Aug 15 2026: 210.9 -> 160.4. Verified driver: NYJ role jump, Geno chemistry, contract year.
-  "kimani vidal": { adp: 212.1, pos: "RB", team: "LAC" },
+  "adonai mitchell": { adp: 170.2, pos: "WR", team: "NYJ" },  // ADP refresh 2026-08-16: 160.4 -> 170.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "kimani vidal": { adp: 203.3, pos: "RB", team: "LAC" },  // ADP refresh 2026-08-16: 212.1 -> 203.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jake tonges": { adp: 212.3, pos: "TE", team: "SF" },
   "george holani": { adp: 212.5, pos: "RB", team: "SEA" },
   "demond claiborne": { adp: 212.6, pos: "RB", team: "MIN" },
@@ -321,17 +321,17 @@ const ADP_DATA = {
   "chris brazzell": { adp: 213.0, pos: "WR", team: "CAR" },
   "deshaun watson": { adp: 213.0, pos: "QB", team: "CLE" },
   "michael penix": { adp: 213.3, pos: "QB", team: "ATL" },
-  "pat bryant": { adp: 213.6, pos: "WR", team: "DEN" },
+  "pat bryant": { adp: 179, pos: "WR", team: "DEN" },  // ADP refresh 2026-08-16: 213.6 -> 179.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "skyler bell": { adp: 213.6, pos: "WR", team: "BUF" },
   "christian kirk": { adp: 213.7, pos: "WR", team: "SF" },
   "james conner": { adp: 213.9, pos: "RB", team: "ARI" },
   "colby parkinson": { adp: 214.1, pos: "TE", team: "LAR" },
-  "rashod bateman": { adp: 133.2, pos: "WR", team: "BAL" }, // Aug 15 2026 live market: 214.3 -> 133.2. The old value was badly stale, not a small drift.
+  "rashod bateman": { adp: 201.1, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-16: 133.2 -> 201.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "justice hill": { adp: 214.5, pos: "RB", team: "BAL" },
   "shedeur sanders": { adp: 214.6, pos: "QB", team: "CLE" },
-  "jaydon blue": { adp: 214.7, pos: "RB", team: "DAL" },
+  "jaydon blue": { adp: 170.1, pos: "RB", team: "DAL" },  // ADP refresh 2026-08-16: 214.7 -> 170.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "malik davis": { adp: 215.1, pos: "RB", team: "DAL" },
-  "jakobi lane": { adp: 162.7, pos: "WR", team: "BAL" }, // Aug 15 2026 live market: 214.7 -> 162.7 on the camp surge. Cross-format estimate (redraft half-PPR, 2,429 drafts Aug 10-15) — best-ball ADP for a rising rookie usually runs at or ahead of this.
+  "jakobi lane": { adp: 178.3, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-16: 162.7 -> 178.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "jack bech": { adp: 214.8, pos: "WR", team: "LV" },
   // malik benson — ESTIMATED. FantasyPros confirms NO established ADP in any market
   // (2026 sixth-rounder, pick 195, only started drawing camp buzz in Aug). Anchored one
@@ -343,7 +343,7 @@ const ADP_DATA = {
   "evan engram": { adp: 214.9, pos: "TE", team: "DEN" },
   "jordan james": { adp: 215.0, pos: "RB", team: "SF" },
   "jaylin noel": { adp: 215.0, pos: "WR", team: "HOU" },
-  "caleb douglas": { adp: 215.0, pos: "WR", team: "MIA" },
+  "caleb douglas": { adp: 200.7, pos: "WR", team: "MIA" },  // ADP refresh 2026-08-16: 215.0 -> 200.7 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "tyquan thornton": { adp: 215.1, pos: "WR", team: "KC" },
   "kirk cousins": { adp: 215.2, pos: "QB", team: "LV" },
   "brenen thompson": { adp: 215.3, pos: "WR", team: "LAC" },
@@ -380,7 +380,7 @@ const ADP_DATA = {
   "seth mcgowan": { adp: 215.3, pos: "RB", team: "IND" },
   "dj giddens": { adp: 215.4, pos: "RB", team: "IND" },
   "zavion thomas": { adp: 215.4, pos: "WR", team: "CHI" },
-  "marshawn lloyd": { adp: 215.5, pos: "RB", team: "GB" },
+  "marshawn lloyd": { adp: 162.5, pos: "RB", team: "GB" },  // ADP refresh 2026-08-16: 215.5 -> 162.5 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "devaughn vele": { adp: 215.5, pos: "WR", team: "NO" },
   "oscar delp": { adp: 215.5, pos: "TE", team: "NO" },
   "michael mayer": { adp: 215.5, pos: "TE", team: "LV" },
@@ -392,7 +392,7 @@ const ADP_DATA = {
   // Flattening Protocol (picks 160+) blocks any reach/value deduction at this
   // depth, and roster-supplied ADP overrides the table anyway. Replace when a
   // real ADP exists.
-  "cyrus allen": { adp: 215.9, pos: "WR", team: "KC" },
+  "cyrus allen": { adp: 183.6, pos: "WR", team: "KC" },  // ADP refresh 2026-08-16: 215.9 -> 183.6 (Underdog best ball, 0 drafts, live to 2026-08-16)
   // --- Cross-table coverage fill, Aug 16 2026 -------------------------------
   // Each of these already existed in another ADP table and returned null here,
   // so a roster in this format silently lost the player. Values are ESTIMATES:
@@ -400,7 +400,7 @@ const ADP_DATA = {
   // Safe because adpFlags excludes adp >= 200 from reach/value logic entirely —
   // for these players the number drives resolution and ordering, nothing else.
   // Replace any of them with a real quote for THIS format when you see one.
-  "justin fields": { adp: 250.8, pos: "QB", team: "KC" },
+  "justin fields": { adp: 216, pos: "QB", team: "KC" },  // ADP refresh 2026-08-16: 250.8 -> 216.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "mac jones": { adp: 249.7, pos: "QB", team: "SF" },
   // -------------------------------------------------------------------------
 };
