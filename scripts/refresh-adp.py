@@ -17,10 +17,22 @@ THE ONE RULE: REPORT BY DEFAULT, NEVER AUTO-APPLY.
     you read. It only edits App.jsx when you pass --apply, and even then it
     refuses moves it cannot justify (see --max-move and --min-drafts).
 
-FORMAT MISMATCH — READ THIS BEFORE TRUSTING A NUMBER
-    The source (Fantasy Football Calculator) is REDRAFT. ADP_DATA is UNDERDOG
-    BEST BALL. They are different markets, and some of the gap this reports is
-    format, not staleness:
+TWO SOURCES. PAIR THEM WITH THE RIGHT TABLE.
+    --source underdog  (DEFAULT)  bestballteambuilder.com, real Underdog BEST
+                                  BALL ADP, server-rendered so curl reaches it.
+                                  Validated Aug 16 2026 at 0.00 mean absolute
+                                  error against nine values read off a live
+                                  Underdog board. LIKE-FOR-LIKE with ADP_DATA.
+    --source ffc                  Fantasy Football Calculator, REDRAFT.
+                                  LIKE-FOR-LIKE with ADP_YAHOO only.
+
+    Only underdog+data and ffc+yahoo are like-for-like; the script computes that
+    from the pair and prints a warning banner for anything else.
+
+FORMAT MISMATCH — WHY MIXING THEM IS NOT A SMALL ERROR
+    Everything below was measured with the REDRAFT source against ADP_DATA, i.e.
+    the wrong pairing. It is kept because the failure is instructive and because
+    --source ffc --table data is still a command someone can type:
 
       - Best ball drafts QUARTERBACKS EARLIER (2-3 per roster, no streaming).
         A QB showing "+40" here is usually correct behavior, not decay.
@@ -61,28 +73,40 @@ FORMAT MISMATCH — READ THIS BEFORE TRUSTING A NUMBER
        which is exactly where a wrong number does the most damage because
        nothing else anchors the price.
 
-    CONCLUSION: --table data is a SCREEN FOR WHICH PLAYERS TO GO LOOK UP, and
-    nothing more. A number only goes into ADP_DATA with a real best-ball
-    quote or a sourced news driver behind it. Never bulk-apply this table.
+    THE SEQUEL, AND THE REASON THE DEFAULT CHANGED. On Aug 15 seven values were
+    written into ADP_DATA from the redraft source anyway, each with a real news
+    driver behind it. A driver justifies that a price MOVED; it never justifies
+    the MAGNITUDE. All seven were too early, and the Aug 16 like-for-like refresh
+    corrected them:
 
-    So: --table yahoo is a LIKE-FOR-LIKE comparison (redraft vs redraft) and
-    can be applied with confidence. --table data is CROSS-FORMAT and should be
-    treated as a directional signal — apply news-driven moves, not QB noise.
+      bateman 133.2->201.1  pierce 53.8->90.0  deebo 97.3->127.1
+      wandale 86.6->111.2   washington 153.2->174.7
+      pittman 80.8->99.4    lane 162.7->178.3
+
+    Deebo's real 127.1 was printed on a roster screenshot graded in the same
+    session. The right number was on screen and a redraft number went in.
+
+    CONCLUSION: with --source ffc, --table data is a SCREEN FOR WHICH PLAYERS TO
+    GO LOOK UP and nothing more — never bulk-apply it, and do not let a news
+    driver talk you into the number. With the default --source underdog it is
+    like-for-like and safe.
 
 USAGE
-    python3 scripts/refresh-adp.py                        # report, ADP_DATA
-    python3 scripts/refresh-adp.py --table yahoo          # report, redraft table
-    python3 scripts/refresh-adp.py --format ppr           # different source format
-    python3 scripts/refresh-adp.py --table yahoo --apply  # write it
-    python3 scripts/refresh-adp.py --out drift.md         # save the report
+    python3 scripts/refresh-adp.py                              # best ball, report
+    python3 scripts/refresh-adp.py --apply                      # best ball, write it
+    python3 scripts/refresh-adp.py --source ffc --table yahoo   # redraft, report
+    python3 scripts/refresh-adp.py --source ffc --table yahoo --apply
+    python3 scripts/refresh-adp.py --out drift.md               # save the report
 
     After --apply you MUST mirror and test:
         cp App.jsx App.jsx.jsx && npm test
 
-SOURCE
-    https://fantasyfootballcalculator.com/api/v1/adp/<format>?teams=12&year=<year>
-    Free, no auth. Returns a meta block with the exact draft-date window, so
-    the vintage is always knowable rather than assumed.
+SOURCES
+    underdog: https://www.bestballteambuilder.com/underdog-best-ball-average-draft-position
+              Server-rendered HTML table. No auth, no browser needed.
+    ffc:      https://fantasyfootballcalculator.com/api/v1/adp/<format>?teams=12&year=<year>
+              Free JSON, no auth, and it returns the exact draft-date window so
+              the vintage is knowable rather than assumed.
 """
 
 import argparse
