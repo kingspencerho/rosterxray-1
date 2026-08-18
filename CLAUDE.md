@@ -1705,3 +1705,50 @@ SOURCE prints, so aliases lag every time. Expect this on every future run.
 roster carries its own ADP and the roster override outranks the table. That is
 the override working, not the refresh failing to bite: it bites on plain-text
 lists and on any screenshot whose ADP the extractor could not read.
+
+---
+
+## Prose Entries Are Model Input, Not a Changelog (fixed Aug 16, 2026)
+
+**The Diggs "unsigned" bug came back, and the entry written to prevent it was the
+cause.** That entry quoted the wrong claim to make the correction vivid:
+
+> "...told a user Diggs was `'unsigned and effectively retired per current data'`
+> in the same output where the app listed him as WR-WAS"
+
+Production nutshell, weeks later:
+
+> "Stefon Diggs being listed as **unsigned and effectively retired per recent
+> news** is a genuine structural gap in that stack's WR corps."
+
+**The model lifted the quoted phrase and inverted the attribution** — "per recent
+news" — while the news block two lines above said the opposite. The data was in
+the prompt and correct. The correction became the source of the error.
+
+This is the same shape already recorded for Stribling (an out player named inside
+a present-tense depth chart). It recurs because writing "here is what the old note
+got wrong" feels like diligence. **`SITUATIONS.trendNote` and `RECENT_NEWS` are
+pasted verbatim into the AI prompt. Anything in them is quotable.**
+
+### The rule
+- Write entries **affirmatively, present tense, about what is true now**.
+- **Never quote a superseded claim.** Never narrate what a previous version of the
+  entry said. Never phrase past unavailability so it can read as current.
+- Correction history goes in **CLAUDE.md and the commit message** — humans read
+  those, the model does not.
+
+`scripts/test-no-quoted-negations.mjs` (guard 12) fails the build on either
+pattern. It found **15 entries** on first run, all written in the same week.
+
+### Also found and fixed
+A dead `"ja'kobi lane"` VERDICTS row still read **HARD FADE** while `"jakobi lane"`
+read TARGET. `normalize()` strips apostrophes, so the key was unreachable — but it
+is the duplicate-key trap in a table no guard covers. Deleted.
+
+### The stale-article trap (same session)
+A search for preseason injuries returned "Buccaneers RB Rachaad White suffers
+groin injury." **White is a Commander in 2026.** The result was undated content
+from his Tampa era, and a Sean Tucker stat line came from the same game. Both were
+discarded. **Search summaries do not carry dates — check any player-team claim
+against `ADP_DATA` before writing it, exactly as the Aug 8 metrics-team rule
+requires.**
