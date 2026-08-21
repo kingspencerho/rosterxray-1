@@ -1752,3 +1752,94 @@ from his Tampa era, and a Sean Tucker stat line came from the same game. Both we
 discarded. **Search summaries do not carry dates — check any player-team claim
 against `ADP_DATA` before writing it, exactly as the Aug 8 metrics-team rule
 requires.**
+
+---
+
+## Underdog Superflex "ADP" Is a RANK, Not a Market (found Aug 20, 2026)
+
+`ADP_SUPERFLEX` was refreshed from a screen recording of the user's own Underdog
+superflex draft board — 174 players, ADP 2-239. It is the first like-for-like
+superflex source this app has ever had. But the headline finding is about what
+that column IS, not what it says.
+
+**All 173 parsed values are whole integers, and each integer is used exactly
+once.** A measured average across real drafts essentially never does that; it
+produces 12.4, 178.3. `ADP_DATA` demonstrates the contrast — 186 of its first 400
+rows carry decimals, because those came from a real market.
+
+So the superflex column is a **projected ordering Underdog seeds the format with,
+not a measurement.** Consistent with The Field General 2 sitting at 5.2% fill
+(1,777 of 33,984 entrants ≈ 148 completed drafts) when the recording was made.
+
+### What this means for the ADP delta rule
+Reach/value flags in **superflex** compare the user's pick against a number nobody
+is drafting to. They are directional only until the format fills. The delta logic
+is not wrong; its input is a projection. Say so when reporting superflex
+reach/value, and prefer RANGES over point estimates in superflex advice.
+
+### The structural offset — decompose before calling anything a market signal
+Measured across 173 players, live superflex minus the Aug 16 `ADP_DATA` board:
+
+```
+QB   n=29   median  -86.0        RB   n=50   median  +13.0
+WR   n=63   median  +28.0        TE   n=30   median   +9.5
+```
+
+The WR push is **not flat** — it compresses late, once the QB run is over:
+
+```
+standard ADP band    median WR offset
+    0- 50   +31.0        100-150   +26.5        200-300   +17.6
+   50-100   +35.0        150-200   +16.3
+```
+
+An earlier header in this file quoted a flat "+16 non-QB / -61 QB" baseline. That
+was directionally right and materially off. Use the banded table.
+
+**Worked example:** Ja'Kobi Lane, standard 178.3, superflex 221 — a +42.7 offset
+where his band expects +15.0, so **+27.7 excess**. His BAL teammates land exactly
+on their norms (Bateman +5.9, Flowers 0.0), which is what makes it a real signal
+rather than uniform staleness: the players whose standard price moved recently are
+the ones the superflex projection has not absorbed.
+
+### Reading video into data (scripts were throwaway — this is the method)
+`get_file_metadata` confirms access; download via a plain `curl` to
+`drive.usercontent.google.com/download?id=...&export=download&confirm=t` rather
+than the MCP `download_file_content`, which returns base64 into the context window
+(33MB would blow it). Then `ffmpeg -vf "fps=1/0.5,crop=..."` and `tesseract --psm 6`.
+
+**TWO OCR ERROR CLASSES THAT NEED OPPOSITE FIXES — this is the part worth keeping:**
+
+1. **Leading-digit truncation.** Braelon Allen read `211.0` / `21.0` / `2.0` across
+   four frames. Naively he enters at ADP 21 as an RB5 — an apparent 165-pick market
+   move that never happened. Truncation only ever makes a number smaller.
+2. **Digit misreads.** CeeDee Lamb read `26` and `96`; Jeanty `23` and `93`. A
+   max-rule "fix" for (1) moves both ~70 picks the WRONG way.
+
+**The arbiter that resolves both is the list's own sort order.** Each frame shows
+~11 contiguous rows of an ADP-sorted board, so every value in a frame must sit near
+that frame's median; anything outside is dropped. That single rule produced **zero
+monotonicity violations** across 174 rows, and resolved Lamb to 26 (independently
+corroborated by FFC's 2QB board), Jeanty to 23, Braelon to 211.
+
+### Alias sweep: surname matching is NOT sufficient here
+`test-alias-adp-sync` pairs keys by SURNAME, so it cannot see short-code aliases.
+The refresh moved `christian mccaffrey` 8 -> 14 and left `cmc` at 8, and the guard
+stayed green. Found by enumerating every single-token key in the table against its
+pos+team group. `cmc`, `jsn`, `arsb`, `btj`, `mhj`, `achane`, `stribling`,
+`heidenreich` are the current set. **After any superflex refresh, check them by
+hand.** (`mhj` and `btj` were already drifting before this refresh; both synced.)
+
+### ⚠️ This table is now MIXED VINTAGE
+178 values are Aug 20; **116 keys keep their Jun 24 values** because the recording
+did not reach them, 109 of those inside the draftable range (<=240) — including
+Josh Allen, Ja'Marr Chase, JSN, ARSB, Jonathan Taylor, Burrow and Jayden Daniels.
+`ADP_VINTAGE.superflex` is stamped `"Aug 20 (partial)"` for exactly this reason.
+**Do not print it as a clean date.** A second recording covering the gaps would
+close this out.
+
+### Calibration — standard formats did not move
+```
+STANDARD mode, table-driven, 7 tournaments: byte-identical before and after
+SUPERFLEX mode: scores moved (intended), no letter grade changed
+```
