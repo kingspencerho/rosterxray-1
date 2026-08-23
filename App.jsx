@@ -871,6 +871,34 @@ const TOURNAMENTS = {
   // small field, so best-player-available beats contrarian differentiation.
   boxer: { name: "The Boxer", entries: "6.2k", weights: [1, 0.75, 2.5], advanceWeight: 0.75, note: "Softest gates anywhere (R1 4/12, W15 2/5, W16 2/4) — reaching the 416-seat final is 1-in-15, but surviving pays $9 on an $18 entry. Everything is W17 placement: top ten take 49.7% of the pool. Small field, so draft best-available over correlation. Max 3 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
+  // The Field General 2 (2026 SUPERFLEX season, read off the in-app rules Aug 21 2026).
+  // $10 entry · 33,984 entries · $300k prizes · 11.7% rake · 20 rounds · 12-man
+  // drafts · SUPERFLEX (QB1/RB2/WR2/TE1/FLEX1/SFLEX1/BENCH12) · max 150 entries.
+  //
+  //   R1  W1-14   2,832 x 12   3 advance (25.0%)   33,984 -> 8,496
+  //   R2  W15       708 x 12   2 advance (16.7%)    8,496 -> 1,416
+  //   R3  W16       118 x 12   1 advance ( 8.3%)    1,416 ->   118
+  //   R4  W17   one 118-seat final, all paid
+  //
+  // W16 IS THE KILL SHOT AND IT IS EXACTLY TWICE AS HARD AS W15. At 1-of-12 it
+  // ties BBM VII's W16 as the second-hardest weekly gate on this board, and every
+  // other format except the Frenchie makes W15 the tighter cut. Hence W16 at max
+  // and W15 at 1.5, matching Pit Bull's identically-sized 16.7% W15.
+  //
+  // W17 gets 1.75 rather than the 2 the other finals carry, because THIS PRIZE
+  // CURVE IS THE FLATTEST ON THE BOARD: only 45.4% of the pool reaches the 118
+  // finalists (Pit Bull 77.5%, Puppy 75.6%), 1st is 16.7%, and $163,666 — 54.6%
+  // of the pool — is paid to entries eliminated before the final.
+  //
+  // advanceWeight 1.5 nets two opposing facts: the R1 gate is SOFT (3-of-12, the
+  // most forgiving qualifier here besides the Boxer's), but 21.2% of the pool
+  // ($63,720) is paid to entries that clear it and then lose in W15 — the largest
+  // share any format pays for surviving the qualifying round alone. Clearing R1
+  // returns $15 on a $10 entry, the only profitable qualifier on the board.
+  //
+  // 33,984 entries is MID-FIELD by the Field Size Overlay, so it is deliberately
+  // NOT in the bbm7/puppy uniqueness-leverage branch.
+  fieldgeneral: { name: "The Field General 2", entries: "34k", weights: [1.5, 2, 1.75], advanceWeight: 1.5, note: "SUPERFLEX. W16 is a 1-of-12 kill shot, exactly twice as hard as W15 — the inverse of every format except the Frenchie. Flattest prize curve here: only 45.4% of the pool reaches the 118-seat final and 54.6% is paid to entries that never get there, so clearing the soft 3-of-12 qualifier already turns a profit", format: "superflex" },
   superflex: { name: "Superflex League", entries: "12-team", weights: [1, 1, 1], note: "2 QBs required · QB scarcity is real · draft accordingly", format: "superflex" },
 };
 
@@ -3796,6 +3824,27 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (w17Elite.length >= 1) {
       strengths.push(`${w17Elite.length} stack(s) live for the 131-seat final — the smallest final on the board, and 1st alone is 30% of the pool`);
+    }
+  } else if (tournamentKey === "fieldgeneral") {
+    // The Field General 2: W16 is 1-of-12, exactly twice as hard as the 2-of-12
+    // W15 and tied with BBM VII for the second-hardest weekly gate on this board.
+    // Like the Frenchie this branch does NOT treat W15 as the tight cut, because
+    // here it is not. W17 is flagged more softly than in the other finals: the
+    // 118-seat final holds only 45.4% of the pool, so arriving is worth real money
+    // ($199 on a $10 entry) but the curve above it is shallower than Pit Bull's.
+    const w15Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) built for the W16 kill shot — 1-of-12 here, exactly twice as hard as W15`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears the W16 gate — W16 is 1-of-12 in this format and eliminates eleven of every twelve survivors, so a W15-built roster dies one week later`);
+    }
+    if (w15Elite.length >= 1 && w16Elite.length >= 1) {
+      strengths.push(`Stacks live in BOTH W15 and W16 — you have to clear the 2-of-12 and then the 1-of-12 back to back`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 118-seat final — 1st alone is 16.7% of the pool`);
     }
   } else if (tournamentKey === "boxer") {
     // The Boxer: softest gates anywhere (33.3 / 40.0 / 50.0), so survival is

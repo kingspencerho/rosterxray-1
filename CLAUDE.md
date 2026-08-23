@@ -1843,3 +1843,74 @@ close this out.
 STANDARD mode, table-driven, 7 tournaments: byte-identical before and after
 SUPERFLEX mode: scores moved (intended), no letter grade changed
 ```
+
+---
+
+## The Field General 2 — added Aug 21, 2026
+
+Ninth tournament in `TOURNAMENTS`, key `fieldgeneral`, and **the first SUPERFLEX config on the
+board.** Read off the in-app rules. $10 · 33,984 entries · $300k · 11.7% rake · **20 rounds** ·
+12-man drafts · QB1/RB2/WR2/TE1/FLEX1/**SFLEX1**/BENCH12 · max 150 entries · closes 9/9/26.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 | W1-14 | 2,832 x 12 | 3 (25.0%) | 33,984 → 8,496 |
+| R2 | W15 | 708 x 12 | 2 (16.7%) | 8,496 → 1,416 |
+| R3 | W16 | 118 x 12 | **1 (8.3%)** | 1,416 → 118 |
+| R4 | W17 | one 118-seat group | 1 grand prize, all paid | 118 → 1 |
+
+P(reach final) = **0.347%**, one in 288.
+
+### W16 is the kill shot — the second W16-inverted format here
+
+At **1-of-12 it ties BBM VII's W16** as the second-hardest weekly gate anywhere, and it is
+**exactly twice as hard as its own W15**. Every format except the Frenchie 13 makes W15 the
+tighter cut; this one does not. Weights `[1.5, 2, 1.75]` — W16 at max, W15 matching Pit Bull's
+identically-sized 16.7% gate.
+
+### W17 gets 1.75, not the 2 every other final carries
+
+**This prize curve is the flattest on the board.** Only **45.4% of the pool reaches the 118
+finalists** (Pit Bull 77.5%, Puppy 75.6%), 1st is 16.7%, and **$163,666 — 54.6% of the pool — is
+paid to entries eliminated before the final.** Arriving is still worth 20x ($199 on $10), but the
+curve above it is shallower than any other format's, so W17 placement is worth proportionally less.
+
+### advanceWeight 1.5 nets two opposing facts
+
+The R1 gate is **soft** — 3-of-12 is the most forgiving qualifier here besides the Boxer's — which
+argues down. But **21.2% of the pool ($63,720) is paid to entries that clear R1 and then lose in
+W15**, the largest share any format pays for surviving the qualifying round alone, and clearing it
+returns **$15 on a $10 entry — the only profitable qualifier on this board** (the Boxer's loses
+money, the Frenchie's breaks even). Those roughly cancel to the standard 1.5.
+
+### Complete ladder across all five group-stage formats
+
+```
+                 weights        gates W15/W16   P(final)   advanceWeight   to finalists
+BBM VII       [2,    2,    1.5]   7.1 / 8.3      0.099%        1.75           70.2%*
+Field General [1.5,  2,    1.75] 16.7 / 8.3      0.347%        1.5            45.4%
+Puppy 3       [2,    1.5,  2]    10.0 / 20.0     0.333%        1.5            75.6%
+Pit Bull 2    [1.5,  1.25, 2]    16.7 / 20.0     0.556%        1.5            77.5%
+Schnauzer     [1.25, 1,    2]    20.0 / 25.0       —           1.5              —
+Frenchie 13   [1.25, 2,    2]    33.3 / 16.7       —           1.25             —
+Boxer         [1,    0.75, 2.5]  40.0 / 50.0     6.67%         0.75             —
+```
+\* BBM's figure is share of the playoff pool; it also pays a separate regular-season pool.
+
+**Field General and the Frenchie are the only two W16-inverted formats.** Field General's is the
+harsher of the two by exactly 2x.
+
+### Other notes
+- **33,984 is MID-FIELD** by the Field Size Overlay (10k-100k), same bucket as Schnauzer and Pit
+  Bull, so it is deliberately **NOT** in the `bbm7 || puppy` uniqueness-leverage branch.
+- `format: "superflex"` — the only non-standard entry besides the generic `superflex` league.
+  20 rounds and a mandatory second QB slot every week.
+- The scoring branch flags W15 and W16 separately, plus a **strength for stacks live in BOTH**
+  (you must clear 2-of-12 then 1-of-12 consecutively) and a softer W17 flag than the other finals.
+- Dropdown order preserved: General / BBM VII / The Puppy 3 stay the top three; `fieldgeneral` is
+  inserted immediately before the generic `superflex` entry.
+
+### Calibration — nothing else moved
+```
+8 pre-existing tournaments, standard reference roster: BYTE-IDENTICAL before and after
+```
