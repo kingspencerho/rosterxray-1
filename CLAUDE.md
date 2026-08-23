@@ -1914,3 +1914,65 @@ harsher of the two by exactly 2x.
 ```
 8 pre-existing tournaments, standard reference roster: BYTE-IDENTICAL before and after
 ```
+
+---
+
+## Competitive Balance Elevation Lived in Four Places (fixed Aug 23, 2026)
+
+Section 4's Competitive Balance Elevation — two evenly-matched offenses in a tight game
+elevate BOTH ceilings — was implemented **three times with three different thresholds**, and a
+fourth consumer applied it **not at all**.
+
+| Site | Feeds | Threshold | Tier strings |
+|---|---|---|---|
+| stack grading loop | `stackGrades` | `\|sp\|<=3` + `total>=46` + `score<=2` | via `tierFromScore` |
+| orphan/partial loop | orphan matchups | same | **hand-rolled** `"Even"`/`"Hard"` |
+| `matchupScoreFor` | Best Playoff Window panel, pivot rankings | **none** | — |
+| redraft path | `analyzeRedraft` | `\|sp\|<=3` + **`total>=49`** | inline |
+
+**The hand-rolled tier strings are the same divergence class fixed for the high-pace boost on
+Aug 14** — a boost that updates `score` without routing through `tierFromScore` produces a label
+that disagrees with the number driving the grade.
+
+**`matchupScoreFor` skipping the rule was the live bug.** It drives the Best Playoff Window panel
+and the pivot rankings, so the panel could rank a player *below* the stack grade of the same
+player in the same week. Now unified in `competitiveBalanceBoost(m, opp, wkIdx)`, defined
+directly under `tierFromScore`. **Change that function or none of them.**
+
+### The redraft site is deliberately left alone
+`analyzeRedraft` uses `total >= 49` and its comment block contradicts its own code in two places
+(header says `>=46`, next line says `|spread| <= 2` and `>= 49`, code says `<= 3` and `>= 49`).
+It is a different mode with its own calibration and moving it would shift redraft grades, so it
+stays until someone re-calibrates redraft on purpose. **The comment is still wrong — fix the
+comment before trusting it.**
+
+### Do NOT loosen these thresholds to make a team grade better
+```
+|spread| <= 3   a genuine pick'em, not a projected blowout
+total   >= 46   the framework says ELITE OFFENSES; total is the proxy. A tight game
+                with a low total is competitive but not a shootout — PHI's W16 vs HOU
+                sits at 41.5 precisely because the PHI defense suppresses scoring.
+score   <= 2    only rescues Hard/Avoid. A neutral matchup is not a wall.
+```
+SF 2026 is the worked example and shows the rule behaving correctly in both directions:
+W15 @LAC (2.5 / 47.5) and W16 @KC (2.5 / 46.5) both boost Hard -> Even; **W17 vs PHI misses by
+half a point** (1.5 / 45.5) and correctly does not boost.
+
+### ⚠️ When quoting tiers to a user, quote the BOOSTED number
+`getMatchupTier` returns the RAW tier. The boost is applied by callers. Any ad-hoc probe that
+calls `getMatchupTier` directly and prints the result is showing pre-boost values and will
+understate every player in a pick'em game — which is exactly what happened when SF pieces were
+repeatedly reported as `Hard/Hard/Avoid` when the engine was scoring them `Even/Even/Avoid`.
+
+### Open question, deliberately not decided here
+The boost caps at 3, so a wall can be lifted to neutral and never further. The framework text
+says competitive balance "elevates BOTH ceilings," which arguably supports letting an elite
+offense in a shootout reach Good. Raising the cap WOULD move grades and needs its own
+calibration run — it is a data decision, not a cleanup.
+
+### Calibration — nothing moved
+```
+STANDARD ref (7 tournaments) · pick-2 superflex (3 formats) · pick-11 hyper-fragile (3 formats)
+ALL BYTE-IDENTICAL before and after. Expected: two sites already agreed, and the third
+feeds display panels rather than the score.
+```
