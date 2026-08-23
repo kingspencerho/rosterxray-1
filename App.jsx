@@ -2883,6 +2883,38 @@ const tierFromScore = (score) => {
   return { tier: "Avoid", color: "wall" };
 };
 
+// Competitive Balance Elevation, in ONE place. Section 4 of the framework: two
+// evenly-matched offenses in a tight game elevate BOTH ceilings, because more
+// possessions and higher pace create ceiling that raw defensive FPA undersells.
+//
+// THIS RULE USED TO LIVE IN THREE PLACES WITH THREE DIFFERENT THRESHOLDS, and a
+// fourth consumer skipped it. The stack grader and the orphan grader both used
+// |spread| <= 3 / total >= 46 but built their tier strings differently — the same
+// divergence class fixed for the high-pace boost on Aug 14. `matchupScoreFor`,
+// which drives the Best Playoff Window panel and the pivot rankings, applied no
+// boost at all, so the panel could rank a player below a stack grade of the very
+// same player in the very same week. Change this function or none of them.
+//
+// The thresholds are deliberately conservative and should not be loosened to make
+// a particular team grade better:
+//   |spread| <= 3   a genuine pick'em, not a projected blowout
+//   total >= 46     the framework says ELITE OFFENSES, and the total is the proxy.
+//                   A tight game with a low total is competitive but not a shootout
+//                   (PHI's W16 vs HOU sits at 41.5 for exactly this reason).
+//   score <= 2      only rescues Hard/Avoid. An already-neutral matchup is not a
+//                   wall, so it needs no rescue, and boosting it would erase tier
+//                   variety across the board.
+// The cap at 3 means this can lift a wall to neutral and never further.
+const competitiveBalanceBoost = (m, opp, wkIdx) => {
+  const wk = [15, 16, 17][wkIdx];
+  if (!wk || !m || m.score > 2) return m;
+  const oppClean = String(opp).replace("@", "").trim().toUpperCase();
+  const g = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(x => x.away === oppClean || x.home === oppClean);
+  if (!g || Math.abs(g.spread) > 3 || g.total < 46) return m;
+  const boosted = Math.min(m.score + 1, 3);
+  return { ...m, ...tierFromScore(boosted), score: boosted, competitiveBoost: true };
+};
+
 // ============ TRUNCATION-TOLERANT JSON PARSE ============
 // The grading response is one JSON object whose fields arrive in a fixed order,
 // `nutshell` first. When the model hits max_tokens the tail is cut off mid
@@ -3258,10 +3290,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         const wk = [15, 16, 17][wkIdx];
         const oppClean = opp.replace("@", "").trim().toUpperCase();
         const gameData = wk ? (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean) : null;
-        if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 46 && m.score <= 2) {
-          const boostedScore = Math.min(m.score + 1, 3);
-          m = { ...m, ...tierFromScore(boostedScore), score: boostedScore, competitiveBoost: true };
-        }
+        m = competitiveBalanceBoost(m, opp, wkIdx);
         // High-Pace Target games (Game Selection Matrix) bump the matchup score by 1 —
         // pace/PPP/PROE reasoning overrides a merely-average raw FPA tier. Capped at 5
         // so this can't push a game past the existing elite ceiling.
@@ -3370,11 +3399,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       let m = getMatchupTier(opp, p.pos, useProjected);
       const wk = [15, 16, 17][i];
       const oppClean = opp.replace("@", "").trim().toUpperCase();
-      const gd = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean);
-      if (gd && Math.abs(gd.spread) <= 3 && gd.total >= 46 && m.score <= 2) {
-        const bs = Math.min(m.score + 1, 3);
-        m = { ...m, tier: bs >= 3 ? "Even" : "Hard", color: bs >= 3 ? "neutral" : "tough", score: bs, competitiveBoost: true };
-      }
+      m = competitiveBalanceBoost(m, opp, i);
       const gsNode = getGameSelectionNode(p.team, opp, wk);
       if (gsNode?.type === "highPace" && m.score < 5) {
         m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };
@@ -4344,7 +4369,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const matchupScoreFor = (p) => {
     const opps = PLAYOFFS[p.team] || [];
     if (opps.length === 0) return null;
-    const matchups = opps.map(opp => getMatchupTier(opp, p.pos, useProjected));
+    const matchups = opps.map((opp, i) => competitiveBalanceBoost(getMatchupTier(opp, p.pos, useProjected), opp, i));
     const avg = matchups.reduce((s, m) => s + m.score, 0) / matchups.length;
     return { avg, matchups };
   };
