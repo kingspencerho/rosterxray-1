@@ -873,6 +873,39 @@ const TOURNAMENTS = {
   // small field, so best-player-available beats contrarian differentiation.
   boxer: { name: "The Boxer", entries: "6.2k", weights: [1, 0.75, 2.5], advanceWeight: 0.75, note: "Softest gates anywhere (R1 4/12, W15 2/5, W16 2/4) — reaching the 416-seat final is 1-in-15, but surviving pays $9 on an $18 entry. Everything is W17 placement: top ten take 49.7% of the pool. Small field, so draft best-available over correlation. Max 3 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
+  // The Frenchie Sprint 2 (2026 6-man season, read off the in-app rules Aug 24 2026).
+  // $10 entry · 11,268 entries · $100k prizes · 11.3% rake · 18 rounds · 6-MAN
+  // drafts (not 12) · half-PPR, 4pt passing TD · max 50 entries · closes 9/9/26.
+  //
+  //   R1  W1-14      1,878 x 6   1 advance (16.7%)   11,268 -> 1,878
+  //   R2  W15-17 COMBINED   one 1,878-seat final, all paid to 1878th
+  //
+  // ONLY TWO ROUNDS, AND ROUND 2 IS NOT WEEKLY GATES — IT IS A SINGLE SUMMED
+  // 3-WEEK SCORE. Every other format on this board models W15/W16/W17 as three
+  // SEPARATE elimination cuts with a weight vector expressing which gate is
+  // hardest. This format has no gate between W15 and W17 at all — 1,878 entries
+  // sit in one room for three weeks and the final standings are decided by total
+  // combined points across W15+W16+W17. A great W15 can outright compensate for
+  // a dead W16 here, which cannot happen in a gated format — a dead W16 there is
+  // eliminated regardless of how good W15 was.
+  //
+  // weights: [1, 1, 1] is deliberate and looks identical to fastpuppy's vector
+  // for the OPPOSITE reason. fastpuppy is three INDEPENDENT must-win single-week
+  // cuts — equal weight because each is its own do-or-die coin flip. This format
+  // is one COMBINED sum with no elimination between weeks — equal weight because
+  // a point in W15 is worth exactly a point in W17. Do not read the matching
+  // vectors as the same structure; they encode opposite mechanics that happen to
+  // average out the same way.
+  //
+  // R1 (1-of-6, 16.7%) is THE ONLY HURDLE IN THE ENTIRE TOURNAMENT, and it is
+  // the same severity as the 12-man 2-advance gates elsewhere (83.3% eliminated
+  // either way) — just run in 6-man pods instead of 12-man ones. Clearing it
+  // guarantees a $10 payout (exact breakeven on entry) and access to the most
+  // top-heavy prize curve on this board: 1st alone is 50% of the $100k pool and
+  // the top 3 take 67.5% — nearly triple the Frenchie 13's 30% first prize, the
+  // next-most-concentrated format here. advanceWeight: 1.5 matches the other
+  // 83.3%-elimination qualifiers (Puppy 3, Pit Bull, Schnauzer, Field General).
+  frenchiesprint: { name: "The Frenchie Sprint 2", entries: "11.3k", weights: [1, 1, 1], advanceWeight: 1.5, note: "6-man pods, only 2 rounds. R1 (1/6) is the sole hurdle — clear it and W15-17 become a single COMBINED 3-week point race in a 1,878-man room, not three separate gates. No per-week kill shot exists here: a great week fully offsets a dead one. 1st alone is 50% of the $100k pool, the most concentrated first prize on the board. Draft for maximum combined 3-week ceiling, not for insurance against any one week", format: "standard" },
   // The Field General 2 (2026 SUPERFLEX season, read off the in-app rules Aug 21 2026).
   // $10 entry · 33,984 entries · $300k prizes · 11.7% rake · 20 rounds · 12-man
   // drafts · SUPERFLEX (QB1/RB2/WR2/TE1/FLEX1/SFLEX1/BENCH12) · max 150 entries.
@@ -3909,6 +3942,26 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         fastPuppyFlatWeeks += 1;
       }
     });
+  } else if (tournamentKey === "frenchiesprint") {
+    // The Frenchie Sprint 2: Round 2 is NOT three gates, it is one combined
+    // 3-week score. There is no "which week is the kill shot" question to ask
+    // here — that question doesn't apply to a summed format — so this branch
+    // checks the AVERAGE across all three weeks together rather than any one
+    // week in isolation. A stack that is merely good in all three weeks beats
+    // a stack that is elite in one and dead in another, because the dead week
+    // costs real points here instead of costing nothing-until-it-costs-everything
+    // the way a gated wall week does.
+    const combinedAvg = (s) => (s.avgPerWeek[0] + s.avgPerWeek[1] + s.avgPerWeek[2]) / 3;
+    const combinedElite = qualifiedStackGrades.filter(s => combinedAvg(s) >= 4);
+    const combinedDead = qualifiedStackGrades.filter(s => combinedAvg(s) < 2.5);
+    if (combinedElite.length >= 1) {
+      strengths.push(`${combinedElite.length} stack(s) elite across the COMBINED W15-17 score (${combinedElite.map(s => s.team).join(", ")}) — this format sums all three weeks into one race, so a stack strong everywhere outweighs one that is elite for a single gate`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack grades elite on the combined 3-week average — since Round 2 has no per-week gate, a stack that peaks in only one week still loses points in the other two rather than being insured by surviving a cut`);
+    }
+    if (combinedDead.length >= 1 && qualifiedStackGrades.length > combinedDead.length) {
+      weaknesses.push(`${combinedDead.length} stack(s) grade weak across all three weeks combined (${combinedDead.map(s => s.team).join(", ")}) — a flat stack here directly subtracts from the total instead of just missing one gate`);
+    }
   }
 
   if (goodStacks.length === 0 && primaryStacks.length > 0 && format !== "superflex") {

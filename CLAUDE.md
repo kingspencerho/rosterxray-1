@@ -1976,3 +1976,60 @@ STANDARD ref (7 tournaments) · pick-2 superflex (3 formats) · pick-11 hyper-fr
 ALL BYTE-IDENTICAL before and after. Expected: two sites already agreed, and the third
 feeds display panels rather than the score.
 ```
+
+---
+
+## The Frenchie Sprint 2 — added Aug 24, 2026
+
+Tenth tournament in `TOURNAMENTS`, key `frenchiesprint`. Read off the in-app rules. $10 ·
+11,268 entries · $100k prizes · 11.3% rake · 18 rounds · **6-man drafts** (not 12) · half-PPR,
+4pt passing TD · max 50 entries · closes 9/9/26.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 | W1-14 | 1,878 × 6 | 1 (16.7%) | 11,268 → 1,878 |
+| R2 | **W15-17 COMBINED** | one 1,878-seat final, all paid | — | — |
+
+### Only two rounds, and Round 2 is not gates — it is a summed score
+
+Every other format on this board models W15/W16/W17 as **three separate elimination cuts**
+with a weight vector expressing which gate is hardest. This format has **no gate between W15
+and W17 at all** — 1,878 entries sit in one room for three weeks and final standings are
+decided by **total combined points across all three weeks.** A great W15 can fully offset a
+dead W16 here; in a gated format a dead W16 eliminates you regardless of how good W15 was.
+
+**`weights: [1, 1, 1]` looks identical to `fastpuppy`'s vector for the opposite reason.**
+fastpuppy is three *independent must-win single-week cuts* — equal weight because each is
+its own coin flip. This format is one *combined sum* with no elimination between weeks —
+equal weight because a point in W15 is worth exactly a point in W17. Do not read the matching
+vectors as the same mechanic; they encode opposite structures that happen to average the same.
+
+### R1 is the only hurdle in the entire tournament
+
+1-of-6 (16.7%) is the same elimination severity as the 12-man 2-advance gates elsewhere
+(83.3% eliminated either way), just run in 6-man pods. Clearing it guarantees a **$10 payout —
+exact breakeven** — and access to the most top-heavy prize curve on this board:
+
+```
+1st alone         50.0% of the $100k pool
+top 3             67.5%
+top 10            73.4%
+```
+
+Nearly triple the Frenchie 13's 30% first prize, the next-most-concentrated format here.
+`advanceWeight: 1.5` matches the other 83.3%-elimination qualifiers (Puppy 3, Pit Bull,
+Schnauzer, Field General).
+
+### The scoring branch checks the COMBINED average, not any one week
+
+Every other branch asks "which week is the kill shot." That question doesn't apply to a
+summed format, so this branch computes `(avgPerWeek[0]+avgPerWeek[1]+avgPerWeek[2])/3` per
+stack and flags strength when a stack clears 4.0 on that combined average — a stack good
+everywhere beats one elite in a single week and dead in another, because the dead week costs
+real points here instead of costing nothing until a cut kills it.
+
+### Calibration — nothing else moved
+
+```
+8 pre-existing tournaments, standard reference roster: BYTE-IDENTICAL before and after
+```
