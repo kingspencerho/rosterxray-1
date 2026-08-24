@@ -231,6 +231,26 @@ export default async function handler(req, res) {
   const origin = req.headers.origin || "";
   const allowed = [
     "https://www.rosterxray.com",
+    // THE APEX DOMAIN IS NOT OPTIONAL — leaving it out is what produced the
+    // "AI unavailable" badge on production for anyone who typed rosterxray.com
+    // without the www. The chain, because it is not obvious:
+    //   1. Vercel 308-redirects rosterxray.com/api/* to www.rosterxray.com/api/*
+    //      (a domain-level setting in the dashboard — vercel.json is empty, so
+    //      it cannot be turned off from this repo).
+    //   2. The client fetches the RELATIVE path "/api/analyze", so from the apex
+    //      the request starts SAME-ORIGIN and no preflight happens.
+    //   3. The 308 sends it cross-origin. Per the Fetch standard the request's
+    //      origin survives a redirect out of a same-origin request, so the browser
+    //      re-issues with Origin: https://rosterxray.com and now applies CORS.
+    //   4. Content-Type: application/json is not a safelisted value, so this
+    //      leg DOES preflight — and both the preflight and the POST need an
+    //      Access-Control-Allow-Origin naming the APEX, not the www host.
+    // Without this entry the browser blocks the response, fetch throws, and
+    // fetchAiNutshell's catch sets aiFailed. curl never reproduces it because
+    // curl does not enforce CORS. Verified Aug 24 2026 against production: a
+    // preflight carrying Origin: https://rosterxray.com came back 200 with NO
+    // access-control-allow-origin header at all.
+    "https://rosterxray.com",
     "https://rosterxray-1.vercel.app", // Adjust if your new project has a different URL
   ];
   if (allowed.includes(origin)) {
