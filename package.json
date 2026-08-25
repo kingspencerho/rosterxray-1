@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/test-adp-delta.mjs && node scripts/test-findplayer.mjs && node scripts/test-player-data.mjs && node scripts/test-no-duplicate-keys.mjs && node scripts/test-loose-json.mjs && node scripts/test-extraction-filters.mjs && node scripts/test-yahoo-share.mjs && node scripts/test-stale-verdicts.mjs && node scripts/test-alias-adp-sync.mjs && node scripts/test-table-coverage.mjs && node scripts/test-extraction-blocks.mjs && node scripts/test-no-quoted-negations.mjs"
+    "test": "node scripts/test-adp-delta.mjs && node scripts/test-findplayer.mjs && node scripts/test-player-data.mjs && node scripts/test-no-duplicate-keys.mjs && node scripts/test-loose-json.mjs && node scripts/test-extraction-filters.mjs && node scripts/test-yahoo-share.mjs && node scripts/test-stale-verdicts.mjs && node scripts/test-alias-adp-sync.mjs && node scripts/test-table-coverage.mjs && node scripts/test-extraction-blocks.mjs && node scripts/test-no-quoted-negations.mjs && node scripts/test-snap-trajectory.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

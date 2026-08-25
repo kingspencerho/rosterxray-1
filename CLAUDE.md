@@ -2033,3 +2033,106 @@ real points here instead of costing nothing until a cut kills it.
 ```
 8 pre-existing tournaments, standard reference roster: BYTE-IDENTICAL before and after
 ```
+
+---
+
+## Snap Trajectory Layer (added Aug 25, 2026)
+
+Fifth nflverse context layer. `scripts/build-snap-trajectory.py` reads the
+nflverse `snap_counts` release into `grading/data/snap_trajectory_2025.json`.
+**Context only — the numeric scoring engine is untouched. Verified: 27 grades
+(3 reference rosters x 9 tournaments) byte-identical before and after.**
+
+### The problem it fixes: a season average buries role CHANGE
+
+`player_metrics_2025.json` stores `snap_sh` as a **season average**. Role change
+is **rank 1** in the Source Hierarchy; a season-long volume average is **rank 2**.
+Averaging the year collapses the higher-ranked signal into the lower-ranked one,
+and it fails in the direction that matters most for projection — a player buried
+in September and starting in December averages out to "committee," which is
+exactly what he no longer is.
+
+Two players were mis-graded off that average before this file existed, both in
+the same direction:
+
+```
+RJ Harvey         season 0.421   W1-9 0.293 -> W10-18 0.565   last 4: 0.620
+Chris Rodriguez   season 0.312   W1-9 0.216 -> W10-18 0.425   last 4: 0.443
+```
+
+Harvey was graded **fade/falling on four separate rosters** off the 0.421. The
+role had already changed and the average is what hid it.
+
+### Fields, and the two the season average cannot express
+
+`season` (== `snap_sh`), `early` / `late` (W1-9 / W10-18), `early_gp` / `late_gp`,
+`last4`, `delta` (late - early), `trend`, `changed_team`.
+
+- **`last4` is games PLAYED, not the last four weeks.** An injured player's exit
+  role still gets measured on real snaps rather than on zeros.
+- **`delta` is null unless BOTH windows clear 3 games.** A one-game window is not
+  a trajectory. Those players still emit a line, saying the season number covers
+  one half of the year only — which is itself the correction (Nabers' 80% is four
+  games; Purdy's 98% is W10-18 only).
+
+### The threshold is DERIVED. Do not nudge it.
+
+Across the 367 qualified 2025 players the delta distribution is centered at zero
+(mean +0.010, **median -0.005**) with **stdev 0.157**. `TREND_THRESHOLD = 0.15` is
+therefore ~1 SD, and it flags the tails: p10 -0.150, p90 +0.193, 57 rising and 37
+falling out of 367.
+
+**The centering is what makes the threshold mean anything.** If a future season's
+median drifts off zero, the threshold starts measuring league-wide change instead
+of player-specific change and must be re-derived before use. Guard 13 asserts
+`|median| <= 0.03` for exactly this reason.
+
+### Only players whose role MOVED are listed
+
+`trajectoryContext` deliberately emits nothing for a `stable` player. A stable
+line repeats what the season average already said. **The prompt header states this
+explicitly**, so absence reads as "the average is a fair read" rather than as
+missing data — the same silent-drop distinction the Jul 27 extraction rules turn
+on. On an 18-man reference roster this produces 6 lines, not 18.
+
+### `changed_team` spans two roles
+
+A mid-season move splices two different jobs into one delta. The line still
+prints the split (it is real information) but flags that the delta itself is not
+a trajectory. Same trap as the Aug 8 rule about `player_metrics` rows carrying the
+OLD team — check `team` against the ADP table before quoting any 2025 number
+about a 2026 mover.
+
+### Guard 13 — `scripts/test-snap-trajectory.mjs`
+
+Three assertions, in descending order of what a regression would cost:
+
+1. **CONTEXT-ONLY CONTAINMENT.** `getSnapTrend` may be referenced **exactly once**
+   outside its definition, and that reference must sit inside `trajectoryContext`.
+   `analyzeRoster` and `analyzeRedraft` are asserted clean. A second call site is
+   a scoring leak even when it looks harmless, and it fails the build immediately
+   rather than surfacing later as an unexplained grade movement.
+2. **The trend LABEL matches the number.** `delta == late - early`, and `trend`
+   follows `delta` against `_meta.trend_threshold`. Same class as the Aug 14
+   tier/score divergence: a label that disagrees with its own value reads as
+   confirmation and is worse than no label.
+3. **The threshold stays earned** (centering + ~1 SD + flags 10-40% of the pool).
+
+Both failure paths were negative-tested: corrupting a trend label and adding a
+second call site each exit non-zero.
+
+### Regenerate
+
+```
+curl -sSL -o snaps.csv.gz \
+  https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_2025.csv.gz
+python3 scripts/build-snap-trajectory.py snaps.csv.gz grading/data/snap_trajectory_2025.json
+```
+
+### Still open (the other two from the same audit)
+
+**Vacated target share** (built as a throwaway script, not yet a data file) and
+**availability rate** (proposed, not built). Both are free from the same nflverse
+source. The vacated-targets pass already needs the suffix normalization fix that
+inflated WAS to 82.4% on its first run — normalize before differencing, or a
+suffixed name reads as a departure.

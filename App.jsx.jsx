@@ -25,6 +25,13 @@ import MOTION from './grading/data/motion_2025.json';
 // framework. Identifies ACCESS to explosive plays, not expected volume —
 // sits beside spike/nuclear rates in ceiling shape, never above role/volume.
 import AIRYARDS from './grading/data/airyards_2025.json';
+// In-season snap TRAJECTORY: W1-9 vs W10-18 snap share, plus the last four
+// games played. PLAYER_METRICS stores snap_sh as a SEASON AVERAGE, which buries
+// role CHANGE — the one thing that outranks everything else in the Source
+// Hierarchy. RJ Harvey averaged 42% and finished at 57%; the average is what
+// made him read as a timeshare. Built by scripts/build-snap-trajectory.py.
+// CONTEXT ONLY — never touches the numeric score.
+import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
 
 // ============ DATA ============
 
@@ -2323,6 +2330,7 @@ const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
 const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
+const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
 
 // === CEILING RANKINGS (informational only — never scored) ===
 // Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
@@ -6684,6 +6692,45 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === 2025 SNAP TRAJECTORY CONTEXT ===
+      // Qualifies the snap share printed in metricsContext above. That number is a
+      // SEASON AVERAGE and a season average hides the direction of travel, which is
+      // rank-1 information (role CHANGE) being flattened into a rank-2 summary.
+      //
+      // Deliberately emits ONLY players whose role actually moved. A "stable" line
+      // is the null result and says nothing the season average did not already say,
+      // so silence here means "the average is a fair read" — stated in the prompt
+      // header so absence is never mistaken for missing data.
+      const trajectoryContext = (result.valid || [])
+        .map(p => {
+          const t = getSnapTrend(p.name);
+          if (!t || t.gp < 4) return null;
+          const pct = v => `${Math.round(v * 100)}%`;
+          // Injured/partial seasons: no late window at all. The season number is
+          // then W1-9 only and must not be read as a full-year role.
+          if (t.delta == null) {
+            if (t.late_gp >= SNAP_TRAJECTORY._meta.min_window_gp || t.early_gp >= SNAP_TRAJECTORY._meta.min_window_gp) {
+              const played = t.late_gp >= t.early_gp ? "W10-18 only" : "W1-9 only";
+              return `${p.name}: ${pct(t.season)} snap share, but ${played} (${t.gp} games) — partial season, not a full-year role`;
+            }
+            return null;
+          }
+          if (t.trend === "stable" && !t.changed_team) return null;
+          const dir = t.delta > 0 ? "ROLE GREW" : "ROLE SHRANK";
+          const bits = [
+            `${pct(t.early)} (W1-9) -> ${pct(t.late)} (W10-18), ${pct(t.last4)} over his last 4 games`,
+          ];
+          if (t.trend !== "stable") {
+            bits.push(`${dir} — the ${pct(t.season)} season average ${t.delta > 0 ? "UNDERSTATES" : "OVERSTATES"} his exit role`);
+          }
+          // A mid-season move splices two different roles into one delta. The split
+          // is still worth showing; the delta on its own is not.
+          if (t.changed_team) bits.push("CHANGED TEAMS mid-2025 — this spans two different roles, read the split not the delta");
+          return `${p.name}: ${bits.join(", ")}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 EFFICIENCY CONTEXT ===
       // The other half of metricsContext. That block says how much a player was
       // given; this says what he did per touch. Rushing and receiving stay
@@ -6743,6 +6790,7 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
@@ -6761,6 +6809,7 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
