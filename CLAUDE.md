@@ -2273,3 +2273,72 @@ the hierarchy tells you what overrides the default.
   as directional. WR/TE n=149 and RB n=58 are solid.
 - Reproduce with the nflverse weekly stats releases plus `snap_counts`; no
   script was committed because this is a one-off calibration, not a data layer.
+
+---
+
+## QB Volume Profile (added Aug 25, 2026)
+
+`scripts/build-qb-profile.py` -> `grading/data/qb_profile_2025.json`. Three fields,
+41 quarterbacks. **Context only — 27 grades byte-identical before and after.**
+
+### Why a sixth data file for three numbers
+
+The stability calibration measured the QB inputs and the result is lopsided:
+
+```
+qb_rush_att_pg   r = 0.815   <- stickiest input measured ANYWHERE
+pass_att_pg      r = 0.605
+pass_adot        r = 0.486
+points_pg        r = 0.383   <- barely sticky
+```
+
+**None of the three sticky ones were in the prompt.** The QB metrics line carried
+spike rate (0.308) and dud rate only — the least useful pair available for the
+position. A QB is projected from volume and deployment; his prior-season points
+are close to noise.
+
+**It could not go in `player_metrics_2025.json`.** That builder tracks carries
+internally but emits no count, and has no passing-attempt fields at all.
+Regenerating it would re-derive `hvt_pg`, `usable_rate` and `spike_rate` — three
+inputs that DO score — over a pbp release that may have been revised since. An
+additive file cannot move a grade; a regeneration can.
+
+### `qbContext` is deliberately NOT inside `metricsContext`
+
+That block gates on `PLAYER_METRICS.gp >= 8`, which drops a QB who missed half a
+season. **A seven-game starter is exactly the case where his rushing rate is the
+most useful thing you can say about him** — Jayden Daniels, 8.29 rush att/gm on
+7 games, would have been silent. This block carries its own gate (6 games, 100
+attempts, matching the stability run's qualifying rule).
+
+The prompt line flags both tails against the league median (3.43): at 1.5x it
+says RUSHING QB, at 0.55x it says no rushing floor. 2025 range is 1.12 (Goff) to
+8.29 (Daniels), so the spread is real and worth naming.
+
+### Efficiency ranks now carry their measured instability inline
+
+`rush_eff_rank` and `ngs_rush_rank` print "2025 only, does NOT carry to 2026",
+and the `efficiencyContext` prompt header states the numbers: **RB yards per
+carry r=0.02, yards per target 0.31, EPA per target 0.27.** The header now says
+explicitly to use efficiency to explain what happened and never to argue what
+will happen.
+
+This closes a live risk rather than a hypothetical one. Nothing in the engine
+scores efficiency — every call site is inside the prompt builder — so the only
+way a coin-flip number could move a verdict was the AI layer quoting a rank as
+though it meant something, which nothing prevented.
+
+### Still open: three anchor-tier metrics the prompt omits
+
+Measured anchors that are absent from `metricsContext`, listed with what they
+would cost:
+
+| Metric | Stability | Cost |
+|---|---|---|
+| Targets per game (WR/TE) | 0.774 | **free** — `tgt` and `gp` are already loaded |
+| Air yards share (WR/TE) | 0.780 | **free** — `ay_sh` is already loaded, just unprinted |
+| Carries per game (RB) | 0.730 | needs a count `build-player-metrics.py` does not emit |
+
+The first two are one line each and cannot move a grade. Left undone on purpose:
+they were outside the change that was approved, and prompt content is a data
+decision like any other.

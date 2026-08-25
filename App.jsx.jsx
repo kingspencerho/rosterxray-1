@@ -32,6 +32,13 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 // made him read as a timeshare. Built by scripts/build-snap-trajectory.py.
 // CONTEXT ONLY — never touches the numeric score.
 import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
+// The three stickiest QB inputs, measured: rushing attempts/gm (r=0.815 year over
+// year, the most repeatable input in football), pass attempts/gm (0.605) and
+// passing aDOT (0.486). A QB's prior-season fantasy POINTS are barely sticky
+// (0.383), so he is projected from volume and deployment instead. None of the
+// three were in the prompt before. Built by scripts/build-qb-profile.py.
+// CONTEXT ONLY — never touches the numeric score.
+import QB_PROFILE from './grading/data/qb_profile_2025.json';
 
 // ============ DATA ============
 
@@ -2331,6 +2338,7 @@ const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
 const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
+const getQbProfile = (name) => lookupPlayer(QB_PROFILE.players, name);
 
 // === CEILING RANKINGS (informational only — never scored) ===
 // Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
@@ -6731,6 +6739,26 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === 2025 QB VOLUME PROFILE ===
+      // Kept OUT of metricsContext deliberately. That block gates on PLAYER_METRICS
+      // gp >= 8, which drops a QB who missed half a season — and a seven-game starter
+      // is exactly the case where his rushing rate is the most useful thing you can
+      // say about him. This block carries its own gate (6 games, 100 attempts).
+      const qbContext = (result.valid || [])
+        .filter(p => p.pos === "QB")
+        .map(p => {
+          const q = getQbProfile(p.name);
+          if (!q) return null;
+          const med = QB_PROFILE._meta.rush_att_pg_median;
+          const runner = q.rush_att_pg >= med * 1.5 ? " — RUSHING QB, this is the most repeatable scoring he has"
+            : q.rush_att_pg <= med * 0.55 ? " — pocket QB, effectively no rushing floor"
+            : "";
+          const moved = q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
+          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${q.gp} games)${moved}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 EFFICIENCY CONTEXT ===
       // The other half of metricsContext. That block says how much a player was
       // given; this says what he did per touch. Rushing and receiving stay
@@ -6755,8 +6783,8 @@ Wan'Dale Robinson`;
               (ay.adot < 0 ? " — catches it behind the line, must earn yards back before gaining any" : "")
             );
           }
-          if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry)`);
-          if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only)`);
+          if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry — 2025 only, does NOT carry to 2026)`);
+          if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only — 2025 only, does NOT carry to 2026)`);
           if (e?.rec_eff_rank) bits.push(`receiving efficiency ${e.rec_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rec_eff_rank`]} (pts over expected per target)`);
           // Only worth a line when the split is big enough to survive the
           // play-level dilution described in build-motion.py.
@@ -6791,7 +6819,8 @@ ${teamContext ? `\nTeam environment (2026 preseason priors — team-level contex
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
+${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -6810,7 +6839,8 @@ ${teamContext ? `\nTeam environment (2026 preseason priors — team-level contex
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
+${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
