@@ -45,16 +45,24 @@ const ok = (label, cond, detail = "") => {
 console.log("context-only containment");
 const defs = [...app.matchAll(/const getSnapTrend\s*=/g)].length;
 ok("getSnapTrend defined exactly once", defs === 1, `found ${defs}`);
+// CONSUMERS ARE AN ALLOWLIST, NOT A COUNT. Two things read this layer today and
+// both are outside the scoring engine: the AI prompt builder and the player card.
+// A THIRD call site fails the run — the point is that every consumer is reviewed,
+// not that there is exactly one. Never relax this to "any number of call sites";
+// the containment is the whole reason the layer cannot move a grade.
+const ALLOWED_CONSUMERS = [
+  { name: "trajectoryContext", start: "const trajectoryContext", end: '.join("\\n");' },
+  { name: "buildPlayerCard", start: "const buildPlayerCard", end: "\n  return card;" },
+];
 const uses = [...app.matchAll(/getSnapTrend\(/g)].length;
-ok("getSnapTrend called exactly once", uses === 1, `found ${uses} call sites — a second one is a scoring leak`);
-
-// The single call site must sit inside trajectoryContext, which is inside the
-// AI prompt builder. Bound the search to that const's body.
-const tcStart = app.indexOf("const trajectoryContext");
-ok("trajectoryContext exists", tcStart > -1);
-const tcEnd = app.indexOf('.join("\\n");', tcStart);
-const tcBody = tcStart > -1 && tcEnd > -1 ? app.slice(tcStart, tcEnd) : "";
-ok("the call site is inside trajectoryContext", tcBody.includes("getSnapTrend("));
+ok(`getSnapTrend has exactly ${ALLOWED_CONSUMERS.length} call sites`, uses === ALLOWED_CONSUMERS.length,
+   `found ${uses} — an unlisted consumer is a containment break, add it here deliberately or remove it`);
+for (const c of ALLOWED_CONSUMERS) {
+  const i = app.indexOf(c.start);
+  const j = i > -1 ? app.indexOf(c.end, i) : -1;
+  const body = i > -1 && j > -1 ? app.slice(i, j) : "";
+  ok(`${c.name} exists and reads the layer`, !!body && body.includes("getSnapTrend("));
+}
 
 // The raw import must not be read anywhere except the accessor and _meta.
 const rawReads = [...app.matchAll(/SNAP_TRAJECTORY\b/g)].length;

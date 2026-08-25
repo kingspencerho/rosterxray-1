@@ -2342,3 +2342,108 @@ would cost:
 The first two are one line each and cannot move a grade. Left undone on purpose:
 they were outside the change that was approved, and prompt content is a data
 decision like any other.
+
+---
+
+## Player Card (added Aug 25, 2026)
+
+Click any name in the roster strip under the grade header and a modal opens with
+that player's 2025 role data. **Informational only — 27 grades byte-identical
+across 3 reference rosters x 9 tournaments.** Guarded by
+`scripts/test-player-card.mjs` (guard 14).
+
+### It answers a DIFFERENT question from the grade
+
+The grade is portfolio-level: is this construction good. The card is
+player-level: what is this player's role. Conflating them is the same error the
+Source Hierarchy already warns about, so the card issues **no verdict** — it
+shows data and lets the reader decide. `PLAYER_VERDICTS` is deliberately absent:
+a stale verdict rendered as current is the Diggs bug in a new costume.
+
+### A MODAL, not another panel
+
+The results view already carries nine disclosure panels. A modal costs the page
+**zero resting density**, which is the whole reason the card is not a tenth one.
+The only resting cost is the roster strip itself: four lines, one per position.
+
+That strip is also the canonical entry point — every rostered player appears
+exactly once, so there is one place to click rather than hoping a name happens to
+show up inside a stack block.
+
+### TWO VISUAL CHANNELS. The second one is the point.
+
+**Colour encodes WHERE a player ranks. Weight encodes HOW MUCH that rank should
+move your opinion.** These are different facts and one channel cannot carry both.
+
+A back at the 78th percentile in yards per carry, painted green, teaches the
+reader to trust `r = 0.022`. That would look like a working feature while doing
+active harm — the same shape as the position-normalisation bug in the Ceiling
+Shape Layer, where grades moved for the wrong reason.
+
+So anchor metrics render at full contrast. Anything below the reliable line
+renders at 55% opacity with a `2025 ONLY` tag, and efficiency rows are dimmed
+wholesale with the coin-flip figure stated in the section note.
+
+### The headline is the TRAJECTORY, not the season average
+
+Leading with a season average reproduces exactly the error that graded RJ Harvey
+`fade/falling` on four rosters. The card opens with `W1-9 -> W10-18 -> last 4`.
+
+**Where the two disagree, BOTH are shown and the conflict is labelled.** Harvey's
+snap-share row reads 42% at the 30th percentile while the headline above it reads
+29% -> 56%. That contradiction is the finding, so the row carries
+`⚠ season average — his role grew, see trajectory` and its percentile is greyed
+out. Never resolve this by hiding one of the two numbers.
+
+### Metric sets are FIXED per position, never selected
+
+A card that picks the most impressive-looking metrics is a highlight reel, and
+**two players stop being comparable**, which is the card's actual job. Same
+metrics, same order, every player at that position.
+
+```
+WR/TE   targets/gm · air yards share · target share · WOPR · snap share
+RB      snap share · target share · targets/gm · WOPR · HVT/gm
+QB      rush att/gm · pass att/gm · passing aDOT   (from QB_PROFILE)
+```
+
+All anchor or reliable tier, all from already-loaded fields. **WR/TE aDOT (0.784)
+is the one anchor still missing** — `AIRYARDS` is RB-only, so it needs data the
+app does not carry. RB carries/gm (0.730) is missing for the same reason.
+
+### Percentile population is the decision that could bias the whole card
+
+Mirrors `CEILING_RANKINGS` exactly: **draftable (present in `ADP_DATA`) and 8+
+games.** Percentile against all players is meaningless — a three-game backup
+lands in the 90th percentile of something. **The gate is printed on the card**, so
+a number can never be read without it. Populations under 12 return null rather
+than a flattering rank.
+
+### No blank cards, ever
+
+A player with no data returns a `reason` string, never an empty card. Of 291
+draftable players, 234 render data and **57 render an explicit reason** (rookies,
+sub-gate). An empty card is the silent-drop failure in a new costume: per the
+Jul 27 extraction rules, a filter that removes something must never be silent.
+
+Guard 14 asserts the no-data branch is actually exercised, so it cannot rot into
+dead code.
+
+### `movedFrom` reconciles the two team fields
+
+`PLAYER_METRICS` carries the team a player PLAYED for; `ADP_DATA` carries his 2026
+team. When they differ the card leads with a warning naming both. Same trap as the
+Aug 8 rule — Gainwell's card reads TB with a banner saying every number below is
+his PIT season.
+
+### Guard 13 changed shape when this shipped
+
+`getSnapTrend` previously had to be called **exactly once**. The card is a second
+legitimate consumer, so the assertion became an **allowlist of reviewed
+consumers** (`trajectoryContext`, `buildPlayerCard`), each verified to sit outside
+the scoring engine.
+
+**Do not relax this to "any number of call sites."** The point is that every
+consumer is reviewed, not that there is one. A third, unlisted call site still
+fails the run — negative-tested. `analyzeRoster` and `analyzeRedraft` are still
+asserted clean, which is the assertion that actually protects the grades.
