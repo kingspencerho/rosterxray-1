@@ -2136,3 +2136,140 @@ python3 scripts/build-snap-trajectory.py snaps.csv.gz grading/data/snap_trajecto
 source. The vacated-targets pass already needs the suffix normalization fix that
 inflated WAS to 82.4% on its first run — normalize before differencing, or a
 suffixed name reads as a departure.
+
+---
+
+## Measured Stability of Every Input (Aug 25, 2026)
+
+The Source Hierarchy ranked inputs by **causal priority**, which was reasoned
+rather than measured. This section measures the other axis: **how often last
+year's number is still true this year.** Everything below is computed from
+nflverse weekly player stats + snap counts, 2023-2025, same player, both
+transitions (23>24, 24>25), 8+ games in both seasons.
+
+### Verified: FPA is the least stable input in the app
+
+Year-over-year correlation of half-PPR points allowed per game, by defense:
+
+```
+pos     r 23>24   r 24>25   mean r    r^2
+QB       -0.150     0.247    0.049   0.00
+RB        0.294     0.196    0.245   0.06
+WR       -0.063    -0.083   -0.073   0.01
+TE        0.152     0.232    0.192   0.04
+```
+
+**The best FPA figure on the board explains 6% of next-season variance, and it
+is worse than the WORST player-level opportunity metric measured.** Rank 5 is
+correct and is now empirical rather than asserted.
+
+**WR FPA is negative in BOTH transitions.** A defense that was soft against
+receivers last year is very slightly more likely than chance to be tough this
+year. Do not build a WR matchup argument on a prior-season FPA number alone.
+
+### Gemini's TE claim is directionally wrong, but it is detecting something real
+
+TE is the **second-most** sticky position (0.192), behind RB. **WR is the least
+sticky.** What TE does have is the widest relative spread across defenses:
+
+```
+pos      mean   stdev      CV       min > max
+QB       16.3    2.68   0.164    11.1 > 23.3
+RB       19.9    2.87   0.145    15.5 > 26.2
+WR       25.3    3.57   0.141    19.3 > 33.3
+TE       10.6    2.35   0.221     6.2 > 17.5
+```
+
+**TE CV 0.221 is the highest** — best TE defense allows 6.2/gm, worst allows
+17.5, a 2.8x range against 1.7x at WR. TE matchups *look* like they swing hardest
+because in percentage terms they do. That is the observation. "Therefore
+unpredictable" is the part that does not follow.
+
+A within-2025 split-half check (odd weeks vs even, Spearman-Brown corrected to
+full season) says **roughly half of a season-long TE or QB FPA number is signal
+(0.458 / 0.466), and an RB one is mostly noise (0.141)** — RB is stickiest across
+years and least reliable within one, which fits: the run front is the most stable
+unit in football while weekly RB output is dominated by game script.
+
+⚠️ These are RAW points allowed, **not schedule-adjusted**. A defense that drew
+Kelce, Bowers and LaPorta looks soft at TE for reasons unrelated to the defense.
+`grading/data/fpa.md` is the same shape of number and inherits the same confound.
+
+### The player-level table — opportunity is sticky, efficiency is not
+
+```
+PASS CATCHERS (WR/TE)              RUNNING BACKS
+metric              mean r         metric              mean r
+adot                 0.784         carries_pg           0.730
+air_yards_share      0.780         snap_share           0.728
+targets_pg           0.774         points_pg            0.715
+wopr                 0.752         dud_rate             0.673
+target_share         0.729         target_share         0.661
+snap_share           0.709         wopr                 0.659
+points_pg            0.699         usable_rate          0.658
+dud_rate             0.667         targets_pg           0.654
+usable_rate          0.652         spike_rate           0.620
+catch_rate           0.496         adot                 0.324
+spike_rate           0.475         yds_per_target       0.311
+yds_per_target       0.308         rec_epa_per_tgt      0.260
+rec_epa_per_tgt      0.278         td_per_touch         0.214
+td_per_touch         0.198         catch_rate           0.103
+                                   yds_per_carry        0.022
+
+QUARTERBACKS
+qb_rush_att_pg 0.815 · pass_att_pg 0.605 · pass_adot 0.486 · yds_per_att 0.444
+sack_rate 0.398 · pass_td_rate 0.389 · points_pg 0.383 · comp_pct 0.338
+usable_rate 0.322 · spike_rate 0.308 · pass_epa_per_att 0.260
+```
+
+### Six things this changes
+
+1. **RB YARDS PER CARRY IS r = 0.022. It is a coin flip.** The most-quoted RB
+   stat in public analysis carries essentially zero year-over-year information.
+   Never let a YPC figure move a verdict. `ngs_rush_rank` measures the same
+   underlying thing and inherits the same warning.
+2. **QB RUSHING ATTEMPTS PER GAME (0.815) IS THE STICKIEST INPUT MEASURED**,
+   ahead of every receiving metric. The konami-code premium is not a narrative —
+   a QB's rushing volume is the single most repeatable thing in football, which
+   is why it is the safest component of a QB projection.
+3. **aDOT is the sticky exception among efficiency-shaped numbers (0.784)**
+   because it is a ROLE property, not a performance one. This validates the
+   air-yards layer's framing: aDOT describes where a player is deployed, and
+   deployment persists while outcomes do not.
+4. **DUD RATE IS MORE STABLE THAN SPIKE RATE at every position** (WR/TE 0.667 vs
+   0.475). Floor is more predictable than ceiling. **In best ball the more
+   stable metric is the less useful one** — a genuine tension, and the reason the
+   Ceiling Shape Layer is capped at ±0.5 rather than trusted. Spike rate at 0.475
+   is exactly what a rank-4 input should look like.
+5. **QB fantasy points per game is barely sticky (0.383)** — QBs are far less
+   predictable season to season than pass catchers (0.699). Combined with (2):
+   project QBs from rushing volume and pass attempts, not from last year's
+   points.
+6. **RB air_yards_share (0.261) and catch_rate (0.103) are unusable for backs**
+   despite working for receivers. The CLAUDE.md note that `ay_sh` "discriminates
+   nothing" for RBs is confirmed, and now quantified.
+
+### Stability is NECESSARY, not SUFFICIENT — do not collapse the two axes
+
+A metric can be perfectly stable and still tell you nothing (jersey number would
+score 1.00). This table answers "will last year's number still be true," and
+nothing else. It does **not** rank metrics by predictive value, and it does not
+replace the Source Hierarchy.
+
+**The apparent contradiction is worth stating plainly.** Rank 1 in the hierarchy
+is role/opportunity **CHANGE**, and change is by definition the part that is NOT
+sticky. That is not a conflict, it is the whole point: a confirmed role change
+outranks everything precisely because it **invalidates the sticky baseline**.
+The two lists are complementary — this one tells you what to assume by default,
+the hierarchy tells you what overrides the default.
+
+### Limits — state these before quoting the numbers
+
+- **Survivorship.** 8+ games in both seasons excludes injury years, so these are
+  correlations among players who held a role two years running. True population
+  stickiness is lower.
+- **Range restriction** biases toward the stable middle for the same reason.
+- **Two transitions only.** QB n=26 per transition is small; treat the QB column
+  as directional. WR/TE n=149 and RB n=58 are solid.
+- Reproduce with the nflverse weekly stats releases plus `snap_counts`; no
+  script was committed because this is a one-off calibration, not a data layer.
