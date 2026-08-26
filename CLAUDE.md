@@ -1453,6 +1453,47 @@ filter that a boost never triggers. The bug was a lying label, not a bad number.
 
 ---
 
+## Draft Report Pipeline (added Aug 26, 2026)
+
+**`draft-report/README.md` is the entry point. Read it before touching anything under
+`draft-report/` or the three new scripts.** One command rebuilds the 28-page PDF:
+`./draft-report/build.sh`.
+
+### The split, because it is the design decision
+`scripts/draft-report.py` does the COMPUTED half and emits a per-round worksheet: the
+ADP-to-metrics join, `ceil(adp/teams)` round math for any league size, the full-PPR
+premium, and the W15-17 slate rating. **The prose is written by hand from that worksheet
+into `draft-report/sections/*.html`.** Choosing which of six true facts belongs in a
+player's one sentence is a judgement about the reader, not a computation, and a template
+produces exactly the analyst voice the report exists to avoid.
+
+### `scripts/extract-app-blocks.mjs` — stop re-solving this
+App.jsx is `.jsx`, so its data tables cannot be imported by a script. Every ad-hoc grep at
+this has the same bug: a naive brace counter breaks on apostrophes inside the prose notes
+(`LAC's 11-PERSONNEL TIGHT END`) and on `//` inside a string. This walks the source with a
+real string/comment state machine. **Use it rather than writing another one.**
+
+### THE FULL-PPR PREMIUM IS THE EDGE, AND IT IS NOT A BUG
+`ADP_YAHOO` comes from FFC, which prices **half** PPR. In a full-PPR league that is a
+systematic mispricing of reception-heavy players, not staleness. `draft-report.py` computes
+the gap per player in points per game. Wan'Dale Robinson at +2.88 in round 6 is the
+clearest instance. **Do not "correct" this by converting the table.**
+
+### The playoff-slate column, and the rule it bends
+The metric hierarchy ranks matchup data 5th of 5 and says redraft ignores W15-17. **That is
+right for a normal league and wrong for a deep one:** in a 16-team league with a short
+bench the waiver pool is empty, so December is closer to locked at draft time. The column
+is a TIEBREAKER and never makes a good player bad. Sole actionable result in the Aug 26
+build: **George Kittle is 0/9, hard matchups in all three playoff weeks, the only one in
+the pool.**
+
+### Fonts are inlined on purpose
+A `<link>` to fonts.googleapis.com **silently falls back to a system font** when the render
+box cannot reach it, producing a wrong-looking PDF with no error. `fonts-inline.css` is
+pinned; `scripts/inline-google-fonts.py` regenerates it and needs network.
+
+---
+
 ## ADP Refresh Tooling & Per-Table Vintage (added Aug 15, 2026)
 
 Two related changes, from one measurement: an audit against a live market found

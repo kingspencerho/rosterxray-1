@@ -1,0 +1,11 @@
+body1_a     A. Read this before the draft starts (the six rules)
+body1g      B. Words you will see in this document (glossary)
+body1b      C. The draft plan, round by round
+body1c      D. Sleepers, by position
+body1d      E. The playoff weeks
+body1_de    F. Three things that make this league different
+body2       G. The rounds — rounds 1-2
+body3       .  rounds 3-5
+body4       .  rounds 6-9
+body5       .  rounds 10-15
+body6       H. Quick view by position + I. If you remember five things + sources

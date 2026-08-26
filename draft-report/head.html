@@ -1,0 +1,162 @@
+<title>Sixteen-Team Full PPR Draft Board</title>
+<style>
+/* ---- fonts inlined below by build step ---- */
+FONTS_PLACEHOLDER
+
+:root{
+  --paper:#ffffff; --ink:#191d25; --ink-soft:#4d5666; --ink-faint:#79828f;
+  --rule:#dfe3ea; --rule-soft:#eef0f4; --tint:#f6f7f9;
+  --accent:#a8552a;            /* burnt leather, used only for round numerals + marks */
+  --warn:#9c3a30; --warn-bg:#fbf1f0;
+  --rb:#15645d; --rb-bg:#e6f2f1;
+  --wr:#2a4a86; --wr-bg:#e8edf7;
+  --te:#8a4626; --te-bg:#f8eee7;
+  --qb:#563a75; --qb-bg:#efe9f6;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Source Sans 3','Segoe UI',Liberation Sans,DejaVu Sans,sans-serif;
+  font-size:15.5px; line-height:1.55;
+}
+.wrap{max-width:52rem;margin:0 auto;padding:2.2rem 1.4rem 4rem}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:3px solid var(--ink);padding-bottom:1.1rem;margin-bottom:1.5rem}
+.kicker{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:.78rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 .35rem}
+h1{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:2.6rem;line-height:1.02;
+  margin:0 0 .5rem;letter-spacing:.005em;text-wrap:balance}
+.sub{color:var(--ink-soft);margin:0;font-size:1.02rem}
+.meta{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.85rem}
+.meta span{font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;
+  font-weight:600;color:var(--ink-soft);background:var(--tint);
+  border:1px solid var(--rule);border-radius:2px;padding:.2rem .5rem}
+
+/* ---------- generic section ---------- */
+h2{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:1.45rem;
+  letter-spacing:.01em;margin:2.4rem 0 .2rem;padding-bottom:.3rem;
+  border-bottom:1px solid var(--rule);text-wrap:balance}
+h2 .n{color:var(--accent);margin-right:.5rem}
+.lede{color:var(--ink-soft);margin:.55rem 0 1rem}
+p{margin:0 0 .8rem}
+strong{font-weight:700}
+
+/* ---------- rules list ---------- */
+ol.rules{list-style:none;counter-reset:r;margin:1rem 0 0;padding:0}
+ol.rules li{counter-increment:r;position:relative;padding:0 0 .9rem 2.5rem;margin:0}
+ol.rules li::before{content:counter(r);position:absolute;left:0;top:-.1rem;
+  font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:1.15rem;
+  color:var(--accent);width:1.7rem;text-align:right}
+ol.rules b{display:block;font-weight:700}
+
+/* ---------- the three facts ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);margin:1.1rem 0 0}
+.fact{background:var(--paper);padding:.95rem 1rem}
+.fact .big{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:1.7rem;
+  line-height:1;color:var(--accent);display:block;margin-bottom:.25rem}
+.fact .lbl{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;
+  font-weight:700;color:var(--ink-faint);display:block;margin-bottom:.4rem}
+.fact p{margin:0;font-size:.93rem;color:var(--ink-soft)}
+
+/* ---------- round ---------- */
+.round{margin-top:2rem;break-inside:auto}
+.rhead{display:flex;align-items:baseline;gap:.7rem;border-bottom:2px solid var(--ink);
+  padding-bottom:.3rem;margin-bottom:.1rem}
+.rnum{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:2rem;line-height:1;
+  color:var(--accent);letter-spacing:-.01em}
+.rlab{font-family:Oswald,Impact,sans-serif;font-weight:500;font-size:1.05rem;
+  text-transform:uppercase;letter-spacing:.07em}
+.rpicks{margin-left:auto;font-size:.8rem;font-weight:700;color:var(--ink-faint);
+  letter-spacing:.05em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rplan{font-style:italic;color:var(--ink-soft);margin:.55rem 0 .9rem;font-size:.97rem}
+
+/* ---------- player row ---------- */
+.p{display:grid;grid-template-columns:auto 1fr;gap:.15rem .7rem;
+  padding:.6rem 0;border-bottom:1px solid var(--rule-soft);break-inside:avoid}
+.p:last-child{border-bottom:none}
+.chip{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:.72rem;
+  letter-spacing:.07em;padding:.16rem .38rem;border-radius:2px;
+  align-self:start;margin-top:.18rem;white-space:nowrap}
+.chip.rb{color:var(--rb);background:var(--rb-bg)}
+.chip.wr{color:var(--wr);background:var(--wr-bg)}
+.chip.te{color:var(--te);background:var(--te-bg)}
+.chip.qb{color:var(--qb);background:var(--qb-bg)}
+.pn{font-family:Oswald,Impact,sans-serif;font-weight:500;font-size:1.12rem;
+  line-height:1.25;letter-spacing:.008em}
+.pn .tm{font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:.76rem;
+  color:var(--ink-faint);letter-spacing:.06em;margin-left:.4rem}
+.pn .adp{font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:.76rem;
+  color:var(--ink-faint);float:right;font-variant-numeric:tabular-nums}
+.pw{grid-column:2;font-size:.95rem;color:var(--ink-soft);margin:0}
+.pw b{color:var(--ink);font-weight:700}
+.tagline{grid-column:2;margin:.25rem 0 0}
+.tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:.12rem .35rem;border-radius:2px;margin-right:.3rem}
+.tag.ppr{color:#6b4200;background:#fdf1d9;border:1px solid #f0dcae}
+.tag.safe{color:#1d5b3a;background:#e7f3ec;border:1px solid #cfe4d8}
+
+/* ---------- avoid ---------- */
+.avoid{background:var(--warn-bg);border-left:3px solid var(--warn);
+  padding:.7rem .9rem;margin-top:.9rem;break-inside:avoid}
+.avoid h4{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:.82rem;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--warn);margin:0 0 .4rem}
+.avoid p{margin:0 0 .35rem;font-size:.92rem;color:var(--ink-soft)}
+.avoid p:last-child{margin-bottom:0}
+.avoid b{color:var(--warn);font-weight:700}
+
+/* ---------- position table ---------- */
+.tblwrap{overflow-x:auto;margin-top:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:.76rem;
+  text-transform:uppercase;letter-spacing:.08em;text-align:left;
+  padding:.4rem .6rem .35rem 0;border-bottom:1.5px solid var(--ink);color:var(--ink-faint)}
+td{padding:.38rem .6rem .38rem 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+td.r{font-variant-numeric:tabular-nums;color:var(--ink-faint);font-weight:600;white-space:nowrap}
+tr{break-inside:avoid}
+
+/* ---------- source note ---------- */
+.src{margin-top:2.4rem;padding-top:1rem;border-top:1px solid var(--rule);
+  font-size:.88rem;color:var(--ink-faint)}
+.src h3{font-family:Oswald,Impact,sans-serif;font-weight:600;font-size:.9rem;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin:0 0 .5rem}
+.src p{margin:0 0 .5rem}
+
+h3.sub-h{font-family:Oswald,Impact,sans-serif;font-weight:500;font-size:1.05rem;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--ink);
+  margin:1.6rem 0 .2rem;padding-bottom:.25rem;border-bottom:1px solid var(--rule)}
+table.plan td{vertical-align:top}
+table.plan td:nth-child(2){white-space:nowrap;padding-right:1rem}
+.mut{color:var(--ink-faint);font-size:.86rem;font-weight:400}
+.risk{font-weight:700;color:var(--warn);font-size:.88rem;
+  text-transform:uppercase;letter-spacing:.05em}
+.tag.rook{color:#4a3a75;background:#eee9f7;border:1px solid #dcd2ee}
+.p .pn .tag{float:none;margin-left:.45rem;vertical-align:middle}
+
+table.gloss td{padding:.5rem .8rem .5rem 0;vertical-align:top}
+table.gloss td.gt{font-family:Oswald,Impact,sans-serif;font-weight:500;font-size:.98rem;
+  white-space:nowrap;color:var(--ink);width:8.5rem;line-height:1.25}
+table.gloss tr:last-child td{border-bottom:none}
+ul{margin:0 0 .8rem;padding-left:1.2rem}
+li{margin-bottom:.3rem}
+
+ol.rules .bi{display:inline;font-weight:700}
+.bi{font-weight:700}
+
+@media print{
+  @page{size:letter;margin:0.55in 0.6in}
+  body{font-size:10.5pt;line-height:1.45}
+  .wrap{max-width:none;padding:0}
+  h1{font-size:30pt}
+  h2{font-size:15pt;margin-top:20pt;break-after:avoid}
+  .round{margin-top:16pt;break-inside:auto}
+  .rhead{break-after:avoid}
+  .rnum{font-size:19pt}
+  .pn{font-size:11.5pt}
+  .p{padding:4pt 0}
+  .fact .big{font-size:16pt}
+  a{color:inherit;text-decoration:none}
+}
+</style>
