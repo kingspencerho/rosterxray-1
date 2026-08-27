@@ -2650,3 +2650,74 @@ Live path dry-run against a real season (2025) reproduces both files exactly.
 Dual-vintage dry run against a simulated "2026 through W8" renders both
   vintages with the footer naming both.
 ```
+
+---
+
+## UI Density Pass (Aug 27, 2026)
+
+Presentation only — **30 grades byte-identical across 10 tournaments x 3
+fixtures.** The governing rule: **nothing shows at rest unless the reader asked
+for it, and colour encodes structure rather than decoration.**
+
+### The roster strip folded into the counts row it duplicated
+
+The results header already printed `QB 3 RB 5 WR 8 TE 2`, and the strip below
+repeated the same grouping in longhand as eighteen pills. Two lines saying the
+same thing, one of them very tall.
+
+The counts row is now the toggle. It carries the position colours, and the pills
+render only when clicked. **Eighteen pills of resting density became zero.**
+
+### `posColor` had a second copy and now does not
+
+The modal is a top-level component and cannot reach `posColor` inside
+`RosterScorer`, so the first version of the card header declared its own map.
+That is the exact divergence class already fixed twice here (Aug 14 tier/score,
+Aug 23 competitive balance). `POS_ACCENT` is now the single module-level
+definition and `posColor` reads it. **One definition or none.**
+
+### Card sections carry an accent, and the dim one stays dim
+
+```
+ROLE TRAJECTORY   cyan          the headline
+VOLUME PROFILE    cyan          the QB headline
+OPPORTUNITY       purple-light  anchor metrics
+WEEK OUTCOMES     info-blue     ceiling shape
+EFFICIENCY        text-dim      deliberately NOT bright
+```
+
+**Efficiency keeping a grey header is the load-bearing part.** A cyan heading on
+that block would say the opposite of the note underneath it and undo the whole
+two-channel design — the section is muted because the numbers in it do not
+predict anything.
+
+### Efficiency is collapsed, and lost four redundant tags
+
+It is the least predictive section on the card, so it is the one that earns a
+click rather than a scroll. Its own note already says "a record of what
+happened, never a forecast," which made a `2025 ONLY` chip on each of its four
+rows four extra pieces of loud orange restating the sentence above them. The
+chip survives on Spike weeks, where it is the only warning present.
+
+**Card height: ~1500px -> 642px** on a 430px viewport.
+
+### Grade history no longer opens by default
+
+Every other panel on the results view is collapsed; `historyPanelOpen` was the
+lone `useState(true)`. It was the outlier, not the convention.
+
+### Auditing this is reproducible, and worth doing before claiming a fix
+
+```
+npx vite --port 5199 --host 127.0.0.1
+# playwright installed OUTSIDE the repo (npm i playwright --prefix /tmp),
+# chromium at /opt/pw-browsers/chromium
+```
+
+**Localhost works from the sandbox even though external hosts do not** — the
+Aug 15 note about Chromium getting `ERR_CONNECTION_RESET` applies to the open
+internet, not to a local dev server. Measuring the card at 1500px is what made
+collapsing Efficiency an obvious call rather than a guess.
+
+Expect `⚠ AI UNAVAILABLE · RETRY` in local screenshots. Vite does not serve
+`/api/analyze`; that badge is correct behaviour, not a regression.

@@ -6024,7 +6024,7 @@ const pctColor = (pct) => {
 
 // One metric row. `dim` is the SECOND channel: it says how much the colour on
 // the left should be allowed to change your mind.
-const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
+const CardMetricRow = ({ label, value, pct, r, dim, caution, noTag }) => (
   <div style={{
     display: "grid", gridTemplateColumns: "1fr auto 52px", alignItems: "center", gap: "10px",
     padding: "6px 0", borderBottom: "1px solid var(--bg-raised)",
@@ -6038,7 +6038,7 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
         </span>
       )}
       {caution && <span style={{ fontSize: "9px", color: "var(--gold)", letterSpacing: "0.02em" }}>⚠ {caution}</span>}
-      {dim && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
+      {dim && !noTag && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
     </span>
     <span style={{ fontSize: "13px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{value}</span>
     <span style={{ fontSize: "11px", color: caution ? "var(--text-dim)" : pctColor(pct), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
@@ -6047,13 +6047,63 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
   </div>
 );
 
-const CardSection = ({ title, note, children }) => (
-  <div style={{ marginTop: "18px" }}>
-    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.13em", textTransform: "uppercase", marginBottom: "6px" }}>{title}</div>
-    {note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "8px", lineHeight: 1.5 }}>{note}</div>}
-    {children}
-  </div>
-);
+// Section headers carry a colour so the eye can find its way around the card
+// without reading. The accent is STRUCTURE, not decoration: it names which of
+// the card's four questions a block answers, and the accent bar repeats the
+// same hue so the grouping survives at a glance.
+//
+// EFFICIENCY IS DELIBERATELY THE DIM ONE. Giving it a bright header would fight
+// the whole point of the second channel — the section is muted because the
+// numbers in it do not predict anything, and a cyan heading would say the
+// opposite of the note underneath it.
+// THE position palette — one definition, read by both the modal (a top-level
+// component) and posColor() inside RosterScorer. Fourth dedicated colour family,
+// distinct from matchups (green/red) and weeks (blue/purple/teal), so a position
+// looks the same everywhere it appears.
+const POS_ACCENT = {
+  QB: { text: "var(--caution-alt)", border: "#f59e0b", bg: "#2a1f08" },   // amber
+  RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" },   // cyan
+  WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" },          // pink/magenta
+  TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
+};
+
+const CARD_ACCENTS = {
+  trajectory: "var(--accent-cyan)",
+  volume: "var(--accent-cyan)",
+  opportunity: "var(--accent-purple-light)",
+  outcomes: "var(--info-blue)",
+  efficiency: "var(--text-dim)",
+};
+
+const CardSection = ({ title, note, accent = "var(--accent-cyan)", collapsible = false, children }) => {
+  const [open, setOpen] = React.useState(false);
+  const shown = !collapsible || open;
+  const Head = collapsible ? "button" : "div";
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <Head
+        {...(collapsible ? { onClick: () => setOpen(o => !o), "aria-expanded": open } : {})}
+        style={{
+          display: "flex", alignItems: "center", gap: "8px", width: "100%",
+          marginBottom: shown && note ? "6px" : shown ? "8px" : "0",
+          background: "transparent", border: "none", padding: 0,
+          cursor: collapsible ? "pointer" : "default", fontFamily: "inherit", textAlign: "left",
+        }}
+      >
+        <span style={{ width: "3px", height: "12px", background: accent, borderRadius: "1px", flex: "none" }} />
+        <div style={{ fontSize: "10px", color: accent, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
+        {collapsible && (
+          <span style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+            {open ? "hide" : "show"}
+            <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+          </span>
+        )}
+      </Head>
+      {shown && note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "9px", lineHeight: 1.5, paddingLeft: "11px" }}>{note}</div>}
+      {shown && children}
+    </div>
+  );
+};
 
 // The player card. Opened by clicking a name anywhere in a result — a modal so
 // it costs the page ZERO resting density, which is the whole reason it is not
@@ -6077,9 +6127,15 @@ const PlayerCardModal = ({ card, onClose }) => {
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
           <div>
-            <div style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", letterSpacing: "0.05em" }}>
-              {card.pos} · {card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}
+            <div style={{ fontSize: "19px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "7px" }}>
+              <span style={{
+                color: POS_ACCENT[card.pos]?.text || "var(--text-secondary)",
+                border: `1px solid ${POS_ACCENT[card.pos]?.border || "#444"}66`,
+                background: POS_ACCENT[card.pos]?.bg || "transparent",
+                borderRadius: "3px", padding: "1px 6px", fontWeight: 600, letterSpacing: "0.08em",
+              }}>{card.pos}</span>
+              <span>{card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}</span>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px", color: "var(--text-muted)", cursor: "pointer", fontSize: "14px", lineHeight: 1, padding: "4px 8px", fontFamily: "inherit" }}>✕</button>
@@ -6106,7 +6162,7 @@ const PlayerCardModal = ({ card, onClose }) => {
                 the insight, and a card that silently swaps vintages is the
                 stale-data trap in a new costume. */}
             {tc && (
-              <CardSection title={`Role trajectory · ${card.curVintage}`}>
+              <CardSection title={`Role trajectory · ${card.curVintage}`} accent={CARD_ACCENTS.trajectory}>
                 {tc.delta == null ? (
                   <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
                     {pct(tc.season)} snap share over {tc.gp} game{tc.gp === 1 ? "" : "s"} so far — too early for a trend.
@@ -6133,7 +6189,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             )}
 
             {t && (
-              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"}>
+              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
                 {t.delta == null ? (
                   <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
                     {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
@@ -6163,7 +6219,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             )}
 
             {qc && (
-              <CardSection title={`Volume profile · ${card.curVintage}`}>
+              <CardSection title={`Volume profile · ${card.curVintage}`} accent={CARD_ACCENTS.volume}>
                 <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
                 <CardMetricRow label="Pass attempts / game" value={qc.pass.toFixed(1)} pct={null} r={0.605} />
                 <CardMetricRow label="Passing aDOT" value={qc.adot.toFixed(1)} pct={null} r={0.486} />
@@ -6176,6 +6232,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             {card.qb && (
               <CardSection
                 title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
+                accent={CARD_ACCENTS.volume}
                 note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
               >
                 <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
@@ -6190,20 +6247,20 @@ const PlayerCardModal = ({ card, onClose }) => {
             )}
 
             {card.metrics.length > 0 && (
-              <CardSection title="Opportunity" note={`Percentile among ${card.popGate} at ${card.pos}.`}>
+              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
                 {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
               </CardSection>
             )}
 
             {card.descriptive.length > 0 && (
-              <CardSection title="Week outcomes" note="Descriptive of 2025. Spike rate is the metric best ball cares most about and the least stable of the three.">
+              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
                 {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
               </CardSection>
             )}
 
             {card.efficiency.length > 0 && (
-              <CardSection title="Efficiency" note="Dimmed on purpose. Measured year over year, RB yards per carry is r=0.02 — a coin flip. Read these as a record of what happened, never as a forecast.">
-                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim />)}
+              <CardSection title="Efficiency" accent={CARD_ACCENTS.efficiency} collapsible note="Measured year over year, RB yards per carry is r=0.02 — a coin flip. A record of what happened, never a forecast.">
+                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
               </CardSection>
             )}
           </>
@@ -6267,7 +6324,7 @@ export default function RosterScorer() {
   const [aiLineupNotes, setAiLineupNotes] = useState({});
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
   const [gradeHistory, setGradeHistory] = useState([]);
-  const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
   const [shareLinkLoading, setShareLinkLoading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [shareLinkError, setShareLinkError] = useState(false);
@@ -6280,6 +6337,7 @@ export default function RosterScorer() {
   const [tradeError, setTradeError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cardPlayer, setCardPlayer] = useState(null);
+  const [rosterStripOpen, setRosterStripOpen] = useState(false);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -7507,15 +7565,11 @@ Analyze this best ball roster. Return JSON only.`;
   // Position palette — fourth dedicated color family. Distinct from matchups
   // (green/red), weeks (blue/purple/teal). Each position gets one consistent color
   // wherever it appears, so a user scanning the page can group by position visually.
-  const posColor = (pos) => {
-    const map = {
-      QB: { text: "var(--caution-alt)", border: "#f59e0b", bg: "#2a1f08" }, // amber
-      RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" }, // cyan
-      WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" }, // pink/magenta
-      TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
-    };
-    return map[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
-  };
+  // Reads the module-level POS_ACCENT so the strip, the card and every other
+  // consumer cannot drift apart. This map used to be declared here as a second
+  // copy — the same divergence class as the Aug 14 tier/score fix and the Aug 23
+  // competitive-balance unification. One definition or none.
+  const posColor = (pos) => POS_ACCENT[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
 
   // Highlight player names (full name or last name) inside a strength/weakness
   // string with a consistent bright color, so names pop out of the colored
@@ -9300,15 +9354,33 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
                   Overall Ceiling Rating · <span style={{ color: "var(--pos)" }}>{analyzed.tournament.name}</span>
                 </div>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "13px" }}>
-                  <span><span style={{ color: "var(--text-muted)" }}>QB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.QB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>RB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.RB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>WR</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.WR}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>TE</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.TE}</span></span>
-                  <span style={{ marginLeft: "auto", color: "var(--text-muted)" }}>
+                <button
+                  onClick={() => setRosterStripOpen(o => !o)}
+                  aria-expanded={rosterStripOpen}
+                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  style={{
+                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
+                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  }}
+                >
+                  {["QB", "RB", "WR", "TE"].map(pos => {
+                    const c = posColor(pos);
+                    return (
+                      <span key={pos}>
+                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                      </span>
+                    );
+                  })}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
                     {analyzed.valid.length}/{analyzed.picks.length} matched
+                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+                      {rosterStripOpen ? "Hide" : "Roster"}
+                      <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                    </span>
                   </span>
-                </div>
+                </button>
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18
@@ -9333,27 +9405,28 @@ Analyze this best ball roster. Return JSON only.`;
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
                     itself is a modal, so this strip is the only resting cost. */}
-                {analyzed.valid.length > 0 && (
+                {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
-                      Your roster · tap a name for 2025 role data
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                      Tap a name for 2025 role data
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
+                        const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
                             {group.map(pl => (
                               <button
                                 key={pl.name}
                                 onClick={() => openCard(pl)}
                                 data-compact
                                 style={{
-                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
-                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
+                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
                                 }}
                               >
                                 {pl.name}
@@ -10610,15 +10683,33 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
                   Redraft Grade · <span style={{ color: "var(--accent-purple-light)" }}>{analyzed.league.name}</span>
                 </div>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "13px" }}>
-                  <span><span style={{ color: "var(--text-muted)" }}>QB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.QB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>RB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.RB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>WR</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.WR}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>TE</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.TE}</span></span>
-                  <span style={{ marginLeft: "auto", color: "var(--text-muted)" }}>
+                <button
+                  onClick={() => setRosterStripOpen(o => !o)}
+                  aria-expanded={rosterStripOpen}
+                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  style={{
+                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
+                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  }}
+                >
+                  {["QB", "RB", "WR", "TE"].map(pos => {
+                    const c = posColor(pos);
+                    return (
+                      <span key={pos}>
+                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                      </span>
+                    );
+                  })}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
                     {analyzed.valid.length}/{analyzed.picks.length} matched
+                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+                      {rosterStripOpen ? "Hide" : "Roster"}
+                      <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                    </span>
                   </span>
-                </div>
+                </button>
                 {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),
                     so a fixed expectation would cry wolf. The match counter plus the
                     notFound rows carry the signal here instead. */}
@@ -10641,27 +10732,28 @@ Analyze this best ball roster. Return JSON only.`;
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
                     itself is a modal, so this strip is the only resting cost. */}
-                {analyzed.valid.length > 0 && (
+                {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
-                      Your roster · tap a name for 2025 role data
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                      Tap a name for 2025 role data
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
+                        const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
                             {group.map(pl => (
                               <button
                                 key={pl.name}
                                 onClick={() => openCard(pl)}
                                 data-compact
                                 style={{
-                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
-                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
+                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
                                 }}
                               >
                                 {pl.name}
