@@ -2033,3 +2033,521 @@ real points here instead of costing nothing until a cut kills it.
 ```
 8 pre-existing tournaments, standard reference roster: BYTE-IDENTICAL before and after
 ```
+
+---
+
+## Snap Trajectory Layer (added Aug 25, 2026)
+
+Fifth nflverse context layer. `scripts/build-snap-trajectory.py` reads the
+nflverse `snap_counts` release into `grading/data/snap_trajectory_2025.json`.
+**Context only — the numeric scoring engine is untouched. Verified: 27 grades
+(3 reference rosters x 9 tournaments) byte-identical before and after.**
+
+### The problem it fixes: a season average buries role CHANGE
+
+`player_metrics_2025.json` stores `snap_sh` as a **season average**. Role change
+is **rank 1** in the Source Hierarchy; a season-long volume average is **rank 2**.
+Averaging the year collapses the higher-ranked signal into the lower-ranked one,
+and it fails in the direction that matters most for projection — a player buried
+in September and starting in December averages out to "committee," which is
+exactly what he no longer is.
+
+Two players were mis-graded off that average before this file existed, both in
+the same direction:
+
+```
+RJ Harvey         season 0.421   W1-9 0.293 -> W10-18 0.565   last 4: 0.620
+Chris Rodriguez   season 0.312   W1-9 0.216 -> W10-18 0.425   last 4: 0.443
+```
+
+Harvey was graded **fade/falling on four separate rosters** off the 0.421. The
+role had already changed and the average is what hid it.
+
+### Fields, and the two the season average cannot express
+
+`season` (== `snap_sh`), `early` / `late` (W1-9 / W10-18), `early_gp` / `late_gp`,
+`last4`, `delta` (late - early), `trend`, `changed_team`.
+
+- **`last4` is games PLAYED, not the last four weeks.** An injured player's exit
+  role still gets measured on real snaps rather than on zeros.
+- **`delta` is null unless BOTH windows clear 3 games.** A one-game window is not
+  a trajectory. Those players still emit a line, saying the season number covers
+  one half of the year only — which is itself the correction (Nabers' 80% is four
+  games; Purdy's 98% is W10-18 only).
+
+### The threshold is DERIVED. Do not nudge it.
+
+Across the 367 qualified 2025 players the delta distribution is centered at zero
+(mean +0.010, **median -0.005**) with **stdev 0.157**. `TREND_THRESHOLD = 0.15` is
+therefore ~1 SD, and it flags the tails: p10 -0.150, p90 +0.193, 57 rising and 37
+falling out of 367.
+
+**The centering is what makes the threshold mean anything.** If a future season's
+median drifts off zero, the threshold starts measuring league-wide change instead
+of player-specific change and must be re-derived before use. Guard 13 asserts
+`|median| <= 0.03` for exactly this reason.
+
+### Only players whose role MOVED are listed
+
+`trajectoryContext` deliberately emits nothing for a `stable` player. A stable
+line repeats what the season average already said. **The prompt header states this
+explicitly**, so absence reads as "the average is a fair read" rather than as
+missing data — the same silent-drop distinction the Jul 27 extraction rules turn
+on. On an 18-man reference roster this produces 6 lines, not 18.
+
+### `changed_team` spans two roles
+
+A mid-season move splices two different jobs into one delta. The line still
+prints the split (it is real information) but flags that the delta itself is not
+a trajectory. Same trap as the Aug 8 rule about `player_metrics` rows carrying the
+OLD team — check `team` against the ADP table before quoting any 2025 number
+about a 2026 mover.
+
+### Guard 13 — `scripts/test-snap-trajectory.mjs`
+
+Three assertions, in descending order of what a regression would cost:
+
+1. **CONTEXT-ONLY CONTAINMENT.** `getSnapTrend` may be referenced **exactly once**
+   outside its definition, and that reference must sit inside `trajectoryContext`.
+   `analyzeRoster` and `analyzeRedraft` are asserted clean. A second call site is
+   a scoring leak even when it looks harmless, and it fails the build immediately
+   rather than surfacing later as an unexplained grade movement.
+2. **The trend LABEL matches the number.** `delta == late - early`, and `trend`
+   follows `delta` against `_meta.trend_threshold`. Same class as the Aug 14
+   tier/score divergence: a label that disagrees with its own value reads as
+   confirmation and is worse than no label.
+3. **The threshold stays earned** (centering + ~1 SD + flags 10-40% of the pool).
+
+Both failure paths were negative-tested: corrupting a trend label and adding a
+second call site each exit non-zero.
+
+### Regenerate
+
+```
+curl -sSL -o snaps.csv.gz \
+  https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_2025.csv.gz
+python3 scripts/build-snap-trajectory.py snaps.csv.gz grading/data/snap_trajectory_2025.json
+```
+
+### Still open (the other two from the same audit)
+
+**Vacated target share** (built as a throwaway script, not yet a data file) and
+**availability rate** (proposed, not built). Both are free from the same nflverse
+source. The vacated-targets pass already needs the suffix normalization fix that
+inflated WAS to 82.4% on its first run — normalize before differencing, or a
+suffixed name reads as a departure.
+
+---
+
+## Measured Stability of Every Input (Aug 25, 2026)
+
+The Source Hierarchy ranked inputs by **causal priority**, which was reasoned
+rather than measured. This section measures the other axis: **how often last
+year's number is still true this year.** Everything below is computed from
+nflverse weekly player stats + snap counts, 2023-2025, same player, both
+transitions (23>24, 24>25), 8+ games in both seasons.
+
+### Verified: FPA is the least stable input in the app
+
+Year-over-year correlation of half-PPR points allowed per game, by defense:
+
+```
+pos     r 23>24   r 24>25   mean r    r^2
+QB       -0.150     0.247    0.049   0.00
+RB        0.294     0.196    0.245   0.06
+WR       -0.063    -0.083   -0.073   0.01
+TE        0.152     0.232    0.192   0.04
+```
+
+**The best FPA figure on the board explains 6% of next-season variance, and it
+is worse than the WORST player-level opportunity metric measured.** Rank 5 is
+correct and is now empirical rather than asserted.
+
+**WR FPA is negative in BOTH transitions.** A defense that was soft against
+receivers last year is very slightly more likely than chance to be tough this
+year. Do not build a WR matchup argument on a prior-season FPA number alone.
+
+### Gemini's TE claim is directionally wrong, but it is detecting something real
+
+TE is the **second-most** sticky position (0.192), behind RB. **WR is the least
+sticky.** What TE does have is the widest relative spread across defenses:
+
+```
+pos      mean   stdev      CV       min > max
+QB       16.3    2.68   0.164    11.1 > 23.3
+RB       19.9    2.87   0.145    15.5 > 26.2
+WR       25.3    3.57   0.141    19.3 > 33.3
+TE       10.6    2.35   0.221     6.2 > 17.5
+```
+
+**TE CV 0.221 is the highest** — best TE defense allows 6.2/gm, worst allows
+17.5, a 2.8x range against 1.7x at WR. TE matchups *look* like they swing hardest
+because in percentage terms they do. That is the observation. "Therefore
+unpredictable" is the part that does not follow.
+
+A within-2025 split-half check (odd weeks vs even, Spearman-Brown corrected to
+full season) says **roughly half of a season-long TE or QB FPA number is signal
+(0.458 / 0.466), and an RB one is mostly noise (0.141)** — RB is stickiest across
+years and least reliable within one, which fits: the run front is the most stable
+unit in football while weekly RB output is dominated by game script.
+
+⚠️ These are RAW points allowed, **not schedule-adjusted**. A defense that drew
+Kelce, Bowers and LaPorta looks soft at TE for reasons unrelated to the defense.
+`grading/data/fpa.md` is the same shape of number and inherits the same confound.
+
+### The player-level table — opportunity is sticky, efficiency is not
+
+```
+PASS CATCHERS (WR/TE)              RUNNING BACKS
+metric              mean r         metric              mean r
+adot                 0.784         carries_pg           0.730
+air_yards_share      0.780         snap_share           0.728
+targets_pg           0.774         points_pg            0.715
+wopr                 0.752         dud_rate             0.673
+target_share         0.729         target_share         0.661
+snap_share           0.709         wopr                 0.659
+points_pg            0.699         usable_rate          0.658
+dud_rate             0.667         targets_pg           0.654
+usable_rate          0.652         spike_rate           0.620
+catch_rate           0.496         adot                 0.324
+spike_rate           0.475         yds_per_target       0.311
+yds_per_target       0.308         rec_epa_per_tgt      0.260
+rec_epa_per_tgt      0.278         td_per_touch         0.214
+td_per_touch         0.198         catch_rate           0.103
+                                   yds_per_carry        0.022
+
+QUARTERBACKS
+qb_rush_att_pg 0.815 · pass_att_pg 0.605 · pass_adot 0.486 · yds_per_att 0.444
+sack_rate 0.398 · pass_td_rate 0.389 · points_pg 0.383 · comp_pct 0.338
+usable_rate 0.322 · spike_rate 0.308 · pass_epa_per_att 0.260
+```
+
+### Six things this changes
+
+1. **RB YARDS PER CARRY IS r = 0.022. It is a coin flip.** The most-quoted RB
+   stat in public analysis carries essentially zero year-over-year information.
+   Never let a YPC figure move a verdict. `ngs_rush_rank` measures the same
+   underlying thing and inherits the same warning.
+2. **QB RUSHING ATTEMPTS PER GAME (0.815) IS THE STICKIEST INPUT MEASURED**,
+   ahead of every receiving metric. The konami-code premium is not a narrative —
+   a QB's rushing volume is the single most repeatable thing in football, which
+   is why it is the safest component of a QB projection.
+3. **aDOT is the sticky exception among efficiency-shaped numbers (0.784)**
+   because it is a ROLE property, not a performance one. This validates the
+   air-yards layer's framing: aDOT describes where a player is deployed, and
+   deployment persists while outcomes do not.
+4. **DUD RATE IS MORE STABLE THAN SPIKE RATE at every position** (WR/TE 0.667 vs
+   0.475). Floor is more predictable than ceiling. **In best ball the more
+   stable metric is the less useful one** — a genuine tension, and the reason the
+   Ceiling Shape Layer is capped at ±0.5 rather than trusted. Spike rate at 0.475
+   is exactly what a rank-4 input should look like.
+5. **QB fantasy points per game is barely sticky (0.383)** — QBs are far less
+   predictable season to season than pass catchers (0.699). Combined with (2):
+   project QBs from rushing volume and pass attempts, not from last year's
+   points.
+6. **RB air_yards_share (0.261) and catch_rate (0.103) are unusable for backs**
+   despite working for receivers. The CLAUDE.md note that `ay_sh` "discriminates
+   nothing" for RBs is confirmed, and now quantified.
+
+### Stability is NECESSARY, not SUFFICIENT — do not collapse the two axes
+
+A metric can be perfectly stable and still tell you nothing (jersey number would
+score 1.00). This table answers "will last year's number still be true," and
+nothing else. It does **not** rank metrics by predictive value, and it does not
+replace the Source Hierarchy.
+
+**The apparent contradiction is worth stating plainly.** Rank 1 in the hierarchy
+is role/opportunity **CHANGE**, and change is by definition the part that is NOT
+sticky. That is not a conflict, it is the whole point: a confirmed role change
+outranks everything precisely because it **invalidates the sticky baseline**.
+The two lists are complementary — this one tells you what to assume by default,
+the hierarchy tells you what overrides the default.
+
+### Limits — state these before quoting the numbers
+
+- **Survivorship.** 8+ games in both seasons excludes injury years, so these are
+  correlations among players who held a role two years running. True population
+  stickiness is lower.
+- **Range restriction** biases toward the stable middle for the same reason.
+- **Two transitions only.** QB n=26 per transition is small; treat the QB column
+  as directional. WR/TE n=149 and RB n=58 are solid.
+- Reproduce with the nflverse weekly stats releases plus `snap_counts`; no
+  script was committed because this is a one-off calibration, not a data layer.
+
+---
+
+## QB Volume Profile (added Aug 25, 2026)
+
+`scripts/build-qb-profile.py` -> `grading/data/qb_profile_2025.json`. Three fields,
+41 quarterbacks. **Context only — 27 grades byte-identical before and after.**
+
+### Why a sixth data file for three numbers
+
+The stability calibration measured the QB inputs and the result is lopsided:
+
+```
+qb_rush_att_pg   r = 0.815   <- stickiest input measured ANYWHERE
+pass_att_pg      r = 0.605
+pass_adot        r = 0.486
+points_pg        r = 0.383   <- barely sticky
+```
+
+**None of the three sticky ones were in the prompt.** The QB metrics line carried
+spike rate (0.308) and dud rate only — the least useful pair available for the
+position. A QB is projected from volume and deployment; his prior-season points
+are close to noise.
+
+**It could not go in `player_metrics_2025.json`.** That builder tracks carries
+internally but emits no count, and has no passing-attempt fields at all.
+Regenerating it would re-derive `hvt_pg`, `usable_rate` and `spike_rate` — three
+inputs that DO score — over a pbp release that may have been revised since. An
+additive file cannot move a grade; a regeneration can.
+
+### `qbContext` is deliberately NOT inside `metricsContext`
+
+That block gates on `PLAYER_METRICS.gp >= 8`, which drops a QB who missed half a
+season. **A seven-game starter is exactly the case where his rushing rate is the
+most useful thing you can say about him** — Jayden Daniels, 8.29 rush att/gm on
+7 games, would have been silent. This block carries its own gate (6 games, 100
+attempts, matching the stability run's qualifying rule).
+
+The prompt line flags both tails against the league median (3.43): at 1.5x it
+says RUSHING QB, at 0.55x it says no rushing floor. 2025 range is 1.12 (Goff) to
+8.29 (Daniels), so the spread is real and worth naming.
+
+### Efficiency ranks now carry their measured instability inline
+
+`rush_eff_rank` and `ngs_rush_rank` print "2025 only, does NOT carry to 2026",
+and the `efficiencyContext` prompt header states the numbers: **RB yards per
+carry r=0.02, yards per target 0.31, EPA per target 0.27.** The header now says
+explicitly to use efficiency to explain what happened and never to argue what
+will happen.
+
+This closes a live risk rather than a hypothetical one. Nothing in the engine
+scores efficiency — every call site is inside the prompt builder — so the only
+way a coin-flip number could move a verdict was the AI layer quoting a rank as
+though it meant something, which nothing prevented.
+
+### Still open: three anchor-tier metrics the prompt omits
+
+Measured anchors that are absent from `metricsContext`, listed with what they
+would cost:
+
+| Metric | Stability | Cost |
+|---|---|---|
+| Targets per game (WR/TE) | 0.774 | **free** — `tgt` and `gp` are already loaded |
+| Air yards share (WR/TE) | 0.780 | **free** — `ay_sh` is already loaded, just unprinted |
+| Carries per game (RB) | 0.730 | needs a count `build-player-metrics.py` does not emit |
+
+The first two are one line each and cannot move a grade. Left undone on purpose:
+they were outside the change that was approved, and prompt content is a data
+decision like any other.
+
+---
+
+## Player Card (added Aug 25, 2026)
+
+Click any name in the roster strip under the grade header and a modal opens with
+that player's 2025 role data. **Informational only — 27 grades byte-identical
+across 3 reference rosters x 9 tournaments.** Guarded by
+`scripts/test-player-card.mjs` (guard 14).
+
+### It answers a DIFFERENT question from the grade
+
+The grade is portfolio-level: is this construction good. The card is
+player-level: what is this player's role. Conflating them is the same error the
+Source Hierarchy already warns about, so the card issues **no verdict** — it
+shows data and lets the reader decide. `PLAYER_VERDICTS` is deliberately absent:
+a stale verdict rendered as current is the Diggs bug in a new costume.
+
+### A MODAL, not another panel
+
+The results view already carries nine disclosure panels. A modal costs the page
+**zero resting density**, which is the whole reason the card is not a tenth one.
+The only resting cost is the roster strip itself: four lines, one per position.
+
+That strip is also the canonical entry point — every rostered player appears
+exactly once, so there is one place to click rather than hoping a name happens to
+show up inside a stack block.
+
+### TWO VISUAL CHANNELS. The second one is the point.
+
+**Colour encodes WHERE a player ranks. Weight encodes HOW MUCH that rank should
+move your opinion.** These are different facts and one channel cannot carry both.
+
+A back at the 78th percentile in yards per carry, painted green, teaches the
+reader to trust `r = 0.022`. That would look like a working feature while doing
+active harm — the same shape as the position-normalisation bug in the Ceiling
+Shape Layer, where grades moved for the wrong reason.
+
+So anchor metrics render at full contrast. Anything below the reliable line
+renders at 55% opacity with a `2025 ONLY` tag, and efficiency rows are dimmed
+wholesale with the coin-flip figure stated in the section note.
+
+### The headline is the TRAJECTORY, not the season average
+
+Leading with a season average reproduces exactly the error that graded RJ Harvey
+`fade/falling` on four rosters. The card opens with `W1-9 -> W10-18 -> last 4`.
+
+**Where the two disagree, BOTH are shown and the conflict is labelled.** Harvey's
+snap-share row reads 42% at the 30th percentile while the headline above it reads
+29% -> 56%. That contradiction is the finding, so the row carries
+`⚠ season average — his role grew, see trajectory` and its percentile is greyed
+out. Never resolve this by hiding one of the two numbers.
+
+### Metric sets are FIXED per position, never selected
+
+A card that picks the most impressive-looking metrics is a highlight reel, and
+**two players stop being comparable**, which is the card's actual job. Same
+metrics, same order, every player at that position.
+
+```
+WR/TE   targets/gm · air yards share · target share · WOPR · snap share
+RB      snap share · target share · targets/gm · WOPR · HVT/gm
+QB      rush att/gm · pass att/gm · passing aDOT   (from QB_PROFILE)
+```
+
+All anchor or reliable tier, all from already-loaded fields. **WR/TE aDOT (0.784)
+is the one anchor still missing** — `AIRYARDS` is RB-only, so it needs data the
+app does not carry. RB carries/gm (0.730) is missing for the same reason.
+
+### Percentile population is the decision that could bias the whole card
+
+Mirrors `CEILING_RANKINGS` exactly: **draftable (present in `ADP_DATA`) and 8+
+games.** Percentile against all players is meaningless — a three-game backup
+lands in the 90th percentile of something. **The gate is printed on the card**, so
+a number can never be read without it. Populations under 12 return null rather
+than a flattering rank.
+
+### No blank cards, ever
+
+A player with no data returns a `reason` string, never an empty card. Of 291
+draftable players, 234 render data and **57 render an explicit reason** (rookies,
+sub-gate). An empty card is the silent-drop failure in a new costume: per the
+Jul 27 extraction rules, a filter that removes something must never be silent.
+
+Guard 14 asserts the no-data branch is actually exercised, so it cannot rot into
+dead code.
+
+### `movedFrom` reconciles the two team fields
+
+`PLAYER_METRICS` carries the team a player PLAYED for; `ADP_DATA` carries his 2026
+team. When they differ the card leads with a warning naming both. Same trap as the
+Aug 8 rule — Gainwell's card reads TB with a banner saying every number below is
+his PIT season.
+
+### Guard 13 changed shape when this shipped
+
+`getSnapTrend` previously had to be called **exactly once**. The card is a second
+legitimate consumer, so the assertion became an **allowlist of reviewed
+consumers** (`trajectoryContext`, `buildPlayerCard`), each verified to sit outside
+the scoring engine.
+
+**Do not relax this to "any number of call sites."** The point is that every
+consumer is reviewed, not that there is one. A third, unlisted call site still
+fails the run — negative-tested. `analyzeRoster` and `analyzeRedraft` are still
+asserted clean, which is the assertion that actually protects the grades.
+---
+## The Puppy 4 — added Aug 25, 2026
+
+Eleventh tournament in `TOURNAMENTS`, key `puppy4`. Read off the in-app rules.
+**It runs ALONGSIDE Puppy 3 and does not replace it** — both sit on the 2026
+slate and both close 9/9/26. $5 · 112,800 entries · $500k prizes · 11.3% rake ·
+18 rounds · 12-man drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/
+BENCH10 · max 150 entries.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 9,400 × 12 | 2 (16.7%) | 112,800 → 18,800 |
+| R2 Quarterfinal | W15 | 1,880 × 10 | 1 (**10.0%**) | 18,800 → 1,880 |
+| R3 Semifinal | W16 | 188 × 10 | 1 (**10.0%**) | 1,880 → 188 |
+| R4 Championship | W17 | one 188-seat group, all paid | 1 | 188 → 1 |
+
+P(reach the final) = **0.167%**, one in 600.
+
+**Every figure reconciles against the rules text.** Unlike the Pit Bull page
+("156 6-person Groups"), the Frenchie R2 reversal and the shared "single1,
+31-person Group" template bug, this one has no typo. The ladder was still
+recomputed from the group counts rather than trusted — do that every time.
+
+### The first format where W15 and W16 are exactly equal AND both brutal
+
+Both are **1-of-10**. Puppy 3 pairs a 10% W15 with a 20% W16; BBM VII pairs 7.1%
+with 8.3%. **This is structurally BBM's shape at a shallower depth** — two
+near-identical consecutive kill shots — so both weeks carry maximum weight and
+the scoring branch flags stacks live in BOTH, exactly as `bbm7` does.
+
+Combined weekly survival is **1.00%**, harder than Field General's 1.39%.
+
+### Why W17 gets 1.75 and not BBM's 1.5 or the others' 2
+
+The final here is **both richer and more reachable than BBM's**: 74.8% of the
+pool ($373,500) reaches the 188 finalists, **1st alone is 20.0%** against BBM's
+13.3%, and arriving pays 150x on a $5 entry.
+
+It stops short of 2 because **the binding constraint really is surviving two 10%
+cuts back to back** — W17 quality cannot buy you past them. The $5 ladder is
+breakeven → $10-125 → $750+ → $100k, and **the jump that matters is clearing
+W16**, which takes you from roughly $25 to a $750 floor.
+
+`advanceWeight: 1.5` matches every other 2-of-12 qualifier (puppy, schnauzer,
+pitbull, fieldgeneral) — same structure, 83.3% eliminated.
+
+### It IS in the uniqueness-leverage branch
+
+**112,800 entries clears the 100k massive-field threshold** in the Field Size
+Overlay, so the uniqueness premium applies and `puppy4` joins `bbm7` and `puppy`
+in that branch. Schnauzer (37.2k), Pit Bull (28.1k) and Field General (34.0k)
+are mid-field and stay out. This is the first addition since BBM to qualify.
+
+### Updated ladder, ordered by weekly gate severity
+
+```
+                weights          gates W15/W16   P(final)   advanceWeight   massive field
+BBM VII      [2,    2,    1.5]     7.1 / 8.3      0.099%       1.75             yes
+Puppy 4      [2,    2,    1.75]   10.0 / 10.0     0.167%       1.5              yes
+Puppy 3      [2,    1.5,  2]      10.0 / 20.0     0.333%       1.5              yes
+Field Genl   [1.5,  2,    1.75]   16.7 / 8.3      0.347%       1.5              no
+Pit Bull 2   [1.5,  1.25, 2]      16.7 / 20.0     0.556%       1.5              no
+Schnauzer    [1.25, 1,    2]      20.0 / 25.0       —          1.5              no
+Frenchie 13  [1.25, 2,    2]      33.3 / 16.7       —          1.25             no
+Boxer        [1,    0.75, 2.5]    40.0 / 50.0     6.67%        0.75             no
+```
+
+### Calibration — nothing else moved
+
+```
+9 pre-existing tournaments x 3 fixtures = 27 grades BYTE-IDENTICAL
+
+The Puppy 4 (new):   ref1 A 7.39 · ref2 C+ 0.73 · ref3 B+ 5.09
+```
+
+**Two of three fixtures grade identically on Puppy 3 and Puppy 4, and that is
+correct rather than a wiring bug.** The weights bite through `normalizedScore`,
+which does differ (ref1: LAR 10.4 → 10.0, JAX 11.2 → 11.3, ATL 12.0 → 12.1) —
+the final grade only moves when a stack crosses an elite/qualified threshold.
+ref2 does move, 1.13 → 0.73. **If you ever change a weight vector and see zero
+movement anywhere, check `normalizedScore` before assuming the config is live.**
+
+---
+
+## Calibration Fixtures Are Now Committed (Aug 25, 2026)
+
+`scripts/fixtures/ref1.txt`, `ref2.txt`, `ref3.txt` — three 18-man rosters
+drafted from real `ADP_DATA` at seats 3, 11 and 7 of a 12-man snake.
+
+**Every calibration recorded in this file compares grades against reference
+rosters that lived in a scratch directory.** That directory does not survive a
+container reset, and it did not: the Puppy 4 session found `node_modules` and the
+entire scratchpad gone, including the rosters that a dozen recorded calibrations
+depend on. **A calibration you cannot re-run is not a calibration** — it is a
+number nobody can check.
+
+The historical ref1/ref2 are unrecoverable, so the numbers recorded in earlier
+sections stay as they are: they were valid against the rosters used at the time
+and remain a true record of "nothing moved" for those runs. **Do not attempt to
+reproduce a pre-Aug-25 calibration figure against the new fixtures** — different
+rosters, different numbers, and a mismatch means nothing.
+
+From here, every calibration run uses `scripts/fixtures/`. Add a fixture rather
+than replacing one if a new shape needs covering, so past numbers stay checkable.

@@ -25,6 +25,20 @@ import MOTION from './grading/data/motion_2025.json';
 // framework. Identifies ACCESS to explosive plays, not expected volume —
 // sits beside spike/nuclear rates in ceiling shape, never above role/volume.
 import AIRYARDS from './grading/data/airyards_2025.json';
+// In-season snap TRAJECTORY: W1-9 vs W10-18 snap share, plus the last four
+// games played. PLAYER_METRICS stores snap_sh as a SEASON AVERAGE, which buries
+// role CHANGE — the one thing that outranks everything else in the Source
+// Hierarchy. RJ Harvey averaged 42% and finished at 57%; the average is what
+// made him read as a timeshare. Built by scripts/build-snap-trajectory.py.
+// CONTEXT ONLY — never touches the numeric score.
+import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
+// The three stickiest QB inputs, measured: rushing attempts/gm (r=0.815 year over
+// year, the most repeatable input in football), pass attempts/gm (0.605) and
+// passing aDOT (0.486). A QB's prior-season fantasy POINTS are barely sticky
+// (0.383), so he is projected from volume and deployment instead. None of the
+// three were in the prompt before. Built by scripts/build-qb-profile.py.
+// CONTEXT ONLY — never touches the numeric score.
+import QB_PROFILE from './grading/data/qb_profile_2025.json';
 
 // ============ DATA ============
 
@@ -787,6 +801,45 @@ const TOURNAMENTS = {
   // advanceWeight 1.5 matches schnauzer because the R1 qualifier is structurally
   // IDENTICAL (12-man groups, 2 advance) and eliminates 83.3% of the field.
   puppy: { name: "The Puppy 3", entries: "225k", weights: [2, 1.5, 2], advanceWeight: 1.5, note: "W15 (1/10) is the hardest weekly gate and W16 (1/5) is twice as survivable — but 75.6% of the $1M pool goes to the 750 who reach W17, so the final is where the money is decided", format: "standard" },
+  // The Puppy 4 (2026 season, read off the in-app rules Aug 25 2026). Runs
+  // ALONGSIDE Puppy 3, it does not replace it — both close 9/9/26 on the 2026
+  // slate. $5 entry · 112,800 entries · $500k prizes · 11.3% rake · 18 rounds ·
+  // 12-man drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/BENCH10 ·
+  // 150 max entries.
+  //
+  //   R1 Qualifier  W1-14  9,400 groups of 12, 2 advance (16.7%)  112,800 -> 18,800
+  //   R2 Quarter    W15    1,880 groups of 10, 1 advance (10.0%)   18,800 ->  1,880
+  //   R3 Semi       W16      188 groups of 10, 1 advance (10.0%)    1,880 ->    188
+  //   R4 Final      W17    one 188-person group, all paid              188 ->      1
+  //
+  // Every figure reconciles against the rules text — unlike Pit Bull ("156
+  // 6-person Groups") and the Frenchie/Boxer pages, this one has no typo. The
+  // ladder was still recomputed from the group counts rather than trusted.
+  //
+  // THE FIRST FORMAT WHERE W15 AND W16 ARE EXACTLY EQUAL AND BOTH BRUTAL.
+  // Both are 1-of-10. Puppy 3 pairs a 10% W15 with a 20% W16; BBM VII pairs
+  // 7.1% with 8.3%. This is structurally BBM's shape — two near-identical
+  // consecutive kill shots — at a shallower depth, so both weeks carry maximum
+  // weight and the branch below flags stacks live in BOTH.
+  //
+  // Combined weekly survival is 1.00%, HARDER than Field General's 1.39%,
+  // and P(reach the final) is 0.167% — one in 600.
+  //
+  // W17 gets 1.75 rather than BBM's 1.5 because the final here is richer AND
+  // more reachable: 74.8% of the pool ($373.5k) is paid to the 188 finalists,
+  // 1st alone is 20.0% (against BBM's 13.3%), and arriving is worth 150x on a
+  // $5 entry. It stops short of 2 because the binding constraint really is
+  // surviving two 10% cuts back to back — you cannot buy your way past them
+  // with W17 quality. The $5 ladder is breakeven -> $10-125 -> $750+ -> $100k,
+  // and the jump that matters is clearing W16.
+  //
+  // advanceWeight 1.5 matches every other 2-of-12 qualifier here (puppy,
+  // schnauzer, pitbull, fieldgeneral) — same structure, 83.3% eliminated.
+  //
+  // 112,800 entries clears the 100k Field Size Overlay threshold, so this IS in
+  // the uniqueness-leverage branch alongside bbm7 and puppy. Schnauzer, Pit Bull
+  // and Field General are mid-field and stay out of it.
+  puppy4: { name: "The Puppy 4", entries: "112.8k", weights: [2, 2, 1.75], advanceWeight: 1.5, note: "W15 and W16 are both 1-of-10 — the first format where the two weekly cuts are exactly equal and both brutal. You must win them back to back, then 74.8% of the $500k is decided among 188 finalists", format: "standard" },
   // Mini Schnauzer 2 (added Jul 31 2026). Structurally the inverse of Puppy: the
   // weekly gates are the SOFTEST Underdog runs (W15 2-of-10 = 20%, W16 2-of-8 = 25%)
   // while the 14-week qualifier (2-of-12 = 16.7%) is the hardest filter in the format.
@@ -2323,6 +2376,8 @@ const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
 const getEfficiency = (name) => lookupPlayer(PLAYER_EFFICIENCY.players, name);
 const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
+const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
+const getQbProfile = (name) => lookupPlayer(QB_PROFILE.players, name);
 
 // === CEILING RANKINGS (informational only — never scored) ===
 // Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
@@ -2351,6 +2406,164 @@ const CEILING_RANKINGS = (() => {
   }
   return out;
 })();
+
+// === PLAYER CARD (informational only — never scored) ===
+//
+// The card answers a DIFFERENT question from the roster grade. The grade is
+// portfolio-level ("is this construction good"); the card is player-level
+// ("what is this player's role"). Everything below reads already-loaded data
+// and touches nothing in analyzeRoster/analyzeRedraft.
+//
+// TWO VISUAL CHANNELS, AND THE SECOND ONE IS THE POINT.
+// Colour encodes WHERE a player ranks. Weight encodes HOW MUCH that rank should
+// move your opinion. Those are different facts and a single colour cannot carry
+// both: a back at the 78th percentile in yards per carry painted green teaches
+// the reader to trust r=0.022. Anchor metrics render at full contrast; anything
+// below the reliable line renders dimmed and tagged "2025 only".
+// Stability figures are the Aug 25 2026 calibration (see CLAUDE.md).
+const CARD_VINTAGE = "2025 season · final";
+
+// Percentile population mirrors CEILING_RANKINGS exactly: draftable (present in
+// ADP_DATA) and 8+ games. Percentile against ALL players is meaningless — a
+// three-game backup lands in the 90th percentile of something. The gate is
+// printed on the card so the number can never be read without it.
+const CARD_POP_GATE = "draftable players, 8+ games";
+
+const CARD_METRICS = {
+  WR: [
+    { key: "tgt_pg",  label: "Targets / game",   r: 0.774, tier: "anchor",   get: m => m.gp ? m.tgt / m.gp : null,   fmt: v => v.toFixed(1) },
+    { key: "ay_sh",   label: "Air yards share",  r: 0.780, tier: "anchor",   get: m => m.ay_sh,   fmt: v => `${Math.round(v * 100)}%` },
+    { key: "tgt_sh",  label: "Target share",     r: 0.729, tier: "anchor",   get: m => m.tgt_sh,  fmt: v => `${Math.round(v * 100)}%` },
+    { key: "wopr",    label: "WOPR",             r: 0.752, tier: "anchor",   get: m => m.wopr,    fmt: v => v.toFixed(2) },
+    { key: "snap_sh", label: "Snap share",       r: 0.709, tier: "anchor",   get: m => m.snap_sh, fmt: v => `${Math.round(v * 100)}%` },
+  ],
+  RB: [
+    { key: "snap_sh", label: "Snap share",       r: 0.728, tier: "anchor",   get: m => m.snap_sh, fmt: v => `${Math.round(v * 100)}%` },
+    { key: "tgt_sh",  label: "Target share",     r: 0.661, tier: "reliable", get: m => m.tgt_sh,  fmt: v => `${Math.round(v * 100)}%` },
+    { key: "tgt_pg",  label: "Targets / game",   r: 0.654, tier: "reliable", get: m => m.gp ? m.tgt / m.gp : null,   fmt: v => v.toFixed(1) },
+    { key: "wopr",    label: "WOPR",             r: 0.659, tier: "reliable", get: m => m.wopr,    fmt: v => v.toFixed(2) },
+    { key: "hvt_pg",  label: "HVT / game",       r: null,  tier: "reliable", get: m => m.hvt_pg,  fmt: v => v.toFixed(1) },
+  ],
+  QB: [],
+  TE: null, // filled below — same set as WR
+};
+CARD_METRICS.TE = CARD_METRICS.WR;
+
+// Second row. Descriptive of 2025 and nothing else — these are what the card
+// dims. Kept visible because hiding a number is not the same as qualifying it.
+const CARD_DESCRIPTIVE = [
+  { key: "spike_rate",  label: "Spike weeks (18+)", r: 0.475, get: m => m.spike_rate,  fmt: v => `${Math.round(v * 100)}%` },
+  { key: "usable_rate", label: "Usable (10+)",      r: 0.652, get: m => m.usable_rate, fmt: v => `${Math.round(v * 100)}%` },
+  { key: "dud_rate",    label: "Duds (<5)",         r: 0.667, get: m => m.dud_rate,    fmt: v => `${Math.round(v * 100)}%`, invert: true },
+];
+
+// Sorted value arrays per position per metric, computed once at module load.
+const CARD_PERCENTILES = (() => {
+  const out = {};
+  for (const pos of ["QB", "RB", "WR", "TE"]) {
+    out[pos] = {};
+    const defs = [...(CARD_METRICS[pos] || []), ...CARD_DESCRIPTIVE];
+    for (const d of defs) {
+      const vals = [];
+      for (const [name, m] of Object.entries(PLAYER_METRICS)) {
+        if (m.pos !== pos || (m.gp || 0) < 8 || !ADP_DATA[name]) continue;
+        const v = d.get(m);
+        if (v != null && !Number.isNaN(v)) vals.push(v);
+      }
+      vals.sort((a, b) => a - b);
+      out[pos][d.key] = vals;
+    }
+  }
+  return out;
+})();
+
+const cardPercentile = (pos, key, value) => {
+  const arr = CARD_PERCENTILES[pos]?.[key];
+  if (!arr || arr.length < 12 || value == null) return null; // too thin to rank honestly
+  let below = 0;
+  for (const v of arr) { if (v < value) below++; else break; }
+  return Math.round((below / arr.length) * 100);
+};
+
+// Builds everything the card renders. Returns a `reason` instead of null when
+// there is no data, so the UI can say WHY — an empty card is the silent-drop
+// failure mode in a new costume.
+const buildPlayerCard = (name, pos, team) => {
+  const m = getMetrics(name);
+  const traj = getSnapTrend(name);
+  const qb = getQbProfile(name);
+  const eff = getEfficiency(name);
+  const ay = pos === "RB" ? getAirYards(name) : null;
+  const adp = ADP_DATA[normalize(name)] || ADP_DATA[normalize(name).replace(SUFFIX_RE, "")];
+
+  const card = {
+    name, pos, team,
+    adp: adp?.adp ?? null,
+    vintage: CARD_VINTAGE,
+    popGate: CARD_POP_GATE,
+    metrics: [], descriptive: [], trajectory: null, qb: null, efficiency: [],
+    movedFrom: null, reason: null,
+  };
+
+  // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
+  // in the 2026 offseason that is not his current job — say so on the card
+  // rather than describing a role he no longer holds.
+  const oldTeam = m?.team === "LA" ? "LAR" : m?.team;
+  if (oldTeam && team && oldTeam !== team) card.movedFrom = oldTeam;
+
+  if (traj) {
+    card.trajectory = {
+      season: traj.season, early: traj.early, late: traj.late, last4: traj.last4,
+      delta: traj.delta, trend: traj.trend, gp: traj.gp,
+      earlyGp: traj.early_gp, lateGp: traj.late_gp, changedTeam: traj.changed_team,
+    };
+  }
+
+  if (pos === "QB" && qb) {
+    const med = QB_PROFILE._meta.rush_att_pg_median;
+    card.qb = {
+      rush: qb.rush_att_pg, pass: qb.pass_att_pg, adot: qb.pass_adot, gp: qb.gp, median: med,
+      runner: qb.rush_att_pg >= med * 1.5 ? "rushing" : qb.rush_att_pg <= med * 0.55 ? "pocket" : null,
+    };
+  }
+
+  if (m && (m.gp || 0) >= 8) {
+    for (const d of (CARD_METRICS[pos] || [])) {
+      const v = d.get(m);
+      if (v == null || Number.isNaN(v)) continue;
+      // snap_sh is a SEASON AVERAGE. On a player whose role moved it contradicts
+      // the trajectory headline above it, and the reader is owed a reason rather
+      // than two numbers that disagree. Never resolve it by hiding one of them.
+      const stale = d.key === "snap_sh" && traj && traj.trend && traj.trend !== "stable";
+      card.metrics.push({
+        label: d.label, r: d.r, tier: d.tier, value: d.fmt(v),
+        pct: cardPercentile(pos, d.key, v),
+        caution: stale ? `season average — his role ${traj.trend === "rising" ? "grew" : "shrank"}, see trajectory` : null,
+      });
+    }
+    for (const d of CARD_DESCRIPTIVE) {
+      const v = d.get(m);
+      if (v == null) continue;
+      let pct = cardPercentile(pos, d.key, v);
+      if (pct != null && d.invert) pct = 100 - pct;
+      card.descriptive.push({ label: d.label, r: d.r, value: d.fmt(v), pct });
+    }
+  }
+
+  // Efficiency ranks ride along DIMMED and captioned. RB yards per carry is
+  // r=0.02 year over year; the rank is a record of 2025, never a projection.
+  if (eff?.rush_eff_rank) card.efficiency.push({ label: "Rush efficiency", value: `${eff.rush_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rush_eff_rank`]}` });
+  if (eff?.ngs_rush_rank) card.efficiency.push({ label: "NGS rush yds over exp", value: `${eff.ngs_rush_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_ngs_rush_rank`]}` });
+  if (eff?.rec_eff_rank) card.efficiency.push({ label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
+  if (ay) card.efficiency.push({ label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
+
+  if (!card.metrics.length && !card.qb && !card.trajectory && !card.efficiency.length) {
+    card.reason = m
+      ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
+      : "No 2025 NFL data. Rookie, or did not clear the volume gate.";
+  }
+  return card;
+};
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
 const buildLastNameIndex = (table) => {
@@ -3829,6 +4042,33 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     if (w17Elite.length === 0 && qualifiedStackGrades.length > 0) {
       weaknesses.push(`No stack has a live W17 window — reaching the 750-seat final is an 80x jump and 75.6% of the $1M pool is decided there`);
     }
+  } else if (tournamentKey === "puppy4") {
+    // The Puppy 4: W15 and W16 are BOTH 1-of-10. Equal, and both brutal — so
+    // unlike Puppy 3 (whose W16 is twice as survivable) there is no easier week
+    // to lean on. The BOTH-weeks check is the one that matters: a roster built
+    // for one 10% gate and dead in the other is not actually alive, it just has
+    // not been eliminated yet. W17 is flagged separately because 74.8% of the
+    // $500k is paid to the 188 who get there.
+    const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    const bothWeeks = primaryStacks.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w15Elite.length >= 1) {
+      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling — a 1-of-10 cut that eliminates 90% of the field`);
+    }
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) with W16 spike ceiling — also 1-of-10, exactly as steep as W15`);
+    }
+    if (bothWeeks.length >= 1) {
+      strengths.push(`${bothWeeks.length} stack(s) live in BOTH W15 and W16 — two 1-of-10 cuts back to back is the whole tournament, so this is what actually survives`);
+    } else if (primaryStacks.length > 0) {
+      weaknesses.push(`No stack clears both W15 and W16 — Puppy 4 makes you win two 1-of-10 gates consecutively, and neither week is the soft one`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — 74.8% of this format's $500k is paid to the 188 who reach it`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — reaching the 188-seat final pays 150x on a $5 entry and the whole $750-to-$100k spread is decided that week`);
+    }
   } else if (tournamentKey === "bbm7") {
     // BBM VII: the two hardest weekly gates anywhere, back to back — W15 is
     // 1-of-14 (7.1%) and W16 is 1-of-12 (8.3%). The old branch checked W15 only,
@@ -4227,7 +4467,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     weaknesses.push(`QB uncertainty in ${names} stack${uncertainQBStacks.length > 1 ? "s" : ""} — starting role unconfirmed`);
     score -= uncertainQBStacks.length * 0.3;
   }
-  if (tournamentKey === "bbm7" || tournamentKey === "puppy") {
+  // Massive field (100k+ entries) per the Field Size Overlay, so the uniqueness
+  // premium applies. Puppy 4 at 112,800 clears the threshold; schnauzer (37.2k),
+  // pitbull (28.1k) and fieldgeneral (34.0k) are mid-field and stay out.
+  if (tournamentKey === "bbm7" || tournamentKey === "puppy" || tournamentKey === "puppy4") {
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
       strengths.push(`${leverageStacks.length} under-the-radar stack(s) — good differentiation if the field is large`);
@@ -5723,6 +5966,167 @@ const saveScheduleImage = async (canvas, filename) => {
 
 // ============ COMPONENT ============
 
+// Percentile -> colour. This channel says WHERE he ranks and nothing else.
+const pctColor = (pct) => {
+  if (pct == null) return "var(--text-dim)";
+  if (pct >= 80) return "var(--pos)";
+  if (pct >= 60) return "#a3e635";
+  if (pct >= 40) return "var(--text-secondary)";
+  if (pct >= 20) return "var(--gold)";
+  return "var(--neg)";
+};
+
+// One metric row. `dim` is the SECOND channel: it says how much the colour on
+// the left should be allowed to change your mind.
+const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
+  <div style={{
+    display: "grid", gridTemplateColumns: "1fr auto 52px", alignItems: "center", gap: "10px",
+    padding: "6px 0", borderBottom: "1px solid var(--bg-raised)",
+    opacity: dim ? 0.55 : 1,
+  }}>
+    <span style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "7px" }}>
+      {label}
+      {r != null && (
+        <span title={`year-over-year stability r=${r.toFixed(2)}`} style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
+          r {r.toFixed(2)}
+        </span>
+      )}
+      {caution && <span style={{ fontSize: "9px", color: "var(--gold)", letterSpacing: "0.02em" }}>⚠ {caution}</span>}
+      {dim && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
+    </span>
+    <span style={{ fontSize: "13px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{value}</span>
+    <span style={{ fontSize: "11px", color: caution ? "var(--text-dim)" : pctColor(pct), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+      {pct == null ? "—" : `${pct}%ile`}
+    </span>
+  </div>
+);
+
+const CardSection = ({ title, note, children }) => (
+  <div style={{ marginTop: "18px" }}>
+    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.13em", textTransform: "uppercase", marginBottom: "6px" }}>{title}</div>
+    {note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "8px", lineHeight: 1.5 }}>{note}</div>}
+    {children}
+  </div>
+);
+
+// The player card. Opened by clicking a name anywhere in a result — a modal so
+// it costs the page ZERO resting density, which is the whole reason it is not
+// another expandable panel.
+const PlayerCardModal = ({ card, onClose }) => {
+  if (!card) return null;
+  const t = card.trajectory;
+  const pct = v => `${Math.round(v * 100)}%`;
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "#000000cc", zIndex: 10000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px", overflowY: "auto" }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-label={`${card.name} metrics`}
+        style={{ background: "var(--bg-inset)", border: "1px solid var(--border-default)", borderRadius: "6px", width: "100%", maxWidth: "460px", padding: "20px 22px 24px", boxShadow: "0 12px 48px #000a" }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+          <div>
+            <div style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", letterSpacing: "0.05em" }}>
+              {card.pos} · {card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}
+            </div>
+          </div>
+          <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px", color: "var(--text-muted)", cursor: "pointer", fontSize: "14px", lineHeight: 1, padding: "4px 8px", fontFamily: "inherit" }}>✕</button>
+        </div>
+
+        {card.movedFrom && (
+          <div style={{ marginTop: "12px", padding: "7px 10px", background: "#1a1200", border: "1px solid #7c5c00", borderRadius: "3px", fontSize: "11px", color: "var(--gold)", lineHeight: 1.45 }}>
+            ⚠ Every number below is his {card.movedFrom} season. He is on {card.team} in 2026 — treat the role as projected, not established.
+          </div>
+        )}
+
+        {card.reason ? (
+          <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+            {card.reason}
+          </div>
+        ) : (
+          <>
+            {/* The headline is the TRAJECTORY, not the season average. A season
+                average buries role change, which is the highest-ranked signal
+                there is — it is what graded RJ Harvey as a timeshare when he had
+                already taken the job. */}
+            {t && (
+              <CardSection title="Role trajectory">
+                {t.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
+                    <span style={{ color: "var(--gold)" }}>
+                      {t.lateGp >= t.earlyGp ? "W10-18 only" : "W1-9 only"}, so this is half a season, not a full-year role.
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(t.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W1-9</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: t.trend === "rising" ? "var(--pos)" : t.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(t.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W10-18</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(t.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {t.trend === "stable"
+                        ? `Steady role. The ${pct(t.season)} season average is a fair read.`
+                        : `${t.trend === "rising" ? "Role grew" : "Role shrank"} — the ${pct(t.season)} season average ${t.trend === "rising" ? "understates" : "overstates"} where he finished.`}
+                      {t.changedTeam && " Changed teams mid-2025, so this spans two different jobs."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
+            {card.qb && (
+              <CardSection
+                title="Volume profile"
+                note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
+              >
+                <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={card.qb.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={card.qb.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  League median {card.qb.median} rush att/gm.
+                  {card.qb.runner === "rushing" && <span style={{ color: "var(--pos)" }}> Rushing QB — this is scoring that survives a bad passing day.</span>}
+                  {card.qb.runner === "pocket" && <span style={{ color: "var(--gold)" }}> Pocket QB — effectively no rushing floor.</span>}
+                </div>
+              </CardSection>
+            )}
+
+            {card.metrics.length > 0 && (
+              <CardSection title="Opportunity" note={`Percentile among ${card.popGate} at ${card.pos}.`}>
+                {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
+            {card.descriptive.length > 0 && (
+              <CardSection title="Week outcomes" note="Descriptive of 2025. Spike rate is the metric best ball cares most about and the least stable of the three.">
+                {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
+              </CardSection>
+            )}
+
+            {card.efficiency.length > 0 && (
+              <CardSection title="Efficiency" note="Dimmed on purpose. Measured year over year, RB yards per carry is r=0.02 — a coin flip. Read these as a record of what happened, never as a forecast.">
+                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim />)}
+              </CardSection>
+            )}
+          </>
+        )}
+
+        <div style={{ marginTop: "18px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
+          {card.vintage} · nflverse
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function RosterScorer() {
   const [input, setInput] = useState("");
   const [analyzed, setAnalyzed] = useState(null);
@@ -5785,6 +6189,21 @@ export default function RosterScorer() {
   const [tradeResult, setTradeResult] = useState(null);
   const [tradeError, setTradeError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [cardPlayer, setCardPlayer] = useState(null);
+
+  // The card is a drill-down, not a destination — Escape and backdrop both close.
+  React.useEffect(() => {
+    if (!cardPlayer) return;
+    const onKey = e => { if (e.key === "Escape") setCardPlayer(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cardPlayer]);
+
+  const openCard = (pl) => {
+    if (!pl?.name) return;
+    setCardPlayer(buildPlayerCard(pl.name, pl.pos, pl.team));
+    track?.("player_card_open", { pos: pl.pos || "" });
+  };
 
   // === ADMIN PANEL STATE ===
   const [adminOpen, setAdminOpen] = useState(false);
@@ -6684,6 +7103,65 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === 2025 SNAP TRAJECTORY CONTEXT ===
+      // Qualifies the snap share printed in metricsContext above. That number is a
+      // SEASON AVERAGE and a season average hides the direction of travel, which is
+      // rank-1 information (role CHANGE) being flattened into a rank-2 summary.
+      //
+      // Deliberately emits ONLY players whose role actually moved. A "stable" line
+      // is the null result and says nothing the season average did not already say,
+      // so silence here means "the average is a fair read" — stated in the prompt
+      // header so absence is never mistaken for missing data.
+      const trajectoryContext = (result.valid || [])
+        .map(p => {
+          const t = getSnapTrend(p.name);
+          if (!t || t.gp < 4) return null;
+          const pct = v => `${Math.round(v * 100)}%`;
+          // Injured/partial seasons: no late window at all. The season number is
+          // then W1-9 only and must not be read as a full-year role.
+          if (t.delta == null) {
+            if (t.late_gp >= SNAP_TRAJECTORY._meta.min_window_gp || t.early_gp >= SNAP_TRAJECTORY._meta.min_window_gp) {
+              const played = t.late_gp >= t.early_gp ? "W10-18 only" : "W1-9 only";
+              return `${p.name}: ${pct(t.season)} snap share, but ${played} (${t.gp} games) — partial season, not a full-year role`;
+            }
+            return null;
+          }
+          if (t.trend === "stable" && !t.changed_team) return null;
+          const dir = t.delta > 0 ? "ROLE GREW" : "ROLE SHRANK";
+          const bits = [
+            `${pct(t.early)} (W1-9) -> ${pct(t.late)} (W10-18), ${pct(t.last4)} over his last 4 games`,
+          ];
+          if (t.trend !== "stable") {
+            bits.push(`${dir} — the ${pct(t.season)} season average ${t.delta > 0 ? "UNDERSTATES" : "OVERSTATES"} his exit role`);
+          }
+          // A mid-season move splices two different roles into one delta. The split
+          // is still worth showing; the delta on its own is not.
+          if (t.changed_team) bits.push("CHANGED TEAMS mid-2025 — this spans two different roles, read the split not the delta");
+          return `${p.name}: ${bits.join(", ")}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      // === 2025 QB VOLUME PROFILE ===
+      // Kept OUT of metricsContext deliberately. That block gates on PLAYER_METRICS
+      // gp >= 8, which drops a QB who missed half a season — and a seven-game starter
+      // is exactly the case where his rushing rate is the most useful thing you can
+      // say about him. This block carries its own gate (6 games, 100 attempts).
+      const qbContext = (result.valid || [])
+        .filter(p => p.pos === "QB")
+        .map(p => {
+          const q = getQbProfile(p.name);
+          if (!q) return null;
+          const med = QB_PROFILE._meta.rush_att_pg_median;
+          const runner = q.rush_att_pg >= med * 1.5 ? " — RUSHING QB, this is the most repeatable scoring he has"
+            : q.rush_att_pg <= med * 0.55 ? " — pocket QB, effectively no rushing floor"
+            : "";
+          const moved = q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
+          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${q.gp} games)${moved}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 EFFICIENCY CONTEXT ===
       // The other half of metricsContext. That block says how much a player was
       // given; this says what he did per touch. Rushing and receiving stay
@@ -6708,8 +7186,8 @@ Wan'Dale Robinson`;
               (ay.adot < 0 ? " — catches it behind the line, must earn yards back before gaining any" : "")
             );
           }
-          if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry)`);
-          if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only)`);
+          if (e?.rush_eff_rank) bits.push(`rush efficiency ${e.rush_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rush_eff_rank`]} (pts over expected per carry — 2025 only, does NOT carry to 2026)`);
+          if (e?.ngs_rush_rank) bits.push(`NGS rush yds over expected ${e.ngs_rush_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_ngs_rush_rank`]} (tracking data, yardage-only — 2025 only, does NOT carry to 2026)`);
           if (e?.rec_eff_rank) bits.push(`receiving efficiency ${e.rec_eff_rank}/${PLAYER_EFFICIENCY._meta.qualified_counts[`${p.pos}_rec_eff_rank`]} (pts over expected per target)`);
           // Only worth a line when the split is big enough to survive the
           // play-level dilution described in build-motion.py.
@@ -6743,7 +7221,9 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
+${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -6761,7 +7241,9 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position):\n${efficiencyContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
+${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
+${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
@@ -8742,6 +9224,43 @@ Analyze this best ball roster. Return JSON only.`;
                     ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
                   </div>
                 )}
+
+                {/* Canonical entry point to the player card. Every rostered player
+                    is here exactly once, so there is one place to click rather
+                    than hoping a name happens to appear in a stack block. The card
+                    itself is a modal, so this strip is the only resting cost. */}
+                {analyzed.valid.length > 0 && (
+                  <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
+                      Your roster · tap a name for 2025 role data
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                      {["QB", "RB", "WR", "TE"].map(pos => {
+                        const group = analyzed.valid.filter(p => p.pos === pos);
+                        if (!group.length) return null;
+                        return (
+                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                            {group.map(pl => (
+                              <button
+                                key={pl.name}
+                                onClick={() => openCard(pl)}
+                                data-compact
+                                style={{
+                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
+                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                }}
+                              >
+                                {pl.name}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
@@ -10011,6 +10530,43 @@ Analyze this best ball roster. Return JSON only.`;
                     letterSpacing: "0.03em",
                   }}>
                     ⚠ Only {analyzed.valid.length} player{analyzed.valid.length !== 1 ? "s" : ""} detected — upload more screens for a complete analysis · {analyzed.format === "superflex" ? "20 players (superflex)" : "18 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
+                  </div>
+                )}
+
+                {/* Canonical entry point to the player card. Every rostered player
+                    is here exactly once, so there is one place to click rather
+                    than hoping a name happens to appear in a stack block. The card
+                    itself is a modal, so this strip is the only resting cost. */}
+                {analyzed.valid.length > 0 && (
+                  <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
+                      Your roster · tap a name for 2025 role data
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                      {["QB", "RB", "WR", "TE"].map(pos => {
+                        const group = analyzed.valid.filter(p => p.pos === pos);
+                        if (!group.length) return null;
+                        return (
+                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                            {group.map(pl => (
+                              <button
+                                key={pl.name}
+                                onClick={() => openCard(pl)}
+                                data-compact
+                                style={{
+                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
+                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                }}
+                              >
+                                {pl.name}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
                 {(analyzed.nutshell || aiLoading) && (
@@ -11934,6 +12490,8 @@ Analyze this best ball roster. Return JSON only.`;
       })()}
 
       </div>{/* end app-content */}
+
+      <PlayerCardModal card={cardPlayer} onClose={() => setCardPlayer(null)} />
 
       {showScrollTop && (
         <button

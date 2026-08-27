@@ -1,0 +1,23 @@
+# RosterXRay calibration fixture — ref1 (seat 3, 12-man snake, 18 rounds)
+# Committed on purpose: every calibration recorded in CLAUDE.md compares grades
+# against these rosters, and they were previously kept in a scratch directory
+# that does not survive a container reset. A calibration you cannot re-run is
+# not a calibration. Names and picks are drafted from real ADP_DATA.
+Jamarr Chase 3
+Bijan Robinson 22
+Amon-ra St Brown 27
+Ashton Jeanty 46
+Nico Collins 51
+Trey Mcbride 70
+Chris Olave 75
+Kenneth Walker Iii 94
+Joe Burrow 99
+Jaylen Waddle 118
+Kyren Williams 123
+Davante Adams 142
+Kyle Pitts 147
+Trevor Lawrence 166
+Carnell Tate 171
+Tuten 190
+Quentin Johnston 195
+Jordan Addison 214
