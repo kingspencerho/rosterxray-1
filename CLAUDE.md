@@ -2763,3 +2763,51 @@ retry button was raised to the same floor while there.
 The general rule: **a name should be reachable everywhere it appears, but
 "clickable" and "a good tap target" are different problems.** Solve the second
 one at the container, not the text.
+
+### Third pass: the input screen, and moving the advance-rate view (Aug 27)
+
+**The Season Schedule · Advance-Rate View moved from the very bottom of the page
+to directly above Playoff Window Preview** — y≈7500 to y=2316. It was the last
+block in the best-ball tree, below FULL ROSTER, and it is a panel this user
+opens constantly.
+
+Moving it cost nothing at rest because **it was already collapsed** — only its
+header row relocated. That is the general lesson: a collapsed panel can sit
+anywhere the reading order wants it, because its resting cost is one line.
+
+Its header was the last disclosure still using the old `▲/▼` idiom. It now
+carries the same accent bar plus cyan `hide / W1-18 ⌄` affordance as the roster
+strip, the card sections and `SectionH2`, so **every disclosure on the page reads
+identically**. The purple label stays — it is schedule context, matching the W16
+slot in `weekColor`.
+
+### The paste instructions are first-run only
+
+The how-to-paste callout is the #1 friction point for a first-time user and pure
+noise for a returning one, so the default now follows who is looking:
+`localStorage["rxr_has_analyzed"]`, set the moment a grade is requested.
+
+```
+INPUT, first visit   2370px   help expanded
+INPUT, return visit  2231px   help collapsed, reopens on click
+```
+
+**Wrapped in try/catch on both read and write** — a private window throws on
+access rather than returning null, and the fallback is the first-run experience,
+which is the safe direction to fail.
+
+### ⚠️ There are two functions that call `analyzeRoster`, and only one is the button
+
+The first version of this hooked the wrong one and the flag never persisted:
+`handleAnalyze` (the `onClick`) is the real path; the other site is a separate
+restore path. **The build was clean and the guards passed the whole time** —
+only rendering the page in a browser and reading `localStorage` back caught it.
+Check which function the control actually calls before adding a side effect.
+
+### Where the results view landed
+
+```
+8,169px  ->  6,102px at rest, core analysis untouched
+0 tap targets under 32px (was 1, briefly 19)
+no page errors in best ball or redraft
+```

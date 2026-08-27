@@ -6367,6 +6367,12 @@ export default function RosterScorer() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cardPlayer, setCardPlayer] = useState(null);
   const [rosterStripOpen, setRosterStripOpen] = useState(false);
+  // The paste instructions are the #1 friction point for a FIRST-time user and
+  // pure noise for a returning one, so the default follows who is looking.
+  // Wrapped because a private window throws on access rather than returning null.
+  const [pasteHelpOpen, setPasteHelpOpen] = useState(() => {
+    try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
+  });
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [byeMapOpen, setByeMapOpen] = useState(false);
   const [fullRosterOpen, setFullRosterOpen] = useState(false);
@@ -7517,6 +7523,10 @@ Analyze this best ball roster. Return JSON only.`;
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
+    // Once someone has graded a roster they are no longer a first-time user, so
+    // the paste instructions stop being the default on every later visit.
+    try { localStorage.setItem("rxr_has_analyzed", "1"); } catch {}
+    setPasteHelpOpen(false);
     setExportedDataUrl(null);
     setAiNutshell(null);
     setAiLoading(false);
@@ -9187,17 +9197,32 @@ Analyze this best ball roster. Return JSON only.`;
               border: "1px solid #1e3a28",
               borderLeft: "3px solid var(--pos)",
               borderRadius: "5px",
-              padding: "12px 14px",
+              padding: pasteHelpOpen ? "12px 14px" : "0",
               marginBottom: "12px",
             }}>
-              <div style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
-                📋 How to paste your roster (15 sec)
-              </div>
-              <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
+              <button
+                onClick={() => setPasteHelpOpen(o => !o)}
+                aria-expanded={pasteHelpOpen}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px",
+                  width: "100%", background: "transparent", border: "none",
+                  padding: pasteHelpOpen ? "0 0 8px" : "12px 14px", minHeight: "40px",
+                  cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  📋 How to paste your roster (15 sec)
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+                  {pasteHelpOpen ? "hide" : "show"}
+                  <span style={{ display: "inline-block", transform: pasteHelpOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                </span>
+              </button>
+              {pasteHelpOpen && <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: League → Draft shows full names, or use the new Share button on your team page — the share image works too.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "var(--text-secondary)" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "var(--text-muted)" }}>Pick numbers optional.</span></div>
-              </div>
+              </div>}
             </div>
             {/* === EMPTY-STATE CTA ===
                 Most prominent when the user hasn't typed anything yet — this is the
@@ -9691,6 +9716,161 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ color: "#a8a29e" }}>
                   {analyzed.picks.filter(p => p.notFound).map(p => p.raw).join(" · ")}
                 </div>
+              </div>
+            )}
+
+            {/* === SEASON SCHEDULE — advance-rate view (collapsed by default) ===
+                The visual companion to the Advance Rate Layer: full W1-18 tier
+                grid, ADP-sorted, split after the 9 core scorers the layer
+                actually scores. Deliberately quieter than the redraft grid —
+                best ball is won W15-17, this exists to sanity-check the road
+                there, not to imply weekly management. */}
+            {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
+              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+                <button
+                  onClick={() => setBbScheduleOpen(prev => !prev)}
+                  aria-expanded={bbScheduleOpen}
+                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "12px 14px", minHeight: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ width: "3px", height: "12px", background: "var(--accent-purple)", borderRadius: "1px" }} />
+                    <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
+                      Season Schedule · Advance-Rate View
+                    </span>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em" }}>
+                    {bbScheduleOpen ? "hide" : "W1-18"}
+                    <span style={{ display: "inline-block", transform: bbScheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                  </span>
+                </button>
+                {bbScheduleOpen && (
+                  <div style={{ background: "var(--bg-surface)", padding: "12px 0 10px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, padding: "0 12px 10px", maxWidth: "640px" }}>
+                      Every player, every week, sorted by ADP. The first 9 rows are the core scorers the advance-rate check grades — their W1–W14 slate is what carries you to the playoff window.
+                    </div>
+                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "4px" }}>
+                      <div style={{ display: "inline-block", minWidth: "100%" }}>
+                        {/* Week header — same synced-scroll pattern as the redraft grid */}
+                        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                          <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
+                            PLAYER
+                          </div>
+                          <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
+                            {Array.from({ length: 18 }, (_, i) => {
+                              const wkNum = i + 1;
+                              const isPlayoff = wkNum >= 15 && wkNum <= 17;
+                              return (
+                                <React.Fragment key={i}>
+                                  {wkNum === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch" }} />}
+                                  <div style={{ width: "34px", textAlign: "center", fontWeight: isPlayoff ? 700 : 500, color: isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)", fontSize: "9px", letterSpacing: "0.05em", flexShrink: 0 }}>
+                                    W{wkNum}
+                                  </div>
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        {analyzed.seasonSchedules.map((s, idx) => {
+                          const pc = posColor(s.pos);
+                          const isDepth = idx >= 9;
+                          const isLast = idx === analyzed.seasonSchedules.length - 1;
+                          return (
+                            <React.Fragment key={idx}>
+                              {idx === 9 && (
+                                <div style={{ display: "flex", alignItems: "center", padding: "8px 0 4px", borderTop: "1px solid var(--bg-raised)", marginTop: "4px" }}>
+                                  <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                                    Depth
+                                  </div>
+                                </div>
+                              )}
+                              <div style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: isLast ? "none" : "1px solid var(--bg-raised)", opacity: isDepth ? 0.78 : 1 }}>
+                                <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", minWidth: 0 }}>
+                                  <div style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {s.name}
+                                  </div>
+                                  <div style={{ fontSize: "9px", color: pc.text, fontWeight: 600, letterSpacing: "0.05em" }}>
+                                    {s.pos} · {s.team}{s.adp ? ` · ADP ${Math.round(s.adp)}` : ""}
+                                  </div>
+                                </div>
+                                <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
+                                  {s.weeklyMatchups.map((m, wIdx) => {
+                                    const isPlayoff = m.week >= 15 && m.week <= 17;
+                                    if (m.isBye) {
+                                      return (
+                                        <React.Fragment key={wIdx}>
+                                          {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
+                                          <div style={{ width: "34px", flexShrink: 0, background: "var(--bg-raised)", border: `1px solid ${isPlayoff ? "#3a2a4a" : "var(--border-strong)"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: "var(--text-dim)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.03em" }}>
+                                            BYE
+                                          </div>
+                                        </React.Fragment>
+                                      );
+                                    }
+                                    const ms = tierStyle(m.color);
+                                    const isAway = m.opp.startsWith("@");
+                                    const teamCode = m.opp.replace("@", "");
+                                    return (
+                                      <React.Fragment key={wIdx}>
+                                        {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
+                                        <div style={{ width: "34px", flexShrink: 0, background: ms.bg, border: `${isPlayoff ? "1.5px" : "1px"} solid ${ms.border}${isPlayoff ? "" : "88"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: ms.text, fontSize: "9px", fontWeight: 700, letterSpacing: "0.02em", lineHeight: 1.2 }}>
+                                          <span style={{ color: "var(--text-muted)", fontSize: "8px" }}>{isAway ? "@" : ""}</span>{teamCode}
+                                        </div>
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--bg-raised)", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
+                      ← swipe to scroll all 18 weeks · <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>purple W15–W17</span> = the weeks that win the tournament
+                    </div>
+                    <div style={{ padding: "8px 12px 2px" }}>
+                      <button
+                        onClick={async () => {
+                          setScheduleExport("working");
+                          try {
+                            const canvas = renderScheduleCanvas({
+                              starters: analyzed.seasonSchedules.slice(0, 9),
+                              bench: analyzed.seasonSchedules.slice(9),
+                              grade: analyzed.grade,
+                              subtitle: `${analyzed.tournament?.name || "Best Ball"} · ${analyzed.seasonSchedules.length} players by ADP · generated ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+                              adpUpdated: ADP_UPDATED,
+                              sectionLabels: { top: "CORE SCORERS · TOP 9 BY ADP", rest: "DEPTH" },
+                            });
+                            const res = await saveScheduleImage(canvas, `rosterxray-bestball-schedule-${new Date().toISOString().slice(0, 10)}.png`);
+                            setScheduleExport(res === "cancelled" ? "idle" : "saved");
+                            track("export_schedule", { mode: res, variant: "bestball" });
+                          } catch (err) {
+                            setScheduleExport("error");
+                          }
+                          setTimeout(() => setScheduleExport("idle"), 2600);
+                        }}
+                        disabled={scheduleExport === "working"}
+                        style={{
+                          background: scheduleExport === "saved" ? "#0d3320" : "transparent",
+                          border: `1px solid ${scheduleExport === "saved" ? "#22c55e" : scheduleExport === "error" ? "#ef4444" : "#3a2a4a"}`,
+                          color: scheduleExport === "saved" ? "var(--pos)" : scheduleExport === "error" ? "var(--neg)" : "var(--accent-purple-light)",
+                          fontFamily: "inherit",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          letterSpacing: "0.08em",
+                          padding: "7px 13px",
+                          borderRadius: "3px",
+                          cursor: scheduleExport === "working" ? "wait" : "pointer",
+                          width: "100%",
+                        }}
+                      >
+                        {scheduleExport === "working" ? "RENDERING…"
+                          : scheduleExport === "saved" ? "✓ SAVED"
+                          : scheduleExport === "error" ? "COULD NOT SAVE — TRY AGAIN"
+                          : "↓ SAVE FULL SCHEDULE AS IMAGE"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -10533,153 +10713,6 @@ Analyze this best ball roster. Return JSON only.`;
               </>}
             </div>
 
-            {/* === SEASON SCHEDULE — advance-rate view (collapsed by default) ===
-                The visual companion to the Advance Rate Layer: full W1-18 tier
-                grid, ADP-sorted, split after the 9 core scorers the layer
-                actually scores. Deliberately quieter than the redraft grid —
-                best ball is won W15-17, this exists to sanity-check the road
-                there, not to imply weekly management. */}
-            {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
-              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
-                <button
-                  onClick={() => setBbScheduleOpen(prev => !prev)}
-                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
-                >
-                  <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-                    Season Schedule · Advance-Rate View
-                  </span>
-                  <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{bbScheduleOpen ? "▲" : "▼"}</span>
-                </button>
-                {bbScheduleOpen && (
-                  <div style={{ background: "var(--bg-surface)", padding: "12px 0 10px" }}>
-                    <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, padding: "0 12px 10px", maxWidth: "640px" }}>
-                      Every player, every week, sorted by ADP. The first 9 rows are the core scorers the advance-rate check grades — their W1–W14 slate is what carries you to the playoff window.
-                    </div>
-                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "4px" }}>
-                      <div style={{ display: "inline-block", minWidth: "100%" }}>
-                        {/* Week header — same synced-scroll pattern as the redraft grid */}
-                        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
-                          <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
-                            PLAYER
-                          </div>
-                          <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
-                            {Array.from({ length: 18 }, (_, i) => {
-                              const wkNum = i + 1;
-                              const isPlayoff = wkNum >= 15 && wkNum <= 17;
-                              return (
-                                <React.Fragment key={i}>
-                                  {wkNum === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch" }} />}
-                                  <div style={{ width: "34px", textAlign: "center", fontWeight: isPlayoff ? 700 : 500, color: isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)", fontSize: "9px", letterSpacing: "0.05em", flexShrink: 0 }}>
-                                    W{wkNum}
-                                  </div>
-                                </React.Fragment>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        {analyzed.seasonSchedules.map((s, idx) => {
-                          const pc = posColor(s.pos);
-                          const isDepth = idx >= 9;
-                          const isLast = idx === analyzed.seasonSchedules.length - 1;
-                          return (
-                            <React.Fragment key={idx}>
-                              {idx === 9 && (
-                                <div style={{ display: "flex", alignItems: "center", padding: "8px 0 4px", borderTop: "1px solid var(--bg-raised)", marginTop: "4px" }}>
-                                  <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                                    Depth
-                                  </div>
-                                </div>
-                              )}
-                              <div style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: isLast ? "none" : "1px solid var(--bg-raised)", opacity: isDepth ? 0.78 : 1 }}>
-                                <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", minWidth: 0 }}>
-                                  <div style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {s.name}
-                                  </div>
-                                  <div style={{ fontSize: "9px", color: pc.text, fontWeight: 600, letterSpacing: "0.05em" }}>
-                                    {s.pos} · {s.team}{s.adp ? ` · ADP ${Math.round(s.adp)}` : ""}
-                                  </div>
-                                </div>
-                                <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
-                                  {s.weeklyMatchups.map((m, wIdx) => {
-                                    const isPlayoff = m.week >= 15 && m.week <= 17;
-                                    if (m.isBye) {
-                                      return (
-                                        <React.Fragment key={wIdx}>
-                                          {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
-                                          <div style={{ width: "34px", flexShrink: 0, background: "var(--bg-raised)", border: `1px solid ${isPlayoff ? "#3a2a4a" : "var(--border-strong)"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: "var(--text-dim)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.03em" }}>
-                                            BYE
-                                          </div>
-                                        </React.Fragment>
-                                      );
-                                    }
-                                    const ms = tierStyle(m.color);
-                                    const isAway = m.opp.startsWith("@");
-                                    const teamCode = m.opp.replace("@", "");
-                                    return (
-                                      <React.Fragment key={wIdx}>
-                                        {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
-                                        <div style={{ width: "34px", flexShrink: 0, background: ms.bg, border: `${isPlayoff ? "1.5px" : "1px"} solid ${ms.border}${isPlayoff ? "" : "88"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: ms.text, fontSize: "9px", fontWeight: 700, letterSpacing: "0.02em", lineHeight: 1.2 }}>
-                                          <span style={{ color: "var(--text-muted)", fontSize: "8px" }}>{isAway ? "@" : ""}</span>{teamCode}
-                                        </div>
-                                      </React.Fragment>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </React.Fragment>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--bg-raised)", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
-                      ← swipe to scroll all 18 weeks · <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>purple W15–W17</span> = the weeks that win the tournament
-                    </div>
-                    <div style={{ padding: "8px 12px 2px" }}>
-                      <button
-                        onClick={async () => {
-                          setScheduleExport("working");
-                          try {
-                            const canvas = renderScheduleCanvas({
-                              starters: analyzed.seasonSchedules.slice(0, 9),
-                              bench: analyzed.seasonSchedules.slice(9),
-                              grade: analyzed.grade,
-                              subtitle: `${analyzed.tournament?.name || "Best Ball"} · ${analyzed.seasonSchedules.length} players by ADP · generated ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-                              adpUpdated: ADP_UPDATED,
-                              sectionLabels: { top: "CORE SCORERS · TOP 9 BY ADP", rest: "DEPTH" },
-                            });
-                            const res = await saveScheduleImage(canvas, `rosterxray-bestball-schedule-${new Date().toISOString().slice(0, 10)}.png`);
-                            setScheduleExport(res === "cancelled" ? "idle" : "saved");
-                            track("export_schedule", { mode: res, variant: "bestball" });
-                          } catch (err) {
-                            setScheduleExport("error");
-                          }
-                          setTimeout(() => setScheduleExport("idle"), 2600);
-                        }}
-                        disabled={scheduleExport === "working"}
-                        style={{
-                          background: scheduleExport === "saved" ? "#0d3320" : "transparent",
-                          border: `1px solid ${scheduleExport === "saved" ? "#22c55e" : scheduleExport === "error" ? "#ef4444" : "#3a2a4a"}`,
-                          color: scheduleExport === "saved" ? "var(--pos)" : scheduleExport === "error" ? "var(--neg)" : "var(--accent-purple-light)",
-                          fontFamily: "inherit",
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          letterSpacing: "0.08em",
-                          padding: "7px 13px",
-                          borderRadius: "3px",
-                          cursor: scheduleExport === "working" ? "wait" : "pointer",
-                          width: "100%",
-                        }}
-                      >
-                        {scheduleExport === "working" ? "RENDERING…"
-                          : scheduleExport === "saved" ? "✓ SAVED"
-                          : scheduleExport === "error" ? "COULD NOT SAVE — TRY AGAIN"
-                          : "↓ SAVE FULL SCHEDULE AS IMAGE"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
 
