@@ -28,7 +28,26 @@ INPUT (download from nflverse-data releases, not committed):
     https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_2025.csv.gz
 
 USAGE
-  python3 scripts/build-snap-trajectory.py <snaps.csv.gz> grading/data/snap_trajectory_2025.json
+  python3 scripts/build-snap-trajectory.py <snaps.csv.gz> <out.json> [season]
+
+  Season defaults to 2025. During the 2026 season this runs weekly against the
+  live release; see scripts/refresh-inseason.sh.
+
+PARTIAL SEASONS SPLIT DIFFERENTLY, ON PURPOSE
+---------------------------------------------
+A W1-9 / W10-18 split is meaningless in Week 8 — nobody has a late window, so
+every player would report "partial season" and the layer would say nothing all
+autumn, which is exactly the half of the year when role change is most worth
+catching. So the split mode follows the data:
+
+  complete season (18+ weeks)  ->  W1-9 vs W10-18          split_mode "calendar"
+  partial season               ->  first half vs second half of weeks covered
+                                                            split_mode "halves"
+
+A 4-vs-4 split is noisier than a 9-vs-9 one, so the threshold is DERIVED from
+that run's own delta distribution rather than inheriting the full-season 0.15.
+`_meta.threshold_source` records which was used. Never compare a partial-season
+delta against a full-season one; they are different measurements.
 
 FIELDS (per player, offensive skill positions only)
   season      mean offense_pct across games played  (== player_metrics snap_sh)
@@ -66,7 +85,8 @@ from datetime import date
 EARLY_MAX = 9          # W1-9
 LATE_MIN = 10          # W10-18
 MIN_WINDOW_GP = 3      # games needed in BOTH windows before a delta is reported
-TREND_THRESHOLD = 0.15 # ~1 stdev of the 2025 delta distribution
+TREND_THRESHOLD = 0.15 # ~1 stdev of the 2025 full-season delta distribution
+COMPLETE_SEASON_WEEKS = 18
 SKILL = ("QB", "RB", "WR", "TE")
 
 
@@ -83,7 +103,15 @@ def mean(v):
     return sum(v) / len(v)
 
 
-def main(snap_path, out_path):
+def stdev(v):
+    if len(v) < 2:
+        return 0.0
+    m = sum(v) / len(v)
+    return (sum((x - m) ** 2 for x in v) / (len(v) - 1)) ** 0.5
+
+
+def main(snap_path, out_path, season="2025"):
+    season = int(season)
     # (normalized name, position) -> [(week, offense_pct, team), ...]
     games = defaultdict(list)
     with gzip.open(snap_path, "rt", encoding="utf-8") as f:
@@ -98,22 +126,28 @@ def main(snap_path, out_path):
             key = (normalize(r["player"]), r["position"])
             games[key].append((int(r["week"]), float(r.get("offense_pct") or 0), r.get("team") or ""))
 
+    weeks_covered = max((w for rows in games.values() for w, _, _ in rows), default=0)
+    complete = weeks_covered >= COMPLETE_SEASON_WEEKS
+    # Mid-season the calendar split has no late window at all, so fall back to
+    # halves of what has actually been played.
+    if complete:
+        split_mode, cut = "calendar", EARLY_MAX
+    else:
+        split_mode, cut = "halves", max(weeks_covered // 2, 1)
+
     players, deltas = {}, []
     for (name, pos), rows in games.items():
         rows.sort()
         if len(rows) < 4:
             continue  # nothing to describe a trajectory with
-        early = [p for w, p, _ in rows if w <= EARLY_MAX]
-        late = [p for w, p, _ in rows if w >= LATE_MIN]
+        early = [p for w, p, _ in rows if w <= cut]
+        late = [p for w, p, _ in rows if w > cut]
         teams = {t for _, _, t in rows if t}
 
         qualified = len(early) >= MIN_WINDOW_GP and len(late) >= MIN_WINDOW_GP
         delta = round(mean(late) - mean(early), 3) if qualified else None
         if delta is not None:
             deltas.append(delta)
-            trend = "rising" if delta >= TREND_THRESHOLD else "falling" if delta <= -TREND_THRESHOLD else "stable"
-        else:
-            trend = None
 
         players[name] = {
             "pos": pos,
@@ -126,20 +160,39 @@ def main(snap_path, out_path):
             "late_gp": len(late),
             "last4": round(mean([p for _, p, _ in rows[-4:]]), 3),
             "delta": delta,
-            "trend": trend,
+            "trend": None,  # assigned below, once the threshold is known
             "changed_team": len(teams) > 1,
         }
+
+    # A complete season reuses the documented 0.15 (~1 SD of the 2025 full-season
+    # distribution). A partial season derives its own, because a 4-vs-4 split is
+    # noisier and inheriting 0.15 would flag ordinary variance as role change.
+    if complete:
+        threshold, threshold_source = TREND_THRESHOLD, "fixed (~1 SD of the 2025 full season)"
+    else:
+        threshold = round(stdev(deltas), 2) if len(deltas) >= 30 else None
+        threshold_source = f"derived from this run ({len(deltas)} qualified deltas)"
+
+    for p in players.values():
+        if p["delta"] is None or threshold is None:
+            p["trend"] = None
+        else:
+            p["trend"] = "rising" if p["delta"] >= threshold else "falling" if p["delta"] <= -threshold else "stable"
 
     deltas.sort()
     n = len(deltas)
     meta = {
-        "season": 2025,
+        "season": season,
         "source": "nflverse-data snap_counts release (offense_pct, REG only)",
         "generated": date.today().isoformat(),
-        "early_weeks": f"1-{EARLY_MAX}",
-        "late_weeks": f"{LATE_MIN}-18",
+        "weeks_covered": weeks_covered,
+        "season_complete": complete,
+        "split_mode": split_mode,
+        "early_weeks": f"1-{cut}",
+        "late_weeks": f"{cut + 1}-{weeks_covered}" if weeks_covered else "",
         "min_window_gp": MIN_WINDOW_GP,
-        "trend_threshold": TREND_THRESHOLD,
+        "trend_threshold": threshold,
+        "threshold_source": threshold_source,
         "qualified": n,
         "delta_median": deltas[n // 2] if n else None,
         "delta_p10": deltas[int(n * 0.10)] if n else None,
@@ -156,11 +209,14 @@ def main(snap_path, out_path):
         json.dump({"_meta": meta, "players": players}, f, separators=(",", ":"), sort_keys=True)
 
     print(f"{len(players)} players written to {out_path}")
+    print(f"  season {season} · weeks 1-{weeks_covered} · {'COMPLETE' if complete else 'PARTIAL'} · split {split_mode} at W{cut}")
+    print(f"  threshold {threshold} ({threshold_source})")
     print(f"  qualified for a delta: {n}  (rising {meta['rising']}, falling {meta['falling']})")
-    print(f"  delta p10 {meta['delta_p10']:+.3f}  median {meta['delta_median']:+.3f}  p90 {meta['delta_p90']:+.3f}")
+    if n:
+        print(f"  delta p10 {meta['delta_p10']:+.3f}  median {meta['delta_median']:+.3f}  p90 {meta['delta_p90']:+.3f}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         sys.exit(__doc__)
-    main(*sys.argv[1:3])
+    main(*sys.argv[1:4])

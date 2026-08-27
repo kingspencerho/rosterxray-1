@@ -39,6 +39,19 @@ import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
 // three were in the prompt before. Built by scripts/build-qb-profile.py.
 // CONTEXT ONLY — never touches the numeric score.
 import QB_PROFILE from './grading/data/qb_profile_2025.json';
+// CURRENT-SEASON companions to the two layers above, refreshed weekly in-season
+// by scripts/refresh-inseason.sh. They ship EMPTY until Week 1 2026 and every
+// consumer degrades to the 2025-only behaviour while `players` is empty, so the
+// placeholder is not a special case anywhere.
+//
+// THE SPLIT REFRESH CADENCE, and the rule behind it: anything that SCORES is
+// frozen, anything that is CONTEXT may refresh. player_metrics_2025.json feeds
+// four scored inputs (hvt_pg, usable_rate, spike_rate, nuclear_rate) so it stays
+// at 2025-final all season — refreshing it weekly would move grades for reasons
+// unrelated to the roster and make the history panel meaningless. These two are
+// context-only, so they can move. Guard 15 enforces the distinction.
+import SNAP_TRAJECTORY_CUR from './grading/data/snap_trajectory_2026.json';
+import QB_PROFILE_CUR from './grading/data/qb_profile_2026.json';
 
 // ============ DATA ============
 
@@ -2378,6 +2391,19 @@ const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
 const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
 const getQbProfile = (name) => lookupPlayer(QB_PROFILE.players, name);
+// Current-season lookups. `hasCurrentSeason` is the single gate every consumer
+// checks, so an empty placeholder is indistinguishable from the pre-2026 build.
+const CUR_SEASON_LIVE = (SNAP_TRAJECTORY_CUR._meta?.weeks_covered || 0) > 0;
+const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
+const getSnapTrendCur = (name) => (CUR_SEASON_LIVE ? lookupPlayer(SNAP_TRAJECTORY_CUR.players, name) : null);
+const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.players, name) : null);
+// Vintage labels. NEVER print a number from these layers without one — a mixed
+// vintage card that does not say which season produced a figure is worse than a
+// stale one that does.
+const vintageLabel = (meta) =>
+  meta?.season_complete ? `${meta.season} season · final`
+    : (meta?.weeks_covered || 0) > 0 ? `${meta.season} through W${meta.weeks_covered}`
+    : null;
 
 // === CEILING RANKINGS (informational only — never scored) ===
 // Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
@@ -2491,7 +2517,9 @@ const cardPercentile = (pos, key, value) => {
 const buildPlayerCard = (name, pos, team) => {
   const m = getMetrics(name);
   const traj = getSnapTrend(name);
+  const trajCur = getSnapTrendCur(name);
   const qb = getQbProfile(name);
+  const qbCur = getQbProfileCur(name);
   const eff = getEfficiency(name);
   const ay = pos === "RB" ? getAirYards(name) : null;
   const adp = ADP_DATA[normalize(name)] || ADP_DATA[normalize(name).replace(SUFFIX_RE, "")];
@@ -2500,8 +2528,10 @@ const buildPlayerCard = (name, pos, team) => {
     name, pos, team,
     adp: adp?.adp ?? null,
     vintage: CARD_VINTAGE,
+    curVintage: vintageLabel(SNAP_TRAJECTORY_CUR._meta),
     popGate: CARD_POP_GATE,
-    metrics: [], descriptive: [], trajectory: null, qb: null, efficiency: [],
+    metrics: [], descriptive: [], trajectory: null, trajectoryCur: null,
+    qb: null, qbCur: null, efficiency: [],
     movedFrom: null, reason: null,
   };
 
@@ -2517,6 +2547,22 @@ const buildPlayerCard = (name, pos, team) => {
       delta: traj.delta, trend: traj.trend, gp: traj.gp,
       earlyGp: traj.early_gp, lateGp: traj.late_gp, changedTeam: traj.changed_team,
     };
+  }
+
+  if (trajCur) {
+    card.trajectoryCur = {
+      season: trajCur.season, early: trajCur.early, late: trajCur.late, last4: trajCur.last4,
+      delta: trajCur.delta, trend: trajCur.trend, gp: trajCur.gp,
+      earlyGp: trajCur.early_gp, lateGp: trajCur.late_gp, changedTeam: trajCur.changed_team,
+      splitMode: SNAP_TRAJECTORY_CUR._meta?.split_mode,
+      earlyWeeks: SNAP_TRAJECTORY_CUR._meta?.early_weeks,
+      lateWeeks: SNAP_TRAJECTORY_CUR._meta?.late_weeks,
+    };
+  }
+
+  if (pos === "QB" && qbCur) {
+    const medCur = QB_PROFILE_CUR._meta.rush_att_pg_median;
+    card.qbCur = { rush: qbCur.rush_att_pg, pass: qbCur.pass_att_pg, adot: qbCur.pass_adot, gp: qbCur.gp, median: medCur };
   }
 
   if (pos === "QB" && qb) {
@@ -2557,7 +2603,7 @@ const buildPlayerCard = (name, pos, team) => {
   if (eff?.rec_eff_rank) card.efficiency.push({ label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
   if (ay) card.efficiency.push({ label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
 
-  if (!card.metrics.length && !card.qb && !card.trajectory && !card.efficiency.length) {
+  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length) {
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
       : "No 2025 NFL data. Rookie, or did not clear the volume gate.";
@@ -6015,6 +6061,8 @@ const CardSection = ({ title, note, children }) => (
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const t = card.trajectory;
+  const tc = card.trajectoryCur;
+  const qc = card.qbCur;
   const pct = v => `${Math.round(v * 100)}%`;
   return (
     <div
@@ -6053,8 +6101,39 @@ const PlayerCardModal = ({ card, onClose }) => {
                 average buries role change, which is the highest-ranked signal
                 there is — it is what graded RJ Harvey as a timeshare when he had
                 already taken the job. */}
+            {/* Current season leads when it exists. The prior season stays on
+                screen underneath rather than being replaced — the COMPARISON is
+                the insight, and a card that silently swaps vintages is the
+                stale-data trap in a new costume. */}
+            {tc && (
+              <CardSection title={`Role trajectory · ${card.curVintage}`}>
+                {tc.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(tc.season)} snap share over {tc.gp} game{tc.gp === 1 ? "" : "s"} so far — too early for a trend.
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(tc.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.earlyWeeks}</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: tc.trend === "rising" ? "var(--pos)" : tc.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(tc.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.lateWeeks}</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(tc.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {tc.trend === "stable"
+                        ? "Steady role so far this season."
+                        : `${tc.trend === "rising" ? "Role growing" : "Role shrinking"} this season.`}
+                      {tc.splitMode === "halves" && " Split at the midpoint of the weeks played, so it is noisier than a full-season read."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
             {t && (
-              <CardSection title="Role trajectory">
+              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"}>
                 {t.delta == null ? (
                   <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
                     {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
@@ -6083,9 +6162,20 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
+            {qc && (
+              <CardSection title={`Volume profile · ${card.curVintage}`}>
+                <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={qc.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={qc.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  {qc.gp} game{qc.gp === 1 ? "" : "s"} this season · league median {qc.median} rush att/gm.
+                </div>
+              </CardSection>
+            )}
+
             {card.qb && (
               <CardSection
-                title="Volume profile"
+                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
                 note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
               >
                 <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
@@ -6120,7 +6210,7 @@ const PlayerCardModal = ({ card, onClose }) => {
         )}
 
         <div style={{ marginTop: "18px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
-          {card.vintage} · nflverse
+          {card.curVintage ? `${card.curVintage} + ${card.vintage}` : card.vintage} · nflverse
         </div>
       </div>
     </div>
@@ -7114,9 +7204,20 @@ Wan'Dale Robinson`;
       // header so absence is never mistaken for missing data.
       const trajectoryContext = (result.valid || [])
         .map(p => {
+          const tc = getSnapTrendCur(p.name);
           const t = getSnapTrend(p.name);
-          if (!t || t.gp < 4) return null;
           const pct = v => `${Math.round(v * 100)}%`;
+          // CURRENT SEASON WINS when it exists — it describes the job he holds
+          // now, and the prior season is the baseline it replaced. The 2025 line
+          // is still appended so the reader sees what changed rather than a
+          // number that silently swapped vintage underneath them.
+          if (tc && tc.delta != null && tc.trend !== "stable") {
+            const cm = SNAP_TRAJECTORY_CUR._meta;
+            const dir = tc.delta > 0 ? "ROLE GROWING" : "ROLE SHRINKING";
+            const prior = t && t.delta != null ? ` (2025 final: ${pct(t.season)})` : "";
+            return `${p.name}: ${pct(tc.early)} (W${cm.early_weeks}) -> ${pct(tc.late)} (W${cm.late_weeks}) THIS SEASON, ${pct(tc.last4)} last 4 — ${dir}${prior}`;
+          }
+          if (!t || t.gp < 4) return null;
           // Injured/partial seasons: no late window at all. The season number is
           // then W1-9 only and must not be read as a full-year role.
           if (t.delta == null) {
@@ -7150,14 +7251,17 @@ Wan'Dale Robinson`;
       const qbContext = (result.valid || [])
         .filter(p => p.pos === "QB")
         .map(p => {
-          const q = getQbProfile(p.name);
+          const qc = getQbProfileCur(p.name);
+          const q = qc || getQbProfile(p.name);
           if (!q) return null;
-          const med = QB_PROFILE._meta.rush_att_pg_median;
+          const meta = qc ? QB_PROFILE_CUR._meta : QB_PROFILE._meta;
+          const vint = qc ? `THIS SEASON, ${qc.gp} games` : "2025";
+          const med = meta.rush_att_pg_median;
           const runner = q.rush_att_pg >= med * 1.5 ? " — RUSHING QB, this is the most repeatable scoring he has"
             : q.rush_att_pg <= med * 0.55 ? " — pocket QB, effectively no rushing floor"
             : "";
-          const moved = q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
-          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${q.gp} games)${moved}`;
+          const moved = !qc && q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
+          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${vint})${moved}`;
         })
         .filter(Boolean)
         .join("\n");

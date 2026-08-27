@@ -26,13 +26,17 @@ usable_rate and spike_rate — three inputs that DO score — over a pbp release
 that may have been revised since. A separate additive file cannot move a grade.
 
 INPUT (download from nflverse-data releases, not committed):
-  stats_player_week_2025.csv   (release: player_stats)
+  stats_player_week_<season>.csv   (release tag: stats_player, NOT player_stats —
+  the obvious guess 404s)
 
   curl -sSL -o qb.csv \\
-    https://github.com/nflverse/nflverse-data/releases/download/player_stats/stats_player_week_2025.csv
+    https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2025.csv
 
 USAGE
-  python3 scripts/build-qb-profile.py <stats_player_week_2025.csv> grading/data/qb_profile_2025.json
+  python3 scripts/build-qb-profile.py <stats_player_week.csv> <out.json> [season]
+
+  Season defaults to 2025. During the 2026 season this runs weekly alongside the
+  snap-trajectory build; see scripts/refresh-inseason.sh.
 
 FIELDS
   gp            games with at least one pass attempt
@@ -45,9 +49,14 @@ FIELDS
                 A style property, which is why it outlives yards per attempt,
                 completion percentage AND fantasy points in stability.
 
-GATE: 6+ games and 100+ attempts, matching the stability run's own qualifying
-rule. A backup's 40-attempt sample describes nothing, and a flattering number on
-a tiny sample is worse than no number.
+GATE: 6+ games and 100+ attempts on a COMPLETE season, matching the stability
+run's own qualifying rule. A backup's 40-attempt sample describes nothing, and a
+flattering number on a tiny sample is worse than no number.
+
+Mid-season that gate would silence every quarterback until roughly Week 6, so a
+partial season scales it to the weeks actually played (half the weeks covered,
+and 20 attempts per qualifying game). `_meta.gate` records what was applied —
+never compare a Week-5 rate against a full-season one without reading it.
 
 SCOPE: CONTEXT ONLY. Feeds the AI prompt, never the numeric score.
 """
@@ -57,6 +66,7 @@ from collections import defaultdict
 from datetime import date
 
 MIN_GP, MIN_ATT = 6, 100
+COMPLETE_SEASON_WEEKS = 18
 
 
 def normalize(name):
@@ -67,9 +77,11 @@ def normalize(name):
     return re.sub(r"\s+", " ", n)
 
 
-def main(stats_path, out_path):
+def main(stats_path, out_path, season="2025"):
+    season = int(season)
     agg = defaultdict(lambda: defaultdict(float))
     games = defaultdict(set)
+    weeks_seen = set()
     teams = defaultdict(lambda: defaultdict(int))
 
     with open(stats_path, encoding="utf-8") as f:
@@ -85,12 +97,21 @@ def main(stats_path, out_path):
             a["carries"] += float(r.get("carries") or 0)
             a["passing_air_yards"] += float(r.get("passing_air_yards") or 0)
             games[k].add(r["week"])
+            weeks_seen.add(int(r["week"]))
             teams[k][r.get("team") or ""] += 1
+
+    weeks_covered = max(weeks_seen, default=0)
+    complete = weeks_covered >= COMPLETE_SEASON_WEEKS
+    if complete:
+        min_gp, min_att = MIN_GP, MIN_ATT
+    else:
+        min_gp = max(weeks_covered // 2, 2)
+        min_att = min_gp * 20
 
     players = {}
     for k, a in agg.items():
         gp = len(games[k])
-        if gp < MIN_GP or a["attempts"] < MIN_ATT:
+        if gp < min_gp or a["attempts"] < min_att:
             continue
         players[k] = {
             "team": max(teams[k].items(), key=lambda x: x[1])[0],
@@ -102,11 +123,15 @@ def main(stats_path, out_path):
 
     rush = sorted(p["rush_att_pg"] for p in players.values())
     meta = {
-        "season": 2025,
+        "season": season,
         "source": "nflverse-data player_stats weekly release (REG only)",
         "generated": date.today().isoformat(),
-        "min_gp": MIN_GP,
-        "min_attempts": MIN_ATT,
+        "weeks_covered": weeks_covered,
+        "season_complete": complete,
+        "min_gp": min_gp,
+        "min_attempts": min_att,
+        "gate": f"{min_gp}+ games, {min_att}+ attempts"
+                + ("" if complete else f" (scaled to {weeks_covered} weeks played)"),
         "qualified": len(players),
         "rush_att_pg_median": rush[len(rush) // 2] if rush else None,
         "stability": {"rush_att_pg": 0.815, "pass_att_pg": 0.605, "pass_adot": 0.486, "points_pg": 0.383},
@@ -120,10 +145,12 @@ def main(stats_path, out_path):
         json.dump({"_meta": meta, "players": players}, f, separators=(",", ":"), sort_keys=True)
 
     print(f"{len(players)} quarterbacks written to {out_path}")
-    print(f"  rush_att_pg median {meta['rush_att_pg_median']}, range {rush[0]} to {rush[-1]}")
+    print(f"  season {season} · weeks 1-{weeks_covered} · {'COMPLETE' if complete else 'PARTIAL'} · gate {meta['gate']}")
+    if rush:
+        print(f"  rush_att_pg median {meta['rush_att_pg_median']}, range {rush[0]} to {rush[-1]}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         sys.exit(__doc__)
-    main(*sys.argv[1:3])
+    main(*sys.argv[1:4])
