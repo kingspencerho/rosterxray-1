@@ -126,7 +126,12 @@ ok("...and the flag never fires on a player who did not move", !badMover, badMov
 // lesson by rendering a coin-flip metric at the same weight as an anchor.
 const anyEff = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team)).find(c => c.efficiency.length);
 ok("efficiency rows exist and are routed to the dimmed channel",
-   !!anyEff && app.includes("card.efficiency.map") && /card\.efficiency\.map[\s\S]{0,220}dim\s*\/>/.test(app));
+   !!anyEff && app.includes("card.efficiency.map") && /card\.efficiency\.map[\s\S]{0,260}\bdim\b[^/]{0,40}\/>/.test(app));
+// The dimmed channel must stay reachable for rows OUTSIDE efficiency too — the
+// week-outcome rows dim conditionally on their own stability, and that is a
+// different call site from the wholesale dimming above.
+ok("the conditional dimmed channel still exists for week outcomes",
+   /card\.descriptive\.map[\s\S]{0,200}dim=\{x\.r < 0\.5\}/.test(app));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

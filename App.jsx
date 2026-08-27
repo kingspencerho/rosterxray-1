@@ -39,6 +39,19 @@ import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
 // three were in the prompt before. Built by scripts/build-qb-profile.py.
 // CONTEXT ONLY — never touches the numeric score.
 import QB_PROFILE from './grading/data/qb_profile_2025.json';
+// CURRENT-SEASON companions to the two layers above, refreshed weekly in-season
+// by scripts/refresh-inseason.sh. They ship EMPTY until Week 1 2026 and every
+// consumer degrades to the 2025-only behaviour while `players` is empty, so the
+// placeholder is not a special case anywhere.
+//
+// THE SPLIT REFRESH CADENCE, and the rule behind it: anything that SCORES is
+// frozen, anything that is CONTEXT may refresh. player_metrics_2025.json feeds
+// four scored inputs (hvt_pg, usable_rate, spike_rate, nuclear_rate) so it stays
+// at 2025-final all season — refreshing it weekly would move grades for reasons
+// unrelated to the roster and make the history panel meaningless. These two are
+// context-only, so they can move. Guard 15 enforces the distinction.
+import SNAP_TRAJECTORY_CUR from './grading/data/snap_trajectory_2026.json';
+import QB_PROFILE_CUR from './grading/data/qb_profile_2026.json';
 
 // ============ DATA ============
 
@@ -2378,6 +2391,19 @@ const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
 const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
 const getQbProfile = (name) => lookupPlayer(QB_PROFILE.players, name);
+// Current-season lookups. `hasCurrentSeason` is the single gate every consumer
+// checks, so an empty placeholder is indistinguishable from the pre-2026 build.
+const CUR_SEASON_LIVE = (SNAP_TRAJECTORY_CUR._meta?.weeks_covered || 0) > 0;
+const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
+const getSnapTrendCur = (name) => (CUR_SEASON_LIVE ? lookupPlayer(SNAP_TRAJECTORY_CUR.players, name) : null);
+const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.players, name) : null);
+// Vintage labels. NEVER print a number from these layers without one — a mixed
+// vintage card that does not say which season produced a figure is worse than a
+// stale one that does.
+const vintageLabel = (meta) =>
+  meta?.season_complete ? `${meta.season} season · final`
+    : (meta?.weeks_covered || 0) > 0 ? `${meta.season} through W${meta.weeks_covered}`
+    : null;
 
 // === CEILING RANKINGS (informational only — never scored) ===
 // Top 10 per position by 2025 spike rate (18+ half-PPR pts), nuclear (28+)
@@ -2491,7 +2517,9 @@ const cardPercentile = (pos, key, value) => {
 const buildPlayerCard = (name, pos, team) => {
   const m = getMetrics(name);
   const traj = getSnapTrend(name);
+  const trajCur = getSnapTrendCur(name);
   const qb = getQbProfile(name);
+  const qbCur = getQbProfileCur(name);
   const eff = getEfficiency(name);
   const ay = pos === "RB" ? getAirYards(name) : null;
   const adp = ADP_DATA[normalize(name)] || ADP_DATA[normalize(name).replace(SUFFIX_RE, "")];
@@ -2500,8 +2528,10 @@ const buildPlayerCard = (name, pos, team) => {
     name, pos, team,
     adp: adp?.adp ?? null,
     vintage: CARD_VINTAGE,
+    curVintage: vintageLabel(SNAP_TRAJECTORY_CUR._meta),
     popGate: CARD_POP_GATE,
-    metrics: [], descriptive: [], trajectory: null, qb: null, efficiency: [],
+    metrics: [], descriptive: [], trajectory: null, trajectoryCur: null,
+    qb: null, qbCur: null, efficiency: [],
     movedFrom: null, reason: null,
   };
 
@@ -2517,6 +2547,22 @@ const buildPlayerCard = (name, pos, team) => {
       delta: traj.delta, trend: traj.trend, gp: traj.gp,
       earlyGp: traj.early_gp, lateGp: traj.late_gp, changedTeam: traj.changed_team,
     };
+  }
+
+  if (trajCur) {
+    card.trajectoryCur = {
+      season: trajCur.season, early: trajCur.early, late: trajCur.late, last4: trajCur.last4,
+      delta: trajCur.delta, trend: trajCur.trend, gp: trajCur.gp,
+      earlyGp: trajCur.early_gp, lateGp: trajCur.late_gp, changedTeam: trajCur.changed_team,
+      splitMode: SNAP_TRAJECTORY_CUR._meta?.split_mode,
+      earlyWeeks: SNAP_TRAJECTORY_CUR._meta?.early_weeks,
+      lateWeeks: SNAP_TRAJECTORY_CUR._meta?.late_weeks,
+    };
+  }
+
+  if (pos === "QB" && qbCur) {
+    const medCur = QB_PROFILE_CUR._meta.rush_att_pg_median;
+    card.qbCur = { rush: qbCur.rush_att_pg, pass: qbCur.pass_att_pg, adot: qbCur.pass_adot, gp: qbCur.gp, median: medCur };
   }
 
   if (pos === "QB" && qb) {
@@ -2557,7 +2603,7 @@ const buildPlayerCard = (name, pos, team) => {
   if (eff?.rec_eff_rank) card.efficiency.push({ label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
   if (ay) card.efficiency.push({ label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
 
-  if (!card.metrics.length && !card.qb && !card.trajectory && !card.efficiency.length) {
+  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length) {
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
       : "No 2025 NFL data. Rookie, or did not clear the volume gate.";
@@ -5978,7 +6024,7 @@ const pctColor = (pct) => {
 
 // One metric row. `dim` is the SECOND channel: it says how much the colour on
 // the left should be allowed to change your mind.
-const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
+const CardMetricRow = ({ label, value, pct, r, dim, caution, noTag }) => (
   <div style={{
     display: "grid", gridTemplateColumns: "1fr auto 52px", alignItems: "center", gap: "10px",
     padding: "6px 0", borderBottom: "1px solid var(--bg-raised)",
@@ -5992,7 +6038,7 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
         </span>
       )}
       {caution && <span style={{ fontSize: "9px", color: "var(--gold)", letterSpacing: "0.02em" }}>⚠ {caution}</span>}
-      {dim && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
+      {dim && !noTag && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
     </span>
     <span style={{ fontSize: "13px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{value}</span>
     <span style={{ fontSize: "11px", color: caution ? "var(--text-dim)" : pctColor(pct), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
@@ -6001,13 +6047,92 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution }) => (
   </div>
 );
 
-const CardSection = ({ title, note, children }) => (
-  <div style={{ marginTop: "18px" }}>
-    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.13em", textTransform: "uppercase", marginBottom: "6px" }}>{title}</div>
-    {note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "8px", lineHeight: 1.5 }}>{note}</div>}
-    {children}
-  </div>
+// Section headers carry a colour so the eye can find its way around the card
+// without reading. The accent is STRUCTURE, not decoration: it names which of
+// the card's four questions a block answers, and the accent bar repeats the
+// same hue so the grouping survives at a glance.
+//
+// EFFICIENCY IS DELIBERATELY THE DIM ONE. Giving it a bright header would fight
+// the whole point of the second channel — the section is muted because the
+// numbers in it do not predict anything, and a cyan heading would say the
+// opposite of the note underneath it.
+// THE position palette — one definition, read by both the modal (a top-level
+// component) and posColor() inside RosterScorer. Fourth dedicated colour family,
+// distinct from matchups (green/red) and weeks (blue/purple/teal), so a position
+// looks the same everywhere it appears.
+const POS_ACCENT = {
+  QB: { text: "var(--caution-alt)", border: "#f59e0b", bg: "#2a1f08" },   // amber
+  RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" },   // cyan
+  WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" },          // pink/magenta
+  TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
+};
+
+const CARD_ACCENTS = {
+  trajectory: "var(--accent-cyan)",
+  volume: "var(--accent-cyan)",
+  opportunity: "var(--accent-purple-light)",
+  outcomes: "var(--info-blue)",
+  efficiency: "var(--text-dim)",
+};
+
+// ONE collapsible section header for the results view, so a fourth ad-hoc
+// implementation never appears. Renders the same h2 the always-open sections
+// use, plus a hit target that spans the whole row.
+//
+// WHAT COLLAPSES AND WHAT DOES NOT is a judgement about reading frequency, not
+// about size. Strengths, weaknesses and the stack matrix are read on every
+// grade and stay open however tall they are. Reference tables and exploratory
+// blocks are read occasionally, so they cost a click instead of a scroll.
+const SectionH2 = ({ title, open, onToggle, hint, children }) => (
+  <button
+    onClick={onToggle}
+    aria-expanded={open}
+    style={{
+      display: "flex", alignItems: "baseline", gap: "10px", width: "100%",
+      background: "transparent", border: "none", padding: "4px 0", margin: "0 0 4px",
+      cursor: "pointer", fontFamily: "inherit", textAlign: "left", minHeight: "40px",
+    }}
+  >
+    <h2 style={{
+      fontFamily: "var(--font-display)", fontSize: "24px", letterSpacing: "0.05em",
+      margin: 0, color: "var(--text-primary)",
+    }}>{title}{children}</h2>
+    <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+      {open ? "hide" : (hint || "show")}
+      <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+    </span>
+  </button>
 );
+
+const CardSection = ({ title, note, accent = "var(--accent-cyan)", collapsible = false, children }) => {
+  const [open, setOpen] = React.useState(false);
+  const shown = !collapsible || open;
+  const Head = collapsible ? "button" : "div";
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <Head
+        {...(collapsible ? { onClick: () => setOpen(o => !o), "aria-expanded": open } : {})}
+        style={{
+          display: "flex", alignItems: "center", gap: "8px", width: "100%",
+          marginBottom: shown && note ? "6px" : shown ? "8px" : "0",
+          background: "transparent", border: "none", padding: 0,
+          cursor: collapsible ? "pointer" : "default", fontFamily: "inherit", textAlign: "left",
+        }}
+      >
+        <span style={{ width: "3px", height: "12px", background: accent, borderRadius: "1px", flex: "none" }} />
+        <div style={{ fontSize: "10px", color: accent, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
+        {collapsible && (
+          <span style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+            {open ? "hide" : "show"}
+            <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+          </span>
+        )}
+      </Head>
+      {shown && note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "9px", lineHeight: 1.5, paddingLeft: "11px" }}>{note}</div>}
+      {shown && children}
+    </div>
+  );
+};
 
 // The player card. Opened by clicking a name anywhere in a result — a modal so
 // it costs the page ZERO resting density, which is the whole reason it is not
@@ -6015,6 +6140,8 @@ const CardSection = ({ title, note, children }) => (
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const t = card.trajectory;
+  const tc = card.trajectoryCur;
+  const qc = card.qbCur;
   const pct = v => `${Math.round(v * 100)}%`;
   return (
     <div
@@ -6029,9 +6156,15 @@ const PlayerCardModal = ({ card, onClose }) => {
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
           <div>
-            <div style={{ fontSize: "18px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", letterSpacing: "0.05em" }}>
-              {card.pos} · {card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}
+            <div style={{ fontSize: "19px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "7px" }}>
+              <span style={{
+                color: POS_ACCENT[card.pos]?.text || "var(--text-secondary)",
+                border: `1px solid ${POS_ACCENT[card.pos]?.border || "#444"}66`,
+                background: POS_ACCENT[card.pos]?.bg || "transparent",
+                borderRadius: "3px", padding: "1px 6px", fontWeight: 600, letterSpacing: "0.08em",
+              }}>{card.pos}</span>
+              <span>{card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}</span>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px", color: "var(--text-muted)", cursor: "pointer", fontSize: "14px", lineHeight: 1, padding: "4px 8px", fontFamily: "inherit" }}>✕</button>
@@ -6053,8 +6186,39 @@ const PlayerCardModal = ({ card, onClose }) => {
                 average buries role change, which is the highest-ranked signal
                 there is — it is what graded RJ Harvey as a timeshare when he had
                 already taken the job. */}
+            {/* Current season leads when it exists. The prior season stays on
+                screen underneath rather than being replaced — the COMPARISON is
+                the insight, and a card that silently swaps vintages is the
+                stale-data trap in a new costume. */}
+            {tc && (
+              <CardSection title={`Role trajectory · ${card.curVintage}`} accent={CARD_ACCENTS.trajectory}>
+                {tc.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(tc.season)} snap share over {tc.gp} game{tc.gp === 1 ? "" : "s"} so far — too early for a trend.
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(tc.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.earlyWeeks}</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: tc.trend === "rising" ? "var(--pos)" : tc.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(tc.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.lateWeeks}</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(tc.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {tc.trend === "stable"
+                        ? "Steady role so far this season."
+                        : `${tc.trend === "rising" ? "Role growing" : "Role shrinking"} this season.`}
+                      {tc.splitMode === "halves" && " Split at the midpoint of the weeks played, so it is noisier than a full-season read."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
             {t && (
-              <CardSection title="Role trajectory">
+              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
                 {t.delta == null ? (
                   <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
                     {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
@@ -6083,9 +6247,21 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
+            {qc && (
+              <CardSection title={`Volume profile · ${card.curVintage}`} accent={CARD_ACCENTS.volume}>
+                <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={qc.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={qc.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  {qc.gp} game{qc.gp === 1 ? "" : "s"} this season · league median {qc.median} rush att/gm.
+                </div>
+              </CardSection>
+            )}
+
             {card.qb && (
               <CardSection
-                title="Volume profile"
+                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
+                accent={CARD_ACCENTS.volume}
                 note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
               >
                 <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
@@ -6100,27 +6276,27 @@ const PlayerCardModal = ({ card, onClose }) => {
             )}
 
             {card.metrics.length > 0 && (
-              <CardSection title="Opportunity" note={`Percentile among ${card.popGate} at ${card.pos}.`}>
+              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
                 {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
               </CardSection>
             )}
 
             {card.descriptive.length > 0 && (
-              <CardSection title="Week outcomes" note="Descriptive of 2025. Spike rate is the metric best ball cares most about and the least stable of the three.">
+              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
                 {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
               </CardSection>
             )}
 
             {card.efficiency.length > 0 && (
-              <CardSection title="Efficiency" note="Dimmed on purpose. Measured year over year, RB yards per carry is r=0.02 — a coin flip. Read these as a record of what happened, never as a forecast.">
-                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim />)}
+              <CardSection title="Efficiency" accent={CARD_ACCENTS.efficiency} collapsible note="Measured year over year, RB yards per carry is r=0.02 — a coin flip. A record of what happened, never a forecast.">
+                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
               </CardSection>
             )}
           </>
         )}
 
         <div style={{ marginTop: "18px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
-          {card.vintage} · nflverse
+          {card.curVintage ? `${card.curVintage} + ${card.vintage}` : card.vintage} · nflverse
         </div>
       </div>
     </div>
@@ -6177,7 +6353,7 @@ export default function RosterScorer() {
   const [aiLineupNotes, setAiLineupNotes] = useState({});
   const [aiBringBackNotes, setAiBringBackNotes] = useState({});
   const [gradeHistory, setGradeHistory] = useState([]);
-  const [historyPanelOpen, setHistoryPanelOpen] = useState(true);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
   const [shareLinkLoading, setShareLinkLoading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [shareLinkError, setShareLinkError] = useState(false);
@@ -6190,6 +6366,16 @@ export default function RosterScorer() {
   const [tradeError, setTradeError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cardPlayer, setCardPlayer] = useState(null);
+  const [rosterStripOpen, setRosterStripOpen] = useState(false);
+  // The paste instructions are the #1 friction point for a FIRST-time user and
+  // pure noise for a returning one, so the default follows who is looking.
+  // Wrapped because a private window throws on access rather than returning null.
+  const [pasteHelpOpen, setPasteHelpOpen] = useState(() => {
+    try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
+  });
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
+  const [byeMapOpen, setByeMapOpen] = useState(false);
+  const [fullRosterOpen, setFullRosterOpen] = useState(false);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -7114,9 +7300,20 @@ Wan'Dale Robinson`;
       // header so absence is never mistaken for missing data.
       const trajectoryContext = (result.valid || [])
         .map(p => {
+          const tc = getSnapTrendCur(p.name);
           const t = getSnapTrend(p.name);
-          if (!t || t.gp < 4) return null;
           const pct = v => `${Math.round(v * 100)}%`;
+          // CURRENT SEASON WINS when it exists — it describes the job he holds
+          // now, and the prior season is the baseline it replaced. The 2025 line
+          // is still appended so the reader sees what changed rather than a
+          // number that silently swapped vintage underneath them.
+          if (tc && tc.delta != null && tc.trend !== "stable") {
+            const cm = SNAP_TRAJECTORY_CUR._meta;
+            const dir = tc.delta > 0 ? "ROLE GROWING" : "ROLE SHRINKING";
+            const prior = t && t.delta != null ? ` (2025 final: ${pct(t.season)})` : "";
+            return `${p.name}: ${pct(tc.early)} (W${cm.early_weeks}) -> ${pct(tc.late)} (W${cm.late_weeks}) THIS SEASON, ${pct(tc.last4)} last 4 — ${dir}${prior}`;
+          }
+          if (!t || t.gp < 4) return null;
           // Injured/partial seasons: no late window at all. The season number is
           // then W1-9 only and must not be read as a full-year role.
           if (t.delta == null) {
@@ -7150,14 +7347,17 @@ Wan'Dale Robinson`;
       const qbContext = (result.valid || [])
         .filter(p => p.pos === "QB")
         .map(p => {
-          const q = getQbProfile(p.name);
+          const qc = getQbProfileCur(p.name);
+          const q = qc || getQbProfile(p.name);
           if (!q) return null;
-          const med = QB_PROFILE._meta.rush_att_pg_median;
+          const meta = qc ? QB_PROFILE_CUR._meta : QB_PROFILE._meta;
+          const vint = qc ? `THIS SEASON, ${qc.gp} games` : "2025";
+          const med = meta.rush_att_pg_median;
           const runner = q.rush_att_pg >= med * 1.5 ? " — RUSHING QB, this is the most repeatable scoring he has"
             : q.rush_att_pg <= med * 0.55 ? " — pocket QB, effectively no rushing floor"
             : "";
-          const moved = q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
-          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${q.gp} games)${moved}`;
+          const moved = !qc && q.team && p.team && q.team !== p.team ? ` [2025 with ${q.team}, now ${p.team}]` : "";
+          return `${p.name}: ${q.rush_att_pg} rush att/gm vs league median ${med}${runner}, ${q.pass_att_pg} pass att/gm, ${q.pass_adot} passing aDOT (${vint})${moved}`;
         })
         .filter(Boolean)
         .join("\n");
@@ -7323,6 +7523,10 @@ Analyze this best ball roster. Return JSON only.`;
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
+    // Once someone has graded a roster they are no longer a first-time user, so
+    // the paste instructions stop being the default on every later visit.
+    try { localStorage.setItem("rxr_has_analyzed", "1"); } catch {}
+    setPasteHelpOpen(false);
     setExportedDataUrl(null);
     setAiNutshell(null);
     setAiLoading(false);
@@ -7403,15 +7607,11 @@ Analyze this best ball roster. Return JSON only.`;
   // Position palette — fourth dedicated color family. Distinct from matchups
   // (green/red), weeks (blue/purple/teal). Each position gets one consistent color
   // wherever it appears, so a user scanning the page can group by position visually.
-  const posColor = (pos) => {
-    const map = {
-      QB: { text: "var(--caution-alt)", border: "#f59e0b", bg: "#2a1f08" }, // amber
-      RB: { text: "var(--accent-cyan)", border: "#06b6d4", bg: "#08222a" }, // cyan
-      WR: { text: "var(--pink)", border: "#ec4899", bg: "#2a0e1e" }, // pink/magenta
-      TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
-    };
-    return map[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
-  };
+  // Reads the module-level POS_ACCENT so the strip, the card and every other
+  // consumer cannot drift apart. This map used to be declared here as a second
+  // copy — the same divergence class as the Aug 14 tier/score fix and the Aug 23
+  // competitive-balance unification. One definition or none.
+  const posColor = (pos) => POS_ACCENT[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
 
   // Highlight player names (full name or last name) inside a strength/weakness
   // string with a consistent bright color, so names pop out of the colored
@@ -8997,17 +9197,32 @@ Analyze this best ball roster. Return JSON only.`;
               border: "1px solid #1e3a28",
               borderLeft: "3px solid var(--pos)",
               borderRadius: "5px",
-              padding: "12px 14px",
+              padding: pasteHelpOpen ? "12px 14px" : "0",
               marginBottom: "12px",
             }}>
-              <div style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
-                📋 How to paste your roster (15 sec)
-              </div>
-              <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
+              <button
+                onClick={() => setPasteHelpOpen(o => !o)}
+                aria-expanded={pasteHelpOpen}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px",
+                  width: "100%", background: "transparent", border: "none",
+                  padding: pasteHelpOpen ? "0 0 8px" : "12px 14px", minHeight: "40px",
+                  cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  📋 How to paste your roster (15 sec)
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+                  {pasteHelpOpen ? "hide" : "show"}
+                  <span style={{ display: "inline-block", transform: pasteHelpOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                </span>
+              </button>
+              {pasteHelpOpen && <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: League → Draft shows full names, or use the new Share button on your team page — the share image works too.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "var(--text-secondary)" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "var(--accent-cyan)", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "var(--text-muted)" }}>Pick numbers optional.</span></div>
-              </div>
+              </div>}
             </div>
             {/* === EMPTY-STATE CTA ===
                 Most prominent when the user hasn't typed anything yet — this is the
@@ -9196,15 +9411,33 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
                   Overall Ceiling Rating · <span style={{ color: "var(--pos)" }}>{analyzed.tournament.name}</span>
                 </div>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "13px" }}>
-                  <span><span style={{ color: "var(--text-muted)" }}>QB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.QB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>RB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.RB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>WR</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.WR}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>TE</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.TE}</span></span>
-                  <span style={{ marginLeft: "auto", color: "var(--text-muted)" }}>
+                <button
+                  onClick={() => setRosterStripOpen(o => !o)}
+                  aria-expanded={rosterStripOpen}
+                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  style={{
+                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
+                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  }}
+                >
+                  {["QB", "RB", "WR", "TE"].map(pos => {
+                    const c = posColor(pos);
+                    return (
+                      <span key={pos}>
+                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                      </span>
+                    );
+                  })}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
                     {analyzed.valid.length}/{analyzed.picks.length} matched
+                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+                      {rosterStripOpen ? "Hide" : "Roster"}
+                      <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                    </span>
                   </span>
-                </div>
+                </button>
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18
@@ -9229,27 +9462,28 @@ Analyze this best ball roster. Return JSON only.`;
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
                     itself is a modal, so this strip is the only resting cost. */}
-                {analyzed.valid.length > 0 && (
+                {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
-                      Your roster · tap a name for 2025 role data
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                      Tap a name for 2025 role data
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
+                        const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
                             {group.map(pl => (
                               <button
                                 key={pl.name}
                                 onClick={() => openCard(pl)}
                                 data-compact
                                 style={{
-                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
-                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
+                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
                                 }}
                               >
                                 {pl.name}
@@ -9285,7 +9519,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <button
                           onClick={() => analyzed && fetchAiNutshell(analyzed)}
                           data-compact
-                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                          style={{ fontSize: "9px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "8px 10px", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
                         >
                           ⚠ AI unavailable · retry
                         </button>
@@ -9482,6 +9716,161 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ color: "#a8a29e" }}>
                   {analyzed.picks.filter(p => p.notFound).map(p => p.raw).join(" · ")}
                 </div>
+              </div>
+            )}
+
+            {/* === SEASON SCHEDULE — advance-rate view (collapsed by default) ===
+                The visual companion to the Advance Rate Layer: full W1-18 tier
+                grid, ADP-sorted, split after the 9 core scorers the layer
+                actually scores. Deliberately quieter than the redraft grid —
+                best ball is won W15-17, this exists to sanity-check the road
+                there, not to imply weekly management. */}
+            {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
+              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+                <button
+                  onClick={() => setBbScheduleOpen(prev => !prev)}
+                  aria-expanded={bbScheduleOpen}
+                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "12px 14px", minHeight: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ width: "3px", height: "12px", background: "var(--accent-purple)", borderRadius: "1px" }} />
+                    <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
+                      Season Schedule · Advance-Rate View
+                    </span>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em" }}>
+                    {bbScheduleOpen ? "hide" : "W1-18"}
+                    <span style={{ display: "inline-block", transform: bbScheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                  </span>
+                </button>
+                {bbScheduleOpen && (
+                  <div style={{ background: "var(--bg-surface)", padding: "12px 0 10px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, padding: "0 12px 10px", maxWidth: "640px" }}>
+                      Every player, every week, sorted by ADP. The first 9 rows are the core scorers the advance-rate check grades — their W1–W14 slate is what carries you to the playoff window.
+                    </div>
+                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "4px" }}>
+                      <div style={{ display: "inline-block", minWidth: "100%" }}>
+                        {/* Week header — same synced-scroll pattern as the redraft grid */}
+                        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                          <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
+                            PLAYER
+                          </div>
+                          <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
+                            {Array.from({ length: 18 }, (_, i) => {
+                              const wkNum = i + 1;
+                              const isPlayoff = wkNum >= 15 && wkNum <= 17;
+                              return (
+                                <React.Fragment key={i}>
+                                  {wkNum === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch" }} />}
+                                  <div style={{ width: "34px", textAlign: "center", fontWeight: isPlayoff ? 700 : 500, color: isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)", fontSize: "9px", letterSpacing: "0.05em", flexShrink: 0 }}>
+                                    W{wkNum}
+                                  </div>
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        {analyzed.seasonSchedules.map((s, idx) => {
+                          const pc = posColor(s.pos);
+                          const isDepth = idx >= 9;
+                          const isLast = idx === analyzed.seasonSchedules.length - 1;
+                          return (
+                            <React.Fragment key={idx}>
+                              {idx === 9 && (
+                                <div style={{ display: "flex", alignItems: "center", padding: "8px 0 4px", borderTop: "1px solid var(--bg-raised)", marginTop: "4px" }}>
+                                  <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                                    Depth
+                                  </div>
+                                </div>
+                              )}
+                              <div style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: isLast ? "none" : "1px solid var(--bg-raised)", opacity: isDepth ? 0.78 : 1 }}>
+                                <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", minWidth: 0 }}>
+                                  <div style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {s.name}
+                                  </div>
+                                  <div style={{ fontSize: "9px", color: pc.text, fontWeight: 600, letterSpacing: "0.05em" }}>
+                                    {s.pos} · {s.team}{s.adp ? ` · ADP ${Math.round(s.adp)}` : ""}
+                                  </div>
+                                </div>
+                                <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
+                                  {s.weeklyMatchups.map((m, wIdx) => {
+                                    const isPlayoff = m.week >= 15 && m.week <= 17;
+                                    if (m.isBye) {
+                                      return (
+                                        <React.Fragment key={wIdx}>
+                                          {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
+                                          <div style={{ width: "34px", flexShrink: 0, background: "var(--bg-raised)", border: `1px solid ${isPlayoff ? "#3a2a4a" : "var(--border-strong)"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: "var(--text-dim)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.03em" }}>
+                                            BYE
+                                          </div>
+                                        </React.Fragment>
+                                      );
+                                    }
+                                    const ms = tierStyle(m.color);
+                                    const isAway = m.opp.startsWith("@");
+                                    const teamCode = m.opp.replace("@", "");
+                                    return (
+                                      <React.Fragment key={wIdx}>
+                                        {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
+                                        <div style={{ width: "34px", flexShrink: 0, background: ms.bg, border: `${isPlayoff ? "1.5px" : "1px"} solid ${ms.border}${isPlayoff ? "" : "88"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: ms.text, fontSize: "9px", fontWeight: 700, letterSpacing: "0.02em", lineHeight: 1.2 }}>
+                                          <span style={{ color: "var(--text-muted)", fontSize: "8px" }}>{isAway ? "@" : ""}</span>{teamCode}
+                                        </div>
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--bg-raised)", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
+                      ← swipe to scroll all 18 weeks · <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>purple W15–W17</span> = the weeks that win the tournament
+                    </div>
+                    <div style={{ padding: "8px 12px 2px" }}>
+                      <button
+                        onClick={async () => {
+                          setScheduleExport("working");
+                          try {
+                            const canvas = renderScheduleCanvas({
+                              starters: analyzed.seasonSchedules.slice(0, 9),
+                              bench: analyzed.seasonSchedules.slice(9),
+                              grade: analyzed.grade,
+                              subtitle: `${analyzed.tournament?.name || "Best Ball"} · ${analyzed.seasonSchedules.length} players by ADP · generated ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+                              adpUpdated: ADP_UPDATED,
+                              sectionLabels: { top: "CORE SCORERS · TOP 9 BY ADP", rest: "DEPTH" },
+                            });
+                            const res = await saveScheduleImage(canvas, `rosterxray-bestball-schedule-${new Date().toISOString().slice(0, 10)}.png`);
+                            setScheduleExport(res === "cancelled" ? "idle" : "saved");
+                            track("export_schedule", { mode: res, variant: "bestball" });
+                          } catch (err) {
+                            setScheduleExport("error");
+                          }
+                          setTimeout(() => setScheduleExport("idle"), 2600);
+                        }}
+                        disabled={scheduleExport === "working"}
+                        style={{
+                          background: scheduleExport === "saved" ? "#0d3320" : "transparent",
+                          border: `1px solid ${scheduleExport === "saved" ? "#22c55e" : scheduleExport === "error" ? "#ef4444" : "#3a2a4a"}`,
+                          color: scheduleExport === "saved" ? "var(--pos)" : scheduleExport === "error" ? "var(--neg)" : "var(--accent-purple-light)",
+                          fontFamily: "inherit",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          letterSpacing: "0.08em",
+                          padding: "7px 13px",
+                          borderRadius: "3px",
+                          cursor: scheduleExport === "working" ? "wait" : "pointer",
+                          width: "100%",
+                        }}
+                      >
+                        {scheduleExport === "working" ? "RENDERING…"
+                          : scheduleExport === "saved" ? "✓ SAVED"
+                          : scheduleExport === "error" ? "COULD NOT SAVE — TRY AGAIN"
+                          : "↓ SAVE FULL SCHEDULE AS IMAGE"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -9851,15 +10240,10 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === DRAFT PIVOT RECOMMENDATIONS === */}
             {analyzed.topPivots.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  WHAT IF YOU HAD<span style={{ color: "var(--text-muted)" }}>...</span>
-                </h2>
+                <SectionH2 title="WHAT IF YOU HAD" open={whatIfOpen} onToggle={() => setWhatIfOpen(o => !o)} hint={`${analyzed.topPivots.length} pivots`}>
+                  <span style={{ color: "var(--text-muted)" }}>...</span>
+                </SectionH2>
+                {whatIfOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "8px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Every pick has a road not taken. Here are the players sitting at <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>similar ADP</span> as your picks — and whether grabbing them instead would have built a stronger roster.
                 </div>
@@ -10002,21 +10386,15 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                   );
                 })}
+                </>}
               </div>
             )}
 
             {/* === BYE WEEK MAP === */}
             {Object.keys(analyzed.byeMap).length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  BYE WEEK MAP
-                </h2>
+                <SectionH2 title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
+                {byeMapOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "6px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Each bye week shows which of your players are sitting that week. Watch for <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>stacked-position byes</span> — too many <span style={{ color: posColor("RB").text }}>RBs</span> or <span style={{ color: posColor("WR").text }}>WRs</span> on the same week creates a hole.
                 </div>
@@ -10076,6 +10454,7 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   )}
                 </div>
+                </>}
               </div>
             )}
 
@@ -10245,15 +10624,12 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Full roster */}
             <div>
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 4px",
-                color: "var(--text-primary)",
-              }}>
-                FULL ROSTER
-              </h2>
+              {/* Duplicates the roster strip under the grade header, which is the
+                  quick entry point; this is the detailed view with pick, position
+                  and team. Collapsed so the page does not list all 18 players
+                  twice at rest. */}
+              <SectionH2 title="FULL ROSTER" open={fullRosterOpen} onToggle={() => setFullRosterOpen(o => !o)} hint={`${analyzed.picks.length} players`} />
+              {fullRosterOpen && <>
               <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
                 {analyzed.hasPickNumbers
                   ? "Sorted by draft slot — your picks from Round 1 to the wire."
@@ -10272,15 +10648,23 @@ Analyze this best ball roster. Return JSON only.`;
                     : null;
                   const rcFlag = (analyzed.roleCeilingFlags || []).find(f => f.name === p.name);
                   return (
-                    <div key={i} style={{
+                    <div
+                      key={i}
+                      onClick={p.notFound ? undefined : () => openCard(p)}
+                      onKeyDown={p.notFound ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard(p); } }}
+                      role={p.notFound ? undefined : "button"}
+                      tabIndex={p.notFound ? undefined : 0}
+                      aria-label={p.notFound ? undefined : `${p.name} — 2025 role data`}
+                      style={{
                       display: "grid",
                       gridTemplateColumns: analyzed.hasPickNumbers ? "32px 1fr auto auto" : "1fr auto auto",
                       gap: "10px",
-                      padding: "5px 0",
+                      padding: "9px 0",
                       borderBottom: i < analyzed.picks.length - 1 ? "1px solid var(--bg-raised)" : "none",
                       fontSize: "12px",
                       alignItems: "center",
                       opacity: p.notFound ? 0.4 : 1,
+                      cursor: p.notFound ? "default" : "pointer",
                     }}>
                       {analyzed.hasPickNumbers && (
                         <span style={{ color: "var(--text-faint)", fontSize: "10px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
@@ -10326,155 +10710,9 @@ Analyze this best ball roster. Return JSON only.`;
                   );
                 })}
               </div>
+              </>}
             </div>
 
-            {/* === SEASON SCHEDULE — advance-rate view (collapsed by default) ===
-                The visual companion to the Advance Rate Layer: full W1-18 tier
-                grid, ADP-sorted, split after the 9 core scorers the layer
-                actually scores. Deliberately quieter than the redraft grid —
-                best ball is won W15-17, this exists to sanity-check the road
-                there, not to imply weekly management. */}
-            {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
-              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
-                <button
-                  onClick={() => setBbScheduleOpen(prev => !prev)}
-                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
-                >
-                  <span style={{ fontSize: "10px", color: "var(--accent-purple)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-                    Season Schedule · Advance-Rate View
-                  </span>
-                  <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{bbScheduleOpen ? "▲" : "▼"}</span>
-                </button>
-                {bbScheduleOpen && (
-                  <div style={{ background: "var(--bg-surface)", padding: "12px 0 10px" }}>
-                    <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, padding: "0 12px 10px", maxWidth: "640px" }}>
-                      Every player, every week, sorted by ADP. The first 9 rows are the core scorers the advance-rate check grades — their W1–W14 slate is what carries you to the playoff window.
-                    </div>
-                    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "4px" }}>
-                      <div style={{ display: "inline-block", minWidth: "100%" }}>
-                        {/* Week header — same synced-scroll pattern as the redraft grid */}
-                        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
-                          <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
-                            PLAYER
-                          </div>
-                          <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
-                            {Array.from({ length: 18 }, (_, i) => {
-                              const wkNum = i + 1;
-                              const isPlayoff = wkNum >= 15 && wkNum <= 17;
-                              return (
-                                <React.Fragment key={i}>
-                                  {wkNum === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch" }} />}
-                                  <div style={{ width: "34px", textAlign: "center", fontWeight: isPlayoff ? 700 : 500, color: isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)", fontSize: "9px", letterSpacing: "0.05em", flexShrink: 0 }}>
-                                    W{wkNum}
-                                  </div>
-                                </React.Fragment>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        {analyzed.seasonSchedules.map((s, idx) => {
-                          const pc = posColor(s.pos);
-                          const isDepth = idx >= 9;
-                          const isLast = idx === analyzed.seasonSchedules.length - 1;
-                          return (
-                            <React.Fragment key={idx}>
-                              {idx === 9 && (
-                                <div style={{ display: "flex", alignItems: "center", padding: "8px 0 4px", borderTop: "1px solid var(--bg-raised)", marginTop: "4px" }}>
-                                  <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", fontSize: "9px", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                                    Depth
-                                  </div>
-                                </div>
-                              )}
-                              <div style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: isLast ? "none" : "1px solid var(--bg-raised)", opacity: isDepth ? 0.78 : 1 }}>
-                                <div style={{ position: "sticky", left: 0, width: "120px", flexShrink: 0, background: "var(--bg-surface)", zIndex: 2, paddingLeft: "12px", paddingRight: "10px", minWidth: 0 }}>
-                                  <div style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {s.name}
-                                  </div>
-                                  <div style={{ fontSize: "9px", color: pc.text, fontWeight: 600, letterSpacing: "0.05em" }}>
-                                    {s.pos} · {s.team}{s.adp ? ` · ADP ${Math.round(s.adp)}` : ""}
-                                  </div>
-                                </div>
-                                <div style={{ display: "flex", gap: "3px", paddingRight: "12px" }}>
-                                  {s.weeklyMatchups.map((m, wIdx) => {
-                                    const isPlayoff = m.week >= 15 && m.week <= 17;
-                                    if (m.isBye) {
-                                      return (
-                                        <React.Fragment key={wIdx}>
-                                          {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
-                                          <div style={{ width: "34px", flexShrink: 0, background: "var(--bg-raised)", border: `1px solid ${isPlayoff ? "#3a2a4a" : "var(--border-strong)"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: "var(--text-dim)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.03em" }}>
-                                            BYE
-                                          </div>
-                                        </React.Fragment>
-                                      );
-                                    }
-                                    const ms = tierStyle(m.color);
-                                    const isAway = m.opp.startsWith("@");
-                                    const teamCode = m.opp.replace("@", "");
-                                    return (
-                                      <React.Fragment key={wIdx}>
-                                        {m.week === 15 && <div style={{ width: "1px", background: "#3a2a4a", margin: "0 4px", alignSelf: "stretch", flexShrink: 0 }} />}
-                                        <div style={{ width: "34px", flexShrink: 0, background: ms.bg, border: `${isPlayoff ? "1.5px" : "1px"} solid ${ms.border}${isPlayoff ? "" : "88"}`, borderRadius: "3px", padding: "3px 2px", textAlign: "center", color: ms.text, fontSize: "9px", fontWeight: 700, letterSpacing: "0.02em", lineHeight: 1.2 }}>
-                                          <span style={{ color: "var(--text-muted)", fontSize: "8px" }}>{isAway ? "@" : ""}</span>{teamCode}
-                                        </div>
-                                      </React.Fragment>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </React.Fragment>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--bg-raised)", letterSpacing: "0.05em", padding: "6px 12px 0" }}>
-                      ← swipe to scroll all 18 weeks · <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>purple W15–W17</span> = the weeks that win the tournament
-                    </div>
-                    <div style={{ padding: "8px 12px 2px" }}>
-                      <button
-                        onClick={async () => {
-                          setScheduleExport("working");
-                          try {
-                            const canvas = renderScheduleCanvas({
-                              starters: analyzed.seasonSchedules.slice(0, 9),
-                              bench: analyzed.seasonSchedules.slice(9),
-                              grade: analyzed.grade,
-                              subtitle: `${analyzed.tournament?.name || "Best Ball"} · ${analyzed.seasonSchedules.length} players by ADP · generated ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-                              adpUpdated: ADP_UPDATED,
-                              sectionLabels: { top: "CORE SCORERS · TOP 9 BY ADP", rest: "DEPTH" },
-                            });
-                            const res = await saveScheduleImage(canvas, `rosterxray-bestball-schedule-${new Date().toISOString().slice(0, 10)}.png`);
-                            setScheduleExport(res === "cancelled" ? "idle" : "saved");
-                            track("export_schedule", { mode: res, variant: "bestball" });
-                          } catch (err) {
-                            setScheduleExport("error");
-                          }
-                          setTimeout(() => setScheduleExport("idle"), 2600);
-                        }}
-                        disabled={scheduleExport === "working"}
-                        style={{
-                          background: scheduleExport === "saved" ? "#0d3320" : "transparent",
-                          border: `1px solid ${scheduleExport === "saved" ? "#22c55e" : scheduleExport === "error" ? "#ef4444" : "#3a2a4a"}`,
-                          color: scheduleExport === "saved" ? "var(--pos)" : scheduleExport === "error" ? "var(--neg)" : "var(--accent-purple-light)",
-                          fontFamily: "inherit",
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          letterSpacing: "0.08em",
-                          padding: "7px 13px",
-                          borderRadius: "3px",
-                          cursor: scheduleExport === "working" ? "wait" : "pointer",
-                          width: "100%",
-                        }}
-                      >
-                        {scheduleExport === "working" ? "RENDERING…"
-                          : scheduleExport === "saved" ? "✓ SAVED"
-                          : scheduleExport === "error" ? "COULD NOT SAVE — TRY AGAIN"
-                          : "↓ SAVE FULL SCHEDULE AS IMAGE"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
 
@@ -10506,15 +10744,33 @@ Analyze this best ball roster. Return JSON only.`;
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
                   Redraft Grade · <span style={{ color: "var(--accent-purple-light)" }}>{analyzed.league.name}</span>
                 </div>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "13px" }}>
-                  <span><span style={{ color: "var(--text-muted)" }}>QB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.QB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>RB</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.RB}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>WR</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.WR}</span></span>
-                  <span><span style={{ color: "var(--text-muted)" }}>TE</span> <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts.TE}</span></span>
-                  <span style={{ marginLeft: "auto", color: "var(--text-muted)" }}>
+                <button
+                  onClick={() => setRosterStripOpen(o => !o)}
+                  aria-expanded={rosterStripOpen}
+                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  style={{
+                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
+                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  }}
+                >
+                  {["QB", "RB", "WR", "TE"].map(pos => {
+                    const c = posColor(pos);
+                    return (
+                      <span key={pos}>
+                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                      </span>
+                    );
+                  })}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
                     {analyzed.valid.length}/{analyzed.picks.length} matched
+                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+                      {rosterStripOpen ? "Hide" : "Roster"}
+                      <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                    </span>
                   </span>
-                </div>
+                </button>
                 {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),
                     so a fixed expectation would cry wolf. The match counter plus the
                     notFound rows carry the signal here instead. */}
@@ -10537,27 +10793,28 @@ Analyze this best ball roster. Return JSON only.`;
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
                     itself is a modal, so this strip is the only resting cost. */}
-                {analyzed.valid.length > 0 && (
+                {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "7px" }}>
-                      Your roster · tap a name for 2025 role data
+                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
+                      Tap a name for 2025 role data
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
+                        const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.1em", minWidth: "22px" }}>{pos}</span>
+                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
                             {group.map(pl => (
                               <button
                                 key={pl.name}
                                 onClick={() => openCard(pl)}
                                 data-compact
                                 style={{
-                                  background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px",
-                                  color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "2px 7px", letterSpacing: "0.01em",
+                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
+                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
                                 }}
                               >
                                 {pl.name}
@@ -10593,7 +10850,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <button
                           onClick={() => analyzed && fetchAiNutshell(analyzed)}
                           data-compact
-                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                          style={{ fontSize: "9px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "8px 10px", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
                         >
                           ⚠ AI unavailable · retry
                         </button>
