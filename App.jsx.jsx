@@ -6075,6 +6075,35 @@ const CARD_ACCENTS = {
   efficiency: "var(--text-dim)",
 };
 
+// ONE collapsible section header for the results view, so a fourth ad-hoc
+// implementation never appears. Renders the same h2 the always-open sections
+// use, plus a hit target that spans the whole row.
+//
+// WHAT COLLAPSES AND WHAT DOES NOT is a judgement about reading frequency, not
+// about size. Strengths, weaknesses and the stack matrix are read on every
+// grade and stay open however tall they are. Reference tables and exploratory
+// blocks are read occasionally, so they cost a click instead of a scroll.
+const SectionH2 = ({ title, open, onToggle, hint, children }) => (
+  <button
+    onClick={onToggle}
+    aria-expanded={open}
+    style={{
+      display: "flex", alignItems: "baseline", gap: "10px", width: "100%",
+      background: "transparent", border: "none", padding: "4px 0", margin: "0 0 4px",
+      cursor: "pointer", fontFamily: "inherit", textAlign: "left", minHeight: "40px",
+    }}
+  >
+    <h2 style={{
+      fontFamily: "var(--font-display)", fontSize: "24px", letterSpacing: "0.05em",
+      margin: 0, color: "var(--text-primary)",
+    }}>{title}{children}</h2>
+    <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+      {open ? "hide" : (hint || "show")}
+      <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+    </span>
+  </button>
+);
+
 const CardSection = ({ title, note, accent = "var(--accent-cyan)", collapsible = false, children }) => {
   const [open, setOpen] = React.useState(false);
   const shown = !collapsible || open;
@@ -6338,6 +6367,9 @@ export default function RosterScorer() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [cardPlayer, setCardPlayer] = useState(null);
   const [rosterStripOpen, setRosterStripOpen] = useState(false);
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
+  const [byeMapOpen, setByeMapOpen] = useState(false);
+  const [fullRosterOpen, setFullRosterOpen] = useState(false);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -9462,7 +9494,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <button
                           onClick={() => analyzed && fetchAiNutshell(analyzed)}
                           data-compact
-                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                          style={{ fontSize: "9px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "8px 10px", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
                         >
                           ⚠ AI unavailable · retry
                         </button>
@@ -10028,15 +10060,10 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === DRAFT PIVOT RECOMMENDATIONS === */}
             {analyzed.topPivots.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  WHAT IF YOU HAD<span style={{ color: "var(--text-muted)" }}>...</span>
-                </h2>
+                <SectionH2 title="WHAT IF YOU HAD" open={whatIfOpen} onToggle={() => setWhatIfOpen(o => !o)} hint={`${analyzed.topPivots.length} pivots`}>
+                  <span style={{ color: "var(--text-muted)" }}>...</span>
+                </SectionH2>
+                {whatIfOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "8px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Every pick has a road not taken. Here are the players sitting at <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>similar ADP</span> as your picks — and whether grabbing them instead would have built a stronger roster.
                 </div>
@@ -10179,21 +10206,15 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                   );
                 })}
+                </>}
               </div>
             )}
 
             {/* === BYE WEEK MAP === */}
             {Object.keys(analyzed.byeMap).length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  BYE WEEK MAP
-                </h2>
+                <SectionH2 title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
+                {byeMapOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "6px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Each bye week shows which of your players are sitting that week. Watch for <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>stacked-position byes</span> — too many <span style={{ color: posColor("RB").text }}>RBs</span> or <span style={{ color: posColor("WR").text }}>WRs</span> on the same week creates a hole.
                 </div>
@@ -10253,6 +10274,7 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   )}
                 </div>
+                </>}
               </div>
             )}
 
@@ -10422,15 +10444,12 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Full roster */}
             <div>
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 4px",
-                color: "var(--text-primary)",
-              }}>
-                FULL ROSTER
-              </h2>
+              {/* Duplicates the roster strip under the grade header, which is the
+                  quick entry point; this is the detailed view with pick, position
+                  and team. Collapsed so the page does not list all 18 players
+                  twice at rest. */}
+              <SectionH2 title="FULL ROSTER" open={fullRosterOpen} onToggle={() => setFullRosterOpen(o => !o)} hint={`${analyzed.picks.length} players`} />
+              {fullRosterOpen && <>
               <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
                 {analyzed.hasPickNumbers
                   ? "Sorted by draft slot — your picks from Round 1 to the wire."
@@ -10449,15 +10468,23 @@ Analyze this best ball roster. Return JSON only.`;
                     : null;
                   const rcFlag = (analyzed.roleCeilingFlags || []).find(f => f.name === p.name);
                   return (
-                    <div key={i} style={{
+                    <div
+                      key={i}
+                      onClick={p.notFound ? undefined : () => openCard(p)}
+                      onKeyDown={p.notFound ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard(p); } }}
+                      role={p.notFound ? undefined : "button"}
+                      tabIndex={p.notFound ? undefined : 0}
+                      aria-label={p.notFound ? undefined : `${p.name} — 2025 role data`}
+                      style={{
                       display: "grid",
                       gridTemplateColumns: analyzed.hasPickNumbers ? "32px 1fr auto auto" : "1fr auto auto",
                       gap: "10px",
-                      padding: "5px 0",
+                      padding: "9px 0",
                       borderBottom: i < analyzed.picks.length - 1 ? "1px solid var(--bg-raised)" : "none",
                       fontSize: "12px",
                       alignItems: "center",
                       opacity: p.notFound ? 0.4 : 1,
+                      cursor: p.notFound ? "default" : "pointer",
                     }}>
                       {analyzed.hasPickNumbers && (
                         <span style={{ color: "var(--text-faint)", fontSize: "10px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
@@ -10503,6 +10530,7 @@ Analyze this best ball roster. Return JSON only.`;
                   );
                 })}
               </div>
+              </>}
             </div>
 
             {/* === SEASON SCHEDULE — advance-rate view (collapsed by default) ===
@@ -10789,7 +10817,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <button
                           onClick={() => analyzed && fetchAiNutshell(analyzed)}
                           data-compact
-                          style={{ fontSize: "8px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "2px 6px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
+                          style={{ fontSize: "9px", color: "var(--neg)", letterSpacing: "0.08em", background: "transparent", border: "1px solid var(--neg)", borderRadius: "3px", padding: "8px 10px", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}
                         >
                           ⚠ AI unavailable · retry
                         </button>

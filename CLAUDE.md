@@ -2721,3 +2721,45 @@ collapsing Efficiency an obvious call rather than a guess.
 
 Expect `⚠ AI UNAVAILABLE · RETRY` in local screenshots. Vite does not serve
 `/api/analyze`; that badge is correct behaviour, not a regression.
+
+### Second pass: what the measurement found that the eye did not
+
+The results view was **8,169px** with twelve sections and essentially no
+disclosure. Three of them were read occasionally rather than every time, so they
+now cost a click:
+
+```
+WHAT IF YOU HAD   991px   exploratory by definition
+BYE WEEK MAP      501px   reference table, not a verdict
+FULL ROSTER       550px   DUPLICATE of the roster strip
+```
+
+**`FULL ROSTER` was the find.** It lists all 18 players at the bottom of the
+page, which is exactly the redundancy that was just removed at the top. Both
+now exist deliberately: the strip is the quick entry point beside the grade, and
+FULL ROSTER is the detailed view with pick, position and team. Neither is open
+at rest.
+
+**8,169px -> 6,275px, with the core read untouched.** Strengths, weaknesses, the
+stack matrix, solo picks and standouts all stay open however tall they are.
+**What collapses is a judgement about reading FREQUENCY, not about size** — the
+stack matrix is the tallest block on the page at 1,340px and it stays open,
+because it is why the page exists.
+
+`SectionH2` is the one collapsible header, so a fourth ad-hoc implementation
+cannot appear.
+
+### The inline-link trap, caught by measuring twice
+
+Making the 18 full-roster names into inline text links took the page from **1
+sub-32px tap target to 19**. An inline 15px link inside a dense 12px table row
+is the wrong affordance on a phone — easy to miss, easy to mis-tap.
+
+**The ROW is the target instead.** One extra line of padding puts it at 33px,
+the whole width is tappable, and it carries `role="button"`, Enter/Space
+handling and an `aria-label`. Back to **zero** sub-32px targets, and the AI
+retry button was raised to the same floor while there.
+
+The general rule: **a name should be reachable everywhere it appears, but
+"clickable" and "a good tap target" are different problems.** Solve the second
+one at the container, not the text.
