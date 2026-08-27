@@ -2447,3 +2447,107 @@ the scoring engine.
 consumer is reviewed, not that there is one. A third, unlisted call site still
 fails the run — negative-tested. `analyzeRoster` and `analyzeRedraft` are still
 asserted clean, which is the assertion that actually protects the grades.
+---
+## The Puppy 4 — added Aug 25, 2026
+
+Eleventh tournament in `TOURNAMENTS`, key `puppy4`. Read off the in-app rules.
+**It runs ALONGSIDE Puppy 3 and does not replace it** — both sit on the 2026
+slate and both close 9/9/26. $5 · 112,800 entries · $500k prizes · 11.3% rake ·
+18 rounds · 12-man drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/
+BENCH10 · max 150 entries.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 9,400 × 12 | 2 (16.7%) | 112,800 → 18,800 |
+| R2 Quarterfinal | W15 | 1,880 × 10 | 1 (**10.0%**) | 18,800 → 1,880 |
+| R3 Semifinal | W16 | 188 × 10 | 1 (**10.0%**) | 1,880 → 188 |
+| R4 Championship | W17 | one 188-seat group, all paid | 1 | 188 → 1 |
+
+P(reach the final) = **0.167%**, one in 600.
+
+**Every figure reconciles against the rules text.** Unlike the Pit Bull page
+("156 6-person Groups"), the Frenchie R2 reversal and the shared "single1,
+31-person Group" template bug, this one has no typo. The ladder was still
+recomputed from the group counts rather than trusted — do that every time.
+
+### The first format where W15 and W16 are exactly equal AND both brutal
+
+Both are **1-of-10**. Puppy 3 pairs a 10% W15 with a 20% W16; BBM VII pairs 7.1%
+with 8.3%. **This is structurally BBM's shape at a shallower depth** — two
+near-identical consecutive kill shots — so both weeks carry maximum weight and
+the scoring branch flags stacks live in BOTH, exactly as `bbm7` does.
+
+Combined weekly survival is **1.00%**, harder than Field General's 1.39%.
+
+### Why W17 gets 1.75 and not BBM's 1.5 or the others' 2
+
+The final here is **both richer and more reachable than BBM's**: 74.8% of the
+pool ($373,500) reaches the 188 finalists, **1st alone is 20.0%** against BBM's
+13.3%, and arriving pays 150x on a $5 entry.
+
+It stops short of 2 because **the binding constraint really is surviving two 10%
+cuts back to back** — W17 quality cannot buy you past them. The $5 ladder is
+breakeven → $10-125 → $750+ → $100k, and **the jump that matters is clearing
+W16**, which takes you from roughly $25 to a $750 floor.
+
+`advanceWeight: 1.5` matches every other 2-of-12 qualifier (puppy, schnauzer,
+pitbull, fieldgeneral) — same structure, 83.3% eliminated.
+
+### It IS in the uniqueness-leverage branch
+
+**112,800 entries clears the 100k massive-field threshold** in the Field Size
+Overlay, so the uniqueness premium applies and `puppy4` joins `bbm7` and `puppy`
+in that branch. Schnauzer (37.2k), Pit Bull (28.1k) and Field General (34.0k)
+are mid-field and stay out. This is the first addition since BBM to qualify.
+
+### Updated ladder, ordered by weekly gate severity
+
+```
+                weights          gates W15/W16   P(final)   advanceWeight   massive field
+BBM VII      [2,    2,    1.5]     7.1 / 8.3      0.099%       1.75             yes
+Puppy 4      [2,    2,    1.75]   10.0 / 10.0     0.167%       1.5              yes
+Puppy 3      [2,    1.5,  2]      10.0 / 20.0     0.333%       1.5              yes
+Field Genl   [1.5,  2,    1.75]   16.7 / 8.3      0.347%       1.5              no
+Pit Bull 2   [1.5,  1.25, 2]      16.7 / 20.0     0.556%       1.5              no
+Schnauzer    [1.25, 1,    2]      20.0 / 25.0       —          1.5              no
+Frenchie 13  [1.25, 2,    2]      33.3 / 16.7       —          1.25             no
+Boxer        [1,    0.75, 2.5]    40.0 / 50.0     6.67%        0.75             no
+```
+
+### Calibration — nothing else moved
+
+```
+9 pre-existing tournaments x 3 fixtures = 27 grades BYTE-IDENTICAL
+
+The Puppy 4 (new):   ref1 A 7.39 · ref2 C+ 0.73 · ref3 B+ 5.09
+```
+
+**Two of three fixtures grade identically on Puppy 3 and Puppy 4, and that is
+correct rather than a wiring bug.** The weights bite through `normalizedScore`,
+which does differ (ref1: LAR 10.4 → 10.0, JAX 11.2 → 11.3, ATL 12.0 → 12.1) —
+the final grade only moves when a stack crosses an elite/qualified threshold.
+ref2 does move, 1.13 → 0.73. **If you ever change a weight vector and see zero
+movement anywhere, check `normalizedScore` before assuming the config is live.**
+
+---
+
+## Calibration Fixtures Are Now Committed (Aug 25, 2026)
+
+`scripts/fixtures/ref1.txt`, `ref2.txt`, `ref3.txt` — three 18-man rosters
+drafted from real `ADP_DATA` at seats 3, 11 and 7 of a 12-man snake.
+
+**Every calibration recorded in this file compares grades against reference
+rosters that lived in a scratch directory.** That directory does not survive a
+container reset, and it did not: the Puppy 4 session found `node_modules` and the
+entire scratchpad gone, including the rosters that a dozen recorded calibrations
+depend on. **A calibration you cannot re-run is not a calibration** — it is a
+number nobody can check.
+
+The historical ref1/ref2 are unrecoverable, so the numbers recorded in earlier
+sections stay as they are: they were valid against the rosters used at the time
+and remain a true record of "nothing moved" for those runs. **Do not attempt to
+reproduce a pre-Aug-25 calibration figure against the new fixtures** — different
+rosters, different numbers, and a mismatch means nothing.
+
+From here, every calibration run uses `scripts/fixtures/`. Add a fixture rather
+than replacing one if a new shape needs covering, so past numbers stay checkable.

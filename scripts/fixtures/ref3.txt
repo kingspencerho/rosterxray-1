@@ -1,0 +1,23 @@
+# RosterXRay calibration fixture — ref3 (seat 7, 12-man snake, 18 rounds)
+# Committed on purpose: every calibration recorded in CLAUDE.md compares grades
+# against these rosters, and they were previously kept in a scratch directory
+# that does not survive a container reset. A calibration you cannot re-run is
+# not a calibration. Names and picks are drafted from real ADP_DATA.
+Puka Nacua 7
+Amon Ra St Brown 18
+Brock Bowers 31
+Cmc 42
+Lamar Jackson 55
+George Pickens 66
+Achane 79
+Zay Flowers 90
+Luther Burden 103
+Caleb Williams 114
+Breece Hall 127
+Parker Washington 138
+Harold Fannin 151
+David Montgomery 162
+Marvin Harrison Jr 175
+Josh Downs 186
+Quinshon Judkins 199
+Michael Pittman 210

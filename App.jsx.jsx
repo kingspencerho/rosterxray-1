@@ -801,6 +801,45 @@ const TOURNAMENTS = {
   // advanceWeight 1.5 matches schnauzer because the R1 qualifier is structurally
   // IDENTICAL (12-man groups, 2 advance) and eliminates 83.3% of the field.
   puppy: { name: "The Puppy 3", entries: "225k", weights: [2, 1.5, 2], advanceWeight: 1.5, note: "W15 (1/10) is the hardest weekly gate and W16 (1/5) is twice as survivable — but 75.6% of the $1M pool goes to the 750 who reach W17, so the final is where the money is decided", format: "standard" },
+  // The Puppy 4 (2026 season, read off the in-app rules Aug 25 2026). Runs
+  // ALONGSIDE Puppy 3, it does not replace it — both close 9/9/26 on the 2026
+  // slate. $5 entry · 112,800 entries · $500k prizes · 11.3% rake · 18 rounds ·
+  // 12-man drafts · half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/BENCH10 ·
+  // 150 max entries.
+  //
+  //   R1 Qualifier  W1-14  9,400 groups of 12, 2 advance (16.7%)  112,800 -> 18,800
+  //   R2 Quarter    W15    1,880 groups of 10, 1 advance (10.0%)   18,800 ->  1,880
+  //   R3 Semi       W16      188 groups of 10, 1 advance (10.0%)    1,880 ->    188
+  //   R4 Final      W17    one 188-person group, all paid              188 ->      1
+  //
+  // Every figure reconciles against the rules text — unlike Pit Bull ("156
+  // 6-person Groups") and the Frenchie/Boxer pages, this one has no typo. The
+  // ladder was still recomputed from the group counts rather than trusted.
+  //
+  // THE FIRST FORMAT WHERE W15 AND W16 ARE EXACTLY EQUAL AND BOTH BRUTAL.
+  // Both are 1-of-10. Puppy 3 pairs a 10% W15 with a 20% W16; BBM VII pairs
+  // 7.1% with 8.3%. This is structurally BBM's shape — two near-identical
+  // consecutive kill shots — at a shallower depth, so both weeks carry maximum
+  // weight and the branch below flags stacks live in BOTH.
+  //
+  // Combined weekly survival is 1.00%, HARDER than Field General's 1.39%,
+  // and P(reach the final) is 0.167% — one in 600.
+  //
+  // W17 gets 1.75 rather than BBM's 1.5 because the final here is richer AND
+  // more reachable: 74.8% of the pool ($373.5k) is paid to the 188 finalists,
+  // 1st alone is 20.0% (against BBM's 13.3%), and arriving is worth 150x on a
+  // $5 entry. It stops short of 2 because the binding constraint really is
+  // surviving two 10% cuts back to back — you cannot buy your way past them
+  // with W17 quality. The $5 ladder is breakeven -> $10-125 -> $750+ -> $100k,
+  // and the jump that matters is clearing W16.
+  //
+  // advanceWeight 1.5 matches every other 2-of-12 qualifier here (puppy,
+  // schnauzer, pitbull, fieldgeneral) — same structure, 83.3% eliminated.
+  //
+  // 112,800 entries clears the 100k Field Size Overlay threshold, so this IS in
+  // the uniqueness-leverage branch alongside bbm7 and puppy. Schnauzer, Pit Bull
+  // and Field General are mid-field and stay out of it.
+  puppy4: { name: "The Puppy 4", entries: "112.8k", weights: [2, 2, 1.75], advanceWeight: 1.5, note: "W15 and W16 are both 1-of-10 — the first format where the two weekly cuts are exactly equal and both brutal. You must win them back to back, then 74.8% of the $500k is decided among 188 finalists", format: "standard" },
   // Mini Schnauzer 2 (added Jul 31 2026). Structurally the inverse of Puppy: the
   // weekly gates are the SOFTEST Underdog runs (W15 2-of-10 = 20%, W16 2-of-8 = 25%)
   // while the 14-week qualifier (2-of-12 = 16.7%) is the hardest filter in the format.
@@ -4003,6 +4042,33 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     if (w17Elite.length === 0 && qualifiedStackGrades.length > 0) {
       weaknesses.push(`No stack has a live W17 window — reaching the 750-seat final is an 80x jump and 75.6% of the $1M pool is decided there`);
     }
+  } else if (tournamentKey === "puppy4") {
+    // The Puppy 4: W15 and W16 are BOTH 1-of-10. Equal, and both brutal — so
+    // unlike Puppy 3 (whose W16 is twice as survivable) there is no easier week
+    // to lean on. The BOTH-weeks check is the one that matters: a roster built
+    // for one 10% gate and dead in the other is not actually alive, it just has
+    // not been eliminated yet. W17 is flagged separately because 74.8% of the
+    // $500k is paid to the 188 who get there.
+    const w15Elite = primaryStacks.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = primaryStacks.filter(s => s.avgPerWeek[1] >= 4);
+    const bothWeeks = primaryStacks.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    if (w15Elite.length >= 1) {
+      strengths.push(`${w15Elite.length} stack(s) with W15 spike ceiling — a 1-of-10 cut that eliminates 90% of the field`);
+    }
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) with W16 spike ceiling — also 1-of-10, exactly as steep as W15`);
+    }
+    if (bothWeeks.length >= 1) {
+      strengths.push(`${bothWeeks.length} stack(s) live in BOTH W15 and W16 — two 1-of-10 cuts back to back is the whole tournament, so this is what actually survives`);
+    } else if (primaryStacks.length > 0) {
+      weaknesses.push(`No stack clears both W15 and W16 — Puppy 4 makes you win two 1-of-10 gates consecutively, and neither week is the soft one`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the W17 final — 74.8% of this format's $500k is paid to the 188 who reach it`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack has a live W17 window — reaching the 188-seat final pays 150x on a $5 entry and the whole $750-to-$100k spread is decided that week`);
+    }
   } else if (tournamentKey === "bbm7") {
     // BBM VII: the two hardest weekly gates anywhere, back to back — W15 is
     // 1-of-14 (7.1%) and W16 is 1-of-12 (8.3%). The old branch checked W15 only,
@@ -4401,7 +4467,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     weaknesses.push(`QB uncertainty in ${names} stack${uncertainQBStacks.length > 1 ? "s" : ""} — starting role unconfirmed`);
     score -= uncertainQBStacks.length * 0.3;
   }
-  if (tournamentKey === "bbm7" || tournamentKey === "puppy") {
+  // Massive field (100k+ entries) per the Field Size Overlay, so the uniqueness
+  // premium applies. Puppy 4 at 112,800 clears the threshold; schnauzer (37.2k),
+  // pitbull (28.1k) and fieldgeneral (34.0k) are mid-field and stay out.
+  if (tournamentKey === "bbm7" || tournamentKey === "puppy" || tournamentKey === "puppy4") {
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
       strengths.push(`${leverageStacks.length} under-the-radar stack(s) — good differentiation if the field is large`);

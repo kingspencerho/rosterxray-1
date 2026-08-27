@@ -1,0 +1,23 @@
+# RosterXRay calibration fixture — ref2 (seat 11, 12-man snake, 18 rounds)
+# Committed on purpose: every calibration recorded in CLAUDE.md compares grades
+# against these rosters, and they were previously kept in a scratch directory
+# that does not survive a container reset. A calibration you cannot re-run is
+# not a calibration. Names and picks are drafted from real ADP_DATA.
+Jahmyr Gibbs 11
+Jsn 14
+Drake London 35
+Devonta Smith 38
+Omarion Hampton 59
+Tee Higgins 62
+Josh Allen 83
+Tyler Warren 86
+Terry Mclaurin 107
+Jeremiyah Love 110
+Christian Watson 131
+Travis Kelce 134
+Travis Etienne 155
+Dak Prescott 158
+Marvin Harrison 179
+Makai Lemon 182
+Treveyon Henderson 203
+Michael Wilson 206
