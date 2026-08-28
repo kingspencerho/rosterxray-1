@@ -2811,3 +2811,82 @@ Check which function the control actually calls before adding a side effect.
 0 tap targets under 32px (was 1, briefly 19)
 no page errors in best ball or redraft
 ```
+
+---
+
+## The Playoff Boosts Lived in Five Places (fixed Aug 27, 2026)
+
+**Reported by a user, not by a test:** the SF stack read `Good/Good/Good` in the
+stack matrix while the same players' W15-17 cells in the Season Schedule ·
+Advance-Rate View read `Hard`/`Avoid`. Both views were correct for their own code
+path, which is the whole problem.
+
+There were **four different boost levels across five consumers**:
+
+| Consumer | competitive balance | high pace | tier label |
+|---|---|---|---|
+| stack loop (the scored path) | yes | yes | correct |
+| orphan matchup loop | yes | yes | **`score` updated WITHOUT `tier`** |
+| `matchupScoreFor` (panel, pivots) | yes | **missing** | n/a |
+| `seasonSchedules` (the W1-18 grid) | **no** | **no** | raw ← what the user saw |
+| Advance Rate Layer, W1-14 | no | no | **correct, leave alone** |
+
+### Two separate bugs, one reported and one latent
+
+1. **The season grid applied neither boost.** It calls
+   `getMatchupScoreForOpponent`, which was never in the boost chain. Seven of
+   nine SF playoff cells disagreed with the stack matrix.
+2. **The orphan loop's high-pace branch skipped `tierFromScore`** — exactly the
+   divergence the Aug 14 note says was fixed. That fix corrected the stack loop's
+   two branches and **missed the orphan loop's**, so orphan tier labels have been
+   understating boosted weeks ever since.
+
+### `playoffBoosts` is now the only place either boost is applied
+
+```js
+const playoffBoosts = (m, team, opp, wkIdx) => { ... }   // wkIdx 0/1/2 = W15/16/17
+```
+
+Both boosts, label and number moving together, one definition. The stack loop,
+the orphan loop, `matchupScoreFor` and `seasonSchedules` all route through it.
+
+### ⚠️ The W1-14 scored path must NOT route through it
+
+The Advance Rate Layer averages `getMatchupScoreForOpponent` over
+`sched.slice(0, 14)`. **That is scored, and `PLAYOFF_GAME_TOTALS` /
+`getGameSelectionNode` carry no W1-14 data** — boosting there would be inventing
+numbers and would move every grade. The season grid passes `weekIdx - 14` so the
+helper no-ops outside the playoff window, and guard 16 asserts both halves.
+
+`analyzeRedraft` is also deliberately out of scope: it keeps its own thresholds
+(`total >= 49`) and its own calibration.
+
+### Guard 16 — `scripts/test-playoff-boosts.mjs`
+
+This is the **third** time this class has bitten (Aug 14 tier/score, Aug 23
+competitive balance, now this), so the guard asserts the SHAPE, not the symptom:
+
+- `playoffBoosts` defined once; `competitiveBalanceBoost` has exactly one call
+  site; the high-pace boost is applied exactly once. **Counted by
+  `highPaceBoost: true`, not by the string `type === "highPace"`** — that also
+  appears as a prompt label, and matching it made a correct file fail.
+- **Each consumer is structurally wired to the helper.** The first version only
+  compared the two tier functions with the test boosting both sides, which
+  cannot see the app skipping a boost — the negative test passed when it should
+  have failed. Fixed by asserting `seasonSchedules`, `matchupScoreFor` and the
+  orphan loop each contain `playoffBoosts(`.
+- The W1-14 pass exists, is bounded to `slice(0, 14)`, and does NOT call it.
+- All 384 playoff cells agree across both tier functions, and the label follows
+  the score in every one.
+- The boosts still fire, and do not fire everywhere.
+
+Negative-tested both ways: reverting the season grid to the unboosted call and
+decoupling the label from the score each exit non-zero.
+
+### Calibration
+
+```
+36 grades BYTE-IDENTICAL — 10 tournaments x 3 fixtures, plus redraft and
+projected mode. Expected: tier is display-only in the scoring path, the orphan
+score was already correct, and the season grid feeds no score at all.
+```

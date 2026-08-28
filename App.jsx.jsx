@@ -3213,6 +3213,31 @@ const competitiveBalanceBoost = (m, opp, wkIdx) => {
   return { ...m, ...tierFromScore(boosted), score: boosted, competitiveBoost: true };
 };
 
+// BOTH playoff boosts, in ONE place, label and number moving together.
+//
+// There were four different boost levels across five consumers: the stack loop
+// applied competitive-balance AND high-pace, the orphan loop applied both but
+// updated `score` WITHOUT `tier` on the high-pace branch, matchupScoreFor
+// applied only competitive-balance, and the season-schedule grid applied
+// neither. That last one is what a user sees when the W15-17 cells in the
+// advance-rate map disagree with the same player's cells in the stack matrix.
+//
+// ⚠️ PLAYOFF WEEKS ONLY. wkIdx is 0/1/2 for W15/W16/W17; PLAYOFF_GAME_TOTALS
+// and getGameSelectionNode carry no data for W1-14, so the Advance Rate Layer's
+// W1-14 pass must NOT route through here — it is scored, and adding a boost it
+// has never had would move grades.
+const playoffBoosts = (m, team, opp, wkIdx) => {
+  if (!m || wkIdx < 0 || wkIdx > 2) return m;
+  let out = competitiveBalanceBoost(m, opp, wkIdx);
+  const wk = [15, 16, 17][wkIdx];
+  const gsNode = getGameSelectionNode(team, opp, wk);
+  if (gsNode?.type === "highPace" && out.score < 5) {
+    const paced = Math.min(out.score + 1, 5);
+    out = { ...out, ...tierFromScore(paced), score: paced, highPaceBoost: true };
+  }
+  return out;
+};
+
 // ============ TRUNCATION-TOLERANT JSON PARSE ============
 // The grading response is one JSON object whose fields arrive in a fixed order,
 // `nutshell` first. When the model hits max_tokens the tail is cut off mid
@@ -3582,21 +3607,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     stack.players.forEach(player => {
       const opps = PLAYOFFS[stack.team] || [];
       opps.forEach((opp, wkIdx) => {
-        let m = getMatchupTier(opp, player.pos, useProjected);
-        // Competitive balance boost: pick'em (|spread| ≤ 3) AND high-scoring (total ≥ 46)
-        // Parity between two good offenses elevates ceiling — raw FPA undersells this environment
-        const wk = [15, 16, 17][wkIdx];
-        const oppClean = opp.replace("@", "").trim().toUpperCase();
-        const gameData = wk ? (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean) : null;
-        m = competitiveBalanceBoost(m, opp, wkIdx);
-        // High-Pace Target games (Game Selection Matrix) bump the matchup score by 1 —
-        // pace/PPP/PROE reasoning overrides a merely-average raw FPA tier. Capped at 5
-        // so this can't push a game past the existing elite ceiling.
-        const gsNode = wk ? getGameSelectionNode(stack.team, opp, wk) : null;
-        if (gsNode?.type === "highPace" && m.score < 5) {
-          const pacedScore = Math.min(m.score + 1, 5);
-          m = { ...m, ...tierFromScore(pacedScore), score: pacedScore, highPaceBoost: true };
-        }
+        const m = playoffBoosts(getMatchupTier(opp, player.pos, useProjected), stack.team, opp, wkIdx);
         weekScores[wkIdx] += m.score;
         weekDetails[wkIdx].push({ name: player.name, pos: player.pos, ...m });
       });
@@ -3694,15 +3705,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const orphans = valid.filter(p => !stackedPlayerNames.has(p.name)).map(p => {
     const opps = PLAYOFFS[p.team] || [];
     const matchups = opps.map((opp, i) => {
-      let m = getMatchupTier(opp, p.pos, useProjected);
-      const wk = [15, 16, 17][i];
-      const oppClean = opp.replace("@", "").trim().toUpperCase();
-      m = competitiveBalanceBoost(m, opp, i);
-      const gsNode = getGameSelectionNode(p.team, opp, wk);
-      if (gsNode?.type === "highPace" && m.score < 5) {
-        m = { ...m, score: Math.min(m.score + 1, 5), highPaceBoost: true };
-      }
-      return m;
+      return playoffBoosts(getMatchupTier(opp, p.pos, useProjected), p.team, opp, i);
     });
     const w17 = matchups[2];
     const peakScore = Math.max(...matchups.map(m => m.score));
@@ -4717,7 +4720,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   const matchupScoreFor = (p) => {
     const opps = PLAYOFFS[p.team] || [];
     if (opps.length === 0) return null;
-    const matchups = opps.map((opp, i) => competitiveBalanceBoost(getMatchupTier(opp, p.pos, useProjected), opp, i));
+    const matchups = opps.map((opp, i) => playoffBoosts(getMatchupTier(opp, p.pos, useProjected), p.team, opp, i));
     const avg = matchups.reduce((s, m) => s + m.score, 0) / matchups.length;
     return { avg, matchups };
   };
@@ -4851,7 +4854,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       name: p.name, pos: p.pos, team: p.team, adp: p.adp,
       weeklyMatchups: (FULL_SCHEDULE[p.team] || []).map((opp, weekIdx) => {
         if (!opp || opp === "BYE") return { week: weekIdx + 1, opp: "BYE", isBye: true };
-        const m = getMatchupScoreForOpponent(opp, p.pos, useProjected);
+        // W15-17 carry the same two boosts the stack matrix applies, so the
+        // playoff cells here cannot disagree with the same player's cells there.
+        // W1-14 stay raw — there is no game-total or pace data for those weeks.
+        const m = playoffBoosts(getMatchupScoreForOpponent(opp, p.pos, useProjected), p.team, opp, weekIdx - 14);
         return { week: weekIdx + 1, opp, isBye: false, ...m };
       }),
     }));
