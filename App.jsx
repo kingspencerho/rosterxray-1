@@ -10077,15 +10077,32 @@ Analyze this best ball roster. Return JSON only.`;
                 <button
                   onClick={() => setBbScheduleOpen(prev => !prev)}
                   aria-expanded={bbScheduleOpen}
-                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "12px 14px", minHeight: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "13px 14px", minHeight: "44px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
                 >
-                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ width: "3px", height: "12px", background: "var(--ui-accent)", borderRadius: "1px" }} />
-                    <span style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-                      Season Schedule · Advance-Rate View
+                  {/* PURPLE IS THIS SECTION'S OWN COLOUR, not a decoration: the
+                      legend inside reads "purple W15-W17 = the weeks that win the
+                      tournament", and the grid paints those columns with the same
+                      token. The header inherits the meaning its own rows carry,
+                      exactly as the Strengths and Weaknesses panels do.
+                      Promoted to the display face because it IS a top-level
+                      section — at 10px micro-label it read as a footnote and got
+                      scrolled past, which was the actual complaint. */}
+                  <span style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                      <span style={{ width: "3px", height: "18px", background: "var(--accent-purple-light)", borderRadius: "1px", flex: "none" }} />
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--accent-purple-light)", letterSpacing: "0.05em" }}>
+                        Season Schedule · Advance-Rate View
+                      </span>
                     </span>
+                    {!bbScheduleOpen && (
+                      // The one line that turns a scroll-past into a tap. Only
+                      // while closed — once open the full explainer says it better.
+                      <span style={{ fontSize: "10px", color: "var(--text-muted)", lineHeight: 1.45, paddingLeft: "12px" }}>
+                        W1–W14 is the round that eliminates most of the field. See every week.
+                      </span>
+                    )}
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--ui-accent)", fontSize: "11px", letterSpacing: "0.06em" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-purple-light)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap", flex: "none" }}>
                     {bbScheduleOpen ? "hide" : "W1-18"}
                     <span style={{ display: "inline-block", transform: bbScheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                   </span>

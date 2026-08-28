@@ -109,5 +109,25 @@ exportNeutral[2] === vars["tier-even"] && exportNeutral[0] === vars["tier-even-b
   ? ok("EXPORT_TIER_COLORS.neutral matches the on-screen neutral")
   : bad(`EXPORT_TIER_COLORS.neutral is ${exportNeutral.join("/")}, the app renders ${vars["tier-even-bg"]}/${vars["tier-even-border"]}/${vars["tier-even"]}`);
 
+console.log("\na section header may wear its own content's colour");
+
+// The Strengths / Weaknesses panels and the Season Schedule header are the
+// sanctioned exceptions to "chrome is hueless": each wears the colour its own
+// rows already carry, so the label and its content read as one object. That is
+// a label inheriting meaning, not chrome borrowing a hue — but it only holds
+// while the two actually match, so assert the pairing rather than the colour.
+const seasonHdr = src.match(/Season Schedule · Advance-Rate View/) ? src.slice(
+  Math.max(0, src.indexOf("Season Schedule · Advance-Rate View") - 1400),
+  src.indexOf("Season Schedule · Advance-Rate View")) : "";
+/color: "var\(--accent-purple-light\)"/.test(seasonHdr)
+  ? ok("the Season Schedule header uses the week/playoff purple")
+  : bad("the Season Schedule header must use --accent-purple-light — its own grid paints W15-17 with it");
+/isPlayoff \? "var\(--accent-purple-light\)"/.test(src)
+  ? ok("...the same token the grid paints its playoff weeks with")
+  : bad("the grid no longer marks playoff weeks in --accent-purple-light; the header pairing is broken");
+/fontFamily: "var\(--font-display\)", fontSize: "22px"/.test(seasonHdr)
+  ? ok("...and reads at top-level section size, not as a micro-label")
+  : bad("the Season Schedule header dropped back to a micro-label size");
+
 console.log(failed ? `\n${failed} colour-role check(s) failed` : "\nall colour-role guards passed");
 process.exit(failed ? 1 : 0);

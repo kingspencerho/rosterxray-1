@@ -3204,3 +3204,26 @@ strengths capped at 4 of 6 · 0 tap targets under 32px · 0 page errors
 - **A sticky section index** (Stacks · Solo · Byes · Pivots). On a 6,000px page
   this would cut more scrolling than any amount of text trimming, and it is the
   right next move if the page keeps growing.
+
+### The Season Schedule header, promoted (Aug 28, 2026)
+
+Reported as *"this is an important section I don't want users to scroll past it"*.
+It was a 10px uppercase micro-label in `--ui-accent`, which is the treatment
+every minor disclosure on the page wears — so it read as a footnote on a panel
+the user opens constantly.
+
+**Purple was the right colour because it is already this section's own.** The
+legend inside it reads "purple W15-W17 = the weeks that win the tournament", and
+the grid paints those columns with `--accent-purple-light`. So the header
+inherits the meaning its own rows carry — the same sanctioned exception the
+Strengths and Weaknesses panels use, not chrome borrowing a hue.
+
+Three changes, and **the size is the one that did the work**: 10px micro-label ->
+22px `--font-display`, a taller accent bar, and a one-line hook that shows only
+while collapsed ("W1-W14 is the round that eliminates most of the field"). A
+section styled like a footnote gets read like one no matter what colour it is.
+
+Guard 17 asserts the PAIRING rather than the colour — the header token must be
+the same one the grid's `isPlayoff` columns use — so a re-tune of the week
+palette stays legal and a "cleanup" back to `--ui-accent` does not.
+Negative-tested.
