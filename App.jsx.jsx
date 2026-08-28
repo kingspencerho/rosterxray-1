@@ -9422,21 +9422,24 @@ Analyze this best ball roster. Return JSON only.`;
                   aria-expanded={rosterStripOpen}
                   aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
                   style={{
-                    display: "flex", gap: "14px", flexWrap: "wrap", alignItems: "center",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    gap: "12px", rowGap: "10px", flexWrap: "wrap",
                     fontSize: "13px", width: "100%", background: "transparent", border: "none",
                     padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                   }}
                 >
+                  <span style={{ display: "flex", gap: "14px", alignItems: "center" }}>
                   {["QB", "RB", "WR", "TE"].map(pos => {
                     const c = posColor(pos);
                     return (
                       <span key={pos}>
-                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
-                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                        <span style={{ color: c.text, letterSpacing: "0.06em", fontWeight: 700 }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{analyzed.posCounts[pos]}</span>
                       </span>
                     );
                   })}
-                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
                     <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
                     <span style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
@@ -10775,21 +10778,24 @@ Analyze this best ball roster. Return JSON only.`;
                   aria-expanded={rosterStripOpen}
                   aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
                   style={{
-                    display: "flex", gap: "14px", flexWrap: "wrap", alignItems: "center",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    gap: "12px", rowGap: "10px", flexWrap: "wrap",
                     fontSize: "13px", width: "100%", background: "transparent", border: "none",
                     padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                   }}
                 >
+                  <span style={{ display: "flex", gap: "14px", alignItems: "center" }}>
                   {["QB", "RB", "WR", "TE"].map(pos => {
                     const c = posColor(pos);
                     return (
                       <span key={pos}>
-                        <span style={{ color: c.text, letterSpacing: "0.06em" }}>{pos}</span>{" "}
-                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                        <span style={{ color: c.text, letterSpacing: "0.06em", fontWeight: 700 }}>{pos}</span>{" "}
+                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{analyzed.posCounts[pos]}</span>
                       </span>
                     );
                   })}
-                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
                     <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
                     <span style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",

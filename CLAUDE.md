@@ -2890,3 +2890,67 @@ decoupling the label from the score each exit non-zero.
 projected mode. Expected: tier is display-only in the scoring path, the orphan
 score was already correct, and the season grid feeds no score at all.
 ```
+
+---
+
+## `button:not([data-compact])` Centres Its Content (found Aug 27, 2026)
+
+Reported as *"it's literally all over the place, why isn't it organized"* — the
+grade header had **seven different left edges** on a phone. Measured, not judged:
+
+```
+grade letter A       left  49
+OVERALL CEILING…     left  49
+counts row container left  49
+  QB 2 RB 5 WR 9…    left 128   <- 79px indent, from nothing in its own style
+  18/18 matched      left 152
+  HIDE ROSTER chip   left 258
+```
+
+### The cause is a global rule, and an auto margin was hiding it
+
+The accessibility pass that gave every button a 44px floor also set
+`justify-content: center` so labels sit centred in the taller box:
+
+```css
+button:not([data-compact]) { min-height:44px; display:inline-flex;
+                             align-items:center; justify-content:center; }
+```
+
+Any button used as a **row of left-aligned content** inherits that. The counts
+row looked fine at desktop width because its right-hand group carries
+`marginLeft: auto`, and an auto margin absorbs all free space, which makes
+`justify-content` a no-op. **On a phone the row wraps**, line 1 holds only the
+four counts, there is no auto-margin item on that line any more, and the rule
+takes over and centres them.
+
+**So the symptom only appears at narrow widths, and only after a wrap.** That is
+why it survived a desktop review and why it needs measuring rather than looking.
+
+### Two rules this produces
+
+- **A button used as a layout row must state `justifyContent` explicitly.** Do
+  not rely on an auto margin to suppress the global rule; the moment the row
+  wraps, the suppression disappears.
+- **Group the halves of a two-sided row.** With the four counts in one span and
+  matched-plus-chip in another, a wrap moves a whole group to the next line
+  instead of splitting the row into differently-aligned fragments.
+
+Check `SectionH2` and the card-section headers if either is ever restyled —
+both are buttons carrying left-aligned content and both currently rely on an
+auto-margin child.
+
+### Pills: grid, not wrapping flex
+
+The same report covered staggered pills. A wrapping flex row sizes every pill to
+its own text, so the second column landed at x=186/216/245/201/208 down the
+list. A grid with `repeat(auto-fill, minmax(132px, 1fr))` puts every
+second-column pill at 235.
+
+**Names wrap rather than truncate.** Fixed columns clipped `Kenneth Walker Iii`
+by 8px, and at 430px two columns cannot fit the longest names at 12px/600 —
+widening enough forces one column and doubles the strip height. Truncating a
+name in a list whose only job is identifying players is the wrong trade, so the
+pill takes a second line and the grid equalises row heights.
+
+Calibration: 33 grades byte-identical, 0 tap targets under 32px in either mode.
