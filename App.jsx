@@ -914,6 +914,40 @@ const TOURNAMENTS = {
   // advanceWeight 1.25: R1 is 3-of-12 (25%), softer than the 2-of-12 (16.7%)
   // that earns 1.5 elsewhere, and surviving it pays exactly the $6 entry back.
   frenchie: { name: "The Frenchie 13", entries: "9.4k", weights: [1.25, 2, 2], advanceWeight: 1.25, note: "The only format where W16 is the kill shot — 1-of-6, exactly TWICE as hard as its 2-of-6 W15. Smallest final on the board at 131 seats and the most top-heavy first prize anywhere (1st = 30% of the pool). Coast W15, win W16 outright, then win a 131-man room. Max 4 entries", format: "standard" },
+  // The Frenchie 14 (added Aug 28 2026, read off the in-app rules).
+  // $20 entry · 6,996 entries · $139k prizes · 0% RAKE · 18 rounds · 12-man
+  // drafts · half-PPR, 4pt passing TD · max 5 entries · closes 9/9/26.
+  //
+  //   R1 Qualifier  W1-14  583 groups of 12, 4 advance (33.3%)  6,996 -> 2,332
+  //   R2 Quarter    W15    583 groups of  4, 1 advance (25.0%)  2,332 ->   583
+  //   R3 Semi       W16     53 groups of 11, 1 advance ( 9.09%)   583 ->    53
+  //   R4 Final      W17    one 53-seat group, all paid              53 ->     1
+  //
+  // ⚠️ FOURTH Underdog page in a row with a group-count slip: the rules say R2
+  // is "2,332 entries in 584 4-person Groups". 2,332/4 = 583, and their own next
+  // line confirms it by putting 583 entries into R3. Recompute, never trust.
+  //
+  // THE MOST EXTREME W16 INVERSION ON THE BOARD. W16 at 1-of-11 (9.09%) is the
+  // third-hardest weekly gate anywhere behind BBM VII's two, and it is 2.75x
+  // harder than its own 1-of-4 (25%) W15 — the Frenchie 13 and Field General
+  // invert at 2.0x. So W15 is a survival check, not a week you buy: you need to
+  // not be dead, and paying up for W15 ceiling buys a gate you were already 75%
+  // to clear. W16 carries max weight and W15 the same 1.25 the other soft-W15
+  // formats get.
+  //
+  // W17 also takes 2: 1st alone is $50k of $139k (36.0%), the second-most
+  // concentrated first prize here after the Frenchie Sprint, and reaching the
+  // 53-seat final is comparatively easy at 0.76% (one in 132) — so placement in
+  // the final, not arrival, is what the money turns on.
+  //
+  // advanceWeight 1.0 — the 4-of-12 R1 is the softest qualifier on the board
+  // alongside the Boxer's, so it sits below the 1.25 the Frenchie 13's 3-of-12
+  // earns and above the Boxer's 0.75, whose R1 loses money outright.
+  //
+  // 0% RAKE is unique here; every other format on this board runs 11-11.7%.
+  // 6,996 entries is a small field, so it is deliberately NOT in the
+  // uniqueness-leverage branch.
+  frenchie14: { name: "The Frenchie 14", entries: "7.0k", weights: [1.25, 2, 2], advanceWeight: 1, note: "W16 is the kill shot and the most extreme inversion here — 1-of-11 (9.09%), 2.75x harder than its 1-of-4 W15. Coast W15, win W16 outright, then place in a 53-seat final where 1st takes 36% of the pool. 0% rake, small field, max 5 entries", format: "standard" },
   // The Boxer (added Aug 14 2026, read off the in-app rules).
   // $18 entry · 6,240 entries · $100k prizes · 11% rake · 18 rounds · 12-man
   // drafts · MAX 3 ENTRIES — the lowest portfolio of any format here.
@@ -4400,6 +4434,27 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (w17Elite.length >= 1) {
       strengths.push(`${w17Elite.length} stack(s) live for the 131-seat final — the smallest final on the board, and 1st alone is 30% of the pool`);
+    }
+  } else if (tournamentKey === "frenchie14") {
+    // The Frenchie 14: W16 is 1-of-11 (9.09%), the third-hardest weekly gate on
+    // this board and 2.75x harder than its own 1-of-4 W15 — the widest inversion
+    // anywhere. Like the Frenchie 13 and Field General branches this one does
+    // NOT flag W15 as the tight cut. What it adds is the opposite warning: a
+    // roster whose ceiling sits in W15 has bought a gate it was already 75% to
+    // clear, and that is the specific trap this format sets.
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    const w15Only = qualifiedStackGrades.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] < 3.5 && s.avgPerWeek[2] < 3.5);
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) built for the W16 kill shot — 1-of-11 here, and 2.75x harder than this format's W15`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears the W16 gate — W16 eliminates ten of every eleven survivors here, and a W15-built roster dies one week later`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 53-seat final — the smallest field left on the board, and 1st alone is 36% of the pool`);
+    }
+    if (w15Only.length >= 1) {
+      weaknesses.push(`${w15Only.length} stack(s) peak in W15 and fade after — W15 is only 1-of-4 here, so that ceiling buys a gate you were already 75% to clear`);
     }
   } else if (tournamentKey === "fieldgeneral") {
     // The Field General 2: W16 is 1-of-12, exactly twice as hard as the 2-of-12
