@@ -1536,7 +1536,7 @@ function calcChampionshipWindowScore(analyzed, adpSource) {
   const total = Math.round((comp1 + comp2 + comp3) * 2) / 2;
 
   const tier = total >= 9 ? "Elite" : total >= 7.5 ? "Contender" : total >= 6 ? "Competitive" : total >= 4.5 ? "Risky" : "Rebuild";
-  const tierColor = total >= 9 ? "var(--pos)" : total >= 7.5 ? "var(--pos-bright)" : total >= 6 ? "var(--caution)" : total >= 4.5 ? "var(--warn)" : "var(--neg)";
+  const tierColor = total >= 9 ? "var(--pos)" : total >= 7.5 ? "var(--pos-bright)" : total >= 6 ? "var(--tier-even)" : total >= 4.5 ? "var(--warn)" : "var(--neg)";
 
   // --- Feedback copy: 3 sentences, player-specific ---
   // Sort starters by playoff score — sentence 1 describes the BEST windows, not the average
@@ -5816,7 +5816,7 @@ const getNflWeek = (now = new Date()) => {
 const EXPORT_TIER_COLORS = {
   elite:   { bg: "#0d3320", border: "#22c55e", text: "#4ade80", label: "Smash" },
   solid:   { bg: "#1e2a1a", border: "#84cc16", text: "#a3e635", label: "Good" },
-  neutral: { bg: "#2a2618", border: "#eab308", text: "#facc15", label: "Even" },
+  neutral: { bg: "#232329", border: "#5a5a68", text: "#b4b4c0", label: "Even" },
   tough:   { bg: "#2a1a18", border: "#f97316", text: "#fb923c", label: "Hard" },
   wall:    { bg: "#2e1414", border: "#ef4444", text: "#f87171", label: "Avoid" },
 };
@@ -7565,7 +7565,7 @@ Analyze this best ball roster. Return JSON only.`;
     const styles = {
       elite: { bg: "#0d3320", border: "#22c55e", text: "var(--pos)" },
       solid: { bg: "#1e2a1a", border: "#84cc16", text: "var(--pos-bright)" },
-      neutral: { bg: "#2a2618", border: "#eab308", text: "var(--caution)" },
+      neutral: { bg: "var(--tier-even-bg)", border: "var(--tier-even-border)", text: "var(--tier-even)" },
       tough: { bg: "#2a1a18", border: "#f97316", text: "var(--warn)" },
       wall: { bg: "#2e1414", border: "#ef4444", text: "var(--neg)" },
     };
@@ -7680,7 +7680,7 @@ Analyze this best ball roster. Return JSON only.`;
       <span style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Matchup:</span>
       <span style={{ color: "var(--pos)", fontWeight: 600 }}>Smash</span>
       <span style={{ color: "var(--pos-bright)", fontWeight: 600 }}>Good</span>
-      <span style={{ color: "var(--caution)", fontWeight: 600 }}>Even</span>
+      <span style={{ color: "var(--tier-even)", fontWeight: 600 }}>Even</span>
       <span style={{ color: "var(--warn)", fontWeight: 600 }}>Hard</span>
       <span style={{ color: "var(--neg)", fontWeight: 600 }}>Avoid</span>
       <span style={{ color: "var(--text-dim)" }}>· vs that week's opponent defense</span>
@@ -7691,7 +7691,7 @@ Analyze this best ball roster. Return JSON only.`;
     const map = {
       elite:   { bg: "#0d2a18", color: "var(--pos)" },
       solid:   { bg: "#1a2a0a", color: "var(--pos-bright)" },
-      neutral: { bg: "#2a2000", color: "var(--caution)" },
+      neutral: { bg: "var(--tier-even-bg)", color: "var(--tier-even)" },
       tough:   { bg: "#2a1400", color: "var(--warn)" },
       wall:    { bg: "#2a0a0a", color: "var(--neg)" },
     };
@@ -7763,13 +7763,23 @@ Analyze this best ball roster. Return JSON only.`;
           --pos-solid: #22c55e;
           --pos-bright: #a3e635;
           --caution: #facc15;
+          /* The matchup ramp's NEUTRAL rung. Deliberately grey, not yellow.
+             Yellow read as a mild warning, which an even matchup is not, and it
+             sat 5 degrees from the QB position chip's amber — the last pair on
+             the page where a category and a verdict wore the same colour.
+             Green good -> grey neutral -> orange hard -> red wall now says
+             exactly what it means, and frees the yellow band for QB alone.
+             REAL warnings (bye severity, admin actions) keep --caution. */
+          --tier-even: #b4b4c0;
+          --tier-even-border: #5a5a68;
+          --tier-even-bg: #232329;
           --caution-alt: #fbbf24;
           --warn: #fb923c;
           --neg: #f87171;
           --gold: #f59e0b;
           --pink: #f472b6;
           /* Typography */
-          --font-display: 'Bebas Neue', 'Impact', sans-serif;
+          --font-display: 'Bebas Neue', 'Anton', 'Impact', 'Arial Black', sans-serif;
           --font-body: 'Inter', system-ui, sans-serif;
           --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
         }
@@ -9417,6 +9427,7 @@ Analyze this best ball roster. Return JSON only.`;
               <div className="grade-pulse" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "110px",
+                fontWeight: 900,
                 lineHeight: 1,
                 color: gradeColor(analyzed.grade),
                 letterSpacing: "-0.02em",
@@ -10018,7 +10029,7 @@ Analyze this best ball roster. Return JSON only.`;
               {analyzed.stackGrades.map((stack, idx) => {
                 const total = stack.normalizedScore;
                 const stackTier = total >= 12 ? "Elite" : total >= 10 ? "Strong" : total >= 8 ? "Neutral" : "Weak";
-                const stackColor = total >= 12 ? "var(--pos)" : total >= 10 ? "var(--pos-bright)" : total >= 8 ? "var(--caution)" : "var(--neg)";
+                const stackColor = total >= 12 ? "var(--pos)" : total >= 10 ? "var(--pos-bright)" : total >= 8 ? "var(--tier-even)" : "var(--neg)";
                 return (
                   <div key={idx} style={{
                     background: "var(--bg-surface)",
@@ -10212,16 +10223,16 @@ Analyze this best ball roster. Return JSON only.`;
                             fontSize: "9px",
                             color: o.tier === "Elite Window" ? "var(--pos)"
                                  : o.tier === "Strong Matchups" ? "var(--pos-bright)"
-                                 : o.tier === "Soft Spot" ? "var(--caution)"
+                                 : o.tier === "Soft Spot" ? "var(--tier-even)"
                                  : "var(--warn)",
                             background: o.tier === "Elite Window" ? "#4ade8015"
                                       : o.tier === "Strong Matchups" ? "#a3e63515"
-                                      : o.tier === "Soft Spot" ? "#facc1515"
+                                      : o.tier === "Soft Spot" ? "#b4b4c018"
                                       : "#fb923c15",
                             border: `1px solid ${
                               o.tier === "Elite Window" ? "#4ade8044"
                             : o.tier === "Strong Matchups" ? "#a3e63544"
-                            : o.tier === "Soft Spot" ? "#facc1544"
+                            : o.tier === "Soft Spot" ? "#5a5a68"
                             : "#fb923c44"}`,
                             fontWeight: 700,
                             letterSpacing: "0.08em",
@@ -10773,6 +10784,7 @@ Analyze this best ball roster. Return JSON only.`;
               <div className="grade-pulse" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "110px",
+                fontWeight: 900,
                 lineHeight: 1,
                 color: gradeColor(analyzed.grade),
                 letterSpacing: "-0.02em",
@@ -11291,7 +11303,7 @@ Analyze this best ball roster. Return JSON only.`;
                 {Object.entries(analyzed.depthAnalysis).map(([pos, d]) => {
                   const isWeak = d.depth < 1;
                   const isStrong = d.depth >= 3;
-                  const color = isWeak ? "#f87171" : isStrong ? "#4ade80" : "#facc15";
+                  const color = isWeak ? "#f87171" : isStrong ? "#4ade80" : "#b4b4c0";
                   return (
                     <div key={pos} style={{
                       background: "var(--bg-surface)",
@@ -11366,7 +11378,7 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 {analyzed.playoffMatchups.map((p, i) => {
                   const scoreOf10 = Math.round((p.totalScore / 15) * 10);
-                  const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--caution)";
+                  const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--tier-even)";
                   const pc = posColor(p.pos);
                   return (
                     <div key={i} style={{
@@ -12382,9 +12394,9 @@ Analyze this best ball roster. Return JSON only.`;
                               </div>
                             </div>
                             {/* Component bars */}
-                            {compBar("Schedule Quality", cws.comp1, 4, cws.comp1 >= 3.5 ? "var(--pos)" : cws.comp1 >= 2.5 ? "var(--caution)" : "var(--neg)")}
-                            {compBar("Starter Caliber", cws.comp2, 4, cws.comp2 >= 3.5 ? "var(--pos)" : cws.comp2 >= 2.5 ? "var(--caution)" : "var(--neg)")}
-                            {compBar("Roster Situations", cws.comp3, 2, cws.comp3 >= 1.5 ? "var(--pos)" : cws.comp3 >= 1.0 ? "var(--caution)" : "var(--neg)")}
+                            {compBar("Schedule Quality", cws.comp1, 4, cws.comp1 >= 3.5 ? "var(--pos)" : cws.comp1 >= 2.5 ? "var(--tier-even)" : "var(--neg)")}
+                            {compBar("Starter Caliber", cws.comp2, 4, cws.comp2 >= 3.5 ? "var(--pos)" : cws.comp2 >= 2.5 ? "var(--tier-even)" : "var(--neg)")}
+                            {compBar("Roster Situations", cws.comp3, 2, cws.comp3 >= 1.5 ? "var(--pos)" : cws.comp3 >= 1.0 ? "var(--tier-even)" : "var(--neg)")}
                           </div>
 
                           {/* Playoff schedule chips — top 3 starters */}
@@ -12403,7 +12415,7 @@ Analyze this best ball roster. Return JSON only.`;
                               .slice(0, 3)
                               .map((p, i, arr) => {
                                 const score = Math.round((p.totalScore / 15) * 10);
-                                const sc = score >= 7 ? "var(--pos)" : score <= 4 ? "var(--neg)" : "var(--caution)";
+                                const sc = score >= 7 ? "var(--pos)" : score <= 4 ? "var(--neg)" : "var(--tier-even)";
                                 const pc = posColor(p.pos).text;
                                 return (
                                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 0 4px 6px", borderBottom: i < arr.length - 1 ? "1px solid var(--bg-surface-alt)" : "none" }}>

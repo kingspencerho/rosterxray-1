@@ -3025,17 +3025,32 @@ definition does not:
 Negative-tested both ways: reintroducing a rival palette and moving one affordance
 back onto cyan each exit non-zero.
 
-### ⚠ Known remaining pair, deliberately NOT changed
+### The tier ramp came off yellow (same session, after sign-off)
 
-**QB amber (h43) sits 5° from the Even tier's yellow (h48)**, and unlike the
+**QB amber (h43) sat 5° from the Even tier's yellow (h48)**, and unlike the
 week/position pairs these two genuinely co-occur — a position chip beside a tier
-word in the redraft matchup rows.
+word in the redraft matchup rows. Nudging QB was not available: the status ramp
+owns 0-142 and the weeks own 174/217/275, leaving no slot ≥40° from both RB and
+TE. **So the fix was on the other side.**
 
-The clean fix is to take the *tier* ramp off yellow (Good green → Even **grey** →
-Hard orange → Wall red), which also reads better: a neutral matchup should not
-look like a warning. That changes what a matchup MEANS visually across the whole
-app, so it needs sign-off and its own calibration rather than being slipped in
-under a cleanup.
+```
+Good green -> Even GREY -> Hard orange -> Wall red
+```
+
+`--tier-even: #b4b4c0` (9% sat), with `--tier-even-bg` / `--tier-even-border`.
+It reads better on its own merits — **a neutral matchup is not a mild warning**,
+which is what yellow said — and it frees the yellow band for QB alone.
+
+**REAL warnings keep `--caution`**: bye-week severity, the admin verify action.
+That is the line to hold. Every *quality-ramp midpoint* moved (tierStyle,
+wkChipStyle, the legend, Soft Spot, stack totals, depth, the /10 score rows, the
+championship-window component bars, and `EXPORT_TIER_COLORS`); nothing that
+means "careful" did. Letter grades were left alone — a C is a verdict on the
+roster, a different scale from schedule quality.
+
+**`EXPORT_TIER_COLORS` is the same palette resolved to hex** because canvas
+cannot read `var()`. Its own comment already said to change both or the export
+silently drifts; guard 17 now enforces it against the `:root` values.
 
 Lower-risk pairs left alone because the panels never co-occur: TE violet vs W16
 purple (15°), RB cyan vs W17 teal (16°). Week chips render only in the bring-back
@@ -3048,3 +3063,28 @@ panel, which carries its own legend and no position chips.
 17 guards pass · dual-file identical · 0 page errors
 Rendered census at 430px: every saturated hue now maps to exactly one meaning
 ```
+
+### The grade letter was never restyled — the FONT was not arriving
+
+Reported as *"make the letter grade bold like it was previously, I'm not a fan of
+skinny letters."* The block is byte-identical across every commit back through
+`913a948`, so nothing had changed it.
+
+**Bebas Neue ships ONE weight (400).** With no `fontWeight` declared, the letter
+renders at 400 in whatever face resolves — and if the Google Fonts `@import` is
+slow or blocked, the fallback chain was `'Impact', sans-serif`, where Impact is
+absent on Linux and most Android, so it landed on a *thin generic sans* at 110px.
+That is the skinny A.
+
+Two changes, both needed:
+- `fontWeight: 900` on the grade letter (both modes). Browsers synthesize weight
+  for a single-weight family, so this thickens Bebas itself rather than doing
+  nothing.
+- `--font-display` fallback is now `'Bebas Neue', 'Anton', 'Impact', 'Arial
+  Black', sans-serif`. **Arial Black is the load-bearing addition** — it is
+  genuinely heavy and actually present on Windows, macOS and Android, so a font
+  that fails to load degrades to something bold instead of something thin.
+
+**Check the fallback chain before restyling a display element.** The sandbox
+cannot reach Google Fonts, so local screenshots always show the fallback — which
+is exactly why this was visible in a local render and invisible in the source.

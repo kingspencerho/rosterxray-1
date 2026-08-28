@@ -80,5 +80,34 @@ for (const [tok, allowed] of [["--accent-cyan", 3], ["--accent-purple", 1]]) {
     : bad(`${tok} is used ${uses}x, over the cap of ${allowed}. Chrome must use --ui-accent.`);
 }
 
+console.log("\nthe matchup ramp's neutral rung is not a warning colour");
+
+// Even is grey, not yellow. Yellow read as a mild warning (an even matchup is
+// not one) and sat 5 degrees from the QB chip's amber — the last place on the
+// page where a category and a verdict wore the same colour.
+const even = (src.match(/--tier-even:\s*#([0-9a-f]{6})/i) || [])[1];
+if (!even) bad("--tier-even is not defined");
+else {
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(even.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  const sat = mx === mn ? 0 : (mx - mn) / (1 - Math.abs(mx + mn - 1));
+  sat <= 0.15
+    ? ok(`--tier-even is neutral (${Math.round(sat * 100)}% sat)`)
+    : bad(`--tier-even is ${Math.round(sat * 100)}% saturated — the neutral rung must not carry a hue`);
+}
+const neutralRung = (src.match(/neutral: \{ bg: "[^"]+", border: "[^"]+", text: "([^"]+)" \}/) || [])[1];
+neutralRung === "var(--tier-even)"
+  ? ok("tierStyle.neutral uses --tier-even")
+  : bad(`tierStyle.neutral uses ${neutralRung}, not --tier-even`);
+
+// EXPORT_TIER_COLORS is the same palette resolved to hex, because canvas cannot
+// read var(). Its own comment says to change both or the export drifts from the
+// app; nothing enforced it until now.
+const vars = Object.fromEntries([...src.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{3,8});/gi)].map((m) => [m[1], m[2].toLowerCase()]));
+const exportNeutral = (src.match(/neutral: \{ bg: "([^"]+)", border: "([^"]+)", text: "([^"]+)", label: "Even" \}/) || []).slice(1);
+exportNeutral[2] === vars["tier-even"] && exportNeutral[0] === vars["tier-even-bg"] && exportNeutral[1] === vars["tier-even-border"]
+  ? ok("EXPORT_TIER_COLORS.neutral matches the on-screen neutral")
+  : bad(`EXPORT_TIER_COLORS.neutral is ${exportNeutral.join("/")}, the app renders ${vars["tier-even-bg"]}/${vars["tier-even-border"]}/${vars["tier-even"]}`);
+
 console.log(failed ? `\n${failed} colour-role check(s) failed` : "\nall colour-role guards passed");
 process.exit(failed ? 1 : 0);
