@@ -102,5 +102,45 @@ const anchors = (src.match(/minWidth: "120px", minHeight: "44px"/g) || []).lengt
 anchors === 4 ? ok("both share anchors state their own 44px floor, in both modes")
               : bad(`${anchors} of 4 share anchors carry a min-height; <a> is not covered by the button floor`);
 
+console.log("\nthe sticky section index");
+
+// A nav entry pointing at an id that no longer renders is a dead link the user
+// can tap: nothing happens, no error. That is the failure this guard exists for.
+const idxBlock = src.slice(src.indexOf("const SECTION_INDEX = {"), src.indexOf("const STICKY_INDEX_H"));
+const navIds = [...idxBlock.matchAll(/id: "(rxr-[a-z]+)"/g)].map(m => m[1]);
+navIds.length >= 10
+  ? ok(`the index covers both modes (${navIds.length} entries)`)
+  : bad(`only ${navIds.length} index entries — both modes need a list`);
+const dead = navIds.filter(id => !new RegExp(`id="${id}"`).test(src));
+dead.length === 0
+  ? ok("every index entry points at an anchor that exists")
+  : bad(`dead nav targets: ${dead.join(", ")}`);
+const dupes = navIds.filter(id => (src.match(new RegExp(`id="${id}"`, "g")) || []).length > 1);
+dupes.length === 0
+  ? ok("no anchor id is rendered twice")
+  : bad(`duplicate anchors: ${dupes.join(", ")} — getElementById would pick the first`);
+
+const mounts = (src.match(/<StickyIndex items=/g) || []).length;
+mounts === 2 ? ok("mounted in best ball AND redraft (2 sites)")
+             : bad(`StickyIndex mounted at ${mounts} sites, expected 2`);
+
+const sticky = slice("StickyIndex");
+/position: "sticky", top: 0/.test(sticky)
+  ? ok("it pins to the top of the scroll container")
+  : bad("StickyIndex is not sticky");
+
+// It is CHROME. Every hue on this page already means something, so a navigation
+// control must distinguish its active pill by lightness, never by colour.
+/var\(--(accent|pos|warn|neg|caution|pink|gold|info)/.test(sticky)
+  ? bad("the index uses a data hue — an active pill must be a lightness step, not a colour")
+  : ok("the active pill is a lightness step, carrying no data hue");
+
+// The last sections live inside the final viewport-height and can never cross
+// the top edge, so without this the pill sticks several sections back — right
+// after the reader tapped the one they wanted.
+/scrollHeight - 4/.test(sticky)
+  ? ok("the last section becomes active at the bottom of the page")
+  : bad("no end-of-page case — the final pills can never highlight");
+
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);

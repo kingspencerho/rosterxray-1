@@ -3252,3 +3252,67 @@ themselves. Guard 18 counts all four.
 generated state is unreachable in a local render and the export silently no-ops.
 Stub `window.html2canvas` via `addInitScript` to return an object with a
 `toDataURL()` — that is the only way to exercise this UI locally.
+
+---
+
+## Sticky Section Index (added Aug 28, 2026)
+
+A pinned pill row — `Schedule · Stacks · Bring-backs · Solo · Byes · Standouts`
+in best ball, `Lineup · Depth · Byes · Playoffs · Weekly · Bench` in redraft.
+**Presentation only — 33 grades byte-identical across 11 tournaments x 3
+fixtures.** Guarded in `scripts/test-disclosure.mjs` (guard 18).
+
+### It attacks a different quantity from every earlier pass
+
+The density passes reduced HOW TALL the page is. This reduces TRAVEL DISTANCE,
+which is what the complaint was actually about — scrolling past sections to
+reach the one you want. **Trimming gets slightly worse every time a section is
+added; an index gets better.**
+
+### The active pill is a lightness step, never a hue
+
+Every hue on this page is spoken for (matchups, weeks, positions), and a
+navigation control must not look like data. Inactive is `--text-muted` on
+transparent; active is `--text-primary` on `--bg-elevated` with a border. Guard
+18 fails the build if any data-colour token appears inside `StickyIndex`.
+
+### Three implementation choices worth keeping
+
+1. **A scroll listener, not an IntersectionObserver.** The observer reads more
+   cleanly but reports on threshold crossings, so a section taller than the
+   viewport — the stack matrix is 1,340px — can stop reporting and the pill goes
+   blank in the middle of the section being read. Nearest-heading-above-the-fold
+   has no such hole.
+2. **AT THE BOTTOM, THE LAST SECTION WINS.** The final sections sit inside the
+   last viewport-height, so they can never cross the top edge. Without an
+   end-of-page case the pill stays several sections back — including immediately
+   after the reader taps that very pill, which is how it was caught.
+3. **The auto-centre scrolls the BAR's own overflow box, never the document.**
+   A nav that moves the page while you read it is worse than one that hides a
+   pill.
+
+### Anchors are ids on the section headings
+
+`SECTION_INDEX` is the single list; `SectionH2` gained an `id` passthrough for
+BYE WEEK MAP, and the Season Schedule anchor sits on its wrapper because that
+header is a button rather than an `h2`.
+
+**A nav entry pointing at an id that no longer renders is a dead link the reader
+can tap: nothing happens and nothing errors.** Guard 18 resolves every entry
+against the source and also fails on a duplicated id, since `getElementById`
+would silently take the first. Both negative-tested.
+
+### Placement matters for `position: sticky`
+
+The bar must be a DIRECT SIBLING of the sections — a sticky element stops
+sticking at the bottom of its own parent, so mounting it inside the grade-header
+block would unpin it before the first section. It sits at the same indent level
+as every section it indexes, in both modes.
+
+### Measured
+
+```
+best ball  6,167px · 6 pills · all anchors resolve · bar pinned at y=0
+redraft    6,355px · 6 pills · jump lands the heading at y=54, under the 44px bar
+0 tap targets under 32px · no horizontal overflow · no page errors
+```

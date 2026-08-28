@@ -6219,8 +6219,9 @@ const CARD_ACCENTS = {
 // about size. Strengths, weaknesses and the stack matrix are read on every
 // grade and stay open however tall they are. Reference tables and exploratory
 // blocks are read occasionally, so they cost a click instead of a scroll.
-const SectionH2 = ({ title, open, onToggle, hint, children }) => (
+const SectionH2 = ({ title, open, onToggle, hint, children, id }) => (
   <button
+    id={id}
     onClick={onToggle}
     aria-expanded={open}
     style={{
@@ -6414,6 +6415,133 @@ const InsightPanel = ({ title, items, color, empty, preview = 4, renderItem }) =
           )}
         </>
       )}
+    </div>
+  );
+};
+
+// STICKY SECTION INDEX.
+//
+// The results view is ~6,100px on a phone, about fifteen screen-heights. Every
+// previous pass attacked HOW TALL the page is; this one attacks TRAVEL
+// DISTANCE, which is the thing actually being complained about — having to
+// scroll past sections to reach the one you want. Trimming gets a little worse
+// every time a section is added; an index gets better.
+//
+// It is CHROME, so it is hueless. The active pill is a lightness step, never a
+// hue: every hue on this page already means something (matchups, weeks,
+// positions) and a navigation control must not look like data.
+const SECTION_INDEX = {
+  bestball: [
+    { id: "rxr-schedule",  label: "Schedule" },
+    { id: "rxr-stacks",    label: "Stacks" },
+    { id: "rxr-bringback", label: "Bring-backs" },
+    { id: "rxr-solo",      label: "Solo" },
+    { id: "rxr-byes",      label: "Byes" },
+    { id: "rxr-standouts", label: "Standouts" },
+  ],
+  redraft: [
+    { id: "rxr-lineup",       label: "Lineup" },
+    { id: "rxr-depth",        label: "Depth" },
+    { id: "rxr-byeconflicts", label: "Byes" },
+    { id: "rxr-playoffs",     label: "Playoffs" },
+    { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-bench",        label: "Bench" },
+  ],
+};
+const STICKY_INDEX_H = 44;
+
+const StickyIndex = ({ items }) => {
+  const [active, setActive] = useState(null);
+  const barRef = useRef(null);
+
+  useLayoutEffect(() => {
+    // ONE scroll listener doing both jobs. An IntersectionObserver reads more
+    // cleanly but reports on threshold crossings, so a section taller than the
+    // viewport (the stack matrix is 1,340px) can stop reporting entirely and
+    // the active pill goes blank in the middle of the section you are reading.
+    // Nearest-heading-above-the-fold has no such hole.
+    const onScroll = () => {
+      let cur = null;
+      const present = [];
+      for (const it of items) {
+        const el = document.getElementById(it.id);
+        if (!el) continue;
+        present.push(it.id);
+        if (el.getBoundingClientRect().top - STICKY_INDEX_H - 12 <= 0) cur = it.id;
+      }
+      // AT THE BOTTOM, THE LAST SECTION WINS. The final sections sit inside the
+      // last viewport-height of the page, so they can never cross the top edge
+      // and "nearest heading above the fold" would leave the pill stuck several
+      // sections back — including right after a reader tapped that very pill.
+      const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      setActive(atEnd && present.length ? present[present.length - 1] : cur);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [items]);
+
+  // Keep the active pill in view without hijacking the page: scroll the BAR's
+  // own overflow box, never the document.
+  useLayoutEffect(() => {
+    if (!active || !barRef.current) return;
+    const pill = barRef.current.querySelector(`[data-sec="${active}"]`);
+    if (!pill) return;
+    const bar = barRef.current;
+    const left = pill.offsetLeft - bar.clientWidth / 2 + pill.offsetWidth / 2;
+    bar.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [active]);
+
+  const go = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - STICKY_INDEX_H - 10;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  };
+
+  return (
+    <div style={{
+      position: "sticky", top: 0, zIndex: 90,
+      background: "var(--bg-base)", borderBottom: "1px solid var(--border-subtle)",
+      marginBottom: "14px",
+    }}>
+      <div
+        ref={barRef}
+        role="navigation"
+        aria-label="Jump to section"
+        style={{
+          display: "flex", gap: "4px", overflowX: "auto", WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none", height: `${STICKY_INDEX_H}px`, alignItems: "center",
+        }}
+      >
+        {items.map(it => {
+          const on = active === it.id;
+          return (
+            <button
+              key={it.id}
+              data-sec={it.id}
+              data-compact
+              onClick={() => go(it.id)}
+              aria-current={on ? "true" : undefined}
+              style={{
+                flex: "none", minHeight: "32px", padding: "6px 11px", borderRadius: "14px",
+                cursor: "pointer", fontFamily: "inherit", fontSize: "11px", letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                background: on ? "var(--bg-elevated)" : "transparent",
+                border: `1px solid ${on ? "var(--border-strong)" : "transparent"}`,
+                color: on ? "var(--text-primary)" : "var(--text-muted)",
+                fontWeight: on ? 700 : 500,
+              }}
+            >
+              {it.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -10077,6 +10205,8 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             </div>
 
+            <StickyIndex items={SECTION_INDEX.bestball} />
+
             {/* Unmatched players */}
             {analyzed.picks.some(p => p.notFound) && (
               <div style={{
@@ -10101,7 +10231,7 @@ Analyze this best ball roster. Return JSON only.`;
                 best ball is won W15-17, this exists to sanity-check the road
                 there, not to imply weekly management. */}
             {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
-              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+              <div id="rxr-schedule" style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
                 <button
                   onClick={() => setBbScheduleOpen(prev => !prev)}
                   aria-expanded={bbScheduleOpen}
@@ -10350,7 +10480,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Stacks */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-stacks" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -10443,7 +10573,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === BRING-BACK GAME STACKS === */}
             {analyzed.bringBacks.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-bringback" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -10532,7 +10662,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === ORPHAN CLASSIFICATION === */}
             {analyzed.orphans.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-solo" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -10785,7 +10915,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === BYE WEEK MAP === */}
             {Object.keys(analyzed.byeMap).length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <SectionH2 title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
+                <SectionH2 id="rxr-byes" title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
                 {byeMapOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "6px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Each bye week shows which of your players are sitting that week. Watch for <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>stacked-position byes</span> — too many <span style={{ color: posColor("RB").text }}>RBs</span> or <span style={{ color: posColor("WR").text }}>WRs</span> on the same week creates a hole.
@@ -10897,7 +11027,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === ROSTER STANDOUTS === */}
             {analyzed.rosterStandouts && analyzed.rosterStandouts.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-standouts" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -11573,9 +11703,11 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             )}
 
+            <StickyIndex items={SECTION_INDEX.redraft} />
+
             {/* Starting Lineup */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-lineup" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11654,7 +11786,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Positional Depth */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-depth" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11689,7 +11821,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bye Week Notes */}
             {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-byeconflicts" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -11721,7 +11853,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Playoff Schedule */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-playoffs" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11818,7 +11950,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-weekly" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -12410,7 +12542,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-bench" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
