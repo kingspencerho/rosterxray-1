@@ -2811,3 +2811,280 @@ Check which function the control actually calls before adding a side effect.
 0 tap targets under 32px (was 1, briefly 19)
 no page errors in best ball or redraft
 ```
+
+---
+
+## The Playoff Boosts Lived in Five Places (fixed Aug 27, 2026)
+
+**Reported by a user, not by a test:** the SF stack read `Good/Good/Good` in the
+stack matrix while the same players' W15-17 cells in the Season Schedule ·
+Advance-Rate View read `Hard`/`Avoid`. Both views were correct for their own code
+path, which is the whole problem.
+
+There were **four different boost levels across five consumers**:
+
+| Consumer | competitive balance | high pace | tier label |
+|---|---|---|---|
+| stack loop (the scored path) | yes | yes | correct |
+| orphan matchup loop | yes | yes | **`score` updated WITHOUT `tier`** |
+| `matchupScoreFor` (panel, pivots) | yes | **missing** | n/a |
+| `seasonSchedules` (the W1-18 grid) | **no** | **no** | raw ← what the user saw |
+| Advance Rate Layer, W1-14 | no | no | **correct, leave alone** |
+
+### Two separate bugs, one reported and one latent
+
+1. **The season grid applied neither boost.** It calls
+   `getMatchupScoreForOpponent`, which was never in the boost chain. Seven of
+   nine SF playoff cells disagreed with the stack matrix.
+2. **The orphan loop's high-pace branch skipped `tierFromScore`** — exactly the
+   divergence the Aug 14 note says was fixed. That fix corrected the stack loop's
+   two branches and **missed the orphan loop's**, so orphan tier labels have been
+   understating boosted weeks ever since.
+
+### `playoffBoosts` is now the only place either boost is applied
+
+```js
+const playoffBoosts = (m, team, opp, wkIdx) => { ... }   // wkIdx 0/1/2 = W15/16/17
+```
+
+Both boosts, label and number moving together, one definition. The stack loop,
+the orphan loop, `matchupScoreFor` and `seasonSchedules` all route through it.
+
+### ⚠️ The W1-14 scored path must NOT route through it
+
+The Advance Rate Layer averages `getMatchupScoreForOpponent` over
+`sched.slice(0, 14)`. **That is scored, and `PLAYOFF_GAME_TOTALS` /
+`getGameSelectionNode` carry no W1-14 data** — boosting there would be inventing
+numbers and would move every grade. The season grid passes `weekIdx - 14` so the
+helper no-ops outside the playoff window, and guard 16 asserts both halves.
+
+`analyzeRedraft` is also deliberately out of scope: it keeps its own thresholds
+(`total >= 49`) and its own calibration.
+
+### Guard 16 — `scripts/test-playoff-boosts.mjs`
+
+This is the **third** time this class has bitten (Aug 14 tier/score, Aug 23
+competitive balance, now this), so the guard asserts the SHAPE, not the symptom:
+
+- `playoffBoosts` defined once; `competitiveBalanceBoost` has exactly one call
+  site; the high-pace boost is applied exactly once. **Counted by
+  `highPaceBoost: true`, not by the string `type === "highPace"`** — that also
+  appears as a prompt label, and matching it made a correct file fail.
+- **Each consumer is structurally wired to the helper.** The first version only
+  compared the two tier functions with the test boosting both sides, which
+  cannot see the app skipping a boost — the negative test passed when it should
+  have failed. Fixed by asserting `seasonSchedules`, `matchupScoreFor` and the
+  orphan loop each contain `playoffBoosts(`.
+- The W1-14 pass exists, is bounded to `slice(0, 14)`, and does NOT call it.
+- All 384 playoff cells agree across both tier functions, and the label follows
+  the score in every one.
+- The boosts still fire, and do not fire everywhere.
+
+Negative-tested both ways: reverting the season grid to the unboosted call and
+decoupling the label from the score each exit non-zero.
+
+### Calibration
+
+```
+36 grades BYTE-IDENTICAL — 10 tournaments x 3 fixtures, plus redraft and
+projected mode. Expected: tier is display-only in the scoring path, the orphan
+score was already correct, and the season grid feeds no score at all.
+```
+
+---
+
+## `button:not([data-compact])` Centres Its Content (found Aug 27, 2026)
+
+Reported as *"it's literally all over the place, why isn't it organized"* — the
+grade header had **seven different left edges** on a phone. Measured, not judged:
+
+```
+grade letter A       left  49
+OVERALL CEILING…     left  49
+counts row container left  49
+  QB 2 RB 5 WR 9…    left 128   <- 79px indent, from nothing in its own style
+  18/18 matched      left 152
+  HIDE ROSTER chip   left 258
+```
+
+### The cause is a global rule, and an auto margin was hiding it
+
+The accessibility pass that gave every button a 44px floor also set
+`justify-content: center` so labels sit centred in the taller box:
+
+```css
+button:not([data-compact]) { min-height:44px; display:inline-flex;
+                             align-items:center; justify-content:center; }
+```
+
+Any button used as a **row of left-aligned content** inherits that. The counts
+row looked fine at desktop width because its right-hand group carries
+`marginLeft: auto`, and an auto margin absorbs all free space, which makes
+`justify-content` a no-op. **On a phone the row wraps**, line 1 holds only the
+four counts, there is no auto-margin item on that line any more, and the rule
+takes over and centres them.
+
+**So the symptom only appears at narrow widths, and only after a wrap.** That is
+why it survived a desktop review and why it needs measuring rather than looking.
+
+### Two rules this produces
+
+- **A button used as a layout row must state `justifyContent` explicitly.** Do
+  not rely on an auto margin to suppress the global rule; the moment the row
+  wraps, the suppression disappears.
+- **Group the halves of a two-sided row.** With the four counts in one span and
+  matched-plus-chip in another, a wrap moves a whole group to the next line
+  instead of splitting the row into differently-aligned fragments.
+
+Check `SectionH2` and the card-section headers if either is ever restyled —
+both are buttons carrying left-aligned content and both currently rely on an
+auto-margin child.
+
+### Pills: grid, not wrapping flex
+
+The same report covered staggered pills. A wrapping flex row sizes every pill to
+its own text, so the second column landed at x=186/216/245/201/208 down the
+list. A grid with `repeat(auto-fill, minmax(132px, 1fr))` puts every
+second-column pill at 235.
+
+**Names wrap rather than truncate.** Fixed columns clipped `Kenneth Walker Iii`
+by 8px, and at 430px two columns cannot fit the longest names at 12px/600 —
+widening enough forces one column and doubles the strip height. Truncating a
+name in a list whose only job is identifying players is the wrong trade, so the
+pill takes a second line and the grid equalises row heights.
+
+Calibration: 33 grades byte-identical, 0 tap targets under 32px in either mode.
+
+---
+
+## One Colour, One Meaning (fixed Aug 28, 2026)
+
+Reported as *"why are the colors so similar to each other, if everything is cyan
+how can the user see the difference"*. The colours were not too similar. They were
+**overloaded** — the same token carried different meanings in different places, so
+similarity was the symptom and ambiguity was the disease.
+
+### `--accent-cyan` meant four things at once
+
+```
+RB position chips           a category
+every disclosure affordance chrome        ("hide ⌄", "VIEW ROSTER", step numbers)
+22 emphasis spans in copy   emphasis      ("without any teammates", "both sides")
+🔥 CEILING GAME + Hidden Gem a value flag
+```
+
+`--accent-purple` did the same for TE against seven chrome labels. So in the header
+the user screenshotted, `RB 5` and the `VIEW ROSTER` chip beside it were **the same
+colour**, and the "tap any name" banner was wearing `POS_ACCENT.RB.bg` and
+`POS_ACCENT.RB.border` exactly.
+
+### Chrome is now HUELESS, and that is the load-bearing decision
+
+Every hue on the wheel is already spoken for by a data family — matchups own
+green→lime→yellow→orange→red, weeks own blue/purple/teal, positions own
+amber/cyan/pink/violet. **Seventeen meanings do not fit on 360 degrees**, so
+adding a chrome hue can only be done by stealing one.
+
+`--ui-accent: #cbd5e1` (27% saturation) cannot collide with anything, ever.
+Affordances, step numbers, panel labels and the roster chip use it. Emphasis
+inside explainer copy became `--text-primary` at weight 600 — **bold white on grey
+body copy is stronger emphasis than a hue anyway**, and it can never be mistaken
+for a position.
+
+Two deliberate exceptions, both a different channel from coloured text: the filled
+primary CTAs (Analyze, Upload) stay cyan-on-solid, and they live on the input
+screen where no position chip exists.
+
+### Five hand-rolled position palettes, two of them painting WR GREEN
+
+Fourth time this repo has hit the duplicate-definition class (Aug 14 tier/score,
+Aug 23 competitive balance, Aug 27 `posColor`, now this). All five now route
+through `posColor()` / `POS_ACCENT`.
+
+**Green WR was the worst of them.** Green means *good matchup* everywhere else on
+the page, so a WR badge was rendering in the grading scale — a category painted as
+a verdict. It appeared in the pivot chips, Roster Standouts and the whole
+championship-window block.
+
+Also fixed while in there: `★ QB GAME STACK` was **cyan text inside a green box**,
+its own label disagreeing with its own border.
+
+### Guard 17 — `scripts/test-color-roles.mjs`
+
+Asserts SHAPE, not hex values, so a deliberate re-tune passes and a second
+definition does not:
+
+- `POS_ACCENT` declared once; no rival `QB:…WR:` colour literal; no inline
+  `pos === "QB" ? colour` chain
+- WR is not painted with a matchup-scale token
+- `--ui-accent` exists and is under 45% saturation — a saturated "neutral" would
+  quietly become a fifth data colour
+- `--accent-cyan` capped at 3 uses and `--accent-purple` at 1, which is what
+  forces chrome to keep using `--ui-accent` instead of drifting back
+
+Negative-tested both ways: reintroducing a rival palette and moving one affordance
+back onto cyan each exit non-zero.
+
+### The tier ramp came off yellow (same session, after sign-off)
+
+**QB amber (h43) sat 5° from the Even tier's yellow (h48)**, and unlike the
+week/position pairs these two genuinely co-occur — a position chip beside a tier
+word in the redraft matchup rows. Nudging QB was not available: the status ramp
+owns 0-142 and the weeks own 174/217/275, leaving no slot ≥40° from both RB and
+TE. **So the fix was on the other side.**
+
+```
+Good green -> Even GREY -> Hard orange -> Wall red
+```
+
+`--tier-even: #b4b4c0` (9% sat), with `--tier-even-bg` / `--tier-even-border`.
+It reads better on its own merits — **a neutral matchup is not a mild warning**,
+which is what yellow said — and it frees the yellow band for QB alone.
+
+**REAL warnings keep `--caution`**: bye-week severity, the admin verify action.
+That is the line to hold. Every *quality-ramp midpoint* moved (tierStyle,
+wkChipStyle, the legend, Soft Spot, stack totals, depth, the /10 score rows, the
+championship-window component bars, and `EXPORT_TIER_COLORS`); nothing that
+means "careful" did. Letter grades were left alone — a C is a verdict on the
+roster, a different scale from schedule quality.
+
+**`EXPORT_TIER_COLORS` is the same palette resolved to hex** because canvas
+cannot read `var()`. Its own comment already said to change both or the export
+silently drifts; guard 17 now enforces it against the `:root` values.
+
+Lower-risk pairs left alone because the panels never co-occur: TE violet vs W16
+purple (15°), RB cyan vs W17 teal (16°). Week chips render only in the bring-back
+panel, which carries its own legend and no position chips.
+
+### Calibration
+
+```
+33 grades BYTE-IDENTICAL — 11 tournaments x 3 fixtures
+17 guards pass · dual-file identical · 0 page errors
+Rendered census at 430px: every saturated hue now maps to exactly one meaning
+```
+
+### The grade letter was never restyled — the FONT was not arriving
+
+Reported as *"make the letter grade bold like it was previously, I'm not a fan of
+skinny letters."* The block is byte-identical across every commit back through
+`913a948`, so nothing had changed it.
+
+**Bebas Neue ships ONE weight (400).** With no `fontWeight` declared, the letter
+renders at 400 in whatever face resolves — and if the Google Fonts `@import` is
+slow or blocked, the fallback chain was `'Impact', sans-serif`, where Impact is
+absent on Linux and most Android, so it landed on a *thin generic sans* at 110px.
+That is the skinny A.
+
+Two changes, both needed:
+- `fontWeight: 900` on the grade letter (both modes). Browsers synthesize weight
+  for a single-weight family, so this thickens Bebas itself rather than doing
+  nothing.
+- `--font-display` fallback is now `'Bebas Neue', 'Anton', 'Impact', 'Arial
+  Black', sans-serif`. **Arial Black is the load-bearing addition** — it is
+  genuinely heavy and actually present on Windows, macOS and Android, so a font
+  that fails to load degrades to something bold instead of something thin.
+
+**Check the fallback chain before restyling a display element.** The sandbox
+cannot reach Google Fonts, so local screenshots always show the fallback — which
+is exactly why this was visible in a local render and invisible in the source.
