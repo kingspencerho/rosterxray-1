@@ -2483,6 +2483,120 @@ const CARD_DESCRIPTIVE = [
   { key: "dud_rate",    label: "Duds (<5)",         r: 0.667, get: m => m.dud_rate,    fmt: v => `${Math.round(v * 100)}%`, invert: true },
 ];
 
+// PLAIN-LANGUAGE GLOSSARY, keyed by the SAME key the metric row uses.
+//
+// Two things drove the shape. First, the card's two most cryptic tokens are not
+// metrics at all — the "r 0.73" beside every label and the "29%ile" on the
+// right. A reader who does not know what those mean cannot use any row, so they
+// are explained first and separately.
+//
+// Second, every entry is TWO fields on purpose: `what` is the definition and
+// `how` is what to DO with it. A definition alone ("share of team targets")
+// leaves the reader exactly where they started; the interpretation is the part
+// that has value, and it is where this file's measured stability work belongs.
+//
+// Entries are emitted only for rows the card actually rendered, so a QB card
+// never explains WOPR. Guard 14 asserts the reverse — that every renderable key
+// HAS an entry — because a metric shown without a definition is the silent-drop
+// failure in a new costume.
+const CARD_GLOSSARY = {
+  _r: {
+    term: "r 0.00 – 1.00",
+    what: "How much of last season's number is still true this season, measured across 2023-2025.",
+    how: "0.70+ is dependable to project from. Under 0.30 is close to a coin flip — read it as history, not a forecast.",
+  },
+  _pct: {
+    term: "%ile",
+    what: "Where he ranks against every draftable player at his position who played 8+ games.",
+    how: "50 is the median starter. It ranks him against his own position, so a 60th-percentile TE and a 60th-percentile WR are equally ordinary for their job.",
+  },
+  _trajectory: {
+    term: "Role trajectory",
+    what: "Snap share in the first half of the season against the second half, plus his last 4 games played.",
+    how: "This is the headline because a season average hides role CHANGE. When the two disagree, the trajectory is the newer fact and the average is the stale one.",
+  },
+  tgt_pg: {
+    term: "Targets / game",
+    what: "Passes thrown his way per game.",
+    how: "Raw volume, and among the most repeatable receiving numbers there is. Nothing else on the card matters if this is low.",
+  },
+  ay_sh: {
+    term: "Air yards share",
+    what: "His share of all the yardage his quarterback threw downfield — counted where the ball was aimed, caught or not.",
+    how: "Measures how far downfield the offense uses him. A high share is the deep threat even in a week he catches nothing.",
+  },
+  tgt_sh: {
+    term: "Target share",
+    what: "His share of his team's total targets.",
+    how: "How central he is to the passing game, independent of how often his team throws. Pair it with pace — a big share of a low-volume offence is a small number of balls.",
+  },
+  wopr: {
+    term: "WOPR",
+    what: "One number combining the two above: 1.5x target share plus 0.7x air yards share.",
+    how: "The best single summary of a pass catcher's opportunity. Roughly, under 0.40 is a complementary piece and over 0.70 is a true number one.",
+  },
+  snap_sh: {
+    term: "Snap share",
+    what: "The share of his offence's plays he was on the field for.",
+    how: "The ceiling on everything else — he cannot be targeted on a play he is not playing. A low snap share caps a talented player no matter what the other rows say.",
+  },
+  hvt_pg: {
+    term: "HVT / game",
+    what: "High-value touches: targets plus carries inside the red zone, where points are actually scored.",
+    how: "Separates a back who scores from a back who merely carries. 4.5+ per game is a real scoring role; total carries alone is not.",
+  },
+  spike_rate: {
+    term: "Spike weeks (18+)",
+    what: "The share of his games scoring 18 or more half-PPR points.",
+    how: "Best ball is won by spikes, not averages — but this is the least repeatable number on the card. Use it to describe last season, never to project the next one.",
+  },
+  usable_rate: {
+    term: "Usable (10+)",
+    what: "The share of his games scoring 10 or more points.",
+    how: "How often he was startable at all. Steadier year to year than spike rate, and the better read on a floor play.",
+  },
+  dud_rate: {
+    term: "Duds (<5)",
+    what: "The share of his games under 5 points.",
+    how: "More predictable than ceiling: a player who dudded a lot tends to keep doing it. In best ball a dud costs nothing directly, so weigh it below spike rate.",
+  },
+  qb_rush: {
+    term: "Rush att / game",
+    what: "Designed runs and scrambles per game.",
+    how: "The stickiest input measured anywhere in this app (r=0.82). It is the safest half of any quarterback projection — far safer than last season's fantasy points.",
+  },
+  qb_pass: {
+    term: "Pass att / game",
+    what: "Pass attempts per game.",
+    how: "The volume his whole passing game is drawn from, his own stack pieces included. Moves with the offence's pace and pass rate, so re-check it after a coaching change.",
+  },
+  qb_adot: {
+    term: "Passing aDOT",
+    what: "How far past the line of scrimmage his average throw travels.",
+    how: "Describes the offence's shape, not its quality. A deep aDOT means bigger weeks and more variance; a short one means a steadier, more checkdown-driven floor.",
+  },
+  eff_rush: {
+    term: "Rush efficiency",
+    what: "Fantasy points over expected per carry, ranked against qualified backs.",
+    how: "Touchdown-sensitive, so it punishes an efficient runner who did not score. Where it disagrees with the NGS rank below, the gap is usually touchdowns rather than running.",
+  },
+  eff_ngs: {
+    term: "NGS rush yds over exp",
+    what: "Next Gen Stats tracking: yards gained above what the blocking and defensive alignment predicted.",
+    how: "The better read on whether he is actually good at running, because it strips out touchdowns. Still 2025 only — yards per carry is r=0.02 year over year.",
+  },
+  eff_rec: {
+    term: "Receiving efficiency",
+    what: "Fantasy points over expected per target, ranked against qualified players.",
+    how: "Near-uncorrelated with the rushing ranks for a back — a bottom-five runner can be an elite receiving back. Never average the two into one figure.",
+  },
+  eff_adot: {
+    term: "aDOT",
+    what: "Average depth of target: how far past the line of scrimmage the ball is thrown to him.",
+    how: "For a back this is usually negative, which is a yardage hole he has to climb out of. When a back's receiving looks thin for his target count, check this before blaming the player.",
+  },
+};
+
 // Sorted value arrays per position per metric, computed once at module load.
 const CARD_PERCENTILES = (() => {
   const out = {};
@@ -2598,12 +2712,25 @@ const buildPlayerCard = (name, pos, team) => {
 
   // Efficiency ranks ride along DIMMED and captioned. RB yards per carry is
   // r=0.02 year over year; the rank is a record of 2025, never a projection.
-  if (eff?.rush_eff_rank) card.efficiency.push({ label: "Rush efficiency", value: `${eff.rush_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rush_eff_rank`]}` });
-  if (eff?.ngs_rush_rank) card.efficiency.push({ label: "NGS rush yds over exp", value: `${eff.ngs_rush_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_ngs_rush_rank`]}` });
-  if (eff?.rec_eff_rank) card.efficiency.push({ label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
-  if (ay) card.efficiency.push({ label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
+  if (eff?.rush_eff_rank) card.efficiency.push({ key: "eff_rush", label: "Rush efficiency", value: `${eff.rush_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rush_eff_rank`]}` });
+  if (eff?.ngs_rush_rank) card.efficiency.push({ key: "eff_ngs", label: "NGS rush yds over exp", value: `${eff.ngs_rush_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_ngs_rush_rank`]}` });
+  if (eff?.rec_eff_rank) card.efficiency.push({ key: "eff_rec", label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
+  if (ay) card.efficiency.push({ key: "eff_adot", label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
+
+  // The glossary explains exactly what this card rendered and nothing else, in
+  // the order the reader met it. A QB card never defines WOPR; an RB card with
+  // no air-yards row never defines aDOT.
+  const glossKeys = [];
+  if (card.trajectory || card.trajectoryCur) glossKeys.push("_trajectory");
+  if (card.metrics.length || card.descriptive.length) glossKeys.push("_r", "_pct");
+  if (card.qb || card.qbCur) glossKeys.push("qb_rush", "qb_pass", "qb_adot");
+  for (const d of (CARD_METRICS[pos] || [])) if (card.metrics.some(x => x.label === d.label)) glossKeys.push(d.key);
+  for (const d of CARD_DESCRIPTIVE) if (card.descriptive.some(x => x.label === d.label)) glossKeys.push(d.key);
+  for (const e of card.efficiency) if (e.key) glossKeys.push(e.key);
+  card.glossary = glossKeys.filter(k => CARD_GLOSSARY[k]).map(k => ({ key: k, ...CARD_GLOSSARY[k] }));
 
   if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length) {
+    card.glossary = [];
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
       : "No 2025 NFL data. Rookie, or did not clear the volume gate.";
@@ -6079,6 +6206,9 @@ const CARD_ACCENTS = {
   opportunity: "var(--accent-purple-light)",
   outcomes: "var(--info-blue)",
   efficiency: "var(--text-dim)",
+  // Reference material, not a finding — same muted header as Efficiency, so the
+  // two channels stay honest: brightness means "this should move your opinion".
+  glossary: "var(--text-dim)",
 };
 
 // ONE collapsible section header for the results view, so a fourth ad-hoc
@@ -6296,6 +6426,28 @@ const PlayerCardModal = ({ card, onClose }) => {
             {card.efficiency.length > 0 && (
               <CardSection title="Efficiency" accent={CARD_ACCENTS.efficiency} collapsible note="Measured year over year, RB yards per carry is r=0.02 — a coin flip. A record of what happened, never a forecast.">
                 {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
+              </CardSection>
+            )}
+
+            {(card.glossary || []).length > 0 && (
+              <CardSection title="Glossary" accent={CARD_ACCENTS.glossary} collapsible note="Every number on this card, in plain language — what it measures, and what to do with it.">
+                {card.glossary.map((g, i) => (
+                  <div key={g.key} style={{
+                    padding: "9px 0",
+                    borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
+                  }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "3px" }}>
+                      {g.term}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                      {g.what}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px", display: "flex", gap: "6px" }}>
+                      <span style={{ color: "var(--ui-accent-dim)", flex: "none" }}>→</span>
+                      <span>{g.how}</span>
+                    </div>
+                  </div>
+                ))}
               </CardSection>
             )}
           </>

@@ -3088,3 +3088,58 @@ Two changes, both needed:
 **Check the fallback chain before restyling a display element.** The sandbox
 cannot reach Google Fonts, so local screenshots always show the fallback — which
 is exactly why this was visible in a local render and invisible in the source.
+
+---
+
+## Player Card Glossary (added Aug 28, 2026)
+
+A collapsed `Glossary` section under Efficiency, explaining every number the card
+just rendered. **Informational only — 33 grades byte-identical across 11
+tournaments x 3 fixtures.** Guarded by the glossary block in
+`scripts/test-player-card.mjs` (guard 14).
+
+### The two most cryptic tokens on the card were not metrics
+
+`r 0.73` beside every label and `29%ile` on the right. A reader who does not know
+what those mean **cannot use any row**, so they are explained first and
+separately as `_r` and `_pct`, ahead of the metrics themselves.
+
+### Every entry is `term` + `what` + `how`, and the third field is the point
+
+A definition alone leaves the reader exactly where they started. "Share of team
+targets" is not usable; "how central he is to the passing game, independent of
+how often his team throws" is. **The `how` field is where this file's measured
+stability work finally reaches the user** — the QB rushing entry names r=0.82,
+the efficiency entries name r=0.02, and spike rate says out loud that it is the
+least repeatable number on the card.
+
+Guard 14 asserts all three fields are present on every entry, so a half-written
+entry cannot ship.
+
+### Coverage runs the OPPOSITE way from the render
+
+The card emits glossary entries only for rows it actually drew — a QB card never
+defines WOPR, an RB card with no air-yards row never defines aDOT. But the GUARD
+asserts that **every key the card CAN render has an entry**, whether or not a
+current player triggers it. A number on screen with no definition is the
+silent-drop failure in a new costume: the reader sees `WOPR 0.08` and has no way
+to act on it. Negative-tested by renaming one entry's key.
+
+### It is muted, and that is deliberate
+
+`CARD_ACCENTS.glossary` is `--text-dim`, the same header treatment as Efficiency.
+The card's second channel means "brightness = this should move your opinion", and
+reference material should not. Resting cost is one line; the card goes 705px ->
+2624px when opened, which is exactly why it is not open by default.
+
+### Still open: recent news on the card
+
+Assessed and NOT built. `RECENT_NEWS` and `SITUATIONS.trendNote` are dated only
+INSIDE their prose, so nothing can compute freshness against the 30-45 day rule,
+and rendering "OUT FOR 2026" undated on a card stamped `2025 season · final` is
+the Diggs failure again — which is the same reason `PLAYER_VERDICTS` was kept off
+the card in the first place. Three conditions before it ships: a structured
+`date` field (no date, no render), full text or nothing (these run 500-1500 chars
+and truncating a `CAVEAT` out of the middle inverts the meaning), and an explicit
+"no dated entry" line so sparse coverage is visible rather than silent. Verdicts
+stay off; the dated factual note is the part that belongs.
