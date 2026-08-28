@@ -2954,3 +2954,97 @@ name in a list whose only job is identifying players is the wrong trade, so the
 pill takes a second line and the grid equalises row heights.
 
 Calibration: 33 grades byte-identical, 0 tap targets under 32px in either mode.
+
+---
+
+## One Colour, One Meaning (fixed Aug 28, 2026)
+
+Reported as *"why are the colors so similar to each other, if everything is cyan
+how can the user see the difference"*. The colours were not too similar. They were
+**overloaded** — the same token carried different meanings in different places, so
+similarity was the symptom and ambiguity was the disease.
+
+### `--accent-cyan` meant four things at once
+
+```
+RB position chips           a category
+every disclosure affordance chrome        ("hide ⌄", "VIEW ROSTER", step numbers)
+22 emphasis spans in copy   emphasis      ("without any teammates", "both sides")
+🔥 CEILING GAME + Hidden Gem a value flag
+```
+
+`--accent-purple` did the same for TE against seven chrome labels. So in the header
+the user screenshotted, `RB 5` and the `VIEW ROSTER` chip beside it were **the same
+colour**, and the "tap any name" banner was wearing `POS_ACCENT.RB.bg` and
+`POS_ACCENT.RB.border` exactly.
+
+### Chrome is now HUELESS, and that is the load-bearing decision
+
+Every hue on the wheel is already spoken for by a data family — matchups own
+green→lime→yellow→orange→red, weeks own blue/purple/teal, positions own
+amber/cyan/pink/violet. **Seventeen meanings do not fit on 360 degrees**, so
+adding a chrome hue can only be done by stealing one.
+
+`--ui-accent: #cbd5e1` (27% saturation) cannot collide with anything, ever.
+Affordances, step numbers, panel labels and the roster chip use it. Emphasis
+inside explainer copy became `--text-primary` at weight 600 — **bold white on grey
+body copy is stronger emphasis than a hue anyway**, and it can never be mistaken
+for a position.
+
+Two deliberate exceptions, both a different channel from coloured text: the filled
+primary CTAs (Analyze, Upload) stay cyan-on-solid, and they live on the input
+screen where no position chip exists.
+
+### Five hand-rolled position palettes, two of them painting WR GREEN
+
+Fourth time this repo has hit the duplicate-definition class (Aug 14 tier/score,
+Aug 23 competitive balance, Aug 27 `posColor`, now this). All five now route
+through `posColor()` / `POS_ACCENT`.
+
+**Green WR was the worst of them.** Green means *good matchup* everywhere else on
+the page, so a WR badge was rendering in the grading scale — a category painted as
+a verdict. It appeared in the pivot chips, Roster Standouts and the whole
+championship-window block.
+
+Also fixed while in there: `★ QB GAME STACK` was **cyan text inside a green box**,
+its own label disagreeing with its own border.
+
+### Guard 17 — `scripts/test-color-roles.mjs`
+
+Asserts SHAPE, not hex values, so a deliberate re-tune passes and a second
+definition does not:
+
+- `POS_ACCENT` declared once; no rival `QB:…WR:` colour literal; no inline
+  `pos === "QB" ? colour` chain
+- WR is not painted with a matchup-scale token
+- `--ui-accent` exists and is under 45% saturation — a saturated "neutral" would
+  quietly become a fifth data colour
+- `--accent-cyan` capped at 3 uses and `--accent-purple` at 1, which is what
+  forces chrome to keep using `--ui-accent` instead of drifting back
+
+Negative-tested both ways: reintroducing a rival palette and moving one affordance
+back onto cyan each exit non-zero.
+
+### ⚠ Known remaining pair, deliberately NOT changed
+
+**QB amber (h43) sits 5° from the Even tier's yellow (h48)**, and unlike the
+week/position pairs these two genuinely co-occur — a position chip beside a tier
+word in the redraft matchup rows.
+
+The clean fix is to take the *tier* ramp off yellow (Good green → Even **grey** →
+Hard orange → Wall red), which also reads better: a neutral matchup should not
+look like a warning. That changes what a matchup MEANS visually across the whole
+app, so it needs sign-off and its own calibration rather than being slipped in
+under a cleanup.
+
+Lower-risk pairs left alone because the panels never co-occur: TE violet vs W16
+purple (15°), RB cyan vs W17 teal (16°). Week chips render only in the bring-back
+panel, which carries its own legend and no position chips.
+
+### Calibration
+
+```
+33 grades BYTE-IDENTICAL — 11 tournaments x 3 fixtures
+17 guards pass · dual-file identical · 0 page errors
+Rendered census at 430px: every saturated hue now maps to exactly one meaning
+```
