@@ -3143,3 +3143,64 @@ the card in the first place. Three conditions before it ships: a structured
 and truncating a `CAVEAT` out of the middle inverts the meaning), and an explicit
 "no dated entry" line so sparse coverage is visible rather than silent. Verdicts
 stay off; the dated factual note is the part that belongs.
+
+---
+
+## Two Disclosures on the Results Header (added Aug 28, 2026)
+
+The complaint was scrolling past tall text blocks to reach the breakdown. Two
+components, both **presentation only — 33 grades byte-identical across 11
+tournaments x 3 fixtures.** Guard 18: `scripts/test-disclosure.mjs`.
+
+### `ClampedText` — CLAMP FIRST, THEN MEASURE
+
+The nutshell clamps to 6 lines with a fade and a `see full summary`. Two
+runtime traps, both of which look correct in the source:
+
+1. **Gating the clamp on the overflow measurement is CIRCULAR.** An unclamped
+   element always reports `scrollHeight === clientHeight`, so the flag can never
+   turn true, the clamp never applies, and the control never appears. This
+   shipped that way for one build and was caught only by reading computed styles
+   out of a real browser (`clamp: "none"` on a 443px block). **The clamp style
+   must depend on `open` alone.**
+2. **The measurement must STOP while expanded.** Once open the two heights match
+   again, so an effect that keeps running flips the flag back to false and the
+   button the reader just pressed disappears under their finger. The last
+   collapsed measurement is retained, and reset only when the text changes.
+
+It measures rather than counting characters, because the same string wraps to
+four lines on a tablet and nine on a phone — a length threshold would clamp text
+that fits and leave text that does not.
+
+⚠️ **The `text` prop must be a STABLE value.** Passing
+`highlightPlayerNames(...)` returns a fresh array every render, so the reset
+effect would fire continuously and expansion would appear to do nothing. Raw
+string only.
+
+### `InsightPanel` — the header wears its content's colour
+
+**This is not chrome borrowing a data hue.** The Aug 28 rule is that a hue means
+one thing; lime already means "strength" on every row of that list, so the label
+inheriting it makes the header and its rows read as one object. A neutral header
+would have been the weaker choice, not the safer one.
+
+**It defaults to OPEN.** These are the headline finding, and the reading-frequency
+rule that decides what collapses puts them with the stack matrix, not with the
+reference tables. **What saves the space is the row cap** — the list truncates to
+4 with `+N more`, so the section costs a predictable height whether it holds
+three items or nine. Collapsing the whole panel is available and is the reader's
+call, never the default.
+
+### Measured
+
+```
+nutshell clamped   6080px      expanded  6402px      collapse restores exactly
+strengths capped at 4 of 6 · 0 tap targets under 32px · 0 page errors
+```
+
+### Considered and not built
+
+- **Persisting panel state** in `localStorage` beside `rxr_has_analyzed`.
+- **A sticky section index** (Stacks · Solo · Byes · Pivots). On a 6,000px page
+  this would cut more scrolling than any amount of text trimming, and it is the
+  right next move if the page keeps growing.

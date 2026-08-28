@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { track } from '@vercel/analytics';
 // 2025 per-player production metrics (target share, WOPR, HVT/gm, spike/dud week
@@ -6273,6 +6273,151 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
 // The player card. Opened by clicking a name anywhere in a result — a modal so
 // it costs the page ZERO resting density, which is the whole reason it is not
 // another expandable panel.
+// Clamp a long block of prose to N lines with a "see more".
+//
+// THE MEASUREMENT ONLY RUNS WHILE COLLAPSED, and that is the whole trick. Once
+// expanded, scrollHeight === clientHeight, so a naive check flips `overflows`
+// back to false and the control that got you there disappears under your
+// finger. The last collapsed measurement is retained instead, and reset only
+// when the text itself changes.
+//
+// It measures rather than counting characters because the same string wraps to
+// four lines on a tablet and nine on a phone; a length threshold would clamp
+// text that fits and leave text that does not.
+const ClampedText = ({ text, lines = 6, accent = "var(--ui-accent)", label = "summary" }) => {
+  const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  useLayoutEffect(() => { setOpen(false); setOverflows(false); }, [text]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return;                    // never measure while expanded
+    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 2);
+    check();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, open]);
+
+  // THE CLAMP IS APPLIED WHENEVER COLLAPSED, not only once overflow is known.
+  // Gating it on `overflows` is circular: an unclamped element always reports
+  // scrollHeight === clientHeight, so the measurement can never turn true and
+  // the control never appears. Clamp first, then measure against the clamp.
+  return (
+    <div>
+      <div style={{ position: "relative" }}>
+        <div
+          ref={ref}
+          style={open ? undefined : {
+            display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {text}
+        </div>
+        {overflows && !open && (
+          // The fade says "there is more" before the reader reaches the button.
+          // Pinned to the container's own background so it works on either panel.
+          <div aria-hidden style={{
+            position: "absolute", left: 0, right: 0, bottom: 0, height: "26px",
+            background: "linear-gradient(to bottom, transparent, var(--bg-base) 92%)",
+            pointerEvents: "none",
+          }} />
+        )}
+      </div>
+      {overflows && (
+        <button
+          onClick={() => setOpen(o => !o)}
+          aria-expanded={open}
+          data-compact
+          style={{
+            marginTop: "6px", background: "transparent", border: "none", padding: "6px 0",
+            minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "11px",
+            letterSpacing: "0.06em", color: accent, fontWeight: 600,
+            display: "inline-flex", alignItems: "center", gap: "5px",
+          }}
+        >
+          {open ? "see less" : `see full ${label}`}
+          <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
+// Strengths / Weaknesses. A collapsible section whose header wears the SAME
+// colour as every row beneath it.
+//
+// That is not chrome borrowing a data hue — it is a label inheriting the meaning
+// its own content already carries, the way a position pill does. The rule the
+// colour system holds is that a hue means one thing; lime here means "strength"
+// exactly as it does on the rows, so the header and its list read as one object
+// and the two panels are told apart before a word is read.
+//
+// It stays OPEN by default. These are the headline finding, and the reading-
+// frequency rule that decides what collapses puts them with the stack matrix,
+// not with the reference tables. What saves the space is the row cap: a long
+// list truncates to `preview` with the rest one tap away, so the section costs a
+// predictable height whether it holds three items or nine.
+const InsightPanel = ({ title, items, color, empty, preview = 4, renderItem }) => {
+  const [open, setOpen] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const list = items.length ? items : [empty];
+  const hidden = Math.max(0, list.length - preview);
+  const shown = showAll || hidden === 0 ? list : list.slice(0, preview);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: "10px", width: "100%", background: "transparent", border: "none",
+          padding: "2px 0 7px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+          minHeight: "34px",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ width: "3px", height: "12px", background: color, borderRadius: "1px", flex: "none" }} />
+          <span style={{ fontSize: "10px", color, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>{title}</span>
+          {items.length > 0 && (
+            <span style={{
+              fontSize: "9px", color, background: `${color}1a`, border: `1px solid ${color}44`,
+              borderRadius: "8px", padding: "1px 6px", fontFamily: "var(--font-mono)", lineHeight: 1.5,
+            }}>{items.length}</span>
+          )}
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+          {open ? "hide" : "show"}
+          <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+        </span>
+      </button>
+      {open && (
+        <>
+          {shown.map(renderItem)}
+          {hidden > 0 && (
+            <button
+              onClick={() => setShowAll(a => !a)}
+              aria-expanded={showAll}
+              data-compact
+              style={{
+                background: "transparent", border: "none", padding: "6px 0", minHeight: "32px",
+                cursor: "pointer", fontFamily: "inherit", fontSize: "11px", letterSpacing: "0.06em",
+                color, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "5px",
+              }}
+            >
+              {showAll ? "show fewer" : `+${hidden} more`}
+              <span style={{ display: "inline-block", transform: showAll ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const t = card.trajectory;
@@ -9740,23 +9885,23 @@ Analyze this best ball roster. Return JSON only.`;
                         ))}
                       </div>
                     ) : (
-                      aiNutshell || analyzed.nutshell
+                      <ClampedText
+                        text={aiNutshell || analyzed.nutshell}
+                        lines={6}
+                        accent={gradeColor(analyzed.grade)}
+                      />
                     )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
-                    {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
-                    {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
+                  <InsightPanel
+                    title="Strengths" items={analyzed.strengths} color="var(--pos-bright)" empty="None identified"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.strengths.length ? "#a3e635" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
+                  <InsightPanel
+                    title="Weaknesses" items={analyzed.weaknesses} color="var(--warn)" empty="None flagged"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.weaknesses.length ? "#fb923c" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
                 </div>
 
                 {/* Grading explainer toggle */}
@@ -11095,23 +11240,23 @@ Analyze this best ball roster. Return JSON only.`;
                         ))}
                       </div>
                     ) : (
-                      aiNutshell || analyzed.nutshell
+                      <ClampedText
+                        text={aiNutshell || analyzed.nutshell}
+                        lines={6}
+                        accent={gradeColor(analyzed.grade)}
+                      />
                     )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
-                    {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
-                    {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
+                  <InsightPanel
+                    title="Strengths" items={analyzed.strengths} color="var(--pos-bright)" empty="None identified"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.strengths.length ? "#a3e635" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
+                  <InsightPanel
+                    title="Weaknesses" items={analyzed.weaknesses} color="var(--warn)" empty="None flagged"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.weaknesses.length ? "#fb923c" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
                 </div>
 
                 {/* Grading explainer toggle — redraft */}
