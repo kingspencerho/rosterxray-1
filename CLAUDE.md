@@ -3394,3 +3394,67 @@ First section on the card, collapsed, with the bright `--ui-accent` header rathe
 than the dim reference treatment — role CHANGE is rank 1 in the Source Hierarchy
 and this is the only place on the card that carries it. Resting cost is one line;
 Bijan's card goes 769px -> 1007px opened.
+
+---
+
+## Aug 28 2026 News Sweep — and a parser bug it exposed
+
+Six entries refreshed off dated late-August reporting. **36 grades byte-identical
+across 12 tournaments x 3 fixtures** — expected, since prose carries no score.
+
+| Player | What changed |
+|---|---|
+| **Alec Pierce** (WR IND, ADP 90) | **ACTIVATED off active/PUP Aug 27 2026.** hold/falling -> hold/rising |
+| **Ashton Jeanty** (RB LV) | Diagnosis landed: ankle sprain, believed short-term, no timeline. TARGET/falling -> TARGET/stable |
+| **Tucker Kraft** (TE GB) | Progressed from walkthroughs to full team periods incl. the ARI joint practice; tracking the Sept 13 opener |
+| **Mike Washington** (RB LV, ADP 192) | The Jeanty contingency is LIVE, not theoretical, and he backed it up on the field |
+| **TreVeyon Henderson** (RB NE, ADP 57) | Right ankle, slipped mid-cut Aug 24, precautionary tests, walking fine, no timeline |
+| **Malik Nabers** (WR NYG) | Same facts, now DATED so the card can age it |
+
+### Pierce is the case the freshness rule exists for
+
+The entry read "no timetable, has not practiced at all this summer" as of Aug 10
+and carried a `falling` trend. He was activated Aug 27 with two-plus weeks of
+practice before Week 1. **A verdict written 17 days earlier had inverted**, and
+nothing in the app would have caught it — this is why the 30-45 day
+re-validation rule is a rule and not a preference.
+
+Note the split the new entry keeps explicit: **availability is resolved, role is
+not.** He has taken no team reps all summer, so Week 1 usage is projected rather
+than established, and the ADP move from 53.8 to 90.0 during the absence means the
+discount survives the good news.
+
+### ⚠️ THE PARSER PREFERRED AN OLD PRECISE DATE OVER A NEW VAGUE ONE
+
+`parseNewsDate` ran the day-precision pass first and `break`ed on any hit, so a
+month-only date could never win even when it was NEWER. Nabers' note carries
+**"Sep 28 2025"** (the ACL tear) and **"Aug 2026 camp"** — his card was stamping
+the tear as his currency and rendering him **334 days stale**.
+
+Both passes now always run and the **latest timestamp wins across them**.
+Precision breaks a tie for free: a month-only date resolves to the 1st, so a
+same-month day form is always the larger timestamp.
+
+**The existing guard asserted "the LATEST date wins" and still passed**, because
+it only tested two day-precision dates. The assertion was true within a pass and
+false across them. Two cases added, both negative-tested — restoring the `break`
+exits non-zero.
+
+**This is the general shape to watch in that parser: a date in a note is not
+necessarily ABOUT the note's currency.** An injury date, a contract date and a
+draft date all parse identically to an update stamp. Taking the latest is the
+defence, and it only works if every pass is considered.
+
+### Method notes
+
+- **The stale-article trap fired twice.** A depth-chart summary returned "Tucker
+  Kraft removed from PUP, TE2 behind Luke Musgrave" and "Odell Beckham on the
+  Giants bubble". Kraft was activated Jul 31 and is a starter; the summary was
+  describing an older season. Every player-team and depth-chart claim was checked
+  against `ADP_DATA` before anything was written, per the Aug 16 rule.
+- **Undated items were dropped rather than written.** A tracker listed "Williams
+  (concussion)", "Warren (groin)" and "Olave (undisclosed)" with no first names
+  and no verifiable dates. Nothing went in for them — an unattributable name is
+  the Rachaad White trap waiting to happen.
+- Every new entry carries a date in a form `parseNewsDate` reads, so all six
+  render on the player card as `current`.

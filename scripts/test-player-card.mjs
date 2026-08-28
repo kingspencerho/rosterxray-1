@@ -188,6 +188,14 @@ ok("prose with no date returns null", e.parseNewsDate("BAL — the runaway stand
 ok("a year with no month is not a date", e.parseNewsDate("a Giant since 2024") === null);
 ok("the LATEST date wins — notes get appended to",
    e.parseNewsDate("signed Jul 1 2026. BLOCKING CONTEXT ADDED Aug 23 2026.")?.label === "Aug 23 2026");
+// ACROSS PRECISIONS TOO. Running the day pass first and stopping on a hit lets
+// an OLD day-precision date outrank a NEWER month-only one — Nabers' note
+// carries "Sep 28 2025" (the ACL tear) and "Aug 2026 camp", and the tear was
+// being stamped as his currency until this was caught.
+ok("...including a newer month-only date over an older day-precision one",
+   e.parseNewsDate("torn ACL Week 4 (Sep 28 2025), repair in late Oct. Aug 2026 camp: full practice.")?.label === "Aug 2026");
+ok("...and a same-month day form still beats the month-only form",
+   e.parseNewsDate("Aug 2026 camp. Activated Aug 27 2026.")?.label === "Aug 27 2026");
 
 // Sweep the whole corpus: nothing undated may survive into a card.
 const allNews = Object.keys(e.ADP_DATA).map(n => e.buildPlayerNews(n, NOW)).flat();
