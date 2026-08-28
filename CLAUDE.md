@@ -3227,3 +3227,28 @@ Guard 17 asserts the PAIRING rather than the colour — the header token must be
 the same one the grid's `isPlayoff` columns use — so a re-tune of the week
 palette stays legal and a "cleanup" back to `--ui-accent` does not.
 Negative-tested.
+
+### The generated grade card had no exit (fixed Aug 28, 2026)
+
+`exportedDataUrl` rendered a full-height PNG mid-page with no way to put it away
+for the rest of the session. Two controls now sit above it:
+
+- **hide preview** gates the `<img>` ALONE. Share / Save / Post stay live,
+  because "I have seen it, now let me file it" is the state a reader is actually
+  in — collapsing the actions with the image would make the control useless.
+- **✕** clears `exportedDataUrl` and restores the `export grade card` link, so it
+  can be regenerated.
+
+Analysis, mode switch and New Roster already reset it, so this closed the only
+remaining path where a card could persist unwanted.
+
+**Found while testing: the share row mixed a `<button>` with two `<a>`s.** The
+global `button:not([data-compact])` floor covers the first and not the others, so
+Share rendered at 44px beside Save Image and Post to X at **31px** — a ragged row
+and two sub-32px tap targets, in both modes. Anchors have to state the floor
+themselves. Guard 18 counts all four.
+
+⚠️ **html2canvas comes from cdnjs, which the sandbox cannot reach**, so the
+generated state is unreachable in a local render and the export silently no-ops.
+Stub `window.html2canvas` via `addInitScript` to return an object with a
+`toDataURL()` — that is the only way to exercise this UI locally.

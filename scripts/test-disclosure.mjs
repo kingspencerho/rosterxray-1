@@ -79,5 +79,28 @@ for (const [what, needle, want] of [
   ? ok("the Weaknesses header wears the same orange as its rows")
   : bad("the Weaknesses header must use --warn, matching its rows");
 
+console.log("\nthe generated grade card can be put away");
+
+// It is a full-height PNG that appears mid-page. Without an exit it sits
+// between the reader and everything below it for the rest of the session.
+const collapse = (src.match(/setCardPreviewOpen\(o => !o\)/g) || []).length;
+collapse === 2 ? ok(`the preview collapses in best ball AND redraft (${collapse} sites)`)
+               : bad(`preview toggle found at ${collapse} sites, expected 2`);
+const dismiss = (src.match(/setExportedDataUrl\(null\); setCardPreviewOpen\(true\);/g) || []).length;
+dismiss === 2 ? ok(`dismiss clears the card and restores the export link (${dismiss} sites)`)
+              : bad(`dismiss found at ${dismiss} sites, expected 2`);
+
+// COLLAPSING MUST NOT TAKE THE ACTIONS WITH IT. "I have seen it, now let me
+// file it" is the state a reader is actually in, so only the <img> is gated.
+/\{cardPreviewOpen && \(\s*<img/.test(src)
+  ? ok("only the image is gated — Share / Save / Post stay live while collapsed")
+  : bad("the collapse must gate the <img> alone, not the action row");
+
+// The share row mixes a <button> (which the global 44px floor covers) with two
+// <a> elements (which it does not). They sat at 31px until they said so.
+const anchors = (src.match(/minWidth: "120px", minHeight: "44px"/g) || []).length;
+anchors === 4 ? ok("both share anchors state their own 44px floor, in both modes")
+              : bad(`${anchors} of 4 share anchors carry a min-height; <a> is not covered by the button floor`);
+
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);

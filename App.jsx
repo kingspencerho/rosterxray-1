@@ -6635,6 +6635,12 @@ export default function RosterScorer() {
   const [lcWeek, setLcWeek] = useState(null);
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
+  // The generated card is a full-height PNG, so once it appears it sits between
+  // the reader and everything below it with no way out. Collapsing hides the
+  // PREVIEW ONLY and keeps Share / Save / Post live, because "I have seen it,
+  // now let me file it" is the actual state a reader is in. Dismiss clears it
+  // and restores the export link so it can be regenerated.
+  const [cardPreviewOpen, setCardPreviewOpen] = useState(true);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
   const [heroCollapsed, setHeroCollapsed] = useState(false);
   const [appReady, setAppReady] = useState(false);
@@ -10007,11 +10013,33 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
-                      <img
-                        src={exportedDataUrl}
-                        alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
-                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "8px" }}>
+                        <button
+                          onClick={() => setCardPreviewOpen(o => !o)}
+                          aria-expanded={cardPreviewOpen}
+                          data-compact
+                          style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", padding: "6px 0", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}
+                        >
+                          Grade card ready
+                          <span style={{ letterSpacing: "0.06em", textTransform: "none", fontWeight: 400 }}>
+                            {cardPreviewOpen ? "hide preview" : "show preview"}
+                          </span>
+                          <span style={{ display: "inline-block", transform: cardPreviewOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                        </button>
+                        <button
+                          onClick={() => { setExportedDataUrl(null); setCardPreviewOpen(true); }}
+                          aria-label="Dismiss grade card"
+                          data-compact
+                          style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "13px", lineHeight: 1, minWidth: "32px", minHeight: "32px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}
+                        >✕</button>
+                      </div>
+                      {cardPreviewOpen && (
+                        <img
+                          src={exportedDataUrl}
+                          alt="Roster X-Ray Grade Card"
+                          style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
+                        />
+                      )}
                       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {navigator.share && (
                           <button
@@ -10030,7 +10058,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -10038,7 +10066,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
@@ -11379,11 +11407,33 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
-                      <img
-                        src={exportedDataUrl}
-                        alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
-                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "8px" }}>
+                        <button
+                          onClick={() => setCardPreviewOpen(o => !o)}
+                          aria-expanded={cardPreviewOpen}
+                          data-compact
+                          style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", padding: "6px 0", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}
+                        >
+                          Grade card ready
+                          <span style={{ letterSpacing: "0.06em", textTransform: "none", fontWeight: 400 }}>
+                            {cardPreviewOpen ? "hide preview" : "show preview"}
+                          </span>
+                          <span style={{ display: "inline-block", transform: cardPreviewOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                        </button>
+                        <button
+                          onClick={() => { setExportedDataUrl(null); setCardPreviewOpen(true); }}
+                          aria-label="Dismiss grade card"
+                          data-compact
+                          style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "13px", lineHeight: 1, minWidth: "32px", minHeight: "32px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}
+                        >✕</button>
+                      </div>
+                      {cardPreviewOpen && (
+                        <img
+                          src={exportedDataUrl}
+                          alt="Roster X-Ray Grade Card"
+                          style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
+                        />
+                      )}
                       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {navigator.share && (
                           <button
@@ -11402,7 +11452,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -11410,7 +11460,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
