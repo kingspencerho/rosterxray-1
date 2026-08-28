@@ -6167,7 +6167,7 @@ const PlayerCardModal = ({ card, onClose }) => {
               <span>{card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}</span>
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "3px", color: "var(--text-muted)", cursor: "pointer", fontSize: "14px", lineHeight: 1, padding: "4px 8px", fontFamily: "inherit" }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "15px", lineHeight: 1, minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}>✕</button>
         </div>
 
         {card.movedFrom && (
@@ -9414,11 +9414,11 @@ Analyze this best ball roster. Return JSON only.`;
                 <button
                   onClick={() => setRosterStripOpen(o => !o)}
                   aria-expanded={rosterStripOpen}
-                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
                   style={{
-                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    display: "flex", gap: "14px", flexWrap: "wrap", alignItems: "center",
                     fontSize: "13px", width: "100%", background: "transparent", border: "none",
-                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                    padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                   }}
                 >
                   {["QB", "RB", "WR", "TE"].map(pos => {
@@ -9430,10 +9430,18 @@ Analyze this best ball roster. Return JSON only.`;
                       </span>
                     );
                   })}
-                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
-                    {analyzed.valid.length}/{analyzed.picks.length} matched
-                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
-                      {rosterStripOpen ? "Hide" : "Roster"}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: "6px",
+                      color: rosterStripOpen ? "var(--accent-cyan)" : "var(--bg-base)",
+                      background: rosterStripOpen ? "transparent" : "var(--accent-cyan)",
+                      border: "1px solid var(--accent-cyan)", borderRadius: "5px",
+                      padding: "7px 12px", minHeight: "32px", boxSizing: "border-box",
+                      fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase",
+                      whiteSpace: "nowrap",
+                    }}>
+                      {rosterStripOpen ? "Hide roster" : "View roster"}
                       <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                     </span>
                   </span>
@@ -9464,31 +9472,41 @@ Analyze this best ball roster. Return JSON only.`;
                     itself is a modal, so this strip is the only resting cost. */}
                 {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
-                      Tap a name for 2025 role data
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: "7px",
+                      background: "#08222a", border: "1px solid #06b6d455", borderRadius: "5px",
+                      padding: "6px 11px", marginBottom: "11px",
+                    }}>
+                      <span style={{ fontSize: "12px", lineHeight: 1 }}>👆</span>
+                      <span style={{ fontSize: "11px", color: "var(--accent-cyan)", letterSpacing: "0.09em", textTransform: "uppercase", fontWeight: 700 }}>
+                        Tap any name for their 2025 role data
+                      </span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
                         const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
-                            {group.map(pl => (
-                              <button
-                                key={pl.name}
-                                onClick={() => openCard(pl)}
-                                data-compact
-                                style={{
-                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
-                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
-                                }}
-                              >
-                                {pl.name}
-                              </button>
-                            ))}
+                          <div key={pos} style={{ display: "grid", gridTemplateColumns: "26px 1fr", gap: "8px", alignItems: "start" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "10px" }}>{pos}</span>
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                              {group.map(pl => (
+                                <button
+                                  key={pl.name}
+                                  onClick={() => openCard(pl)}
+                                  data-compact
+                                  style={{
+                                    background: c.bg, border: `1px solid ${c.border}66`, borderRadius: "6px",
+                                    color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                    fontSize: "12px", padding: "0 11px", minHeight: "34px",
+                                    letterSpacing: "0.01em", display: "inline-flex", alignItems: "center",
+                                  }}
+                                >
+                                  {pl.name}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         );
                       })}
@@ -10747,11 +10765,11 @@ Analyze this best ball roster. Return JSON only.`;
                 <button
                   onClick={() => setRosterStripOpen(o => !o)}
                   aria-expanded={rosterStripOpen}
-                  aria-label={rosterStripOpen ? "Hide roster" : "Show roster"}
+                  aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
                   style={{
-                    display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center",
+                    display: "flex", gap: "14px", flexWrap: "wrap", alignItems: "center",
                     fontSize: "13px", width: "100%", background: "transparent", border: "none",
-                    padding: "2px 0", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                    padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                   }}
                 >
                   {["QB", "RB", "WR", "TE"].map(pos => {
@@ -10763,10 +10781,18 @@ Analyze this best ball roster. Return JSON only.`;
                       </span>
                     );
                   })}
-                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px", color: "var(--text-muted)" }}>
-                    {analyzed.valid.length}/{analyzed.picks.length} matched
-                    <span style={{ color: "var(--accent-cyan)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
-                      {rosterStripOpen ? "Hide" : "Roster"}
+                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: "6px",
+                      color: rosterStripOpen ? "var(--accent-cyan)" : "var(--bg-base)",
+                      background: rosterStripOpen ? "transparent" : "var(--accent-cyan)",
+                      border: "1px solid var(--accent-cyan)", borderRadius: "5px",
+                      padding: "7px 12px", minHeight: "32px", boxSizing: "border-box",
+                      fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase",
+                      whiteSpace: "nowrap",
+                    }}>
+                      {rosterStripOpen ? "Hide roster" : "View roster"}
                       <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                     </span>
                   </span>
@@ -10795,31 +10821,41 @@ Analyze this best ball roster. Return JSON only.`;
                     itself is a modal, so this strip is the only resting cost. */}
                 {rosterStripOpen && analyzed.valid.length > 0 && (
                   <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px" }}>
-                      Tap a name for 2025 role data
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: "7px",
+                      background: "#08222a", border: "1px solid #06b6d455", borderRadius: "5px",
+                      padding: "6px 11px", marginBottom: "11px",
+                    }}>
+                      <span style={{ fontSize: "12px", lineHeight: 1 }}>👆</span>
+                      <span style={{ fontSize: "11px", color: "var(--accent-cyan)", letterSpacing: "0.09em", textTransform: "uppercase", fontWeight: 700 }}>
+                        Tap any name for their 2025 role data
+                      </span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
                       {["QB", "RB", "WR", "TE"].map(pos => {
                         const group = analyzed.valid.filter(p => p.pos === pos);
                         if (!group.length) return null;
                         const c = posColor(pos);
                         return (
-                          <div key={pos} style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", minWidth: "22px", fontWeight: 600 }}>{pos}</span>
-                            {group.map(pl => (
-                              <button
-                                key={pl.name}
-                                onClick={() => openCard(pl)}
-                                data-compact
-                                style={{
-                                  background: c.bg, border: `1px solid ${c.border}55`, borderRadius: "4px",
-                                  color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
-                                  fontSize: "11px", padding: "3px 9px", letterSpacing: "0.01em",
-                                }}
-                              >
-                                {pl.name}
-                              </button>
-                            ))}
+                          <div key={pos} style={{ display: "grid", gridTemplateColumns: "26px 1fr", gap: "8px", alignItems: "start" }}>
+                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "10px" }}>{pos}</span>
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                              {group.map(pl => (
+                                <button
+                                  key={pl.name}
+                                  onClick={() => openCard(pl)}
+                                  data-compact
+                                  style={{
+                                    background: c.bg, border: `1px solid ${c.border}66`, borderRadius: "6px",
+                                    color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
+                                    fontSize: "12px", padding: "0 11px", minHeight: "34px",
+                                    letterSpacing: "0.01em", display: "inline-flex", alignItems: "center",
+                                  }}
+                                >
+                                  {pl.name}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         );
                       })}
