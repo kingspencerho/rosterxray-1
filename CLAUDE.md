@@ -3316,3 +3316,81 @@ best ball  6,167px · 6 pills · all anchors resolve · bar pinned at y=0
 redraft    6,355px · 6 pills · jump lands the heading at y=54, under the 44px bar
 0 tap targets under 32px · no horizontal overflow · no page errors
 ```
+
+---
+
+## Recent News on the Player Card (added Aug 28, 2026)
+
+Shipped under the three conditions the Aug 28 assessment set. **Informational
+only — 33 grades byte-identical across 11 tournaments x 3 fixtures.** Guarded in
+`scripts/test-player-card.mjs` (guard 14).
+
+`PLAYER_VERDICTS` was kept off this card because a stale verdict rendered as
+current is the Diggs failure in a new costume. A **dated fact** is a different
+thing, but only if the date reaches the reader.
+
+### 1. NO DATE, NO RENDER — and the date is PARSED, not stored
+
+`RECENT_NEWS` and `SITUATIONS.trendNote` carry dates inside the prose, so
+`parseNewsDate` extracts them and an entry with none is dropped. Backfilling a
+structured `date` field onto 216 entries by hand would have been the other
+option; parsing is reversible, guarded, and cannot silently disagree with the
+text the reader is looking at — the guard re-parses every rendered note and
+asserts it still yields the date shown.
+
+- **The LATEST date in an entry is its currency.** Notes get appended to
+  ("BLOCKING CONTEXT ADDED AUG 23 2026"), so the newest mention is how fresh the
+  entry actually is, not the first.
+- **Three forms parse**: `Aug 23 2026`, the range `Aug 4-5 2026` (the corpus uses
+  it for multi-day events), and month-only `July 2026`, which renders stamped
+  `(month only)` so the coarser precision is visible.
+- **A year without a month is not a date.** "a Giant since 2024" must not become
+  a currency stamp.
+
+**Measured coverage: 63 of 84 `RECENT_NEWS` entries and 32 of 132 `trendNote`s
+carry a parseable date.** The rest are evergreen role descriptions ("locked
+bell-cow, zero backfield competition") with no currency to state. **Dropping
+those is correct, not a gap** — an undated note on a card stamped `2025 season ·
+final` is precisely what this rule exists to prevent.
+
+### 2. FULL TEXT OR NOTHING
+
+These run 500-1500 chars and are written as a single argument. Truncating a
+`CAVEAT ONE, THE ANKLE:` out of the middle inverts the meaning, so **the SECTION
+collapses; the note never clips.** The guard asserts the longest rendered note is
+whole.
+
+### 3. ABSENCE IS VISIBLE
+
+`card.news` is always an array, so the section always renders. With nothing dated
+it says so in words, including that undated notes exist and are being withheld —
+silence would read as "no news", which is the silent-drop failure the Jul 27
+extraction rules forbid. 
+
+**It renders OUTSIDE the no-data branch.** A rookie with no 2025 role is exactly
+the player whose only useful information is this month's news; Carnell Tate's
+card is the worked example — no metrics at all, and the news section still
+explains itself.
+
+### Verdicts stay off, and that is asserted
+
+`buildPlayerNews` reads `trendNote` only. The guard fails if `verdict` or `trend`
+is ever referenced in it. Negative-tested, along with the no-date rule.
+
+### Freshness uses --caution, which now means only one thing
+
+`current` ≤30d, `ageing` 31-45d, `stale` >45d against the framework's own
+re-validation rule. **The stale badge is the only thing on the card wearing
+`--caution`** — after the Aug 28 palette change that token means an actual
+warning and nothing else, so a note past its shelf life is exactly the right
+consumer.
+
+Clock is injectable (`buildPlayerCard(name, pos, team, nowTs)`) so the age
+assertions are pinned instead of rotting.
+
+### Placement
+
+First section on the card, collapsed, with the bright `--ui-accent` header rather
+than the dim reference treatment — role CHANGE is rank 1 in the Source Hierarchy
+and this is the only place on the card that carries it. Resting cost is one line;
+Bijan's card goes 769px -> 1007px opened.

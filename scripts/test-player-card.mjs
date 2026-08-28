@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE };\n";
+  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -172,6 +172,68 @@ ok("the no-data card carries no glossary", !!empty && (empty.glossary || []).len
 // It must cost nothing at rest — the card is already the densest surface here.
 ok("the glossary section is collapsible",
    /title="Glossary"[^>]*collapsible/.test(app));
+
+console.log("\nrecent news: dated, whole, and never silent");
+
+// Pinned clock — an age assertion against Date.now() would rot.
+const NOW = Date.UTC(2026, 7, 28);
+
+// RULE 1: no date, no render. This is the one that keeps the section from
+// becoming the Diggs failure — an undated note on a card stamped 2025.
+ok("the day, range and month-only forms all parse",
+   e.parseNewsDate("resolved Aug 4-5 2026.")?.label === "Aug 4 2026" &&
+   e.parseNewsDate("updated Aug 23 2026")?.label === "Aug 23 2026" &&
+   e.parseNewsDate("As of July 2026 he says")?.label === "Jul 2026");
+ok("prose with no date returns null", e.parseNewsDate("BAL — the runaway standout of camp.") === null);
+ok("a year with no month is not a date", e.parseNewsDate("a Giant since 2024") === null);
+ok("the LATEST date wins — notes get appended to",
+   e.parseNewsDate("signed Jul 1 2026. BLOCKING CONTEXT ADDED Aug 23 2026.")?.label === "Aug 23 2026");
+
+// Sweep the whole corpus: nothing undated may survive into a card.
+const allNews = Object.keys(e.ADP_DATA).map(n => e.buildPlayerNews(n, NOW)).flat();
+ok("every rendered note carries a date and an age",
+   allNews.length > 0 && allNews.every(n => n.date && Number.isFinite(n.ageDays)),
+   `${allNews.length} notes`);
+ok("...and every one of them re-parses to the date shown",
+   allNews.every(n => e.parseNewsDate(n.text)?.label === n.date));
+
+// RULE 2: full text or nothing. Truncating a CAVEAT out of the middle inverts
+// the note, so the section collapses instead of clipping.
+const longest = allNews.slice().sort((a, b) => b.text.length - a.text.length)[0];
+ok("notes are rendered whole, never clipped",
+   !!longest && longest.text.length > 400 && !/…|\.\.\.$/.test(longest.text.trim()),
+   `longest ${longest?.text.length} chars`);
+
+// RULE 3: absence is visible. `news` is always an array so the section always
+// renders, and the empty branch must be reachable and actually exercised.
+const cards = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team, NOW));
+ok("news is always an array, never undefined", cards.every(c => Array.isArray(c.news)));
+const withNews = cards.filter(c => c.news.length).length;
+ok("some players carry dated news", withNews > 20, `${withNews} of ${cards.length}`);
+ok("...and some carry none, so the empty branch is live",
+   cards.some(c => c.news.length === 0));
+ok("the no-dated-note branch states the absence in words",
+   /No dated note for this player/.test(app));
+
+// It must render OUTSIDE the no-data branch: a rookie with no 2025 role is
+// exactly the player whose only useful information is this month's news.
+const newsIdx = app.indexOf('title="Recent news"');
+const reasonIdx = app.indexOf("{card.reason ? (");
+ok("the news section renders outside the no-data branch",
+   newsIdx > -1 && reasonIdx > -1 && newsIdx < reasonIdx);
+
+// VERDICTS STAY OFF. The card shows the dated fact, never the fade/TARGET call.
+const fn = app.slice(app.indexOf("const buildPlayerNews"), app.indexOf("const CARD_VINTAGE"));
+ok("buildPlayerNews reads trendNote only, never verdict or trend",
+   /"trendNote"/.test(fn) && !/\bverdict\b/.test(fn) && !/row\.trend\b/.test(fn));
+
+// Freshness follows the framework's own 30-45 day rule.
+const ages = allNews.map(n => n.status);
+ok("freshness classifies against the 30-45 day rule",
+   allNews.every(n => n.status === (n.ageDays > 45 ? "stale" : n.ageDays > 30 ? "ageing" : "current")),
+   [...new Set(ages)].join("/"));
+ok("...and the stale badge is the only one using --caution",
+   /n\.status === "stale" \? "var\(--caution\)"/.test(app));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

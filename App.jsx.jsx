@@ -2447,6 +2447,98 @@ const CEILING_RANKINGS = (() => {
 // the reader to trust r=0.022. Anchor metrics render at full contrast; anything
 // below the reliable line renders dimmed and tagged "2025 only".
 // Stability figures are the Aug 25 2026 calibration (see CLAUDE.md).
+// RECENT NEWS ON THE CARD — and the three rules that made it shippable.
+//
+// PLAYER_VERDICTS was deliberately kept off this card because a stale verdict
+// rendered as current is the Diggs failure in a new costume. Dated FACTS are a
+// different thing, but only if the date actually reaches the reader, so:
+//
+// 1. NO DATE, NO RENDER. RECENT_NEWS and SITUATIONS.trendNote carry their dates
+//    inside the prose rather than in a field, so the date is parsed out and the
+//    entry is dropped when none is found. An undated note on a card stamped
+//    "2025 season · final" cannot be aged by the reader and is exactly the
+//    failure this rule exists to prevent. Measured cost, Aug 2026: 54 of 84
+//    RECENT_NEWS entries and 36 of 132 trendNotes carry a date. The rest are
+//    evergreen role descriptions ("locked bell-cow, zero backfield
+//    competition") that have no currency to state — dropping them is correct,
+//    not a gap.
+// 2. FULL TEXT OR NOTHING. These run 500-1500 chars and are written as one
+//    argument. Truncating a "CAVEAT ONE, THE ANKLE:" out of the middle inverts
+//    the meaning, so the section collapses instead of clipping.
+// 3. ABSENCE IS VISIBLE. A player with no dated entry gets an explicit line
+//    saying so. Silence would read as "no news", which is the silent-drop
+//    failure the Jul 27 extraction rules already forbid.
+//
+// VERDICTS STAY OFF. `verdict` and `trend` are never read here — only the dated
+// factual note, which is the half that belongs on a data card.
+const NEWS_MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+// Day-precision first, then a month-year fallback. The day form tolerates a
+// range ("Aug 4-5 2026") because the corpus uses one for multi-day events.
+const NEWS_DATE_DAY = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*[-–]\s*\d{1,2})?,?\s+(20\d{2})\b/gi;
+const NEWS_DATE_MONTH = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?,?\s+(20\d{2})\b/gi;
+const NEWS_MON_LABEL = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// The LATEST date in the entry is its currency: notes get appended to over time
+// ("BLOCKING CONTEXT ADDED AUG 23 2026"), so the newest mention is how fresh the
+// entry actually is. Returns null when nothing parses, which drops the entry.
+const parseNewsDate = (text) => {
+  if (!text) return null;
+  let best = null;
+  for (const [re, hasDay] of [[NEWS_DATE_DAY, true], [NEWS_DATE_MONTH, false]]) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const mon = NEWS_MONTHS[m[1].slice(0, 3).toLowerCase()];
+      if (mon == null) continue;
+      const day = hasDay ? parseInt(m[2], 10) : 1;
+      const year = parseInt(hasDay ? m[3] : m[2], 10);
+      if (day < 1 || day > 31) continue;
+      const ts = Date.UTC(year, mon, day);
+      if (!best || ts > best.ts) {
+        best = { ts, label: hasDay ? `${NEWS_MON_LABEL[mon]} ${day} ${year}` : `${NEWS_MON_LABEL[mon]} ${year}`, precise: hasDay };
+      }
+    }
+    if (best) break;   // a day-precision hit always beats a month-only one
+  }
+  return best;
+};
+
+// The framework's own rule: a note older than 30-45 days needs re-validation
+// before it drives a draft decision. Past 45 the card says so in --caution,
+// which after the Aug 28 palette change means an actual warning and nothing
+// else.
+const NEWS_FRESH_DAYS = 30;
+const NEWS_STALE_DAYS = 45;
+
+const buildPlayerNews = (name, nowTs = Date.now()) => {
+  const key = normalize(name);
+  const alt = key.replace(SUFFIX_RE, "");
+  const out = [];
+  const seen = new Set();
+  for (const [label, table, field] of [
+    ["news", RECENT_NEWS, null],
+    ["situation", SITUATIONS, "trendNote"],
+  ]) {
+    for (const k of [key, alt]) {
+      const row = table[k];
+      if (!row || seen.has(k + label)) continue;
+      seen.add(k + label);
+      const text = field ? row[field] : row;
+      if (typeof text !== "string" || !text.trim()) continue;
+      const d = parseNewsDate(text);
+      if (!d) continue;                       // rule 1: no date, no render
+      const ageDays = Math.floor((nowTs - d.ts) / 86400000);
+      out.push({
+        source: label, text, date: d.label, precise: d.precise, ageDays,
+        status: ageDays > NEWS_STALE_DAYS ? "stale" : ageDays > NEWS_FRESH_DAYS ? "ageing" : "current",
+      });
+      break;
+    }
+  }
+  out.sort((a, b) => a.ageDays - b.ageDays);
+  return out;
+};
+
 const CARD_VINTAGE = "2025 season · final";
 
 // Percentile population mirrors CEILING_RANKINGS exactly: draftable (present in
@@ -2628,7 +2720,7 @@ const cardPercentile = (pos, key, value) => {
 // Builds everything the card renders. Returns a `reason` instead of null when
 // there is no data, so the UI can say WHY — an empty card is the silent-drop
 // failure mode in a new costume.
-const buildPlayerCard = (name, pos, team) => {
+const buildPlayerCard = (name, pos, team, nowTs = Date.now()) => {
   const m = getMetrics(name);
   const traj = getSnapTrend(name);
   const trajCur = getSnapTrendCur(name);
@@ -2647,6 +2739,9 @@ const buildPlayerCard = (name, pos, team) => {
     metrics: [], descriptive: [], trajectory: null, trajectoryCur: null,
     qb: null, qbCur: null, efficiency: [],
     movedFrom: null, reason: null,
+    // Rule 3: absence must be visible, so this is always an array and the
+    // section always renders — an empty one says so in words.
+    news: buildPlayerNews(name, nowTs),
   };
 
   // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
@@ -6205,6 +6300,10 @@ const CARD_ACCENTS = {
   volume: "var(--ui-accent)",
   opportunity: "var(--accent-purple-light)",
   outcomes: "var(--info-blue)",
+  // Rank 1 in the Source Hierarchy is role CHANGE, and this is the only place
+  // on the card that carries it, so it gets the bright headline treatment
+  // rather than the dim reference one.
+  news: "var(--ui-accent)",
   efficiency: "var(--text-dim)",
   // Reference material, not a finding — same muted header as Efficiency, so the
   // two channels stay honest: brightness means "this should move your opinion".
@@ -6548,6 +6647,7 @@ const StickyIndex = ({ items }) => {
 
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
+  const news = card.news || [];
   const t = card.trajectory;
   const tc = card.trajectoryCur;
   const qc = card.qbCur;
@@ -6584,6 +6684,53 @@ const PlayerCardModal = ({ card, onClose }) => {
             ⚠ Every number below is his {card.movedFrom} season. He is on {card.team} in 2026 — treat the role as projected, not established.
           </div>
         )}
+
+        {/* NEWS SITS OUTSIDE THE no-data BRANCH ON PURPOSE. A rookie with no
+            2025 role is precisely the player whose only useful information is
+            what happened this month, and burying it behind "no 2025 data" would
+            hide the one thing there is to say about him. */}
+        <CardSection
+          title="Recent news"
+          accent={CARD_ACCENTS.news}
+          collapsible
+          note={news.length
+            ? `Dated notes only. Anything past ${NEWS_STALE_DAYS} days needs re-validating before it drives a pick.`
+            : null}
+        >
+          {news.length === 0 ? (
+            // Rule 3: absence stated in words. Silence would read as "no news".
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, padding: "2px 0 4px" }}>
+              No dated note for this player. The app carries undated role notes on many
+              players, but they cannot be aged against the 30-45 day freshness rule, so
+              they are not shown here. This is not a statement that nothing has happened.
+            </div>
+          ) : news.map((n, i) => (
+            <div key={i} style={{ padding: "9px 0", borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap", marginBottom: "5px" }}>
+                <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "0.04em" }}>
+                  {n.date}{!n.precise && " (month only)"}
+                </span>
+                <span style={{
+                  fontSize: "9px", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 700,
+                  borderRadius: "2px", padding: "1px 5px",
+                  // --caution means an actual warning here, which is what a note
+                  // past the framework's own freshness rule is.
+                  color: n.status === "stale" ? "var(--caution)" : "var(--text-muted)",
+                  border: `1px solid ${n.status === "stale" ? "var(--caution)" : "var(--border-subtle)"}`,
+                }}>
+                  {n.ageDays <= 0 ? "today" : `${n.ageDays}d ago`}
+                  {n.status === "stale" && " · re-validate"}
+                </span>
+                <span style={{ fontSize: "9px", color: "var(--text-faint)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  {n.source === "news" ? "news" : "situation note"}
+                </span>
+              </div>
+              {/* Rule 2: full text. These are single arguments and clipping the
+                  middle inverts them, so the SECTION collapses, never the note. */}
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.55 }}>{n.text}</div>
+            </div>
+          ))}
+        </CardSection>
 
         {card.reason ? (
           <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
