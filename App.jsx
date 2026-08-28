@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { track } from '@vercel/analytics';
 // 2025 per-player production metrics (target share, WOPR, HVT/gm, spike/dud week
@@ -2483,6 +2483,120 @@ const CARD_DESCRIPTIVE = [
   { key: "dud_rate",    label: "Duds (<5)",         r: 0.667, get: m => m.dud_rate,    fmt: v => `${Math.round(v * 100)}%`, invert: true },
 ];
 
+// PLAIN-LANGUAGE GLOSSARY, keyed by the SAME key the metric row uses.
+//
+// Two things drove the shape. First, the card's two most cryptic tokens are not
+// metrics at all — the "r 0.73" beside every label and the "29%ile" on the
+// right. A reader who does not know what those mean cannot use any row, so they
+// are explained first and separately.
+//
+// Second, every entry is TWO fields on purpose: `what` is the definition and
+// `how` is what to DO with it. A definition alone ("share of team targets")
+// leaves the reader exactly where they started; the interpretation is the part
+// that has value, and it is where this file's measured stability work belongs.
+//
+// Entries are emitted only for rows the card actually rendered, so a QB card
+// never explains WOPR. Guard 14 asserts the reverse — that every renderable key
+// HAS an entry — because a metric shown without a definition is the silent-drop
+// failure in a new costume.
+const CARD_GLOSSARY = {
+  _r: {
+    term: "r 0.00 – 1.00",
+    what: "How much of last season's number is still true this season, measured across 2023-2025.",
+    how: "0.70+ is dependable to project from. Under 0.30 is close to a coin flip — read it as history, not a forecast.",
+  },
+  _pct: {
+    term: "%ile",
+    what: "Where he ranks against every draftable player at his position who played 8+ games.",
+    how: "50 is the median starter. It ranks him against his own position, so a 60th-percentile TE and a 60th-percentile WR are equally ordinary for their job.",
+  },
+  _trajectory: {
+    term: "Role trajectory",
+    what: "Snap share in the first half of the season against the second half, plus his last 4 games played.",
+    how: "This is the headline because a season average hides role CHANGE. When the two disagree, the trajectory is the newer fact and the average is the stale one.",
+  },
+  tgt_pg: {
+    term: "Targets / game",
+    what: "Passes thrown his way per game.",
+    how: "Raw volume, and among the most repeatable receiving numbers there is. Nothing else on the card matters if this is low.",
+  },
+  ay_sh: {
+    term: "Air yards share",
+    what: "His share of all the yardage his quarterback threw downfield — counted where the ball was aimed, caught or not.",
+    how: "Measures how far downfield the offense uses him. A high share is the deep threat even in a week he catches nothing.",
+  },
+  tgt_sh: {
+    term: "Target share",
+    what: "His share of his team's total targets.",
+    how: "How central he is to the passing game, independent of how often his team throws. Pair it with pace — a big share of a low-volume offence is a small number of balls.",
+  },
+  wopr: {
+    term: "WOPR",
+    what: "One number combining the two above: 1.5x target share plus 0.7x air yards share.",
+    how: "The best single summary of a pass catcher's opportunity. Roughly, under 0.40 is a complementary piece and over 0.70 is a true number one.",
+  },
+  snap_sh: {
+    term: "Snap share",
+    what: "The share of his offence's plays he was on the field for.",
+    how: "The ceiling on everything else — he cannot be targeted on a play he is not playing. A low snap share caps a talented player no matter what the other rows say.",
+  },
+  hvt_pg: {
+    term: "HVT / game",
+    what: "High-value touches: targets plus carries inside the red zone, where points are actually scored.",
+    how: "Separates a back who scores from a back who merely carries. 4.5+ per game is a real scoring role; total carries alone is not.",
+  },
+  spike_rate: {
+    term: "Spike weeks (18+)",
+    what: "The share of his games scoring 18 or more half-PPR points.",
+    how: "Best ball is won by spikes, not averages — but this is the least repeatable number on the card. Use it to describe last season, never to project the next one.",
+  },
+  usable_rate: {
+    term: "Usable (10+)",
+    what: "The share of his games scoring 10 or more points.",
+    how: "How often he was startable at all. Steadier year to year than spike rate, and the better read on a floor play.",
+  },
+  dud_rate: {
+    term: "Duds (<5)",
+    what: "The share of his games under 5 points.",
+    how: "More predictable than ceiling: a player who dudded a lot tends to keep doing it. In best ball a dud costs nothing directly, so weigh it below spike rate.",
+  },
+  qb_rush: {
+    term: "Rush att / game",
+    what: "Designed runs and scrambles per game.",
+    how: "The stickiest input measured anywhere in this app (r=0.82). It is the safest half of any quarterback projection — far safer than last season's fantasy points.",
+  },
+  qb_pass: {
+    term: "Pass att / game",
+    what: "Pass attempts per game.",
+    how: "The volume his whole passing game is drawn from, his own stack pieces included. Moves with the offence's pace and pass rate, so re-check it after a coaching change.",
+  },
+  qb_adot: {
+    term: "Passing aDOT",
+    what: "How far past the line of scrimmage his average throw travels.",
+    how: "Describes the offence's shape, not its quality. A deep aDOT means bigger weeks and more variance; a short one means a steadier, more checkdown-driven floor.",
+  },
+  eff_rush: {
+    term: "Rush efficiency",
+    what: "Fantasy points over expected per carry, ranked against qualified backs.",
+    how: "Touchdown-sensitive, so it punishes an efficient runner who did not score. Where it disagrees with the NGS rank below, the gap is usually touchdowns rather than running.",
+  },
+  eff_ngs: {
+    term: "NGS rush yds over exp",
+    what: "Next Gen Stats tracking: yards gained above what the blocking and defensive alignment predicted.",
+    how: "The better read on whether he is actually good at running, because it strips out touchdowns. Still 2025 only — yards per carry is r=0.02 year over year.",
+  },
+  eff_rec: {
+    term: "Receiving efficiency",
+    what: "Fantasy points over expected per target, ranked against qualified players.",
+    how: "Near-uncorrelated with the rushing ranks for a back — a bottom-five runner can be an elite receiving back. Never average the two into one figure.",
+  },
+  eff_adot: {
+    term: "aDOT",
+    what: "Average depth of target: how far past the line of scrimmage the ball is thrown to him.",
+    how: "For a back this is usually negative, which is a yardage hole he has to climb out of. When a back's receiving looks thin for his target count, check this before blaming the player.",
+  },
+};
+
 // Sorted value arrays per position per metric, computed once at module load.
 const CARD_PERCENTILES = (() => {
   const out = {};
@@ -2598,12 +2712,25 @@ const buildPlayerCard = (name, pos, team) => {
 
   // Efficiency ranks ride along DIMMED and captioned. RB yards per carry is
   // r=0.02 year over year; the rank is a record of 2025, never a projection.
-  if (eff?.rush_eff_rank) card.efficiency.push({ label: "Rush efficiency", value: `${eff.rush_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rush_eff_rank`]}` });
-  if (eff?.ngs_rush_rank) card.efficiency.push({ label: "NGS rush yds over exp", value: `${eff.ngs_rush_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_ngs_rush_rank`]}` });
-  if (eff?.rec_eff_rank) card.efficiency.push({ label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
-  if (ay) card.efficiency.push({ label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
+  if (eff?.rush_eff_rank) card.efficiency.push({ key: "eff_rush", label: "Rush efficiency", value: `${eff.rush_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rush_eff_rank`]}` });
+  if (eff?.ngs_rush_rank) card.efficiency.push({ key: "eff_ngs", label: "NGS rush yds over exp", value: `${eff.ngs_rush_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_ngs_rush_rank`]}` });
+  if (eff?.rec_eff_rank) card.efficiency.push({ key: "eff_rec", label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
+  if (ay) card.efficiency.push({ key: "eff_adot", label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
+
+  // The glossary explains exactly what this card rendered and nothing else, in
+  // the order the reader met it. A QB card never defines WOPR; an RB card with
+  // no air-yards row never defines aDOT.
+  const glossKeys = [];
+  if (card.trajectory || card.trajectoryCur) glossKeys.push("_trajectory");
+  if (card.metrics.length || card.descriptive.length) glossKeys.push("_r", "_pct");
+  if (card.qb || card.qbCur) glossKeys.push("qb_rush", "qb_pass", "qb_adot");
+  for (const d of (CARD_METRICS[pos] || [])) if (card.metrics.some(x => x.label === d.label)) glossKeys.push(d.key);
+  for (const d of CARD_DESCRIPTIVE) if (card.descriptive.some(x => x.label === d.label)) glossKeys.push(d.key);
+  for (const e of card.efficiency) if (e.key) glossKeys.push(e.key);
+  card.glossary = glossKeys.filter(k => CARD_GLOSSARY[k]).map(k => ({ key: k, ...CARD_GLOSSARY[k] }));
 
   if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length) {
+    card.glossary = [];
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
       : "No 2025 NFL data. Rookie, or did not clear the volume gate.";
@@ -6079,6 +6206,9 @@ const CARD_ACCENTS = {
   opportunity: "var(--accent-purple-light)",
   outcomes: "var(--info-blue)",
   efficiency: "var(--text-dim)",
+  // Reference material, not a finding — same muted header as Efficiency, so the
+  // two channels stay honest: brightness means "this should move your opinion".
+  glossary: "var(--text-dim)",
 };
 
 // ONE collapsible section header for the results view, so a fourth ad-hoc
@@ -6089,8 +6219,9 @@ const CARD_ACCENTS = {
 // about size. Strengths, weaknesses and the stack matrix are read on every
 // grade and stay open however tall they are. Reference tables and exploratory
 // blocks are read occasionally, so they cost a click instead of a scroll.
-const SectionH2 = ({ title, open, onToggle, hint, children }) => (
+const SectionH2 = ({ title, open, onToggle, hint, children, id }) => (
   <button
+    id={id}
     onClick={onToggle}
     aria-expanded={open}
     style={{
@@ -6143,6 +6274,278 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
 // The player card. Opened by clicking a name anywhere in a result — a modal so
 // it costs the page ZERO resting density, which is the whole reason it is not
 // another expandable panel.
+// Clamp a long block of prose to N lines with a "see more".
+//
+// THE MEASUREMENT ONLY RUNS WHILE COLLAPSED, and that is the whole trick. Once
+// expanded, scrollHeight === clientHeight, so a naive check flips `overflows`
+// back to false and the control that got you there disappears under your
+// finger. The last collapsed measurement is retained instead, and reset only
+// when the text itself changes.
+//
+// It measures rather than counting characters because the same string wraps to
+// four lines on a tablet and nine on a phone; a length threshold would clamp
+// text that fits and leave text that does not.
+const ClampedText = ({ text, lines = 6, accent = "var(--ui-accent)", label = "summary" }) => {
+  const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  useLayoutEffect(() => { setOpen(false); setOverflows(false); }, [text]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return;                    // never measure while expanded
+    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 2);
+    check();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, open]);
+
+  // THE CLAMP IS APPLIED WHENEVER COLLAPSED, not only once overflow is known.
+  // Gating it on `overflows` is circular: an unclamped element always reports
+  // scrollHeight === clientHeight, so the measurement can never turn true and
+  // the control never appears. Clamp first, then measure against the clamp.
+  return (
+    <div>
+      <div style={{ position: "relative" }}>
+        <div
+          ref={ref}
+          style={open ? undefined : {
+            display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {text}
+        </div>
+        {overflows && !open && (
+          // The fade says "there is more" before the reader reaches the button.
+          // Pinned to the container's own background so it works on either panel.
+          <div aria-hidden style={{
+            position: "absolute", left: 0, right: 0, bottom: 0, height: "26px",
+            background: "linear-gradient(to bottom, transparent, var(--bg-base) 92%)",
+            pointerEvents: "none",
+          }} />
+        )}
+      </div>
+      {overflows && (
+        <button
+          onClick={() => setOpen(o => !o)}
+          aria-expanded={open}
+          data-compact
+          style={{
+            marginTop: "6px", background: "transparent", border: "none", padding: "6px 0",
+            minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "11px",
+            letterSpacing: "0.06em", color: accent, fontWeight: 600,
+            display: "inline-flex", alignItems: "center", gap: "5px",
+          }}
+        >
+          {open ? "see less" : `see full ${label}`}
+          <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
+// Strengths / Weaknesses. A collapsible section whose header wears the SAME
+// colour as every row beneath it.
+//
+// That is not chrome borrowing a data hue — it is a label inheriting the meaning
+// its own content already carries, the way a position pill does. The rule the
+// colour system holds is that a hue means one thing; lime here means "strength"
+// exactly as it does on the rows, so the header and its list read as one object
+// and the two panels are told apart before a word is read.
+//
+// It stays OPEN by default. These are the headline finding, and the reading-
+// frequency rule that decides what collapses puts them with the stack matrix,
+// not with the reference tables. What saves the space is the row cap: a long
+// list truncates to `preview` with the rest one tap away, so the section costs a
+// predictable height whether it holds three items or nine.
+const InsightPanel = ({ title, items, color, empty, preview = 4, renderItem }) => {
+  const [open, setOpen] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const list = items.length ? items : [empty];
+  const hidden = Math.max(0, list.length - preview);
+  const shown = showAll || hidden === 0 ? list : list.slice(0, preview);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: "10px", width: "100%", background: "transparent", border: "none",
+          padding: "2px 0 7px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+          minHeight: "34px",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ width: "3px", height: "12px", background: color, borderRadius: "1px", flex: "none" }} />
+          <span style={{ fontSize: "10px", color, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>{title}</span>
+          {items.length > 0 && (
+            <span style={{
+              fontSize: "9px", color, background: `${color}1a`, border: `1px solid ${color}44`,
+              borderRadius: "8px", padding: "1px 6px", fontFamily: "var(--font-mono)", lineHeight: 1.5,
+            }}>{items.length}</span>
+          )}
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+          {open ? "hide" : "show"}
+          <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+        </span>
+      </button>
+      {open && (
+        <>
+          {shown.map(renderItem)}
+          {hidden > 0 && (
+            <button
+              onClick={() => setShowAll(a => !a)}
+              aria-expanded={showAll}
+              data-compact
+              style={{
+                background: "transparent", border: "none", padding: "6px 0", minHeight: "32px",
+                cursor: "pointer", fontFamily: "inherit", fontSize: "11px", letterSpacing: "0.06em",
+                color, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "5px",
+              }}
+            >
+              {showAll ? "show fewer" : `+${hidden} more`}
+              <span style={{ display: "inline-block", transform: showAll ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// STICKY SECTION INDEX.
+//
+// The results view is ~6,100px on a phone, about fifteen screen-heights. Every
+// previous pass attacked HOW TALL the page is; this one attacks TRAVEL
+// DISTANCE, which is the thing actually being complained about — having to
+// scroll past sections to reach the one you want. Trimming gets a little worse
+// every time a section is added; an index gets better.
+//
+// It is CHROME, so it is hueless. The active pill is a lightness step, never a
+// hue: every hue on this page already means something (matchups, weeks,
+// positions) and a navigation control must not look like data.
+const SECTION_INDEX = {
+  bestball: [
+    { id: "rxr-schedule",  label: "Schedule" },
+    { id: "rxr-stacks",    label: "Stacks" },
+    { id: "rxr-bringback", label: "Bring-backs" },
+    { id: "rxr-solo",      label: "Solo" },
+    { id: "rxr-byes",      label: "Byes" },
+    { id: "rxr-standouts", label: "Standouts" },
+  ],
+  redraft: [
+    { id: "rxr-lineup",       label: "Lineup" },
+    { id: "rxr-depth",        label: "Depth" },
+    { id: "rxr-byeconflicts", label: "Byes" },
+    { id: "rxr-playoffs",     label: "Playoffs" },
+    { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-bench",        label: "Bench" },
+  ],
+};
+const STICKY_INDEX_H = 44;
+
+const StickyIndex = ({ items }) => {
+  const [active, setActive] = useState(null);
+  const barRef = useRef(null);
+
+  useLayoutEffect(() => {
+    // ONE scroll listener doing both jobs. An IntersectionObserver reads more
+    // cleanly but reports on threshold crossings, so a section taller than the
+    // viewport (the stack matrix is 1,340px) can stop reporting entirely and
+    // the active pill goes blank in the middle of the section you are reading.
+    // Nearest-heading-above-the-fold has no such hole.
+    const onScroll = () => {
+      let cur = null;
+      const present = [];
+      for (const it of items) {
+        const el = document.getElementById(it.id);
+        if (!el) continue;
+        present.push(it.id);
+        if (el.getBoundingClientRect().top - STICKY_INDEX_H - 12 <= 0) cur = it.id;
+      }
+      // AT THE BOTTOM, THE LAST SECTION WINS. The final sections sit inside the
+      // last viewport-height of the page, so they can never cross the top edge
+      // and "nearest heading above the fold" would leave the pill stuck several
+      // sections back — including right after a reader tapped that very pill.
+      const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      setActive(atEnd && present.length ? present[present.length - 1] : cur);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [items]);
+
+  // Keep the active pill in view without hijacking the page: scroll the BAR's
+  // own overflow box, never the document.
+  useLayoutEffect(() => {
+    if (!active || !barRef.current) return;
+    const pill = barRef.current.querySelector(`[data-sec="${active}"]`);
+    if (!pill) return;
+    const bar = barRef.current;
+    const left = pill.offsetLeft - bar.clientWidth / 2 + pill.offsetWidth / 2;
+    bar.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [active]);
+
+  const go = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - STICKY_INDEX_H - 10;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  };
+
+  return (
+    <div style={{
+      position: "sticky", top: 0, zIndex: 90,
+      background: "var(--bg-base)", borderBottom: "1px solid var(--border-subtle)",
+      marginBottom: "14px",
+    }}>
+      <div
+        ref={barRef}
+        role="navigation"
+        aria-label="Jump to section"
+        style={{
+          display: "flex", gap: "4px", overflowX: "auto", WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none", height: `${STICKY_INDEX_H}px`, alignItems: "center",
+        }}
+      >
+        {items.map(it => {
+          const on = active === it.id;
+          return (
+            <button
+              key={it.id}
+              data-sec={it.id}
+              data-compact
+              onClick={() => go(it.id)}
+              aria-current={on ? "true" : undefined}
+              style={{
+                flex: "none", minHeight: "32px", padding: "6px 11px", borderRadius: "14px",
+                cursor: "pointer", fontFamily: "inherit", fontSize: "11px", letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                background: on ? "var(--bg-elevated)" : "transparent",
+                border: `1px solid ${on ? "var(--border-strong)" : "transparent"}`,
+                color: on ? "var(--text-primary)" : "var(--text-muted)",
+                fontWeight: on ? 700 : 500,
+              }}
+            >
+              {it.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const t = card.trajectory;
@@ -6298,6 +6701,28 @@ const PlayerCardModal = ({ card, onClose }) => {
                 {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
               </CardSection>
             )}
+
+            {(card.glossary || []).length > 0 && (
+              <CardSection title="Glossary" accent={CARD_ACCENTS.glossary} collapsible note="Every number on this card, in plain language — what it measures, and what to do with it.">
+                {card.glossary.map((g, i) => (
+                  <div key={g.key} style={{
+                    padding: "9px 0",
+                    borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
+                  }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "3px" }}>
+                      {g.term}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                      {g.what}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px", display: "flex", gap: "6px" }}>
+                      <span style={{ color: "var(--ui-accent-dim)", flex: "none" }}>→</span>
+                      <span>{g.how}</span>
+                    </div>
+                  </div>
+                ))}
+              </CardSection>
+            )}
           </>
         )}
 
@@ -6338,6 +6763,12 @@ export default function RosterScorer() {
   const [lcWeek, setLcWeek] = useState(null);
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
+  // The generated card is a full-height PNG, so once it appears it sits between
+  // the reader and everything below it with no way out. Collapsing hides the
+  // PREVIEW ONLY and keeps Share / Save / Post live, because "I have seen it,
+  // now let me file it" is the actual state a reader is in. Dismiss clears it
+  // and restores the export link so it can be regenerated.
+  const [cardPreviewOpen, setCardPreviewOpen] = useState(true);
   const [gradeExplainerOpen, setGradeExplainerOpen] = useState(false);
   const [heroCollapsed, setHeroCollapsed] = useState(false);
   const [appReady, setAppReady] = useState(false);
@@ -9588,23 +10019,23 @@ Analyze this best ball roster. Return JSON only.`;
                         ))}
                       </div>
                     ) : (
-                      aiNutshell || analyzed.nutshell
+                      <ClampedText
+                        text={aiNutshell || analyzed.nutshell}
+                        lines={6}
+                        accent={gradeColor(analyzed.grade)}
+                      />
                     )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
-                    {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
-                    {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
+                  <InsightPanel
+                    title="Strengths" items={analyzed.strengths} color="var(--pos-bright)" empty="None identified"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.strengths.length ? "#a3e635" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
+                  <InsightPanel
+                    title="Weaknesses" items={analyzed.weaknesses} color="var(--warn)" empty="None flagged"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.weaknesses.length ? "#fb923c" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
                 </div>
 
                 {/* Grading explainer toggle */}
@@ -9710,11 +10141,33 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my best ball squad and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
-                      <img
-                        src={exportedDataUrl}
-                        alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
-                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "8px" }}>
+                        <button
+                          onClick={() => setCardPreviewOpen(o => !o)}
+                          aria-expanded={cardPreviewOpen}
+                          data-compact
+                          style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", padding: "6px 0", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}
+                        >
+                          Grade card ready
+                          <span style={{ letterSpacing: "0.06em", textTransform: "none", fontWeight: 400 }}>
+                            {cardPreviewOpen ? "hide preview" : "show preview"}
+                          </span>
+                          <span style={{ display: "inline-block", transform: cardPreviewOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                        </button>
+                        <button
+                          onClick={() => { setExportedDataUrl(null); setCardPreviewOpen(true); }}
+                          aria-label="Dismiss grade card"
+                          data-compact
+                          style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "13px", lineHeight: 1, minWidth: "32px", minHeight: "32px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}
+                        >✕</button>
+                      </div>
+                      {cardPreviewOpen && (
+                        <img
+                          src={exportedDataUrl}
+                          alt="Roster X-Ray Grade Card"
+                          style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
+                        />
+                      )}
                       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {navigator.share && (
                           <button
@@ -9733,7 +10186,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -9741,7 +10194,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Stacks look clean, playoff matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out my playoff stacks have matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
@@ -9751,6 +10204,8 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
+
+            <StickyIndex items={SECTION_INDEX.bestball} />
 
             {/* Unmatched players */}
             {analyzed.picks.some(p => p.notFound) && (
@@ -9776,19 +10231,36 @@ Analyze this best ball roster. Return JSON only.`;
                 best ball is won W15-17, this exists to sanity-check the road
                 there, not to imply weekly management. */}
             {analyzed.seasonSchedules && analyzed.seasonSchedules.length > 0 && (
-              <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+              <div id="rxr-schedule" style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
                 <button
                   onClick={() => setBbScheduleOpen(prev => !prev)}
                   aria-expanded={bbScheduleOpen}
-                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "12px 14px", minHeight: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+                  style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: bbScheduleOpen ? "1px solid var(--bg-elevated)" : "none", padding: "13px 14px", minHeight: "44px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
                 >
-                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ width: "3px", height: "12px", background: "var(--ui-accent)", borderRadius: "1px" }} />
-                    <span style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-                      Season Schedule · Advance-Rate View
+                  {/* PURPLE IS THIS SECTION'S OWN COLOUR, not a decoration: the
+                      legend inside reads "purple W15-W17 = the weeks that win the
+                      tournament", and the grid paints those columns with the same
+                      token. The header inherits the meaning its own rows carry,
+                      exactly as the Strengths and Weaknesses panels do.
+                      Promoted to the display face because it IS a top-level
+                      section — at 10px micro-label it read as a footnote and got
+                      scrolled past, which was the actual complaint. */}
+                  <span style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                      <span style={{ width: "3px", height: "18px", background: "var(--accent-purple-light)", borderRadius: "1px", flex: "none" }} />
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--accent-purple-light)", letterSpacing: "0.05em" }}>
+                        Season Schedule · Advance-Rate View
+                      </span>
                     </span>
+                    {!bbScheduleOpen && (
+                      // The one line that turns a scroll-past into a tap. Only
+                      // while closed — once open the full explainer says it better.
+                      <span style={{ fontSize: "10px", color: "var(--text-muted)", lineHeight: 1.45, paddingLeft: "12px" }}>
+                        W1–W14 is the round that eliminates most of the field. See every week.
+                      </span>
+                    )}
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--ui-accent)", fontSize: "11px", letterSpacing: "0.06em" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-purple-light)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap", flex: "none" }}>
                     {bbScheduleOpen ? "hide" : "W1-18"}
                     <span style={{ display: "inline-block", transform: bbScheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                   </span>
@@ -10008,7 +10480,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Stacks */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-stacks" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -10101,7 +10573,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === BRING-BACK GAME STACKS === */}
             {analyzed.bringBacks.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-bringback" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -10190,7 +10662,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === ORPHAN CLASSIFICATION === */}
             {analyzed.orphans.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-solo" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -10443,7 +10915,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === BYE WEEK MAP === */}
             {Object.keys(analyzed.byeMap).length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <SectionH2 title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
+                <SectionH2 id="rxr-byes" title="BYE WEEK MAP" open={byeMapOpen} onToggle={() => setByeMapOpen(o => !o)} hint={`${Object.keys(analyzed.byeMap).length} weeks`} />
                 {byeMapOpen && <>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "6px", lineHeight: 1.5, maxWidth: "640px" }}>
                   Each bye week shows which of your players are sitting that week. Watch for <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>stacked-position byes</span> — too many <span style={{ color: posColor("RB").text }}>RBs</span> or <span style={{ color: posColor("WR").text }}>WRs</span> on the same week creates a hole.
@@ -10555,7 +11027,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* === ROSTER STANDOUTS === */}
             {analyzed.rosterStandouts && analyzed.rosterStandouts.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-standouts" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -10943,23 +11415,23 @@ Analyze this best ball roster. Return JSON only.`;
                         ))}
                       </div>
                     ) : (
-                      aiNutshell || analyzed.nutshell
+                      <ClampedText
+                        text={aiNutshell || analyzed.nutshell}
+                        lines={6}
+                        accent={gradeColor(analyzed.grade)}
+                      />
                     )}
                   </div>
                 )}
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Strengths</div>
-                    {analyzed.strengths.length > 0
-                      ? analyzed.strengths.map((s, i) => <InsightRow key={i} text={s} color="#a3e635" players={analyzed.valid} />)
-                      : <InsightRow text="None identified" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Weaknesses</div>
-                    {analyzed.weaknesses.length > 0
-                      ? analyzed.weaknesses.map((w, i) => <InsightRow key={i} text={w} color="#fb923c" players={analyzed.valid} />)
-                      : <InsightRow text="None flagged" color="var(--text-dim)" players={analyzed.valid} />}
-                  </div>
+                  <InsightPanel
+                    title="Strengths" items={analyzed.strengths} color="var(--pos-bright)" empty="None identified"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.strengths.length ? "#a3e635" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
+                  <InsightPanel
+                    title="Weaknesses" items={analyzed.weaknesses} color="var(--warn)" empty="None flagged"
+                    renderItem={(x, i) => <InsightRow key={i} text={x} color={analyzed.weaknesses.length ? "#fb923c" : "var(--text-dim)"} players={analyzed.valid} />}
+                  />
                 </div>
 
                 {/* Grading explainer toggle — redraft */}
@@ -11065,11 +11537,33 @@ Analyze this best ball roster. Return JSON only.`;
                   )}
                   {exportedDataUrl && (() => { const _hooks = ["Stop drafting blind.", "They're drafting players. You're building a system.", "Bet your roster has a problem you haven't caught yet. Mine did.", "Drafted my redraft roster and immediately ran it through Roster X-Ray. The AI breakdown was brutal but fair."]; const _hook = _hooks[Math.floor(Math.random() * _hooks.length)]; return (
                     <div style={{ marginTop: "14px" }}>
-                      <img
-                        src={exportedDataUrl}
-                        alt="Roster X-Ray Grade Card"
-                        style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
-                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginBottom: "8px" }}>
+                        <button
+                          onClick={() => setCardPreviewOpen(o => !o)}
+                          aria-expanded={cardPreviewOpen}
+                          data-compact
+                          style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", padding: "6px 0", minHeight: "32px", cursor: "pointer", fontFamily: "inherit", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700 }}
+                        >
+                          Grade card ready
+                          <span style={{ letterSpacing: "0.06em", textTransform: "none", fontWeight: 400 }}>
+                            {cardPreviewOpen ? "hide preview" : "show preview"}
+                          </span>
+                          <span style={{ display: "inline-block", transform: cardPreviewOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                        </button>
+                        <button
+                          onClick={() => { setExportedDataUrl(null); setCardPreviewOpen(true); }}
+                          aria-label="Dismiss grade card"
+                          data-compact
+                          style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "13px", lineHeight: 1, minWidth: "32px", minHeight: "32px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}
+                        >✕</button>
+                      </div>
+                      {cardPreviewOpen && (
+                        <img
+                          src={exportedDataUrl}
+                          alt="Roster X-Ray Grade Card"
+                          style={{ width: "100%", borderRadius: "6px", display: "block", marginBottom: "10px" }}
+                        />
+                      )}
                       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {navigator.share && (
                           <button
@@ -11088,7 +11582,7 @@ Analyze this best ball roster. Return JSON only.`;
                         <a
                           href={exportedDataUrl}
                           download="roster-xray.png"
-                          style={{ flex: 1, minWidth: "120px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#ffffff0a", border: "1px solid var(--border-default)", borderRadius: "4px", padding: "8px 12px", color: "var(--text-secondary)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           ⬇ Save Image
                         </a>
@@ -11096,7 +11590,7 @@ Analyze this best ball roster. Return JSON only.`;
                           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${["A", "A-"].includes(analyzed.grade) ? "Roster looks clean, matchups are elite. www.rosterxray.com confirmed it." : ["B+", "B"].includes(analyzed.grade) ? "Thought I crushed this draft. Turns out I had matchup problems I completely missed. Wouldn't have known without: www.rosterxray.com" : "Way more problems than I thought, but now I know exactly how to up my draft game. Thanks for the honest breakdown: www.rosterxray.com"}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, minWidth: "120px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                          style={{ flex: 1, minWidth: "120px", minHeight: "44px", background: "#1d9bf022", border: "1px solid #1d9bf055", borderRadius: "4px", padding: "8px 12px", color: "#1d9bf0", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", cursor: "pointer", fontFamily: "var(--font-body)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
                         >
                           𝕏 Post to X
                         </a>
@@ -11209,9 +11703,11 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             )}
 
+            <StickyIndex items={SECTION_INDEX.redraft} />
+
             {/* Starting Lineup */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-lineup" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11290,7 +11786,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Positional Depth */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-depth" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11325,7 +11821,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bye Week Notes */}
             {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-byeconflicts" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",
@@ -11357,7 +11853,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Playoff Schedule */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-playoffs" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -11454,7 +11950,7 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-weekly" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
@@ -12046,7 +12542,7 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 style={{
+                <h2 id="rxr-bench" style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "24px",
                   letterSpacing: "0.05em",

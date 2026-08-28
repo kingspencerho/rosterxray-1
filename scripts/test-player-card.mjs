@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS };\n";
+  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -132,6 +132,46 @@ ok("efficiency rows exist and are routed to the dimmed channel",
 // different call site from the wholesale dimming above.
 ok("the conditional dimmed channel still exists for week outcomes",
    /card\.descriptive\.map[\s\S]{0,200}dim=\{x\.r < 0\.5\}/.test(app));
+
+console.log("\nthe glossary covers exactly what the card renders");
+
+// A number on screen with no definition is the silent-drop failure in a new
+// costume: the reader sees "WOPR 0.08" and has no way to act on it. So the
+// coverage assertion runs the OTHER way from the render — every key the card
+// CAN show must have an entry, whether or not any current player triggers it.
+const renderableKeys = [
+  ...Object.values(e.CARD_METRICS).flat().filter(Boolean).map(d => d.key),
+  ...e.CARD_DESCRIPTIVE.map(d => d.key),
+  "eff_rush", "eff_ngs", "eff_rec", "eff_adot",
+  "qb_rush", "qb_pass", "qb_adot", "_r", "_pct", "_trajectory",
+];
+const missing = [...new Set(renderableKeys)].filter(k => !e.CARD_GLOSSARY[k]);
+ok("every renderable metric has a glossary entry", missing.length === 0, missing.join(", "));
+
+// Both halves are required. A definition with no interpretation leaves the
+// reader where they started, which is the entire reason this section exists.
+const halfWritten = Object.entries(e.CARD_GLOSSARY).filter(([, g]) => !g.term || !g.what || !g.how);
+ok("every entry carries term + what + how", halfWritten.length === 0, halfWritten.map(x => x[0]).join(", "));
+
+// Position-scoped: a quarterback card must never define a receiving metric it
+// does not show, and a receiver card must never define the QB volume rows.
+const qbName = Object.entries(e.ADP_DATA).find(([n, v]) => v.pos === "QB" && e.buildPlayerCard(n, "QB", v.team).qb);
+const qbCard = qbName ? e.buildPlayerCard(qbName[0], "QB", qbName[1].team) : null;
+ok("a QB card explains the QB rows", !!qbCard && qbCard.glossary.some(g => g.key === "qb_rush"));
+ok("...and never explains WOPR", !!qbCard && !qbCard.glossary.some(g => g.key === "wopr"));
+const wrName = Object.entries(e.ADP_DATA).find(([n, v]) => v.pos === "WR" && e.buildPlayerCard(n, "WR", v.team).metrics.length);
+const wrCard = wrName ? e.buildPlayerCard(wrName[0], "WR", wrName[1].team) : null;
+ok("a WR card explains WOPR", !!wrCard && wrCard.glossary.some(g => g.key === "wopr"));
+ok("...and never explains the QB rows", !!wrCard && !wrCard.glossary.some(g => g.key === "qb_rush"));
+
+// A no-data card is a reason string and nothing else. A glossary attached to an
+// empty card would be a wall of definitions for numbers that are not there.
+const empty = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team)).find(c => c.reason);
+ok("the no-data card carries no glossary", !!empty && (empty.glossary || []).length === 0);
+
+// It must cost nothing at rest — the card is already the densest surface here.
+ok("the glossary section is collapsible",
+   /title="Glossary"[^>]*collapsible/.test(app));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

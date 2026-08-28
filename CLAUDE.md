@@ -3088,3 +3088,231 @@ Two changes, both needed:
 **Check the fallback chain before restyling a display element.** The sandbox
 cannot reach Google Fonts, so local screenshots always show the fallback — which
 is exactly why this was visible in a local render and invisible in the source.
+
+---
+
+## Player Card Glossary (added Aug 28, 2026)
+
+A collapsed `Glossary` section under Efficiency, explaining every number the card
+just rendered. **Informational only — 33 grades byte-identical across 11
+tournaments x 3 fixtures.** Guarded by the glossary block in
+`scripts/test-player-card.mjs` (guard 14).
+
+### The two most cryptic tokens on the card were not metrics
+
+`r 0.73` beside every label and `29%ile` on the right. A reader who does not know
+what those mean **cannot use any row**, so they are explained first and
+separately as `_r` and `_pct`, ahead of the metrics themselves.
+
+### Every entry is `term` + `what` + `how`, and the third field is the point
+
+A definition alone leaves the reader exactly where they started. "Share of team
+targets" is not usable; "how central he is to the passing game, independent of
+how often his team throws" is. **The `how` field is where this file's measured
+stability work finally reaches the user** — the QB rushing entry names r=0.82,
+the efficiency entries name r=0.02, and spike rate says out loud that it is the
+least repeatable number on the card.
+
+Guard 14 asserts all three fields are present on every entry, so a half-written
+entry cannot ship.
+
+### Coverage runs the OPPOSITE way from the render
+
+The card emits glossary entries only for rows it actually drew — a QB card never
+defines WOPR, an RB card with no air-yards row never defines aDOT. But the GUARD
+asserts that **every key the card CAN render has an entry**, whether or not a
+current player triggers it. A number on screen with no definition is the
+silent-drop failure in a new costume: the reader sees `WOPR 0.08` and has no way
+to act on it. Negative-tested by renaming one entry's key.
+
+### It is muted, and that is deliberate
+
+`CARD_ACCENTS.glossary` is `--text-dim`, the same header treatment as Efficiency.
+The card's second channel means "brightness = this should move your opinion", and
+reference material should not. Resting cost is one line; the card goes 705px ->
+2624px when opened, which is exactly why it is not open by default.
+
+### Still open: recent news on the card
+
+Assessed and NOT built. `RECENT_NEWS` and `SITUATIONS.trendNote` are dated only
+INSIDE their prose, so nothing can compute freshness against the 30-45 day rule,
+and rendering "OUT FOR 2026" undated on a card stamped `2025 season · final` is
+the Diggs failure again — which is the same reason `PLAYER_VERDICTS` was kept off
+the card in the first place. Three conditions before it ships: a structured
+`date` field (no date, no render), full text or nothing (these run 500-1500 chars
+and truncating a `CAVEAT` out of the middle inverts the meaning), and an explicit
+"no dated entry" line so sparse coverage is visible rather than silent. Verdicts
+stay off; the dated factual note is the part that belongs.
+
+---
+
+## Two Disclosures on the Results Header (added Aug 28, 2026)
+
+The complaint was scrolling past tall text blocks to reach the breakdown. Two
+components, both **presentation only — 33 grades byte-identical across 11
+tournaments x 3 fixtures.** Guard 18: `scripts/test-disclosure.mjs`.
+
+### `ClampedText` — CLAMP FIRST, THEN MEASURE
+
+The nutshell clamps to 6 lines with a fade and a `see full summary`. Two
+runtime traps, both of which look correct in the source:
+
+1. **Gating the clamp on the overflow measurement is CIRCULAR.** An unclamped
+   element always reports `scrollHeight === clientHeight`, so the flag can never
+   turn true, the clamp never applies, and the control never appears. This
+   shipped that way for one build and was caught only by reading computed styles
+   out of a real browser (`clamp: "none"` on a 443px block). **The clamp style
+   must depend on `open` alone.**
+2. **The measurement must STOP while expanded.** Once open the two heights match
+   again, so an effect that keeps running flips the flag back to false and the
+   button the reader just pressed disappears under their finger. The last
+   collapsed measurement is retained, and reset only when the text changes.
+
+It measures rather than counting characters, because the same string wraps to
+four lines on a tablet and nine on a phone — a length threshold would clamp text
+that fits and leave text that does not.
+
+⚠️ **The `text` prop must be a STABLE value.** Passing
+`highlightPlayerNames(...)` returns a fresh array every render, so the reset
+effect would fire continuously and expansion would appear to do nothing. Raw
+string only.
+
+### `InsightPanel` — the header wears its content's colour
+
+**This is not chrome borrowing a data hue.** The Aug 28 rule is that a hue means
+one thing; lime already means "strength" on every row of that list, so the label
+inheriting it makes the header and its rows read as one object. A neutral header
+would have been the weaker choice, not the safer one.
+
+**It defaults to OPEN.** These are the headline finding, and the reading-frequency
+rule that decides what collapses puts them with the stack matrix, not with the
+reference tables. **What saves the space is the row cap** — the list truncates to
+4 with `+N more`, so the section costs a predictable height whether it holds
+three items or nine. Collapsing the whole panel is available and is the reader's
+call, never the default.
+
+### Measured
+
+```
+nutshell clamped   6080px      expanded  6402px      collapse restores exactly
+strengths capped at 4 of 6 · 0 tap targets under 32px · 0 page errors
+```
+
+### Considered and not built
+
+- **Persisting panel state** in `localStorage` beside `rxr_has_analyzed`.
+- **A sticky section index** (Stacks · Solo · Byes · Pivots). On a 6,000px page
+  this would cut more scrolling than any amount of text trimming, and it is the
+  right next move if the page keeps growing.
+
+### The Season Schedule header, promoted (Aug 28, 2026)
+
+Reported as *"this is an important section I don't want users to scroll past it"*.
+It was a 10px uppercase micro-label in `--ui-accent`, which is the treatment
+every minor disclosure on the page wears — so it read as a footnote on a panel
+the user opens constantly.
+
+**Purple was the right colour because it is already this section's own.** The
+legend inside it reads "purple W15-W17 = the weeks that win the tournament", and
+the grid paints those columns with `--accent-purple-light`. So the header
+inherits the meaning its own rows carry — the same sanctioned exception the
+Strengths and Weaknesses panels use, not chrome borrowing a hue.
+
+Three changes, and **the size is the one that did the work**: 10px micro-label ->
+22px `--font-display`, a taller accent bar, and a one-line hook that shows only
+while collapsed ("W1-W14 is the round that eliminates most of the field"). A
+section styled like a footnote gets read like one no matter what colour it is.
+
+Guard 17 asserts the PAIRING rather than the colour — the header token must be
+the same one the grid's `isPlayoff` columns use — so a re-tune of the week
+palette stays legal and a "cleanup" back to `--ui-accent` does not.
+Negative-tested.
+
+### The generated grade card had no exit (fixed Aug 28, 2026)
+
+`exportedDataUrl` rendered a full-height PNG mid-page with no way to put it away
+for the rest of the session. Two controls now sit above it:
+
+- **hide preview** gates the `<img>` ALONE. Share / Save / Post stay live,
+  because "I have seen it, now let me file it" is the state a reader is actually
+  in — collapsing the actions with the image would make the control useless.
+- **✕** clears `exportedDataUrl` and restores the `export grade card` link, so it
+  can be regenerated.
+
+Analysis, mode switch and New Roster already reset it, so this closed the only
+remaining path where a card could persist unwanted.
+
+**Found while testing: the share row mixed a `<button>` with two `<a>`s.** The
+global `button:not([data-compact])` floor covers the first and not the others, so
+Share rendered at 44px beside Save Image and Post to X at **31px** — a ragged row
+and two sub-32px tap targets, in both modes. Anchors have to state the floor
+themselves. Guard 18 counts all four.
+
+⚠️ **html2canvas comes from cdnjs, which the sandbox cannot reach**, so the
+generated state is unreachable in a local render and the export silently no-ops.
+Stub `window.html2canvas` via `addInitScript` to return an object with a
+`toDataURL()` — that is the only way to exercise this UI locally.
+
+---
+
+## Sticky Section Index (added Aug 28, 2026)
+
+A pinned pill row — `Schedule · Stacks · Bring-backs · Solo · Byes · Standouts`
+in best ball, `Lineup · Depth · Byes · Playoffs · Weekly · Bench` in redraft.
+**Presentation only — 33 grades byte-identical across 11 tournaments x 3
+fixtures.** Guarded in `scripts/test-disclosure.mjs` (guard 18).
+
+### It attacks a different quantity from every earlier pass
+
+The density passes reduced HOW TALL the page is. This reduces TRAVEL DISTANCE,
+which is what the complaint was actually about — scrolling past sections to
+reach the one you want. **Trimming gets slightly worse every time a section is
+added; an index gets better.**
+
+### The active pill is a lightness step, never a hue
+
+Every hue on this page is spoken for (matchups, weeks, positions), and a
+navigation control must not look like data. Inactive is `--text-muted` on
+transparent; active is `--text-primary` on `--bg-elevated` with a border. Guard
+18 fails the build if any data-colour token appears inside `StickyIndex`.
+
+### Three implementation choices worth keeping
+
+1. **A scroll listener, not an IntersectionObserver.** The observer reads more
+   cleanly but reports on threshold crossings, so a section taller than the
+   viewport — the stack matrix is 1,340px — can stop reporting and the pill goes
+   blank in the middle of the section being read. Nearest-heading-above-the-fold
+   has no such hole.
+2. **AT THE BOTTOM, THE LAST SECTION WINS.** The final sections sit inside the
+   last viewport-height, so they can never cross the top edge. Without an
+   end-of-page case the pill stays several sections back — including immediately
+   after the reader taps that very pill, which is how it was caught.
+3. **The auto-centre scrolls the BAR's own overflow box, never the document.**
+   A nav that moves the page while you read it is worse than one that hides a
+   pill.
+
+### Anchors are ids on the section headings
+
+`SECTION_INDEX` is the single list; `SectionH2` gained an `id` passthrough for
+BYE WEEK MAP, and the Season Schedule anchor sits on its wrapper because that
+header is a button rather than an `h2`.
+
+**A nav entry pointing at an id that no longer renders is a dead link the reader
+can tap: nothing happens and nothing errors.** Guard 18 resolves every entry
+against the source and also fails on a duplicated id, since `getElementById`
+would silently take the first. Both negative-tested.
+
+### Placement matters for `position: sticky`
+
+The bar must be a DIRECT SIBLING of the sections — a sticky element stops
+sticking at the bottom of its own parent, so mounting it inside the grade-header
+block would unpin it before the first section. It sits at the same indent level
+as every section it indexes, in both modes.
+
+### Measured
+
+```
+best ball  6,167px · 6 pills · all anchors resolve · bar pinned at y=0
+redraft    6,355px · 6 pills · jump lands the heading at y=54, under the 44px bar
+0 tap targets under 32px · no horizontal overflow · no page errors
+```
