@@ -9495,18 +9495,20 @@ Analyze this best ball roster. Return JSON only.`;
                         const c = posColor(pos);
                         return (
                           <div key={pos} style={{ display: "grid", gridTemplateColumns: "26px 1fr", gap: "8px", alignItems: "start" }}>
-                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "10px" }}>{pos}</span>
-                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "11px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "9px" }}>{pos}</span>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))", gap: "6px" }}>
                               {group.map(pl => (
                                 <button
                                   key={pl.name}
                                   onClick={() => openCard(pl)}
                                   data-compact
+                                  title={pl.name}
                                   style={{
                                     background: c.bg, border: `1px solid ${c.border}66`, borderRadius: "6px",
-                                    color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
-                                    fontSize: "12px", padding: "0 11px", minHeight: "34px",
-                                    letterSpacing: "0.01em", display: "inline-flex", alignItems: "center",
+                                    color: "var(--text-primary)", cursor: "pointer", fontFamily: "inherit",
+                                    fontSize: "12px", fontWeight: 600, padding: "6px 10px", minHeight: "34px",
+                                    letterSpacing: "0.01em", display: "flex", alignItems: "center",
+                                    textAlign: "left", lineHeight: 1.2, whiteSpace: "normal",
                                   }}
                                 >
                                   {pl.name}
@@ -10844,18 +10846,20 @@ Analyze this best ball roster. Return JSON only.`;
                         const c = posColor(pos);
                         return (
                           <div key={pos} style={{ display: "grid", gridTemplateColumns: "26px 1fr", gap: "8px", alignItems: "start" }}>
-                            <span style={{ fontSize: "10px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "10px" }}>{pos}</span>
-                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "11px", color: c.text, letterSpacing: "0.1em", fontWeight: 700, paddingTop: "9px" }}>{pos}</span>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))", gap: "6px" }}>
                               {group.map(pl => (
                                 <button
                                   key={pl.name}
                                   onClick={() => openCard(pl)}
                                   data-compact
+                                  title={pl.name}
                                   style={{
                                     background: c.bg, border: `1px solid ${c.border}66`, borderRadius: "6px",
-                                    color: "var(--text-soft)", cursor: "pointer", fontFamily: "inherit",
-                                    fontSize: "12px", padding: "0 11px", minHeight: "34px",
-                                    letterSpacing: "0.01em", display: "inline-flex", alignItems: "center",
+                                    color: "var(--text-primary)", cursor: "pointer", fontFamily: "inherit",
+                                    fontSize: "12px", fontWeight: 600, padding: "6px 10px", minHeight: "34px",
+                                    letterSpacing: "0.01em", display: "flex", alignItems: "center",
+                                    textAlign: "left", lineHeight: 1.2, whiteSpace: "normal",
                                   }}
                                 >
                                   {pl.name}
