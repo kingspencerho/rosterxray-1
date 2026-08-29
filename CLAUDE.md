@@ -3458,3 +3458,96 @@ defence, and it only works if every pass is considered.
   the Rachaad White trap waiting to happen.
 - Every new entry carries a date in a form `parseNewsDate` reads, so all six
   render on the player card as `current`.
+
+---
+
+## Redraft Audit (Aug 28, 2026)
+
+Every density and correctness pass since Aug 27 went to best ball. This is the
+redraft half. **44 grades byte-identical — 36 best ball (12 tournaments x 3
+fixtures) and 8 redraft (4 rosters x 2 data modes).**
+
+### 1. THE SAME BOOST DIVERGENCE WAS STILL LIVE HERE
+
+The Aug 27 fix unified five best-ball consumers behind `playoffBoosts` and
+explicitly left redraft alone. **Redraft had the identical defect internally:**
+
+| Redraft path | Feeds | Boost |
+|---|---|---|
+| `playoffMatchups` | PLAYOFF SCHEDULE · STARTERS, **the grade** | applied inline |
+| `buildScheduleEntry` -> `weeklyMatchups` | WEEKLY ROAD AHEAD, lineup confidence, bench swaps | **none** |
+
+So a W15-17 cell could read `Hard` in one panel and be graded `Even` in the
+next — the exact user-visible symptom reported on the best-ball side.
+Reproduced on **Chase Brown's W16 and W17** (CIN, pick'em shootouts vs IND and
+BAL): grid `Hard/2`, scored `Even/3`.
+
+Now one `redraftPlayoffBoost(m, opp, week)` above `analyzeRedraft`, used by both.
+
+**⚠️ THE THRESHOLDS ARE DELIBERATELY STILL THE REDRAFT ONES** — `total >= 49`
+against best ball's 46, and it rescues `score === 2` only rather than `<= 2`.
+Unifying the NUMBERS would move every redraft grade and needs its own
+calibration; what is unified here is WHERE the boost applies, which moves
+nothing. Guard 16 now asserts both thresholds are unchanged, so a future
+"cleanup" toward the best-ball values fails loudly instead of silently
+re-grading every redraft roster.
+
+**The grid gates on `league.playoffWeeks`.** `PLAYOFF_GAME_TOTALS` carries no
+W1-14 rows, so boosting the full W1-18 grid would invent numbers — the same
+constraint that keeps the Advance Rate Layer's W1-14 pass raw.
+
+### 2. The old comment block was wrong in two places, as recorded
+
+It claimed `|spread| <= 2` and `total >= 46` while the code read `<= 3` and
+`>= 49`. The code was always the truth. The new comment is written from the
+code, and the note it replaces has been carrying a "fix the comment before
+trusting it" warning since Aug 23.
+
+### 3. NINE SECTIONS, ZERO DISCLOSURES
+
+Best ball got `SectionH2` on three sections plus a collapsed Season Schedule
+panel. Redraft had **none**, and was the taller page:
+
+```
+                          before          after
+BENCH MOVES               1,021px    ->    60px   advisory
+WEEKLY ROAD AHEAD           592px    ->    56px   reference grid
+BENCH                       435px    ->   118px   reference list
+page                      6,355px    -> 4,550px   (-28%)
+```
+
+Same reading-frequency rule as best ball: the lineup, positional depth, bye
+conflicts, the playoff schedule, lineup confidence and handcuffs are read on
+every grade and stay open. What collapsed is reference and advisory.
+
+**The sticky index keeps working on collapsed sections** — `rxr-weekly` and
+`rxr-bench` moved onto the `SectionH2` buttons, both still resolve, and a jump
+to a collapsed section lands its heading at y=84, under the 44px bar. A
+collapsed panel is a perfectly good nav target because its resting cost is one
+line.
+
+### 4. The Yahoo instructions were two UI versions stale
+
+Both the upload tip and paste step 1 said "go to League tab -> press Draft
+button for full names". Yahoo now exports a roster card from a **share icon at
+the top right of the Team tab**. Both strings updated.
+
+**The parser already handled the new card** — it is the same share-card shape
+documented Jul 28 2026 (`QB D. PRESCOTT Sun 5:20PM @ NYG — 22.34`), so only the
+instructions were wrong. Verified end to end: a real Aug 2026 card grades
+**13/13 matched** in redraft with K and DEF filtered.
+
+### 5. Found while auditing: `grade-cli` silently accepts a wrong flag
+
+`--mode redraft` is not a flag; the CLI reads `--redraft`. It silently graded a
+redraft roster through the BEST BALL engine and printed a plausible answer.
+Same class as the silent-drop bugs — left as a note here rather than fixed,
+since it is a dev tool, but **check the `mode` field in the output** before
+trusting a CLI grade.
+
+### Still open, deliberately
+
+- **Unifying the redraft boost NUMBERS with best ball's.** A data decision that
+  moves grades; needs its own calibration run.
+- **The redraft high-pace boost does not exist.** Best ball lifts pace-driven
+  shootouts; redraft never has. Adding it would move redraft grades.

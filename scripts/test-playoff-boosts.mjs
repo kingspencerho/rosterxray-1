@@ -133,5 +133,28 @@ ok("weeks outside W15-17 are never boosted",
    e.playoffBoosts(t0, "SF", e.PLAYOFFS.SF[0], -1).score === t0.score &&
    e.playoffBoosts(t0, "SF", e.PLAYOFFS.SF[0], 7).score === t0.score);
 
+console.log("\nredraft: the grid and the scored path cannot disagree");
+
+// The redraft half of the class the best-ball `playoffBoosts` fix closed on
+// Aug 27. The scored playoff path boosted a pick'em shootout from Hard to Even
+// while the W1-18 grid rendering those same weeks did not, so a cell could read
+// "Hard" in WEEKLY ROAD AHEAD and be graded "Even" one panel away. Reproduced
+// before the fix on Chase Brown's W16 and W17.
+const rDefs = (app.match(/^const redraftPlayoffBoost = /gm) || []).length;
+ok("redraftPlayoffBoost is defined once", rDefs === 1, `found ${rDefs}`);
+const rCalls = (app.match(/redraftPlayoffBoost\(/g) || []).length;
+ok("both consumers route through it (2 call sites)", rCalls === 2, `found ${rCalls}`);
+
+// The grid spans W1-18 and PLAYOFF_GAME_TOTALS has no W1-14 rows, so the boost
+// must be gated to the playoff window rather than applied blind.
+ok("the W1-18 grid only boosts inside the playoff window",
+   /league\.playoffWeeks\.includes\(week\) \? redraftPlayoffBoost/.test(app));
+
+// Redraft's thresholds are deliberately NOT the best-ball ones — unifying the
+// NUMBERS would move every redraft grade. Assert they are still the redraft set
+// so a future cleanup toward the best-ball values fails loudly.
+ok("redraft still rescues score === 2 only, not <= 2", /m\.score !== 2\) return m;/.test(app));
+ok("redraft still uses its own total >= 49 threshold", /g\.total < 49\) return m;/.test(app));
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall playoff-boost guards passed");
 process.exit(fail ? 1 : 0);

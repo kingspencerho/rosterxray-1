@@ -5253,6 +5253,32 @@ const getMatchupScoreForOpponent = (opp, pos, useProjected = false) => {
 
 // ============ REDRAFT ANALYZER ============
 
+// Redraft's competitive-balance boost — ONE definition, used by the scored
+// playoff path AND by the W1-18 grid that displays those same weeks.
+//
+// They disagreed until Aug 28 2026: the scored path boosted, the grid did not,
+// so a W15-17 cell could read "Hard" in WEEKLY ROAD AHEAD while the same
+// player's PLAYOFF SCHEDULE row was scored "Even". That is the identical defect
+// reported on the best-ball side on Aug 27, which `playoffBoosts` fixed there —
+// this is the redraft half of the same class, now closed the same way.
+//
+// ⚠️ THESE THRESHOLDS ARE DELIBERATELY NOT THE BEST-BALL ONES. Redraft carries
+// its own calibration (`total >= 49` against best ball's 46, and it rescues only
+// score === 2 rather than <= 2), so unifying the NUMBERS would move every
+// redraft grade and needs its own calibration run. What is unified here is WHERE
+// the boost is applied, which moves nothing.
+//
+// The old comment block on this rule contradicted its own code in two places —
+// it claimed `|spread| <= 2` and `total >= 46` while the code read `<= 3` and
+// `>= 49`. The code was always the truth; the text is now written from it.
+const redraftPlayoffBoost = (m, opp, week) => {
+  if (!m || m.score !== 2) return m;                 // rescues Hard only, never Even or above
+  const oppClean = String(opp).replace("@", "").trim().toUpperCase();
+  const g = (PLAYOFF_GAME_TOTALS[`W${week}`] || []).find(x => x.away === oppClean || x.home === oppClean);
+  if (!g || Math.abs(g.spread) > 3 || g.total < 49) return m;
+  return { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
+};
+
 const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false, useProjected = false) => {
   // Accept either a preset key (string) or a resolved league object (custom)
   const league = typeof leagueOrKey === "string"
@@ -5325,9 +5351,13 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     let hardWeeks = 0;
     let softWeeks = 0;
     const weeklyMatchups = fullSchedule.map((opp, weekIdx) => {
-      if (!opp || opp === "BYE") return { week: weekIdx + 1, opp: "BYE", isBye: true };
-      const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
-      return { week: weekIdx + 1, opp, isBye: false, ...m };
+      const week = weekIdx + 1;
+      if (!opp || opp === "BYE") return { week, opp: "BYE", isBye: true };
+      // PLAYOFF WEEKS ONLY. PLAYOFF_GAME_TOTALS carries no W1-14 rows, so the
+      // helper no-ops outside the window rather than inventing a boost there.
+      const raw = getMatchupScoreForOpponent(opp, player.pos, useProjected);
+      const m = league.playoffWeeks.includes(week) ? redraftPlayoffBoost(raw, opp, week) : raw;
+      return { week, opp, isBye: false, ...m };
     });
     fullSchedule.forEach((opp) => {
       if (opp === "BYE") return;
@@ -5357,17 +5387,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     const playoffMatches = league.playoffWeeks.map(wk => {
       const opp = fullSchedule[wk - 1];
       if (!opp || opp === "BYE") return { week: wk, opp: "BYE", score: 0, tier: "BYE", color: "wall" };
-      const m = getMatchupScoreForOpponent(opp, player.pos, useProjected);
-      // Competitive balance boost: pick'em game (|spread| ≤ 3) AND high-scoring (total ≥ 46)
-      // Two evenly-matched offenses elevate both ceilings — raw FPA undersells this environment
-      // Hard → Even only: pick'em (|spread| ≤ 2) AND high-scoring (total ≥ 49)
-      // Prevents hard matchups from being penalized as walls in true shootout environments
-      // Does not boost Even or above — preserves tier variety
-      const oppClean = opp.replace("@", "").trim().toUpperCase();
-      const gameData = (PLAYOFF_GAME_TOTALS[`W${wk}`] || []).find(g => g.away === oppClean || g.home === oppClean);
-      if (gameData && Math.abs(gameData.spread) <= 3 && gameData.total >= 49 && m && m.score === 2) {
-        return { week: wk, opp, ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
-      }
+      const m = redraftPlayoffBoost(getMatchupScoreForOpponent(opp, player.pos, useProjected), opp, wk);
       return { week: wk, opp, ...m };
     });
     // Raw total (unweighted) — used for display chip colors
@@ -7020,6 +7040,15 @@ export default function RosterScorer() {
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [byeMapOpen, setByeMapOpen] = useState(false);
   const [fullRosterOpen, setFullRosterOpen] = useState(false);
+  // REDRAFT disclosures. Every density pass before Aug 28 2026 went to best ball,
+  // so the redraft tree had nine sections and no disclosure at all — 6,355px with
+  // nothing collapsed. Same reading-frequency rule applies: the lineup, the
+  // playoff schedule, depth and bye conflicts are read on every grade and stay
+  // open; the W1-18 grid, the bench advisories and the bench list are reference
+  // and cost a click.
+  const [weeklyOpen, setWeeklyOpen] = useState(false);
+  const [benchMovesOpen, setBenchMovesOpen] = useState(false);
+  const [benchListOpen, setBenchListOpen] = useState(false);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -9736,7 +9765,7 @@ Analyze this best ball roster. Return JSON only.`;
                 Underdog · Yahoo · Sleeper · ESPN
               </div>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", letterSpacing: "0.04em", marginTop: "4px" }}>
-                <span style={{ color: "var(--accent-purple-mid)", fontWeight: 700 }}>Yahoo Tip:</span> go to League tab → press Draft button for full names
+                <span style={{ color: "var(--accent-purple-mid)", fontWeight: 700 }}>Yahoo Tip:</span> tap the share icon at the top right of your Team tab → it exports a roster card. Upload that.
               </div>
               <div style={{ fontSize: "10px", color: "var(--text-secondary)", letterSpacing: "0.04em", marginTop: "4px" }}>
                 <span style={{ color: "var(--accent-purple-mid)", fontWeight: 700 }}>For Best Results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
@@ -9883,7 +9912,7 @@ Analyze this best ball roster. Return JSON only.`;
                 </span>
               </button>
               {pasteHelpOpen && <div style={{ fontSize: "12px", color: "#cfcfcf", lineHeight: 1.6 }}>
-                <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--ui-accent)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: League → Draft shows full names, or use the new Share button on your team page — the share image works too.</span></div>
+                <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--ui-accent)", fontWeight: 700 }}>1.</span> Screenshot your roster on Underdog / Yahoo / Sleeper / ESPN. <span style={{ color: "var(--text-muted)" }}>Yahoo: tap the share icon at the top right of your Team tab — it exports a roster card with your full lineup and bench.</span></div>
                 <div style={{ marginBottom: "4px" }}><span style={{ color: "var(--ui-accent)", fontWeight: 700 }}>2.</span> Open the screenshot in Photos. Press-and-hold the player names — your phone selects the text <span style={{ color: "var(--text-secondary)" }}>(iPhone "Live Text" · Android "Lens")</span>. Tap <span style={{ color: "#fff" }}>Copy</span>.</div>
                 <div><span style={{ color: "var(--ui-accent)", fontWeight: 700 }}>3.</span> Paste it in the box below and hit Analyze. <span style={{ color: "var(--text-muted)" }}>Pick numbers optional.</span></div>
               </div>}
@@ -12157,15 +12186,8 @@ Analyze this best ball roster. Return JSON only.`;
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 id="rxr-weekly" style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 4px",
-                color: "var(--text-primary)",
-              }}>
-                WEEKLY ROAD AHEAD
-              </h2>
+                            <SectionH2 id="rxr-weekly" title="WEEKLY ROAD AHEAD" open={weeklyOpen} onToggle={() => setWeeklyOpen(o => !o)} hint={"W1-18"} />
+              {weeklyOpen && (<>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
                 Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "var(--pos)" }}>smashable</span>; red weeks are <span style={{ color: "var(--neg)" }}>landmines</span>. The <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
               </div>
@@ -12439,7 +12461,8 @@ Analyze this best ball roster. Return JSON only.`;
                   </button>
                 </div>
               </div>
-            </div>
+            </>)}
+              </div>
 
             {/* Lineup Confidence */}
             {/* === LINEUP CONFIDENCE — week chip strip + one panel ===
@@ -12749,15 +12772,8 @@ Analyze this best ball roster. Return JSON only.`;
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 id="rxr-bench" style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  BENCH MOVES
-                </h2>
+                              <SectionH2 id="rxr-bench" title="BENCH MOVES" open={benchMovesOpen} onToggle={() => setBenchMovesOpen(o => !o)} hint={`${analyzed.benchMoves.length} moves`} />
+              {benchMovesOpen && (<>
                 <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 12px", maxWidth: "640px" }}>
                   Your bench, broken down by role — <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>handcuffs</span> to lock in, <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>streamers</span> to rotate in on good matchups, and <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>bye-week fills</span> to plan around.
                 </p>
@@ -12809,20 +12825,13 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   );
                 })}
+              </>)}
               </div>
             )}
-
             {/* Bench */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 4px",
-                color: "var(--text-primary)",
-              }}>
-                BENCH
-              </h2>
+                            <SectionH2 title="BENCH" open={benchListOpen} onToggle={() => setBenchListOpen(o => !o)} hint={`${analyzed.bench.length} players`} />
+              {benchListOpen && (<>
               <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
                 Your non-starters — depth for <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>injuries, byes, matchups</span>. Bye week shown so you can plan ahead.
               </p>
@@ -12840,7 +12849,8 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                 ))}
               </div>
-            </div>
+            </>)}
+              </div>
           </div>
         )}
 
