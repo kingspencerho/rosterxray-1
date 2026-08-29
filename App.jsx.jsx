@@ -6505,7 +6505,7 @@ const SectionH2 = ({ title, open, onToggle, hint, children, id }) => (
 // `nested` is for a section inside a section (the game-by-game table): it
 // keeps the tighter spacing and no rule, so sub-sections stay visually
 // subordinate instead of impersonating top-level ones.
-const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = false, nested = false, children }) => {
+const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = false, nested = false, hint = null, children }) => {
   const [open, setOpen] = React.useState(false);
   const shown = !collapsible || open;
   const Head = collapsible ? "button" : "div";
@@ -6525,8 +6525,8 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
         <span style={{ width: "3px", height: "12px", background: accent, borderRadius: "1px", flex: "none" }} />
         <div style={{ fontSize: "10px", color: accent, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
         {collapsible && (
-          <span style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
-            {open ? "hide" : "show"}
+          <span style={{ marginLeft: "auto", color: hint ? "var(--ui-accent)" : "var(--text-dim)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
+            {open ? "hide" : (hint || "show")}
             <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
           </span>
         )}
@@ -6928,7 +6928,7 @@ const GameLogSection = ({ cur, prior }) => {
           did not play
         </span>
       </div>
-      <CardSection title="Game by game" accent="var(--text-dim)" collapsible nested note={null}>
+      <CardSection title="Full game log" accent="var(--ui-accent)" collapsible nested hint={`${log.gp} games`} note={null}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)" }}>
             <thead>

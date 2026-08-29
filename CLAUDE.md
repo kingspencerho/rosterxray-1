@@ -3800,3 +3800,22 @@ divider, the nested exemption, and that the game-by-game table is the nested
 one. Negative-tested.
 
 Card height 974px -> 1014px; 36 grades byte-identical.
+
+### The full-game-log disclosure was misclassified as reference (Aug 29, 2026)
+
+Reported as "Game by game" not popping — the user should know immediately that
+it opens the entire log. The header was wearing `--text-dim`, and on this card
+that token MEANS something: Efficiency and Glossary are dimmed because their
+contents should not move your opinion. The drill-down into the chart's own data
+is not that, so the fix was reclassification, not a new colour:
+
+1. **Bright chrome** (`--ui-accent`) — the affordance token every disclosure
+   control already wears. No hue, so one-colour-one-meaning holds.
+2. **Named for what it opens** — `Full game log`, not the coy "Game by game".
+3. **The affordance counts the games** — `8 games ⌄` instead of a generic
+   `show`, via a new `hint` prop on `CardSection` (same idiom as `SectionH2`'s
+   hint, `+N more`, and the roster chip). A control that says what you get is
+   the difference between a header you notice and one you act on.
+
+Guard 14 asserts all three and fails if it is ever demoted back to the dim
+token. 36 grades byte-identical.

@@ -299,8 +299,17 @@ ok("the 2026 placeholder is empty, so nothing renders as current",
    (e.GAME_LOGS_CUR._meta?.weeks_covered || 0) === 0);
 ok("the chart gives every week a slot, including ones he did not play",
    /did not play/.test(app) && /Math\.max\(log\.maxWeek, 1\)/.test(app));
-ok("the game-by-game table is collapsible",
-   /title="Game by game"[^>]*collapsible/.test(app));
+// The full-log disclosure is an AFFORDANCE, not deprioritised reference:
+// --text-dim on this card means "should not move your opinion", and the drill-
+// down into the chart's own data is not that. It wears the bright chrome
+// token, is named for what it opens, and its hint counts the games — a generic
+// "show" tells the reader nothing about what is behind it.
+ok("the full game log is collapsible",
+   /title="Full game log"[^>]*collapsible/.test(app));
+ok("...wears the bright affordance token, not the dim reference one",
+   /title="Full game log" accent="var\(--ui-accent\)"/.test(app));
+ok("...and its affordance counts the games instead of saying show",
+   /title="Full game log"[^>]*hint=\{`\$\{log\.gp\} games`\}/.test(app));
 
 // The bars must not colour by opponent difficulty — that would mix matchup
 // data, the least stable input in the app, into a record of what happened.
@@ -331,7 +340,7 @@ ok("top-level card sections carry a hairline divider",
 ok("nested sections stay subordinate — tighter gap, no rule",
    /nested\s*\?\s*\{ marginTop: "16px" \}/.test(cardSec));
 ok("the game-by-game table is the nested one",
-   /title="Game by game"[^>]*\bnested\b/.test(app));
+   /title="Full game log"[^>]*\bnested\b/.test(app));
 
 ok("the toggle pills are chrome — no data hue",
    !/var\(--(accent|pos|warn|neg|caution|pink|gold|info)/.test(glSec.slice(glSec.indexOf("{both &&"), glSec.indexOf("<WeeklyBars"))));
