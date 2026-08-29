@@ -8785,6 +8785,18 @@ Analyze this best ball roster. Return JSON only.`;
           0%, 100% { box-shadow: 0 0 0px 0px rgba(74, 222, 128, 0); }
           50%       { box-shadow: 0 0 18px 5px rgba(74, 222, 128, 0.5); }
         }
+        /* Season Schedule W1-18 chip — the upload tab's glow mechanic in this
+           section's OWN purple, at about a third of the intensity and a slower
+           beat. Applied only while the panel is COLLAPSED: an attention-getter
+           for a closed door, silenced the moment it is opened, same rule as
+           the tab ("stops when clicked"). */
+        .schedule-cta-pulse {
+          animation: scheduleCta 2.6s ease-in-out infinite;
+        }
+        @keyframes scheduleCta {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(192, 132, 252, 0); }
+          50%       { box-shadow: 0 0 8px 2px rgba(192, 132, 252, 0.35); }
+        }
         /* Analyze button glow — mirrors upload tab, active when input has text */
         .analyze-glow {
           animation: analyzeGlow 1.8s ease-in-out infinite;
@@ -8904,6 +8916,9 @@ Analyze this best ball roster. Return JSON only.`;
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .schedule-cta-pulse {
+            animation: none;
+          }
           .hero-diagnose-scan {
             animation: none;
             background-position: 200% center;
@@ -10733,7 +10748,16 @@ Analyze this best ball roster. Return JSON only.`;
                       </span>
                     )}
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "var(--accent-purple-light)", fontSize: "11px", letterSpacing: "0.06em", whiteSpace: "nowrap", flex: "none" }}>
+                  <span
+                    className={bbScheduleOpen ? undefined : "schedule-cta-pulse"}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "5px",
+                      color: "var(--accent-purple-light)", fontSize: "11px",
+                      letterSpacing: "0.06em", whiteSpace: "nowrap", flex: "none",
+                      padding: "4px 10px", borderRadius: "12px",
+                      border: `1px solid ${bbScheduleOpen ? "transparent" : "#c084fc55"}`,
+                    }}
+                  >
                     {bbScheduleOpen ? "hide" : "W1-18"}
                     <span style={{ display: "inline-block", transform: bbScheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                   </span>

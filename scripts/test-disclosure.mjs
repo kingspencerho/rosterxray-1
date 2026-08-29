@@ -142,5 +142,22 @@ const sticky = slice("StickyIndex");
   ? ok("the last section becomes active at the bottom of the page")
   : bad("no end-of-page case — the final pills can never highlight");
 
+console.log("\nthe W1-18 attention pulse");
+
+// The upload tab's glow mechanic, in the schedule section's own purple at a
+// fraction of the intensity. Two properties keep it from becoming noise: it
+// runs ONLY while the panel is collapsed (an attention-getter for a closed
+// door, silenced on open — the tab's own "stops when clicked" rule), and it
+// honours prefers-reduced-motion.
+/className=\{bbScheduleOpen \? undefined : "schedule-cta-pulse"\}/.test(src)
+  ? ok("the pulse runs only while the panel is collapsed")
+  : bad("the pulse must be gated on the collapsed state — flashing after open is noise");
+/@media \(prefers-reduced-motion: reduce\) \{\s*\.schedule-cta-pulse \{\s*animation: none;/.test(src)
+  ? ok("reduced-motion silences it")
+  : bad("the pulse must be disabled under prefers-reduced-motion");
+/scheduleCta[\s\S]{0,220}rgba\(192, 132, 252/.test(src)
+  ? ok("it glows in the section's own purple, not a borrowed hue")
+  : bad("the pulse colour must be the schedule section's own purple");
+
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);
