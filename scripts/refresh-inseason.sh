@@ -15,6 +15,7 @@
 #
 #   WEEKLY   grading/data/snap_trajectory_2026.json   <- role CHANGE, rank 1
 #            grading/data/qb_profile_2026.json        <- QB volume, r=0.815
+#            grading/data/gamelogs_2026.json          <- per-week output, card only
 #            Both are context-only: they reach the AI prompt and the player
 #            card, never analyzeRoster or analyzeRedraft.
 #
@@ -56,7 +57,7 @@ echo
 
 fail=0
 
-echo "1/2  snap trajectory (role change)"
+echo "1/3  snap trajectory (role change)"
 # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
 if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
   python3 "$ROOT/scripts/build-snap-trajectory.py" "$TMP/snaps.csv.gz" \
@@ -66,12 +67,21 @@ else
 fi
 echo
 
-echo "2/2  QB volume profile"
-if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/qb.csv"; then
-  python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/qb.csv" \
+# ONE DOWNLOAD, TWO BUILDERS. The QB profile and the game logs read the same
+# weekly stats file, so the second layer costs a parse and no extra network.
+echo "2/3  QB volume profile"
+if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
+  python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
     "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
+  echo
+  echo "3/3  game logs (reusing the same download)"
+  python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
+    "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
 else
   echo "  skipped — placeholder left untouched"; fail=1
+  echo
+  echo "3/3  game logs (reusing the same download)"
+  echo "  skipped — the weekly stats file is unavailable"
 fi
 echo
 

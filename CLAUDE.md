@@ -3671,3 +3671,85 @@ date all parse identically to an update stamp. Two defences are needed together 
 take the LATEST date, and never take one in the FUTURE. Three cases added to
 guard 14 including a sweep asserting no rendered note has a negative age;
 negative-tested.
+
+---
+
+## Game Logs on the Player Card (added Aug 29, 2026)
+
+`scripts/build-gamelogs.py` -> `gamelogs_2025.json` / `gamelogs_2026.json`.
+**Context only — 44 grades byte-identical (36 best ball, 8 redraft).** Guarded in
+`scripts/test-player-card.mjs`.
+
+### The card ASSERTED what a game log SHOWS
+
+Three claims the card already makes in prose, each of which the data can draw:
+
+```
+RJ Harvey          ▃▁▁▆▁▁▃█▆▁▃·██▆█▆▁     the back-half surge, visible
+Tucker Kraft       ▃█▁▃·▆▆█▁·········     the ACL tear, visible as a gap
+Justin Jefferson   ▆▃▆▆▆·▆▆▆▃▃▃▁▁▁▆▃▆     never bad, never great
+```
+
+Harvey is the case this file's own notes say was graded `fade/falling` on four
+rosters off a season average. The chart makes that mistake impossible to repeat.
+
+### THE BANDS ARE THE CARD'S OWN — that is the anti-clutter decision
+
+18+ / 10+ / <5 are exactly the spike, usable and dud thresholds `WEEK OUTCOMES`
+already prints as three rates. So the chart draws the distribution those rates
+summarise: **no new vocabulary, no fifth colour scale, and the two sections
+visibly agree.** They live in `_meta.bands` and `gameBand()` reads them from
+there — a second hand-typed 18/10/5 would be the duplicate-definition class this
+repo has now hit five times, and the guard forbids it.
+
+### Cheap, because the download already happens
+
+`refresh-inseason.sh` was already fetching `stats_player_week_<season>.csv` for
+`build-qb-profile.py`. The game-log builder reads the same file, so the layer
+costs **one extra parse and no extra network**. The job is now 3 steps with one
+download feeding steps 2 and 3.
+
+```
+213 draftable players · 2,972 games
+raw JSON   80 KB
+gzipped    28 KB
+```
+
+**Rows are fixed-width ARRAYS, not objects**, with `_meta.cols` naming the
+columns per position. Named keys on ~3,000 rows would roughly triple the file for
+no added meaning. The guard asserts every row's length matches its position's
+column count, so a mislabelled table is impossible.
+
+### Three display rules
+
+1. **EVERY WEEK GETS A SLOT, including ones he did not play**, rendered as a
+   floor tick rather than a zero bar. Compressing twelve games into twelve bars
+   hides "he missed five weeks" — and an absence and a zero-point game are
+   different facts that must not look alike. This is what makes Kraft's tear
+   visible as a gap instead of invisible as a shorter chart.
+2. **NO OPPONENT-DIFFICULTY COLOURING.** That would mix matchup data — rank 5,
+   the least stable input in the app — into a record of what actually happened.
+   The table names the opponent; the bars stay about output. Guarded.
+3. **Open by default, table collapsed.** The chart is the evidence for the ROLE
+   TRAJECTORY claim directly above it, so it earns its place; the 17-row numeric
+   table is reference and costs a click.
+
+### Two bugs the guard caught before they shipped
+
+- **`weeks_covered` was 1 on an empty build.** `sorted({...}) or [0]` gave a
+  header-only input one "week", which would have made the 2026 placeholder read
+  as LIVE and let an empty file outrank the real 2025 season on every card.
+- **A finished season labelled itself "through W18".** `vintageLabel()` prints
+  in-progress unless the meta declares completion, so the builder now sets
+  `season_complete` at max_week >= 18. Labelling a closed book as in-progress is
+  the vintage trap in miniature.
+
+### Measured
+
+```
+card at rest   769px -> 974px   (+205px for 17 games of data)
+game-by-game table open        1,341px
+0 tap targets under 32px · no page errors
+213 of 289 draftable covered; the other 76 are rookies and sub-gate players
+  and fall through to the existing no-data reason, unchanged
+```

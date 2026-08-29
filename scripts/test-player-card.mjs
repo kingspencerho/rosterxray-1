@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS };\n";
+  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -71,7 +71,7 @@ const draftable = Object.entries(e.ADP_DATA).filter(([, v]) => v && v.adp != nul
 let blank = [], withData = 0, withReason = 0;
 for (const [name, v] of draftable) {
   const c = e.buildPlayerCard(name, v.pos, v.team);
-  const has = c.metrics.length || c.descriptive.length || c.efficiency.length || c.qb || c.trajectory;
+  const has = c.metrics.length || c.descriptive.length || c.efficiency.length || c.qb || c.trajectory || c.gameLog || c.gameLogCur;
   if (has) withData++;
   else if (c.reason && c.reason.length > 10) withReason++;
   else blank.push(name);
@@ -253,6 +253,60 @@ ok("freshness classifies against the 30-45 day rule",
    [...new Set(ages)].join("/"));
 ok("...and the stale badge is the only one using --caution",
    /n\.status === "stale" \? "var\(--caution\)"/.test(app));
+
+console.log("\ngame logs: context only, banded on the card's own thresholds");
+
+// CONTAINMENT FIRST. This is the assertion that protects the grades: a game log
+// is a picture, and the moment the scoring engine reads one it stops being that.
+for (const fn of ["analyzeRoster", "analyzeRedraft"]) {
+  const i = app.indexOf(`const ${fn} = `);
+  const j = app.indexOf("\nconst ", i + 10);
+  const body = i === -1 ? "" : app.slice(i, j === -1 ? app.length : j);
+  ok(`${fn} never reads a game log`,
+     i > -1 && !body.includes("GAME_LOGS") && !body.includes("getGameLog"));
+}
+
+// The bands must come FROM the data file, not be retyped beside it. Two copies
+// of 18/10/5 is the duplicate-definition class this repo has hit five times.
+const bands = e.GAME_LOGS._meta?.bands;
+ok("the data file carries its own bands", !!bands && bands.spike === 18 && bands.usable === 10 && bands.dud === 5,
+   JSON.stringify(bands));
+ok("gameBand honours them",
+   e.gameBand(18) === "spike" && e.gameBand(17.9) === "usable" && e.gameBand(10) === "usable" &&
+   e.gameBand(9.9) === "low" && e.gameBand(5) === "low" && e.gameBand(4.9) === "dud");
+ok("...and the app does not retype the thresholds",
+   !/spike:\s*18[\s\S]{0,60}usable:\s*10/.test(app.replace(/GAME_BANDS[\s\S]{0,200}/, "")));
+
+// Rows are fixed-width arrays and _meta.cols is what makes them readable. A
+// mismatch would silently mislabel every column in the table.
+const meta = e.GAME_LOGS._meta;
+const logged = Object.entries(e.GAME_LOGS).filter(([k]) => k !== "_meta");
+ok("every player row declares its position", logged.every(([, v]) => v.pos && meta.cols[v.pos]));
+ok("every game row matches its position's column count",
+   logged.every(([, v]) => v.g.every(g => g.length === meta.cols[v.pos].length)),
+   logged.find(([, v]) => v.g.some(g => g.length !== meta.cols[v.pos].length))?.[0] || "");
+ok("opponent indices all resolve against _meta.teams",
+   logged.every(([, v]) => v.g.every(g => g[1] >= 0 && g[1] < meta.teams.length)));
+ok("weeks are inside the season", logged.every(([, v]) => v.g.every(g => g[0] >= 1 && g[0] <= 22)));
+
+// The card must surface it, with the current season leading when one is live.
+const withLog = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team, NOW)).filter(c => c.gameLog);
+ok("cards carry game logs", withLog.length > 50, `${withLog.length} of ${draftable.length}`);
+ok("...and each game is banded", withLog.every(c => c.gameLog.games.every(g => g.band)));
+ok("...and stats are paired with their column names",
+   withLog.every(c => c.gameLog.games.every(g => g.stats.every(st => st.label && st.value != null))));
+ok("the 2026 placeholder is empty, so nothing renders as current",
+   (e.GAME_LOGS_CUR._meta?.weeks_covered || 0) === 0);
+ok("the chart gives every week a slot, including ones he did not play",
+   /did not play/.test(app) && /Math\.max\(log\.maxWeek, 1\)/.test(app));
+ok("the game-by-game table is collapsible",
+   /title="Game by game"[^>]*collapsible/.test(app));
+
+// The bars must not colour by opponent difficulty — that would mix matchup
+// data, the least stable input in the app, into a record of what happened.
+const bars = app.slice(app.indexOf("const WeeklyBars"), app.indexOf("const PlayerCardModal"));
+ok("the bars carry no matchup colouring",
+   !/getMatchupTier|tierStyle|matchupScore/.test(bars));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);
