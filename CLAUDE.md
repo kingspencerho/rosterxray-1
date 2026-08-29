@@ -3777,3 +3777,45 @@ swapped in as `gamelogs_2026.json`): defaults to `2026 through W8`, flips to
 negative-tested — burying the live season behind a "prior" default and painting
 a pill cyan each exit non-zero. The committed 2026 placeholder is untouched;
 the real file arrives via `refresh-inseason.sh` from Week 1.
+
+### Card sections now separate by structure, not colour (Aug 29, 2026)
+
+Reported as the headers and text feeling "too bunched together" — wanting each
+section identifiable WITHOUT colouring everything. The headers are hueless on
+purpose (the accent channel is reserved for meaning), which left only
+whitespace marking where one section ends, and equal-ish gaps read as one
+continuous column.
+
+The fix is the proximity rule: **a 1px `--border-default` hairline above each
+top-level `CardSection`, plus a between-sections gap (22px + 14px padding)
+visibly larger than any gap inside a section.** Lines cost no hue and cannot be
+mistaken for data. First attempt used `--bg-raised` (#1a1a1a) and was invisible
+against the card background — a divider drawn in a background token is
+decoration, not structure; `--border-default` is the token whose job this is.
+
+**`nested` sections keep the tighter gap and NO rule.** The game-by-game table
+lives inside Weekly Output, and giving it the same divider would flatten the
+hierarchy — a sub-section impersonating a top-level one. Guard 14 asserts the
+divider, the nested exemption, and that the game-by-game table is the nested
+one. Negative-tested.
+
+Card height 974px -> 1014px; 36 grades byte-identical.
+
+### The full-game-log disclosure was misclassified as reference (Aug 29, 2026)
+
+Reported as "Game by game" not popping — the user should know immediately that
+it opens the entire log. The header was wearing `--text-dim`, and on this card
+that token MEANS something: Efficiency and Glossary are dimmed because their
+contents should not move your opinion. The drill-down into the chart's own data
+is not that, so the fix was reclassification, not a new colour:
+
+1. **Bright chrome** (`--ui-accent`) — the affordance token every disclosure
+   control already wears. No hue, so one-colour-one-meaning holds.
+2. **Named for what it opens** — `Full game log`, not the coy "Game by game".
+3. **The affordance counts the games** — `8 games ⌄` instead of a generic
+   `show`, via a new `hint` prop on `CardSection` (same idiom as `SectionH2`'s
+   hint, `+N more`, and the roster chip). A control that says what you get is
+   the difference between a header you notice and one you act on.
+
+Guard 14 asserts all three and fails if it is ever demoted back to the dim
+token. 36 grades byte-identical.
