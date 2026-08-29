@@ -3819,3 +3819,22 @@ is not that, so the fix was reclassification, not a new colour:
 
 Guard 14 asserts all three and fails if it is ever demoted back to the dim
 token. 36 grades byte-identical.
+
+### The W1-18 chip pulses (Aug 29, 2026)
+
+Requested as "strobe like the upload screenshot tab, doesn't have to be as
+impactful." Same mechanic — the `tabGlow` box-shadow pulse — re-tuned three
+ways so it draws the eye without becoming the page's loudest element:
+
+1. **The section's own purple** (`rgba(192,132,252)`), not the tab's green —
+   the glow inherits the meaning its header already carries.
+2. **A third of the intensity, slower beat** — 8px/0.35 at 2.6s against the
+   tab's 18px/0.5 at 1.8s.
+3. **Collapsed-only.** `className={bbScheduleOpen ? undefined : ...}` — an
+   attention-getter for a closed door, silenced the moment it opens, which is
+   the tab's own "stops when clicked" rule.
+
+The affordance became a bordered pill because a box-shadow glow needs a shape
+to sit on; plain text just blooms. `prefers-reduced-motion` disables it.
+Guard 18 asserts the collapsed gate, the reduced-motion opt-out and the hue;
+the always-on variant exits non-zero. 36 grades byte-identical.
