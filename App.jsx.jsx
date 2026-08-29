@@ -32,6 +32,7 @@ import AIRYARDS from './grading/data/airyards_2025.json';
 // made him read as a timeshare. Built by scripts/build-snap-trajectory.py.
 // CONTEXT ONLY — never touches the numeric score.
 import SNAP_TRAJECTORY from './grading/data/snap_trajectory_2025.json';
+import GAME_LOGS from './grading/data/gamelogs_2025.json';
 // The three stickiest QB inputs, measured: rushing attempts/gm (r=0.815 year over
 // year, the most repeatable input in football), pass attempts/gm (0.605) and
 // passing aDOT (0.486). A QB's prior-season fantasy POINTS are barely sticky
@@ -51,6 +52,7 @@ import QB_PROFILE from './grading/data/qb_profile_2025.json';
 // unrelated to the roster and make the history panel meaningless. These two are
 // context-only, so they can move. Guard 15 enforces the distinction.
 import SNAP_TRAJECTORY_CUR from './grading/data/snap_trajectory_2026.json';
+import GAME_LOGS_CUR from './grading/data/gamelogs_2026.json';
 import QB_PROFILE_CUR from './grading/data/qb_profile_2026.json';
 
 // ============ DATA ============
@@ -2435,6 +2437,35 @@ const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.pla
 // Vintage labels. NEVER print a number from these layers without one — a mixed
 // vintage card that does not say which season produced a figure is worse than a
 // stale one that does.
+// === GAME LOGS (informational only — never scored) ===
+// Per-week fantasy output for draftable players, built offline by
+// scripts/build-gamelogs.py. The card already ASSERTS what these SHOW: that a
+// role grew in the back half, that a snap share covers half a season, that a
+// player never spiked. This draws it.
+//
+// THE BANDS ARE THE CARD'S OWN. 18+/10+/<5 are the same spike, usable and dud
+// thresholds WEEK OUTCOMES prints as rates, so the chart is a picture of a
+// section the card already has — no new vocabulary, no fifth colour scale.
+//
+// Rows are fixed-width arrays; `_meta.cols` names the columns per position.
+// Objects would triple the file for no added meaning.
+const GAME_LOG_CUR_LIVE = (GAME_LOGS_CUR._meta?.weeks_covered || 0) > 0;
+const gameLogFor = (src, name) => {
+  const k = normalize(name);
+  return src[k] || src[k.replace(SUFFIX_RE, "")] || null;
+};
+const getGameLog = (name) => gameLogFor(GAME_LOGS, name);
+const getGameLogCur = (name) => (GAME_LOG_CUR_LIVE ? gameLogFor(GAME_LOGS_CUR, name) : null);
+
+// One game -> the band the card already names. Kept beside the data so the
+// thresholds cannot drift from _meta.bands.
+const GAME_BANDS = GAME_LOGS._meta?.bands || { spike: 18, usable: 10, dud: 5 };
+const gameBand = (pts) =>
+  pts >= GAME_BANDS.spike ? "spike"
+    : pts >= GAME_BANDS.usable ? "usable"
+    : pts >= GAME_BANDS.dud ? "low"
+    : "dud";
+
 const vintageLabel = (meta) =>
   meta?.season_complete ? `${meta.season} season · final`
     : (meta?.weeks_covered || 0) > 0 ? `${meta.season} through W${meta.weeks_covered}`
@@ -2789,7 +2820,41 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now()) => {
     // Rule 3: absence must be visible, so this is always an array and the
     // section always renders — an empty one says so in words.
     news: buildPlayerNews(name, nowTs),
+    gameLog: null, gameLogCur: null,
   };
+
+  // GAME LOG — current season first, prior season underneath, never swapped.
+  // Same dual-vintage rule the trajectory and QB blocks follow: the comparison
+  // is the insight, and silently changing which year a chart describes is the
+  // stale-data trap in a new costume.
+  const buildLog = (row, meta) => {
+    if (!row || !row.g?.length) return null;
+    const cols = meta.cols?.[row.pos] || [];
+    const teams = meta.teams || [];
+    const games = row.g.map(g => ({
+      week: g[0],
+      opp: teams[g[1]] || "—",
+      pts: g[2],
+      band: gameBand(g[2]),
+      // Everything after the fixed head is position-specific; pair it with its
+      // column name here so the table never has to know the row layout.
+      stats: cols.slice(3).map((label, i) => ({ label, value: g[i + 3] })),
+    }));
+    const pts = games.map(g => g.pts);
+    return {
+      season: meta.season,
+      maxWeek: meta.max_week || Math.max(...games.map(g => g.week)),
+      vintage: vintageLabel(meta) || `${meta.season} season · final`,
+      games,
+      gp: games.length,
+      best: Math.max(...pts),
+      ppg: +(pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1),
+      spikes: games.filter(g => g.band === "spike").length,
+      duds: games.filter(g => g.band === "dud").length,
+    };
+  };
+  card.gameLog = buildLog(getGameLog(name), GAME_LOGS._meta || {});
+  card.gameLogCur = buildLog(getGameLogCur(name), GAME_LOGS_CUR._meta || {});
 
   // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
   // in the 2026 offseason that is not his current job — say so on the card
@@ -2871,7 +2936,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now()) => {
   for (const e of card.efficiency) if (e.key) glossKeys.push(e.key);
   card.glossary = glossKeys.filter(k => CARD_GLOSSARY[k]).map(k => ({ key: k, ...CARD_GLOSSARY[k] }));
 
-  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length) {
+  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length && !card.gameLog && !card.gameLogCur) {
     card.glossary = [];
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
@@ -6392,6 +6457,7 @@ const CARD_ACCENTS = {
   // on the card that carries it, so it gets the bright headline treatment
   // rather than the dim reference one.
   news: "var(--ui-accent)",
+  gamelog: "var(--ui-accent)",
   efficiency: "var(--text-dim)",
   // Reference material, not a finding — same muted header as Efficiency, so the
   // two channels stay honest: brightness means "this should move your opinion".
@@ -6733,6 +6799,154 @@ const StickyIndex = ({ items }) => {
   );
 };
 
+// WEEKLY BARS — the game log's whole reason to exist.
+//
+// A 17-row table is clutter; a 60px chart is the finding. Bars are coloured on
+// the card's OWN bands (spike 18+ / usable 10+ / dud <5), which WEEK OUTCOMES
+// already prints as three rates — so this draws the distribution those rates
+// summarise rather than introducing a new scale.
+//
+// EVERY WEEK GETS A SLOT, including ones he did not play. Compressing twelve
+// games into twelve bars hides "he missed five weeks", and a missed week is
+// information — it is what makes Kraft's ACL tear visible as a gap rather than
+// invisible as a shorter chart.
+//
+// NO OPPONENT-DIFFICULTY COLOURING. That would mix matchup data — rank 5, the
+// least stable input in the app — into a display of what actually happened.
+// The table below names the opponent; the bars stay about output.
+const GAME_BAND_COLOR = {
+  spike: "var(--pos)",
+  usable: "var(--pos-bright)",
+  low: "var(--tier-even)",
+  dud: "var(--neg)",
+};
+const WeeklyBars = ({ log }) => {
+  if (!log) return null;
+  const byWeek = new Map(log.games.map(g => [g.week, g]));
+  const weeks = Array.from({ length: Math.max(log.maxWeek, 1) }, (_, i) => i + 1);
+  const peak = Math.max(log.best, GAME_BANDS.spike);
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "46px", marginBottom: "4px" }}>
+        {weeks.map(w => {
+          const g = byWeek.get(w);
+          if (!g) {
+            // Did not play. A floor tick, not a zero bar — an absence and a
+            // zero-point game are different facts and must not look alike.
+            return <div key={w} title={`W${w} — did not play`} style={{ flex: 1, minWidth: "3px", height: "3px", background: "var(--bg-elevated)", borderRadius: "1px" }} />;
+          }
+          const h = Math.max(3, Math.round((g.pts / peak) * 46));
+          return (
+            <div key={w} title={`W${w} vs ${g.opp} — ${g.pts} pts`}
+              style={{ flex: 1, minWidth: "3px", height: `${h}px`, background: GAME_BAND_COLOR[g.band], borderRadius: "1px" }} />
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>
+        <span>W1</span><span>W{log.maxWeek}</span>
+      </div>
+    </div>
+  );
+};
+
+// GAME LOG SECTION — one season on screen at a time, chosen by a toggle.
+//
+// The first version stacked 2026 above 2025, which honoured the never-swap-
+// vintage rule but paid for it in height: two charts, always. A toggle keeps
+// the rule a different way — THE SELECTED SEASON IS ALWAYS NAMED IN THE
+// SECTION TITLE, so no number is ever on screen without its year, and the
+// reader chooses which book to open instead of scrolling past both.
+//
+// Defaults to the CURRENT season whenever it is live (role change is rank 1,
+// and this week's usage outranks last year's), falling back to the prior
+// season before Week 1 and for players with no 2026 games yet.
+//
+// The toggle is CHROME: a lightness step, never a hue, exactly as the sticky
+// index rules. Both pills always show both years, so "2025" is a visible,
+// tappable fact even while 2026 is selected — absence of the toggle (single
+// vintage) means there is genuinely only one season of data.
+const GameLogSection = ({ cur, prior }) => {
+  const [season, setSeason] = useState(cur ? "cur" : "prior");
+  if (!cur && !prior) return null;
+  const log = season === "cur" && cur ? cur : (prior || cur);
+  const both = !!(cur && prior);
+  return (
+    <CardSection
+      title={`Weekly output · ${log.vintage}`}
+      accent={CARD_ACCENTS.gamelog}
+      note={`${log.gp} games · ${log.ppg} per game · best ${log.best}`}
+    >
+      {both && (
+        <div style={{ display: "flex", gap: "4px", marginBottom: "9px" }}>
+          {[["cur", cur], ["prior", prior]].map(([key, l]) => {
+            const on = (season === "cur" && cur ? "cur" : "prior") === key;
+            return (
+              <button
+                key={key}
+                data-compact
+                onClick={() => setSeason(key)}
+                aria-pressed={on}
+                style={{
+                  minHeight: "32px", padding: "5px 12px", borderRadius: "14px",
+                  cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "10px",
+                  letterSpacing: "0.05em",
+                  background: on ? "var(--bg-elevated)" : "transparent",
+                  border: `1px solid ${on ? "var(--border-strong)" : "var(--border-subtle)"}`,
+                  color: on ? "var(--text-primary)" : "var(--text-muted)",
+                  fontWeight: on ? 700 : 500,
+                }}
+              >
+                {l.season}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <WeeklyBars log={log} />
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: "7px" }}>
+        {[["spike", `${GAME_BANDS.spike}+`], ["usable", `${GAME_BANDS.usable}+`], ["low", `${GAME_BANDS.dud}-${GAME_BANDS.usable}`], ["dud", `<${GAME_BANDS.dud}`]].map(([band, label]) => (
+          <span key={band} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "7px", height: "7px", borderRadius: "1px", background: GAME_BAND_COLOR[band], display: "inline-block" }} />
+            {label}
+          </span>
+        ))}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+          <span style={{ width: "7px", height: "3px", borderRadius: "1px", background: "var(--bg-elevated)", display: "inline-block" }} />
+          did not play
+        </span>
+      </div>
+      <CardSection title="Game by game" accent="var(--text-dim)" collapsible note={null}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)" }}>
+            <thead>
+              <tr style={{ color: "var(--text-faint)", textAlign: "right" }}>
+                <th style={{ textAlign: "left", padding: "3px 6px 5px 0", fontWeight: 600 }}>Wk</th>
+                <th style={{ textAlign: "left", padding: "3px 8px 5px 0", fontWeight: 600 }}>Opp</th>
+                <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Pts</th>
+                {log.games[0].stats.map(st => (
+                  <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{st.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {log.games.map(g => (
+                <tr key={g.week} style={{ borderTop: "1px solid var(--bg-raised)", color: "var(--text-secondary)" }}>
+                  <td style={{ padding: "4px 6px 4px 0", color: "var(--text-faint)" }}>{g.week}</td>
+                  <td style={{ padding: "4px 8px 4px 0" }}>{g.opp}</td>
+                  <td style={{ padding: "4px 8px 4px 0", textAlign: "right", color: GAME_BAND_COLOR[g.band], fontWeight: 700 }}>{g.pts}</td>
+                  {g.stats.map(st => (
+                    <td key={st.label} style={{ padding: "4px 0 4px 8px", textAlign: "right" }}>{st.value}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardSection>
+    </CardSection>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const news = card.news || [];
@@ -6918,6 +7132,8 @@ const PlayerCardModal = ({ card, onClose }) => {
                 </div>
               </CardSection>
             )}
+
+            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
 
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
