@@ -3551,3 +3551,84 @@ trusting a CLI grade.
   moves grades; needs its own calibration run.
 - **The redraft high-pace boost does not exist.** Best ball lifts pace-driven
   shootouts; redraft never has. Adding it would move redraft grades.
+
+### ATL QB competition re-sourced (Aug 28, 2026)
+
+Reported by the user, verified, and it had inverted since the Jun 10 entries.
+**36 grades byte-identical.**
+
+Penix was **cleared for 11-on-11 and split first-team reps with Tua on Mon Aug
+24 2026** — first full team work since the Week 11 2025 ACL tear. Tua's camp has
+been inconsistent and his preseason opener vs DEN was **3-of-5 for 22 yards**;
+Rapoport reports Penix has closed the gap and national reporting frames the job
+as **Penix's to lose**. Both play the Fri Aug 28 finale vs MIA; no Week 1 starter
+named.
+
+```
+tua tagovailoa   TARGET/—      -> hold/falling
+michael penix    fade/—        -> DART/rising
+michael penix jr fade/—        -> DART/rising
+```
+
+**The official depth chart still lists Tua QB1 and that is not evidence** — it
+was set while Penix was carried as an injured player. Checked, and stated inside
+the entry so the model cannot read the chart as a confirmation.
+
+**The HC named in the source (Kevin Stefanski) was verified against
+`grading/data/defense.md` before the source was trusted**, per the stale-article
+rule. It matches. The entries still avoid naming him, because the coach is not
+load-bearing for the read and an unverifiable detail is free risk.
+
+### ⚠️ SITUATIONS HAS TWO SHAPES, AND ONE IS INVISIBLE TO THE PLAYER CARD
+
+Census: **128 entries are `trendNote`-shaped, 4 are `reason`-shaped, 0 have
+both.** `buildPlayerNews` reads `trendNote` only, so those 4 never render on the
+card no matter how fresh they are — three of them were these ATL quarterbacks.
+
+`reason` is not dead: the AI prompt reads it at the `verdictAlignments` line. So
+the fix is additive rather than a migration — these three now carry BOTH, with
+`reason` kept for the prompt and `trendNote` added for the card.
+
+**The remaining `reason`-only entry is the one to watch.** A future sweep should
+either finish the additive pass or teach `buildPlayerNews` to fall back to
+`reason`; until then, a `reason`-shaped entry is a silent gap in card coverage
+that no guard catches.
+
+### Clearing the RE-VALIDATE badges (Aug 28, 2026)
+
+The card's stale badge finally got used as a worklist. `scripts/report-stale-news.mjs`
+answers WHICH players carry it, so nobody has to open 291 cards by hand.
+
+**Only 5 players had every note past 45 days**, which is the useful finding — the
+corpus is in better shape than it felt. All five re-sourced; the report now
+returns zero.
+
+| Player | Was | Now |
+|---|---|---|
+| **Josh Jacobs** (RB GB, ADP 41) | "arrest situation June 2026" | **Charged with two misdemeanors**, court date Nov 17, GB publicly preparing for a suspension |
+| **James Cook** (RB BUF, ADP 12) | Carmichael "hints" at more receptions | Carmichael says it **on the record**; healthy, full first quarter in the opener |
+| **Zach Charbonnet** (RB SEA) | 189 days old, "wide timeline split" | **Reserve/PUP — earliest is Week 5**, minimum four games missed |
+| **Jacoby Brissett** (QB ARI) | holdout resolved | Job settled; Beck out with a rib injury from the HOF game |
+| **Tyreek Hill** (WR FA) | unsigned, no timetable | Agent says **no signing before the season**; targeting a contender late |
+
+**Jacobs is the one that mattered.** A June note reading "legal issues create
+real availability risk" understated a player now facing an open league review
+with his own front office saying publicly it is planning for a ban — at ADP 41,
+paid before the question resolves.
+
+### ⚠️ A DATE WITH NO YEAR DOES NOT PARSE
+
+Brissett's note read **58 days stale while describing early-August reporting**,
+because it said "as of Aug 6" with no year. `NEWS_DATE_DAY` requires a year, so
+the entry aged from the older "late Jul 2026" mention instead.
+
+**Always write the year.** This is not a parser bug — a bare "Aug 6" is genuinely
+ambiguous across seasons, and guessing the year would be worse than not matching.
+The report script's header carries this warning, since that is where someone will
+next be confused by it.
+
+### The report is the durable part
+
+A stale badge nobody enumerates is a badge nobody acts on. Run
+`node scripts/report-stale-news.mjs` before any draft; it takes a date argument
+so a future session can ask "what will be stale on Sept 5" and pre-empt it.
