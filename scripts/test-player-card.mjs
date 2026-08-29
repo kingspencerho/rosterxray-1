@@ -196,6 +196,15 @@ ok("...including a newer month-only date over an older day-precision one",
    e.parseNewsDate("torn ACL Week 4 (Sep 28 2025), repair in late Oct. Aug 2026 camp: full practice.")?.label === "Aug 2026");
 ok("...and a same-month day form still beats the month-only form",
    e.parseNewsDate("Aug 2026 camp. Activated Aug 27 2026.")?.label === "Aug 27 2026");
+// A FUTURE DATE IS NOT A CURRENCY STAMP. Forward-looking dates appear all over
+// this corpus — a scheduled court appearance, a return window, an opener — and
+// "latest wins" would hand the badge to one of them. Jacobs' entry cites a
+// Nov 17 2026 court date and read "-80d ago" until this was fixed.
+ok("a future date is never taken as the note's currency",
+   e.parseNewsDate("Charged Aug 27 2026. Court appearance set for Nov 17 2026.", NOW)?.label === "Aug 27 2026");
+ok("...and a note whose ONLY date is in the future does not render",
+   e.parseNewsDate("Initial court appearance is scheduled for Nov 17 2026.", NOW) === null);
+
 
 // Sweep the whole corpus: nothing undated may survive into a card.
 const allNews = Object.keys(e.ADP_DATA).map(n => e.buildPlayerNews(n, NOW)).flat();
@@ -203,7 +212,9 @@ ok("every rendered note carries a date and an age",
    allNews.length > 0 && allNews.every(n => n.date && Number.isFinite(n.ageDays)),
    `${allNews.length} notes`);
 ok("...and every one of them re-parses to the date shown",
-   allNews.every(n => e.parseNewsDate(n.text)?.label === n.date));
+   allNews.every(n => e.parseNewsDate(n.text, NOW)?.label === n.date));
+ok("no rendered note is dated in the future", allNews.every(n => n.ageDays >= 0),
+   allNews.filter(n => n.ageDays < 0).map(n => n.date).join(", "));
 
 // RULE 2: full text or nothing. Truncating a CAVEAT out of the middle inverts
 // the note, so the section collapses instead of clipping.

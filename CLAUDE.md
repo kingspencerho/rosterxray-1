@@ -3632,3 +3632,42 @@ next be confused by it.
 A stale badge nobody enumerates is a badge nobody acts on. Run
 `node scripts/report-stale-news.mjs` before any draft; it takes a date argument
 so a future session can ask "what will be stale on Sept 5" and pre-empt it.
+
+### Aug 29: Jacobs sharpened, Lloyd created, and a FUTURE-DATE parser bug
+
+**36 grades byte-identical.** Two prose changes and one real parser fix.
+
+**Josh Jacobs** — the Brown County DA filed on **Aug 27 2026**: two misdemeanors
+(battery, criminal damage to property), court Nov 17. **The detail that matters
+is what the filing leaves out** — it is a reduction from five original counts and
+carries **no domestic-violence designation**, which weakens the case for the
+CBA's six-game domestic-abuse baseline. Against that: the personal conduct policy
+runs independently of the criminal charge, and GM Brian Gutekunst has said on the
+record that Green Bay is preparing for a suspension. **And separately, a groin
+injury has kept Jacobs out of practice for most of two weeks.** Two independent
+availability risks on one player at ADP 41.
+
+**MarShawn Lloyd** — first coverage in any prose layer, and he was the only other
+GB back in `ADP_DATA`, so the entire Jacobs contingency was uncovered. He took
+the majority of first-team snaps while Jacobs was down, came through his most
+productive camp healthy, and OC Adam Stenavich (verified against `defense.md`
+before the source was trusted) describes growing confidence. **The counterweight
+is the record, not the role: one career NFL game and a season lost on the first
+day of padded practices.** A durability bet, not a role bet. ADP has run 215.5 ->
+low 140s since mid-August, so the market is already moving.
+
+### ⚠️ A FUTURE DATE IS NEVER THE NOTE'S CURRENCY
+
+Jacobs' entry cites his **Nov 17 2026 court date**, and "latest date wins" handed
+the badge to it — his card stamped itself **"-80d ago"**. A note cannot have been
+written after today, so a forward-looking date in the prose is describing
+something the note is ABOUT, not when it was written.
+
+`parseNewsDate` now takes `nowTs` and discards any candidate later than it.
+
+**This is the third instance of the same shape**, and the pattern is now
+explicit: an injury date, a contract date, a draft date and a scheduled court
+date all parse identically to an update stamp. Two defences are needed together —
+take the LATEST date, and never take one in the FUTURE. Three cases added to
+guard 14 including a sweep asserting no rendered note has a negative age;
+negative-tested.
