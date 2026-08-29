@@ -3593,3 +3593,42 @@ the fix is additive rather than a migration — these three now carry BOTH, with
 either finish the additive pass or teach `buildPlayerNews` to fall back to
 `reason`; until then, a `reason`-shaped entry is a silent gap in card coverage
 that no guard catches.
+
+### Clearing the RE-VALIDATE badges (Aug 28, 2026)
+
+The card's stale badge finally got used as a worklist. `scripts/report-stale-news.mjs`
+answers WHICH players carry it, so nobody has to open 291 cards by hand.
+
+**Only 5 players had every note past 45 days**, which is the useful finding — the
+corpus is in better shape than it felt. All five re-sourced; the report now
+returns zero.
+
+| Player | Was | Now |
+|---|---|---|
+| **Josh Jacobs** (RB GB, ADP 41) | "arrest situation June 2026" | **Charged with two misdemeanors**, court date Nov 17, GB publicly preparing for a suspension |
+| **James Cook** (RB BUF, ADP 12) | Carmichael "hints" at more receptions | Carmichael says it **on the record**; healthy, full first quarter in the opener |
+| **Zach Charbonnet** (RB SEA) | 189 days old, "wide timeline split" | **Reserve/PUP — earliest is Week 5**, minimum four games missed |
+| **Jacoby Brissett** (QB ARI) | holdout resolved | Job settled; Beck out with a rib injury from the HOF game |
+| **Tyreek Hill** (WR FA) | unsigned, no timetable | Agent says **no signing before the season**; targeting a contender late |
+
+**Jacobs is the one that mattered.** A June note reading "legal issues create
+real availability risk" understated a player now facing an open league review
+with his own front office saying publicly it is planning for a ban — at ADP 41,
+paid before the question resolves.
+
+### ⚠️ A DATE WITH NO YEAR DOES NOT PARSE
+
+Brissett's note read **58 days stale while describing early-August reporting**,
+because it said "as of Aug 6" with no year. `NEWS_DATE_DAY` requires a year, so
+the entry aged from the older "late Jul 2026" mention instead.
+
+**Always write the year.** This is not a parser bug — a bare "Aug 6" is genuinely
+ambiguous across seasons, and guessing the year would be worse than not matching.
+The report script's header carries this warning, since that is where someone will
+next be confused by it.
+
+### The report is the durable part
+
+A stale badge nobody enumerates is a badge nobody acts on. Run
+`node scripts/report-stale-news.mjs` before any draft; it takes a date argument
+so a future session can ask "what will be stale on Sept 5" and pre-empt it.
