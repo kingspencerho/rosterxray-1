@@ -3777,3 +3777,26 @@ swapped in as `gamelogs_2026.json`): defaults to `2026 through W8`, flips to
 negative-tested — burying the live season behind a "prior" default and painting
 a pill cyan each exit non-zero. The committed 2026 placeholder is untouched;
 the real file arrives via `refresh-inseason.sh` from Week 1.
+
+### Card sections now separate by structure, not colour (Aug 29, 2026)
+
+Reported as the headers and text feeling "too bunched together" — wanting each
+section identifiable WITHOUT colouring everything. The headers are hueless on
+purpose (the accent channel is reserved for meaning), which left only
+whitespace marking where one section ends, and equal-ish gaps read as one
+continuous column.
+
+The fix is the proximity rule: **a 1px `--border-default` hairline above each
+top-level `CardSection`, plus a between-sections gap (22px + 14px padding)
+visibly larger than any gap inside a section.** Lines cost no hue and cannot be
+mistaken for data. First attempt used `--bg-raised` (#1a1a1a) and was invisible
+against the card background — a divider drawn in a background token is
+decoration, not structure; `--border-default` is the token whose job this is.
+
+**`nested` sections keep the tighter gap and NO rule.** The game-by-game table
+lives inside Weekly Output, and giving it the same divider would flatten the
+hierarchy — a sub-section impersonating a top-level one. Guard 14 asserts the
+divider, the nested exemption, and that the game-by-game table is the nested
+one. Negative-tested.
+
+Card height 974px -> 1014px; 36 grades byte-identical.

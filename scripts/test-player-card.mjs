@@ -320,6 +320,19 @@ ok("the toggle renders only when both vintages exist",
    /\{both && \(/.test(glSec) && /const both = !!\(cur && prior\)/.test(glSec));
 ok("the selected season's vintage is always in the section title",
    /title=\{`Weekly output · \$\{log\.vintage\}`\}/.test(glSec));
+// SECTIONS SEPARATE BY STRUCTURE, NOT COLOUR. The headers are deliberately
+// hueless, so the boundary work is done by a hairline above each top-level
+// section plus a between-sections gap larger than any gap inside one. A
+// nested section (the game-by-game table) must NOT carry the rule, or
+// sub-sections impersonate top-level ones and the hierarchy flattens.
+const cardSec = app.slice(app.indexOf("const CardSection"), app.indexOf("// The player card."));
+ok("top-level card sections carry a hairline divider",
+   /borderTop: "1px solid var\(--border-default\)"/.test(cardSec));
+ok("nested sections stay subordinate — tighter gap, no rule",
+   /nested\s*\?\s*\{ marginTop: "16px" \}/.test(cardSec));
+ok("the game-by-game table is the nested one",
+   /title="Game by game"[^>]*\bnested\b/.test(app));
+
 ok("the toggle pills are chrome — no data hue",
    !/var\(--(accent|pos|warn|neg|caution|pink|gold|info)/.test(glSec.slice(glSec.indexOf("{both &&"), glSec.indexOf("<WeeklyBars"))));
 
