@@ -3753,3 +3753,27 @@ game-by-game table open        1,341px
 213 of 289 draftable covered; the other 76 are rookies and sub-gate players
   and fall through to the existing no-data reason, unchanged
 ```
+
+### The season toggle (same day)
+
+The first version stacked 2026 above 2025 — two charts, always, which honoured
+the never-swap-vintage rule by paying height for it. `GameLogSection` now shows
+**one season at a time behind a 2026/2025 toggle**, and keeps the rule a
+different way: **the selected season's vintage is printed in the section title
+from `log.vintage`**, so no chart is ever on screen without its year named.
+
+- **Defaults to the current season whenever it is live** — this week's usage
+  outranks last year's (role change is rank 1) — and falls back to 2025 before
+  Week 1 or for players with no current-season games.
+- **The toggle renders only when BOTH vintages exist.** Its absence means one
+  season of data, never a silent swap.
+- The pills are **chrome** — a lightness step, same rules as the sticky index.
+  Guarded: a data hue inside the toggle fails the build.
+- The game-by-game table follows the selected season.
+
+Verified against a simulated live season (the 2025 file truncated to W1-8 and
+swapped in as `gamelogs_2026.json`): defaults to `2026 through W8`, flips to
+`2025 season · final` and back, no toggle pre-season. Both new assertions
+negative-tested — burying the live season behind a "prior" default and painting
+a pill cyan each exit non-zero. The committed 2026 placeholder is untouched;
+the real file arrives via `refresh-inseason.sh` from Week 1.

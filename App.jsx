@@ -6849,6 +6849,104 @@ const WeeklyBars = ({ log }) => {
   );
 };
 
+// GAME LOG SECTION — one season on screen at a time, chosen by a toggle.
+//
+// The first version stacked 2026 above 2025, which honoured the never-swap-
+// vintage rule but paid for it in height: two charts, always. A toggle keeps
+// the rule a different way — THE SELECTED SEASON IS ALWAYS NAMED IN THE
+// SECTION TITLE, so no number is ever on screen without its year, and the
+// reader chooses which book to open instead of scrolling past both.
+//
+// Defaults to the CURRENT season whenever it is live (role change is rank 1,
+// and this week's usage outranks last year's), falling back to the prior
+// season before Week 1 and for players with no 2026 games yet.
+//
+// The toggle is CHROME: a lightness step, never a hue, exactly as the sticky
+// index rules. Both pills always show both years, so "2025" is a visible,
+// tappable fact even while 2026 is selected — absence of the toggle (single
+// vintage) means there is genuinely only one season of data.
+const GameLogSection = ({ cur, prior }) => {
+  const [season, setSeason] = useState(cur ? "cur" : "prior");
+  if (!cur && !prior) return null;
+  const log = season === "cur" && cur ? cur : (prior || cur);
+  const both = !!(cur && prior);
+  return (
+    <CardSection
+      title={`Weekly output · ${log.vintage}`}
+      accent={CARD_ACCENTS.gamelog}
+      note={`${log.gp} games · ${log.ppg} per game · best ${log.best}`}
+    >
+      {both && (
+        <div style={{ display: "flex", gap: "4px", marginBottom: "9px" }}>
+          {[["cur", cur], ["prior", prior]].map(([key, l]) => {
+            const on = (season === "cur" && cur ? "cur" : "prior") === key;
+            return (
+              <button
+                key={key}
+                data-compact
+                onClick={() => setSeason(key)}
+                aria-pressed={on}
+                style={{
+                  minHeight: "32px", padding: "5px 12px", borderRadius: "14px",
+                  cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "10px",
+                  letterSpacing: "0.05em",
+                  background: on ? "var(--bg-elevated)" : "transparent",
+                  border: `1px solid ${on ? "var(--border-strong)" : "var(--border-subtle)"}`,
+                  color: on ? "var(--text-primary)" : "var(--text-muted)",
+                  fontWeight: on ? 700 : 500,
+                }}
+              >
+                {l.season}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <WeeklyBars log={log} />
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: "7px" }}>
+        {[["spike", `${GAME_BANDS.spike}+`], ["usable", `${GAME_BANDS.usable}+`], ["low", `${GAME_BANDS.dud}-${GAME_BANDS.usable}`], ["dud", `<${GAME_BANDS.dud}`]].map(([band, label]) => (
+          <span key={band} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "7px", height: "7px", borderRadius: "1px", background: GAME_BAND_COLOR[band], display: "inline-block" }} />
+            {label}
+          </span>
+        ))}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+          <span style={{ width: "7px", height: "3px", borderRadius: "1px", background: "var(--bg-elevated)", display: "inline-block" }} />
+          did not play
+        </span>
+      </div>
+      <CardSection title="Game by game" accent="var(--text-dim)" collapsible note={null}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)" }}>
+            <thead>
+              <tr style={{ color: "var(--text-faint)", textAlign: "right" }}>
+                <th style={{ textAlign: "left", padding: "3px 6px 5px 0", fontWeight: 600 }}>Wk</th>
+                <th style={{ textAlign: "left", padding: "3px 8px 5px 0", fontWeight: 600 }}>Opp</th>
+                <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Pts</th>
+                {log.games[0].stats.map(st => (
+                  <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{st.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {log.games.map(g => (
+                <tr key={g.week} style={{ borderTop: "1px solid var(--bg-raised)", color: "var(--text-secondary)" }}>
+                  <td style={{ padding: "4px 6px 4px 0", color: "var(--text-faint)" }}>{g.week}</td>
+                  <td style={{ padding: "4px 8px 4px 0" }}>{g.opp}</td>
+                  <td style={{ padding: "4px 8px 4px 0", textAlign: "right", color: GAME_BAND_COLOR[g.band], fontWeight: 700 }}>{g.pts}</td>
+                  {g.stats.map(st => (
+                    <td key={st.label} style={{ padding: "4px 0 4px 8px", textAlign: "right" }}>{st.value}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardSection>
+    </CardSection>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const news = card.news || [];
@@ -7035,69 +7133,7 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {(card.gameLogCur || card.gameLog) && (() => {
-              // Current season leads when it is live; the prior season sits
-              // underneath rather than replacing it.
-              const lead = card.gameLogCur || card.gameLog;
-              const prior = card.gameLogCur ? card.gameLog : null;
-              return (
-                <CardSection
-                  title={`Weekly output · ${lead.vintage}`}
-                  accent={CARD_ACCENTS.gamelog}
-                  note={`${lead.gp} games · ${lead.ppg} per game · best ${lead.best}`}
-                >
-                  <WeeklyBars log={lead} />
-                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: "7px" }}>
-                    {[["spike", `${GAME_BANDS.spike}+`], ["usable", `${GAME_BANDS.usable}+`], ["low", `${GAME_BANDS.dud}-${GAME_BANDS.usable}`], ["dud", `<${GAME_BANDS.dud}`]].map(([band, label]) => (
-                      <span key={band} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ width: "7px", height: "7px", borderRadius: "1px", background: GAME_BAND_COLOR[band], display: "inline-block" }} />
-                        {label}
-                      </span>
-                    ))}
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ width: "7px", height: "3px", borderRadius: "1px", background: "var(--bg-elevated)", display: "inline-block" }} />
-                      did not play
-                    </span>
-                  </div>
-                  {prior && (
-                    <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)" }}>
-                      <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "6px", letterSpacing: "0.04em" }}>
-                        {prior.vintage} · {prior.gp} games · {prior.ppg} per game
-                      </div>
-                      <WeeklyBars log={prior} />
-                    </div>
-                  )}
-                  <CardSection title="Game by game" accent="var(--text-dim)" collapsible note={null}>
-                    <div style={{ overflowX: "auto" }}>
-                      <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)" }}>
-                        <thead>
-                          <tr style={{ color: "var(--text-faint)", textAlign: "right" }}>
-                            <th style={{ textAlign: "left", padding: "3px 6px 5px 0", fontWeight: 600 }}>Wk</th>
-                            <th style={{ textAlign: "left", padding: "3px 8px 5px 0", fontWeight: 600 }}>Opp</th>
-                            <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Pts</th>
-                            {lead.games[0].stats.map(st => (
-                              <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{st.label}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {lead.games.map(g => (
-                            <tr key={g.week} style={{ borderTop: "1px solid var(--bg-raised)", color: "var(--text-secondary)" }}>
-                              <td style={{ padding: "4px 6px 4px 0", color: "var(--text-faint)" }}>{g.week}</td>
-                              <td style={{ padding: "4px 8px 4px 0" }}>{g.opp}</td>
-                              <td style={{ padding: "4px 8px 4px 0", textAlign: "right", color: GAME_BAND_COLOR[g.band], fontWeight: 700 }}>{g.pts}</td>
-                              {g.stats.map(st => (
-                                <td key={st.label} style={{ padding: "4px 0 4px 8px", textAlign: "right" }}>{st.value}</td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardSection>
-                </CardSection>
-              );
-            })()}
+            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
 
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>

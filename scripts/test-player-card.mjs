@@ -305,6 +305,24 @@ ok("the game-by-game table is collapsible",
 // The bars must not colour by opponent difficulty — that would mix matchup
 // data, the least stable input in the app, into a record of what happened.
 const bars = app.slice(app.indexOf("const WeeklyBars"), app.indexOf("const PlayerCardModal"));
+// THE SEASON TOGGLE. One season on screen at a time, but the vintage rule
+// survives it: the year is printed in the section title from log.vintage, so
+// no chart is ever on screen without its season named. The toggle renders only
+// when BOTH vintages exist — its absence means one season of data, never a
+// silent swap.
+const glSec = app.slice(app.indexOf("const GameLogSection"), app.indexOf("const PlayerCardModal"));
+ok("GameLogSection is defined once and mounted once",
+   (app.match(/const GameLogSection/g) || []).length === 1 &&
+   (app.match(/<GameLogSection /g) || []).length === 1);
+ok("the toggle defaults to the current season when it is live",
+   /useState\(cur \? "cur" : "prior"\)/.test(glSec));
+ok("the toggle renders only when both vintages exist",
+   /\{both && \(/.test(glSec) && /const both = !!\(cur && prior\)/.test(glSec));
+ok("the selected season's vintage is always in the section title",
+   /title=\{`Weekly output · \$\{log\.vintage\}`\}/.test(glSec));
+ok("the toggle pills are chrome — no data hue",
+   !/var\(--(accent|pos|warn|neg|caution|pink|gold|info)/.test(glSec.slice(glSec.indexOf("{both &&"), glSec.indexOf("<WeeklyBars"))));
+
 ok("the bars carry no matchup colouring",
    !/getMatchupTier|tierStyle|matchupScore/.test(bars));
 
