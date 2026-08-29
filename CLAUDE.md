@@ -3551,3 +3551,45 @@ trusting a CLI grade.
   moves grades; needs its own calibration run.
 - **The redraft high-pace boost does not exist.** Best ball lifts pace-driven
   shootouts; redraft never has. Adding it would move redraft grades.
+
+### ATL QB competition re-sourced (Aug 28, 2026)
+
+Reported by the user, verified, and it had inverted since the Jun 10 entries.
+**36 grades byte-identical.**
+
+Penix was **cleared for 11-on-11 and split first-team reps with Tua on Mon Aug
+24 2026** — first full team work since the Week 11 2025 ACL tear. Tua's camp has
+been inconsistent and his preseason opener vs DEN was **3-of-5 for 22 yards**;
+Rapoport reports Penix has closed the gap and national reporting frames the job
+as **Penix's to lose**. Both play the Fri Aug 28 finale vs MIA; no Week 1 starter
+named.
+
+```
+tua tagovailoa   TARGET/—      -> hold/falling
+michael penix    fade/—        -> DART/rising
+michael penix jr fade/—        -> DART/rising
+```
+
+**The official depth chart still lists Tua QB1 and that is not evidence** — it
+was set while Penix was carried as an injured player. Checked, and stated inside
+the entry so the model cannot read the chart as a confirmation.
+
+**The HC named in the source (Kevin Stefanski) was verified against
+`grading/data/defense.md` before the source was trusted**, per the stale-article
+rule. It matches. The entries still avoid naming him, because the coach is not
+load-bearing for the read and an unverifiable detail is free risk.
+
+### ⚠️ SITUATIONS HAS TWO SHAPES, AND ONE IS INVISIBLE TO THE PLAYER CARD
+
+Census: **128 entries are `trendNote`-shaped, 4 are `reason`-shaped, 0 have
+both.** `buildPlayerNews` reads `trendNote` only, so those 4 never render on the
+card no matter how fresh they are — three of them were these ATL quarterbacks.
+
+`reason` is not dead: the AI prompt reads it at the `verdictAlignments` line. So
+the fix is additive rather than a migration — these three now carry BOTH, with
+`reason` kept for the prompt and `trendNote` added for the card.
+
+**The remaining `reason`-only entry is the one to watch.** A future sweep should
+either finish the additive pass or teach `buildPlayerNews` to fall back to
+`reason`; until then, a `reason`-shaped entry is a silent gap in card coverage
+that no guard catches.
