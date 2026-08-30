@@ -2808,7 +2808,7 @@ const cardPercentile = (pos, key, value) => {
 // Builds everything the card renders. Returns a `reason` instead of null when
 // there is no data, so the UI can say WHY — an empty card is the silent-drop
 // failure mode in a new costume.
-const buildPlayerCard = (name, pos, team, nowTs = Date.now()) => {
+const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard") => {
   const m = getMetrics(name);
   const traj = getSnapTrend(name);
   const trajCur = getSnapTrendCur(name);
@@ -2816,11 +2816,25 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now()) => {
   const qbCur = getQbProfileCur(name);
   const eff = getEfficiency(name);
   const ay = pos === "RB" ? getAirYards(name) : null;
-  const adp = ADP_DATA[normalize(name)] || ADP_DATA[normalize(name).replace(SUFFIX_RE, "")];
+  // THE CARD'S ADP MUST COME FROM THE TABLE THE USER'S FORMAT USES. Hardcoding
+  // ADP_DATA printed an Underdog best-ball number inside a redraft session with
+  // no label — the same error the ADP_VINTAGE footer rule already forbids — and
+  // rendered nothing at all for the 39 names that live only in ADP_YAHOO.
+  // findPlayer is the fallback so suffix and nickname keys resolve too.
+  const _adpTable = lookupTableFor(format);
+  const adp = _adpTable[normalize(name)]
+    || _adpTable[normalize(name).replace(SUFFIX_RE, "")]
+    || findPlayer(name, format)
+    || null;
+  const adpVintage = format === "yahoo" ? ADP_VINTAGE.yahoo
+    : format === "superflex" ? ADP_VINTAGE.superflex
+    : ADP_VINTAGE.standard;
 
   const card = {
     name, pos, team,
-    adp: adp?.adp ?? null,
+    adp: typeof adp?.adp === "number" ? adp.adp : null,
+    adpMarket: adpVintage.market,
+    adpVintage: adpVintage.label,
     vintage: CARD_VINTAGE,
     curVintage: vintageLabel(SNAP_TRAJECTORY_CUR._meta),
     popGate: CARD_POP_GATE,
@@ -2977,6 +2991,73 @@ const _lastNameIndexCache = new Map();
 const getLastNameIndex = (table) => {
   if (!_lastNameIndexCache.has(table)) _lastNameIndexCache.set(table, buildLastNameIndex(table));
   return _lastNameIndexCache.get(table);
+};
+
+// === PLAYER LOOKUP =========================================================
+// findPlayer RESOLVES a known name; this SEARCHES for one the user is still
+// typing. Different jobs: the resolver must never guess (a wrong match grades
+// the wrong player), the search must offer candidates and let a human pick.
+//
+// The table choice MIRRORS findPlayer and adpVintageFor — all three pick off
+// the same two fields. Change one, change the others, or the lookup offers a
+// player the grade cannot resolve.
+const lookupTableFor = (format) =>
+  format === "superflex" ? ADP_SUPERFLEX : format === "yahoo" ? ADP_YAHOO : ADP_DATA;
+
+const _searchIndexCache = new Map();
+const getSearchIndex = (format) => {
+  if (_searchIndexCache.has(format)) return _searchIndexCache.get(format);
+  const table = lookupTableFor(format);
+  const seen = new Set();
+  const rows = [];
+  for (const key of Object.keys(table)) {
+    const e = table[key];
+    if (!e || !e.pos) continue;
+    // K/DEF are filtered from every other surface; do not surface them here.
+    if (e.pos === "K" || e.pos === "DEF" || e.pos === "DST") continue;
+    const hit = findPlayer(key, format);
+    if (!hit || !hit.name) continue;
+    // Aliases ("cmc", "jsn") resolve to the same player as their full key.
+    // Collapse them so the list shows each player once, under his real name.
+    const id = normalize(hit.name);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const norm = normalize(hit.name);
+    const bare = norm.replace(SUFFIX_RE, "");
+    rows.push({
+      name: hit.name, pos: hit.pos, team: hit.team,
+      adp: typeof hit.adp === "number" ? hit.adp : null,
+      norm, last: bare.split(" ").slice(-1)[0] || bare,
+    });
+  }
+  rows.sort((a, b) => (a.adp ?? 9999) - (b.adp ?? 9999));
+  _searchIndexCache.set(format, rows);
+  return rows;
+};
+
+// Ranked so the obvious answer is first: a full-name prefix beats a surname
+// prefix beats a loose substring, and ADP breaks ties inside a tier. Typing
+// "jeff" should land on Justin Jefferson, not on whoever happens to sort first.
+const searchPlayers = (query, format = "standard", limit = 8) => {
+  const q = normalize(query || "");
+  if (q.length < 2) return [];
+  const out = [];
+  for (const r of getSearchIndex(format)) {
+    let rank = -1;
+    if (r.norm === q) rank = 0;
+    else if (r.norm.startsWith(q)) rank = 1;
+    else if (r.last.startsWith(q)) rank = 2;
+    else if (r.norm.includes(q)) rank = 3;
+    else if (q.includes(" ")) {
+      // "justin jeff" — every typed token prefixes some token of the name.
+      const parts = q.split(" ").filter(Boolean);
+      const names = r.norm.split(" ");
+      if (parts.every(p => names.some(n => n.startsWith(p)))) rank = 4;
+    }
+    if (rank >= 0) out.push({ ...r, rank });
+  }
+  out.sort((a, b) => a.rank - b.rank || (a.adp ?? 9999) - (b.adp ?? 9999));
+  return out.slice(0, limit);
 };
 
 const findPlayer = (name, format = "standard") => {
@@ -6970,6 +7051,131 @@ const GameLogSection = ({ cur, prior }) => {
   );
 };
 
+// One line at rest, matching every other disclosure on the page. The affordance
+// is HUELESS (--ui-accent): a lookup control is chrome, and every saturated hue
+// is already spoken for by a data family. Position chips DO carry their data
+// hue, via posColor — that is the one thing in here that means something.
+const PlayerLookup = ({ format, onPick, autoFocusOnOpen = true }) => {
+  const [open, setOpen] = React.useState(false);
+  const [q, setQ] = React.useState("");
+  const [active, setActive] = React.useState(0);
+  const inputRef = React.useRef(null);
+
+  const results = React.useMemo(() => searchPlayers(q, format), [q, format]);
+  React.useEffect(() => { setActive(0); }, [q]);
+  React.useEffect(() => {
+    if (open && autoFocusOnOpen && inputRef.current) inputRef.current.focus();
+  }, [open, autoFocusOnOpen]);
+
+  const pick = (r) => {
+    if (!r) return;
+    onPick({ name: r.name, pos: r.pos, team: r.team });
+    setQ("");
+    setOpen(false);
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") { setQ(""); setOpen(false); return; }
+    if (!results.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); setActive(i => (i + 1) % results.length); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActive(i => (i - 1 + results.length) % results.length); }
+    else if (e.key === "Enter") { e.preventDefault(); pick(results[active]); }
+  };
+
+  const posColor = (pos) => POS_ACCENT[pos] || { text: "var(--text-secondary)", border: "#444444", bg: "var(--bg-raised)" };
+
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          // A button used as a layout ROW must state this: the global
+          // button:not([data-compact]) rule centres its content otherwise, and
+          // the miscentring only appears once the row wraps on a phone.
+          justifyContent: "flex-start",
+          width: "100%", background: "transparent", border: "none",
+          borderLeft: "2px solid var(--ui-accent)", borderRadius: 0,
+          padding: "0 0 0 10px", cursor: "pointer", textAlign: "left",
+          color: "var(--ui-accent)", fontFamily: "inherit",
+          fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700,
+        }}
+      >
+        <span>Look up any player</span>
+        <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "5px", color: "var(--ui-accent-dim)", fontSize: "10px" }}>
+          {open ? "close" : "search"}
+          <span style={{ display: "inline-block", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+        </span>
+      </button>
+
+      {open && (
+        <div style={{ marginTop: "10px" }}>
+          <input
+            ref={inputRef}
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Type a name — any player, on your roster or not"
+            aria-label="Search for a player"
+            style={{
+              width: "100%", boxSizing: "border-box", minHeight: "44px",
+              background: "var(--bg-base)", color: "var(--text-primary)",
+              border: "1px solid var(--border-strong)", borderRadius: "4px",
+              padding: "10px 12px", fontFamily: "inherit", fontSize: "14px",
+            }}
+          />
+
+          {q.trim().length >= 2 && (
+            results.length > 0 ? (
+              <div role="listbox" style={{ marginTop: "8px", border: "1px solid var(--border-default)", borderRadius: "4px", overflow: "hidden" }}>
+                {results.map((r, i) => {
+                  const c = posColor(r.pos);
+                  return (
+                    <div
+                      key={r.name + r.pos}
+                      role="option"
+                      aria-selected={i === active}
+                      tabIndex={0}
+                      onClick={() => pick(r)}
+                      onMouseEnter={() => setActive(i)}
+                      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(r); } }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "10px",
+                        minHeight: "38px", padding: "8px 10px", cursor: "pointer",
+                        background: i === active ? "var(--bg-elevated)" : "transparent",
+                        borderTop: i === 0 ? "none" : "1px solid var(--border-default)",
+                      }}
+                    >
+                      <span style={{
+                        color: c.text, background: c.bg, border: `1px solid ${c.border}`,
+                        borderRadius: "3px", padding: "1px 6px", fontSize: "10px",
+                        fontWeight: 700, letterSpacing: "0.08em", minWidth: "28px", textAlign: "center",
+                      }}>{r.pos}</span>
+                      <span style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 600 }}>{r.name}</span>
+                      <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{r.team}</span>
+                      <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-dim)" }}>
+                        {r.adp != null ? `ADP ${r.adp}` : ""}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              // A search that finds nothing must SAY so. An empty box reads as a
+              // broken control, and a silently-dropped name is the failure mode
+              // this app has fixed four times already.
+              <div style={{ marginTop: "8px", padding: "10px", fontSize: "12px", color: "var(--text-muted)", border: "1px solid var(--border-default)", borderRadius: "4px" }}>
+                No player matching “{q.trim()}” in this format's ADP table. Check the spelling, or he may not be drafted in this format.
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   if (!card) return null;
   const news = card.news || [];
@@ -6998,7 +7204,18 @@ const PlayerCardModal = ({ card, onClose }) => {
                 background: POS_ACCENT[card.pos]?.bg || "transparent",
                 borderRadius: "3px", padding: "1px 6px", fontWeight: 600, letterSpacing: "0.08em",
               }}>{card.pos}</span>
-              <span>{card.team || "—"}{card.adp != null && ` · ADP ${card.adp}`}</span>
+              <span>{card.team || "—"}</span>
+              {card.adp != null && (
+                // Never print an ADP bare at a site that can show more than one
+                // format — the number means nothing without its market.
+                <span title={`${card.adpMarket} · ${card.adpVintage}`}>
+                  · ADP {card.adp}
+                  {" "}
+                  <span style={{ color: "var(--text-dim)", marginLeft: "3px", fontSize: "10px" }}>
+                    {card.adpMarket.includes("redraft") ? "redraft" : card.adpMarket.includes("superflex") ? "superflex" : "best ball"}
+                  </span>
+                </span>
+              )}
             </div>
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "15px", lineHeight: 1, minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}>✕</button>
@@ -7305,9 +7522,15 @@ export default function RosterScorer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [cardPlayer]);
 
+  // Mirrors findPlayer / adpVintageFor: same two fields, same table. Declared
+  // ahead of openCard, which reads it.
+  const lookupFormat = analysisMode === "redraft"
+    ? "yahoo"
+    : (TOURNAMENTS[tournament]?.format || "standard");
+
   const openCard = (pl) => {
     if (!pl?.name) return;
-    setCardPlayer(buildPlayerCard(pl.name, pl.pos, pl.team));
+    setCardPlayer(buildPlayerCard(pl.name, pl.pos, pl.team, Date.now(), lookupFormat));
     track?.("player_card_open", { pos: pl.pos || "" });
   };
 
@@ -9210,6 +9433,13 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
         </div>
 
+        {/* Player lookup. Near the TOP because the pre-draft case has no grade
+            on screen and no roster to click — burying it under the paste box
+            meant a full-page scroll to reach it. Costs one line at rest, and a
+            collapsed panel can sit wherever the reading order wants it. Outside
+            the mode conditional, so best ball and redraft both get it. */}
+        <PlayerLookup format={lookupFormat} onPick={openCard} />
+
         {/* Data Mode Toggle: 2025 Actual vs 2026 Projected */}
         <div style={{ marginBottom: "20px" }}>
           <div style={{ fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
@@ -10702,6 +10932,11 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
+
+            {/* Sits ABOVE the sticky bar, beside the roster strip — the other
+                entry point into the same card. Not IN the bar: that is nav,
+                this is lookup, and merging them makes the bar taller. */}
+            <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
 
             <StickyIndex items={SECTION_INDEX.bestball} />
 
@@ -12209,6 +12444,11 @@ Analyze this best ball roster. Return JSON only.`;
                 )}
               </div>
             )}
+
+            {/* Sits ABOVE the sticky bar, beside the roster strip — the other
+                entry point into the same card. Not IN the bar: that is nav,
+                this is lookup, and merging them makes the bar taller. */}
+            <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
 
             <StickyIndex items={SECTION_INDEX.redraft} />
 
