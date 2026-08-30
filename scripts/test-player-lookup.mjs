@@ -198,8 +198,32 @@ console.log("\n=== both modes mount the lookup ===");
 ok("the lookup is mounted 3 times (input, best ball, redraft)",
    (raw.match(/<PlayerLookup /g) || []).length === 3,
    String((raw.match(/<PlayerLookup /g) || []).length));
-ok("the redraft results screen mounts it",
-   raw.indexOf("<PlayerLookup ", raw.indexOf("SECTION_INDEX.redraft") - 800) < raw.indexOf("SECTION_INDEX.redraft"));
+
+// PLACEMENT IS THE ASSERTION, not merely presence. Mounted below the sticky
+// bar the lookup rendered 1,664px under the grade letter — past every roster
+// pill and the whole nutshell — so it was on the page and unfindable. Each
+// results-screen mount must sit ABOVE its own mode's roster pills, which is
+// the card's other entry point and the thing it belongs beside.
+const PILLS = "Canonical entry point to the player card";
+const pillIdx = [];
+for (let i = raw.indexOf(PILLS); i !== -1; i = raw.indexOf(PILLS, i + 1)) pillIdx.push(i);
+ok("both modes render the roster pills", pillIdx.length === 2, String(pillIdx.length));
+
+const mountIdx = [];
+for (let i = raw.indexOf("<PlayerLookup "); i !== -1; i = raw.indexOf("<PlayerLookup ", i + 1)) mountIdx.push(i);
+for (const [n, pi] of pillIdx.entries()) {
+  // The nearest mount before these pills must be closer to them than the
+  // previous pills block, i.e. it lives inside this mode's grade header.
+  const before = mountIdx.filter(m => m < pi);
+  const nearest = before.length ? before[before.length - 1] : -1;
+  const floor = n === 0 ? 0 : pillIdx[n - 1];
+  ok(`results mount ${n + 1} sits above its roster pills, inside the grade header`,
+     nearest > floor, `mount@${nearest} pills@${pi} floor@${floor}`);
+  ok(`results mount ${n + 1} is close to the header (not screens away)`,
+     nearest > 0 && pi - nearest < 3000, `gap ${pi - nearest} chars`);
+}
+ok("no results mount is left stranded above the sticky bar",
+   !/<PlayerLookup[^>]*\/>\s*\n\s*\n\s*<StickyIndex/.test(raw));
 ok("lookupFormat maps redraft to the yahoo table", raw.includes('analysisMode === "redraft"') && raw.includes('? "yahoo"'));
 ok("openCard threads the format into buildPlayerCard",
    /buildPlayerCard\(pl\.name, pl\.pos, pl\.team, Date\.now\(\), lookupFormat\)/.test(raw));
