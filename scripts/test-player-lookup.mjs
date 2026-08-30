@@ -39,6 +39,7 @@ await build({ stdin:{contents:src,loader:"jsx",resolveDir:repoRoot,sourcefile:"A
 const e = await import(pathToFileURL(outfile).href + `?t=${Date.now()}`);
 
 let fail = 0;
+const bad = (m) => { console.log("  FAIL " + m); fail++; };
 const ok = (label, cond, extra = "") => {
   console.log((cond ? "  ok   " : "  FAIL ") + label + (cond ? "" : `  <${extra}>`));
   if (!cond) fail++;
@@ -198,6 +199,23 @@ console.log("\n=== both modes mount the lookup ===");
 ok("the lookup is mounted 3 times (input, best ball, redraft)",
    (raw.match(/<PlayerLookup /g) || []).length === 3,
    String((raw.match(/<PlayerLookup /g) || []).length));
+
+// EXACTLY ONE LOOKUP MAY BE ON SCREEN AT A TIME. The input screen stays mounted
+// above the results, so an ungated input-screen mount puts the same control on
+// the page twice the moment a grade exists — reported as a duplicate. It cannot
+// simply be deleted either: before the first grade there is no header to hold
+// the header copy, and pre-draft lookup is the case the feature was built for.
+// So it is gated on !analyzed, and that gate is the assertion.
+ok("the input-screen lookup is hidden once a grade exists",
+   /\{!analyzed && <PlayerLookup /.test(raw),
+   "ungated input mount duplicates the header copy");
+
+// ...and it must still be REACHABLE pre-grade, which is the other half.
+const inputMount = raw.indexOf("{!analyzed && <PlayerLookup ");
+const firstResultsMount = raw.indexOf("<PlayerLookup ", raw.indexOf("Canonical entry point to the player card") - 900);
+ok("...and still renders before the first grade",
+   inputMount >= 0 && inputMount < firstResultsMount,
+   `input@${inputMount} results@${firstResultsMount}`);
 
 // PLACEMENT IS THE ASSERTION, not merely presence. Mounted below the sticky
 // bar the lookup rendered 1,664px under the grade letter — past every roster
