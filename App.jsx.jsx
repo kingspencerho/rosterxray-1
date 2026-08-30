@@ -10655,6 +10655,15 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                 )}
 
+                {/* The card's OTHER entry point, and it belongs beside the first
+                    one. Mounted below the sticky bar it sat 1,664px under the
+                    grade — past every roster pill and the whole nutshell — so a
+                    user looking for it found nothing. The pills open a card for
+                    someone ON the roster; this opens a card for anyone else. */}
+                <div style={{ marginTop: "12px" }}>
+                  <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
+                </div>
+
                 {/* Canonical entry point to the player card. Every rostered player
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
@@ -10932,11 +10941,6 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
-
-            {/* Sits ABOVE the sticky bar, beside the roster strip — the other
-                entry point into the same card. Not IN the bar: that is nav,
-                this is lookup, and merging them makes the bar taller. */}
-            <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
 
             <StickyIndex items={SECTION_INDEX.bestball} />
 
@@ -12065,6 +12069,15 @@ Analyze this best ball roster. Return JSON only.`;
                   </div>
                 )}
 
+                {/* The card's OTHER entry point, and it belongs beside the first
+                    one. Mounted below the sticky bar it sat 1,664px under the
+                    grade — past every roster pill and the whole nutshell — so a
+                    user looking for it found nothing. The pills open a card for
+                    someone ON the roster; this opens a card for anyone else. */}
+                <div style={{ marginTop: "12px" }}>
+                  <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
+                </div>
+
                 {/* Canonical entry point to the player card. Every rostered player
                     is here exactly once, so there is one place to click rather
                     than hoping a name happens to appear in a stack block. The card
@@ -12444,11 +12457,6 @@ Analyze this best ball roster. Return JSON only.`;
                 )}
               </div>
             )}
-
-            {/* Sits ABOVE the sticky bar, beside the roster strip — the other
-                entry point into the same card. Not IN the bar: that is nav,
-                this is lookup, and merging them makes the bar taller. */}
-            <PlayerLookup format={lookupFormat} onPick={openCard} autoFocusOnOpen={false} />
 
             <StickyIndex items={SECTION_INDEX.redraft} />
 
