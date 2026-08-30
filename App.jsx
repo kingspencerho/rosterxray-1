@@ -9523,12 +9523,16 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
         </div>
 
-        {/* Player lookup. Near the TOP because the pre-draft case has no grade
-            on screen and no roster to click — burying it under the paste box
-            meant a full-page scroll to reach it. Costs one line at rest, and a
-            collapsed panel can sit wherever the reading order wants it. Outside
-            the mode conditional, so best ball and redraft both get it. */}
-        <PlayerLookup format={lookupFormat} onPick={openCard} />
+        {/* Player lookup, PRE-GRADE ONLY. The input screen stays mounted above
+            the results, so once a grade exists this and the one in the grade
+            header are both on the page — the same control twice. The header
+            copy is the better of the two there: it sits beside the roster
+            strip, which is the other entry point into the same card.
+            It still has to exist here, because before the first grade there is
+            no header to hold it and no roster to click, and pre-draft lookup is
+            the case the feature was built for. Outside the mode conditional, so
+            best ball and redraft both get it. */}
+        {!analyzed && <PlayerLookup format={lookupFormat} onPick={openCard} />}
 
         {/* Data Mode Toggle: 2025 Actual vs 2026 Projected */}
         <div style={{ marginBottom: "20px" }}>
