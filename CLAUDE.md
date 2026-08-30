@@ -3838,3 +3838,70 @@ The affordance became a bordered pill because a box-shadow glow needs a shape
 to sit on; plain text just blooms. `prefers-reduced-motion` disables it.
 Guard 18 asserts the collapsed gate, the reduced-motion opt-out and the hue;
 the always-on variant exits non-zero. 36 grades byte-identical.
+
+---
+
+## Sanctioned Archetypes Are No Longer Charged As Flaws (added Aug 30, 2026)
+
+**A roster cannot be simultaneously a recommended construction and a scored flaw.**
+Section 5 names five valid positional layouts; the generic construction bands were
+penalising three of them.
+
+```
+Hyper-Fragile      2-4-10-2   -1.0   10 WR, 2 over the band, MAJOR
+Balanced           2-5-9-2    -0.3   9 WR, 1 over, minor and SILENT
+Balanced           2-6-8-2     0.0   clean
+Triple QB Mutation 3-5-8-2     0.0   clean
+Triple TE Mutation 2-4-9-3    -0.3   9 WR, 1 over, minor and SILENT
+```
+
+The bands measure DEVIATION FROM THE MEAN. That is the right default and the wrong
+answer for a build that deviates on purpose. **All three reference fixtures are
+2-5-9-2, so every calibration recorded in this file before today carried a silent
+-0.3 that never appeared as a weakness.**
+
+### The precondition is what keeps this from being a free pass
+
+An archetype is its counts AND the thing that makes those counts work. `ARCHETYPES`
+stores both, and the waiver requires both:
+
+- **2-4-10-2** needs *premium early RB capital* — an RB at **ADP <= 24** (rounds 1-2).
+- **2-4-9-3** needs *elite, consolidated target shares in the TE room* — a TE at
+  **ADP <= 60**.
+- The three balanced/mutation layouts carry no stated precondition and waive on shape.
+
+**Same shape without the anchor keeps the full deduction** and gets a weakness naming
+what is missing: a 10-WR/4-RB roster whose best back went in the fourth round is not
+Hyper-Fragile, it is thin at RB. Verified both directions.
+
+### Three rules for anyone touching this
+
+1. **`under` is NEVER waived.** Being short at a position is a real hole whatever
+   shape the rest of the roster is in. Only over-count flags at the archetype's own
+   position are removed.
+2. **The waiver removes the DEDUCTION, never the DISCLOSURE.** A qualifying roster
+   gains a strength line naming the layout and which count is the archetype. "Hyper-
+   Fragile" is called that for a reason and a reader who cannot see the shape cannot
+   judge the risk.
+3. **Standard best ball only.** Superflex has its own bands and a 20-round roster
+   shifts every count, so neither is described by these layouts. `analyzeRedraft` is
+   untouched.
+
+### ⚠️ Calibration — this MOVED SCORES, and the old numbers are superseded
+
+```
+                          before  ->  after
+ref1/ref2/ref3, standard    +0.30 uniformly   (the 2-5-9-2 waiver)
+fieldgeneral (superflex)    +0.00             (correctly out of scope)
+redraft                     +0.00             (correctly out of scope)
+NO LETTER GRADE MOVED on any of the 39
+```
+
+**Every pre-Aug-30 calibration figure in this file is now 0.30 low for the standard
+best-ball tournaments** on these fixtures. Do not chase those numbers; they were
+true against the code of their day. Re-baseline from here.
+
+Guarded by `scripts/test-archetypes.mjs` (guard 20), which builds 2-4-10-2 both with
+and without the RB anchor and asserts they diverge. Four failure paths negative-
+tested: dropping the precondition, waiving `under` flags, waiving without disclosing,
+and letting superflex in.

@@ -4017,6 +4017,48 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         TE: { min: 1, max: is20Round ? 4 : 3, msg: `${posCounts.TE} TE (target 1-${is20Round ? 4 : 3})` },
         QB: { min: 2, max: is20Round ? 4 : 3, msg: `${posCounts.QB} QB (target 2-${is20Round ? 4 : 3})` },
       };
+  // === SANCTIONED ARCHETYPES ===
+  // The generic bands above measure DEVIATION FROM THE MEAN, which is the right
+  // default and the wrong answer for a build that deviates ON PURPOSE. Three of
+  // the five layouts the framework names as valid were being charged by them:
+  // 2-4-10-2 took a full -1.0 for the ten receivers the archetype REQUIRES, and
+  // 2-5-9-2 and 2-4-9-3 each took a silent -0.3 that never surfaced as a
+  // weakness. A roster cannot be simultaneously a recommended construction and a
+  // scored flaw.
+  //
+  // THE PRECONDITION IS WHAT KEEPS THIS FROM BEING A FREE PASS. Each archetype
+  // is defined by its counts AND by the thing that makes those counts work. A
+  // 10-WR / 4-RB roster whose best back went in the fourth round is not
+  // Hyper-Fragile, it is just thin at RB, and it keeps the penalty. Matching the
+  // shape is not enough; the roster has to have paid for the shape.
+  const ARCHETYPES = [
+    { name: "Hyper-Fragile", layout: "2-4-10-2", counts: { QB: 2, RB: 4, WR: 10, TE: 2 },
+      // "Requires premium early RB capital" — rounds 1-2 of a 12-man draft.
+      requires: (v) => v.some(p => p.pos === "RB" && p.adp != null && p.adp <= 24),
+      requiresLabel: "an RB inside the first two rounds",
+      note: "caps RB at 4 and leans on ten receivers to insulate the flex" },
+    { name: "Balanced", layout: "2-5-9-2", counts: { QB: 2, RB: 5, WR: 9, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "maximises WR depth against early anchors" },
+    { name: "Balanced", layout: "2-6-8-2", counts: { QB: 2, RB: 6, WR: 8, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "maximises WR depth against early anchors" },
+    { name: "Triple QB Mutation", layout: "3-5-8-2", counts: { QB: 3, RB: 5, WR: 8, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "a third QB bypasses schedule bottlenecks or locks a secondary bring-back" },
+    { name: "Triple TE Mutation", layout: "2-4-9-3", counts: { QB: 2, RB: 4, WR: 9, TE: 3 },
+      // "Requires elite, consolidated target shares in the TE room."
+      requires: (v) => v.some(p => p.pos === "TE" && p.adp != null && p.adp <= 60),
+      requiresLabel: "a premium TE anchor",
+      note: "trades the tenth WR for a consolidated TE room" },
+  ];
+
+  // Standard best ball only. Superflex has its own bands and 20-round rosters
+  // shift every count, so neither is described by these layouts.
+  const archetype = (format === "superflex" || is20Round) ? null
+    : ARCHETYPES.find(a => ["QB", "RB", "WR", "TE"].every(p => posCounts[p] === a.counts[p])) || null;
+  const archetypeQualified = archetype ? archetype.requires(valid) : false;
+
   const benchmarkIssues = [];
   Object.entries(benchmarks).forEach(([pos, b]) => {
     if (posCounts[pos] < b.min) benchmarkIssues.push({ type: "under", pos, msg: b.msg, severity: "major" });
@@ -4026,6 +4068,18 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       benchmarkIssues.push({ type: "over", pos, msg: b.msg, severity: overBy >= 2 ? "major" : "minor" });
     }
   });
+
+  // The waiver covers ONLY the over-count flags the archetype is defined by.
+  // An "under" flag is never waived: being short at a position is a real hole
+  // whatever shape the rest of the roster is in.
+  const archetypeWaived = [];
+  const benchmarkIssuesScored = archetypeQualified
+    ? benchmarkIssues.filter(i => {
+        const waive = i.type === "over" && archetype.counts[i.pos] === posCounts[i.pos];
+        if (waive) archetypeWaived.push(i);
+        return !waive;
+      })
+    : benchmarkIssues;
 
   // Playoff window grading per stack with TOURNAMENT WEIGHTS
   const stackGrades = stacks.map(stack => {
@@ -4706,10 +4760,22 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   }
 
   // === CONSTRUCTION ANALYSIS ===
-  const majorIssues = benchmarkIssues.filter(i => i.severity === "major");
-  const minorIssues = benchmarkIssues.filter(i => i.severity === "minor");
+  const majorIssues = benchmarkIssuesScored.filter(i => i.severity === "major");
+  const minorIssues = benchmarkIssuesScored.filter(i => i.severity === "minor");
 
-  if (benchmarkIssues.length === 0) {
+  // A recognised archetype is named out loud. The waiver removes the DEDUCTION,
+  // never the disclosure — "Hyper-Fragile" is called that for a reason, and a
+  // reader who cannot see the shape cannot judge the risk it carries.
+  if (archetypeQualified && archetypeWaived.length > 0) {
+    strengths.push(`Deliberate ${archetype.name} construction (${archetype.layout}) — ${archetype.note}; ${archetypeWaived.map(i => i.msg).join(", ")} is the archetype, not a flaw`);
+  }
+  // Matching the shape without paying for it is the case the penalty exists for,
+  // so it keeps the deduction and gets told exactly what is missing.
+  if (archetype && !archetypeQualified && benchmarkIssues.some(i => i.type === "over")) {
+    weaknesses.push(`${archetype.layout} shape without ${archetype.requiresLabel} — the ${archetype.name} build depends on it, so the heavy position is exposure rather than design`);
+  }
+
+  if (benchmarkIssuesScored.length === 0 && !archetypeQualified) {
     strengths.push(format === "superflex" ? "Roster construction fits Superflex format" : "Roster construction matches BBM benchmarks");
   } else {
     majorIssues.forEach(i => weaknesses.push(`${i.type === "under" ? "Light at" : "Heavy at"} ${i.pos}: ${i.msg}`));
