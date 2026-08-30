@@ -358,7 +358,8 @@ const ADP_DATA = {
   "christian kirk": { adp: 213.7, pos: "WR", team: "SF" },
   "james conner": { adp: 213.9, pos: "RB", team: "ARI" },
   "colby parkinson": { adp: 214.1, pos: "TE", team: "LAR" },
-  "rashod bateman": { adp: 201.1, pos: "WR", team: "BAL" },  // ADP refresh 2026-08-16: 133.2 -> 201.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "rashod bateman": { adp: 201.1, pos: "WR", team: "BAL" },
+  "najee harris": { adp: 201.3, pos: "RB", team: "NYG" },  // added 2026-08-30: signed NYG 1yr (mid-Aug 2026). Direct Underdog best-ball quote via refresh-adp.py --source underdog.  // ADP refresh 2026-08-16: 133.2 -> 201.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "justice hill": { adp: 214.5, pos: "RB", team: "BAL" },
   "shedeur sanders": { adp: 214.6, pos: "QB", team: "CLE" },
   "jaydon blue": { adp: 170.1, pos: "RB", team: "DAL" },  // ADP refresh 2026-08-16: 214.7 -> 170.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
@@ -682,6 +683,7 @@ const ADP_SUPERFLEX = {
   "evan engram": { adp: 190, pos: "TE", team: "DEN" },
   "demond claiborne": { adp: 214, pos: "RB", team: "MIN" },
   "jordan james": { adp: 229, pos: "RB", team: "SF" },
+  "najee harris": { adp: 215, pos: "RB", team: "NYG" },  // added 2026-08-30: ESTIMATE, standard 201.3 + the measured +13.0 RB band offset. adp>=200, so this drives resolution and ordering only.
   "calvin ridley": { adp: 200, pos: "WR", team: "TEN" },
   "elic ayomanor": { adp: 236, pos: "WR", team: "TEN" },  // added Aug 15 2026 — was missing from this table too. Anchored ~20 picks behind Ridley, the gap measured in ADP_DATA.
   "colby parkinson": { adp: 204, pos: "TE", team: "LAR" },
@@ -1297,6 +1299,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "najee harris": { verdict: "dart", trend: "rising", trendNote: "SIGNED WITH THE GIANTS on a one-year deal in mid-August 2026, and preseason Week 3 was the first real evidence (updated Aug 29 2026). He WON THE FIRST-TEAM SNAP COUNT 11-9 OVER TYRONE TRACY and carried 11 times for 39 yards with a 20-yard reception. THE ROOM IS CROWDED — Cam Skattebo, Tracy and Devin Singletary are all here — so this is a competition for the No. 2 job behind Skattebo rather than a path to a workhorse role, and ball security is the stated differentiator between him and Tracy. THE INJURY IS THE WHOLE BET: he tore his left Achilles on a noncontact play Sept 21 2025, three games into his time in Los Angeles, and he is not back to full. An Achilles in the calendar year before is a real availability and explosiveness risk, and his own framing is that the prior production does not carry over. Career volume is the traits case. Free at ADP 201.3, and a 2-of-4 backfield at that price is a contingency, not a starter.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "depth_chart_competition"] },
   "keenan allen": { verdict: "hold", trend: "stable", trendNote: "SIGNED WITH INDIANAPOLIS on a one-year deal reported Aug 17 2026 (base $3.32M, $2.81M fully guaranteed, up to $8.32M with incentives and per-game roster bonuses). THE ROLE IS WR3 BEHIND ALEC PIERCE AND JOSH DOWNS, and the modest guarantee is the org commitment signal — an auxiliary target, not a target-share reset. The connection is Shane Steichen, who was his OC in Los Angeles, so the scheme fit is real and the route tree should be the short-area, option-route work he has run his whole career. Daniel Jones is the QB. He turns 34 this season and would be the oldest active receiver in the league, so the standalone case is volume-light: he is a floor piece in a top-5 WR FPA offense whose ceiling depends on a Pierce or Downs absence. Contingent value clearly exceeds standalone value here. Pierce came off active/PUP Aug 27 2026 with no team reps all summer, which is the live path to more work.", situationFlags: ["scheme_fit", "role_dependent"], riskFlags: ["age_decline", "depth_chart_competition"] },
   "dezhaun stribling": { verdict: "TARGET", trend: "rising", trendNote: "SF confirms a MAJOR ROLE FOR WEEK 1 (updated Aug 29 2026). He led the preseason opener in receiving and finished the first two exhibitions with 11 catches for 109 yards, the most productive preseason of any rookie receiver on this board. A minor shoulder injury held him out of preseason Week 3 and he returned to drills in a non-contact jersey before that, so availability is the open question and the role is not. Per Lens 4 the Week 1 usage statement outranks the snap counts, because it is direct commitment language rather than scheme evaluation. ADP has moved 198 -> 130.7 and the market is still catching up. SF W15 @LAC and W16 @KC both clear the competitive-balance bar as pick'em shootouts, so the playoff window is live even against tough raw defensive grades.", situationFlags: ["breakout_profile", "target_vacuum"], riskFlags: ["injury_history"] },
   "kaelon black": { verdict: "DART", trend: "rising", trendNote: "SF's RB2 and the McCaffrey handcuff, and preseason Week 3 settled it (updated Aug 29 2026). He started, took all 12 snaps across the first three possessions, and carried 4 times for 28 yards while averaging 5.1 per attempt on the exhibition season. That is a clean separation from Jordan James, who had been the competition. THE BET IS CONTINGENT, NOT STANDALONE: behind a healthy McCaffrey there is no weekly volume here, and McCaffrey graded elite on every opportunity field in 2025 with a rush_eff_rank of 63 of 73, so the workload is his. What makes this worth a pick at ADP 206.4 is that the contingency is now UNAMBIGUOUS — one back inherits the job rather than a committee splitting it.", situationFlags: ["role_dependent"], riskFlags: ["depth_chart_competition"] },
@@ -1875,7 +1878,7 @@ const ADP_YAHOO = {
   "ollie gordon": { adp: 241.0, pos: "RB", team: "MIA" },
   "samaje perine": { adp: 242.0, pos: "RB", team: "CIN" },
   "skyler bell": { adp: 243.0, pos: "WR", team: "BUF" },
-  "najee harris": { adp: 246.0, pos: "RB", team: "-" },
+  "najee harris": { adp: 246.0, pos: "RB", team: "NYG" },
   "tyquan thornton": { adp: 247.0, pos: "WR", team: "KC" },
   "dawson knox": { adp: 248.0, pos: "TE", team: "BUF" },
   "darius slayton": { adp: 249.0, pos: "WR", team: "NYG" },
