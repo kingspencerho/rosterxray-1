@@ -142,22 +142,53 @@ const sticky = slice("StickyIndex");
   ? ok("the last section becomes active at the bottom of the page")
   : bad("no end-of-page case — the final pills can never highlight");
 
-console.log("\nthe W1-18 attention pulse");
+console.log("\nthe attention pulses");
 
-// The upload tab's glow mechanic, in the schedule section's own purple at a
-// fraction of the intensity. Two properties keep it from becoming noise: it
-// runs ONLY while the panel is collapsed (an attention-getter for a closed
-// door, silenced on open — the tab's own "stops when clicked" rule), and it
-// honours prefers-reduced-motion.
+// The upload tab's glow mechanic at a fraction of the intensity, on two
+// controls: the W1-18 schedule chip and the VIEW ROSTER chip. Three properties
+// keep them from becoming noise.
+//
+// 1. ONE MECHANISM. Timing and shape are defined once and shared, so the two
+//    cues cannot drift into different rhythms — a divergence class this repo
+//    has hit repeatedly with duplicated definitions. Each caller supplies only
+//    its own hue, via --cta-glow, because the hue is the part that means
+//    something.
+// 2. COLLAPSED-ONLY. An attention-getter for a closed door, silent the moment
+//    it opens (the upload tab's own "stops when clicked" rule).
+// 3. prefers-reduced-motion silences both.
+
+/\.schedule-cta-pulse,\s*\n\s*\.roster-cta-pulse \{\s*animation: ctaPulse ([\d.]+)s/.test(src)
+  ? ok("both pulses share one animation definition — the timing cannot drift")
+  : bad("the two pulses must share one keyframes/timing definition, not clone it");
+
+/@keyframes ctaPulse[\s\S]{0,240}rgba\(var\(--cta-glow\)/.test(src)
+  ? ok("the shared keyframes takes its colour from a per-caller variable")
+  : bad("the shared keyframes must read --cta-glow so each caller owns its hue");
+
+// Each control is gated on ITS OWN collapsed state.
 /className=\{bbScheduleOpen \? undefined : "schedule-cta-pulse"\}/.test(src)
-  ? ok("the pulse runs only while the panel is collapsed")
-  : bad("the pulse must be gated on the collapsed state — flashing after open is noise");
-/@media \(prefers-reduced-motion: reduce\) \{\s*\.schedule-cta-pulse \{\s*animation: none;/.test(src)
-  ? ok("reduced-motion silences it")
-  : bad("the pulse must be disabled under prefers-reduced-motion");
-/scheduleCta[\s\S]{0,220}rgba\(192, 132, 252/.test(src)
-  ? ok("it glows in the section's own purple, not a borrowed hue")
-  : bad("the pulse colour must be the schedule section's own purple");
+  ? ok("the schedule pulse runs only while its panel is collapsed")
+  : bad("the schedule pulse must be gated on the collapsed state");
+
+const rosterGated = (src.match(/className=\{rosterStripOpen \? undefined : "roster-cta-pulse"\}/g) || []).length;
+rosterGated === 2
+  ? ok("the roster pulse is gated on collapsed, at both render sites")
+  : bad(`the roster pulse must be gated on rosterStripOpen at both sites (found ${rosterGated})`);
+
+/@media \(prefers-reduced-motion: reduce\) \{\s*\.schedule-cta-pulse,\s*\n\s*\.roster-cta-pulse \{\s*animation: none;/.test(src)
+  ? ok("reduced-motion silences both")
+  : bad("both pulses must be disabled under prefers-reduced-motion");
+
+// The hues are the assertion, not the timing. Purple is the schedule section's
+// own; the roster chip is CHROME and must stay hueless, or a navigation
+// affordance starts reading as data.
+/\.schedule-cta-pulse \{ --cta-glow: 192, 132, 252; \}/.test(src)
+  ? ok("the schedule pulse glows in the section's own purple")
+  : bad("the schedule pulse colour must be the schedule section's purple");
+
+/\.roster-cta-pulse\s+\{ --cta-glow: 203, 213, 225; \}/.test(src)
+  ? ok("the roster pulse glows in hueless --ui-accent, matching the chip")
+  : bad("the roster pulse must use --ui-accent (203,213,225) — chrome carries no data hue");
 
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);

@@ -129,5 +129,28 @@ const seasonHdr = src.match(/Season Schedule · Advance-Rate View/) ? src.slice(
   ? ok("...and reads at top-level section size, not as a micro-label")
   : bad("the Season Schedule header dropped back to a micro-label size");
 
+// Ceiling Rankings is the third sanctioned pairing: the words SPIKE and
+// NUCLEAR wear the colours of the cells directly beneath them. Assert the
+// PAIRING, not the hex — a deliberate re-tune of either token stays legal,
+// while colouring the label independently of its data does not.
+const ceilHdr = src.slice(
+  src.indexOf("Ceiling Rankings · "),
+  src.indexOf("Ceiling Rankings · ") + 400);
+/<span style=\{\{ color: "var\(--pos\)" \}\}>Spike<\/span>/.test(ceilHdr)
+  ? ok("the Ceiling Rankings header paints Spike in --pos")
+  : bad("Spike in the Ceiling Rankings header must use --pos, the colour of its own spike cells");
+/<span style=\{\{ color: "var\(--accent-purple-light\)" \}\}>Nuclear<\/span>/.test(ceilHdr)
+  ? ok("...and Nuclear in --accent-purple-light")
+  : bad("Nuclear in the Ceiling Rankings header must use --accent-purple-light, the colour of its own nuclear cells");
+/color: "var\(--pos\)", fontWeight: 700, fontSize: "10px", width: "34px"/.test(src)
+  ? ok("...matching the spike cell the header labels")
+  : bad("the spike cell no longer renders in --pos; the header pairing is broken");
+/p\.nuclear > 0 \? "var\(--accent-purple-light\)"/.test(src)
+  ? ok("...and matching the nuclear cell")
+  : bad("the nuclear cell no longer renders in --accent-purple-light; the header pairing is broken");
+/<span style=\{\{ color: "var\(--pos\)" \}\}>SPIKE<\/span> · <span style=\{\{ color: "var\(--accent-purple-light\)" \}\}>NUKE<\/span>/.test(src)
+  ? ok("...and the column label above those cells agrees")
+  : bad("the SPIKE · NUKE column label must carry the same two colours as its cells");
+
 console.log(failed ? `\n${failed} colour-role check(s) failed` : "\nall colour-role guards passed");
 process.exit(failed ? 1 : 0);
