@@ -9023,12 +9023,20 @@ Analyze this best ball roster. Return JSON only.`;
            beat. Applied only while the panel is COLLAPSED: an attention-getter
            for a closed door, silenced the moment it is opened, same rule as
            the tab ("stops when clicked"). */
-        .schedule-cta-pulse {
-          animation: scheduleCta 2.6s ease-in-out infinite;
+        /* ONE pulse mechanism. Timing and shape live here so two attention cues
+           can never drift apart; each caller supplies only its own hue, because
+           the hue is the part that carries meaning. Both are gated on their
+           panel being COLLAPSED — an attention-getter for a closed door, silent
+           the moment it opens. */
+        .schedule-cta-pulse,
+        .roster-cta-pulse {
+          animation: ctaPulse 2.6s ease-in-out infinite;
         }
-        @keyframes scheduleCta {
-          0%, 100% { box-shadow: 0 0 0px 0px rgba(192, 132, 252, 0); }
-          50%       { box-shadow: 0 0 8px 2px rgba(192, 132, 252, 0.35); }
+        .schedule-cta-pulse { --cta-glow: 192, 132, 252; }  /* the schedule section's own purple */
+        .roster-cta-pulse   { --cta-glow: 203, 213, 225; }  /* --ui-accent: chrome, hueless by design */
+        @keyframes ctaPulse {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(var(--cta-glow), 0); }
+          50%       { box-shadow: 0 0 8px 2px rgba(var(--cta-glow), 0.35); }
         }
         /* Analyze button glow — mirrors upload tab, active when input has text */
         .analyze-glow {
@@ -9149,7 +9157,8 @@ Analyze this best ball roster. Return JSON only.`;
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .schedule-cta-pulse {
+          .schedule-cta-pulse,
+          .roster-cta-pulse {
             animation: none;
           }
           .hero-diagnose-scan {
@@ -10621,7 +10630,7 @@ Analyze this best ball roster. Return JSON only.`;
                   </span>
                   <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
                     <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
-                    <span style={{
+                    <span className={rosterStripOpen ? undefined : "roster-cta-pulse"} style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
                       color: rosterStripOpen ? "var(--ui-accent)" : "var(--bg-base)",
                       background: rosterStripOpen ? "transparent" : "var(--ui-accent)",
@@ -12037,7 +12046,7 @@ Analyze this best ball roster. Return JSON only.`;
                   </span>
                   <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
                     <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
-                    <span style={{
+                    <span className={rosterStripOpen ? undefined : "roster-cta-pulse"} style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
                       color: rosterStripOpen ? "var(--ui-accent)" : "var(--bg-base)",
                       background: rosterStripOpen ? "transparent" : "var(--ui-accent)",
