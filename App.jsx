@@ -9023,20 +9023,33 @@ Analyze this best ball roster. Return JSON only.`;
            beat. Applied only while the panel is COLLAPSED: an attention-getter
            for a closed door, silenced the moment it is opened, same rule as
            the tab ("stops when clicked"). */
-        /* ONE pulse mechanism. Timing and shape live here so two attention cues
-           can never drift apart; each caller supplies only its own hue, because
-           the hue is the part that carries meaning. Both are gated on their
-           panel being COLLAPSED — an attention-getter for a closed door, silent
-           the moment it opens. */
+        /* Two attention cues, one TIMING definition. The duration/easing/count
+           longhands are shared so the two can never drift into different
+           rhythms; only animation-name differs.
+
+           ⚠ THE COLOURS IN THE KEYFRAMES ARE LITERAL, NEVER var(). A shared
+           @keyframes reading rgba(var(--cta-glow), …) is tidier and DOES work
+           in Chromium — and silently does not animate in WebKit, so the pulse
+           dies on iPhone while every desktop check passes. Interpolating a
+           keyframe value containing var() is the trap; keep the hex inline.
+
+           Both are gated on their panel being COLLAPSED — an attention-getter
+           for a closed door, silent the moment it opens. */
         .schedule-cta-pulse,
         .roster-cta-pulse {
-          animation: ctaPulse 2.6s ease-in-out infinite;
+          animation-duration: 2.6s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
         }
-        .schedule-cta-pulse { --cta-glow: 192, 132, 252; }  /* the schedule section's own purple */
-        .roster-cta-pulse   { --cta-glow: 203, 213, 225; }  /* --ui-accent: chrome, hueless by design */
-        @keyframes ctaPulse {
-          0%, 100% { box-shadow: 0 0 0px 0px rgba(var(--cta-glow), 0); }
-          50%       { box-shadow: 0 0 8px 2px rgba(var(--cta-glow), 0.35); }
+        .schedule-cta-pulse { animation-name: scheduleCta; }  /* the schedule section's own purple */
+        .roster-cta-pulse   { animation-name: rosterCta; }    /* --ui-accent: chrome, hueless by design */
+        @keyframes scheduleCta {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(192, 132, 252, 0); }
+          50%       { box-shadow: 0 0 8px 2px rgba(192, 132, 252, 0.35); }
+        }
+        @keyframes rosterCta {
+          0%, 100% { box-shadow: 0 0 0px 0px rgba(203, 213, 225, 0); }
+          50%       { box-shadow: 0 0 8px 2px rgba(203, 213, 225, 0.35); }
         }
         /* Analyze button glow — mirrors upload tab, active when input has text */
         .analyze-glow {
