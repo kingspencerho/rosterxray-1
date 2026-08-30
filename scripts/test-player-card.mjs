@@ -348,5 +348,65 @@ ok("the toggle pills are chrome — no data hue",
 ok("the bars carry no matchup colouring",
    !/getMatchupTier|tierStyle|matchupScore/.test(bars));
 
+// ===================== TEAMMATE ABSENCE (context only) =====================
+// Answers the one question a target share cannot: who else was on the field.
+// The worked case is Wan'Dale Robinson 2025 — a 29.8% share at the 87th
+// percentile, collected across sixteen games of which Malik Nabers played four.
+console.log("\n=== teammate absence ===");
+
+const wd = e.buildPlayerCard("Wandale Robinson", "WR", "TEN");
+ok("the card always carries an absence array", Array.isArray(wd.absence));
+const nab = (wd.absence || []).find(a => /Nabers/i.test(a.name));
+ok("Wan'Dale's card surfaces the Nabers absence", !!nab,
+   (wd.absence || []).map(a => a.name).join(", "));
+if (nab) {
+  ok("...with the real split (4 played of 16)", nab.playedOf === 4 && nab.total === 16,
+     `${nab.playedOf}/${nab.total}`);
+  ok("...and both halves have >= 3 games", nab.playedOf >= 3 && nab.missed >= 3);
+  ok("...carrying tgt/gm and pts/gm on both sides",
+     [nab.withTgt, nab.withoutTgt, nab.withPts, nab.withoutPts].every(v => typeof v === "number"));
+}
+
+// THE TEAM MUST COME FROM PLAYER_METRICS (2025), NEVER ADP_DATA (2026).
+// Pairing off the 2026 table would compare players never on the field together.
+const absSrc = app.slice(app.indexOf("const teammateAbsence"), app.indexOf("const teammateAbsence") + 2600);
+ok("teammateAbsence pairs on the PLAYER_METRICS team", /tm\.team !== me\.team/.test(absSrc));
+ok("...and never reads ADP_DATA", !absSrc.includes("ADP_DATA"));
+
+// Both split halves must clear the same floor the trajectory layer uses.
+ok("a minimum split size is enforced", /TEAMMATE_MIN_SPLIT/.test(absSrc));
+ok("...and a minimum teammate role", /TEAMMATE_MIN_SHARE/.test(absSrc));
+
+// CONTAINMENT: context only. A scoring path that reads it would move grades.
+for (const fn of ["const analyzeRoster", "const analyzeRedraft"]) {
+  const i = app.indexOf(fn);
+  let depth = 0, j = app.indexOf("{", i), end = j;
+  for (let k = j; k < app.length; k++) {
+    if (app[k] === "{") depth++;
+    else if (app[k] === "}") { depth--; if (depth === 0) { end = k; break; } }
+  }
+  ok(`${fn.replace("const ", "")} never calls teammateAbsence`,
+     !app.slice(i, end).includes("teammateAbsence("));
+}
+
+// Silence is meaningful and must be REACHABLE: most players have no qualifying
+// absence, and that says the shares read at face value.
+const someQuiet = ["Justin Jefferson", "Joe Burrow"].some(n => {
+  const c = e.buildPlayerCard(n, e.ADP_DATA[n.toLowerCase()]?.pos || "WR", "X");
+  return Array.isArray(c.absence);
+});
+ok("the no-absence branch is exercised", someQuiet);
+
+// The section must not be the only thing keeping a blank card alive.
+ok("the no-data branch accounts for absence", /!card\.absence\.length/.test(app));
+
+// It qualifies OPPORTUNITY, so it wears opportunity's colour rather than a new one.
+ok("the absence accent reuses the opportunity token",
+   /absence: "var\(--accent-purple-light\)"/.test(app));
+
+// It reports, it does not conclude.
+ok("the section note refuses to assert causation",
+   /does not prove the volume was hollow/.test(app));
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

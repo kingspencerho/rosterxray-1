@@ -1407,7 +1407,7 @@ const SITUATIONS = {
   // Per the Source Hierarchy, opportunity volume outranks a projection about a rookie.
   // The soft slate (WR SOS #5, delta +25; W15 Smash / W16 Good / W17 Good) is recorded
   // as a FILTER only — it sorts him, it is not why the verdict moved.
-  "wandale robinson": { verdict: "TARGET", trend: "rising", trendNote: "Alpha-tier 2025 volume that the market has not repriced: 92/1014/4 on a 29.8% target share, 26.8% air yards share and 0.64 WOPR — genuine downfield work, not a slot-only profile. Competition in TEN is thinner than the ADP implies: Tate is a rookie (premium capital, but unproven) and Ridley is coming off 2.4 rec/g with a 0% spike rate. Schedule is a bonus rather than the thesis: WR slate ranks 5th-easiest and improved 25 spots, with W15 Smash / W16 Good / W17 Good. Real risks stay live — new team, new QB in Ward, and a 12% spike rate means the volume floor has been higher than the ceiling. Target on volume and competition; re-validate once camp confirms the TEN pecking order.", situationFlags: ["target_vacuum"], riskFlags: [] },
+  "wandale robinson": { verdict: "TARGET", trend: "rising", trendNote: "TEN WR, and the two signals the market is underweighting are the CONTRACT and the COACH (updated Aug 30 2026). He signed a FOUR-YEAR DEAL REPORTED AT $70-78M WITH $38M GUARANTEED on Mar 12 2026, which is No. 1 receiver money and, per Lens 2, an org commitment signal that outranks his draft slot. And the offensive coordinator is BRIAN DABOLL, the head coach who drafted him in New York — so the scheme is continuous even though the uniform is not, which is the opposite of the new-team uncertainty his ADP implies. THE 2025 PRODUCTION NEEDS ITS CONTEXT: 92/1014/4 on a 29.8% target share, 26.8% air yards share and a 0.64 WOPR is alpha-tier volume, but MALIK NABERS PLAYED FOUR GAMES. Twelve of Wan Dale sixteen came without the offence other alpha, and his targets rose 6.8 to 9.4 per game across that line while his points rose only 9.7 to 11.1. The volume is real and partly circumstantial, and his second-best game came with Nabers active, so the conversion limit is his own. THE CEILING LEVER IS AIR YARDS, NOT TARGETS: both of his 18-plus games came on 160-plus air yards against a 74 per game average, while 14 targets on 77 air yards produced 16.8. A 12.5% spike rate with a 0% nuclear rate is the honest ceiling read, though at the 67th percentile it is less damning than the raw number sounds. His standout trait is an 18.8% dud rate at the 80th percentile, which is a FLOOR virtue in a format that does not pay for floor. COMPETITION: Carnell Tate is the 4th overall pick, which is enormous capital and will buy him snaps regardless of a preseason with zero catches on five targets; Saleh has said the play calling is simply not engineered to him yet, and pre-Week-3 exhibition usage is scheme evaluation rather than role confirmation. Ridley posted 2.4 rec/g with a 0% spike rate in 2025. Cam Ward is the QB. WR slate ranks 5th-easiest and improved 25 spots, with W15 Smash / W16 Good / W17 Good. Confidence MEDIUM: the contract and the Daboll reunion are the case, the air-yards ceiling and Tate capital are the counterweight.", situationFlags: ["target_vacuum"], riskFlags: [] },
   "parker washington": { verdict: "TARGET", trend: "rising", trendNote: "JAX WR1 breakout in 2025 — 65/954/6 with 19 catches of 20+ yards; perimeter YPRR (2.59) better than slot (1.87), Coen offense, Lawrence chemistry ascending", situationFlags: ["breakout_profile"], riskFlags: [] },
   "jahan dotson": { verdict: "DART", trend: "stable", trendNote: "2yr/$15M ATL deal puts him in competition with Zachariah Branch for WR2 behind London — role not confirmed. ATL WR room is genuinely vacant behind London so the opportunity is real, but Branch has draft capital working against Dotson. Contingent dart: wins the job = three-week soft window (W15 @WAS, W16 vs TB, W17 vs NO) at near-free ADP.", situationFlags: [], riskFlags: ["role_competition"] },
   "jaylin noel": { verdict: "fade", trend: "rising", trendNote: "ROLE improved, WINDOW did not — the two are separate axes and only one moved. HOUSTON'S WR2 JOB IS NOW OPEN: Jayden Higgins is out for the season with a torn ACL, so the receiver room behind Nico Collins is Noel, Xavier Hutchinson and Tank Dell competing for a full-time outside role (updated Aug 23 2026). Noel already graded as a camp starter before that vacancy appeared, which makes him the leading candidate rather than a settled winner. Stroud connection is real. The fade is unchanged and is purely schedule: HOU draws JAX W15, @PHI W16, @GB W17 — a 3-week playoff avoid. Better player, same dead window. Redraft-relevant, best-ball irrelevant.", situationFlags: ["breakout_profile"], riskFlags: ["schedule_avoid"] },
@@ -2469,6 +2469,85 @@ const gameLogFor = (src, name) => {
 const getGameLog = (name) => gameLogFor(GAME_LOGS, name);
 const getGameLogCur = (name) => (GAME_LOG_CUR_LIVE ? gameLogFor(GAME_LOGS_CUR, name) : null);
 
+// Title-case a normalized DB key into a clean display name. Capitalize after a
+// hyphen too, or a key that kept one renders "Smith-njigba". ONE definition:
+// findPlayer and the card both render names from normalized keys, and two
+// copies is the divergence class this repo has hit repeatedly.
+const titleCaseName = (k) => k.split(" ").map(w => w.length <= 2 && /^(jr|sr|ii|iii|iv)$/.test(w) ? w.toUpperCase() : w.replace(/(^|-)([a-z])/g, (_, sep, c) => sep + c.toUpperCase())).join(" ");
+
+// === TEAMMATE ABSENCE ======================================================
+// CONTEXT ONLY, never scored. It answers the one question a target share
+// cannot: WHO ELSE WAS ON THE FIELD while it was collected.
+//
+// The worked case is Wan'Dale Robinson 2025 — a 29.8% target share at the 87th
+// percentile, which reads as alpha usage until you notice Malik Nabers played
+// FOUR games. Twelve of Wan'Dale's sixteen were played without the offence's
+// other alpha. No single field on the card can show that, because it is a fact
+// about a different player's row.
+//
+// IT REPORTS A SPLIT AND ASSERTS NOTHING. An absence is not proof the volume
+// was inflated — Wan'Dale's second-best game came with Nabers active. The
+// reader gets both halves and draws the conclusion; the layer's job is to make
+// the question visible, not to answer it.
+//
+// ⚠ THE TEAM MUST COME FROM PLAYER_METRICS, NEVER ADP_DATA. These rows carry
+// the team a player PLAYED for in 2025; ADP_DATA carries his 2026 team. Pairing
+// teammates off the 2026 table would compare players who were never on the
+// field together — the exact trap the movedFrom banner exists for.
+const TEAMMATE_MIN_SHARE = 0.15;  // below this an absence redistributes nothing meaningful
+const TEAMMATE_MIN_SPLIT = 3;     // mirrors the snap-trajectory gate: a 1-2 game window is not a split
+const TEAMMATE_MIN_GAMES = 6;     // the subject needs enough season to divide at all
+const TEAMMATE_QB_ATT = 20;       // a QB teammate counts only if he was the actual starter
+
+const teammateAbsence = (name) => {
+  const me = getMetrics(name);
+  const myLog = getGameLog(name);
+  if (!me?.team || !myLog?.g?.length || myLog.g.length < TEAMMATE_MIN_GAMES) return [];
+
+  const cols = GAME_LOGS._meta?.cols?.[myLog.pos] || [];
+  const iPts = cols.indexOf("pts"), iTgt = cols.indexOf("tgt");
+  if (iPts < 0) return [];
+
+  const meKey = normalize(name);
+  const out = [];
+  for (const [key, tm] of Object.entries(PLAYER_METRICS)) {
+    if (key === meKey || tm.team !== me.team) continue;
+    const tmLog = GAME_LOGS[key];
+    if (!tmLog?.g?.length) continue;
+
+    // Two ways to qualify, because the two absences matter for different
+    // reasons: a pass catcher competes for the same targets, a starting QB
+    // changes every target's value.
+    let role = null;
+    if (["WR", "TE", "RB"].includes(tm.pos) && tm.tgt_sh >= TEAMMATE_MIN_SHARE) {
+      role = `${Math.round(tm.tgt_sh * 100)}% target share`;
+    } else if (tm.pos === "QB") {
+      const qcols = GAME_LOGS._meta?.cols?.QB || [];
+      const iAtt = qcols.indexOf("att");
+      const attPg = iAtt >= 0 ? tmLog.g.reduce((s, r) => s + (r[iAtt] || 0), 0) / tmLog.g.length : 0;
+      if (attPg >= TEAMMATE_QB_ATT) role = "starting QB";
+    }
+    if (!role) continue;
+
+    const played = new Set(tmLog.g.map(r => r[0]));
+    const withRows = myLog.g.filter(r => played.has(r[0]));
+    const withoutRows = myLog.g.filter(r => !played.has(r[0]));
+    if (withRows.length < TEAMMATE_MIN_SPLIT || withoutRows.length < TEAMMATE_MIN_SPLIT) continue;
+
+    const avg = (rows, i) => i < 0 ? null : rows.reduce((s, r) => s + (r[i] || 0), 0) / rows.length;
+    out.push({
+      name: titleCaseName(key), pos: tm.pos, role,
+      playedOf: withRows.length, total: myLog.g.length, missed: withoutRows.length,
+      withPts: avg(withRows, iPts), withoutPts: avg(withoutRows, iPts),
+      withTgt: avg(withRows, iTgt), withoutTgt: avg(withoutRows, iTgt),
+    });
+  }
+  // Most of the subject's season affected first — that is the "how much of this
+  // card is describing the absence" question, which is the one worth leading on.
+  out.sort((a, b) => b.missed - a.missed);
+  return out.slice(0, 2);
+};
+
 // One game -> the band the card already names. Kept beside the data so the
 // thresholds cannot drift from _meta.bands.
 const GAME_BANDS = GAME_LOGS._meta?.bands || { spike: 18, usable: 10, dud: 5 };
@@ -2907,6 +2986,11 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     };
   }
 
+  // Who else was on the field while the opportunity numbers were collected.
+  // Empty for most players, and that silence is meaningful: it says no
+  // significant teammate missed time, so the shares read at face value.
+  card.absence = teammateAbsence(name);
+
   if (pos === "QB" && qbCur) {
     const medCur = QB_PROFILE_CUR._meta.rush_att_pg_median;
     card.qbCur = { rush: qbCur.rush_att_pg, pass: qbCur.pass_att_pg, adot: qbCur.pass_adot, gp: qbCur.gp, median: medCur };
@@ -2962,7 +3046,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   for (const e of card.efficiency) if (e.key) glossKeys.push(e.key);
   card.glossary = glossKeys.filter(k => CARD_GLOSSARY[k]).map(k => ({ key: k, ...CARD_GLOSSARY[k] }));
 
-  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length && !card.gameLog && !card.gameLogCur) {
+  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length && !card.gameLog && !card.gameLogCur && !card.absence.length) {
     card.glossary = [];
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
@@ -3070,9 +3154,7 @@ const findPlayer = (name, format = "standard") => {
   else if (format === "yahoo") table = ADP_YAHOO;
   else table = ADP_DATA;
 
-  // Title-case a normalized DB key into a clean display name
-  // Capitalize after a hyphen too, or a key that kept one renders "Smith-njigba".
-  const titleCase = (k) => k.split(" ").map(w => w.length <= 2 && /^(jr|sr|ii|iii|iv)$/.test(w) ? w.toUpperCase() : w.replace(/(^|-)([a-z])/g, (_, sep, c) => sep + c.toUpperCase())).join(" ");
+  const titleCase = titleCaseName;
   const mk = (key, entry, extra = {}) => ({ ...entry, name: titleCase(key), matchedKey: key, ...extra });
 
   // 1. Exact normalized match
@@ -6611,6 +6693,9 @@ const CARD_ACCENTS = {
   trajectory: "var(--ui-accent)",
   volume: "var(--ui-accent)",
   opportunity: "var(--accent-purple-light)",
+  // Qualifies the OPPORTUNITY numbers, so it wears their colour: the two are
+  // one idea, and a share means something different once you know who was out.
+  absence: "var(--accent-purple-light)",
   outcomes: "var(--info-blue)",
   // Rank 1 in the Source Hierarchy is role CHANGE, and this is the only place
   // on the card that carries it, so it gets the bright headline treatment
@@ -7442,6 +7527,34 @@ const PlayerCardModal = ({ card, onClose }) => {
             )}
 
             <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
+
+            {card.absence.length > 0 && (
+              <CardSection
+                title="Who else was on the field"
+                accent={CARD_ACCENTS.absence}
+                collapsible
+                hint={`${card.absence.length} absence${card.absence.length > 1 ? "s" : ""}`}
+                note="A target share is a share OF something. These teammates missed real time, so part of the season above was played without them. The split is shown, not a conclusion — an absence explains where volume came from, it does not prove the volume was hollow.">
+                {card.absence.map((a, i) => (
+                  <div key={i} style={{ padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>
+                      {a.name}
+                      <span style={{ color: "var(--text-dim)", fontWeight: 400 }}> {a.pos} · {a.role}</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 6px" }}>
+                      played {a.playedOf} of {a.total} · missed {a.missed}
+                    </div>
+                    {[["with him", a.withTgt, a.withPts], ["without him", a.withoutTgt, a.withoutPts]].map(([lab, tgt, pts]) => (
+                      <div key={lab} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "1px 0" }}>
+                        <span style={{ color: "var(--text-dim)", minWidth: "84px" }}>{lab}</span>
+                        {tgt != null && <span style={{ color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{tgt.toFixed(1)} tgt/gm</span>}
+                        <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{pts.toFixed(1)} pts/gm</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </CardSection>
+            )}
 
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
