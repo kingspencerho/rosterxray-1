@@ -10146,8 +10146,13 @@ Analyze this best ball roster. Return JSON only.`;
             onClick={() => setCeilingOpen(prev => !prev)}
             style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: ceilingOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
           >
+            {/* The two words wear the colours their own rows already carry —
+                spike cells are --pos, nuclear cells --accent-purple-light — so
+                the header and its data read as one object. Same sanctioned
+                pairing as the Season Schedule header; everything else in this
+                label stays --ui-accent chrome. */}
             <span style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-              Ceiling Rankings · Spike / Nuclear Weeks
+              Ceiling Rankings · <span style={{ color: "var(--pos)" }}>Spike</span> / <span style={{ color: "var(--accent-purple-light)" }}>Nuclear</span> Weeks
             </span>
             <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{ceilingOpen ? "▲" : "▼"}</span>
           </button>
@@ -10163,7 +10168,9 @@ Analyze this best ball roster. Return JSON only.`;
                     <div key={pos} style={{ background: "var(--bg-inset)", border: "1px solid var(--bg-raised)", borderRadius: "4px", padding: "10px 12px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
                         <span style={{ fontSize: "11px", color: pc.text, fontWeight: 700, letterSpacing: "0.1em" }}>{pos}</span>
-                        <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>SPIKE · NUKE · SOS</span>
+                        <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>
+                          <span style={{ color: "var(--pos)" }}>SPIKE</span> · <span style={{ color: "var(--accent-purple-light)" }}>NUKE</span> · SOS
+                        </span>
                       </div>
                       {CEILING_RANKINGS[pos].map((p, i) => (
                         <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", borderBottom: i < CEILING_RANKINGS[pos].length - 1 ? "1px solid var(--bg-raised)" : "none", fontSize: "11px" }}>
