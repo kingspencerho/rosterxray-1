@@ -157,13 +157,25 @@ console.log("\nthe attention pulses");
 //    it opens (the upload tab's own "stops when clicked" rule).
 // 3. prefers-reduced-motion silences both.
 
-/\.schedule-cta-pulse,\s*\n\s*\.roster-cta-pulse \{\s*animation: ctaPulse ([\d.]+)s/.test(src)
-  ? ok("both pulses share one animation definition — the timing cannot drift")
-  : bad("the two pulses must share one keyframes/timing definition, not clone it");
+/\.schedule-cta-pulse,\s*\n\s*\.roster-cta-pulse \{\s*animation-duration: ([\d.]+)s;\s*animation-timing-function: [^;]+;\s*animation-iteration-count: infinite;/.test(src)
+  ? ok("both pulses share one timing definition — the rhythm cannot drift")
+  : bad("the two pulses must share the duration/easing/count longhands, not clone them");
 
-/@keyframes ctaPulse[\s\S]{0,240}rgba\(var\(--cta-glow\)/.test(src)
-  ? ok("the shared keyframes takes its colour from a per-caller variable")
-  : bad("the shared keyframes must read --cta-glow so each caller owns its hue");
+// ⚠ THE WEBKIT TRAP. A single shared @keyframes reading rgba(var(--cta-glow))
+// is tidier and animates correctly in Chromium — and silently does NOT animate
+// in WebKit, so the pulse dies on iPhone while every desktop check passes.
+// This shipped once and had to be reverted. Keep the colours literal.
+/@keyframes (scheduleCta|rosterCta)[\s\S]{0,300}var\(/.test(src)
+  ? bad("a pulse @keyframes contains var() — WebKit will not animate it; inline the rgba literal")
+  : ok("no pulse keyframes contains var() — safe to animate in WebKit");
+
+/@keyframes scheduleCta[\s\S]{0,240}rgba\(192, 132, 252, 0\.35\)/.test(src)
+  ? ok("the schedule pulse peaks at its literal purple")
+  : bad("the schedule pulse must peak at a literal rgba(192, 132, 252, 0.35)");
+
+/@keyframes rosterCta[\s\S]{0,240}rgba\(203, 213, 225, 0\.35\)/.test(src)
+  ? ok("the roster pulse peaks at its literal --ui-accent grey")
+  : bad("the roster pulse must peak at a literal rgba(203, 213, 225, 0.35)");
 
 // Each control is gated on ITS OWN collapsed state.
 /className=\{bbScheduleOpen \? undefined : "schedule-cta-pulse"\}/.test(src)
@@ -182,13 +194,13 @@ rosterGated === 2
 // The hues are the assertion, not the timing. Purple is the schedule section's
 // own; the roster chip is CHROME and must stay hueless, or a navigation
 // affordance starts reading as data.
-/\.schedule-cta-pulse \{ --cta-glow: 192, 132, 252; \}/.test(src)
-  ? ok("the schedule pulse glows in the section's own purple")
-  : bad("the schedule pulse colour must be the schedule section's purple");
+/\.schedule-cta-pulse \{ animation-name: scheduleCta; \}/.test(src)
+  ? ok("the schedule chip is wired to its own keyframes")
+  : bad("the schedule chip must select animation-name: scheduleCta");
 
-/\.roster-cta-pulse\s+\{ --cta-glow: 203, 213, 225; \}/.test(src)
-  ? ok("the roster pulse glows in hueless --ui-accent, matching the chip")
-  : bad("the roster pulse must use --ui-accent (203,213,225) — chrome carries no data hue");
+/\.roster-cta-pulse\s+\{ animation-name: rosterCta; \}/.test(src)
+  ? ok("the roster chip is wired to its own keyframes")
+  : bad("the roster chip must select animation-name: rosterCta");
 
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);
