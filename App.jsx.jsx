@@ -306,7 +306,7 @@ const ADP_DATA = {
   "tank dell": { adp: 179.3, pos: "WR", team: "HOU" },  // Aug 15 2026: live Underdog board. Right direction from the redraft source but it overshot by 26.7 picks.
   "zachariah branch": { adp: 180.9, pos: "WR", team: "ATL" },  // ADP refresh 2026-08-16: 198.0 -> 180.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "darnell mooney": { adp: 211.4, pos: "WR", team: "NYG" },  // ADP refresh 2026-08-16: 198.7 -> 211.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
-  "kayshon boutte": { adp: 200.1, pos: "WR", team: "NE" },
+  "kayshon boutte": { adp: 200.1, pos: "WR", team: "HOU" },
   "sean tucker": { adp: 200.1, pos: "RB", team: "TB" },
   "braelon allen": { adp: 212.1, pos: "RB", team: "NYJ" },  // ADP refresh 2026-08-16: 200.7 -> 212.1 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "ray davis": { adp: 188, pos: "RB", team: "BUF" },  // ADP refresh 2026-08-16: 203.1 -> 188.0 (Underdog best ball, 0 drafts, live to 2026-08-16)
@@ -695,7 +695,7 @@ const ADP_SUPERFLEX = {
   "tre' harris": { adp: 196, pos: "WR", team: "LAC" },
   "ryan flournoy": { adp: 166, pos: "WR", team: "DAL" },
   "germie bernard": { adp: 206, pos: "WR", team: "PIT" },
-  "kayshon boutte": { adp: 239, pos: "WR", team: "NE" },
+  "kayshon boutte": { adp: 239, pos: "WR", team: "HOU" },
   "sean tucker": { adp: 204, pos: "RB", team: "TB" },
   "mason taylor": { adp: 235, pos: "TE", team: "NYJ" },
   "adonai mitchell": { adp: 144, pos: "WR", team: "NYJ" },  // Aug 15 2026: measured -50 live move applied to this table's scale
@@ -1112,6 +1112,7 @@ const TEAM_CHALK = {
 // Format: normalized player name → one-sentence situation update
 // Update this alongside VERDICTS whenever a significant role/roster change happens
 const RECENT_NEWS = {
+  "adam randall": "BAL rookie RB, 2026 fifth round out of Clemson, built as a JOKER under new OC Declan Doyle: fullback, tight end, slot and flexed outside. PRESEASON WEEK 3, Aug 28 2026 vs WAS: a TEAM-HIGH 70 SCRIMMAGE YARDS on 5 carries for 25 and 3 catches for 45 on 4 targets, the long a second-quarter screen he took 24 by stiff-arming a defensive back. He shed a tackler in the backfield on his second carry and broke another for a 4-yard gain. HC Jesse Minter called the skill set versatile, said he has learned to be a really physical runner, and credited a really good skill set out of the backfield. Derrick Henry is clearly ahead of the whole room. THE SPECIFIC JOB IN PLAY IS JUSTICE HILL PASSING-DOWN WORK, which analysts now have Randall threatening on the strength of his pass-catching. Rasheen Ali remains in the mix and led the team in touches in that game despite leaving early for the birth of his child. Randall missed the Week 2 game vs MIN with a minor injury and returned without limitation, and beat reporting has him proven for the 53. Aug 15 debut vs PHI: team-leading 13 touches, 12 carries, 46 yards, a rushing TD.",
   // === Aug 2 2026 news sweep (agent-researched, sourced) ===
   "ricky pearsall": "OUT FOR 2026 (Aug 1 2026). Season-ending PCL surgery on the right knee — the same PCL that cost him 8 games in 2025, re-aggravated in the first week of camp after just two practices. Placed on IR. GM John Lynch expects a full recovery for 2027; PCL recovery runs 6-12 months. Remove from all 2026 boards — this is not a monitor situation. His vacated targets are the direct cause of the Deebo signing and raise the floor for Mike Evans and rookie De'Zhaun Stribling.",
   "deebo samuel": "HE IS A 49ER. Deebo Samuel plays for SAN FRANCISCO — signed 1yr/up to $7M on Aug 1 2026, the same day Ricky Pearsall went on IR. Do not describe him as a Commander, a Washington player, or a free agent; any such reference is wrong for 2026. Every matchup, stack and bring-back for him runs off SF's schedule. GM John Lynch says they will 'use him all over the field' — receiver, backfield touches, return duties. The SF room ahead of him is thin (Evans is 32, Kirk has a calf strain, Pearsall is out for the year), so his touch floor beats his ADP, though gadget deployment caps his target-share ceiling. His 2025 receiving line of 72/727/5 on 99 targets plus 17 carries was produced with a different team and is prior-role context only.",
@@ -1192,7 +1193,7 @@ const RECENT_NEWS = {
   "zachariah branch": "ATL \u2014 UPGRADED Aug 15 2026. He is competing with Jahan Dotson for WR2 behind Drake London, with the ATL QB situation gating the whole offense. Camp has been emphatic: he was THE MOST IMPRESSIVE PLAYER OF ATLANTA'S FIRST WEEK, and the specifics matter more than the label. Electric athleticism in both 1-on-1 and team drills, ROUTE RUNNING DESCRIBED AS FAR MORE ADVANCED THAN WHAT HE SHOWED AT GEORGIA, and hands reported as arguably the best of any receiver in the building. The route-running note is the important one, because separation-by-technique is the thing that converts a returner-athlete profile into a real target share, and it is exactly what the pre-camp scouting doubted. He made his preseason debut at Mercedes-Benz Stadium. WHAT HAS NOT CHANGED: he is still behind London, still needs the WR2 job over Dotson (2yr/$15M), and the Atlanta QB situation is still the gate on the whole offense. Three-week window remains soft: W15 @WAS, W16 vs TB, W17 vs NO. Per Lens 4 these are pre-Week-3 reps. Re-check after preseason Week 3.",
   "oscar delp": "NO drafted Delp as a developmental TE2 behind Juwan Johnson. 6-5/245, 4.49 40, 38-inch vertical — legitimate athleticism. Kittle comp per Saints Wire. Different skill set from Johnson (blocker/receiver vs. gadget/red zone) means complementary deployment is plausible in Shough's play-action system. Free dart in three soft playoff weeks.",
   "mike washington": "LV — THE CONTINGENCY IS LIVE (updated Aug 28 2026). Ashton Jeanty is dealing with an ankle sprain and Washington, the Raiders' fourth-round rookie, is the named beneficiary for any games Jeanty misses. He backed it up on the field: a strong preseason including an eight-yard gain on his first carry, a 14-yard run, a five-yard run through a broken tackle and an 11-yard gain. Klint Kubiak historically deploys even two-back splits regardless of talent differential, with Walker/Charbonnet in Seattle as the precedent, so there is a standalone path even once Jeanty is healthy. LV W16 vs TEN and W17 @ARI are two soft playoff weeks at an ADP near 192.",
-  "kayshon boutte": "AJ Brown arrival at NE crowds target share but Boutte's deep threat profile creates a distinct role that doesn't compete directly with Brown's intermediate/possession work. Maye's aggressive downfield tendency means vertical shots are part of the scheme regardless of Brown's presence. Boutte is a role-specific dart — not a volume play — who fires in games where Maye takes deep shots. NE W15 @KC is a legitimate bring-back game for KC stacks.",
+  "kayshon boutte": "TRADED TO HOUSTON on Aug 24 2026 for safety Jaylen Reed and a 2028 seventh-round pick. Houston moved for him after Jayden Higgins tore an ACL, and the plan is for him to be the TEXANS WR2 opposite Nico Collins, a defined role rather than a rotation. New England had him as a healthy scratch and Vrabel said he would not have played there, so the trade converts a buried depth piece into a starter. He caught 76 for 1,140 and 9 TDs across two seasons in New England. C.J. Stroud is the quarterback and Higgins vacates a full-time outside job.",
   "jaylin noel": "HOU — the ROLE resolved UPWARD (Jul 2026): SI's camp depth chart lists him as a STARTER alongside Nico Collins and Jayden Higgins, with Tank Dell and Xavier Hutchinson as backups. Dell was NOT placed on PUP (so he is cleared) but was held out of full-team reps to open camp and is being brought along slowly after the Dec 2024 knee dislocation. OUTLET CONFLICT: other reporting still frames Dell as battling Noel and Hutchinson for WR3, and both framings are circulating in early August — do not treat the starter listing as settled. THE SCHEDULE VERDICT IS A SEPARATE AXIS AND STILL STANDS: HOU is a 3-week playoff avoid (JAX W15, @PHI W16, @GB W17). Better player, same dead window.",
   "carson beck": "ARI — STARTED THE HALL OF FAME GAME Aug 6 2026 and was the best player on the field in the first half: 15/19, 188 yards, 1 TD, 125.4 rating, one sack, two scoring drives, out at halftime with the game tied 17-17. Highlights were a 49-yard deep ball to Jalen Brooks (3-99 in the half) and a 5-yard TD fade to Simi Fehoko. Arm strength is the flagged question. CAR won 33-30 on Haynes King's walk-off 5-yard run. BUT THE JOB IS NOT OPEN: Brissett's holdout ended in late July on a reworked $15.5M/up-to-$21M deal and reporting has him starting Week 1 vs LAC, with HC LaFleur saying it benefits Beck to sit. Read this as a strong audition for a LATE-SEASON contingency, not a Week 1 threat.",
   "jacoby brissett": "ARI — THE WEEK 1 STARTING JOB IS SETTLED (updated Aug 28 2026). He signed a reworked deal in late Jul 2026 at $15.5M base with up to $21M in incentives, reported on time and has practised since; $15M guaranteed is starter money and reporting through late August treats him as the outright Week 1 starter against the Chargers. The depth chart behind him runs Gardner Minshew, third-round rookie Carson Beck and Kedon Slovis. Beck was ruled out with a rib injury sustained in the Hall of Fame game and had been practising through soreness, and HC LaFleur has said sitting benefits a rookie quarterback, so the leash here is long. Low ceiling on a rebuilding offense, but the job itself is not in question.",
@@ -1217,7 +1218,7 @@ const VERDICTS = {
   // an upgrade over a WR they actually drafted. Do not delete this to "clean up" a
   // roster he is not on; the entry exists for the recommendation path, not the grade.
   "ricky pearsall": { verdict: "fade", date: "2026-08-14", reason: "OUT FOR 2026 — season-ending PCL surgery on the right knee, placed on IR Aug 1. Same PCL that cost him 8 games in 2025, re-aggravated after two camp practices. Lynch expects a full 2027 recovery; PCL rehab runs 6-12 months. Undraftable this season at any price, and his ADP is stale market residue rather than a live valuation. His vacated targets caused the Deebo signing and lift Evans and Stribling.", confidence: "HIGH" },
-  "kayshon boutte": { verdict: "TARGET", date: "2026-06-10", reason: "Role-specific deep threat dart at near-free ADP. AJ Brown arrival crowds volume but Boutte's vertical speed profile creates a distinct usage pattern that doesn't compete directly with Brown's intermediate/possession role or Doubs' slot work. Drake Maye's aggressive downfield tendency means vertical shots are part of the scheme regardless of Brown's presence — Boutte is the designated speed option on the outside. Not a weekly starter thesis. Best ball only needs 3-4 deep shot games. NE W15 @KC is the bring-back ceiling game for KC stacks — negative game script in that matchup actually increases Boutte's deep shot volume.", confidence: "SPECULATIVE" },
+  "kayshon boutte": { verdict: "TARGET", date: "2026-08-30", reason: "Houston WR2 opposite Nico Collins after the Aug 24 2026 trade from New England. The role is the whole case: Jayden Higgins tore an ACL and vacated a full-time outside job, and Houston gave up a safety and a pick specifically to fill it. Draft capital is modest (6th round, 2023), so the org commitment signal here is the trade itself plus the immediate WR2 designation. C.J. Stroud elevates the situation. Price has not caught up to the role change.", confidence: "SPECULATIVE" },
   "jaxson dart": { verdict: "TARGET", date: "2026-06-03", reason: "NYG run-heavy limits ceiling but W17 @DAL + DAL bottom-5 defense is a real spike week; late-round leverage play", confidence: "MEDIUM" },
   "jakobi lane": { verdict: "TARGET", date: "2026-08-15", reason: "Runaway BAL camp standout, first-team reps, red-zone chemistry with Lamar; ADP 214.7 -> 162.7", confidence: "MEDIUM" },
   "lamar jackson": { verdict: "hold", date: "2026-06-04", reason: "Mixed playoff schedule — W15 @PIT tough, W17 @CIN soft; scheme uncertainty under Minter/Doyle is the real flag", confidence: "MEDIUM" },
@@ -1299,6 +1300,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "adam randall": { verdict: "DART", trend: "rising", trendNote: "BAL JOKER ROOKIE, fifth round 2026 out of Clemson (updated Aug 30 2026). New OC Declan Doyle deploys him as a multi-position piece, fullback through tight end through slot and flexed outside, so this is a ROLE rather than a depth-chart slot. PRESEASON WEEK 3 IS THE SIGNAL AND IT IS A RECEIVING ONE: Aug 28 2026 vs WAS he led the team with 70 scrimmage yards, going 5-25 rushing and 3-45 receiving on 4 targets, 15.0 per catch, the long a second-quarter screen he took 24 by stiff-arming a defensive back. Creating after the catch in space is precisely the job the staff described, and per Lens 4 usage after preseason Week 3 is the primary signal and outranks coachspeak. The running answered its own question too: 5.0 per carry, a tackler shed in the backfield and another broken. HC Jesse Minter is on record with FUNCTIONAL language rather than generic praise, calling the skill set versatile, saying he has learned to be a really physical runner and crediting a really good skill set out of the backfield. Lens 4 grades that as signal. THE PATH IS NOW A NAMED JOB RATHER THAN A DEPTH-CHART NUMBER: the role in play is JUSTICE HILL PASSING-DOWN WORK, which analysts have Randall threatening on the strength of his pass catching. Treat that as a PROJECTION rather than a confirmed role — it rests on one exhibition receiving line, and Hill holds the job today. It matters because a passing-down back carries standalone snaps, so the bet is no longer only a Derrick Henry injury. THE CONSTRAINTS ARE REAL: Henry is clearly ahead of the entire room, and Rasheen Ali is still in the mix and actually LED THE TEAM IN TOUCHES in that same game despite leaving early for the birth of his child, so the backup competition is live rather than settled. STACK CAUTION SPECIFIC TO THIS APP: he is a rookie with no prior NFL season, so he clears neither the Elite Receiving Back nor the Real Receiving Role tier and earns NO receiving-back stack credit, however his camp receiving line reads. Grade a Lamar loop containing him as the QB plus its pass catchers and treat Randall as a same-team dart on top. Baltimore W17 at CIN is the strongest of his three playoff environments. Confidence MEDIUM on the role and SPECULATIVE on weekly output: all of the above was earned against backup defenses in August.", situationFlags: ["role_dependent", "scheme_fit"], riskFlags: ["depth_chart_competition"] },
   "najee harris": { verdict: "dart", trend: "rising", trendNote: "SIGNED WITH THE GIANTS on a one-year deal in mid-August 2026, and preseason Week 3 was the first real evidence (updated Aug 29 2026). He WON THE FIRST-TEAM SNAP COUNT 11-9 OVER TYRONE TRACY and carried 11 times for 39 yards with a 20-yard reception. THE ROOM IS CROWDED — Cam Skattebo, Tracy and Devin Singletary are all here — so this is a competition for the No. 2 job behind Skattebo rather than a path to a workhorse role, and ball security is the stated differentiator between him and Tracy. THE INJURY IS THE WHOLE BET: he tore his left Achilles on a noncontact play Sept 21 2025, three games into his time in Los Angeles, and he is not back to full. An Achilles in the calendar year before is a real availability and explosiveness risk, and his own framing is that the prior production does not carry over. Career volume is the traits case. Free at ADP 201.3, and a 2-of-4 backfield at that price is a contingency, not a starter.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "depth_chart_competition"] },
   "keenan allen": { verdict: "hold", trend: "stable", trendNote: "SIGNED WITH INDIANAPOLIS on a one-year deal reported Aug 17 2026 (base $3.32M, $2.81M fully guaranteed, up to $8.32M with incentives and per-game roster bonuses). THE ROLE IS WR3 BEHIND ALEC PIERCE AND JOSH DOWNS, and the modest guarantee is the org commitment signal — an auxiliary target, not a target-share reset. The connection is Shane Steichen, who was his OC in Los Angeles, so the scheme fit is real and the route tree should be the short-area, option-route work he has run his whole career. Daniel Jones is the QB. He turns 34 this season and would be the oldest active receiver in the league, so the standalone case is volume-light: he is a floor piece in a top-5 WR FPA offense whose ceiling depends on a Pierce or Downs absence. Contingent value clearly exceeds standalone value here. Pierce came off active/PUP Aug 27 2026 with no team reps all summer, which is the live path to more work.", situationFlags: ["scheme_fit", "role_dependent"], riskFlags: ["age_decline", "depth_chart_competition"] },
   "dezhaun stribling": { verdict: "TARGET", trend: "rising", trendNote: "SF confirms a MAJOR ROLE FOR WEEK 1 (updated Aug 29 2026). He led the preseason opener in receiving and finished the first two exhibitions with 11 catches for 109 yards, the most productive preseason of any rookie receiver on this board. A minor shoulder injury held him out of preseason Week 3 and he returned to drills in a non-contact jersey before that, so availability is the open question and the role is not. Per Lens 4 the Week 1 usage statement outranks the snap counts, because it is direct commitment language rather than scheme evaluation. ADP has moved 198 -> 130.7 and the market is still catching up. SF W15 @LAC and W16 @KC both clear the competitive-balance bar as pick'em shootouts, so the playoff window is live even against tough raw defensive grades.", situationFlags: ["breakout_profile", "target_vacuum"], riskFlags: ["injury_history"] },
@@ -1377,7 +1379,7 @@ const SITUATIONS = {
   "germie bernard": { verdict: "DART", trend: "stable", trendNote: "PIT WR4, and preseason Week 3 moved the read AGAINST him (updated Aug 29 2026). He played extensively in the finale while ROMAN WILSON SAT — the standard usage pattern for a player whose job is already settled — which points to Wilson holding the third receiver role into Week 1 and Bernard behind him. Opening-week slot snaps are scheme evaluation; a Week 3 split like this one is role confirmation, and per Lens 4 the later signal governs. THE DRAFT CAPITAL IS STILL REAL: a second-round pick working mainly from the slot, a spot Metcalf and Pittman do not occupy, so the role complements the starters rather than competing with them. He led the offense through the first half of the preseason opener. The bet is now explicitly CONTINGENT — extensive Week 3 volume means he is next up if the Pittsburgh receiver room takes another injury, and that room has already had several. Near-free at ADP 198.8, so the price still fits a contingency.", situationFlags: ["target_vacuum"], riskFlags: ["depth_chart_competition"] },
   "seth mcgowan": { verdict: "DART", trend: "rising", trendNote: "Leading the IND RB2 competition through two weeks of camp — no drops, a 30-yard TD run in a two-minute drill, and real pass-protection reps, which is the skill that actually decides backup snaps. Steichen and Cooter both positive; Jonathan Taylor comped him to David Montgomery. 6-0, 223, 4.49, downhill power with better feet than the build implies. Two caveats that keep this a dart rather than a target: the opening is partly injury-made (Giddens has a hamstring), and seventh-round capital at No. 237 is the weakest draft signal there is. PURE HANDCUFF — Taylor is the undisputed lead and there is no path to volume without an injury ahead of him. The reason he is worth a final-round slot anyway is that he handcuffs a top-6 ADP workhorse, which is the Contingency Protocol shape rather than a role bet. Kickoff-return work is a small extra path to touches.", situationFlags: ["committee_breaker"], riskFlags: ["depth_chart_competition", "role_dependent"] },
   "ricky pearsall": { verdict: "fade", trend: "falling", trendNote: "OUT FOR THE 2026 SEASON — season-ending PCL surgery, on IR since Aug 1. Not a monitor situation and not a stash: PCL recovery runs 6-12 months and Lynch\'s stated target is 2027. He must not appear in any depth-chart discussion of the SF receiver room as present or returning; the current room is Evans, Deebo, Kirk and Stribling. His ADP in these tables is stale market residue from before the injury.", situationFlags: [], riskFlags: ["injury_history"] },
-  "kayshon boutte": { verdict: "TARGET", trend: "stable", trendNote: "Deep threat role survives AJ Brown arrival — distinct vertical speed profile doesn't compete with Brown's possession work or Doubs' slot role. Maye's downfield aggression means vertical shots are baked into the scheme. Role-specific dart, not a volume play. Best ball ceiling game: NE W15 @KC as bring-back for KC stacks — negative game script increases deep shot volume.", situationFlags: ["scheme_fit"], riskFlags: [] },
+  "kayshon boutte": { verdict: "TARGET", trend: "rising", trendNote: "HOUSTON WR2, acquired from New England on Aug 24 2026 for a safety and a 2028 seventh (updated Aug 30 2026). THE ROLE IS THE THESIS: Jayden Higgins is out for the season with a torn ACL, which vacated a FULL-TIME OUTSIDE job, and Houston traded for Boutte specifically to fill it. The staff has named him the No. 2 opposite Nico Collins. Per the Source Hierarchy this is a rank-1 confirmed role CHANGE, so it outranks any prior-season metric, and his 2025 numbers describe a different team and a different quarterback, so re-validate rather than carry them. C.J. Stroud is a clear situation upgrade. Collins commands the alpha target share, so this is a WR2 volume profile with real weekly variance rather than a target hog.", situationFlags: ["scheme_fit"], riskFlags: [] },
   "kenneth gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB deal, and Aug 2026 camp confirmed the SHAPE of the role: Zac Robinson uses him as the receiving back and safety valve, not a rotational runner — Irving takes the bulk of carries. Primary receiving option from 21-personnel pony sets, aligned in the backfield and the slot; Robinson's ATL backs totaled 1,435 receiving yards over two seasons. Rushing volume is capped by Irving, so the value is target-driven and game-script sensitive. His 73-reception 2025 line is PIT data under a different QB and OC — re-validate the elite-receiving-back tier rather than assuming it carries.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee", "role_dependent"] },
   "kenny gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB deal, and Aug 2026 camp confirmed the SHAPE of the role: Zac Robinson uses him as the receiving back and safety valve, not a rotational runner — Irving takes the bulk of carries. Primary receiving option from 21-personnel pony sets, aligned in the backfield and the slot; Robinson's ATL backs totaled 1,435 receiving yards over two seasons. Rushing volume is capped by Irving, so the value is target-driven and game-script sensitive. His 73-reception 2025 line is PIT data under a different QB and OC — re-validate the elite-receiving-back tier rather than assuming it carries.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee", "role_dependent"] },
   // === QB UNCERTAINTY FLAGS ===
@@ -1813,7 +1815,7 @@ const ADP_YAHOO = {
   "nicholas singleton": { adp: 167.0, pos: "RB", team: "TEN" },
   "rashid shaheed": { adp: 130.1, pos: "WR", team: "SEA" },
   "adonai mitchell": { adp: 169.0, pos: "WR", team: "NYJ" },
-  "kayshon boutte": { adp: 170.0, pos: "WR", team: "NE" },
+  "kayshon boutte": { adp: 170.0, pos: "WR", team: "HOU" },
   "kaytron allen": { adp: 171.0, pos: "RB", team: "WAS" },
   "ray davis": { adp: 172.0, pos: "RB", team: "BUF" },
   "emmett johnson": { adp: 173.0, pos: "RB", team: "KC" },
@@ -4015,6 +4017,48 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
         TE: { min: 1, max: is20Round ? 4 : 3, msg: `${posCounts.TE} TE (target 1-${is20Round ? 4 : 3})` },
         QB: { min: 2, max: is20Round ? 4 : 3, msg: `${posCounts.QB} QB (target 2-${is20Round ? 4 : 3})` },
       };
+  // === SANCTIONED ARCHETYPES ===
+  // The generic bands above measure DEVIATION FROM THE MEAN, which is the right
+  // default and the wrong answer for a build that deviates ON PURPOSE. Three of
+  // the five layouts the framework names as valid were being charged by them:
+  // 2-4-10-2 took a full -1.0 for the ten receivers the archetype REQUIRES, and
+  // 2-5-9-2 and 2-4-9-3 each took a silent -0.3 that never surfaced as a
+  // weakness. A roster cannot be simultaneously a recommended construction and a
+  // scored flaw.
+  //
+  // THE PRECONDITION IS WHAT KEEPS THIS FROM BEING A FREE PASS. Each archetype
+  // is defined by its counts AND by the thing that makes those counts work. A
+  // 10-WR / 4-RB roster whose best back went in the fourth round is not
+  // Hyper-Fragile, it is just thin at RB, and it keeps the penalty. Matching the
+  // shape is not enough; the roster has to have paid for the shape.
+  const ARCHETYPES = [
+    { name: "Hyper-Fragile", layout: "2-4-10-2", counts: { QB: 2, RB: 4, WR: 10, TE: 2 },
+      // "Requires premium early RB capital" — rounds 1-2 of a 12-man draft.
+      requires: (v) => v.some(p => p.pos === "RB" && p.adp != null && p.adp <= 24),
+      requiresLabel: "an RB inside the first two rounds",
+      note: "caps RB at 4 and leans on ten receivers to insulate the flex" },
+    { name: "Balanced", layout: "2-5-9-2", counts: { QB: 2, RB: 5, WR: 9, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "maximises WR depth against early anchors" },
+    { name: "Balanced", layout: "2-6-8-2", counts: { QB: 2, RB: 6, WR: 8, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "maximises WR depth against early anchors" },
+    { name: "Triple QB Mutation", layout: "3-5-8-2", counts: { QB: 3, RB: 5, WR: 8, TE: 2 },
+      requires: () => true, requiresLabel: null,
+      note: "a third QB bypasses schedule bottlenecks or locks a secondary bring-back" },
+    { name: "Triple TE Mutation", layout: "2-4-9-3", counts: { QB: 2, RB: 4, WR: 9, TE: 3 },
+      // "Requires elite, consolidated target shares in the TE room."
+      requires: (v) => v.some(p => p.pos === "TE" && p.adp != null && p.adp <= 60),
+      requiresLabel: "a premium TE anchor",
+      note: "trades the tenth WR for a consolidated TE room" },
+  ];
+
+  // Standard best ball only. Superflex has its own bands and 20-round rosters
+  // shift every count, so neither is described by these layouts.
+  const archetype = (format === "superflex" || is20Round) ? null
+    : ARCHETYPES.find(a => ["QB", "RB", "WR", "TE"].every(p => posCounts[p] === a.counts[p])) || null;
+  const archetypeQualified = archetype ? archetype.requires(valid) : false;
+
   const benchmarkIssues = [];
   Object.entries(benchmarks).forEach(([pos, b]) => {
     if (posCounts[pos] < b.min) benchmarkIssues.push({ type: "under", pos, msg: b.msg, severity: "major" });
@@ -4024,6 +4068,18 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       benchmarkIssues.push({ type: "over", pos, msg: b.msg, severity: overBy >= 2 ? "major" : "minor" });
     }
   });
+
+  // The waiver covers ONLY the over-count flags the archetype is defined by.
+  // An "under" flag is never waived: being short at a position is a real hole
+  // whatever shape the rest of the roster is in.
+  const archetypeWaived = [];
+  const benchmarkIssuesScored = archetypeQualified
+    ? benchmarkIssues.filter(i => {
+        const waive = i.type === "over" && archetype.counts[i.pos] === posCounts[i.pos];
+        if (waive) archetypeWaived.push(i);
+        return !waive;
+      })
+    : benchmarkIssues;
 
   // Playoff window grading per stack with TOURNAMENT WEIGHTS
   const stackGrades = stacks.map(stack => {
@@ -4704,10 +4760,22 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   }
 
   // === CONSTRUCTION ANALYSIS ===
-  const majorIssues = benchmarkIssues.filter(i => i.severity === "major");
-  const minorIssues = benchmarkIssues.filter(i => i.severity === "minor");
+  const majorIssues = benchmarkIssuesScored.filter(i => i.severity === "major");
+  const minorIssues = benchmarkIssuesScored.filter(i => i.severity === "minor");
 
-  if (benchmarkIssues.length === 0) {
+  // A recognised archetype is named out loud. The waiver removes the DEDUCTION,
+  // never the disclosure — "Hyper-Fragile" is called that for a reason, and a
+  // reader who cannot see the shape cannot judge the risk it carries.
+  if (archetypeQualified && archetypeWaived.length > 0) {
+    strengths.push(`Deliberate ${archetype.name} construction (${archetype.layout}) — ${archetype.note}; ${archetypeWaived.map(i => i.msg).join(", ")} is the archetype, not a flaw`);
+  }
+  // Matching the shape without paying for it is the case the penalty exists for,
+  // so it keeps the deduction and gets told exactly what is missing.
+  if (archetype && !archetypeQualified && benchmarkIssues.some(i => i.type === "over")) {
+    weaknesses.push(`${archetype.layout} shape without ${archetype.requiresLabel} — the ${archetype.name} build depends on it, so the heavy position is exposure rather than design`);
+  }
+
+  if (benchmarkIssuesScored.length === 0 && !archetypeQualified) {
     strengths.push(format === "superflex" ? "Roster construction fits Superflex format" : "Roster construction matches BBM benchmarks");
   } else {
     majorIssues.forEach(i => weaknesses.push(`${i.type === "under" ? "Light at" : "Heavy at"} ${i.pos}: ${i.msg}`));
