@@ -1219,6 +1219,7 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
@@ -1230,7 +1231,6 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 | Aug 30 2026 | Floor Layer (scored, redraft, ±0.5) + redraft role context |
 | Aug 30 2026 | Sanctioned archetypes stopped being charged as flaws |
 | Aug 29 2026 | Game logs on the player card |
-| Aug 28 2026 | Recent news on the player card, with parsed dates |
 
 ---
 

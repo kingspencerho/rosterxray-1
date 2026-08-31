@@ -9732,6 +9732,55 @@ Analyze this best ball roster. Return JSON only.`;
     }
   };
 
+  // THE PAGE DID NOT MOVE WHEN A GRADE ARRIVED.
+  //
+  // Measured: after Analyze, scrollY stayed at 0 while the grade letter sat at
+  // y=1243 in both modes. Every user scrolled roughly 1,200px past the form they
+  // had just filled in to reach their own result — and the portfolio drafter
+  // does that on every one of forty entries.
+  //
+  // Deliberately keyed on a COUNTER rather than on `analyzed`, so restoring a
+  // saved grade on page load does not yank a reader who has not asked for it.
+  // The counter only moves when the Analyze button is pressed.
+  // ⚠ WAIT FOR THE LAYOUT TO STOP MOVING, THEN MEASURE ONCE.
+  //
+  // Two earlier versions both called scrollTo and both landed in the wrong
+  // place, silently:
+  //   - inside the layout effect: measured y=686 while the results tree was
+  //     still expanding, the page grew to put the grade at 1243, and Chromium
+  //     cancelled the in-flight smooth scroll. scrollY stayed 0.
+  //   - after two animation frames: measured y=2031 while the page was still
+  //     SHRINKING (the paste help collapses on analyze), overshooting the real
+  //     target of 1218 by 814px and putting the grade above the viewport.
+  //
+  // Neither errored. A scroll that goes to the wrong place is the same class as
+  // a filter that drops a player: the code ran, nothing complained, and only a
+  // real render shows it.
+  //
+  // So poll scrollHeight until it is unchanged across two consecutive frames,
+  // then measure and scroll once. Capped so a page that never settles (an
+  // animation, a late image) still scrolls rather than hanging.
+  const resultsRef = useRef(null);
+  const [analyzeTick, setAnalyzeTick] = useState(0);
+  useLayoutEffect(() => {
+    if (!analyzeTick) return;
+    let raf = 0, last = -1, stable = 0, frames = 0;
+    const step = () => {
+      const h = document.body.scrollHeight;
+      stable = h === last ? stable + 1 : 0;
+      last = h;
+      if (stable < 2 && ++frames < 40) { raf = requestAnimationFrame(step); return; }
+      const el = resultsRef.current;
+      if (!el) return;
+      const reduce = typeof window !== "undefined" && window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const top = el.getBoundingClientRect().top + window.scrollY - 12;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduce ? "auto" : "smooth" });
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [analyzeTick]);
+
   const handleAnalyze = () => {
     if (!input.trim()) return;
     // Once someone has graded a roster they are no longer a first-time user, so
@@ -9750,6 +9799,7 @@ Analyze this best ball roster. Return JSON only.`;
       setAnalyzed(result);
       // Anonymous grade-distribution event — grade curve calibration (audit Jul 16 2026)
       track("grade", { grade: result.grade, mode: "redraft", league: redraftLeague });
+      setAnalyzeTick(t => t + 1);
       fetchAiNutshell(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
@@ -9757,6 +9807,7 @@ Analyze this best ball roster. Return JSON only.`;
       const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
       track("grade", { grade: result.grade, mode: "bestball", tournament });
+      setAnalyzeTick(t => t + 1);
       fetchAiNutshell(result);
     }
   };
@@ -11671,7 +11722,7 @@ Analyze this best ball roster. Return JSON only.`;
 
         {/* Output */}
         {analyzed && analyzed.mode !== "redraft" && (
-          <div className="fade-in">
+          <div className="fade-in" ref={resultsRef}>
             {/* Grade banner */}
             <div className="grade-banner-grid" style={{
               display: "grid",
@@ -13087,7 +13138,7 @@ Analyze this best ball roster. Return JSON only.`;
 
         {/* === REDRAFT OUTPUT === */}
         {analyzed && analyzed.mode === "redraft" && (
-          <div className="fade-in">
+          <div className="fade-in" ref={resultsRef}>
             {/* Grade banner */}
             <div className="grade-banner-grid" style={{
               display: "grid",

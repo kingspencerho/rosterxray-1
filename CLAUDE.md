@@ -4513,3 +4513,86 @@ Carnell Tate has no 2025 role, so he renders `RECENT NEWS · THE READ · WHAT
 COULD CHANGE IT` and nothing else — 615px. The groups that have no content
 simply do not appear, which is the behaviour the guard's content-gating
 assertion exists to protect.
+
+---
+
+## Persona Sweep of Both Sides (Sep 1, 2026)
+
+Full audit of best ball and redraft against `USER-PERSONAS.md`, at three
+viewports. **One real defect found, and it was the worst pain point either page
+had. 39 grades byte-identical.**
+
+### THE PAGE DID NOT MOVE WHEN A GRADE ARRIVED
+
+Measured: after Analyze, `scrollY` stayed at **0** while the grade letter sat at
+**y=1243** (best ball) and **y=1232** (redraft). **Every user scrolled roughly
+1,200px past the form they had just filled in to reach their own result** — and
+P1, the portfolio drafter, does that on every one of forty entries.
+
+Now lands the results root at the top of the viewport in both modes and at every
+width tested.
+
+### ⚠️ THREE ATTEMPTS LANDED IN THE WRONG PLACE, ALL SILENTLY
+
+This is the part worth keeping. `scrollTo` was called every time and nothing
+ever errored:
+
+1. **No scroll at all.** The original state.
+2. **Scrolling from inside the layout effect** — measured y=686 while the
+   results tree was still EXPANDING. The page then grew to put the grade at
+   1243, and Chromium **cancelled the in-flight smooth scroll**. `scrollTo` was
+   called with a sane number and `scrollY` stayed 0.
+3. **Scrolling after two animation frames** — measured y=2031 while the page was
+   still SHRINKING (the paste help collapses on analyze), **overshooting the
+   real target of 1218 by 814px** and putting the grade above the viewport.
+
+The fix polls `document.body.scrollHeight` until it is unchanged across two
+consecutive frames, then measures once and scrolls. Capped at 40 frames so a
+page that never settles still scrolls rather than hanging.
+
+**A scroll that goes to the wrong place is the same class as a filter that drops
+a player: the code ran, nothing complained, and only a real render shows it.**
+
+Keyed on a COUNTER rather than on `analyzed`, so restoring a saved grade on page
+load does not yank a reader who did not ask for it.
+
+### ⚠️ `test-disclosure.mjs` USES A DIFFERENT ASSERTION IDIOM
+
+Its `ok()` takes **one argument and always prints a pass**; the file's idiom is
+`cond ? ok(msg) : bad(msg)`. The first version of this guard was written in the
+`ok(label, condition)` form the other guards use, so **every assertion in it was
+a no-op and both negative tests passed.** Same one-argument `ok()` trap already
+recorded for guards 19 and 20 — it has now bitten three times, so check the
+assertion signature of the file you are editing before adding to it.
+
+A fourth assertion was also too loose: it checked that the string
+`prefers-reduced-motion` appeared, and passed when the behavior was hard-coded
+to `"smooth"` with the media query sitting unused above it. **Assert the flag is
+USED, not merely present.** All four failure paths now exit non-zero.
+
+### What the sweep confirmed was already right
+
+Both modes, phone / tablet / desktop: **0 sub-32px tap targets, no horizontal
+overflow, no page errors.** First screen after analyze now reads grade → counts
+→ match counter → roster → lookup → nutshell → strengths → weaknesses, in both
+modes, without a scroll.
+
+Sticky index, data-vintage footer, "how is this grade calculated" and the match
+counter are all present in both modes.
+
+### Three findings that were MEASUREMENT ARTEFACTS, not defects
+
+Recorded because each cost a cycle and the same traps will recur:
+
+- **`innerText` returns text-transformed output.** Searching page text for
+  `nutshell` found nothing because CSS renders it uppercase. The nutshell was
+  there the whole time.
+- **A crude "is this jargon defined nearby" regex produced false positives.**
+  `bring-back` has a full plain-English intro paragraph, `Smash` has a
+  five-tier `MatchupLegend` used in four places, and the grade explainer defines
+  stacks and construction. The vocabulary support is in place.
+- **`scrollY` capping at exactly 1024 on desktop looked like clamping.** It is
+  not: `rootTop` is 1036 and the target is `rootTop - 12`. The grade sits lower
+  in the viewport there only because the banner is a taller grid at width.
+
+**Verify a suspicious measurement before reporting it as a finding.**

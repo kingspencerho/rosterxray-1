@@ -215,6 +215,10 @@ Six requirements that survived the persona split. **These are the design floor.*
    fresh one.
 6. **Nothing that costs a tap the On-The-Clock drafter does not have.** The
    headline must be readable without interaction.
+7. **The result must arrive in the viewport.** Measured Sep 1 2026: after
+   Analyze the page did not move, leaving the grade 1,200px below the fold in
+   both modes. A result the reader has to go looking for is a result they did
+   not get.
 
 ---
 
@@ -229,6 +233,7 @@ Six requirements that survived the persona split. **These are the design floor.*
 | **Colour encodes one meaning**, and chrome is hueless | all | seventeen meanings do not fit on 360° |
 | **Gates and vintages always print** | P4, Expert | provenance is the trust mechanism |
 | **Percentiles run one direction** | Beginner | "below 92%" inverts on a reader |
+| **Analyze scrolls the results into view** | P1, P2 | forty entries x 1,200px of scrolling |
 | Redraft and best ball **never share an argument** | P3 | floor is the product in one, irrelevant in the other |
 
 ---
