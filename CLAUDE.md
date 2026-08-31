@@ -4213,5 +4213,27 @@ Week 1.
 | Targets per route run | — | **Paywalled.** No free routes source since the 2023 feed died. Never substitute target share for it. |
 | Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
 
-The first two remain the best value-to-effort on the list: anchor-grade numbers
-already in memory and currently invisible to the model.
+### SHIPPED Aug 31 2026: the two free anchors now reach the model
+
+`metricsContext` printed target share, WOPR and snap share and never printed the
+two numbers those three depend on. **Targets/gm (0.774) and air yards share
+(0.780) are the most repeatable figures in the receiving block**, both were
+already loaded, and both were invisible to the AI.
+
+- **They LEAD the receiving line**, ahead of target share and WOPR. Targets/gm is
+  the raw volume nothing else survives being low; air yards share is where on the
+  field that volume is aimed, which separates an alpha from a high-volume slot
+  player at the same target count.
+- **Backs get targets/gm and NOT air yards share.** `ay_sh` is r=0.26 for RBs and
+  discriminates nothing, so printing it would invite the model to read a number
+  carrying no information. Targets/gm belongs there because the receiving tier is
+  both a stack qualifier and the garbage-time exemption.
+- **The header now names the stability of everything in the block** — anchors
+  0.77/0.78, then 0.73/0.75/0.71, then spike rate at 0.48 flagged as descriptive
+  of 2025. The model previously had no way to know which of six numbers to lean
+  on.
+- Computed over GAMES PLAYED, never a 17-game denominator.
+
+**39 grades byte-identical** — prompt content cannot reach the scoring engine.
+
+The remaining rows in the table above are unchanged.

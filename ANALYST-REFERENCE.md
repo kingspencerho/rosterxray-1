@@ -107,15 +107,15 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 
 | Input | r | Rank | Tier | Status | Scored? |
 |---|---|---|---|---|---|
-| [Intended air yards](#intended-air-yards--r--083--rank-2) | 0.83 | 2 | A | live | no |
+| [Intended air yards](#intended-air-yards--r--083--rank-2) | 0.83 | 1 | A | live | no |
 | [QB rushing attempts / game](#qb-rushing-attempts--game--r--082--rank-2) | 0.82 | 2 | A | live | no |
 | [Air yards share](#air-yards-share--r--078--rank-2) | 0.78 | 2 | A | live | no |
 | [Targets / game](#targets--game--r--077--rank-2) | 0.77 | 2 | A | live | no |
 | [WOPR](#wopr--r--075--rank-2) | 0.75 | 2 | A | live | no |
 | [Target share](#target-share--r--073--rank-2) | 0.73 | 2 | A | live | no |
 | [Snap share](#snap-share--r--071--rank-2) | 0.71 | 2 | A | live | no |
-| [Dud rate](#dud-rate--r--067--rank-4) | 0.67 | 4 | A | live | **yes — Floor** |
-| [Separation](#separation--r--066--rank-3) | 0.66 | 3 | A | live | no |
+| [Dud rate](#dud-rate--r--067--rank-4) | 0.67 | 3 | A | live | **yes — Floor** |
+| [Separation](#separation--r--066--rank-3) | 0.66 | 2 | A | live | no |
 | [Usable rate](#usable-rate--r--065--rank-4) | 0.65 | 4 | A | live | **yes — Advance, Floor** |
 | [QB pass attempts / game](#qb-pass-attempts--game--r--061--rank-2) | 0.61 | 2 | A | live | no |
 | [Spike rate](#spike-rate--r--048--rank-4) | 0.48 | 4 | A | live | **yes — Ceiling** |
@@ -125,11 +125,10 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [HVT / game](#hvt--game--r----rank-1) | — | 1 | A | live | **yes — Naked RB gate** |
 | [Career arc](#career-arc--r----rank) | — | — | A | live | no |
 | [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | — | 4 | A | live | no |
-| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 5 | A | live | **yes — schedule** |
+| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 4 | A | live | **yes — schedule** |
 | [RB carries / game](#rb-carries--game--r--073--rank-2) | 0.73 | 2 | B | proposed | no |
 | [Availability rate](#availability-rate--r----rank-2) | — | 2 | B | proposed | no |
 | [Red-zone target share](#red-zone-target-share--r----rank-1) | — | 1 | B | proposed | no |
-| [Targets/gm + AY share in the prompt](#targetsgm--ay-share-in-the-prompt--r----rank-2) | — | 2 | B | proposed | no |
 | [Targets per route run](#targets-per-route-run--r----rank-2) | — | 2 | C | rejected | no |
 | [Offensive line rank](#offensive-line-rank--r----rank) | — | — | C | rejected | no |
 | [Coverage-scheme splits](#coverage-scheme-splits--r----rank-3) | — | 3 | C | rejected | no |
@@ -333,7 +332,7 @@ thing you can say about him. Own gate: 6 games, 100 attempts.
 |---|---|
 | **File** | `player_metrics_2025.json` |
 | **Field** | `ay_sh` |
-| **Surfaces** | Player card → Opportunity |
+| **Surfaces** | Player card → Opportunity · AI prompt → `metricsContext` |
 | **Status** | live |
 
 **Plain English.** His slice of all the yardage his quarterback threw downfield.
@@ -356,7 +355,7 @@ being loaded — see [§5](#targetsgm--ay-share-in-the-prompt--r---rank-2).
 |---|---|
 | **File** | `player_metrics_2025.json` |
 | **Field** | `tgt` ÷ `gp` |
-| **Surfaces** | Player card → Opportunity |
+| **Surfaces** | Player card → Opportunity · AI prompt → `metricsContext` |
 | **Status** | live |
 
 **Plain English.** How often is the ball thrown at him.
@@ -793,26 +792,6 @@ are directional reference, never hard logic gates.
 
 ## §5 · Tier B — worth building next
 
-### Targets/gm + AY share in the prompt · r = — · rank 2
-
-| | |
-|---|---|
-| **File** | `player_metrics_2025.json` (already imported) |
-| **Field** | `tgt`, `gp`, `ay_sh` — already loaded |
-| **Surfaces** | would join `metricsContext` |
-| **Status** | proposed |
-
-**Plain English.** Print two numbers the model already has access to.
-
-**Why it matters.** Two **anchor-grade** inputs (`0.774` and `0.780`) sitting in
-memory and invisible to the AI. **One line each, and neither can move a grade.**
-The best value-to-effort item on the whole list.
-
-**Gotchas.** Prompt content is a data decision like any other — it was left
-undone because it fell outside an approved change, not because it is hard.
-
----
-
 ### RB carries / game · r = 0.73 · rank 2
 
 | | |
@@ -1170,16 +1149,15 @@ analysis.
 
 | # | Item | Effort | Moves grades? |
 |---|---|---|---|
-| 1 | [Print targets/gm + AY share in the prompt](#targetsgm--ay-share-in-the-prompt--r----rank-2) | one line each | no |
 | 2 | [Availability rate](#availability-rate--r----rank-2) | half a day, free data | no |
 | 3 | [Red-zone target share](#red-zone-target-share--r----rank-1) | half a day, free data | no |
 | 4 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
 | 5 | Decide whether separation should SCORE | a real data decision | **yes** |
-| 6 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
-| 7 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
-| 8 | Fix `grade-cli`'s silent `--mode` flag | 20 minutes | no |
+| 5 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
+| 6 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
+| 7 | Fix `grade-cli`'s silent `--mode` flag | 20 minutes | no |
 
-**On #5.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
+**On #4.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
 full of players who cannot get open is genuinely worse than one full of players
 who can, and no current input sees that. **Against:** separation on 40 targets is
@@ -1187,7 +1165,7 @@ thin, the population is WR/TE only so it would systematically ignore half a
 roster, and it would move every grade. **If it ships, it ships alone, with its
 own calibration run and its own cap.**
 
-**On #7.** 128 `SITUATIONS` entries are `trendNote`-shaped, 4 are `reason`-shaped,
+**On #6.** 128 `SITUATIONS` entries are `trendNote`-shaped, 4 are `reason`-shaped,
 and `buildPlayerNews` reads `trendNote` only — so those never render on the card
 however fresh they are. One remains unconverted. **No guard catches this.**
 
@@ -1199,6 +1177,7 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
 | Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
 | Aug 31 2026 | This file created |
 | Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
