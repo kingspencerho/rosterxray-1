@@ -953,6 +953,47 @@ const TOURNAMENTS = {
   // 6,996 entries is a small field, so it is deliberately NOT in the
   // uniqueness-leverage branch.
   frenchie14: { name: "The Frenchie 14", entries: "7.0k", weights: [1.25, 2, 2], advanceWeight: 1, note: "W16 is the kill shot and the most extreme inversion here — 1-of-11 (9.09%), 2.75x harder than its 1-of-4 W15. Coast W15, win W16 outright, then place in a 53-seat final where 1st takes 36% of the pool. 0% rake, small field, max 5 entries", format: "standard" },
+  // The Husky (added Aug 31 2026, read off the in-app rules).
+  // $40 entry · 11,232 entries · $400k prizes · 11% rake · 18 rounds · 12-man
+  // drafts · half-PPR, 4pt passing TD · MAX 10 ENTRIES · closes 9/9/26.
+  //
+  //   R1 Qualifier  W1-14  936 groups of 12, 3 advance (25.0%)  11,232 -> 2,808
+  //   R2 Quarter    W15    351 groups of  8, 2 advance (25.0%)   2,808 ->   702
+  //   R3 Semi       W16    117 groups of  6, 1 advance (16.7%)     702 ->   117
+  //   R4 Final      W17    one 117-person group                    117 ->     1
+  //
+  // Every figure reconciles against the rules text — unlike the Pit Bull page
+  // ("156 6-person Groups" for 5) and the Frenchie pages (reversed R2 numbers,
+  // "single1, 31-person Group"), this one has no typo. The ladder was still
+  // recomputed from the group counts rather than trusted.
+  //
+  // P(reach the final) = 1.042%, ONE IN 96 — the second-most reachable final on
+  // this board after the Boxer's, and 10.5x more reachable than BBM VII's.
+  //
+  // W16 IS THE ONLY GATE THAT TIGHTENS. R1 and W15 are both 25.0%, and W16 is
+  // 1-of-6. That makes this the third W16-inverted format here, alongside the
+  // Frenchie 13/14 and Field General — and the weight vector [1.25, 2, 2] is
+  // deliberately identical to the Frenchie 13's, because the binding gates are
+  // the same shape. The 25% W15 sits on the same plateau the Schnauzer (20%)
+  // and Frenchie 13 (33.3%) both occupy at 1.25.
+  //
+  // W17 EARNS A FULL 2 BECAUSE THE FINAL IS ACTUALLY REACHABLE. 65.7% of the
+  // pool sits inside the 117 seats and 45.0% is in the top ten, and unlike BBM
+  // — where W17 is held at 1.5 precisely because arriving is a 0.099%
+  // proposition — you get there one time in 96. Reachable money is worth more
+  // in expectation than unreachable money.
+  //
+  // advanceWeight 1.25, matching the Frenchie 13 rather than the standard 1.5,
+  // and for the identical reason: R1 is 3-of-12 (soft), and 21.1% of the whole
+  // pool is paid to the 2,106 entries that clear it and then lose in W15 — at
+  // EXACTLY the $40 entry fee. That is the largest breakeven band on the board
+  // and it carries zero profit, so a big share of pool buys no EV.
+  //
+  // 11,232 entries is MID-FIELD by the Field Size Overlay (10k-100k), so this
+  // is deliberately NOT in the bbm7/puppy/puppy4 uniqueness-leverage branch.
+  // Max 10 entries is a low-portfolio format, which argues against
+  // spray-and-pray construction the same way the Pit Bull's cap does.
+  husky: { name: "The Husky", entries: "11.2k", weights: [1.25, 2, 2], advanceWeight: 1.25, note: "W16 is the only gate that tightens — R1 and W15 are both 25%, W16 is 1-of-6. Coast the first two, win W16 outright, then place in a 117-seat final holding 65.7% of the pool. Reaching it is 1-in-96, the second-most reachable final here. Clearing R1 pays back exactly the $40 entry and nothing more. Max 10 entries", format: "standard" },
   // The Boxer (added Aug 14 2026, read off the in-app rules).
   // $18 entry · 6,240 entries · $100k prizes · 11% rake · 18 rounds · 12-man
   // drafts · MAX 3 ENTRIES — the lowest portfolio of any format here.
@@ -4789,6 +4830,33 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (w15Only.length >= 1) {
       weaknesses.push(`${w15Only.length} stack(s) peak in W15 and fade after — W15 is only 1-of-4 here, so that ceiling buys a gate you were already 75% to clear`);
+    }
+  } else if (tournamentKey === "husky") {
+    // The Husky: W16 (1-of-6) is the ONLY gate that tightens — R1 and W15 are
+    // both 25.0%. So like the other W16-inverted branches this one does not
+    // flag W15 as the tight cut, and it adds the same trap warning: a ceiling
+    // parked in W15 buys a gate you were already 75% to clear.
+    //
+    // What is different here is W17. The final is reachable (1 in 96) and holds
+    // 65.7% of the pool with 45.0% in the top ten, so a stack live in BOTH the
+    // W16 kill shot and the final is the shape that actually wins this — you
+    // must survive one 1-of-6 and then place in a 117-man single-week shootout.
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    const bothLate = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4 && s.avgPerWeek[2] >= 4);
+    const w15Only = qualifiedStackGrades.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] < 3.5 && s.avgPerWeek[2] < 3.5);
+    if (w16Elite.length >= 1) {
+      strengths.push(`${w16Elite.length} stack(s) built for the W16 kill shot — the only gate that tightens here, 1-of-6 against a 25% W15`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears the W16 gate — W16 is the one week this format actually cuts on, and a roster built for W15 dies the week after`);
+    }
+    if (bothLate.length >= 1) {
+      strengths.push(`${bothLate.length} stack(s) live in BOTH W16 and the final — the shape that wins this: clear the 1-of-6, then place in a 117-seat room holding 65.7% of the prize pool`);
+    } else if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 117-seat final — 65.7% of the pool is paid inside it and 45% goes to the top ten`);
+    }
+    if (w15Only.length >= 1) {
+      weaknesses.push(`${w15Only.length} stack(s) peak in W15 and fade — W15 is only 2-of-8 here, so that ceiling buys a gate you were already 75% to clear`);
     }
   } else if (tournamentKey === "fieldgeneral") {
     // The Field General 2: W16 is 1-of-12, exactly twice as hard as the 2-of-12
