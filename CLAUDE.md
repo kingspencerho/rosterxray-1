@@ -3978,3 +3978,73 @@ starters, a best-ball leak, and a multiplier that saturates the fixtures.
   not a verdict).
 - The SOS block prints its own instability warning inline (WR matchup data is
   NEGATIVE year over year). Context only, and it says so where it renders.
+
+---
+
+## The Husky — added Aug 31, 2026
+
+Fourteenth tournament in `TOURNAMENTS`, key `husky`. Read off the in-app rules.
+$40 · 11,232 entries · $400k prizes · 11% rake · 18 rounds · 12-man drafts ·
+half-PPR, 4pt passing TD · **max 10 entries** · closes 9/9/26.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 936 × 12 | 3 (25.0%) | 11,232 → 2,808 |
+| R2 Quarterfinal | W15 | 351 × 8 | 2 (25.0%) | 2,808 → 702 |
+| R3 Semifinal | W16 | 117 × 6 | **1 (16.7%)** | 702 → 117 |
+| R4 Championship | W17 | one 117-seat group | 1 | 117 → 1 |
+
+P(reach the final) = **1.042%, one in 96.**
+
+**Every figure reconciles against the rules text.** Unlike the Pit Bull page
+("156 6-person Groups" for 5), the Frenchie R2 reversal and the shared
+"single1, 31-person Group" template bug, this page has no typo. The ladder was
+still recomputed from the group counts rather than trusted — do that every time.
+
+### W16 is the only gate that TIGHTENS
+
+R1 and W15 are both **25.0%**; W16 is **1-of-6**. That makes this the third
+W16-inverted format here, alongside the Frenchie 13/14 and Field General, and
+`weights: [1.25, 2, 2]` is deliberately **identical to the Frenchie 13's**
+because the binding gates are the same shape. The 25% W15 sits on the same
+plateau the Schnauzer (20%) and Frenchie 13 (33.3%) both occupy at 1.25.
+
+### W17 earns a full 2 because the final is actually REACHABLE
+
+**65.7% of the pool sits inside the 117 seats and 45.0% is in the top ten.**
+BBM VII holds its W17 at 1.5 precisely because arriving there is a 0.099%
+proposition; here you arrive one time in 96. **Reachable money is worth more in
+expectation than unreachable money**, and that is the whole reason the two
+differ.
+
+### advanceWeight 1.25 — the largest breakeven band on the board
+
+R1 is 3-of-12 (soft), which argues down. Against that, **21.1% of the entire
+pool ($84,240) is paid to the 2,106 entries that clear R1 and then lose in
+W15 — at EXACTLY the $40 entry fee.** A big share of pool that carries zero
+profit buys no EV, so this matches the Frenchie 13's 1.25 rather than the
+standard 1.5, for the identical reason.
+
+```
+the ladder on $40:  clear R1 -> $40 (breakeven)  ·  clear W15 -> $75-150
+                    clear W16 -> $400 (10x)      ·  win W17   -> $50k (1,250x)
+```
+
+### Other notes
+
+- **11,232 is MID-FIELD** by the Field Size Overlay (10k-100k), so it is
+  deliberately NOT in the `bbm7 || puppy || puppy4` uniqueness-leverage branch.
+- **Max 10 entries** matches the Pit Bull as the lowest portfolio here, which
+  argues against spray-and-pray construction.
+- The scoring branch flags the W16 kill shot in both directions, adds a
+  **stacks-live-in-BOTH-W16-and-the-final** strength (the shape that actually
+  wins this), and carries the same W15-only trap warning the other W16-inverted
+  branches use.
+
+### Calibration — nothing else moved
+
+```
+13 pre-existing tournaments x 3 fixtures = 36 grades BYTE-IDENTICAL
+The Husky (new):  ref1 A 10.73 · ref2 C+ 0.96 · ref3 B+ 4.21
+All four branch paths verified firing in both directions.
+```
