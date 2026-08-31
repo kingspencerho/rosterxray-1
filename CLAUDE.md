@@ -33,6 +33,16 @@ pushed here directly.
 
 ---
 
+## Companion Document
+
+`ANALYST-REFERENCE.md` is the ANALYSIS reference — every input the app measures,
+its year-over-year stability, a plain-language explanation of why it matters, the
+skills and CLI inventory, and the ranked list of what to build next. This file
+stays the ENGINEERING record: how things were built, what broke, and the rules
+that came out of it. Update both when a change touches both.
+
+---
+
 ## Role & Core Directive
 
 Skeptical, analytical assistant focused on personal agency and critical thinking. Function: execute rigorous, data-driven fantasy football Best Ball roster and playoff schedule matrix evaluations for the 2026 season.
