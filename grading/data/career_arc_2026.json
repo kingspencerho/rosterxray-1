@@ -1,0 +1,7915 @@
+{
+ "_meta": {
+  "as_of": "2026-09-01",
+  "bands": {
+   "QB": {
+    "decline": 35,
+    "note": "the longest runway; rushing production ages faster than passing",
+    "peak": 32,
+    "rising": 25
+   },
+   "RB": {
+    "decline": 27,
+    "note": "the sharpest curve in fantasy \u2014 production falls off from about 27, and workload history compounds it",
+    "peak": 26,
+    "rising": 23
+   },
+   "TE": {
+    "decline": 31,
+    "note": "the latest-developing position \u2014 a 25-year-old TE is often still pre-breakout",
+    "peak": 29,
+    "rising": 25
+   },
+   "WR": {
+    "decline": 30,
+    "note": "breakout age matters early; the plateau is long and the fall is later and gentler than at RB",
+    "peak": 28,
+    "rising": 24
+   }
+  },
+  "bands_are_priors": "Published career-arc priors, NOT measured in this repo. One season of player data cannot produce an aging curve, and a cross-sectional read is confounded by survivorship. Weigh them; never quote them as a finding.",
+  "counts": {
+   "QB": 125,
+   "RB": 230,
+   "TE": 216,
+   "WR": 413
+  },
+  "draft": "0 = undrafted. Lens 2 treats a high pick plus an early role as a strong signal.",
+  "season": 2026,
+  "source": "nflverse rosters (birth_date, years_exp, draft_number)"
+ },
+ "players": {
+  "aaron jones": {
+   "age": 31,
+   "draft": 182,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "aaron rodgers": {
+   "age": 42,
+   "draft": 24,
+   "exp": 21,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "PIT"
+  },
+  "adam prentice": {
+   "age": 29,
+   "draft": 0,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "adam randall": {
+   "age": 22,
+   "draft": 174,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "adam thielen": {
+   "age": 36,
+   "draft": 0,
+   "exp": 13,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "adam trautman": {
+   "age": 29,
+   "draft": 105,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "adonai mitchell": {
+   "age": 23,
+   "draft": 52,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "adrian martinez": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "SF"
+  },
+  "ahmani marshall": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "aidan oconnell": {
+   "age": 28,
+   "draft": 135,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "LV"
+  },
+  "ainias smith": {
+   "age": 25,
+   "draft": 152,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "aj barner": {
+   "age": 24,
+   "draft": 121,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "aj brown": {
+   "age": 29,
+   "draft": 51,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "aj dillon": {
+   "age": 28,
+   "draft": 62,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "aj henning": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "albert okwuegbunam": {
+   "age": 28,
+   "draft": 118,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "alec ingold": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "alec pierce": {
+   "age": 26,
+   "draft": 53,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "alex bachman": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "alvin kamara": {
+   "age": 31,
+   "draft": 67,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "amar johnson": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "ameer abdullah": {
+   "age": 33,
+   "draft": 54,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "amon ra st brown": {
+   "age": 26,
+   "draft": 112,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "anderson castle": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "IND"
+  },
+  "andrei iosivas": {
+   "age": 26,
+   "draft": 206,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "andrew armstrong": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "andrew beck": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "andrew ogletree": {
+   "age": 28,
+   "draft": 192,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "andy dalton": {
+   "age": 38,
+   "draft": 35,
+   "exp": 15,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "PHI"
+  },
+  "anthony firkser": {
+   "age": 31,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "anthony gould": {
+   "age": 25,
+   "draft": 142,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "anthony hankerson": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "anthony richardson": {
+   "age": 24,
+   "draft": 4,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "IND"
+  },
+  "anthony smith": {
+   "age": 24,
+   "draft": 218,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "anthony tyus iii": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "antonio williams": {
+   "age": 22,
+   "draft": 71,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "antwane wells jr": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "arian smith": {
+   "age": 24,
+   "draft": 110,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "ashton dulin": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "ashton jeanty": {
+   "age": 22,
+   "draft": 6,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "at perry": {
+   "age": 26,
+   "draft": 195,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "athan kaliakmanis": {
+   "age": 23,
+   "draft": 223,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "WAS"
+  },
+  "audric estim\u00e9": {
+   "age": 22,
+   "draft": 147,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "austin hooper": {
+   "age": 31,
+   "draft": 81,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "austin reed": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BAL"
+  },
+  "austin trammell": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "bailey zappe": {
+   "age": 27,
+   "draft": 137,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NYJ"
+  },
+  "baker mayfield": {
+   "age": 31,
+   "draft": 1,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "TB"
+  },
+  "bam knight": {
+   "age": 25,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "barika kpeenu": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "barion brown": {
+   "age": 22,
+   "draft": 190,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "bauer sharp": {
+   "age": 23,
+   "draft": 185,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "beaux collins": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "behren morton": {
+   "age": 24,
+   "draft": 234,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NE"
+  },
+  "ben nikkel": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "ben patterson": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "ben sims": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "ben sinnott": {
+   "age": 24,
+   "draft": 53,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "ben skowronek": {
+   "age": 29,
+   "draft": 249,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "ben vansumeren": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "ben yurosek": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "bhayshul tuten": {
+   "age": 24,
+   "draft": 104,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "bijan robinson": {
+   "age": 24,
+   "draft": 8,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "blake corum": {
+   "age": 25,
+   "draft": 83,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LA"
+  },
+  "blake whiteheart": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "bo melton": {
+   "age": 27,
+   "draft": 229,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "bo nix": {
+   "age": 26,
+   "draft": 12,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DEN"
+  },
+  "brady boyd": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "brady cook": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NYJ"
+  },
+  "brady russell": {
+   "age": 28,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "braelon allen": {
+   "age": 22,
+   "draft": 134,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "brandon allen": {
+   "age": 33,
+   "draft": 201,
+   "exp": 10,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NYG"
+  },
+  "brandon johnson": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "brandon smith": {
+   "age": 27,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "brashard smith": {
+   "age": 23,
+   "draft": 228,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "braxton berrios": {
+   "age": 30,
+   "draft": 210,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "brayden willis": {
+   "age": 26,
+   "draft": 247,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "breece hall": {
+   "age": 25,
+   "draft": 36,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "brenden bates": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "brenden rice": {
+   "age": 24,
+   "draft": 225,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "brenen thompson": {
+   "age": 23,
+   "draft": 105,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "brennan presley": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "brenton strange": {
+   "age": 25,
+   "draft": 61,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "brett rypien": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "HOU"
+  },
+  "brevin jordan": {
+   "age": 26,
+   "draft": 147,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "brevyn spann ford": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "brian robinson": {
+   "age": 27,
+   "draft": 98,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "brian thomas jr": {
+   "age": 23,
+   "draft": 23,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "britain covey": {
+   "age": 29,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "british brooks": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "brittain brown": {
+   "age": 28,
+   "draft": 250,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CHI"
+  },
+  "brock bowers": {
+   "age": 23,
+   "draft": 13,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "brock lampe": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "brock purdy": {
+   "age": 26,
+   "draft": 262,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "SF"
+  },
+  "brock rechsteiner": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "brock wright": {
+   "age": 27,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "bryce lance": {
+   "age": 24,
+   "draft": 136,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "bryce oliver": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "bryce pierre": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "bryce young": {
+   "age": 25,
+   "draft": 1,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CAR"
+  },
+  "brycen tremayne": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "bryson green": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "bryson nesbit": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "bub means": {
+   "age": 25,
+   "draft": 170,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "bucky irving": {
+   "age": 24,
+   "draft": 125,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "cade klubnik": {
+   "age": 22,
+   "draft": 110,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NYJ"
+  },
+  "cade otton": {
+   "age": 27,
+   "draft": 106,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "cade stover": {
+   "age": 26,
+   "draft": 123,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "caden prieskorn": {
+   "age": 26,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "caleb douglas": {
+   "age": 22,
+   "draft": 75,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "caleb lohner": {
+   "age": 24,
+   "draft": 241,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "caleb williams": {
+   "age": 24,
+   "draft": 1,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CHI"
+  },
+  "calvin austin iii": {
+   "age": 27,
+   "draft": 138,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "calvin ridley": {
+   "age": 31,
+   "draft": 26,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "cam camper": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "cam grandy": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "cam miller": {
+   "age": 25,
+   "draft": 215,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "MIA"
+  },
+  "cam skattebo": {
+   "age": 24,
+   "draft": 105,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "cam ward": {
+   "age": 24,
+   "draft": 1,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "TEN"
+  },
+  "camden brown": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "cameron dorner": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "cameron latu": {
+   "age": 26,
+   "draft": 101,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "cameron ross": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "carlos washington": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "carnell tate": {
+   "age": 21,
+   "draft": 4,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "carsen ryan": {
+   "age": 23,
+   "draft": 248,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "carson beck": {
+   "age": 24,
+   "draft": 65,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "ARI"
+  },
+  "carson steele": {
+   "age": 23,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "carson towt": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "carson wentz": {
+   "age": 33,
+   "draft": 2,
+   "exp": 10,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "MIN"
+  },
+  "carter bradley": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "JAX"
+  },
+  "carter runyon": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "case keenum": {
+   "age": 38,
+   "draft": 0,
+   "exp": 14,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "CHI"
+  },
+  "casey washington": {
+   "age": 25,
+   "draft": 187,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "cash jones": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "caullin lacy": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "cedric tillman": {
+   "age": 26,
+   "draft": 74,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "cedrick wilson jr": {
+   "age": 30,
+   "draft": 208,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "ceedee lamb": {
+   "age": 27,
+   "draft": 17,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "chandler brayboy": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "charlie jones": {
+   "age": 27,
+   "draft": 131,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "charlie kolar": {
+   "age": 27,
+   "draft": 128,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LAC"
+  },
+  "charlie woerner": {
+   "age": 28,
+   "draft": 190,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "chase brown": {
+   "age": 26,
+   "draft": 163,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "chase curtis": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "chase roberts": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "chig okonkwo": {
+   "age": 26,
+   "draft": 143,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "chimere dike": {
+   "age": 24,
+   "draft": 103,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "chip trayanum": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "chris bell": {
+   "age": 22,
+   "draft": 94,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "chris blair": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "chris brazzell ii": {
+   "age": 22,
+   "draft": 83,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "chris brooks": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "chris collier": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "chris godwin jr": {
+   "age": 30,
+   "draft": 84,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "chris hilton jr": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "chris manhertz": {
+   "age": 34,
+   "draft": 0,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "chris moore": {
+   "age": 33,
+   "draft": 107,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "chris myarick": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "chris oladokun": {
+   "age": 28,
+   "draft": 241,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "KC"
+  },
+  "chris olave": {
+   "age": 26,
+   "draft": 11,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "chris rodriguez jr": {
+   "age": 26,
+   "draft": 193,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "christian kirk": {
+   "age": 29,
+   "draft": 47,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "christian mccaffrey": {
+   "age": 30,
+   "draft": 8,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "christian watson": {
+   "age": 27,
+   "draft": 34,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "chuba hubbard": {
+   "age": 27,
+   "draft": 126,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "cj daniels": {
+   "age": 24,
+   "draft": 197,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "cj dippre": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "cj donaldson": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "cj ham": {
+   "age": 33,
+   "draft": 0,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "cj stroud": {
+   "age": 24,
+   "draft": 2,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "HOU"
+  },
+  "cj williams": {
+   "age": 23,
+   "draft": 203,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "cody hardy": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "cody schrader": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "cody white": {
+   "age": 27,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "colbie young": {
+   "age": 24,
+   "draft": 140,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "colby parkinson": {
+   "age": 27,
+   "draft": 133,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "cole burgess": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "cole kmet": {
+   "age": 27,
+   "draft": 43,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "cole payton": {
+   "age": 23,
+   "draft": 178,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "PHI"
+  },
+  "cole turner": {
+   "age": 26,
+   "draft": 149,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "coleman bennett": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "coleman owen": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "colson yankoff": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "colston loveland": {
+   "age": 22,
+   "draft": 10,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "colton dowell": {
+   "age": 27,
+   "draft": 228,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "connor bazelak": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "TB"
+  },
+  "connor heyward": {
+   "age": 27,
+   "draft": 208,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "connor hulstein": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "cooper kupp": {
+   "age": 33,
+   "draft": 69,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "cooper rush": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ATL"
+  },
+  "corey kiner": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "corey rucker": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "cornelius johnson": {
+   "age": 25,
+   "draft": 253,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "cornell powell": {
+   "age": 28,
+   "draft": 181,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "cortez braham": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "courtland sutton": {
+   "age": 30,
+   "draft": 40,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "courtney jackson": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "craig reynolds": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "cyrus allen": {
+   "age": 23,
+   "draft": 176,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "daequan wright": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "dak prescott": {
+   "age": 33,
+   "draft": 135,
+   "exp": 10,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DAL"
+  },
+  "dalen cambre": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "dalevon campbell": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "dallas goedert": {
+   "age": 31,
+   "draft": 49,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "dallen bentley": {
+   "age": 25,
+   "draft": 256,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "dalton kincaid": {
+   "age": 26,
+   "draft": 25,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "BUF"
+  },
+  "dalton schultz": {
+   "age": 30,
+   "draft": 137,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "dameon pierce": {
+   "age": 26,
+   "draft": 107,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "damien martinez": {
+   "age": 22,
+   "draft": 223,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "damon bankston": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "dan chisena": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "dan villari": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "dandre swift": {
+   "age": 27,
+   "draft": 35,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CHI"
+  },
+  "dane key": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "daniel bellinger": {
+   "age": 25,
+   "draft": 112,
+   "exp": 4,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "daniel jones": {
+   "age": 29,
+   "draft": 6,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "IND"
+  },
+  "daniel sobkowicz": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "danny gray": {
+   "age": 27,
+   "draft": 105,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "dante miller": {
+   "age": 27,
+   "draft": 0,
+   "exp": 2,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "dare ogunbowale": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "dareke young": {
+   "age": 27,
+   "draft": 233,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "darius cooper": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "darius slayton": {
+   "age": 29,
+   "draft": 171,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "darnell mooney": {
+   "age": 28,
+   "draft": 173,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "darnell washington": {
+   "age": 25,
+   "draft": 93,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "darren waller": {
+   "age": 33,
+   "draft": 204,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "davante adams": {
+   "age": 33,
+   "draft": 53,
+   "exp": 12,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "david martin robinson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "david montgomery": {
+   "age": 29,
+   "draft": 73,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "david moore": {
+   "age": 31,
+   "draft": 226,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "david njoku": {
+   "age": 30,
+   "draft": 29,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LAC"
+  },
+  "david sills": {
+   "age": 31,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "davis allen": {
+   "age": 25,
+   "draft": 175,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "davis mills": {
+   "age": 27,
+   "draft": 67,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "HOU"
+  },
+  "davon booth": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "dawson knox": {
+   "age": 29,
+   "draft": 96,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "BUF"
+  },
+  "dayton wade": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "dean connors": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "LA"
+  },
+  "dean patterson iv": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "deebo samuel sr": {
+   "age": 30,
+   "draft": 36,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "deejay dallas": {
+   "age": 27,
+   "draft": 144,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "deion burks": {
+   "age": 23,
+   "draft": 254,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "demarcus robinson": {
+   "age": 31,
+   "draft": 126,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "demario douglas": {
+   "age": 25,
+   "draft": 210,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "demond claiborne": {
+   "age": 22,
+   "draft": 198,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "dennis houston": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "denzel boston": {
+   "age": 22,
+   "draft": 39,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "denzel mims": {
+   "age": 28,
+   "draft": 59,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "derius davis": {
+   "age": 25,
+   "draft": 125,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "dernest johnson": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "derrick henry": {
+   "age": 32,
+   "draft": 45,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "deshaun watson": {
+   "age": 30,
+   "draft": 12,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CLE"
+  },
+  "deuce vaughn": {
+   "age": 24,
+   "draft": 212,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "devaughn vele": {
+   "age": 28,
+   "draft": 235,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "deven thompkins": {
+   "age": 26,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "devin culp": {
+   "age": 26,
+   "draft": 246,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "devin duvernay": {
+   "age": 28,
+   "draft": 92,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "devin neal": {
+   "age": 23,
+   "draft": 184,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "devin singletary": {
+   "age": 28,
+   "draft": 74,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "devon achane": {
+   "age": 24,
+   "draft": 84,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "devonta smith": {
+   "age": 27,
+   "draft": 10,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "devonte ross": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "devontez walker": {
+   "age": 25,
+   "draft": 113,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "dezhaun stribling": {
+   "age": 23,
+   "draft": 33,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "dillon bell": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "dillon gabriel": {
+   "age": 25,
+   "draft": 94,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CLE"
+  },
+  "dj giddens": {
+   "age": 23,
+   "draft": 151,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "IND"
+  },
+  "dj herman": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "dj montgomery": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "dj moore": {
+   "age": 29,
+   "draft": 24,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "dj rogers": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "dj uiagalelei": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "LAC"
+  },
+  "dk metcalf": {
+   "age": 28,
+   "draft": 64,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "dohnte meyers": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "dominic lovett": {
+   "age": 23,
+   "draft": 244,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "dominic richardson": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "donaven mcculley": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "donovan edwards": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "dontae fleming": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "dontae mcmillan": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "dontayvion wicks": {
+   "age": 25,
+   "draft": 159,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "donte thornton jr": {
+   "age": 23,
+   "draft": 108,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "drake dabney": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "drake london": {
+   "age": 25,
+   "draft": 8,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "drake maye": {
+   "age": 24,
+   "draft": 3,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NE"
+  },
+  "drew allar": {
+   "age": 22,
+   "draft": 76,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "PIT"
+  },
+  "drew biber": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "drew lock": {
+   "age": 29,
+   "draft": 42,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "SEA"
+  },
+  "drew sample": {
+   "age": 30,
+   "draft": 52,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "dt sheffield": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "durham smythe": {
+   "age": 31,
+   "draft": 123,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "BAL"
+  },
+  "dyami brown": {
+   "age": 26,
+   "draft": 82,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "dylan drummond": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "dylan laube": {
+   "age": 26,
+   "draft": 208,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "dylan sampson": {
+   "age": 21,
+   "draft": 126,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "easton stick": {
+   "age": 30,
+   "draft": 166,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "IND"
+  },
+  "efton chism iii": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "ej horton": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "ej jenkins": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "ej smith": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "ej williams jr": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "eli heidenreich": {
+   "age": 23,
+   "draft": 230,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "eli pancol": {
+   "age": 26,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "eli raridon": {
+   "age": 22,
+   "draft": 95,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "eli stowers": {
+   "age": 23,
+   "draft": 54,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "elic ayomanor": {
+   "age": 23,
+   "draft": 136,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "elijah arroyo": {
+   "age": 23,
+   "draft": 50,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "elijah cooks": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "elijah higgins": {
+   "age": 25,
+   "draft": 197,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "elijah mitchell": {
+   "age": 28,
+   "draft": 194,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "elijah moore": {
+   "age": 26,
+   "draft": 34,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "elijah sarratt": {
+   "age": 23,
+   "draft": 115,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "elijah tau tolliver": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "emanuel wilson": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "emari demercado": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "emeka egbuka": {
+   "age": 23,
+   "draft": 19,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "emmanuel henderson jr": {
+   "age": 23,
+   "draft": 199,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "emmett johnson": {
+   "age": 22,
+   "draft": 161,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "eric gray": {
+   "age": 26,
+   "draft": 172,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "eric rivers jr": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "eric saubert": {
+   "age": 32,
+   "draft": 174,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "erick all": {
+   "age": 25,
+   "draft": 115,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "erik ezukanma": {
+   "age": 26,
+   "draft": 125,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "ethan conner": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "evan engram": {
+   "age": 31,
+   "draft": 23,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "evan hull": {
+   "age": 25,
+   "draft": 176,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "evan svoboda": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LAC"
+  },
+  "feleipe franks": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "fernando mendoza": {
+   "age": 22,
+   "draft": 1,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "LV"
+  },
+  "foster moreau": {
+   "age": 29,
+   "draft": 137,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "frank gore jr": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "gage larvadain": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "gardner minshew": {
+   "age": 30,
+   "draft": 178,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ARI"
+  },
+  "garrett greene": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "garrett nussmeier": {
+   "age": 24,
+   "draft": 249,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "KC"
+  },
+  "garrett wilson": {
+   "age": 26,
+   "draft": 10,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "gary brightwell": {
+   "age": 28,
+   "draft": 196,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "gary jennings": {
+   "age": 29,
+   "draft": 120,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "gavin bartholomew": {
+   "age": 23,
+   "draft": 202,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "gee scott jr": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "geno smith": {
+   "age": 35,
+   "draft": 39,
+   "exp": 13,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "NYJ"
+  },
+  "george holani": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "george kittle": {
+   "age": 32,
+   "draft": 146,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "george pickens": {
+   "age": 25,
+   "draft": 52,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "germie bernard": {
+   "age": 22,
+   "draft": 47,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "graham mertz": {
+   "age": 25,
+   "draft": 197,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "HOU"
+  },
+  "grant calcaterra": {
+   "age": 27,
+   "draft": 198,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "grant finley": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "greg dortch": {
+   "age": 28,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "greg dulcich": {
+   "age": 26,
+   "draft": 80,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "gregory desrosiers": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "gunnar helm": {
+   "age": 23,
+   "draft": 120,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "gunner olszewski": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "hank beatty": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "harold fannin jr": {
+   "age": 22,
+   "draft": 67,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "harrison bryant": {
+   "age": 28,
+   "draft": 115,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "harrison wallace iii": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "hayden large": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "hayden rucci": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "haynes king": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CAR"
+  },
+  "hendon hooker": {
+   "age": 28,
+   "draft": 68,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "TEN"
+  },
+  "hunter dekkers": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NO"
+  },
+  "hunter henry": {
+   "age": 31,
+   "draft": 35,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "hunter long": {
+   "age": 28,
+   "draft": 81,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "hunter luepke": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "ian thomas": {
+   "age": 30,
+   "draft": 101,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "ian wheeler": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "ihmir smith marsette": {
+   "age": 27,
+   "draft": 157,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "irvin charles": {
+   "age": 29,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "isaac guerendo": {
+   "age": 26,
+   "draft": 129,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "isaac teslaa": {
+   "age": 24,
+   "draft": 70,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "isaiah bond": {
+   "age": 22,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "isaiah davis": {
+   "age": 24,
+   "draft": 173,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "isaiah hodgins": {
+   "age": 27,
+   "draft": 207,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "isaiah likely": {
+   "age": 26,
+   "draft": 139,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "isaiah neyor": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "isaiah williams": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "isaiah winstead": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "isiah pacheco": {
+   "age": 27,
+   "draft": 251,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "israel abanikanda": {
+   "age": 23,
+   "draft": 143,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "j michael sturdivant": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "jabari small": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "jacardia wright": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "jack bech": {
+   "age": 23,
+   "draft": 58,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "jack endries": {
+   "age": 22,
+   "draft": 221,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "jack stoll": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "jack strand": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "ATL"
+  },
+  "jack velling": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "jack westover": {
+   "age": 27,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "jackson acker": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "jackson hawes": {
+   "age": 25,
+   "draft": 173,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "BUF"
+  },
+  "jackson meeks": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "jacob clark": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "LV"
+  },
+  "jacob cowing": {
+   "age": 25,
+   "draft": 135,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "jacob de jesus": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jacob saylors": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "jacoby brissett": {
+   "age": 33,
+   "draft": 91,
+   "exp": 10,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ARI"
+  },
+  "jacoby jones": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "jacory croskey merritt": {
+   "age": 25,
+   "draft": 245,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "jadarian price": {
+   "age": 22,
+   "draft": 32,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "jaden bradley": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "jaden nixon": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "jaden smith": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "jahan dotson": {
+   "age": 26,
+   "draft": 16,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "jahdae walker": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "jaheim bell": {
+   "age": 25,
+   "draft": 231,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "jahmyr gibbs": {
+   "age": 24,
+   "draft": 12,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "jake bobo": {
+   "age": 28,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "jake briningstool": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "jake browning": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "TB"
+  },
+  "jake ferguson": {
+   "age": 27,
+   "draft": 129,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "jake haener": {
+   "age": 27,
+   "draft": 127,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NYG"
+  },
+  "jake tonges": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "jakobi lane": {
+   "age": 22,
+   "draft": 80,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "jakobi meyers": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "jakobie keeney james": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "jaleel mclaughlin": {
+   "age": 25,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "jalen brooks": {
+   "age": 26,
+   "draft": 244,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "jalen coker": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "jalen hurts": {
+   "age": 28,
+   "draft": 53,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "PHI"
+  },
+  "jalen mcmillan": {
+   "age": 24,
+   "draft": 92,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "jalen milroe": {
+   "age": 23,
+   "draft": 92,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "SEA"
+  },
+  "jalen moreno cropper": {
+   "age": 25,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "jalen nailor": {
+   "age": 27,
+   "draft": 191,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "jalen reagor": {
+   "age": 27,
+   "draft": 21,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "jalen royals": {
+   "age": 23,
+   "draft": 133,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jalen tolbert": {
+   "age": 27,
+   "draft": 88,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "jalen virgil": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "jalin hyatt": {
+   "age": 24,
+   "draft": 73,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "jalon daniels": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "TB"
+  },
+  "jalynn polk": {
+   "age": 24,
+   "draft": 37,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "jam miller": {
+   "age": 22,
+   "draft": 245,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "jamaal pritchett": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "jamal haynes": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "jamari thrash": {
+   "age": 25,
+   "draft": 156,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "jamarr chase": {
+   "age": 26,
+   "draft": 5,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "jameis winston": {
+   "age": 32,
+   "draft": 1,
+   "exp": 11,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NYG"
+  },
+  "james conner": {
+   "age": 31,
+   "draft": 105,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "james cook": {
+   "age": 26,
+   "draft": 63,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "james mitchell": {
+   "age": 27,
+   "draft": 177,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "jameson geers": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "jameson williams": {
+   "age": 25,
+   "draft": 12,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "jamori maclin": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "jamycal hasty": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "jaquae jackson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "jaquinden jackson": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "jared goff": {
+   "age": 31,
+   "draft": 1,
+   "exp": 10,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DET"
+  },
+  "jared wayne": {
+   "age": 25,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "jared wiley": {
+   "age": 25,
+   "draft": 131,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "jaren kanak": {
+   "age": 22,
+   "draft": 225,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "jaret patterson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "jarquez hunter": {
+   "age": 23,
+   "draft": 117,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "jarrett stidham": {
+   "age": 30,
+   "draft": 133,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DEN"
+  },
+  "jaseem reed": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "jashaun corbin": {
+   "age": 26,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "jason brownlee": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jatavion sanders": {
+   "age": 23,
+   "draft": 101,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "jauan jennings": {
+   "age": 29,
+   "draft": 217,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "javonte williams": {
+   "age": 26,
+   "draft": 35,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "jawhar jordan": {
+   "age": 27,
+   "draft": 205,
+   "exp": 2,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "jaxon smith njigba": {
+   "age": 24,
+   "draft": 20,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "jaxson dart": {
+   "age": 23,
+   "draft": 25,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NYG"
+  },
+  "jayden daniels": {
+   "age": 25,
+   "draft": 2,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "WAS"
+  },
+  "jayden higgins": {
+   "age": 23,
+   "draft": 34,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "jayden reed": {
+   "age": 26,
+   "draft": 50,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "jaydn ott": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "jaydon blue": {
+   "age": 22,
+   "draft": 149,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "jaylen waddle": {
+   "age": 27,
+   "draft": 6,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "jaylen warren": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "jaylen wright": {
+   "age": 23,
+   "draft": 120,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "jaylin lane": {
+   "age": 24,
+   "draft": 128,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "jaylin noel": {
+   "age": 23,
+   "draft": 79,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "jeff caldwell": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jeff weimer": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jelani woods": {
+   "age": 27,
+   "draft": 73,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "jerand bradley": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "jeremiah franklin": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "jeremiah webb": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "jeremiyah love": {
+   "age": 21,
+   "draft": 3,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "jeremy mcnichols": {
+   "age": 30,
+   "draft": 162,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "jeremy ruckert": {
+   "age": 26,
+   "draft": 101,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "jermaine terry": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "jermar jefferson": {
+   "age": 26,
+   "draft": 257,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "jerome ford": {
+   "age": 26,
+   "draft": 156,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "jerry jeudy": {
+   "age": 27,
+   "draft": 15,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "jeshaun jones": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "jhaquan jackson": {
+   "age": 26,
+   "draft": 182,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "jimmy holiday": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "jimmy horn jr": {
+   "age": 23,
+   "draft": 208,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "jimmy kibble": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "jj galbreath": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "jj mccarthy": {
+   "age": 23,
+   "draft": 10,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "MIN"
+  },
+  "jk dobbins": {
+   "age": 27,
+   "draft": 55,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "jmari taylor": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "joe burrow": {
+   "age": 29,
+   "draft": 1,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CIN"
+  },
+  "joe fagnano": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "BAL"
+  },
+  "joe flacco": {
+   "age": 41,
+   "draft": 18,
+   "exp": 18,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "CIN"
+  },
+  "joe milton iii": {
+   "age": 26,
+   "draft": 193,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DAL"
+  },
+  "joe royer": {
+   "age": 24,
+   "draft": 170,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CLE"
+  },
+  "joel wilson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "joey aguilar": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "JAX"
+  },
+  "john bates": {
+   "age": 28,
+   "draft": 124,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "john metchie iii": {
+   "age": 26,
+   "draft": 44,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "john michael gyllenborg": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "johnny mundt": {
+   "age": 31,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "johnny pascuzzi": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LAC"
+  },
+  "johnny wilson": {
+   "age": 25,
+   "draft": 185,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "jonah coleman": {
+   "age": 23,
+   "draft": 108,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "jonathan mingo": {
+   "age": 25,
+   "draft": 39,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "jonathan taylor": {
+   "age": 27,
+   "draft": 41,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "IND"
+  },
+  "jonathan ward": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "jonathon brooks": {
+   "age": 23,
+   "draft": 46,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "jonnu smith": {
+   "age": 31,
+   "draft": 100,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "jordan addison": {
+   "age": 24,
+   "draft": 23,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "jordan hudson": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "jordan james": {
+   "age": 22,
+   "draft": 147,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "jordan love": {
+   "age": 27,
+   "draft": 26,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "GB"
+  },
+  "jordan mason": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "jordan mims": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "jordan moore": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "jordan waters": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LA"
+  },
+  "jordan watkins": {
+   "age": 24,
+   "draft": 138,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "jordan whittington": {
+   "age": 25,
+   "draft": 213,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "jordyn tyson": {
+   "age": 22,
+   "draft": 8,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "joseph manjack": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "josh allen": {
+   "age": 30,
+   "draft": 7,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BUF"
+  },
+  "josh cameron": {
+   "age": 23,
+   "draft": 191,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "josh cuevas": {
+   "age": 23,
+   "draft": 173,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "BAL"
+  },
+  "josh downs": {
+   "age": 25,
+   "draft": 79,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "josh jacobs": {
+   "age": 28,
+   "draft": 24,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "josh johnson": {
+   "age": 40,
+   "draft": 160,
+   "exp": 18,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "CIN"
+  },
+  "josh kattus": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "josh kelly": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "josh oliver": {
+   "age": 29,
+   "draft": 69,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "josh palmer": {
+   "age": 26,
+   "draft": 77,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "josh pitsenberger": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "josh whyle": {
+   "age": 26,
+   "draft": 147,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "josh williams": {
+   "age": 26,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "joshua dobbs": {
+   "age": 31,
+   "draft": 135,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DET"
+  },
+  "joshua simon": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "josiah deguara": {
+   "age": 29,
+   "draft": 94,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "jp richardson": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "juju smith schuster": {
+   "age": 29,
+   "draft": 62,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "julian hicks": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "julian hill": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "julius chestnut": {
+   "age": 25,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "junior bergen": {
+   "age": 23,
+   "draft": 252,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "justice hill": {
+   "age": 28,
+   "draft": 113,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "justin fields": {
+   "age": 27,
+   "draft": 11,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "KC"
+  },
+  "justin herbert": {
+   "age": 28,
+   "draft": 6,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "LAC"
+  },
+  "justin jefferson": {
+   "age": 27,
+   "draft": 22,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "justin joly": {
+   "age": 22,
+   "draft": 152,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "justin jones": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "justin shorter": {
+   "age": 26,
+   "draft": 150,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "justin watson": {
+   "age": 30,
+   "draft": 144,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "juwan johnson": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "kadarius calloway": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "kaden davis": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "kaden prather": {
+   "age": 23,
+   "draft": 240,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "kaden wetjen": {
+   "age": 24,
+   "draft": 121,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "kaelon black": {
+   "age": 24,
+   "draft": 90,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "kaleb johnson": {
+   "age": 23,
+   "draft": 83,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "kalel mullings": {
+   "age": 23,
+   "draft": 188,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "kalif raymond": {
+   "age": 32,
+   "draft": 0,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "kameron johnson": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "kavontae turpin": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "kayshon boutte": {
+   "age": 24,
+   "draft": 187,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "kaytron allen": {
+   "age": 23,
+   "draft": 187,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "kc concepcion": {
+   "age": 21,
+   "draft": 24,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "keandre lambert smith": {
+   "age": 24,
+   "draft": 158,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "keaton mitchell": {
+   "age": 24,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "kedon slovis": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "ARI"
+  },
+  "keelan marion": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "keenan allen": {
+   "age": 34,
+   "draft": 76,
+   "exp": 13,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "keleki latu": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "BUF"
+  },
+  "kendall milton": {
+   "age": 24,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "kendre miller": {
+   "age": 24,
+   "draft": 71,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "kendric pryor": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "kendrick bourne": {
+   "age": 31,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "kendrick law": {
+   "age": 22,
+   "draft": 168,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "kene nwangwu": {
+   "age": 28,
+   "draft": 119,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "kenneth walker iii": {
+   "age": 25,
+   "draft": 41,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "KC"
+  },
+  "kenny fletcher jr": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "kenny gainwell": {
+   "age": 27,
+   "draft": 150,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "kenny mcintosh": {
+   "age": 26,
+   "draft": 237,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "kenny pickett": {
+   "age": 28,
+   "draft": 20,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CAR"
+  },
+  "kentrel bullock": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "kenyon sadiq": {
+   "age": 21,
+   "draft": 16,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "keon coleman": {
+   "age": 23,
+   "draft": 33,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "keshawn williams": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "kevin austin jr": {
+   "age": 26,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "kevin coleman jr": {
+   "age": 22,
+   "draft": 177,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "khadarel hodge": {
+   "age": 32,
+   "draft": 0,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "khalil dinkins": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "khalil herbert": {
+   "age": 28,
+   "draft": 217,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "khalil shakir": {
+   "age": 26,
+   "draft": 148,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "kimani vidal": {
+   "age": 25,
+   "draft": 181,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "kirk cousins": {
+   "age": 38,
+   "draft": 102,
+   "exp": 14,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "LV"
+  },
+  "kisean johnson": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "kj osborn": {
+   "age": 29,
+   "draft": 176,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "ko kieft": {
+   "age": 28,
+   "draft": 218,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "kobe prentice": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "kolbe katsis": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "kole wilson": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "konata mumpfield": {
+   "age": 23,
+   "draft": 242,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "kurtis rourke": {
+   "age": 25,
+   "draft": 227,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "SF"
+  },
+  "kye robichaux": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "kyle allen": {
+   "age": 30,
+   "draft": 0,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BUF"
+  },
+  "kyle dixon": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "kyle juszczyk": {
+   "age": 35,
+   "draft": 130,
+   "exp": 13,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "kyle mccord": {
+   "age": 23,
+   "draft": 181,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "GB"
+  },
+  "kyle monangai": {
+   "age": 24,
+   "draft": 233,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CHI"
+  },
+  "kyle pitts": {
+   "age": 25,
+   "draft": 4,
+   "exp": 5,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "kyle trask": {
+   "age": 28,
+   "draft": 64,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CAR"
+  },
+  "kyle williams": {
+   "age": 23,
+   "draft": 69,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "kylen granson": {
+   "age": 28,
+   "draft": 127,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TEN"
+  },
+  "kyler murray": {
+   "age": 29,
+   "draft": 1,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "MIN"
+  },
+  "kyre duplessis": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "kyren williams": {
+   "age": 26,
+   "draft": 164,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LA"
+  },
+  "kyrese rowan": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "kyron drones": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "GB"
+  },
+  "kyron hudson": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "ladd mcconkey": {
+   "age": 24,
+   "draft": 34,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "lajohntay wester": {
+   "age": 24,
+   "draft": 203,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "lake mcree": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "lamar jackson": {
+   "age": 29,
+   "draft": 32,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BAL"
+  },
+  "lan larison": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "lance mason": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "lance mccutcheon": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "laquon treadwell": {
+   "age": 31,
+   "draft": 23,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "lawrence cager": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "layne pryor": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "lemeke brockington": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "lequint allen jr": {
+   "age": 22,
+   "draft": 236,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "JAX"
+  },
+  "levi wentz": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "lew nichols iii": {
+   "age": 25,
+   "draft": 235,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "lewis bond": {
+   "age": 23,
+   "draft": 204,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "liljordan humphrey": {
+   "age": 28,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "louis hansen": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "lucas krull": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "lucas scott": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "lucky jackson": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "luke altmyer": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "DET"
+  },
+  "luke farrell": {
+   "age": 28,
+   "draft": 145,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "SF"
+  },
+  "luke floriea": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "luke grimm": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "luke mccaffrey": {
+   "age": 25,
+   "draft": 100,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "luke musgrave": {
+   "age": 25,
+   "draft": 42,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "luke schoonmaker": {
+   "age": 27,
+   "draft": 58,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "luther burden iii": {
+   "age": 22,
+   "draft": 39,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "mac dalena": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "mac jones": {
+   "age": 27,
+   "draft": 15,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "SF"
+  },
+  "mack hollins": {
+   "age": 32,
+   "draft": 118,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "makai lemon": {
+   "age": 22,
+   "draft": 20,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "malachi corley": {
+   "age": 24,
+   "draft": 65,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "malachi fields": {
+   "age": 23,
+   "draft": 74,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "malick meiga": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "malik benson": {
+   "age": 23,
+   "draft": 195,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "malik cunningham": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "malik davis": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "malik mcclain": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "malik nabers": {
+   "age": 23,
+   "draft": 6,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "malik turner": {
+   "age": 30,
+   "draft": 0,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "malik washington": {
+   "age": 25,
+   "draft": 184,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "malik willis": {
+   "age": 27,
+   "draft": 86,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "MIA"
+  },
+  "marcus mariota": {
+   "age": 32,
+   "draft": 2,
+   "exp": 11,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "WAS"
+  },
+  "marcus sanders jr": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "mario williams": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "mark andrews": {
+   "age": 30,
+   "draft": 86,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "BAL"
+  },
+  "mark gronowski": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "MIA"
+  },
+  "mark redman": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "marlin klein": {
+   "age": 23,
+   "draft": 59,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "HOU"
+  },
+  "marquez valdes scantling": {
+   "age": 31,
+   "draft": 174,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "marquise brown": {
+   "age": 29,
+   "draft": 25,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "marshall lang": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "marshawn lloyd": {
+   "age": 25,
+   "draft": 88,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "marvin harrison jr": {
+   "age": 24,
+   "draft": 4,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "marvin mims jr": {
+   "age": 24,
+   "draft": 63,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "mason kinsey": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "mason pline": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "mason rudolph": {
+   "age": 31,
+   "draft": 76,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "PIT"
+  },
+  "mason taylor": {
+   "age": 22,
+   "draft": 42,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NYJ"
+  },
+  "mason tipton": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "matt lauter": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "matthew caldwell": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "LA"
+  },
+  "matthew golden": {
+   "age": 23,
+   "draft": 23,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "matthew hibner": {
+   "age": 24,
+   "draft": 133,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "BAL"
+  },
+  "matthew stafford": {
+   "age": 38,
+   "draft": 1,
+   "exp": 17,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "LA"
+  },
+  "maurice alexander": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "max bredeson": {
+   "age": 23,
+   "draft": 159,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "max brosmer": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "MIN"
+  },
+  "max hurleman": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "max klare": {
+   "age": 23,
+   "draft": 61,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "max tomczak": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "mccallan castles": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "mecole hardman": {
+   "age": 28,
+   "draft": 56,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "messiah swinson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "michael bandy": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "michael briscoe": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "michael burton": {
+   "age": 34,
+   "draft": 168,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "michael carter": {
+   "age": 27,
+   "draft": 107,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "michael mayer": {
+   "age": 25,
+   "draft": 35,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "michael penix jr": {
+   "age": 26,
+   "draft": 8,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ATL"
+  },
+  "michael pittman": {
+   "age": 28,
+   "draft": 34,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "michael trigg": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "michael wilson": {
+   "age": 26,
+   "draft": 94,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "michael wortham": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "mike evans": {
+   "age": 33,
+   "draft": 7,
+   "exp": 12,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "mike gesicki": {
+   "age": 30,
+   "draft": 42,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "mike washington jr": {
+   "age": 23,
+   "draft": 122,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "mike woods": {
+   "age": 26,
+   "draft": 202,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "miles davis": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "miller moss": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CHI"
+  },
+  "mitch van vooren": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "mitchell evans": {
+   "age": 23,
+   "draft": 163,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "mitchell tinsley": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "mitchell trubisky": {
+   "age": 32,
+   "draft": 2,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "TEN"
+  },
+  "mo alie cox": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "moliki matavao": {
+   "age": 23,
+   "draft": 248,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "montorie foster jr": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "myles montgomery": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "myles price": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "najee harris": {
+   "age": 28,
+   "draft": 24,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "nate adkins": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DEN"
+  },
+  "nate boerkircher": {
+   "age": 24,
+   "draft": 56,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "nate carter": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "nicholas singleton": {
+   "age": 22,
+   "draft": 165,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "nick degennaro": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "nick kallerup": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "nick mullens": {
+   "age": 31,
+   "draft": 0,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "JAX"
+  },
+  "nick muse": {
+   "age": 27,
+   "draft": 227,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "ATL"
+  },
+  "nick nash": {
+   "age": 27,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "nick vannett": {
+   "age": 33,
+   "draft": 94,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "SEA"
+  },
+  "nick westbrook ikhine": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "nico collins": {
+   "age": 27,
+   "draft": 89,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "nikko remigio": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "nikola kalinic": {
+   "age": 29,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "noah fant": {
+   "age": 28,
+   "draft": 20,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "noah gray": {
+   "age": 27,
+   "draft": 162,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "noah thomas": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "noah whittington": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "octavian smith": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "odell beckham jr": {
+   "age": 33,
+   "draft": 12,
+   "exp": 12,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "olamide zaccheaus": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "ollie gordon ii": {
+   "age": 22,
+   "draft": 179,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "MIA"
+  },
+  "omar cooper jr": {
+   "age": 22,
+   "draft": 30,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "omari evans": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "omari kelly": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "omarion hampton": {
+   "age": 23,
+   "draft": 22,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "oronde gadsden ii": {
+   "age": 23,
+   "draft": 165,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LAC"
+  },
+  "oscar delp": {
+   "age": 23,
+   "draft": 73,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "owen wright": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "parker washington": {
+   "age": 24,
+   "draft": 185,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "parris campbell": {
+   "age": 29,
+   "draft": 59,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "pat bryant": {
+   "age": 23,
+   "draft": 74,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "pat freiermuth": {
+   "age": 27,
+   "draft": 55,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "patrick gurd": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LV"
+  },
+  "patrick herbert": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "patrick mahomes": {
+   "age": 30,
+   "draft": 10,
+   "exp": 9,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "KC"
+  },
+  "patrick ricard": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "patrick taylor": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "payne durham": {
+   "age": 26,
+   "draft": 171,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "TB"
+  },
+  "pharaoh brown": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "phil mafah": {
+   "age": 23,
+   "draft": 239,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "DAL"
+  },
+  "phillip dorsett": {
+   "age": 33,
+   "draft": 29,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "pierre strong": {
+   "age": 27,
+   "draft": 127,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "GB"
+  },
+  "princeton fant": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "puka nacua": {
+   "age": 25,
+   "draft": 177,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "qadir ismail": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "quentin johnston": {
+   "age": 24,
+   "draft": 21,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "quentin moore": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "quentin skinner": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "quez watkins": {
+   "age": 28,
+   "draft": 200,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "quincy skinner jr": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "quinn ewers": {
+   "age": 23,
+   "draft": 231,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "MIA"
+  },
+  "quinshon judkins": {
+   "age": 22,
+   "draft": 36,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "quintin morris": {
+   "age": 27,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "rachaad white": {
+   "age": 27,
+   "draft": 91,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "raheim sanders": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "rashad rochelle": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "rashee rice": {
+   "age": 26,
+   "draft": 55,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "rasheen ali": {
+   "age": 25,
+   "draft": 165,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BAL"
+  },
+  "rashid shaheed": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "rashod bateman": {
+   "age": 26,
+   "draft": 27,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "ray davis": {
+   "age": 26,
+   "draft": 128,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "ray ray mccloud": {
+   "age": 29,
+   "draft": 187,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "raylen sharpe": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "reggie gilliam": {
+   "age": 29,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "reggie virgil": {
+   "age": 22,
+   "draft": 143,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "rhamondre stevenson": {
+   "age": 28,
+   "draft": 120,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "ricky pearsall": {
+   "age": 25,
+   "draft": 31,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "ricky white iii": {
+   "age": 24,
+   "draft": 238,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "rico dowdle": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "riley leonard": {
+   "age": 23,
+   "draft": 189,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "IND"
+  },
+  "riley nowakowski": {
+   "age": 24,
+   "draft": 169,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "rivaldo fairweather": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "rj harvey": {
+   "age": 25,
+   "draft": 60,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "robbie ouzts": {
+   "age": 23,
+   "draft": 175,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "robert henry jr": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "WAS"
+  },
+  "robert tonyan": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "PIT"
+  },
+  "roc taylor": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "rohan jones": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "roman hemby": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LV"
+  },
+  "roman wilson": {
+   "age": 25,
+   "draft": 84,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PIT"
+  },
+  "rome odunze": {
+   "age": 24,
+   "draft": 9,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "romeo doubs": {
+   "age": 26,
+   "draft": 132,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "ronnie bell": {
+   "age": 26,
+   "draft": 253,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "ronnie rivers": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "LA"
+  },
+  "roschon johnson": {
+   "age": 25,
+   "draft": 115,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CHI"
+  },
+  "roydell williams": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "ryan flournoy": {
+   "age": 26,
+   "draft": 216,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "ryan miller": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "sahmir hagans": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "IND"
+  },
+  "salvon ahmed": {
+   "age": 27,
+   "draft": 0,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CHI"
+  },
+  "sam darnold": {
+   "age": 29,
+   "draft": 3,
+   "exp": 8,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "SEA"
+  },
+  "sam ehlinger": {
+   "age": 27,
+   "draft": 218,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DEN"
+  },
+  "sam hartman": {
+   "age": 27,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "WAS"
+  },
+  "sam howell": {
+   "age": 25,
+   "draft": 144,
+   "exp": 4,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "DAL"
+  },
+  "sam laporta": {
+   "age": 25,
+   "draft": 34,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "sam roush": {
+   "age": 22,
+   "draft": 69,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "sam scott": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NYJ"
+  },
+  "samaje perine": {
+   "age": 30,
+   "draft": 114,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "samori toure": {
+   "age": 28,
+   "draft": 258,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "saquon barkley": {
+   "age": 29,
+   "draft": 2,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "savion williams": {
+   "age": 24,
+   "draft": 87,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "scott matlock": {
+   "age": 26,
+   "draft": 200,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "LAC"
+  },
+  "scott miller": {
+   "age": 29,
+   "draft": 208,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "sean clifford": {
+   "age": 28,
+   "draft": 149,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CIN"
+  },
+  "sean mckeon": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "sean tucker": {
+   "age": 24,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TB"
+  },
+  "seth mcgowan": {
+   "age": 24,
+   "draft": 237,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "IND"
+  },
+  "seydou traore": {
+   "age": 24,
+   "draft": 180,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "shane buechele": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BUF"
+  },
+  "shane zylstra": {
+   "age": 29,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "BUF"
+  },
+  "shawn bowman": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "shedeur sanders": {
+   "age": 24,
+   "draft": 144,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CLE"
+  },
+  "shedrick jackson": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "simi fehoko": {
+   "age": 28,
+   "draft": 179,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "sincere brown": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "sincere mccormick": {
+   "age": 25,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SF"
+  },
+  "sione vaki": {
+   "age": 25,
+   "draft": 132,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "skylar thompson": {
+   "age": 29,
+   "draft": 247,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BAL"
+  },
+  "skyler bell": {
+   "age": 24,
+   "draft": 125,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "skyy moore": {
+   "age": 25,
+   "draft": 54,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "spencer rattler": {
+   "age": 25,
+   "draft": 150,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "NO"
+  },
+  "stefon diggs": {
+   "age": 32,
+   "draft": 146,
+   "exp": 11,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "stephen carlson": {
+   "age": 29,
+   "draft": 0,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CHI"
+  },
+  "stephen gosnell": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "sterling shepard": {
+   "age": 33,
+   "draft": 40,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "stetson bennett": {
+   "age": 28,
+   "draft": 128,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "LA"
+  },
+  "stone smartt": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "PHI"
+  },
+  "tahj brooks": {
+   "age": 24,
+   "draft": 193,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "CIN"
+  },
+  "tahj washington": {
+   "age": 25,
+   "draft": 241,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "PHI"
+  },
+  "tai felton": {
+   "age": 23,
+   "draft": 102,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "tank bigsby": {
+   "age": 24,
+   "draft": 88,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "tank dell": {
+   "age": 26,
+   "draft": 69,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "tanner arkin": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NE"
+  },
+  "tanner conner": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "tanner hudson": {
+   "age": 31,
+   "draft": 0,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "CIN"
+  },
+  "tanner koziol": {
+   "age": 22,
+   "draft": 164,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "JAX"
+  },
+  "tanner mckee": {
+   "age": 26,
+   "draft": 188,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "PHI"
+  },
+  "tarik black": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "tay martin": {
+   "age": 28,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "taylen green": {
+   "age": 23,
+   "draft": 182,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "CLE"
+  },
+  "teagan quitoriano": {
+   "age": 26,
+   "draft": 170,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "ted hurst iii": {
+   "age": 22,
+   "draft": 84,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "teddy bridgewater": {
+   "age": 33,
+   "draft": 32,
+   "exp": 12,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "DET"
+  },
+  "tee higgins": {
+   "age": 27,
+   "draft": 33,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "tejhaun palmer": {
+   "age": 26,
+   "draft": 191,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NE"
+  },
+  "terrace marshall jr": {
+   "age": 26,
+   "draft": 59,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "terrance ferguson": {
+   "age": 23,
+   "draft": 46,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "terrell jennings": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "terrill davis": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "terry mclaurin": {
+   "age": 30,
+   "draft": 76,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "tetairoa mcmillan": {
+   "age": 23,
+   "draft": 8,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "tez johnson": {
+   "age": 24,
+   "draft": 235,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TB"
+  },
+  "theo johnson": {
+   "age": 25,
+   "draft": 107,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "theo wease jr": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "MIA"
+  },
+  "thomas fidone ii": {
+   "age": 23,
+   "draft": 219,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NYG"
+  },
+  "thomas gordon": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "thomas yassmin": {
+   "age": 26,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "tim jones": {
+   "age": 28,
+   "draft": 0,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "tim patrick": {
+   "age": 32,
+   "draft": 0,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "NYJ"
+  },
+  "tip reiman": {
+   "age": 24,
+   "draft": 82,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "tj harden": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CLE"
+  },
+  "tj hockenson": {
+   "age": 29,
+   "draft": 8,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "MIN"
+  },
+  "tom kennedy": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "DET"
+  },
+  "tommy devito": {
+   "age": 28,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NE"
+  },
+  "tommy tremble": {
+   "age": 26,
+   "draft": 83,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "CAR"
+  },
+  "tony pollard": {
+   "age": 29,
+   "draft": 128,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "tory horton": {
+   "age": 23,
+   "draft": 166,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "traeshon holden": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "travis etienne": {
+   "age": 27,
+   "draft": 25,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "travis homer": {
+   "age": 28,
+   "draft": 204,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "PIT"
+  },
+  "travis hunter": {
+   "age": 23,
+   "draft": 2,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "travis kelce": {
+   "age": 36,
+   "draft": 63,
+   "exp": 13,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "trayveon williams": {
+   "age": 28,
+   "draft": 182,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DET"
+  },
+  "trayvon rudolph": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "MIN"
+  },
+  "tre harris": {
+   "age": 24,
+   "draft": 55,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LAC"
+  },
+  "tre mckitty": {
+   "age": 27,
+   "draft": 97,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "WAS"
+  },
+  "tre stewart": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "tre tucker": {
+   "age": 25,
+   "draft": 100,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LV"
+  },
+  "tre watson": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "KC"
+  },
+  "trebor pena": {
+   "age": 24,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "JAX"
+  },
+  "trent sherfield": {
+   "age": 30,
+   "draft": 0,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "trenton irwin": {
+   "age": 30,
+   "draft": 0,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "treveyon henderson": {
+   "age": 23,
+   "draft": 38,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "NE"
+  },
+  "trevor etienne": {
+   "age": 22,
+   "draft": 114,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "RB",
+   "team": "CAR"
+  },
+  "trevor lawrence": {
+   "age": 26,
+   "draft": 1,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "JAX"
+  },
+  "trevor siemian": {
+   "age": 34,
+   "draft": 250,
+   "exp": 11,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ATL"
+  },
+  "trey benson": {
+   "age": 24,
+   "draft": 66,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "trey lance": {
+   "age": 26,
+   "draft": 3,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "LAC"
+  },
+  "trey mcbride": {
+   "age": 26,
+   "draft": 55,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "ARI"
+  },
+  "trey palmer": {
+   "age": 25,
+   "draft": 191,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NO"
+  },
+  "trey sermon": {
+   "age": 27,
+   "draft": 88,
+   "exp": 5,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "treylon burks": {
+   "age": 26,
+   "draft": 18,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "treyton welch": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "treyvhon saunders": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "troy franklin": {
+   "age": 23,
+   "draft": 102,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "DEN"
+  },
+  "tru edwards": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "tua tagovailoa": {
+   "age": 28,
+   "draft": 5,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "ATL"
+  },
+  "tucker kraft": {
+   "age": 25,
+   "draft": 78,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "GB"
+  },
+  "tutu atwell": {
+   "age": 26,
+   "draft": 57,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "ty chandler": {
+   "age": 28,
+   "draft": 169,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "ty johnson": {
+   "age": 28,
+   "draft": 186,
+   "exp": 7,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "BUF"
+  },
+  "ty pezza": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "ty simpson": {
+   "age": 23,
+   "draft": 13,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "LA"
+  },
+  "tyjae spears": {
+   "age": 25,
+   "draft": 81,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "TEN"
+  },
+  "tylan wallace": {
+   "age": 27,
+   "draft": 131,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CLE"
+  },
+  "tyler allgeier": {
+   "age": 26,
+   "draft": 151,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ARI"
+  },
+  "tyler badie": {
+   "age": 27,
+   "draft": 196,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "DEN"
+  },
+  "tyler conklin": {
+   "age": 31,
+   "draft": 157,
+   "exp": 8,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "tyler goodson": {
+   "age": 25,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "ATL"
+  },
+  "tyler higbee": {
+   "age": 33,
+   "draft": 110,
+   "exp": 10,
+   "phase": "decline",
+   "pos": "TE",
+   "team": "LA"
+  },
+  "tyler huntley": {
+   "age": 28,
+   "draft": 0,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "BAL"
+  },
+  "tyler johnson": {
+   "age": 28,
+   "draft": 161,
+   "exp": 6,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "DAL"
+  },
+  "tyler moore": {
+   "age": 26,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "tyler scott": {
+   "age": 24,
+   "draft": 133,
+   "exp": 3,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "tyler shough": {
+   "age": 26,
+   "draft": 40,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NO"
+  },
+  "tyler warren": {
+   "age": 24,
+   "draft": 14,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "tyquan thornton": {
+   "age": 26,
+   "draft": 50,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "tyrell shavers": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BUF"
+  },
+  "tyren montgomery": {
+   "age": 25,
+   "draft": 0,
+   "exp": 0,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "tyrod taylor": {
+   "age": 37,
+   "draft": 180,
+   "exp": 15,
+   "phase": "decline",
+   "pos": "QB",
+   "team": "GB"
+  },
+  "tyrone broden": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "SEA"
+  },
+  "tyrone tracy jr": {
+   "age": 26,
+   "draft": 166,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NYG"
+  },
+  "tyson bagent": {
+   "age": 26,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CHI"
+  },
+  "ulysses bentley iv": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "IND"
+  },
+  "van jefferson": {
+   "age": 30,
+   "draft": 57,
+   "exp": 6,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "WAS"
+  },
+  "velus jones jr": {
+   "age": 29,
+   "draft": 71,
+   "exp": 4,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "vinny anthony ii": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "wandale robinson": {
+   "age": 25,
+   "draft": 43,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "wesley grimes": {
+   "age": 22,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "will grier": {
+   "age": 31,
+   "draft": 100,
+   "exp": 7,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "CAR"
+  },
+  "will howard": {
+   "age": 24,
+   "draft": 185,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "QB",
+   "team": "PIT"
+  },
+  "will kacmarek": {
+   "age": 23,
+   "draft": 87,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "MIA"
+  },
+  "will levis": {
+   "age": 27,
+   "draft": 33,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "TEN"
+  },
+  "will mallory": {
+   "age": 27,
+   "draft": 162,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "IND"
+  },
+  "will pauling": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "SF"
+  },
+  "will sheppard": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "GB"
+  },
+  "will shipley": {
+   "age": 24,
+   "draft": 127,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "PHI"
+  },
+  "woody marks": {
+   "age": 25,
+   "draft": 116,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "HOU"
+  },
+  "xavier gipson": {
+   "age": 25,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "NYG"
+  },
+  "xavier guillory": {
+   "age": 25,
+   "draft": 0,
+   "exp": 1,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "xavier hutchinson": {
+   "age": 26,
+   "draft": 205,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "HOU"
+  },
+  "xavier johnson": {
+   "age": 27,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CIN"
+  },
+  "xavier legette": {
+   "age": 25,
+   "draft": 32,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "CAR"
+  },
+  "xavier loyd": {
+   "age": 23,
+   "draft": 0,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "xavier restrepo": {
+   "age": 24,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "TEN"
+  },
+  "xavier smith": {
+   "age": 28,
+   "draft": 0,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "LA"
+  },
+  "xavier weaver": {
+   "age": 25,
+   "draft": 0,
+   "exp": 2,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "ARI"
+  },
+  "xavier worthy": {
+   "age": 23,
+   "draft": 28,
+   "exp": 2,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "KC"
+  },
+  "zach charbonnet": {
+   "age": 25,
+   "draft": 52,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "SEA"
+  },
+  "zach horton": {
+   "age": 23,
+   "draft": 0,
+   "exp": 1,
+   "phase": "rising",
+   "pos": "TE",
+   "team": "DET"
+  },
+  "zach wilson": {
+   "age": 27,
+   "draft": 2,
+   "exp": 5,
+   "phase": "peak",
+   "pos": "QB",
+   "team": "NO"
+  },
+  "zachariah branch": {
+   "age": 22,
+   "draft": 79,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "ATL"
+  },
+  "zack kuntz": {
+   "age": 27,
+   "draft": 220,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "DAL"
+  },
+  "zaire mitchell paden": {
+   "age": 27,
+   "draft": 0,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "TE",
+   "team": "NO"
+  },
+  "zamir white": {
+   "age": 26,
+   "draft": 122,
+   "exp": 4,
+   "phase": "peak",
+   "pos": "RB",
+   "team": "NO"
+  },
+  "zavier scott": {
+   "age": 27,
+   "draft": 0,
+   "exp": 3,
+   "phase": "decline",
+   "pos": "RB",
+   "team": "MIN"
+  },
+  "zavion thomas": {
+   "age": 22,
+   "draft": 89,
+   "exp": 0,
+   "phase": "rising",
+   "pos": "WR",
+   "team": "CHI"
+  },
+  "zay flowers": {
+   "age": 25,
+   "draft": 22,
+   "exp": 3,
+   "phase": "peak",
+   "pos": "WR",
+   "team": "BAL"
+  },
+  "zay jones": {
+   "age": 31,
+   "draft": 37,
+   "exp": 9,
+   "phase": "decline",
+   "pos": "WR",
+   "team": "HOU"
+  }
+ }
+}

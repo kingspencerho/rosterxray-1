@@ -4048,3 +4048,160 @@ the ladder on $40:  clear R1 -> $40 (breakeven)  ·  clear W15 -> $75-150
 The Husky (new):  ref1 A 10.73 · ref2 C+ 0.96 · ref3 B+ 4.21
 All four branch paths verified firing in both directions.
 ```
+
+---
+
+## Three Context Layers: Deployment, Career Arc, Vacated Targets (added Aug 31, 2026)
+
+The app graded structure well and knew almost nothing about the players in it.
+Of everything the AI saw, the receiving block was opportunity handed down by a
+coach, and the matchup tier is the LEAST stable input measured here. These three
+files close the gap. **CONTEXT ONLY — 39 grades byte-identical (36 best ball
+across 12 tournaments x 3 fixtures, plus 3 redraft).** Guard 22:
+`scripts/test-context-layers.mjs`.
+
+| File | Script | Rank | What it answers |
+|---|---|---|---|
+| `ngs_receiving_2025.json` | `build-ngs-receiving.py` | 2 and 3 | Where is he used, and does he get open |
+| `career_arc_2026.json` | `build-career-arc.py` | — | Is the calendar with him or against him |
+| `vacated_2026.json` | `build-vacated.py` | **1** | Who left, and how big is the opening |
+
+### Separation is the FIRST talent-in-isolation input this app has carried
+
+Every other receiving number here — target share, WOPR, snap share, targets per
+game — measures what a coach GAVE a player. `sep` (yards of space at the catch
+point, from the tracking chip) measures whether he is EARNING it. That is rank 3
+in the Source Hierarchy, a rank the app had no data for at all.
+
+**Measured r = 0.663** (23>24 0.595, 24>25 0.732, n=85 at 40+ targets) — above
+`spike_rate` at 0.475, which the Ceiling Shape Layer already trusts enough to
+score. AJ Brown at 2.24 against a WR median of 2.78 is an 8th-percentile
+separation profile carrying a top-decile target share; that tension is exactly
+what the card could not previously show.
+
+### Intended air yards is the stickiest player input in the project
+
+**r = 0.826** (0.832 / 0.820), ahead of QB rushing attempts at 0.815. It is
+sticky for the reason aDOT already is: **deployment is a role property, not a
+performance one.** Where a coach lines a receiver up and what routes he calls
+persist; whether the ball arrives does not. Two receivers with identical target
+counts are different assets when one is at 6.3 and the other at 14.1.
+
+**Four NGS fields were measured and deliberately LEFT OUT**, recorded in
+`_meta.not_emitted` with their r: `catch_percentage` 0.492, `avg_yac` 0.458,
+`avg_cushion` 0.415, `avg_yac_above_expectation` 0.358. The reason a field was
+rejected is worth as much as the ones kept, and guard 22 asserts they stay
+recorded — otherwise a future session re-adds one on intuition.
+
+### ⚠️ NGS HAS ITS OWN POPULATION AND MUST NEVER SHARE THE CARD'S
+
+`CARD_PERCENTILES` ranks against draftable players with 8+ games. NGS ranks
+against **40+ targets in 2025** — a different, smaller pool. Merging the two
+tables would print a percentile under a population label that does not describe
+it, which is the vintage trap in a new costume. Hence `NGS_PERCENTILES`,
+`ngsPercentile` and `NGS_POP_GATE` as separate definitions, a separate
+`Deployment` card section, and a note saying the two ranks are not
+interchangeable. Guarded, and negative-tested by swapping in `cardPercentile`.
+
+### The aging bands are PRIORS. Say so every time they render.
+
+`CAREER_ARC._meta.bands` (RB decline 27, WR 30, TE 31, QB 35) are **published
+career-arc priors, NOT measured in this repo.** One season of data cannot
+produce an aging curve and a cross-sectional read is confounded by survivorship.
+The age itself is measured; the band around it is borrowed. The file says so,
+the card says so, and the AI prompt says so — an inherited curve rendered as a
+finding is the same failure as a stale verdict rendered as current.
+
+**The prompt emits only the TAILS.** A player inside his peak band tells the
+model nothing his other numbers did not, so silence there means the calendar is
+neutral rather than that data is missing — stated in the header, the same rule
+`trajectoryContext` follows.
+
+### Vacated targets is rank 1, and the app had no view of it
+
+Lens 1 says to project who absorbs a vacated share before ADP reflects it. There
+was no file that could see the vacancy. Now there is, per team:
+
+```
+PIT 57.1%   MIA 56.6%   WAS 46.6%   NYG 42.0%   NE 37.8%   ATL 36.4%
+```
+
+**It locates the opening. It does not name who fills it** — that stays a
+judgement, and the file, the card and the prompt all say so rather than letting
+a team number read as a player projection.
+
+**⚠️ TWO SCALES IN ONE FILE.** `vacated_pct` is stored in PERCENT units (46.6)
+while `gone[].tgt_sh` is a FRACTION (0.247). Anything reading them must not
+assume — a `* 100` on the wrong one rendered **4660%** on the card for one build.
+Guard 22 asserts the units directly.
+
+The denominator is the team's **own measured 2025 share**, not 1.00: the metrics
+cover drafted players only, so a team's shares do not sum to 100% and the honest
+comparable figure is "share of the measured pool that left". That qualifier is
+printed on the card beneath the number, because a percentage without its
+denominator is a number nobody can act on.
+
+`norm()` strips SUFFIXES before differencing. The known bug read
+`brian robinson jr` as a departure and inflated WAS to 82.4%; it now reads 46.6%
+and the guard pins that.
+
+### CAREER ARC AND TURNOVER RENDER ABOVE THE no-data BRANCH
+
+The first version put all three sections inside the card's `card.reason ? … : …`
+else-branch, and **a rookie got none of them** — Carnell Tate's card showed only
+"No 2025 NFL data" while age 21, drafted 4th overall and a 29% TEN vacancy were
+sitting right there. A rookie is precisely the player for whom those two facts
+are the ONLY useful information on the card.
+
+Both now mount above the branch, collapsed. Tate 289px -> 451px; a full card
+pays two lines. **Deployment stays inside the branch** because it needs 2025
+receiving volume, so a no-data player never has it either way.
+
+Also fixed on the way in: the position median was riding in a row's `caution`
+slot, which on this card MEANS "this number disagrees with another one above it"
+and renders with a warning mark. A reference value is not a conflict, and
+dressing one as a warning devalues the mark everywhere it appears. It moved to
+the section note.
+
+### Guard 22 — containment is the assertion that matters
+
+The three accessors are enumerated, **every call site is checked against an
+allowlist of reviewed consumers** (`buildPlayerCard`, `deploymentContext`,
+`arcContext`, `vacatedContext`), and `analyzeRoster` / `analyzeRedraft` are
+asserted clean of both the accessors and the raw tables.
+
+Structural rather than behavioural on purpose: a leak can move one roster by 0.01
+and pass a spot check, and a layer that starts scoring **silently invalidates
+every calibration figure in this file** — nothing errors, the numbers just stop
+meaning what they meant. Three failure paths negative-tested: a read inside
+`analyzeRoster`, an unreviewed call site outside the engines, and the merged
+percentile population. All exit non-zero.
+
+### Regenerate
+
+```
+pip install nflreadpy
+python3 scripts/build-ngs-receiving.py   # nextgen_stats/ngs_receiving
+python3 scripts/build-career-arc.py      # rosters/roster_2026
+python3 scripts/build-vacated.py         # player_metrics_2025 x roster_2026
+```
+
+All three are ANNUAL under the split refresh cadence. None feeds a scored input,
+so a mid-season regeneration would be safe — it is simply not worth the network:
+NGS is a closed 2025 season, ages move once a year, and a vacancy is settled by
+Week 1.
+
+### Still open, and why each was left
+
+| Item | Stability | Why not built |
+|---|---|---|
+| Targets per game in the prompt | 0.774 | **free — `tgt` and `gp` already loaded.** One line. |
+| Air yards share in the prompt | 0.780 | **free — `ay_sh` already loaded, unprinted.** One line. |
+| Availability rate | — | Every metric here is per-game; nothing expresses "he plays" |
+| Red-zone target share | — | Lens 1 calls it standalone scoring equity and the app cannot see it |
+| Carries per game (RB) | 0.730 | `build-player-metrics.py` emits no carry count |
+| Targets per route run | — | **Paywalled.** No free routes source since the 2023 feed died. Never substitute target share for it. |
+| Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
+
+The first two remain the best value-to-effort on the list: anchor-grade numbers
+already in memory and currently invisible to the model.

@@ -54,6 +54,31 @@ import QB_PROFILE from './grading/data/qb_profile_2025.json';
 import SNAP_TRAJECTORY_CUR from './grading/data/snap_trajectory_2026.json';
 import GAME_LOGS_CUR from './grading/data/gamelogs_2026.json';
 import QB_PROFILE_CUR from './grading/data/qb_profile_2026.json';
+// Next Gen Stats receiving: separation at the catch point, and intended air
+// yards (aDOT, counted where the ball was AIMED whether or not it arrived).
+//
+// SEPARATION IS THE ONLY TALENT-IN-ISOLATION INPUT THIS APP CARRIES. Every
+// other receiving number here measures what a coach handed a player — target
+// share, WOPR, snap share are all opportunity. Separation measures whether he
+// earned it, which is rank 3 in the Source Hierarchy and previously absent.
+// Intended air yards is rank 2 and, at r=0.83, the stickiest player input
+// measured anywhere in this project: it describes WHERE a receiver is deployed,
+// and deployment persists while outcomes do not. Built by
+// scripts/build-ngs-receiving.py. CONTEXT ONLY — never touches the score.
+import NGS_RECEIVING from './grading/data/ngs_receiving_2025.json';
+// Age, experience and draft slot, with the published aging band per position.
+// The cheapest available correction to the most common projection error:
+// carrying a season forward on a player the calendar is working against.
+// ⚠️ The bands are PRIORS, not measured in this repo — see the file's _meta.
+// Built by scripts/build-career-arc.py. CONTEXT ONLY.
+import CAREER_ARC from './grading/data/career_arc_2026.json';
+// Per-team share of 2025 targets belonging to players no longer on the roster.
+// Rank 1 in the Source Hierarchy is role/opportunity CHANGE, and this is the
+// only file that measures it at the team level — Lens 1 requires projecting who
+// absorbs a vacated share before ADP does, and nothing in the app could see the
+// vacancy. It says targets are AVAILABLE; naming who inherits them is still a
+// judgement. Built by scripts/build-vacated.py. CONTEXT ONLY.
+import VACATED from './grading/data/vacated_2026.json';
 
 // ============ DATA ============
 
@@ -2483,6 +2508,10 @@ const getMotion = (name) => lookupPlayer(MOTION.players, name);
 const getAirYards = (name) => lookupPlayer(AIRYARDS.backs, name);
 const getSnapTrend = (name) => lookupPlayer(SNAP_TRAJECTORY.players, name);
 const getQbProfile = (name) => lookupPlayer(QB_PROFILE.players, name);
+const getNgsRec = (name) => lookupPlayer(NGS_RECEIVING.players, name);
+const getCareerArc = (name) => lookupPlayer(CAREER_ARC.players, name);
+// Team-level, so it is keyed by team code rather than through lookupPlayer.
+const getVacated = (team) => (team ? VACATED.teams[team] || null : null);
 // Current-season lookups. `hasCurrentSeason` is the single gate every consumer
 // checks, so an empty placeholder is indistinguishable from the pre-2026 build.
 const CUR_SEASON_LIVE = (SNAP_TRAJECTORY_CUR._meta?.weeks_covered || 0) > 0;
@@ -2844,6 +2873,26 @@ const CARD_GLOSSARY = {
     what: "Snap share in the first half of the season against the second half, plus his last 4 games played.",
     how: "This is the headline because a season average hides role CHANGE. When the two disagree, the trajectory is the newer fact and the average is the stale one.",
   },
+  ngs_iay: {
+    term: "Intended air yards",
+    what: "How far downfield the ball is travelling when it is thrown at him, averaged over every target — counted where it was aimed, whether or not he caught it.",
+    how: "The stickiest player number on this card. It describes WHERE the offence uses him, and deployment carries from season to season even when production does not. Two receivers with the same target count are different assets if one runs slants and the other runs digs.",
+  },
+  ngs_sep: {
+    term: "Separation",
+    what: "Yards of space between him and the nearest defender at the moment the pass arrives, from the tracking chip in the ball.",
+    how: "The only number here that measures the player rather than his opportunity. Everything else says what a coach gave him; this says whether he is earning it. Big separation on modest volume is the shape a breakout has before the targets show up.",
+  },
+  _arc: {
+    term: "Career arc",
+    what: "Age, seasons of experience and draft slot, set against the typical aging curve for the position.",
+    how: "The cheapest guard against projecting a season forward on a player the calendar is working against. Running back is the steep one; tight end runs the other way, where a 25-year-old is often still pre-breakout. The age is a fact, the curve is a published prior rather than something measured here.",
+  },
+  _vacated: {
+    term: "Team target turnover",
+    what: "The share of his team's 2025 targets that belonged to players no longer on the roster.",
+    how: "Targets do not disappear, they get reassigned — so a big number is an opening somebody on that offence is about to inherit. It says where the vacancy is; it does not say who fills it, and that is the part worth working out before the market does.",
+  },
   tgt_pg: {
     term: "Targets / game",
     what: "Passes thrown his way per game.",
@@ -2954,6 +3003,43 @@ const cardPercentile = (pos, key, value) => {
   return Math.round((below / arr.length) * 100);
 };
 
+// NGS carries its OWN population (40+ targets in 2025) and its own gate, which
+// is not the gate CARD_PERCENTILES uses. Ranking one against the other would
+// print a percentile whose stated population is wrong, so the two never share a
+// table and the NGS section prints its own gate.
+const NGS_PERCENTILES = (() => {
+  const out = {};
+  for (const r of Object.values(NGS_RECEIVING.players || {})) {
+    const b = (out[r.pos] ||= { sep: [], iay: [] });
+    if (typeof r.sep === "number") b.sep.push(r.sep);
+    if (typeof r.iay === "number") b.iay.push(r.iay);
+  }
+  for (const b of Object.values(out)) { b.sep.sort((a, c) => a - c); b.iay.sort((a, c) => a - c); }
+  return out;
+})();
+const NGS_POP_GATE = `${NGS_RECEIVING._meta.min_targets}+ targets in 2025`;
+
+const ngsPercentile = (pos, key, value) => {
+  const arr = NGS_PERCENTILES[pos]?.[key];
+  if (!arr || arr.length < 12 || value == null) return null;
+  let below = 0;
+  for (const v of arr) { if (v < value) below++; else break; }
+  return Math.round((below / arr.length) * 100);
+};
+
+// The band a player's age falls in, from CAREER_ARC._meta. The bands are
+// published priors rather than a finding of this repo, so the card labels them
+// that way wherever they render.
+const careerPhaseLabel = (arc) => {
+  const band = CAREER_ARC._meta.bands?.[arc?.pos];
+  if (!arc || !band) return null;
+  const phase = arc.phase;
+  const text = phase === "rising" ? `ascending — ${arc.pos} production typically peaks around ${band.peak}`
+    : phase === "peak" ? `in the peak band for a ${arc.pos} (about ${band.rising}-${band.decline})`
+    : `past the ${band.decline} mark where ${arc.pos} production typically starts to fall`;
+  return { phase, text, note: band.note, peak: band.peak, decline: band.decline };
+};
+
 // Builds everything the card renders. Returns a `reason` instead of null when
 // there is no data, so the UI can say WHY — an empty card is the silent-drop
 // failure mode in a new costume.
@@ -2994,6 +3080,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // section always renders — an empty one says so in words.
     news: buildPlayerNews(name, nowTs),
     gameLog: null, gameLogCur: null,
+    deployment: [], arc: null, vacated: null,
   };
 
   // GAME LOG — current season first, prior season underneath, never swapped.
@@ -3102,6 +3189,55 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   if (eff?.rec_eff_rank) card.efficiency.push({ key: "eff_rec", label: "Receiving efficiency", value: `${eff.rec_eff_rank} of ${PLAYER_EFFICIENCY._meta.qualified_counts[`${pos}_rec_eff_rank`]}` });
   if (ay) card.efficiency.push({ key: "eff_adot", label: "aDOT", value: `${ay.adot > 0 ? "+" : ""}${ay.adot} on ${ay.tgt} tgts` });
 
+  // DEPLOYMENT — separation and intended air yards, from Next Gen Stats.
+  // Deliberately its OWN section rather than extra rows inside Opportunity:
+  // different source, different population, different printed gate. Merging
+  // them would put a percentile under a population label that does not describe
+  // it, which is the vintage trap wearing a new costume.
+  const ngs = (pos === "WR" || pos === "TE") ? getNgsRec(name) : null;
+  if (ngs) {
+    const st = NGS_RECEIVING._meta.stability;
+    const med = NGS_RECEIVING._meta.medians[pos];
+    card.deployment.push({
+      key: "ngs_iay", label: "Intended air yards", r: st.avg_intended_air_yards.r, tier: "anchor",
+      value: `${ngs.iay.toFixed(1)} yds`, pct: ngsPercentile(pos, "iay", ngs.iay),
+    });
+    card.deployment.push({
+      key: "ngs_sep", label: "Separation", r: st.avg_separation.r, tier: "reliable",
+      value: `${ngs.sep.toFixed(2)} yds`, pct: ngsPercentile(pos, "sep", ngs.sep),
+    });
+    // The median goes in the section NOTE, never in a row's `caution`. On this
+    // card `caution` means "this number disagrees with another one above it" and
+    // renders with a warning mark; a reference value is not a conflict, and
+    // dressing one as a warning devalues the mark everywhere it appears.
+    card.deploymentSepMedian = med;
+    card.deploymentTargets = ngs.tgt;
+    card.deploymentTeam = ngs.team;
+  }
+
+  // CAREER ARC. Age is a fact; the band around it is a published prior, and the
+  // card says so rather than dressing a borrowed curve as a measurement.
+  const arc = getCareerArc(name);
+  if (arc) {
+    const phase = careerPhaseLabel(arc);
+    card.arc = {
+      age: arc.age, exp: arc.exp, draft: arc.draft, team: arc.team,
+      phase: arc.phase, text: phase?.text || null, note: phase?.note || null,
+      asOf: CAREER_ARC._meta.as_of,
+    };
+  }
+
+  // TEAM TARGET TURNOVER. Team-level and stated as such: it locates a vacancy,
+  // it does not name the player who fills it.
+  const vac = getVacated(team);
+  if (vac && typeof vac.vacated_pct === "number") {
+    card.vacated = {
+      team, pct: vac.vacated_pct,
+      gone: (vac.gone || []).slice(0, 5),
+      denominator: VACATED._meta.denominator,
+    };
+  }
+
   // The glossary explains exactly what this card rendered and nothing else, in
   // the order the reader met it. A QB card never defines WOPR; an RB card with
   // no air-yards row never defines aDOT.
@@ -3112,9 +3248,16 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   for (const d of (CARD_METRICS[pos] || [])) if (card.metrics.some(x => x.label === d.label)) glossKeys.push(d.key);
   for (const d of CARD_DESCRIPTIVE) if (card.descriptive.some(x => x.label === d.label)) glossKeys.push(d.key);
   for (const e of card.efficiency) if (e.key) glossKeys.push(e.key);
+  for (const d of card.deployment) if (d.key) glossKeys.push(d.key);
+  if (card.arc) glossKeys.push("_arc");
+  if (card.vacated) glossKeys.push("_vacated");
   card.glossary = glossKeys.filter(k => CARD_GLOSSARY[k]).map(k => ({ key: k, ...CARD_GLOSSARY[k] }));
 
-  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length && !card.gameLog && !card.gameLogCur && !card.absence.length) {
+  // ⚠️ arc and vacated are deliberately EXCLUDED from this test. Both are
+  // near-universal — a rookie has an age and his team has a vacancy — so
+  // counting them as data would suppress the reason line on exactly the players
+  // who most need it, and the card would go quiet instead of explaining itself.
+  if (!card.metrics.length && !card.qb && !card.qbCur && !card.trajectory && !card.trajectoryCur && !card.efficiency.length && !card.deployment.length && !card.gameLog && !card.gameLogCur && !card.absence.length) {
     card.glossary = [];
     card.reason = m
       ? `Only ${m.gp} game${m.gp === 1 ? "" : "s"} of 2025 data — below the 8-game bar for a readable role.`
@@ -6861,6 +7004,13 @@ const POS_ACCENT = {
 const CARD_ACCENTS = {
   trajectory: "var(--ui-accent)",
   volume: "var(--ui-accent)",
+  // Deployment answers the same question Opportunity does — how is he used —
+  // so it shares that colour. The two sections are one idea split by source.
+  deployment: "var(--accent-purple-light)",
+  // Career arc and team turnover are both role CHANGE, which is what the news
+  // accent already means on this card.
+  arc: "var(--ui-accent)",
+  vacated: "var(--ui-accent)",
   opportunity: "var(--accent-purple-light)",
   // Qualifies the OPPORTUNITY numbers, so it wears their colour: the two are
   // one idea, and a share means something different once you know who was out.
@@ -7596,6 +7746,67 @@ const PlayerCardModal = ({ card, onClose }) => {
           ))}
         </CardSection>
 
+        {/* CAREER ARC AND TEAM TURNOVER SIT ABOVE THE no-data BRANCH ON PURPOSE.
+            Both are near-universal — a rookie has an age and his team has a
+            vacancy — and a rookie is exactly the player for whom they are the
+            ONLY useful information on the card. Rendering them inside the
+            branch below would hide them from him, which is the silent-drop
+            failure this card exists to avoid. Both are collapsed, so the cost
+            to a full card is two lines. */}
+        {card.arc && (
+          <CardSection
+            title="Career arc"
+            accent={CARD_ACCENTS.arc}
+            collapsible
+            hint={`age ${card.arc.age} · ${card.arc.phase}`}
+            note="Age is measured. The band around it is a published aging prior, not a finding of this app — weigh it, do not quote it.">
+            <div style={{ display: "flex", gap: "18px", flexWrap: "wrap", fontSize: "12px", marginBottom: "7px" }}>
+              {[["Age", card.arc.age], ["Season", `#${card.arc.exp + 1}`], ["Draft", card.arc.draft ? `pick ${card.arc.draft}` : "undrafted"]].map(([k, v]) => (
+                <div key={k}>
+                  <div style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{k}</div>
+                  <div style={{ color: "var(--text-primary)", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v}</div>
+                </div>
+              ))}
+            </div>
+            {card.arc.text && (
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>{card.arc.text}.</div>
+            )}
+            {card.arc.note && (
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px" }}>{card.arc.note}.</div>
+            )}
+          </CardSection>
+        )}
+
+        {card.vacated && (
+          <CardSection
+            title="Team target turnover"
+            accent={CARD_ACCENTS.vacated}
+            collapsible
+            hint={`${Math.round(card.vacated.pct)}% of ${card.vacated.team} targets gone`}
+            note="Share of this team's 2025 targets belonging to players no longer on the roster. It locates the opening; who inherits it is still a judgement.">
+            <div style={{ fontSize: "22px", fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.1 }}>
+              {Math.round(card.vacated.pct)}%
+              <span style={{ fontFamily: "inherit", fontSize: "11px", color: "var(--text-dim)", marginLeft: "8px", letterSpacing: 0 }}>
+                of {card.vacated.team}'s measured 2025 targets
+              </span>
+            </div>
+            {card.vacated.gone.length > 0 ? card.vacated.gone.map((g, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "4px 0", borderTop: "1px solid var(--bg-raised)" }}>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600, textTransform: "capitalize" }}>{g.name}</span>
+                <span style={{ color: "var(--text-dim)" }}>{g.pos} · {g.status}</span>
+                <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{Math.round(g.tgt_sh * 100)}%</span>
+              </div>
+            )) : (
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "6px" }}>
+                No individual departure cleared the 3% target-share listing cut.
+              </div>
+            )}
+            <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "7px", lineHeight: 1.5 }}>
+              {card.vacated.denominator}
+            </div>
+          </CardSection>
+        )}
+
         {card.reason ? (
           <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
             {card.reason}
@@ -7728,6 +7939,15 @@ const PlayerCardModal = ({ card, onClose }) => {
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
                 {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
+            {card.deployment.length > 0 && (
+              <CardSection
+                title="Deployment"
+                accent={CARD_ACCENTS.deployment}
+                note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
+                {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
               </CardSection>
             )}
 
@@ -8868,6 +9088,66 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === NGS DEPLOYMENT CONTEXT ===
+      // The two receiving numbers the prompt never carried, and the two that
+      // most deserve to be there. Intended air yards is the stickiest player
+      // input measured in this project (r=0.83) and separation is the only
+      // talent-in-isolation figure the app holds (r=0.66) — everything else in
+      // the receiving block is opportunity handed down by a coach.
+      const deploymentContext = (result.valid || [])
+        .map(p => {
+          if (p.pos !== "WR" && p.pos !== "TE") return null;
+          const n = getNgsRec(p.name);
+          if (!n) return null;
+          const med = NGS_RECEIVING._meta.medians[p.pos];
+          const sepRead = n.sep >= med + 0.4 ? " — gets open comfortably for the position"
+            : n.sep <= med - 0.4 ? " — wins less separation than the position median"
+            : "";
+          const moved = n.team && p.team && n.team !== p.team ? ` [2025 with ${n.team}, now ${p.team}]` : "";
+          return `${p.name}: ${n.iay.toFixed(1)} intended air yards (aDOT — where he is deployed), ${n.sep.toFixed(2)} yds separation vs ${p.pos} median ${med}${sepRead}, on ${n.tgt} targets${moved}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      // === CAREER ARC CONTEXT ===
+      // Only the tails. A player sitting inside his position's peak band tells
+      // the model nothing his other numbers did not, so silence here means the
+      // calendar is neutral rather than that the data is missing — stated in
+      // the prompt header, same rule the trajectory block follows.
+      const arcContext = (result.valid || [])
+        .map(p => {
+          const a = getCareerArc(p.name);
+          if (!a || a.phase === "peak") return null;
+          const band = CAREER_ARC._meta.bands[a.pos];
+          if (!band) return null;
+          const read = a.phase === "decline"
+            ? `past ${band.decline}, where ${a.pos} production typically starts to fall`
+            : `still ascending — ${a.pos} production typically peaks around ${band.peak}`;
+          return `${p.name}: age ${a.age}, season #${a.exp + 1}, ${a.draft ? `drafted ${a.draft} overall` : "undrafted"} — ${read}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      // === VACATED TARGET CONTEXT ===
+      // Team-level, deduped, and only the teams this roster actually touches.
+      // Rank 1 in the Source Hierarchy and the app had no view of it at all.
+      const vacatedContext = (() => {
+        const teams = [...new Set((result.valid || []).map(p => p.team).filter(Boolean))];
+        return teams
+          .map(t => {
+            const v = getVacated(t);
+            // vacated_pct is stored in PERCENT units (46.6), not as a fraction.
+            if (!v || !(v.vacated_pct > 20)) return null;
+            const gone = (v.gone || []).slice(0, 4)
+              .map(g => `${titleCaseName(g.name)} ${g.pos} ${Math.round(g.tgt_sh * 100)}% (${g.status})`)
+              .join(", ");
+            return `${t}: ${Math.round(v.vacated_pct)}% of measured 2025 targets have left${gone ? ` — ${gone}` : ""}`;
+          })
+          .filter(Boolean)
+          .sort((a, b) => parseInt(b.split(": ")[1]) - parseInt(a.split(": ")[1]))
+          .join("\n");
+      })();
+
       // === 2025 EFFICIENCY CONTEXT ===
       // The other half of metricsContext. That block says how much a player was
       // given; this says what he did per touch. Rushing and receiving stay
@@ -8929,7 +9209,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -8949,7 +9229,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
