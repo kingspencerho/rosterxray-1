@@ -28,12 +28,45 @@ if (!args.length) {
   console.error("usage: node scripts/grade-cli.mjs <roster.txt|-> [--redraft] [--tournament key] [--league key] [--projected]");
   process.exit(1);
 }
+// ⚠ UNKNOWN FLAGS ARE A HARD ERROR, and this is the reason.
+//
+// `--mode redraft` reads like a flag and is not one. It was silently ignored,
+// so a redraft roster was graded through the BEST BALL engine and a plausible
+// answer was printed with no indication anything was wrong. That is the
+// silent-drop failure class this repo has fixed five times in the app itself:
+// a wrong answer nobody can tell is wrong costs more than a crash.
+//
+// So every argument is validated. A typo exits non-zero and names the flag.
+const KNOWN_FLAGS = new Set(["--redraft", "--projected", "--tournament", "--league", "--json"]);
+const TAKES_VALUE = new Set(["--tournament", "--league"]);
+for (let i = 1; i < args.length; i++) {
+  const a = args[i];
+  if (!a.startsWith("--")) {
+    // A bare token is legal only as the value of the flag before it.
+    if (i > 0 && TAKES_VALUE.has(args[i - 1])) continue;
+    console.error(`grade-cli: unexpected argument "${a}"`);
+    process.exit(2);
+  }
+  if (!KNOWN_FLAGS.has(a)) {
+    const hint = a === "--mode"
+      ? `  did you mean --redraft?  ("--mode redraft" is not a flag and was silently ignored before Sep 1 2026)`
+      : `  known flags: ${[...KNOWN_FLAGS].join(" ")}`;
+    console.error(`grade-cli: unknown flag "${a}"\n${hint}`);
+    process.exit(2);
+  }
+  if (TAKES_VALUE.has(a) && (i + 1 >= args.length || args[i + 1].startsWith("--"))) {
+    console.error(`grade-cli: ${a} needs a value`);
+    process.exit(2);
+  }
+}
+
 const rosterText = args[0] === "-" ? readFileSync(0, "utf8") : readFileSync(args[0], "utf8");
 const flag = (name, dflt) => { const i = args.indexOf(`--${name}`); return i === -1 ? dflt : (args[i + 1] || true); };
 const isRedraft = args.includes("--redraft");
 const useProjected = args.includes("--projected");
 const tournamentKey = flag("tournament", "main");
 const leagueKey = flag("league", "yahoo_std");
+
 
 // Bundle the real app module with exports appended. Stub the analytics
 // package (browser-only side effects); React bundles fine unused.
@@ -59,6 +92,13 @@ if (isRedraft) {
   const picks = eng.parseRosterRedraft(rosterText);
   result = eng.analyzeRedraft(picks, leagueKey, picks.hasPickNumbers, useProjected);
 } else {
+  // Same reason as the flag check above: an unknown key would fall through to
+  // `undefined` and the engine would return a plausible number for a tournament
+  // that does not exist.
+  if (!eng.TOURNAMENTS[tournamentKey]) {
+    console.error(`grade-cli: unknown tournament "${tournamentKey}"\n  known: ${Object.keys(eng.TOURNAMENTS).join(" ")}`);
+    process.exit(2);
+  }
   const fmt = eng.TOURNAMENTS[tournamentKey]?.format || "standard";
   const picks = eng.parseRoster(rosterText, fmt);
   result = eng.analyzeRoster(picks, tournamentKey, picks.hasPickNumbers, useProjected);

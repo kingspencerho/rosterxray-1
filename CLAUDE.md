@@ -4237,3 +4237,93 @@ already loaded, and both were invisible to the AI.
 **39 grades byte-identical** — prompt content cannot reach the scoring engine.
 
 The remaining rows in the table above are unchanged.
+
+---
+
+## Red Zone & On-Field Rate (added Sep 1, 2026)
+
+Two more context layers, both free from nflverse, both closing a gap the
+framework itself had already named. **CONTEXT ONLY — 39 grades byte-identical.**
+Guarded by the additions to `scripts/test-context-layers.mjs` (guard 22).
+
+### Red zone: `hvt_pg` was a COUNT and Lens 1 asks for a SHARE
+
+Lens 1 calls red zone and goal line touches standalone scoring equity and says
+to track them separately from snap share. `hvt_pg` was the nearest thing the app
+carried, and being a per-game count it cannot distinguish **a back on a team
+that never reaches the red zone from one on a team that lives there.** The share
+isolates the player's claim on the scoring chances, which is the part that
+survives a change in team scoring rate.
+
+Three zones, because they answer different questions: inside 20 (opportunity),
+inside 10 (where scores are decided, noisier), inside 5 (goal line, almost
+entirely a personnel decision).
+
+**⚠️ THE COUNT TRAVELS WITH THE SHARE, EVERYWHERE.** Red-zone volume is a
+fraction of total volume, so every share here is a ratio of two small numbers.
+The card prints `31% of 22`, the prompt prints `31% of team red-zone targets
+(22)`, and the prompt header forbids quoting a share without its count. A share
+is emitted only when the player AND his team clear a gate, so **a count with no
+share means the sample is too thin to express as a rate** — that absence is
+information. Goal line is a count only; a share there would be two or three
+plays wearing a percentage sign.
+
+**⚠️ pbp NEVER carries a usable name.** It prints `A.St. Brown` and `H.Henry`,
+which normalise to `ast brown` and `hhenry` and match nothing in any ADP table.
+The first build shipped exactly that. The player id is the only real join key,
+so display names come from the weekly stats release and a player absent from it
+is DROPPED rather than published under an abbreviation nobody can look up.
+
+### On-field rate: the DENOMINATOR is the whole measurement
+
+Every metric in the app is a per-game rate, which is right for comparability and
+means nothing expressed whether a player plays.
+
+Two ways to get this wrong, both of which were built and measured before being
+rejected:
+
+1. **Counting games played against 17** skips a fully lost season entirely — an
+   August Achilles produces no rows, the year is silently omitted, and the
+   player reports as durable. So the denominator is **team games in every season
+   he appears on a ROSTER**, played or not.
+2. **Counting STAT LINES as the numerator** put the league median at **63%**,
+   because a blocking TE, a receiver who ran routes and drew no targets, and a
+   QB who handed off twice all record zero stats while playing. The numerator is
+   **offensive snaps** from `snap_counts`.
+
+A third correction was needed on the population: the roster file carries ~3,100
+rows a season including the practice squad and everyone cut in camp, and
+counting those seasons put the median at **25%** — a number describing roster
+churn, not durability. Fixed by gating status to `ACT`/`RES`/`INA` and requiring
+the player to have held a real role (8+ games) in some covered season. Final
+medians: all 0.70, QB 0.53, TE 0.74, WR 0.70, RB 0.68.
+
+**⚠️ IT IS NAMED FOR WHAT IT MEASURES.** The gameday inactive list would
+separate hurt from healthy-and-not-playing and nflverse does not ship it, so
+this **blends availability with role**. A backup who dresses weekly and never
+plays scores low — correct for fantasy, and not a medical finding. It also
+cannot separate injury from a coaching decision, a suspension or a holdout.
+
+**Career and recent are both shown and never averaged.** Nick Chubb is the
+worked example: **71.8% career against 49.0% over the last three.** One number
+cannot say both, and the split is the finding.
+
+### Three percentile populations now, three tables, three printed gates
+
+```
+CARD_PERCENTILES   draftable, 8+ games          Opportunity, Week outcomes
+NGS_PERCENTILES    40+ targets in 2025          Deployment
+RZ_PERCENTILES     5+ red-zone opportunities    Red zone
+```
+
+Merging any two prints a rank under a population label that does not describe
+it. Guard 22 asserts all three stay separate and that each section prints its
+own gate.
+
+### `grade-cli` now validates its flags
+
+`--mode redraft` is not a flag and was **silently ignored**, so a redraft roster
+graded through the BEST BALL engine and printed a plausible answer. Same
+silent-wrong-answer class the app itself has fixed five times. Unknown flags,
+unknown tournament keys and value-less flags now exit 2 with a hint naming the
+correct flag. Verified both valid paths still run.

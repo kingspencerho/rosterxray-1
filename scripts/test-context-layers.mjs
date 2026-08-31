@@ -28,6 +28,8 @@ import path from "path";
 const repoRoot = process.cwd();
 const rd = f => JSON.parse(readFileSync(path.join(repoRoot, f), "utf8"));
 const NGS = rd("grading/data/ngs_receiving_2025.json");
+const RZ = rd("grading/data/redzone_2025.json");
+const AV = rd("grading/data/availability_2026.json");
 const ARC = rd("grading/data/career_arc_2026.json");
 const VAC = rd("grading/data/vacated_2026.json");
 const app = readFileSync(path.join(repoRoot, "App.jsx"), "utf8");
@@ -59,7 +61,7 @@ console.log("context-only containment");
 
 ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 
-const ACCESSORS = ["getNgsRec", "getCareerArc", "getVacated"];
+const ACCESSORS = ["getNgsRec", "getCareerArc", "getVacated", "getRedZone", "getAvailability"];
 // Every reviewed consumer. Adding a name here is a deliberate act; a call site
 // that is not on this list fails the run whether or not it looks harmless.
 const ALLOWED = [
@@ -82,7 +84,7 @@ for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
     ok(`${engine.match(/analyze\w+/)[0]} never calls ${fn}`, !body.includes(`${fn}(`),
       "a context layer reaching the scoring engine moves grades and invalidates every recorded calibration");
   }
-  for (const tbl of ["NGS_RECEIVING", "CAREER_ARC", "VACATED"]) {
+  for (const tbl of ["NGS_RECEIVING", "CAREER_ARC", "VACATED", "REDZONE", "AVAILABILITY"]) {
     ok(`${engine.match(/analyze\w+/)[0]} never reads ${tbl}`, !body.includes(tbl));
   }
 }
@@ -116,6 +118,18 @@ ok("the Deployment section prints the NGS gate, not the card gate",
   "a rank under the wrong population label is a number the reader cannot act on");
 ok("NGS_POP_GATE is derived from the file, not typed",
   app.includes("NGS_RECEIVING._meta.min_targets"));
+
+// THREE populations now, three tables, three printed gates. Red zone gates on
+// red-zone opportunities, NGS on 40 targets, the card on draftable/8 games.
+// Merging any two prints a rank under a label that does not describe it.
+ok("red zone has its own percentile table", app.includes("const RZ_PERCENTILES"));
+ok("red zone has its own percentile function", app.includes("const rzPercentile"));
+ok("the card's red-zone rows use rzPercentile",
+  /rzPercentile\(pos, "rz_tgt_sh"/.test(app));
+ok("the red-zone gate is derived from the file, not typed",
+  app.includes("REDZONE._meta.gates"));
+ok("the red-zone section prints its own gate",
+  /Percentile among \$\{card\.redzoneGate\}/.test(app));
 
 // ---- 3. THE AGING BANDS ARE LABELLED AS PRIORS ----
 console.log("\ncareer arc honesty");
@@ -159,6 +173,71 @@ ok("the card renders vacated_pct without a x100",
   !/card\.vacated\.pct \* 100/.test(app));
 ok("every listed departure clears the stated cutoff",
   Object.values(VAC.teams).every(t => (t.gone || []).every(g => g.tgt_sh >= 0.03)));
+
+// ---- 4b. THE TWO LAYERS ADDED SEP 1 ----
+console.log("\nred zone");
+
+// THE COUNT MUST TRAVEL WITH THE SHARE. Red-zone volume is a fraction of total
+// volume, so a bare percentage is a ratio of two small numbers. "31%" is
+// unreadable; "31% of 22" is a fact.
+ok("the card prints the count beside every share",
+  /value: `\$\{pctOf\(rz\.rz_tgt_sh\)\} of \$\{rz\.rz_tgt\}`/.test(app));
+ok("the prompt prints the count beside every share",
+  /of team red-zone targets \(\$\{r\.rz_tgt\}\)/.test(app));
+ok("the prompt header forbids quoting a share without its count",
+  /must never be quoted without its count/.test(app));
+ok("a share is emitted only above the gate",
+  Object.values(RZ.players).every(p =>
+    (p.rz_tgt_sh == null || p.rz_tgt >= RZ._meta.gates.min_player_rz_opp) &&
+    (p.i10_tgt_sh == null || p.i10_tgt >= RZ._meta.gates.min_player_i10_opp) &&
+    (p.rz_car_sh == null || p.rz_car >= RZ._meta.gates.min_player_rz_opp)),
+  "a 100% share on two targets is noise wearing a percentage sign");
+ok("every share is a real fraction",
+  Object.values(RZ.players).every(p =>
+    ["rz_tgt_sh", "i10_tgt_sh", "rz_car_sh", "i10_car_sh"]
+      .every(k => p[k] == null || (p[k] > 0 && p[k] <= 1))),
+  "these are FRACTIONS — vacated_pct in the sibling file is percent units, and mixing the two shipped a 4660% figure once");
+ok("goal line is a count, never a share",
+  Object.values(RZ.players).every(p => p.i5_tgt_sh === undefined && p.i5_car_sh === undefined));
+ok("names resolved past the pbp abbreviations",
+  RZ._meta.counts.dropped_no_display_name === 0 &&
+  !Object.keys(RZ.players).some(k => /^[a-z]{1,2}[a-z]+$/.test(k) && !k.includes(" ")),
+  "pbp prints A.St. Brown, which normalises to 'ast brown' and matches nothing in any ADP table");
+ok("the file says red-zone usage is coaching-dependent", typeof RZ._meta.not_a_projection === "string");
+
+console.log("\non-field rate");
+
+// THE DENOMINATOR IS THE WHOLE MEASUREMENT. Counting games played against games
+// played is circular; counting against 17 skips a fully lost season entirely and
+// reports the player as durable.
+ok("the denominator is rostered seasons, stated in the file",
+  /appeared on a ROSTER/.test(AV._meta.denominator));
+ok("the numerator is snaps, not stat lines",
+  /snap_counts/.test(AV._meta.source) && typeof AV._meta.numerator_is_snaps === "string",
+  "stat lines miss a blocking TE and a zero-target WR, and put the median at 63%");
+ok("practice-squad and cut seasons are excluded",
+  Array.isArray(AV._meta.gates.counted_status) && !AV._meta.gates.counted_status.includes("DEV"));
+ok("the median is plausible for an NFL population",
+  AV._meta.medians.all > 0.6 && AV._meta.medians.all < 0.95,
+  `${AV._meta.medians.all} — a low median means the population is camp bodies, not that players are fragile`);
+ok("career and recent are separate fields, never averaged",
+  Object.values(AV.players).every(p => p.career != null) &&
+  Object.values(AV.players).some(p => p.recent != null));
+ok("every rate is a fraction",
+  Object.values(AV.players).every(p => p.career >= 0 && p.career <= 1 && (p.recent == null || (p.recent >= 0 && p.recent <= 1))));
+ok("gp never exceeds possible",
+  Object.values(AV.players).every(p => p.gp <= p.possible));
+ok("the min-seasons gate holds",
+  Object.values(AV.players).every(p => p.seasons >= AV._meta.gates.min_seasons),
+  "a one-season sample called a rate implies a trend");
+ok("the card shows career AND recent, never one blended number",
+  /Last \$\{card\.availability\.recentWindow\} seasons/.test(app));
+ok("the card names a fully lost season explicitly",
+  /lost entirely — invisible in either rate above/.test(app),
+  "a missed season is the most useful line in the record and is invisible in both rates");
+ok("both the file and the card say this is not a medical finding",
+  typeof AV._meta.not_medical === "string" && /not a statement about his health/.test(app));
+ok("the prompt emits only the tails", /a player absent from this block sits near his position's median/.test(app));
 
 // ---- 5. DATA SHAPE ----
 console.log("\ndata shape");

@@ -121,14 +121,14 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [Spike rate](#spike-rate--r--048--rank-4) | 0.48 | 4 | A | live | **yes — Ceiling** |
 | [Snap trajectory](#snap-trajectory--r----rank-1) | — | 1 | A | live | no |
 | [Vacated targets](#vacated-targets--r----rank-1) | — | 1 | A | live | no |
+| [Red-zone opportunity share](#red-zone-opportunity-share--r----rank-1) | — | 1 | A | live | no |
+| [On-field rate](#on-field-rate--r----rank-2) | — | 2 | A | live | no |
 | [Teammate absence](#teammate-absence--r----rank-2) | — | 2 | A | live | no |
 | [HVT / game](#hvt--game--r----rank-1) | — | 1 | A | live | **yes — Naked RB gate** |
 | [Career arc](#career-arc--r----rank) | — | — | A | live | no |
 | [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | — | 4 | A | live | no |
 | [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 4 | A | live | **yes — schedule** |
 | [RB carries / game](#rb-carries--game--r--073--rank-2) | 0.73 | 2 | B | proposed | no |
-| [Availability rate](#availability-rate--r----rank-2) | — | 2 | B | proposed | no |
-| [Red-zone target share](#red-zone-target-share--r----rank-1) | — | 1 | B | proposed | no |
 | [Targets per route run](#targets-per-route-run--r----rank-2) | — | 2 | C | rejected | no |
 | [Offensive line rank](#offensive-line-rank--r----rank) | — | — | C | rejected | no |
 | [Coverage-scheme splits](#coverage-scheme-splits--r----rank-3) | — | 3 | C | rejected | no |
@@ -790,6 +790,88 @@ are directional reference, never hard logic gates.
 
 ---
 
+### Red-zone opportunity share · r = — · rank 1
+
+| | |
+|---|---|
+| **File** | `redzone_2025.json` |
+| **Field** | `rz_tgt_sh`, `i10_tgt_sh`, `rz_car_sh`, `i10_car_sh`, `i5_*` |
+| **Surfaces** | Player card → Red zone · AI prompt → `redzoneContext` |
+| **Status** | live |
+
+**Plain English.** Does he score, or just catch.
+
+**Why it matters.** Lens 1 calls red zone and goal line touches **standalone
+scoring equity** and instructs tracking them separately from snap share. The app
+could not see them. `hvt_pg` was the nearest thing it carried and it is a
+per-game **count**, so a back on a team that never reaches the red zone and one
+on a team that lives there looked identical — and they are not the same asset.
+The **share** isolates the player's claim on his offense's scoring chances, which
+is the part that survives a change in team scoring rate.
+
+Touchdowns are where the volatility lives. A receiver who owns the 10-yard line
+is a different asset from one who owns the 40, and a big overall target share
+with a small red-zone share is a yardage player rather than a scorer.
+
+**Worked example.** Amon-Ra St. Brown **38.9%** of DET's red-zone targets on 35 ·
+Hunter Henry 33.9% on 22 · Trey McBride 32.4% on 33. Three zones are carried:
+inside 20, inside 10, and goal line inside the 5.
+
+**Gotchas.** **⚠️ THE COUNT TRAVELS WITH THE SHARE, ALWAYS.** Red-zone volume is
+a fraction of total volume, so a share is a ratio of two small numbers — "31%"
+is unreadable, "31% of 22" is a fact. A share is emitted only when the player
+**and** his team clear their gate, so a count with no share means the sample is
+too thin to express as a rate. **Goal line is a count only**, never a share.
+Red-zone usage is among the most coaching-dependent things in football — a new
+OC reassigns a goal-line role in a week, so any dated role note supersedes this.
+
+---
+
+### On-field rate · r = — · rank 2
+
+| | |
+|---|---|
+| **File** | `availability_2026.json` |
+| **Field** | `career`, `recent`, `by_season`, `missed_full_seasons` |
+| **Surfaces** | Player card → On-field rate · AI prompt → `availabilityContext` |
+| **Status** | live |
+
+**Plain English.** How often does he actually play.
+
+**Why it matters.** **Every other metric in this app is a per-game rate**, which
+is right for comparability and means nothing anywhere expressed whether a player
+plays at all. A 17-game season of a good player beats 11 games of a slightly
+better one. Best ball feels it hardest — an empty week is a zero that cannot be
+substituted out of.
+
+**Career and recent are both shown and never averaged.** A clean decade with two
+broken years running is a different bet from a steady career at the same figure,
+and one number cannot say both.
+
+**Worked example.** Josh Allen 99.1% career · Nick Chubb **71.8% career against
+49.0% over the last three** — the split is the finding · McCaffrey 68.4% / 72.5%
+· Rashee Rice 54.9%.
+
+**Gotchas.** **⚠️ THE DENOMINATOR IS THE MEASUREMENT.** Counting games played
+against games played is circular; counting against 17 skips a fully lost season
+entirely and reports the player as durable. A season counts whenever he appears
+on that season's **roster**, played or not.
+
+**⚠️ It is named for what it measures.** The gameday inactive list is what would
+separate hurt from healthy-and-not-playing, and nflverse does not ship it, so
+this counts games with **offensive snaps** — which blends availability with
+**role**. A backup who dresses weekly and never plays scores low, which is
+correct for fantasy and is **not a medical finding**. Read it beside snap share.
+It also cannot separate injury from a coaching decision, a suspension or a
+holdout.
+
+Two population decisions carry the file: practice-squad and cut seasons are
+excluded (counting them put the league median at **25%**, which measures roster
+churn), and the numerator is snaps rather than stat lines (stat lines miss a
+blocking TE and a zero-target WR, and put the median at **63%**).
+
+---
+
 ## §5 · Tier B — worth building next
 
 ### RB carries / game · r = 0.73 · rank 2
@@ -811,49 +893,6 @@ reachable through the `car` column of `GAME_LOGS`.
 `hvt_pg`, `usable_rate` and `spike_rate` over a pbp release that may have been
 revised since. Needs a full calibration run and must not be bundled with anything
 else.
-
----
-
-### Availability rate · r = — · rank 2
-
-| | |
-|---|---|
-| **File** | new — free from nflverse |
-| **Field** | games played ÷ games possible, career |
-| **Surfaces** | would join Opportunity and both prompts |
-| **Status** | proposed |
-
-**Plain English.** How often does he actually suit up.
-
-**Why it matters.** **Every metric in this app is a per-game rate**, and nothing
-expresses "he plays 17". A 17-game season of a good player beats 11 games of a
-slightly better one. Best ball feels it hardest — an empty week is a zero you
-cannot substitute out of.
-
-**Gotchas.** Career availability is confounded by age and role; it should sit
-beside [Career arc](#career-arc--r----rank) rather than be read alone.
-
----
-
-### Red-zone target share · r = — · rank 1
-
-| | |
-|---|---|
-| **File** | new — free from nflverse pbp |
-| **Field** | inside-20 targets ÷ team inside-20 targets |
-| **Surfaces** | would join Opportunity and both prompts |
-| **Status** | proposed |
-
-**Plain English.** Does he score, or just catch.
-
-**Why it matters.** **The framework explicitly asks for it** — Lens 1 calls
-red-zone work "standalone scoring equity" and instructs tracking it separately
-from snap share. The app cannot see it. Touchdowns are where the volatility
-lives, and a receiver who owns the 10-yard line is a different asset from one who
-owns the 40.
-
-**Gotchas.** Red-zone samples are small, so it needs a volume gate and a stated
-population like every other percentile on the card.
 
 ---
 
@@ -974,6 +1013,8 @@ npm test && git add grading/data && git commit
 | `ngs_receiving_2025.json` | does he get open, and where is he used | 2 & 3 |
 | `career_arc_2026.json` | is the calendar with him | — |
 | `vacated_2026.json` | who left, how big is the opening | **1** |
+| `redzone_2025.json` | does he score, or just catch | **1** |
+| `availability_2026.json` | how often does he actually play | 2 |
 | `player_efficiency_2025.json` | what did he do per touch | 4 |
 | `airyards_2025.json` | RB aDOT, team RB air yards, QB dropback drain | 4 |
 | `motion_2025.json` | does this offense use motion (team screen) | — |
@@ -1032,7 +1073,7 @@ an empty answer or a guess.
 
 | Command | What it does |
 |---|---|
-| `node scripts/grade-cli.mjs <roster> --tournament <key>` | grade headlessly. **⚠️ `--mode redraft` is silently ignored — the flag is `--redraft`.** Check the `mode` field before trusting a CLI grade |
+| `node scripts/grade-cli.mjs <roster> --tournament <key>` | grade headlessly. Unknown flags and unknown tournament keys exit non-zero with a hint — `--mode redraft` was silently ignored until Sep 1 2026 and graded a redraft roster through the best-ball engine |
 | `node scripts/scout.mjs "Name" [--format …]` | the data behind `/scout` |
 | `node scripts/report-stale-news.mjs [date]` | **run before any draft.** Lists players whose every note is past the 45-day re-validation rule. Takes a date, so you can ask what will be stale on Sept 5 |
 | `bash scripts/refresh-inseason.sh [season]` | the weekly job. Two downloads. No-ops safely before Week 1 |
@@ -1047,6 +1088,8 @@ build-player-metrics.py     the SCORED file — regenerate with extreme care
 build-ngs-receiving.py      separation + intended air yards
 build-career-arc.py         age / experience / draft slot
 build-vacated.py            per-team target turnover
+build-redzone.py            red-zone / inside-10 / goal-line share
+build-availability.py       on-field rate, career and recent
 build-snap-trajectory.py    W1-9 vs W10-18 role direction
 build-qb-profile.py         the three sticky QB inputs
 build-gamelogs.py           week-by-week output
@@ -1149,13 +1192,11 @@ analysis.
 
 | # | Item | Effort | Moves grades? |
 |---|---|---|---|
-| 2 | [Availability rate](#availability-rate--r----rank-2) | half a day, free data | no |
-| 3 | [Red-zone target share](#red-zone-target-share--r----rank-1) | half a day, free data | no |
-| 4 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
-| 5 | Decide whether separation should SCORE | a real data decision | **yes** |
-| 5 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
-| 6 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
-| 7 | Fix `grade-cli`'s silent `--mode` flag | 20 minutes | no |
+| 1 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
+| 2 | Decide whether separation should SCORE | a real data decision | **yes** |
+| 3 | Player card: group 14 sections into 4 | design | no |
+| 4 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
+| 5 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
 
 **On #4.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
@@ -1177,6 +1218,8 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
+| Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
 | Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
 | Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
 | Aug 31 2026 | This file created |
