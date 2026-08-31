@@ -12919,9 +12919,45 @@ Analyze this best ball roster. Return JSON only.`;
             </div>
 
 
-            {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS */}
-            <div style={{ marginBottom: "20px" }}>
-                            <SectionH2 id="rxr-weekly" title="WEEKLY ROAD AHEAD" open={weeklyOpen} onToggle={() => setWeeklyOpen(o => !o)} hint={"W1-18"} />
+            {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS.
+                Header matches the best-ball Season Schedule panel: same purple,
+                same accent bar, same display size, same collapsed-only pulse.
+                PURPLE IS EARNED THE SAME WAY IT IS THERE — this grid paints its
+                own isPlayoff columns with --accent-purple-light, so the header
+                inherits the meaning its rows carry rather than borrowing a hue. */}
+            <div id="rxr-weekly" style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+              <button
+                onClick={() => setWeeklyOpen(o => !o)}
+                aria-expanded={weeklyOpen}
+                style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: weeklyOpen ? "1px solid var(--bg-elevated)" : "none", padding: "13px 14px", minHeight: "44px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
+              >
+                <span style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <span style={{ width: "3px", height: "18px", background: "var(--accent-purple-light)", borderRadius: "1px", flex: "none" }} />
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var(--accent-purple-light)", letterSpacing: "0.05em" }}>
+                      Weekly Road Ahead
+                    </span>
+                  </span>
+                  {!weeklyOpen && (
+                    <span style={{ fontSize: "10px", color: "var(--text-muted)", lineHeight: 1.45, paddingLeft: "12px" }}>
+                      W15–W17 are the fantasy playoffs. See every starter, every week.
+                    </span>
+                  )}
+                </span>
+                <span
+                  className={weeklyOpen ? undefined : "schedule-cta-pulse"}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    color: "var(--accent-purple-light)", fontSize: "11px",
+                    letterSpacing: "0.06em", whiteSpace: "nowrap", flex: "none",
+                    padding: "4px 10px", borderRadius: "12px",
+                    border: `1px solid ${weeklyOpen ? "transparent" : "#c084fc55"}`,
+                  }}
+                >
+                  {weeklyOpen ? "hide" : "W1-18"}
+                  <span style={{ display: "inline-block", transform: weeklyOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
+                </span>
+              </button>
               {weeklyOpen && (<>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
                 Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "var(--pos)" }}>smashable</span>; red weeks are <span style={{ color: "var(--neg)" }}>landmines</span>. The <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
