@@ -3905,3 +3905,76 @@ Guarded by `scripts/test-archetypes.mjs` (guard 20), which builds 2-4-10-2 both 
 and without the RB anchor and asserts they diverge. Four failure paths negative-
 tested: dropping the precondition, waiving `under` flags, waiving without disclosing,
 and letting superflex in.
+
+---
+
+## The Floor Layer & Redraft Role Context (added Aug 30, 2026)
+
+The redraft audit found the engine graded CONSTRUCTION AND SCHEDULE and never
+asked whether the starters produce usable weeks: it read none of
+`PLAYER_METRICS`, no trajectory, no absence, no SOS. Four additions close that,
+and exactly ONE of them scores.
+
+### The Floor Layer (SCORED, redraft only, ±0.5 cap)
+
+The mirror of the Ceiling Shape Layer, on the metrics redraft actually wants.
+The stability run measured **dud rate r=0.67 and usable rate r=0.65 against
+spike's 0.475** — and this file already recorded the tension ("in best ball the
+more stable metric is the less useful one"). Redraft is the format where floor
+IS the product; the more stable pair now scores there.
+
+**BLEND = `usable_rate - dud_rate`**, per gate-clearing STARTER (gp>=8,
+snap>=0.35), centred on a positional baseline, averaged, `x1.5`, clamped ±0.5.
+
+Three derivation decisions, each the answer to a bug hit on the way in:
+
+1. **`FLOOR_BASE = { QB: 0.882, RB: 0.528, WR: 0.298, TE: 0.133 }`** — the
+   median of the STARTER POOL (gate-clearing drafted players cut at 12-team
+   league-wide starter slots: QB 15, RB 30, WR 36, TE 15). The first derivation
+   centred on the full drafted pool exactly as the ceiling layer does, and
+   ref1's ordinary lineup SATURATED THE CAP — a starting lineup is early-ADP by
+   construction, so the median drafted player is the wrong zero. The median
+   STARTER is the zero. Mid-pool starters land within ±0.06 of it.
+2. **The population scored is `allStarters`, deliberately NOT `valid`.** Best
+   ball has no lineup, so the ceiling layer reads the roster; redraft scores
+   the lineup you submit, and a bench streamer's dud rate dilutes exactly the
+   signal this layer reads.
+3. **Multiplier 1.5, not the ceiling layer's 2.5.** A lineup averages ~5-9
+   qualified starters against best ball's 12-18 rostered, so 2.5 amplified
+   small-sample noise into the cap on a real fixture. At 1.5 the fixtures land
+   +0.08..+0.35 and the floor-max/min synthetics still both saturate — the two
+   properties a capped layer must hold at once.
+
+### ⚠️ Calibration — REDRAFT grades moved; re-baseline from here
+
+```
+                 yahoo_std      yahoo_ppr      yahoo_std_10
+ref1            6.5  -> 6.61   7.2 -> 7.31    7.1 -> 7.21    (+0.11)
+ref2            6.5  -> 6.58   7.2 -> 7.28    7.1 -> 7.18    (+0.08)
+ref3            8    -> 8.35   8.7 -> 9.05    8   -> 8.35    (+0.35)
+NO LETTER GRADE MOVED · BEST BALL: 36 grades BYTE-IDENTICAL
+```
+
+Guard 21 (`scripts/test-floor-layer.mjs`) asserts normalisation, the
+starter-pool baseline shape, saturate-and-sit-still, and best-ball containment
+(`analyzeRoster` clean, no `floorLayer` key on a best-ball result). Four
+failure paths negative-tested: a flat baseline, scoring `valid` instead of
+starters, a best-ball leak, and a multiplier that saturates the fixtures.
+
+### The three context additions (grades untouched)
+
+- **`buildRoleContext(starters)`** renders a collapsed `2025 CONTEXT · ROLE &
+  SCHEDULE` section on the redraft page: starters whose role MOVED
+  (trajectory), starters with a qualifying TEAMMATE ABSENCE (with the ppg
+  split both ways), and per-starter season SOS with delta. One line at rest,
+  ~450px opened. Empty groups say so in words — silence must not look like
+  missing data. It is the third reviewed consumer on guard 13's `getSnapTrend`
+  allowlist.
+- **`absenceContext` now reaches BOTH AI prompts**, beside `trajectoryContext`.
+  The header tells the model that silence means the shares read at face value,
+  and that an absence explains volume without proving it hollow — several
+  players produced their best games with the teammate active (Gibbs graded
+  BETTER without LaPorta; Pierce better without Jones. The split is evidence,
+  not a verdict).
+- The SOS block prints its own instability warning inline (WR matchup data is
+  NEGATIVE year over year). Context only, and it says so where it renders.

@@ -2550,6 +2550,31 @@ const teammateAbsence = (name) => {
   return out.slice(0, 2);
 };
 
+// === REDRAFT ROLE CONTEXT ==================================================
+// Display-only bundle for the redraft results page: which starters' 2025 roles
+// MOVED (trajectory), which starters' numbers were collected with a key
+// teammate ABSENT, and each starter's season-long positional SOS. All three
+// existed in the app and none was surfaced where a weekly manager decides —
+// the audit finding this answers. Reviewed consumer of getSnapTrend
+// (guard 13 allowlist) and of teammateAbsence; reads SOS; feeds NO score.
+const buildRoleContext = (players) => {
+  const out = { moved: [], absences: [], sos: [] };
+  (players || []).forEach(p => {
+    if (!p?.name || !["QB", "RB", "WR", "TE"].includes(p.pos)) return;
+    const t = getSnapTrend(p.name);
+    if (t && t.delta != null && t.trend !== "stable" && !t.changed_team) {
+      out.moved.push({ name: p.name, pos: p.pos, early: t.early, late: t.late, last4: t.last4, trend: t.trend });
+    }
+    for (const a of teammateAbsence(p.name)) {
+      out.absences.push({ starter: p.name, pos: p.pos, ...a });
+    }
+    const srow = SOS?.[p.pos]?.[p.team];
+    if (srow) out.sos.push({ name: p.name, pos: p.pos, team: p.team, rank: srow.rank, delta: srow.delta });
+  });
+  out.sos.sort((a, b) => a.rank - b.rank);
+  return out;
+};
+
 // One game -> the band the card already names. Kept beside the data so the
 // thresholds cannot drift from _meta.bands.
 const GAME_BANDS = GAME_LOGS._meta?.bands || { spike: 18, usable: 10, dud: 5 };
@@ -6168,6 +6193,80 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     score -= rdUncertainQBs.length * 0.4; // slightly heavier than BB — floor matters more in redraft
   }
 
+  // === FLOOR LAYER (redraft only) ================================================
+  // The mirror of best ball's Ceiling Shape Layer, built on the metrics that
+  // format actually wants. The stability run measured DUD RATE at r=0.67 and
+  // USABLE RATE at r=0.65 against SPIKE at r=0.475 — and CLAUDE.md records the
+  // tension: in best ball the more stable metric is the less useful one. Redraft
+  // is the format where floor IS the product, and until this layer the engine
+  // never read it: it graded construction and schedule and never asked whether
+  // the starters produce usable weeks.
+  //
+  // BLEND = usable_rate - dud_rate. Both ends matter in a weekly lineup: a
+  // usable week wins the slot, a dud loses the game, and the difference is the
+  // week-in-week-out expectation.
+  //
+  // POSITION-NORMALISED, same non-negotiable as the ceiling layer: a QB posts a
+  // usable week almost by default (median blend 0.724) while a TE median is
+  // NEGATIVE (-0.122). Raw blends would reward every QB and punish every TE for
+  // reasons unrelated to the roster.
+  //
+  // BASELINES ARE THE MEDIAN *STARTER*, NOT THE MEDIAN DRAFTED PLAYER — and the
+  // first derivation got this wrong in exactly the way the ceiling layer's
+  // notes warn about (the baseline population decides the bias). Centred on the
+  // full drafted pool, ref1's ordinary lineup saturated the +0.5 cap, because a
+  // starting lineup is early-ADP by construction and early picks have good
+  // blends. So the pool here is gate-clearing drafted players cut at the
+  // league-wide starter slots of a 12-team league (QB 15 with streaming churn,
+  // RB 30, WR 36 with the flex lean, TE 15), and the baseline is that pool's
+  // median. Derived Aug 30 2026; mid-pool starters delta within ±0.06 of zero,
+  // which is the property that makes an AVERAGE LINEUP score zero.
+  //
+  // POPULATION IS THE STARTERS, not the roster — deliberately different from
+  // the ceiling layer's `valid`. Best ball has no lineup, so the roster is the
+  // unit; redraft scores the lineup you will actually submit, and averaging a
+  // bench streamer's dud rate into the grade dilutes exactly the signal this
+  // layer exists to read.
+  //
+  // Same known limit as the ceiling layer, same defence: 2025-only rates, one
+  // misleading player moves the average by under 0.02, read it as lineup-wide
+  // floor density and never quote it about an individual.
+  let floorLayer = null;
+  {
+    const FLOOR_BASE = { QB: 0.882, RB: 0.528, WR: 0.298, TE: 0.133 };
+    const deltas = [];
+    (allStarters || []).forEach(p => {
+      const m = getMetrics(p.name);
+      if (!m || m.usable_rate == null || m.dud_rate == null) return;
+      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      const base = FLOOR_BASE[p.pos];
+      if (base == null) return;
+      deltas.push((m.usable_rate - m.dud_rate) - base);
+    });
+    if (deltas.length >= 5) {
+      const avg = deltas.reduce((s, v) => s + v, 0) / deltas.length;
+      // 1.5, not the ceiling layer's 2.5: a lineup averages ~5-9 qualified
+      // starters against best ball's 12-18 rostered, so the same multiplier
+      // amplifies small-sample noise — at 2.5, ref3's ordinary lineup hit the
+      // cap. At 1.5 the fixtures land +0.08..+0.35 while the deliberately
+      // floor-max and floor-min synthetics both still saturate, which is the
+      // pair of properties a capped layer has to hold at once.
+      const floorPts = Math.max(-0.5, Math.min(0.5, avg * 1.5));
+      score += floorPts;
+      floorLayer = {
+        score: Math.round(floorPts * 100) / 100,
+        avgDelta: Math.round(avg * 1000) / 1000,
+        qualified: deltas.length,
+        starters: (allStarters || []).length,
+      };
+      if (floorPts >= 0.3) {
+        strengths.push(`High-floor lineup — starters post usable weeks and avoid duds well above positional norms, which is what wins head-to-head weeks`);
+      } else if (floorPts <= -0.3) {
+        weaknesses.push(`Fragile floor — starters dud below positional norms, so this lineup loses winnable weeks even when the matchups look fine`);
+      }
+    }
+  }
+
   // Convert to grade — normalized by league difficulty
   // Larger leagues and superflex formats have shallower player pools;
   // the same raw score means more in a 14-team SF than a 10-team standard
@@ -6381,7 +6480,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     .sort((a, b) => urgencyRank[b.urgency] - urgencyRank[a.urgency]);
 
   return {
-    valid, picks, posCounts, league,
+    valid, picks, posCounts, league, floorLayer,
     startingLineup, allStarters, bench,
     starterSchedules, benchSchedules, playoffMatchups,
     byeMap, criticalByeConflicts,
@@ -7696,6 +7795,7 @@ export default function RosterScorer() {
   const [weeklyOpen, setWeeklyOpen] = useState(false);
   const [benchMovesOpen, setBenchMovesOpen] = useState(false);
   const [benchListOpen, setBenchListOpen] = useState(false);
+  const [roleCtxOpen, setRoleCtxOpen] = useState(false);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -8665,6 +8765,18 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // Teammate absence, prompt-side: the one question the shares can't
+      // answer — who else was on the field. Only players with a qualifying
+      // absence emit a line; the header tells the model silence means the
+      // numbers read at face value. Context only, mirrors the player card.
+      const absenceContext = (result.valid || [])
+        .flatMap(p => teammateAbsence(p.name).map(a => {
+          const tgt = a.withTgt != null ? `${a.withTgt.toFixed(1)}->${a.withoutTgt.toFixed(1)} tgt/gm, ` : "";
+          return `${p.name}: ${a.name} (${a.role}) missed ${a.missed} of his ${a.total} games — ${tgt}${a.withPts.toFixed(1)} ppg WITH him vs ${a.withoutPts.toFixed(1)} WITHOUT. The season line blends both.`;
+        }))
+        .filter(Boolean)
+        .join("\n");
+
       // === 2025 QB VOLUME PROFILE ===
       // Kept OUT of metricsContext deliberately. That block gates on PLAYER_METRICS
       // gp >= 8, which drops a QB who missed half a season — and a seven-game starter
@@ -8747,7 +8859,7 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
-${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
@@ -8767,7 +8879,7 @@ ADP flags: ${adpFlagLines || "none"}
 ${teamContext ? `\nTeam environment (2026 preseason priors — team-level context, not player verdicts):\n${teamContext}` : ""}
 ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these team assignments are current and override your training knowledge; a QB you expect on one of these teams who is NOT listed here is not on that team):\n${teammateContext}` : ""}
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes):\n${metricsContext}` : ""}
-${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}
+${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
 ${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
@@ -12788,6 +12900,59 @@ Analyze this best ball roster. Return JSON only.`;
                 })}
               </div>
             </div>
+
+            {/* 2025 role context for the starters — trajectory, teammate
+                absence, season SOS. Collapsed reference; costs one line at
+                rest. Empty groups SAY they are empty: per the silent-drop
+                rules, "nothing moved" is information and must not look like
+                missing data. */}
+            {(() => {
+              const ctx = buildRoleContext(analyzed.allStarters);
+              const n = ctx.moved.length + ctx.absences.length;
+              return (
+                <div style={{ marginBottom: "20px" }}>
+                  <SectionH2 title="2025 CONTEXT · ROLE & SCHEDULE" open={roleCtxOpen} onToggle={() => setRoleCtxOpen(o => !o)} hint={n > 0 ? `${n} flag${n > 1 ? "s" : ""} · SOS` : "SOS"} />
+                  {roleCtxOpen && (
+                    <div style={{ fontSize: "12px", lineHeight: 1.55 }}>
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "10px 0 4px" }}>Role trajectory</div>
+                      {ctx.moved.length === 0 && <div style={{ color: "var(--text-muted)" }}>No starter's role moved across 2025 — season averages are fair reads.</div>}
+                      {ctx.moved.map((t, i) => (
+                        <div key={i} style={{ padding: "2px 0" }}>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{t.name}</span>
+                          <span style={{ color: "var(--text-secondary)" }}> {Math.round(t.early * 100)}% W1-9 → {Math.round(t.late * 100)}% W10-18</span>
+                          <span style={{ color: t.trend === "rising" ? "var(--pos)" : "var(--neg)", fontWeight: 600 }}> {t.trend}</span>
+                          <span style={{ color: "var(--text-dim)" }}> — the season average {t.trend === "rising" ? "understates" : "overstates"} the current role</span>
+                        </div>
+                      ))}
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Who else was on the field</div>
+                      {ctx.absences.length === 0 && <div style={{ color: "var(--text-muted)" }}>No significant teammate absence behind any starter's 2025 line — the numbers read at face value.</div>}
+                      {ctx.absences.map((a, i) => (
+                        <div key={i} style={{ padding: "2px 0" }}>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{a.starter}</span>
+                          <span style={{ color: "var(--text-secondary)" }}> — {a.name} ({a.role}) missed {a.missed} of his {a.total}:</span>
+                          <span style={{ color: "var(--text-primary)" }}> {a.withPts.toFixed(1)}</span>
+                          <span style={{ color: "var(--text-dim)" }}> ppg with · </span>
+                          <span style={{ color: "var(--text-primary)" }}>{a.withoutPts.toFixed(1)}</span>
+                          <span style={{ color: "var(--text-dim)" }}> without</span>
+                        </div>
+                      ))}
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Season schedule (SOS) · 1 = easiest of 32</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "3px 14px" }}>
+                        {ctx.sos.map((r, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                            <span style={{ color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name.split(" ").slice(-1)[0]} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>{r.team}</span></span>
+                            <span style={{ fontVariantNumeric: "tabular-nums", color: r.rank <= 10 ? "var(--pos)" : r.rank >= 23 ? "var(--neg)" : "var(--text-muted)", fontWeight: 600 }}>{r.rank}<span style={{ color: "var(--text-dim)", fontWeight: 400 }}>{r.delta > 0 ? ` +${r.delta}` : r.delta < 0 ? ` ${r.delta}` : ""}</span></span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", lineHeight: 1.5 }}>
+                        Context only — none of this moves the grade. SOS is the least stable input in the app (WR matchup data is negative year over year); the delta is how many spots the slate eased since 2025. An absence explains where volume came from; it does not prove the volume was hollow.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Bye Week Notes */}
             {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
