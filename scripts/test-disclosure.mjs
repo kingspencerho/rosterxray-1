@@ -179,8 +179,21 @@ console.log("\nthe attention pulses");
 
 // Each control is gated on ITS OWN collapsed state.
 /className=\{bbScheduleOpen \? undefined : "schedule-cta-pulse"\}/.test(src)
-  ? ok("the schedule pulse runs only while its panel is collapsed")
-  : bad("the schedule pulse must be gated on the collapsed state");
+  ? ok("the best-ball schedule pulse runs only while its panel is collapsed")
+  : bad("the best-ball schedule pulse must be gated on the collapsed state");
+
+// The redraft Weekly Road Ahead header is the same component shape and shares
+// the same pulse class, so it needs the same gate. An ungated one strobes
+// forever after the reader has already opened the panel.
+/className=\{weeklyOpen \? undefined : "schedule-cta-pulse"\}/.test(src)
+  ? ok("the redraft weekly pulse runs only while its panel is collapsed")
+  : bad("the redraft Weekly Road Ahead pulse must be gated on weeklyOpen");
+
+// Both panels wear the same header treatment. Asserting the SHAPE keeps the two
+// modes from drifting the way the pulse definitions nearly did.
+((src.match(/fontFamily: "var\(--font-display\)", fontSize: "22px", fontWeight: 700, lineHeight: 1, color: "var\(--accent-purple-light\)"/g) || []).length === 2)
+  ? ok("best ball and redraft share one schedule-header treatment")
+  : bad("the two schedule headers have drifted apart — both must use the 22px display face in --accent-purple-light");
 
 const rosterGated = (src.match(/className=\{rosterStripOpen \? undefined : "roster-cta-pulse"\}/g) || []).length;
 rosterGated === 2

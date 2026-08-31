@@ -129,6 +129,17 @@ const seasonHdr = src.match(/Season Schedule · Advance-Rate View/) ? src.slice(
   ? ok("...and reads at top-level section size, not as a micro-label")
   : bad("the Season Schedule header dropped back to a micro-label size");
 
+// The redraft Weekly Road Ahead header wears the same purple for the same
+// reason: ITS OWN grid paints the isPlayoff columns with that token. Assert the
+// PAIRING, so the header cannot keep the hue after the grid stops using it.
+const weeklyHdr = src.slice(Math.max(0, src.indexOf("Weekly Road Ahead") - 1400), src.indexOf("Weekly Road Ahead"));
+/color: "var\(--accent-purple-light\)"/.test(weeklyHdr)
+  ? ok("the redraft Weekly Road Ahead header uses the playoff purple")
+  : bad("the redraft weekly header must use --accent-purple-light — its own grid paints W15-17 with it");
+/isPlayoff \? "var\(--accent-purple-light\)"/.test(src)
+  ? ok("...the same token its grid marks playoff weeks with")
+  : bad("the redraft grid no longer marks playoff weeks in --accent-purple-light; the pairing is broken");
+
 // Ceiling Rankings is the third sanctioned pairing: the words SPIKE and
 // NUCLEAR wear the colours of the cells directly beneath them. Assert the
 // PAIRING, not the hex — a deliberate re-tune of either token stays legal,

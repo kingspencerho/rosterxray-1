@@ -78,7 +78,14 @@ if (log?.g?.length) {
     if (ay != null) L(`  aDOT              ${(ay / tgt).toFixed(2)}   (air yds/gm ${(ay / log.g.length).toFixed(0)})`);
   }
   if (car) L(`  ${car} carries, ${ry} yds, ${(ry / car).toFixed(2)} ypc   << r=0.02, a coin flip. Never project from this.`);
-  if (td != null && tgt) L(`  TD rate           ${pct(td / tgt)} of targets`);
+  // The log's tds column is TOTAL touchdowns. Dividing it by targets is only
+  // meaningful for a player whose touches ARE targets; a back with 232 carries
+  // would read as a 13% receiving TD rate off rushing scores.
+  if (td != null) {
+    const touches = (rec || 0) + (car || 0);
+    if (car) L(`  TD per touch      ${pct(td / touches)}   (${td} total TD over ${touches} touches — rushing and receiving combined)`);
+    else if (tgt) L(`  TD per target     ${pct(td / tgt)}`);
+  }
   L(`  HVT / game        ${m.hvt_pg?.toFixed(2) ?? "—"}   (rz tgt ${m.rz_tgt ?? "—"}, ez tgt ${m.ez_tgt ?? "—"})`);
 }
 

@@ -53,6 +53,11 @@ ok("getSnapTrend defined exactly once", defs === 1, `found ${defs}`);
 const ALLOWED_CONSUMERS = [
   { name: "trajectoryContext", start: "const trajectoryContext", end: '.join("\\n");' },
   { name: "buildPlayerCard", start: "const buildPlayerCard", end: "\n  return card;" },
+  // Reviewed Aug 30 2026: the redraft results page's 2025 CONTEXT section.
+  // Display-only bundle (trajectory + teammate absence + SOS) rendered from
+  // analyzed.allStarters; sits at module level, outside both scoring paths,
+  // which the analyzeRoster/analyzeRedraft assertions below keep true.
+  { name: "buildRoleContext", start: "const buildRoleContext", end: "\n  return out;" },
 ];
 const uses = [...app.matchAll(/getSnapTrend\(/g)].length;
 ok(`getSnapTrend has exactly ${ALLOWED_CONSUMERS.length} call sites`, uses === ALLOWED_CONSUMERS.length,
