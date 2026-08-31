@@ -35,6 +35,10 @@ pushed here directly.
 
 ## Companion Document
 
+`USER-PERSONAS.md` is the PRODUCT reference — who uses this app, what each
+persona is trying to do, and the design rules that fall out of it. Read it before
+changing what the app shows, hides, collapses, orders or names.
+
 `ANALYST-REFERENCE.md` is the ANALYSIS reference — every input the app measures,
 its year-over-year stability, a plain-language explanation of why it matters, the
 skills and CLI inventory, and the ranked list of what to build next. This file
@@ -4424,3 +4428,88 @@ Carnell Tate      451px   3 s     547px   5 s
 The card is roughly the same height and now opens with a paragraph anyone can
 read. That is the trade that was wanted: **the height was never the complaint,
 the lack of a starting point was.**
+
+---
+
+## Personas First, Then the Card (Sep 1, 2026)
+
+Reported as: establish who the user is *before* making UI updates. That
+reordering changed the answer, so it is worth recording why.
+**Presentation only — 39 grades byte-identical.** `USER-PERSONAS.md` is the new
+product document; guard 14 now asserts the card matches it.
+
+### The first regrouping was wrong, and personas are what showed it
+
+The card had been regrouped into **who he is / his role / what he did /
+reference**. That is a description of the SECTIONS. It is not a question anyone
+asks. Written down against a real reader, it falls apart immediately:
+**availability and career arc are not identity — they are the things that could
+change the role.**
+
+Regrouped against the reader's own questions instead:
+
+```
+HIS JOB                purple  trajectory · opportunity · deployment · red zone · absence
+WHAT HE PRODUCED       blue    game log · week outcomes
+WHAT COULD CHANGE IT   grey    news · on-field rate · career arc · team turnover
+REFERENCE              dim     efficiency · glossary
+```
+
+### The two axes, and why designing against one produced a bad card
+
+**INTENT** (what they are doing now) controls what they need to SEE.
+**EXPERTISE** (how much vocabulary they have) controls how it needs to be SAID.
+They are independent — a portfolio drafter on his 40th entry may not know what
+WOPR is, and a first-time user may be an analyst.
+
+The card had been designed against expertise alone, which is why it was right
+for one quadrant and wrong for three. **The hardest and most common quadrant is
+someone mid-draft, on a phone, with 30 seconds, who does not know which of
+fourteen sections to look at.**
+
+### The persona that decides the hard calls is P2, the on-the-clock drafter
+
+Under 30 seconds, timer running, no taps to spend. He is why:
+
+- **The Read is first and needs no interaction.** It was rendering fourth,
+  behind three sections, which made it useless to the only reader who needs it
+  most.
+- **The groups are DIVIDERS, not collapsible wrappers.** Nesting his role data
+  one level deeper would cost him the thing he came for.
+- **There is no skill-level toggle.** A toggle is a tap. One design that works
+  at a glance beats two behind a switch — and it is also one design to maintain.
+
+### Two ordering bugs the render caught
+
+1. **The game log sat under HIS JOB.** It is output, not role.
+2. **REFERENCE rendered before WHAT COULD CHANGE IT**, because reference lived
+   inside the `card.reason` data branch and outlook lived outside it. Both of
+   its sections already guard on their own content, so it moved out of the
+   branch and to the end where every persona actually consults it.
+
+A third was caught by the browser rather than the source: the reference block
+was pasted **inside** the Team target turnover `CardSection`, so it rendered
+only when that collapsed section was open. **The source read correctly and the
+page did not** — the same reason the localStorage flag bug needed a real render
+to find.
+
+### What guard 14 now pins
+
+- Four groups, named `job` / `production` / `outlook` / `reference`
+- Each section's group membership, individually — so a future session cannot
+  quietly file availability under the job it qualifies
+- **Group headers render in reader order**, asserted as an exact sequence
+- Every header is guarded on having content, so an empty group never shows a
+  bare label pointing at nothing
+- The game log sits between the production and outlook headers
+- Reference resolves to `--text-dim`
+
+Both failure paths negative-tested: moving reference out of reader order, and
+regrouping availability under `job`, each exit non-zero.
+
+### Rookie cards prove the grouping degrades correctly
+
+Carnell Tate has no 2025 role, so he renders `RECENT NEWS · THE READ · WHAT
+COULD CHANGE IT` and nothing else — 615px. The groups that have no content
+simply do not appear, which is the behaviour the guard's content-gating
+assertion exists to protect.

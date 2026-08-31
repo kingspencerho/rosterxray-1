@@ -4,8 +4,10 @@
 carries, why each one earns its place, and what is deliberately absent.
 
 This is the **analysis** document. `CLAUDE.md` is the **engineering** document —
-it records how things were built and what broke, in date order. Read this one to
-understand the analysis; read that one before changing code.
+it records how things were built and what broke, in date order.
+`USER-PERSONAS.md` is the **product** document — who is on the other side of the
+screen. Read this one to understand the analysis, that one before changing code,
+and the personas before changing what the app shows, hides, orders or names.
 
 **Structure guarded by:** `scripts/test-analyst-reference.mjs` (guard 23)
 
@@ -1217,6 +1219,7 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 | Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
@@ -1228,7 +1231,6 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 | Aug 30 2026 | Sanctioned archetypes stopped being charged as flaws |
 | Aug 29 2026 | Game logs on the player card |
 | Aug 28 2026 | Recent news on the player card, with parsed dates |
-| Aug 25 2026 | Snap trajectory layer · QB volume profile · player card |
 
 ---
 

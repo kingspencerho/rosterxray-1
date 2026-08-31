@@ -7216,52 +7216,74 @@ const POS_ACCENT = {
   TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
 };
 
-// ONE ACCENT PER GROUP, NOT PER SECTION.
+// FOUR GROUPS, NAMED FOR THE QUESTION A READER IS ASKING.
 //
-// The card reached fourteen sections and the accents no longer differentiated
-// anything: six sections shared --ui-accent and five shared --accent-purple-
-// light, so the channel was carrying two values across fourteen slots. A colour
-// that appears six times has stopped being a signal.
+// See USER-PERSONAS.md. The card reached fourteen sections and the accents had
+// stopped differentiating — six shared --ui-accent and five shared
+// --accent-purple-light, so the channel carried two values across fourteen
+// slots. A colour appearing six times is not a signal.
 //
-// So the accent now names WHICH OF FOUR QUESTIONS a section answers, and every
-// section in a group wears the same one. Four meanings, four colours, and the
-// reader learns the mapping once instead of fourteen times.
+// The first regrouping used "who he is / his role / what he did", which is a
+// DESCRIPTION of the sections rather than a question anyone asks. Availability
+// and career arc are not identity; they are the things that could change the
+// role. Grouping by the reader's question instead:
 //
-//   WHO HE IS      grey    identity and the calendar — context, not performance
-//   HIS ROLE       purple  what the offense gives him. The core of the card
-//   WHAT HE DID    blue    output. Descriptive of 2025 and nothing else
-//   REFERENCE      dim     material that should not move an opinion
+//   HIS JOB              purple  what the offense gives him. The core.
+//   WHAT HE PRODUCED     blue    output. Descriptive of 2025 and nothing else.
+//   WHAT COULD CHANGE IT grey    news, durability, the calendar, team turnover
+//   REFERENCE            dim     material that should not move an opinion
 //
 // The dim group is load-bearing: brightness on this card means "this should
-// move your opinion", so efficiency and the glossary stay grey on purpose.
-// Painting either of them brighter would undo the second channel entirely.
+// move your opinion", so efficiency and the glossary stay grey. Efficiency is
+// descriptive of 2025 and would read as PRODUCTION, but it belongs with
+// reference for the same reason the glossary does — it is consulted, never
+// concluded from. RB yards per carry is r=0.02.
 const CARD_GROUP_ACCENT = {
-  who: "var(--ui-accent)",
-  role: "var(--accent-purple-light)",
-  did: "var(--info-blue)",
-  ref: "var(--text-dim)",
+  job: "var(--accent-purple-light)",
+  production: "var(--info-blue)",
+  outlook: "var(--ui-accent)",
+  reference: "var(--text-dim)",
 };
 
 const CARD_ACCENTS = {
-  // WHO HE IS
-  news: CARD_GROUP_ACCENT.who,
-  availability: CARD_GROUP_ACCENT.who,
-  arc: CARD_GROUP_ACCENT.who,
-  vacated: CARD_GROUP_ACCENT.who,
-  // HIS ROLE
-  trajectory: CARD_GROUP_ACCENT.role,
-  volume: CARD_GROUP_ACCENT.role,
-  opportunity: CARD_GROUP_ACCENT.role,
-  deployment: CARD_GROUP_ACCENT.role,
-  redzone: CARD_GROUP_ACCENT.role,
-  absence: CARD_GROUP_ACCENT.role,
-  // WHAT HE DID
-  outcomes: CARD_GROUP_ACCENT.did,
-  gamelog: CARD_GROUP_ACCENT.did,
+  // HIS JOB — what the offense gives him
+  trajectory: CARD_GROUP_ACCENT.job,
+  volume: CARD_GROUP_ACCENT.job,
+  opportunity: CARD_GROUP_ACCENT.job,
+  deployment: CARD_GROUP_ACCENT.job,
+  redzone: CARD_GROUP_ACCENT.job,
+  absence: CARD_GROUP_ACCENT.job,
+  // WHAT HE PRODUCED
+  outcomes: CARD_GROUP_ACCENT.production,
+  gamelog: CARD_GROUP_ACCENT.production,
+  // WHAT COULD CHANGE IT
+  news: CARD_GROUP_ACCENT.outlook,
+  availability: CARD_GROUP_ACCENT.outlook,
+  arc: CARD_GROUP_ACCENT.outlook,
+  vacated: CARD_GROUP_ACCENT.outlook,
   // REFERENCE — deliberately dim. See the note above before changing either.
-  efficiency: CARD_GROUP_ACCENT.ref,
-  glossary: CARD_GROUP_ACCENT.ref,
+  efficiency: CARD_GROUP_ACCENT.reference,
+  glossary: CARD_GROUP_ACCENT.reference,
 };
+
+// A labelled break between groups, so the reader meets FOUR things rather than
+// fourteen. Deliberately a divider and not a collapsible wrapper: the
+// on-the-clock drafter has no taps to spend, and burying his role data one
+// level deeper would cost him the thing he came for.
+const CardGroupHeader = ({ group, label, hint, nested = false }) => (
+  <div style={{
+    display: "flex", alignItems: "baseline", gap: "8px",
+    marginTop: nested ? "20px" : "26px", marginBottom: "-4px",
+    paddingTop: "12px", borderTop: `1px solid ${CARD_GROUP_ACCENT[group]}33`,
+  }}>
+    <span style={{
+      fontFamily: "var(--font-display)", fontSize: "15px", letterSpacing: "0.06em",
+      color: CARD_GROUP_ACCENT[group], textTransform: "uppercase",
+    }}>{label}</span>
+    <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>{hint}</span>
+  </div>
+);
+
 
 
 // ONE collapsible section header for the results view, so a fourth ad-hoc
@@ -7983,6 +8005,208 @@ const PlayerCardModal = ({ card, onClose }) => {
           ))}
         </CardSection>
 
+        {/* THE READ. First thing on the card, because a reader who does not
+            already know which of fourteen sections matters cannot start.
+            Every line restates a number visible further down, in plain English.
+            It issues NO VERDICT — that is the Diggs rule, and the reason
+            PLAYER_VERDICTS is not on this card either. */}
+        {card.read.length > 0 && (
+          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
+              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
+                The read
+              </span>
+              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>from the data below</span>
+            </div>
+            {card.read.map((r, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
+                <span style={{
+                  flex: "none", marginTop: "5px", width: "5px", height: "5px", borderRadius: "50%",
+                  background: r.tone === "pos" ? "var(--pos)" : r.tone === "neg" ? "var(--neg)" : r.tone === "warn" ? "var(--caution)" : "var(--text-dim)",
+                }} />
+                <span style={{ fontSize: "12.5px", lineHeight: 1.5, color: "var(--text-primary)" }}>{r.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!card.reason && (
+          <CardGroupHeader group="job" label="His job" hint="what the offense gives him" />
+        )}
+        {card.reason ? (
+          <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+            {card.reason}
+          </div>
+        ) : (
+          <>
+            {/* The headline is the TRAJECTORY, not the season average. A season
+                average buries role change, which is the highest-ranked signal
+                there is — it is what graded RJ Harvey as a timeshare when he had
+                already taken the job. */}
+            {/* Current season leads when it exists. The prior season stays on
+                screen underneath rather than being replaced — the COMPARISON is
+                the insight, and a card that silently swaps vintages is the
+                stale-data trap in a new costume. */}
+            {tc && (
+              <CardSection title={`Role trajectory · ${card.curVintage}`} accent={CARD_ACCENTS.trajectory}>
+                {tc.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(tc.season)} snap share over {tc.gp} game{tc.gp === 1 ? "" : "s"} so far — too early for a trend.
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(tc.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.earlyWeeks}</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: tc.trend === "rising" ? "var(--pos)" : tc.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(tc.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.lateWeeks}</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(tc.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {tc.trend === "stable"
+                        ? "Steady role so far this season."
+                        : `${tc.trend === "rising" ? "Role growing" : "Role shrinking"} this season.`}
+                      {tc.splitMode === "halves" && " Split at the midpoint of the weeks played, so it is noisier than a full-season read."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
+            {t && (
+              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
+                {t.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
+                    <span style={{ color: "var(--gold)" }}>
+                      {t.lateGp >= t.earlyGp ? "W10-18 only" : "W1-9 only"}, so this is half a season, not a full-year role.
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(t.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W1-9</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: t.trend === "rising" ? "var(--pos)" : t.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(t.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W10-18</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(t.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {t.trend === "stable"
+                        ? `Steady role. The ${pct(t.season)} season average is a fair read.`
+                        : `${t.trend === "rising" ? "Role grew" : "Role shrank"} — the ${pct(t.season)} season average ${t.trend === "rising" ? "understates" : "overstates"} where he finished.`}
+                      {t.changedTeam && " Changed teams mid-2025, so this spans two different jobs."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
+            {qc && (
+              <CardSection title={`Volume profile · ${card.curVintage}`} accent={CARD_ACCENTS.volume}>
+                <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={qc.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={qc.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  {qc.gp} game{qc.gp === 1 ? "" : "s"} this season · league median {qc.median} rush att/gm.
+                </div>
+              </CardSection>
+            )}
+
+            {card.qb && (
+              <CardSection
+                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
+                accent={CARD_ACCENTS.volume}
+                note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
+              >
+                <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={card.qb.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={card.qb.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  League median {card.qb.median} rush att/gm.
+                  {card.qb.runner === "rushing" && <span style={{ color: "var(--pos)" }}> Rushing QB — this is scoring that survives a bad passing day.</span>}
+                  {card.qb.runner === "pocket" && <span style={{ color: "var(--gold)" }}> Pocket QB — effectively no rushing floor.</span>}
+                </div>
+              </CardSection>
+            )}
+
+            {card.absence.length > 0 && (
+              <CardSection
+                title="Who else was on the field"
+                accent={CARD_ACCENTS.absence}
+                collapsible
+                hint={`${card.absence.length} absence${card.absence.length > 1 ? "s" : ""}`}
+                note="A target share is a share OF something. These teammates missed real time, so part of the season above was played without them. The split is shown, not a conclusion — an absence explains where volume came from, it does not prove the volume was hollow.">
+                {card.absence.map((a, i) => (
+                  <div key={i} style={{ padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>
+                      {a.name}
+                      <span style={{ color: "var(--text-dim)", fontWeight: 400 }}> {a.pos} · {a.role}</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 6px" }}>
+                      played {a.playedOf} of {a.total} · missed {a.missed}
+                    </div>
+                    {[["with him", a.withTgt, a.withPts], ["without him", a.withoutTgt, a.withoutPts]].map(([lab, tgt, pts]) => (
+                      <div key={lab} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "1px 0" }}>
+                        <span style={{ color: "var(--text-dim)", minWidth: "84px" }}>{lab}</span>
+                        {tgt != null && <span style={{ color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{tgt.toFixed(1)} tgt/gm</span>}
+                        <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{pts.toFixed(1)} pts/gm</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </CardSection>
+            )}
+
+            {card.metrics.length > 0 && (
+              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
+                {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
+            {card.deployment.length > 0 && (
+              <CardSection
+                title="Deployment"
+                accent={CARD_ACCENTS.deployment}
+                collapsible
+                hint="separation · depth"
+                note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
+                {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
+            {card.redzone.length > 0 && (
+              <CardSection
+                title="Red zone"
+                accent={CARD_ACCENTS.redzone}
+                collapsible
+                hint={`${card.redzone.length} measure${card.redzone.length > 1 ? "s" : ""}`}
+                note={`Scoring opportunity, which the framework tracks separately from overall volume. Each share prints the count it came from — red-zone samples are small, and a percentage without its count is unreadable. Percentile among ${card.redzoneGate} at ${card.pos}, a different population from Opportunity above.`}>
+                {card.redzone.map((x, i) => <CardMetricRow key={i} {...x} r={null} noTag />)}
+              </CardSection>
+            )}
+
+            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur) && (
+              <CardGroupHeader group="production" label="What he produced" hint="2025 output" nested />
+            )}
+
+            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
+
+            {card.descriptive.length > 0 && (
+              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
+                {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
+              </CardSection>
+            )}
+
+          </>
+        )}
+
+        {(card.availability || card.arc || card.vacated) && (
+          <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
+        )}
         {/* CAREER ARC AND TEAM TURNOVER SIT ABOVE THE no-data BRANCH ON PURPOSE.
             Both are near-universal — a rookie has an age and his team has a
             vacancy — and a rookie is exactly the player for whom they are the
@@ -8084,230 +8308,45 @@ const PlayerCardModal = ({ card, onClose }) => {
                 No individual departure cleared the 3% target-share listing cut.
               </div>
             )}
+
             <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "7px", lineHeight: 1.5 }}>
               {card.vacated.denominator}
             </div>
           </CardSection>
         )}
 
-        {/* THE READ. First thing on the card, because a reader who does not
-            already know which of fourteen sections matters cannot start.
-            Every line restates a number visible further down, in plain English.
-            It issues NO VERDICT — that is the Diggs rule, and the reason
-            PLAYER_VERDICTS is not on this card either. */}
-        {card.read.length > 0 && (
-          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
-                The read
-              </span>
-              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>from the data below</span>
-            </div>
-            {card.read.map((r, i) => (
-              <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
-                <span style={{
-                  flex: "none", marginTop: "5px", width: "5px", height: "5px", borderRadius: "50%",
-                  background: r.tone === "pos" ? "var(--pos)" : r.tone === "neg" ? "var(--neg)" : r.tone === "warn" ? "var(--caution)" : "var(--text-dim)",
-                }} />
-                <span style={{ fontSize: "12.5px", lineHeight: 1.5, color: "var(--text-primary)" }}>{r.text}</span>
+        {(card.efficiency.length > 0 || (card.glossary || []).length > 0) && (
+          <CardGroupHeader group="reference" label="Reference" hint="consult, do not conclude" nested />
+        )}
+
+        {card.efficiency.length > 0 && (
+          <CardSection title="Efficiency" accent={CARD_ACCENTS.efficiency} collapsible note="Measured year over year, RB yards per carry is r=0.02 — a coin flip. A record of what happened, never a forecast.">
+            {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
+          </CardSection>
+        )}
+
+        {(card.glossary || []).length > 0 && (
+          <CardSection title="Glossary" accent={CARD_ACCENTS.glossary} collapsible note="Every number on this card, in plain language — what it measures, and what to do with it.">
+            {card.glossary.map((g, i) => (
+              <div key={g.key} style={{
+                padding: "9px 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
+              }}>
+                <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "3px" }}>
+                  {g.term}
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  {g.what}
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px", display: "flex", gap: "6px" }}>
+                  <span style={{ color: "var(--ui-accent-dim)", flex: "none" }}>→</span>
+                  <span>{g.how}</span>
+                </div>
               </div>
             ))}
-          </div>
+          </CardSection>
         )}
 
-        {card.reason ? (
-          <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-            {card.reason}
-          </div>
-        ) : (
-          <>
-            {/* The headline is the TRAJECTORY, not the season average. A season
-                average buries role change, which is the highest-ranked signal
-                there is — it is what graded RJ Harvey as a timeshare when he had
-                already taken the job. */}
-            {/* Current season leads when it exists. The prior season stays on
-                screen underneath rather than being replaced — the COMPARISON is
-                the insight, and a card that silently swaps vintages is the
-                stale-data trap in a new costume. */}
-            {tc && (
-              <CardSection title={`Role trajectory · ${card.curVintage}`} accent={CARD_ACCENTS.trajectory}>
-                {tc.delta == null ? (
-                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-                    {pct(tc.season)} snap share over {tc.gp} game{tc.gp === 1 ? "" : "s"} so far — too early for a trend.
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
-                      <span style={{ color: "var(--text-muted)" }}>{pct(tc.early)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.earlyWeeks}</span>
-                      <span style={{ color: "var(--text-dim)" }}>→</span>
-                      <span style={{ color: tc.trend === "rising" ? "var(--pos)" : tc.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(tc.late)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W{tc.lateWeeks}</span>
-                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(tc.last4)} last 4</span>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
-                      {tc.trend === "stable"
-                        ? "Steady role so far this season."
-                        : `${tc.trend === "rising" ? "Role growing" : "Role shrinking"} this season.`}
-                      {tc.splitMode === "halves" && " Split at the midpoint of the weeks played, so it is noisier than a full-season read."}
-                    </div>
-                  </>
-                )}
-              </CardSection>
-            )}
-
-            {t && (
-              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
-                {t.delta == null ? (
-                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-                    {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
-                    <span style={{ color: "var(--gold)" }}>
-                      {t.lateGp >= t.earlyGp ? "W10-18 only" : "W1-9 only"}, so this is half a season, not a full-year role.
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
-                      <span style={{ color: "var(--text-muted)" }}>{pct(t.early)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W1-9</span>
-                      <span style={{ color: "var(--text-dim)" }}>→</span>
-                      <span style={{ color: t.trend === "rising" ? "var(--pos)" : t.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(t.late)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W10-18</span>
-                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(t.last4)} last 4</span>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
-                      {t.trend === "stable"
-                        ? `Steady role. The ${pct(t.season)} season average is a fair read.`
-                        : `${t.trend === "rising" ? "Role grew" : "Role shrank"} — the ${pct(t.season)} season average ${t.trend === "rising" ? "understates" : "overstates"} where he finished.`}
-                      {t.changedTeam && " Changed teams mid-2025, so this spans two different jobs."}
-                    </div>
-                  </>
-                )}
-              </CardSection>
-            )}
-
-            {qc && (
-              <CardSection title={`Volume profile · ${card.curVintage}`} accent={CARD_ACCENTS.volume}>
-                <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
-                <CardMetricRow label="Pass attempts / game" value={qc.pass.toFixed(1)} pct={null} r={0.605} />
-                <CardMetricRow label="Passing aDOT" value={qc.adot.toFixed(1)} pct={null} r={0.486} />
-                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
-                  {qc.gp} game{qc.gp === 1 ? "" : "s"} this season · league median {qc.median} rush att/gm.
-                </div>
-              </CardSection>
-            )}
-
-            {card.qb && (
-              <CardSection
-                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
-                accent={CARD_ACCENTS.volume}
-                note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
-              >
-                <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
-                <CardMetricRow label="Pass attempts / game" value={card.qb.pass.toFixed(1)} pct={null} r={0.605} />
-                <CardMetricRow label="Passing aDOT" value={card.qb.adot.toFixed(1)} pct={null} r={0.486} />
-                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
-                  League median {card.qb.median} rush att/gm.
-                  {card.qb.runner === "rushing" && <span style={{ color: "var(--pos)" }}> Rushing QB — this is scoring that survives a bad passing day.</span>}
-                  {card.qb.runner === "pocket" && <span style={{ color: "var(--gold)" }}> Pocket QB — effectively no rushing floor.</span>}
-                </div>
-              </CardSection>
-            )}
-
-            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
-
-            {card.absence.length > 0 && (
-              <CardSection
-                title="Who else was on the field"
-                accent={CARD_ACCENTS.absence}
-                collapsible
-                hint={`${card.absence.length} absence${card.absence.length > 1 ? "s" : ""}`}
-                note="A target share is a share OF something. These teammates missed real time, so part of the season above was played without them. The split is shown, not a conclusion — an absence explains where volume came from, it does not prove the volume was hollow.">
-                {card.absence.map((a, i) => (
-                  <div key={i} style={{ padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
-                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>
-                      {a.name}
-                      <span style={{ color: "var(--text-dim)", fontWeight: 400 }}> {a.pos} · {a.role}</span>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 6px" }}>
-                      played {a.playedOf} of {a.total} · missed {a.missed}
-                    </div>
-                    {[["with him", a.withTgt, a.withPts], ["without him", a.withoutTgt, a.withoutPts]].map(([lab, tgt, pts]) => (
-                      <div key={lab} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "1px 0" }}>
-                        <span style={{ color: "var(--text-dim)", minWidth: "84px" }}>{lab}</span>
-                        {tgt != null && <span style={{ color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{tgt.toFixed(1)} tgt/gm</span>}
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{pts.toFixed(1)} pts/gm</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </CardSection>
-            )}
-
-            {card.metrics.length > 0 && (
-              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}.`}>
-                {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
-              </CardSection>
-            )}
-
-            {card.deployment.length > 0 && (
-              <CardSection
-                title="Deployment"
-                accent={CARD_ACCENTS.deployment}
-                collapsible
-                hint="separation · depth"
-                note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
-                {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
-              </CardSection>
-            )}
-
-            {card.redzone.length > 0 && (
-              <CardSection
-                title="Red zone"
-                accent={CARD_ACCENTS.redzone}
-                collapsible
-                hint={`${card.redzone.length} measure${card.redzone.length > 1 ? "s" : ""}`}
-                note={`Scoring opportunity, which the framework tracks separately from overall volume. Each share prints the count it came from — red-zone samples are small, and a percentage without its count is unreadable. Percentile among ${card.redzoneGate} at ${card.pos}, a different population from Opportunity above.`}>
-                {card.redzone.map((x, i) => <CardMetricRow key={i} {...x} r={null} noTag />)}
-              </CardSection>
-            )}
-
-            {card.descriptive.length > 0 && (
-              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
-                {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
-              </CardSection>
-            )}
-
-            {card.efficiency.length > 0 && (
-              <CardSection title="Efficiency" accent={CARD_ACCENTS.efficiency} collapsible note="Measured year over year, RB yards per carry is r=0.02 — a coin flip. A record of what happened, never a forecast.">
-                {card.efficiency.map((x, i) => <CardMetricRow key={i} label={x.label} value={x.value} pct={null} r={null} dim noTag />)}
-              </CardSection>
-            )}
-
-            {(card.glossary || []).length > 0 && (
-              <CardSection title="Glossary" accent={CARD_ACCENTS.glossary} collapsible note="Every number on this card, in plain language — what it measures, and what to do with it.">
-                {card.glossary.map((g, i) => (
-                  <div key={g.key} style={{
-                    padding: "9px 0",
-                    borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
-                  }}>
-                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "3px" }}>
-                      {g.term}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      {g.what}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px", display: "flex", gap: "6px" }}>
-                      <span style={{ color: "var(--ui-accent-dim)", flex: "none" }}>→</span>
-                      <span>{g.how}</span>
-                    </div>
-                  </div>
-                ))}
-              </CardSection>
-            )}
-          </>
-        )}
 
         <div style={{ marginTop: "18px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
           {card.curVintage ? `${card.curVintage} + ${card.vintage}` : card.vintage} · nflverse
