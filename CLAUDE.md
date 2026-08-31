@@ -4327,3 +4327,100 @@ graded through the BEST BALL engine and printed a plausible answer. Same
 silent-wrong-answer class the app itself has fixed five times. Unknown flags,
 unknown tournament keys and value-less flags now exit 2 with a hint naming the
 correct flag. Verified both valid paths still run.
+
+---
+
+## The Read, and One Accent Per GROUP (added Sep 1, 2026)
+
+Reported as wanting the card to work for beginners through experts. Measured
+first: **the card had reached 14 sections and 1,732px**, and the accents had
+stopped differentiating — **six sections shared `--ui-accent` and five shared
+`--accent-purple-light`**, so the colour channel was carrying two values across
+fourteen slots. **Presentation only — 39 grades byte-identical.**
+
+### The real problem was an ENTRY POINT, not density
+
+Every one of the fourteen sections is individually justified. Collectively they
+present a reader with fourteen equally-weighted peers **in the order they were
+added**, which is neither importance order nor reading order. A beginner has no
+idea where to start; an expert scrolls past six things to reach one number.
+
+`card.read` answers that with plain-English sentences derived from numbers the
+card is already showing, ordered by the **Source Hierarchy** — role change,
+volume, talent, scoring equity, durability, calendar. A reader who stops after
+two lines has read the two that matter most.
+
+```
+He wins little separation — 2.24 yds, more than only 8% of WRs.
+  A contested-catch profile rather than a get-open one.
+He owns the scoring work — 22% of his team's throws inside the 20.
+```
+
+**⚠️ IT ISSUES NO VERDICT, and that constraint is load-bearing.** A verdict
+rendered as current is the Diggs failure, and it is exactly why
+`PLAYER_VERDICTS` was kept off this card in the first place. Every line
+**describes** a number visible further down, in the reader's own language —
+"wins little separation for the position" is a restatement of 8th percentile,
+never a judgement about whether to draft him. Guard 14 asserts the block never
+reaches for a verdict table.
+
+### Three defects the first version shipped, all caught by measuring
+
+1. **THE SUMMARY CONTRADICTED ITSELF.** RJ Harvey read *"his role grew — 29% of
+   snaps early, 56% late"* and then, two lines down, *"he is off the field a
+   lot — 42% of snaps."* `snap_sh` is a SEASON AVERAGE and the card already
+   flags it as stale when the role moved; the summary was restating the stale
+   number as current. **A summary that disagrees with itself is worse than one
+   that omits a line.** The snap line is now suppressed whenever the trajectory
+   says the role moved, and the guard sweeps every draftable card for the pair.
+2. **A line with no number is a verdict wearing a sentence.** The goal-line line
+   asserted something the reader could not check. Every line now carries the
+   figure behind it — the team-change line is the one exception, because it
+   names a TEAM and inventing a number for it would be worse.
+3. **"below 92% of WRs" inverts on the reader.** Percentiles now run one
+   direction only: "more than only 8% of WRs".
+
+### One accent per GROUP, not per section
+
+A colour that appears six times has stopped being a signal. `CARD_GROUP_ACCENT`
+now names **which of four questions** a section answers, and every section in a
+group wears the same one:
+
+```
+WHO HE IS    grey    news · on-field rate · career arc · team turnover
+HIS ROLE     purple  trajectory · volume · opportunity · deployment · red zone · absence
+WHAT HE DID  blue    week outcomes · game log
+REFERENCE    dim     efficiency · glossary
+```
+
+Four meanings, four colours, learned once instead of fourteen times.
+
+**The dim group stays dim.** Brightness on this card means "this should move
+your opinion", so efficiency and the glossary are grey on purpose — painting
+either brighter undoes the second channel entirely. Guard 14 asserts the
+reference group resolves to `--text-dim`.
+
+**The guard now asserts the MAPPING rather than a literal token**, so a
+deliberate palette re-tune stays legal and a hand-written colour beside grouped
+ones fails. That replaces an assertion which string-matched one section's exact
+hex token and broke on a refactor that preserved its intent exactly.
+
+### Deployment and Red zone are collapsed now
+
+Both are summarised in The Read, so they cost a tap instead of a scroll. Same
+reading-frequency rule the results page uses: **what stays open is what is read
+on every visit, not what is small.**
+
+### Measured
+
+```
+                 before          after
+AJ Brown         1656px  13 s    1721px  13 s
+Bijan Robinson   1732px  14 s    1738px  16 s
+Carnell Tate      451px   3 s     547px   5 s
+0 sub-32px tap targets · no page errors
+```
+
+The card is roughly the same height and now opens with a paragraph anyone can
+read. That is the trade that was wanted: **the height was never the complaint,
+the lack of a starting point was.**

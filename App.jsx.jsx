@@ -3150,7 +3150,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // section always renders — an empty one says so in words.
     news: buildPlayerNews(name, nowTs),
     gameLog: null, gameLogCur: null,
-    deployment: [], arc: null, vacated: null, redzone: [], availability: null,
+    deployment: [], arc: null, vacated: null, redzone: [], availability: null, read: [],
   };
 
   // GAME LOG — current season first, prior season underneath, never swapped.
@@ -3345,6 +3345,111 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       recentWindow: AVAILABILITY._meta.recent_window,
     };
   }
+
+  // === THE READ ===
+  //
+  // Plain-English sentences derived from the numbers the card is already
+  // showing. It exists because the card grew to fourteen sections, and a reader
+  // who does not already know which of them matters cannot start.
+  //
+  // ⚠️ IT ISSUES NO VERDICT, and that is the load-bearing constraint. A verdict
+  // rendered as current is the Diggs failure, which is why PLAYER_VERDICTS was
+  // kept off this card in the first place. Every line here DESCRIBES a number
+  // that is visible further down, in the reader's own language — "wins little
+  // separation for the position" is a restatement of 8th percentile, not a
+  // judgement about whether to draft him.
+  //
+  // Ordered by the Source Hierarchy: role change first, then volume, then
+  // talent, then scoring equity, then durability, then the calendar. A reader
+  // who stops after two lines has still read the two that matter most.
+  const read = [];
+  {
+    const t = card.trajectoryCur || card.trajectory;
+    const pctS = v => `${Math.round(v * 100)}%`;
+    const findM = k => card.metrics.find(m => m.label === k);
+
+    if (t && t.trend && t.trend !== "stable" && t.delta != null) {
+      read.push({
+        tone: t.trend === "rising" ? "pos" : "neg",
+        text: `His role ${t.trend === "rising" ? "grew" : "shrank"} through the season — ${pctS(t.early)} of snaps early, ${pctS(t.late)} late. The season average understates it.`,
+      });
+    }
+    if (card.movedFrom) {
+      read.push({ tone: "warn", text: `He changed teams. Every number below is from his ${card.movedFrom} season and describes a job he no longer has.` });
+    }
+    const tpg = findM("Targets / game");
+    if (tpg?.pct != null) {
+      read.push({
+        tone: tpg.pct >= 75 ? "pos" : tpg.pct <= 30 ? "neg" : "flat",
+        text: tpg.pct >= 75 ? `Heavy target volume — ${tpg.value} a game, more than ${tpg.pct}% of ${card.pos}s.`
+          : tpg.pct <= 30 ? `Light target volume — ${tpg.value} a game, more than only ${tpg.pct}% of ${card.pos}s.`
+          : `Ordinary target volume — ${tpg.value} a game, around the middle for a ${card.pos}.`,
+      });
+    }
+    // ⚠️ SUPPRESSED WHEN THE ROLE MOVED. snap_sh is a SEASON AVERAGE, and the
+    // trajectory line directly above already says it is stale. RJ Harvey read
+    // "his role grew, 29% to 56%" and then "he is off the field a lot, 42% of
+    // snaps" two lines later — the summary contradicting itself is worse than
+    // the summary omitting a line.
+    const snap = findM("Snap share");
+    if (snap?.pct != null && snap.pct <= 30 && !(t && t.trend && t.trend !== "stable")) {
+      read.push({ tone: "neg", text: `He is off the field a lot — ${snap.value} of snaps. That caps everything else, however well he plays.` });
+    }
+    const sep = card.deployment.find(d => d.key === "ngs_sep");
+    if (sep?.pct != null) {
+      read.push({
+        tone: sep.pct >= 70 ? "pos" : sep.pct <= 30 ? "neg" : "flat",
+        text: sep.pct >= 70 ? `He gets open — ${sep.value} of separation, better than ${sep.pct}% of ${card.pos}s. The volume is earned.`
+          : sep.pct <= 30 ? `He wins little separation — ${sep.value}, more than only ${sep.pct}% of ${card.pos}s. A contested-catch profile rather than a get-open one.`
+          : `Average separation for the position at ${sep.value}.`,
+      });
+    }
+    const iay = card.deployment.find(d => d.key === "ngs_iay");
+    if (iay?.pct != null && (iay.pct >= 75 || iay.pct <= 25)) {
+      read.push({
+        tone: "flat",
+        text: iay.pct >= 75 ? `He is used deep — ${iay.value} downfield per target. Big weeks, quiet weeks.`
+          : `He is used short — ${iay.value} downfield per target. Steadier, with a lower ceiling.`,
+      });
+    }
+    const RZ_PLAIN = {
+      rz_tgt_sh: "throws inside the 20",
+      i10_tgt_sh: "throws inside the 10",
+      rz_car_sh: "runs inside the 20",
+      i10_car_sh: "runs inside the 10",
+    };
+    const rzTop = card.redzone.find(r => r.pct != null && r.pct >= 75);
+    const rzLow = card.redzone.length && card.redzone.every(r => r.pct == null || r.pct <= 30);
+    if (rzTop) read.push({ tone: "pos", text: `He owns the scoring work — ${rzTop.value.split(" of ")[0]} of his team's ${RZ_PLAIN[rzTop.key] || "red-zone work"}. Touchdowns are where weeks are won.` });
+    else if (rzLow && card.redzone.length) {
+      const worst = card.redzone.filter(r => r.pct != null).sort((a, b) => a.pct - b.pct)[0];
+      if (worst) read.push({ tone: "neg", text: `He is not a scoring option near the goal line — ${worst.value.split(" of ")[0]} of his team's ${RZ_PLAIN[worst.key] || "red-zone work"}, whatever his volume looks like elsewhere.` });
+    }
+    if (card.availability) {
+      const a = card.availability, cur = a.recent ?? a.career, med = a.median;
+      if (a.recent != null && a.recent <= a.career - 0.12) {
+        read.push({ tone: "neg", text: `Durability is trending the wrong way — ${pctS(a.career)} of games across his career, ${pctS(a.recent)} over the last ${a.recentWindow}.` });
+      } else if (med != null && cur <= med - 0.12) {
+        read.push({ tone: "neg", text: `He misses real time — on the field for ${pctS(cur)} of his team's games against a ${card.pos} median of ${pctS(med)}.` });
+      } else if (med != null && cur >= med + 0.18) {
+        read.push({ tone: "pos", text: `He plays — ${pctS(cur)} of his team's games, well above the ${card.pos} median.` });
+      }
+    }
+    if (card.arc && card.arc.phase !== "peak") {
+      read.push({
+        tone: card.arc.phase === "decline" ? "neg" : "pos",
+        text: card.arc.phase === "decline"
+          ? `Age ${card.arc.age}, past the point ${card.pos} production usually starts to fall.`
+          : `Age ${card.arc.age}, still short of where ${card.pos}s usually peak.`,
+      });
+    }
+    if (card.vacated && card.vacated.pct >= 30) {
+      read.push({ tone: "flat", text: `${card.vacated.team} lost ${Math.round(card.vacated.pct)}% of last season's targets. Someone on that offense inherits them.` });
+    }
+  }
+  // Cap at six. A summary that runs the length of the card is not a summary,
+  // and the ordering above already puts the most causal lines first.
+  card.read = read.slice(0, 6);
 
   // The glossary explains exactly what this card rendered and nothing else, in
   // the order the reader met it. A QB card never defines WOPR; an RB card with
@@ -7111,31 +7216,53 @@ const POS_ACCENT = {
   TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
 };
 
-const CARD_ACCENTS = {
-  trajectory: "var(--ui-accent)",
-  volume: "var(--ui-accent)",
-  // Deployment answers the same question Opportunity does — how is he used —
-  // so it shares that colour. The two sections are one idea split by source.
-  deployment: "var(--accent-purple-light)",
-  // Career arc and team turnover are both role CHANGE, which is what the news
-  // accent already means on this card.
-  arc: "var(--ui-accent)",
-  vacated: "var(--ui-accent)",
-  opportunity: "var(--accent-purple-light)",
-  // Qualifies the OPPORTUNITY numbers, so it wears their colour: the two are
-  // one idea, and a share means something different once you know who was out.
-  absence: "var(--accent-purple-light)",
-  outcomes: "var(--info-blue)",
-  // Rank 1 in the Source Hierarchy is role CHANGE, and this is the only place
-  // on the card that carries it, so it gets the bright headline treatment
-  // rather than the dim reference one.
-  news: "var(--ui-accent)",
-  gamelog: "var(--ui-accent)",
-  efficiency: "var(--text-dim)",
-  // Reference material, not a finding — same muted header as Efficiency, so the
-  // two channels stay honest: brightness means "this should move your opinion".
-  glossary: "var(--text-dim)",
+// ONE ACCENT PER GROUP, NOT PER SECTION.
+//
+// The card reached fourteen sections and the accents no longer differentiated
+// anything: six sections shared --ui-accent and five shared --accent-purple-
+// light, so the channel was carrying two values across fourteen slots. A colour
+// that appears six times has stopped being a signal.
+//
+// So the accent now names WHICH OF FOUR QUESTIONS a section answers, and every
+// section in a group wears the same one. Four meanings, four colours, and the
+// reader learns the mapping once instead of fourteen times.
+//
+//   WHO HE IS      grey    identity and the calendar — context, not performance
+//   HIS ROLE       purple  what the offense gives him. The core of the card
+//   WHAT HE DID    blue    output. Descriptive of 2025 and nothing else
+//   REFERENCE      dim     material that should not move an opinion
+//
+// The dim group is load-bearing: brightness on this card means "this should
+// move your opinion", so efficiency and the glossary stay grey on purpose.
+// Painting either of them brighter would undo the second channel entirely.
+const CARD_GROUP_ACCENT = {
+  who: "var(--ui-accent)",
+  role: "var(--accent-purple-light)",
+  did: "var(--info-blue)",
+  ref: "var(--text-dim)",
 };
+
+const CARD_ACCENTS = {
+  // WHO HE IS
+  news: CARD_GROUP_ACCENT.who,
+  availability: CARD_GROUP_ACCENT.who,
+  arc: CARD_GROUP_ACCENT.who,
+  vacated: CARD_GROUP_ACCENT.who,
+  // HIS ROLE
+  trajectory: CARD_GROUP_ACCENT.role,
+  volume: CARD_GROUP_ACCENT.role,
+  opportunity: CARD_GROUP_ACCENT.role,
+  deployment: CARD_GROUP_ACCENT.role,
+  redzone: CARD_GROUP_ACCENT.role,
+  absence: CARD_GROUP_ACCENT.role,
+  // WHAT HE DID
+  outcomes: CARD_GROUP_ACCENT.did,
+  gamelog: CARD_GROUP_ACCENT.did,
+  // REFERENCE — deliberately dim. See the note above before changing either.
+  efficiency: CARD_GROUP_ACCENT.ref,
+  glossary: CARD_GROUP_ACCENT.ref,
+};
+
 
 // ONE collapsible section header for the results view, so a fourth ad-hoc
 // implementation never appears. Renders the same h2 the always-open sections
@@ -7963,6 +8090,32 @@ const PlayerCardModal = ({ card, onClose }) => {
           </CardSection>
         )}
 
+        {/* THE READ. First thing on the card, because a reader who does not
+            already know which of fourteen sections matters cannot start.
+            Every line restates a number visible further down, in plain English.
+            It issues NO VERDICT — that is the Diggs rule, and the reason
+            PLAYER_VERDICTS is not on this card either. */}
+        {card.read.length > 0 && (
+          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
+              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
+                The read
+              </span>
+              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>from the data below</span>
+            </div>
+            {card.read.map((r, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
+                <span style={{
+                  flex: "none", marginTop: "5px", width: "5px", height: "5px", borderRadius: "50%",
+                  background: r.tone === "pos" ? "var(--pos)" : r.tone === "neg" ? "var(--neg)" : r.tone === "warn" ? "var(--caution)" : "var(--text-dim)",
+                }} />
+                <span style={{ fontSize: "12.5px", lineHeight: 1.5, color: "var(--text-primary)" }}>{r.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {card.reason ? (
           <div style={{ marginTop: "16px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
             {card.reason}
@@ -8102,6 +8255,8 @@ const PlayerCardModal = ({ card, onClose }) => {
               <CardSection
                 title="Deployment"
                 accent={CARD_ACCENTS.deployment}
+                collapsible
+                hint="separation · depth"
                 note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
                 {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
               </CardSection>
@@ -8111,6 +8266,8 @@ const PlayerCardModal = ({ card, onClose }) => {
               <CardSection
                 title="Red zone"
                 accent={CARD_ACCENTS.redzone}
+                collapsible
+                hint={`${card.redzone.length} measure${card.redzone.length > 1 ? "s" : ""}`}
                 note={`Scoring opportunity, which the framework tracks separately from overall volume. Each share prints the count it came from — red-zone samples are small, and a percentage without its count is unreadable. Percentile among ${card.redzoneGate} at ${card.pos}, a different population from Opportunity above.`}>
                 {card.redzone.map((x, i) => <CardMetricRow key={i} {...x} r={null} noTag />)}
               </CardSection>

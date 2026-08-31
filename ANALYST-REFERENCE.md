@@ -1194,9 +1194,8 @@ analysis.
 |---|---|---|---|
 | 1 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
 | 2 | Decide whether separation should SCORE | a real data decision | **yes** |
-| 3 | Player card: group 14 sections into 4 | design | no |
-| 4 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
-| 5 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
+| 3 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
+| 4 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
 
 **On #4.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
@@ -1218,6 +1217,7 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 | Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
 | Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
@@ -1229,7 +1229,6 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 | Aug 29 2026 | Game logs on the player card |
 | Aug 28 2026 | Recent news on the player card, with parsed dates |
 | Aug 25 2026 | Snap trajectory layer · QB volume profile · player card |
-| Aug 25 2026 | Measured stability of every input — the §2 table |
 
 ---
 

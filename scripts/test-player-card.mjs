@@ -400,9 +400,107 @@ ok("the no-absence branch is exercised", someQuiet);
 // The section must not be the only thing keeping a blank card alive.
 ok("the no-data branch accounts for absence", /!card\.absence\.length/.test(app));
 
-// It qualifies OPPORTUNITY, so it wears opportunity's colour rather than a new one.
-ok("the absence accent reuses the opportunity token",
-   /absence: "var\(--accent-purple-light\)"/.test(app));
+// THE ACCENT NAMES A GROUP, NOT A SECTION. The card reached fourteen sections
+// and a per-section accent had collapsed to two colours across fourteen slots,
+// which is a channel carrying no information. Every section now resolves to one
+// of four groups, and this asserts the mapping rather than a literal token so a
+// deliberate re-tune of the palette stays legal.
+const groups = {};
+for (const m of app.matchAll(/^  (\w+): CARD_GROUP_ACCENT\.(\w+),/gm)) groups[m[1]] = m[2];
+
+ok("CARD_GROUP_ACCENT is declared once", (app.match(/const CARD_GROUP_ACCENT = /g) || []).length === 1);
+ok("every card accent resolves through a group",
+   Object.keys(groups).length >= 12 && !/^  \w+: "var\(--/m.test(app.slice(app.indexOf("const CARD_ACCENTS = {"), app.indexOf("};", app.indexOf("const CARD_ACCENTS = {")))),
+   "a hand-written colour beside grouped ones is the duplicate-definition class this repo has hit five times");
+ok("exactly four groups are in use", new Set(Object.values(groups)).size === 4, JSON.stringify(groups));
+
+// Absence QUALIFIES the opportunity numbers, so the two are one idea and must
+// share a group. A share means something different once you know who was out.
+ok("absence and opportunity share a group", groups.absence === groups.opportunity,
+   `absence=${groups.absence} opportunity=${groups.opportunity}`);
+// Red zone and deployment are opportunity too — different sources, same question.
+ok("red zone sits with role", groups.redzone === groups.opportunity);
+ok("deployment sits with role", groups.deployment === groups.opportunity);
+// The dim group is load-bearing: brightness on this card means "this should move
+// your opinion", and efficiency does not predict anything.
+ok("efficiency and glossary share the reference group",
+   groups.efficiency === groups.glossary && groups.efficiency !== groups.opportunity);
+ok("the reference group is the dim token",
+   new RegExp(`${groups.efficiency}: "var\\(--text-dim\\)"`).test(app),
+   "painting efficiency brighter would undo the card's second channel");
+// On-field rate and career arc describe the player rather than his usage.
+ok("availability and career arc share a group", groups.availability === groups.arc);
+
+// ---- THE READ ----
+// Plain-English sentences at the top of the card, derived from numbers the card
+// is already showing. It exists because the card reached fourteen sections and a
+// reader who does not already know which of them matters cannot start.
+console.log("\nthe read");
+
+const readCards = draftable.map(([n, v]) => [n, e.buildPlayerCard(n, v.pos, v.team)]);
+
+// 1. IT ISSUES NO VERDICT. A verdict rendered as current is the Diggs failure,
+//    and it is why PLAYER_VERDICTS was kept off this card in the first place.
+//    Every line DESCRIBES a number visible further down.
+// ⚠ STRIP COMMENTS BEFORE SCANNING. The block's own comments explain WHY a
+// verdict is forbidden, and the first version of this check matched its own
+// warning text — a guard failing on the sentence describing the rule it guards.
+const readSrc = app.slice(app.indexOf("// === THE READ ==="), app.indexOf("card.read = read.slice"))
+  .split("\n").filter(l => !l.trim().startsWith("//")).join("\n");
+ok("the read block exists", readSrc.length > 200);
+for (const banned of ["PLAYER_VERDICTS", "getVerdict", "verdict", "TARGET", "FADE", "draft him", "avoid"]) {
+  ok(`the read never reaches for "${banned}"`, !readSrc.includes(banned),
+     "it describes the data; a verdict on this card is the Diggs failure in a new costume");
+}
+
+// 2. IT IS CAPPED. A summary the length of the card is not a summary.
+ok("the read is capped", /card\.read = read\.slice\(0, \d\)/.test(app));
+const maxLines = Math.max(...readCards.map(([, c]) => c.read.length));
+ok("no card exceeds the cap in practice", maxLines <= 6, `${maxLines} lines`);
+
+// 3. IT NEVER CONTRADICTS ITSELF. snap_sh is a SEASON AVERAGE and the trajectory
+//    line above already says it is stale when the role moved. RJ Harvey read
+//    "his role grew, 29% to 56%" and then "he is off the field a lot, 42% of
+//    snaps" two lines later. A summary that disagrees with itself is worse than
+//    one that omits a line.
+const contradictions = readCards.filter(([, c]) => {
+  const moved = c.read.some(r => /role (grew|shrank)/.test(r.text));
+  const stale = c.read.some(r => /off the field a lot/.test(r.text));
+  return moved && stale;
+});
+ok("no card states a role change and a stale snap average together",
+   contradictions.length === 0, contradictions.slice(0, 3).map(c => c[0]).join(", "));
+
+// 4. EVERY LINE CARRIES ITS NUMBER. A bare assertion is a verdict wearing a
+//    sentence; the number is what makes it checkable by the reader.
+// The team-change line is the deliberate exception: it names a TEAM, which is
+// the checkable fact there, and inventing a number for it would be worse.
+const numberless = [];
+for (const [n, c] of readCards) for (const r of c.read) {
+  if (/\d/.test(r.text)) continue;
+  if (/He changed teams/.test(r.text)) continue;
+  numberless.push(`${n}: ${r.text.slice(0, 40)}`);
+}
+ok("every read line carries a number, or names the team it describes",
+   numberless.length === 0, numberless.slice(0, 3).join(" | "));
+
+// 5. IT REACHES A PLAYER WITH NO 2025 DATA. A rookie is exactly the reader who
+//    needs a plain-English start, and the first version buried the whole block
+//    inside the else-branch of `card.reason`.
+const rookieWithRead = readCards.find(([, c]) => c.reason && c.read.length > 0);
+ok("a no-data player still gets a read", !!rookieWithRead,
+   rookieWithRead ? rookieWithRead[0] : "the read must render ABOVE the reason branch");
+ok("the read renders above the no-data branch",
+   app.indexOf("card.read.length > 0 &&") < app.indexOf("{card.reason ? ("));
+
+// 6. IT IS ORDERED BY THE SOURCE HIERARCHY, so a reader who stops after two
+//    lines has read the two that matter most. Role change outranks volume.
+const ordered = readCards.filter(([, c]) => {
+  const i = c.read.findIndex(r => /role (grew|shrank)/.test(r.text));
+  const j = c.read.findIndex(r => /target volume/.test(r.text));
+  return i > -1 && j > -1 && i > j;
+});
+ok("role change always precedes volume", ordered.length === 0, ordered.slice(0, 3).map(c => c[0]).join(", "));
 
 // It reports, it does not conclude.
 ok("the section note refuses to assert causation",
