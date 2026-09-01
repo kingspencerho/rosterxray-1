@@ -1395,6 +1395,15 @@ rather than sitting beside them.
 | `npm test` | 26 guards |
 | `npm run build` | Vite production build |
 
+### Runbooks
+
+`RUNBOOKS.md` holds the procedures a HUMAN runs on a schedule, with the exact commands for
+PowerShell and a log table where the runbook ends in a decision. It is procedure, never project
+state — `CLAUDE.md` stays the single context handoff.
+
+Live: **the Sleeper feed watch** (daily to Sep 8 2026), which gates whether the status layer is
+allowed to render.
+
 ### Builders
 
 ```
