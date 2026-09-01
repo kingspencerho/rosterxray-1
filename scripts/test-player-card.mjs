@@ -441,6 +441,53 @@ for (const k of ["absence", "redzone", "deployment", "trajectory"]) {
 for (const k of ["availability", "arc", "vacated", "news"]) {
   ok(`${k} sits with the outlook group`, groups[k] === "outlook", groups[k]);
 }
+// ---- NO SECTION VANISHES SILENTLY ----
+// An audit across 287 draftable cards found 182 silent Deployment omissions,
+// 177 for Man vs zone, 101 for Route workload and 51 for Opportunity — the
+// core block. A reader could not tell "he did not qualify" from "the app is
+// broken", which is exactly how a missing game log got reported as an access
+// bug. Every gated section now names itself and its gate in one line per group.
+console.log("\nno card section vanishes silently");
+{
+  const rows = draftable.map(([n, v]) => [n, v, e.buildPlayerCard(n, v.pos, v.team)]);
+  const silent = [];
+  for (const [n, v, c] of rows) {
+    if (c.reason) continue;                       // the no-data branch covers it
+    const om = new Set((c.omitted || []).map(x => x.label));
+    const qb = v.pos === "QB";
+    const miss = [];
+    if (!qb && !c.metrics.length && !om.has("Opportunity")) miss.push("Opportunity");
+    if (!c.deployment.length && !om.has("Deployment")) miss.push("Deployment");
+    if (!qb && !c.routes.length && !om.has("Route workload")) miss.push("Route workload");
+    if (!c.redzone.length && !om.has("Red zone")) miss.push("Red zone");
+    if (!c.coverage && !om.has("Man vs zone")) miss.push("Man vs zone");
+    if (miss.length) silent.push(`${n}: ${miss.join(", ")}`);
+  }
+  ok("every gated section that is absent is named", silent.length === 0, silent.slice(0, 4).join(" | "));
+
+  // ⚠️ A section that does not APPLY is not a gate he failed. CARD_METRICS.QB
+  // is empty by design, so telling a QB reader he "needs 8+ games" for
+  // Opportunity is a false explanation — worse than none.
+  const burrow = rows.find(([n]) => n === "joe burrow")?.[2];
+  ok("a QB is not told he failed a gate that does not apply to him",
+    !!burrow && !(burrow.omitted || []).some(x => x.label === "Opportunity" || x.label === "Route workload"));
+  ok("...and the ones that do not apply say so rather than quoting a threshold",
+    !!burrow && (burrow.omitted || []).some(x => /does not apply/.test(x.why)));
+
+  // The no-data branch already says he has no 2025 role; listing seven gates
+  // underneath repeats the same sentence.
+  ok("a no-data card lists no gates",
+    rows.every(([, , c]) => !c.reason || (c.omitted || []).length === 0));
+
+  // One line per group, never one panel per section — a dozen empty blocks is
+  // noise, not information.
+  ok("the omissions render as one line per group", /const OmittedNote = /.test(app));
+  for (const g of ["job", "production", "reference"])
+    ok(`the ${g} group renders its omissions`, new RegExp(`OmittedNote items=\\{card\\.omitted\\} group="${g}"`).test(app));
+  ok("at least one real card actually has omissions to show",
+    rows.some(([, , c]) => (c.omitted || []).length > 0));
+}
+
 // ---- THE GAME LOG RESOLVES, AND ITS ABSENCE STATES A REASON ----
 // A user asked why he "could not access" Luther Burden's game log. Three
 // separate name bugs were dropping 18 draftable players, and the section

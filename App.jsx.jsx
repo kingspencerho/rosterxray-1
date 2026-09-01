@@ -3596,6 +3596,52 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     card.availabilityGates = g;
   }
 
+  // === WHAT WAS GATED OUT, AND WHY ===
+  //
+  // Seven sections have their own population gate and every one of them used
+  // to vanish SILENTLY. An audit across 287 draftable cards found 182 silent
+  // Deployment omissions, 177 for Man vs zone, 101 for Route workload and 51
+  // for Opportunity — the core block. A reader could not tell "he did not
+  // qualify" from "the app is broken", which is exactly how a missing game log
+  // got reported as an access bug.
+  //
+  // ⚠️ ONE LINE PER GROUP, NOT ONE PANEL PER SECTION. Rendering a "no data"
+  // panel for each would put a dozen empty blocks on a rookie card, which is
+  // noise rather than information. The absence has to be visible; it does not
+  // have to be loud.
+  //
+  // Skipped entirely when `card.reason` is set — that branch already says he
+  // has no 2025 role, and re-listing seven gates under it would repeat it.
+  // ⚠️ `card.reason` is assigned FURTHER DOWN, so it cannot be read here. The
+  // no-data branch is the same condition it uses: no season metrics at all.
+  // Reading the flag instead of the condition listed seven gates under a card
+  // that already says "no 2025 NFL data", which is the same sentence twice.
+  const hasAnySeason = !!getMetrics(name);
+  if (hasAnySeason) {
+    const rzGate = REDZONE._meta?.gates?.min_player_rz_opp;
+    const omit = [];
+    const gated = (cond, group, label, why) => { if (cond) omit.push({ group, label, why }); };
+    // ⚠️ A SECTION THAT DOES NOT APPLY IS NOT A GATE HE FAILED. CARD_METRICS.QB
+    // is empty BY DESIGN — a quarterback's volume lives in Volume profile — so
+    // telling a QB reader that Burrow "needs 8+ games" for Opportunity is a
+    // false explanation, which is worse than no explanation.
+    const isQB = pos === "QB";
+    gated(!isQB && !card.metrics.length, "job", "Opportunity", `needs ${CARD_POP_GATE}`);
+    gated(!card.deployment.length, "job", "Deployment",
+      pos === "WR" || pos === "TE" ? `needs ${NGS_POP_GATE}`
+        : isQB ? "receiving tracking does not apply to him"
+        : "Next Gen Stats receiving tracking covers WR and TE only");
+    gated(!isQB && !card.routes.length, "job", "Route workload", `needs ${ROUTES_POP_GATE}`);
+    gated(!card.redzone.length, "job", "Red zone", rzGate ? `needs ${rzGate}+ red-zone opportunities` : "no qualifying red-zone volume");
+    gated(!isQB && !card.descriptive.length, "production", "Week outcomes", `needs ${CARD_POP_GATE}`);
+    gated(!card.coverage, "reference", "Man vs zone",
+      pos === "QB" ? "a passing split does not apply to him" : `needs ${COV_POP_GATE}`);
+    gated(!card.efficiency.length, "reference", "Efficiency", "no qualifying 2025 per-touch volume");
+    card.omitted = omit;
+  } else {
+    card.omitted = [];
+  }
+
   // === THE READ ===
   //
   // Plain-English sentences derived from the numbers the card is already
@@ -7778,6 +7824,27 @@ const CARD_ACCENTS = {
   glossary: CARD_GROUP_ACCENT.reference,
 };
 
+// One muted line naming the sections a population gate removed, so an absence
+// is visible without costing a panel each. See the omissions block in
+// buildPlayerCard for why this is one line rather than seven empty sections.
+const OmittedNote = ({ items, group }) => {
+  const mine = (items || []).filter(x => x.group === group);
+  if (!mine.length) return null;
+  return (
+    <div style={{
+      fontSize: "10px", color: "var(--text-dim)", lineHeight: 1.6,
+      padding: "6px 0 2px", borderTop: "1px solid var(--bg-raised)", marginTop: "2px",
+    }}>
+      Not shown: {mine.map((x, i) => (
+        <span key={x.label}>
+          {i > 0 && " · "}
+          <span style={{ color: "var(--text-muted)" }}>{x.label}</span> ({x.why})
+        </span>
+      ))}. Population gates, not missing data.
+    </div>
+  );
+};
+
 // A labelled break between groups, so the reader meets FOUR things rather than
 // fourteen. Deliberately a divider and not a collapsible wrapper: the
 // on-the-clock drafter has no taps to spend, and burying his role data one
@@ -8726,7 +8793,9 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur) && (
+            <OmittedNote items={card.omitted} group="job" />
+
+            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
               <CardGroupHeader group="production" label="What he produced" hint="2025 output" nested />
             )}
 
@@ -8740,6 +8809,8 @@ const PlayerCardModal = ({ card, onClose }) => {
 
           </>
         )}
+
+        <OmittedNote items={card.omitted} group="production" />
 
         {(card.availability || card.availabilityReason || card.arc || card.vacated) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
@@ -8870,9 +8941,11 @@ const PlayerCardModal = ({ card, onClose }) => {
           </CardSection>
         )}
 
-        {(card.efficiency.length > 0 || card.coverage || (card.glossary || []).length > 0) && (
+        {(card.efficiency.length > 0 || card.coverage || (card.glossary || []).length > 0
+          || (card.omitted || []).some(x => x.group === "reference")) && (
           <CardGroupHeader group="reference" label="Reference" hint="consult, do not conclude" nested />
         )}
+        <OmittedNote items={card.omitted} group="reference" />
 
         {card.coverage && (
           <CardSection

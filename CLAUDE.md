@@ -5457,3 +5457,70 @@ The strongest available assertion, and it is cheap: **if a player's SEASON
 TOTALS resolved, his WEEK-BY-WEEK rows must resolve too.** They come from
 different files, so a name bug in either shows up there and nowhere else. Plus
 one named regression per bug class, and three failure paths negative-tested.
+
+
+---
+
+## The Card Audit: No Section Vanishes Silently (Sep 1, 2026)
+
+Reported as *"having the same issue with Brian Thomas — can you audit my player
+cards"*. Thomas was already fixed on the branch; **he was still broken because
+the fix had not reached `main`, and rosterxray.com serves `main`.** The audit is
+what the request actually earned.
+
+**CONTEXT ONLY — 51 grades byte-identical.** Guarded in
+`scripts/test-player-card.mjs`.
+
+### The measurement
+
+Across **287 draftable cards**, counting sections that were absent AND said
+nothing about it:
+
+```
+deployment      182 silent      efficiency        76
+man vs zone     177             opportunity       51   <- the core block
+route workload  101             week outcomes     18
+red zone         78             turnover           8
+game log          0             availability       0   <- already fixed
+```
+
+Two sections had been fixed one at a time. **Seven more had the same defect**,
+and Opportunity — the block the whole card is built around — was silent on 51
+players.
+
+### ⚠️ ONE LINE PER GROUP, NOT ONE PANEL PER SECTION
+
+The obvious fix is the wrong one. A "no data" panel per gated section puts a
+dozen empty blocks on a rookie card, which is noise rather than information.
+**The absence has to be visible; it does not have to be loud.**
+
+`card.omitted` collects `{group, label, why}` and `OmittedNote` renders one
+muted line per group:
+
+> *Not shown: Red zone (needs 5+ red-zone opportunities) · Man vs zone (needs
+> 15+ targets against each coverage in 2025). Population gates, not missing
+> data.*
+
+### Two false explanations the first pass shipped
+
+Both are worse than saying nothing, and both were caught by reading real output
+rather than the source.
+
+1. **`card.reason` is assigned FURTHER DOWN than the omissions block**, so
+   reading the flag there always saw `undefined` and a rookie card listed seven
+   gates directly beneath its own "no 2025 NFL data" line. The block now tests
+   the same CONDITION the branch uses rather than the flag it sets.
+2. **A SECTION THAT DOES NOT APPLY IS NOT A GATE HE FAILED.**
+   `CARD_METRICS.QB` is empty **by design** — a quarterback's volume lives in
+   Volume profile — so telling a Burrow reader that Opportunity "needs 8+
+   games" is a false explanation. QBs now read *"receiving tracking does not
+   apply to him"* and skip the sections that are structurally absent.
+
+**Result: 0 silent absences and 0 false explanations across all 287 cards.**
+
+### The rule
+
+**Any population gate that keeps a median honest will exclude somebody, and a
+reader cannot tell an exclusion from a bug.** Name the section, name its gate,
+and distinguish *did not qualify* from *does not apply*. Three failure paths
+negative-tested.
