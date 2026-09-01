@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand };\n";
+  "\nexport { newsDateFor, buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -211,8 +211,20 @@ const allNews = Object.keys(e.ADP_DATA).map(n => e.buildPlayerNews(n, NOW)).flat
 ok("every rendered note carries a date and an age",
    allNews.length > 0 && allNews.every(n => n.date && Number.isFinite(n.ageDays)),
    `${allNews.length} notes`);
-ok("...and every one of them re-parses to the date shown",
-   allNews.every(n => e.parseNewsDate(n.text, NOW)?.label === n.date));
+// ⚠ RE-DERIVE THROUGH newsDateFor, NOT parseNewsDate. Prose was the only date
+// source when this was written; a SITUATIONS row can also carry a structured
+// `date`, which legitimately produces a label the prose does not contain.
+// Re-deriving from the SOURCE ROW keeps the intent — the date is derived, never
+// invented — and is stronger than re-parsing the text alone.
+const rowFor = (n) => {
+  const tbl = n.source === "situation" ? e.SITUATIONS : e.RECENT_NEWS;
+  return Object.values(tbl).find(r => r === n.text || (r && (r.trendNote === n.text || r.reason === n.text)));
+};
+ok("...and every one of them re-derives to the date shown",
+   allNews.every(n => {
+     const row = rowFor(n);
+     return row !== undefined && e.newsDateFor(row, n.text, NOW)?.label === n.date;
+   }));
 ok("no rendered note is dated in the future", allNews.every(n => n.ageDays >= 0),
    allNews.filter(n => n.ageDays < 0).map(n => n.date).join(", "));
 
@@ -461,9 +473,155 @@ ok("the game log sits in the production group",
    glAt > app.indexOf('CardGroupHeader group="production"') &&
    glAt < app.indexOf('CardGroupHeader group="outlook"'));
 
-// It reports, it does not conclude.// It reports, it does not conclude.
+// It reports, it does not conclude.
 ok("the section note refuses to assert causation",
    /does not prove the volume was hollow/.test(app));
+
+// ---- EVERY DATED SITUATION MUST BE REACHABLE ----
+//
+// SITUATIONS has TWO prose shapes and buildPlayerNews read only one. 138 entries
+// are `trendNote`-shaped and a handful are `reason`-shaped — and `reason` is
+// what the AI prompt reads at the verdictAlignments line, so it is live data the
+// card was blind to. A fresh reason-only entry could never reach a reader, and
+// no guard caught it.
+//
+// Separately, a SITUATIONS row can carry a STRUCTURED `date` and nothing read
+// it; dates were parsed out of the prose only. `malik davis` carries
+// date: "2026-06-07" and no date in its prose, so the card rendered nothing
+// while a perfectly good date sat in the object.
+//
+// The assertion sweeps the WHOLE table rather than the known cases, so it covers
+// shapes nobody has written yet.
+console.log("\nevery dated situation is reachable");
+
+const nowFixed = Date.UTC(2026, 8, 1);
+const situations = Object.entries(e.SITUATIONS);
+const unreachable = [];
+for (const [k, v] of situations) {
+  const text = [v.trendNote, v.reason].find(t => typeof t === "string" && t.trim());
+  const dated = (typeof v.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.date))
+    || (text && e.parseNewsDate(text, nowFixed));
+  if (!text || !dated) continue;             // undated is withheld on purpose
+  if (!e.buildPlayerNews(k, nowFixed).some(n => n.source === "situation")) unreachable.push(k);
+}
+ok("no dated SITUATIONS entry is invisible to the card", unreachable.length === 0,
+   unreachable.slice(0, 5).join(", "));
+
+const shapes = { trendNote: 0, reason: 0, both: 0 };
+for (const [, v] of situations) {
+  const t = typeof v.trendNote === "string" && v.trendNote.trim();
+  const r = typeof v.reason === "string" && v.reason.trim();
+  if (t && r) shapes.both++; else if (t) shapes.trendNote++; else if (r) shapes.reason++;
+}
+ok("the reason-only shape is actually exercised", shapes.reason > 0,
+   "if this is 0 the fallback is untested, not unnecessary");
+console.log(`       ${shapes.trendNote} trendNote-only · ${shapes.reason} reason-only · ${shapes.both} both`);
+
+// trendNote WINS where both exist — it is written for this surface.
+const bothRow = situations.find(([, v]) =>
+  typeof v.trendNote === "string" && v.trendNote.trim() &&
+  typeof v.reason === "string" && v.reason.trim() && v.trendNote !== v.reason);
+ok("trendNote is preferred where both fields exist",
+   !!bothRow && (() => {
+     const r = e.buildPlayerNews(bothRow[0], nowFixed).find(n => n.source === "situation");
+     return !r || r.text === bothRow[1].trendNote;
+   })(),
+   bothRow ? bothRow[0] : "no row carries both — assertion untested");
+
+console.log("\nstructured vs prose dates");
+
+ok("a structured ISO date is read",
+   e.newsDateFor({ date: "2026-06-07" }, "no date in here", nowFixed)?.label === "Jun 7 2026");
+// THE LATEST DATE IS THE CURRENCY. Notes get appended to, so an entry stamped in
+// June whose prose was updated in August is an August note.
+ok("a newer prose date beats an older structured one",
+   e.newsDateFor({ date: "2026-06-07" }, "updated Aug 20 2026", nowFixed)?.label === "Aug 20 2026");
+ok("a newer structured date beats an older prose one",
+   e.newsDateFor({ date: "2026-08-20" }, "as of Jun 7 2026", nowFixed)?.label === "Aug 20 2026");
+// A FUTURE DATE IS NEVER THE CURRENCY, on either path.
+ok("a future structured date is discarded",
+   e.newsDateFor({ date: "2026-12-01" }, "as of Jun 7 2026", nowFixed)?.label === "Jun 7 2026");
+ok("a future structured date with no prose yields nothing",
+   e.newsDateFor({ date: "2026-12-01" }, "no date in here", nowFixed) === null);
+ok("a malformed date field falls through to the prose",
+   e.newsDateFor({ date: "June 7th" }, "as of Jun 7 2026", nowFixed)?.label === "Jun 7 2026");
+ok("a plain string row (RECENT_NEWS) still parses from prose",
+   e.newsDateFor("signed Aug 20 2026", "signed Aug 20 2026", nowFixed)?.label === "Aug 20 2026");
+
+const futureNotes = [];
+for (const [k] of situations) for (const n of e.buildPlayerNews(k, nowFixed)) if (n.ageDays < 0) futureNotes.push(k);
+ok("no rendered note is dated in the future", futureNotes.length === 0, futureNotes.slice(0, 3).join(", "));
+
+// ---- THE READ ----
+//
+// Plain-English sentences at the top of the card, derived from numbers the card
+// already shows. It exists because the card reached fourteen sections and a
+// reader who does not already know which of them matters cannot start.
+//
+// ⚠ THIS BLOCK WAS SILENTLY LOST ONCE. It was written, it passed, and a later
+// edit that replaced a neighbouring section spanned to the same end marker and
+// swallowed it whole. The suite still passed, because a guard that no longer
+// exists cannot fail. Found by grepping the committed file for `readCards`.
+console.log("\nthe read");
+
+const readCards = draftable.map(([n, v]) => [n, e.buildPlayerCard(n, v.pos, v.team)]);
+
+// 1. IT ISSUES NO VERDICT. A verdict rendered as current is the Diggs failure,
+//    and it is why PLAYER_VERDICTS was kept off this card in the first place.
+//    Comments are stripped first: the block's own text explains WHY a verdict is
+//    forbidden, and the first version of this check matched its own warning.
+const readSrc = app.slice(app.indexOf("// === THE READ ==="), app.indexOf("card.read = read.slice"))
+  .split("\n").filter(l => !l.trim().startsWith("//")).join("\n");
+ok("the read block exists", readSrc.length > 200);
+for (const banned of ["PLAYER_VERDICTS", "getVerdict", "verdict", "draft him"]) {
+  ok(`the read never reaches for "${banned}"`, !readSrc.includes(banned),
+     "it describes the data; a verdict here is the Diggs failure in a new costume");
+}
+
+// 2. IT IS CAPPED. A summary the length of the card is not a summary.
+ok("the read is capped", /card\.read = read\.slice\(0, \d\)/.test(app));
+ok("no card exceeds the cap in practice",
+   Math.max(...readCards.map(([, c]) => c.read.length)) <= 6);
+
+// 3. IT NEVER CONTRADICTS ITSELF. snap_sh is a SEASON AVERAGE and the trajectory
+//    line above already says it is stale when the role moved. RJ Harvey read
+//    "his role grew, 29% to 56%" and then "he is off the field a lot, 42% of
+//    snaps" two lines later.
+const contradictions = readCards.filter(([, c]) =>
+  c.read.some(r => /role (grew|shrank)/.test(r.text)) &&
+  c.read.some(r => /off the field a lot/.test(r.text)));
+ok("no card states a role change and a stale snap average together",
+   contradictions.length === 0, contradictions.slice(0, 3).map(c => c[0]).join(", "));
+
+// 4. EVERY LINE CARRIES ITS NUMBER. A bare assertion is a verdict wearing a
+//    sentence. The team-change line is the deliberate exception: it names a TEAM,
+//    which is the checkable fact there.
+const numberless = [];
+for (const [n, c] of readCards) for (const r of c.read) {
+  if (/\d/.test(r.text) || /He changed teams/.test(r.text)) continue;
+  numberless.push(`${n}: ${r.text.slice(0, 40)}`);
+}
+ok("every read line carries a number, or names the team it describes",
+   numberless.length === 0, numberless.slice(0, 3).join(" | "));
+
+// 5. IT REACHES A PLAYER WITH NO 2025 DATA. A rookie is exactly the reader who
+//    needs a plain-English start, and the first version buried the whole block
+//    inside the else-branch of `card.reason`.
+const rookieWithRead = readCards.find(([, c]) => c.reason && c.read.length > 0);
+ok("a no-data player still gets a read", !!rookieWithRead,
+   rookieWithRead ? rookieWithRead[0] : "the read must render ABOVE the reason branch");
+ok("the read renders above the no-data branch",
+   app.indexOf("card.read.length > 0 &&") < app.indexOf("{card.reason ? ("));
+
+// 6. IT IS ORDERED BY THE SOURCE HIERARCHY, so a reader who stops after two
+//    lines has read the two that matter most. Role change outranks volume.
+const misordered = readCards.filter(([, c]) => {
+  const i = c.read.findIndex(r => /role (grew|shrank)/.test(r.text));
+  const j = c.read.findIndex(r => /target volume/.test(r.text));
+  return i > -1 && j > -1 && i > j;
+});
+ok("role change always precedes volume", misordered.length === 0,
+   misordered.slice(0, 3).map(c => c[0]).join(", "));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);
