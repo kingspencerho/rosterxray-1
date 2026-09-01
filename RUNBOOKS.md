@@ -137,7 +137,7 @@ measured input is not a trade worth making. That one is permanent, not part of t
 | Day | Date | players | depth_chart | hard_status | contradictions | Notes |
 |---|---|---|---|---|---|---|
 | 0 | Sep 1 | 812 | 544 | 75 | 11 | **Baseline. Both pulls this day were mine, during the build and while verifying the PowerShell command** — so this is ONE reading, not two, and it is not yet evidence of stability. |
-| 1 | Sep 1 | | | | | |
+| 1 | Sep 1 | 812 | 544 | 75 | 11 | ✅ First run by Spencer, 05:34:36Z. All four numbers identical to baseline. ⚠️ **Not a stability signal** — this pull was 9 minutes after the baseline, so it is the same Sleeper snapshot. It proves the command works end to end. **Day 2 is the first reading that can move.** |
 | 2 | Sep 2 | | | | | |
 | 3 | Sep 3 | | | | | |
 | 4 | Sep 4 | | | | | |
@@ -145,6 +145,20 @@ measured input is not a trade worth making. That one is permanent, not part of t
 | 6 | Sep 6 | | | | | |
 | 7 | Sep 7 | | | | | |
 | — | **Sep 8** | | | | | **DECISION:** |
+
+### ⭐ THE NUMBER THAT JUSTIFIES THE WHOLE LAYER, VISIBLE ON DAY 1
+
+The two sections of the report disagree completely, and that disagreement is the point:
+
+```
+section 1 (the 45-day prose clock)    0 players — "Nothing to re-validate."
+section 2 (the new status clock)     11 players
+```
+
+**The instrument that existed said all-clear. The new one found eleven.** They are not
+measuring the same thing: section 1 asks *is this note OLD*, section 2 asks *does this note
+disagree with today*. **A note written two days ago can be perfectly fresh and completely
+wrong**, and nothing in the app could see that before.
 
 ### What the contradiction list found on day 1
 
