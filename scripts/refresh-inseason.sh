@@ -67,20 +67,34 @@ else
 fi
 echo
 
-# ONE DOWNLOAD, TWO BUILDERS. The QB profile and the game logs read the same
-# weekly stats file, so the second layer costs a parse and no extra network.
-echo "2/3  QB volume profile"
+# ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
+# twin all read the same weekly stats file, so the second and third layers cost
+# a parse each and no extra network.
+echo "2/4  QB volume profile"
 if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
   python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
     "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
   echo
-  echo "3/3  game logs (reusing the same download)"
+  echo "3/4  game logs (reusing the same download)"
   python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
     "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
+  echo
+  # THE CONTEXT TWIN OF THE FROZEN SCORED FILE. player_metrics_2025.json feeds
+  # four scored inputs and stays frozen all season, which means the anchors it
+  # carries (targets/gm 0.77, air yards share 0.78, target share 0.73) describe
+  # LAST season for the whole of this one. This is the same measurements on the
+  # current season, context only. Both vintages render; neither replaces the
+  # other.
+  echo "4/4  current-season volume (reusing the same download)"
+  python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
+    "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
 else
   echo "  skipped — placeholder left untouched"; fail=1
   echo
-  echo "3/3  game logs (reusing the same download)"
+  echo "3/4  game logs (reusing the same download)"
+  echo "  skipped — the weekly stats file is unavailable"
+  echo
+  echo "4/4  current-season volume (reusing the same download)"
   echo "  skipped — the weekly stats file is unavailable"
 fi
 echo

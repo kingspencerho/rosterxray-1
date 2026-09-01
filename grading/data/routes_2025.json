@@ -1,0 +1,2792 @@
+{
+ "_meta": {
+  "counts": {
+   "RB": 71,
+   "TE": 81,
+   "WR": 153
+  },
+  "denominator": "pass-snap participation \u2014 ON THE FIELD, not charted routes",
+  "dropbacks": 19830,
+  "hierarchy_rank": {
+   "route_sh": "2 \u2014 same rank and very nearly the same number as snap_sh.",
+   "tprr": "2 \u2014 opportunity, per-route rather than per-game."
+  },
+  "joined": 19830,
+  "medians": {
+   "RB": 0.137,
+   "TE": 0.154,
+   "WR": 0.169
+  },
+  "min_routes": 100,
+  "overlap": {
+   "note": "measured on 2025. tprr is correlated with volume and not a restatement of it; route_sh IS a restatement of snap_sh.",
+   "route_sh_vs_snap_share": 0.957,
+   "tprr_vs_target_share": 0.817,
+   "tprr_vs_targets_per_game": 0.871,
+   "tprr_vs_wopr": 0.767
+  },
+  "season": 2025,
+  "season_complete": true,
+  "source": "nflverse pbp_participation x pbp (qb_dropback == 1, REG only)",
+  "stability": {
+   "route_sh": {
+    "note": "23>24 0.715, 24>25 0.797. r=0.957 against snap_sh (WR 0.966) \u2014 it restates snap share and must never be presented as a separate signal.",
+    "r": 0.756,
+    "tier": "denominator, NOT an independent input"
+   },
+   "tprr": {
+    "note": "23>24 0.621, 24>25 0.728, n=219/217 at 100+ routes. WR/TE 0.687, RB 0.515 \u2014 the blocking denominator costs backs.",
+    "r": 0.674,
+    "tier": "reliable"
+   }
+  },
+  "weeks_covered": 18
+ },
+ "players": {
+  "aaron jones": {
+   "gp": 12,
+   "pos": "RB",
+   "route_sh": 0.571,
+   "routes": 212,
+   "team": "MIN",
+   "tgt": 41,
+   "tprr": 0.193
+  },
+  "adam thielen": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.415,
+   "routes": 248,
+   "team": "PIT",
+   "tgt": 36,
+   "tprr": 0.145
+  },
+  "adam trautman": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.438,
+   "routes": 296,
+   "team": "DEN",
+   "tgt": 23,
+   "tprr": 0.078
+  },
+  "adonai mitchell": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.53,
+   "routes": 311,
+   "team": "NYJ",
+   "tgt": 74,
+   "tprr": 0.238
+  },
+  "aj barner": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.825,
+   "routes": 429,
+   "team": "SEA",
+   "tgt": 68,
+   "tprr": 0.159
+  },
+  "aj brown": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.954,
+   "routes": 480,
+   "team": "PHI",
+   "tgt": 121,
+   "tprr": 0.252
+  },
+  "alec pierce": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.888,
+   "routes": 475,
+   "team": "IND",
+   "tgt": 84,
+   "tprr": 0.177
+  },
+  "allen lazard": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.4,
+   "routes": 162,
+   "team": "NYJ",
+   "tgt": 18,
+   "tprr": 0.111
+  },
+  "alvin kamara": {
+   "gp": 11,
+   "pos": "RB",
+   "route_sh": 0.645,
+   "routes": 280,
+   "team": "NO",
+   "tgt": 39,
+   "tprr": 0.139
+  },
+  "amon ra st brown": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.907,
+   "routes": 566,
+   "team": "DET",
+   "tgt": 172,
+   "tprr": 0.304
+  },
+  "andrei iosivas": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.797,
+   "routes": 551,
+   "team": "CIN",
+   "tgt": 58,
+   "tprr": 0.105
+  },
+  "anthony firkser": {
+   "gp": 7,
+   "pos": "TE",
+   "route_sh": 0.404,
+   "routes": 116,
+   "team": "DET",
+   "tgt": 10,
+   "tprr": 0.086
+  },
+  "arian smith": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.427,
+   "routes": 244,
+   "team": "NYJ",
+   "tgt": 16,
+   "tprr": 0.066
+  },
+  "ashton jeanty": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.735,
+   "routes": 441,
+   "team": "LV",
+   "tgt": 73,
+   "tprr": 0.166
+  },
+  "audric estim\u00e9": {
+   "gp": 5,
+   "pos": "RB",
+   "route_sh": 0.592,
+   "routes": 113,
+   "team": "NO",
+   "tgt": 13,
+   "tprr": 0.115
+  },
+  "austin hooper": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.397,
+   "routes": 229,
+   "team": "NE",
+   "tgt": 26,
+   "tprr": 0.114
+  },
+  "bam knight": {
+   "gp": 9,
+   "pos": "RB",
+   "route_sh": 0.4,
+   "routes": 173,
+   "team": "ARI",
+   "tgt": 31,
+   "tprr": 0.179
+  },
+  "ben sinnott": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.236,
+   "routes": 118,
+   "team": "WAS",
+   "tgt": 13,
+   "tprr": 0.11
+  },
+  "bhayshul tuten": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.202,
+   "routes": 100,
+   "team": "JAX",
+   "tgt": 14,
+   "tprr": 0.14
+  },
+  "bijan robinson": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.867,
+   "routes": 508,
+   "team": "ATL",
+   "tgt": 103,
+   "tprr": 0.203
+  },
+  "blake corum": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.268,
+   "routes": 167,
+   "team": "LAR",
+   "tgt": 14,
+   "tprr": 0.084
+  },
+  "blake whiteheart": {
+   "gp": 14,
+   "pos": "TE",
+   "route_sh": 0.214,
+   "routes": 118,
+   "team": "CLE",
+   "tgt": 6,
+   "tprr": 0.051
+  },
+  "brandin cooks": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.651,
+   "routes": 384,
+   "team": "BUF",
+   "tgt": 36,
+   "tprr": 0.094
+  },
+  "brashard smith": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.158,
+   "routes": 109,
+   "team": "KC",
+   "tgt": 35,
+   "tprr": 0.321
+  },
+  "breece hall": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.563,
+   "routes": 331,
+   "team": "NYJ",
+   "tgt": 48,
+   "tprr": 0.145
+  },
+  "brenton strange": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.77,
+   "routes": 342,
+   "team": "JAX",
+   "tgt": 60,
+   "tprr": 0.175
+  },
+  "brevyn spann ford": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.148,
+   "routes": 101,
+   "team": "DAL",
+   "tgt": 13,
+   "tprr": 0.129
+  },
+  "brian thomas jr": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.845,
+   "routes": 468,
+   "team": "JAX",
+   "tgt": 91,
+   "tprr": 0.194
+  },
+  "brock bowers": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.917,
+   "routes": 411,
+   "team": "LV",
+   "tgt": 87,
+   "tprr": 0.212
+  },
+  "brock wright": {
+   "gp": 11,
+   "pos": "TE",
+   "route_sh": 0.453,
+   "routes": 172,
+   "team": "DET",
+   "tgt": 22,
+   "tprr": 0.128
+  },
+  "brycen tremayne": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.203,
+   "routes": 113,
+   "team": "CAR",
+   "tgt": 18,
+   "tprr": 0.159
+  },
+  "bucky irving": {
+   "gp": 10,
+   "pos": "RB",
+   "route_sh": 0.566,
+   "routes": 213,
+   "team": "TB",
+   "tgt": 35,
+   "tprr": 0.164
+  },
+  "cade otton": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.957,
+   "routes": 577,
+   "team": "TB",
+   "tgt": 82,
+   "tprr": 0.142
+  },
+  "calvin austin iii": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.622,
+   "routes": 303,
+   "team": "PIT",
+   "tgt": 55,
+   "tprr": 0.182
+  },
+  "calvin ridley": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.574,
+   "routes": 159,
+   "team": "TEN",
+   "tgt": 36,
+   "tprr": 0.226
+  },
+  "cam skattebo": {
+   "gp": 8,
+   "pos": "RB",
+   "route_sh": 0.495,
+   "routes": 151,
+   "team": "NYG",
+   "tgt": 32,
+   "tprr": 0.212
+  },
+  "casey washington": {
+   "gp": 6,
+   "pos": "WR",
+   "route_sh": 0.47,
+   "routes": 101,
+   "team": "ATL",
+   "tgt": 14,
+   "tprr": 0.139
+  },
+  "cedric tillman": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.642,
+   "routes": 312,
+   "team": "CLE",
+   "tgt": 39,
+   "tprr": 0.125
+  },
+  "ceedee lamb": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.785,
+   "routes": 452,
+   "team": "DAL",
+   "tgt": 117,
+   "tprr": 0.259
+  },
+  "charlie kolar": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.241,
+   "routes": 121,
+   "team": "BAL",
+   "tgt": 15,
+   "tprr": 0.124
+  },
+  "charlie woerner": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.36,
+   "routes": 211,
+   "team": "ATL",
+   "tgt": 9,
+   "tprr": 0.043
+  },
+  "chase brown": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.65,
+   "routes": 449,
+   "team": "CIN",
+   "tgt": 89,
+   "tprr": 0.198
+  },
+  "chig okonkwo": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.69,
+   "routes": 446,
+   "team": "TEN",
+   "tgt": 79,
+   "tprr": 0.177
+  },
+  "chimere dike": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.63,
+   "routes": 407,
+   "team": "TEN",
+   "tgt": 74,
+   "tprr": 0.182
+  },
+  "chris brooks": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.244,
+   "routes": 135,
+   "team": "GB",
+   "tgt": 17,
+   "tprr": 0.126
+  },
+  "chris godwin jr": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.783,
+   "routes": 267,
+   "team": "TB",
+   "tgt": 52,
+   "tprr": 0.195
+  },
+  "chris moore": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.5,
+   "routes": 229,
+   "team": "WAS",
+   "tgt": 23,
+   "tprr": 0.1
+  },
+  "chris olave": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.925,
+   "routes": 582,
+   "team": "NO",
+   "tgt": 156,
+   "tprr": 0.268
+  },
+  "chris rodriguez jr": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.255,
+   "routes": 109,
+   "team": "WAS",
+   "tgt": 4,
+   "tprr": 0.037
+  },
+  "christian kirk": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.572,
+   "routes": 278,
+   "team": "HOU",
+   "tgt": 53,
+   "tprr": 0.191
+  },
+  "christian mccaffrey": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.889,
+   "routes": 559,
+   "team": "SF",
+   "tgt": 129,
+   "tprr": 0.231
+  },
+  "christian watson": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.716,
+   "routes": 242,
+   "team": "GB",
+   "tgt": 55,
+   "tprr": 0.227
+  },
+  "chuba hubbard": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.507,
+   "routes": 266,
+   "team": "CAR",
+   "tgt": 39,
+   "tprr": 0.147
+  },
+  "colby parkinson": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.561,
+   "routes": 315,
+   "team": "LAR",
+   "tgt": 56,
+   "tprr": 0.178
+  },
+  "cole kmet": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.682,
+   "routes": 411,
+   "team": "CHI",
+   "tgt": 49,
+   "tprr": 0.119
+  },
+  "colston loveland": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.676,
+   "routes": 407,
+   "team": "CHI",
+   "tgt": 83,
+   "tprr": 0.204
+  },
+  "cooper kupp": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.845,
+   "routes": 419,
+   "team": "SEA",
+   "tgt": 71,
+   "tprr": 0.169
+  },
+  "courtland sutton": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.923,
+   "routes": 624,
+   "team": "DEN",
+   "tgt": 125,
+   "tprr": 0.2
+  },
+  "dallas goedert": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.883,
+   "routes": 446,
+   "team": "PHI",
+   "tgt": 82,
+   "tprr": 0.184
+  },
+  "dalton kincaid": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.501,
+   "routes": 206,
+   "team": "BUF",
+   "tgt": 50,
+   "tprr": 0.243
+  },
+  "dalton schultz": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.836,
+   "routes": 542,
+   "team": "HOU",
+   "tgt": 107,
+   "tprr": 0.197
+  },
+  "dandre swift": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.579,
+   "routes": 347,
+   "team": "CHI",
+   "tgt": 48,
+   "tprr": 0.138
+  },
+  "daniel bellinger": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.435,
+   "routes": 256,
+   "team": "NYG",
+   "tgt": 26,
+   "tprr": 0.102
+  },
+  "dare ogunbowale": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.194,
+   "routes": 111,
+   "team": "HOU",
+   "tgt": 13,
+   "tprr": 0.117
+  },
+  "darius cooper": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.232,
+   "routes": 101,
+   "team": "PHI",
+   "tgt": 11,
+   "tprr": 0.109
+  },
+  "darius slayton": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.829,
+   "routes": 435,
+   "team": "NYG",
+   "tgt": 65,
+   "tprr": 0.149
+  },
+  "darnell mooney": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.901,
+   "routes": 454,
+   "team": "ATL",
+   "tgt": 72,
+   "tprr": 0.159
+  },
+  "darnell washington": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.486,
+   "routes": 264,
+   "team": "PIT",
+   "tgt": 44,
+   "tprr": 0.167
+  },
+  "darren waller": {
+   "gp": 9,
+   "pos": "TE",
+   "route_sh": 0.571,
+   "routes": 160,
+   "team": "MIA",
+   "tgt": 35,
+   "tprr": 0.219
+  },
+  "davante adams": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.831,
+   "routes": 408,
+   "team": "LAR",
+   "tgt": 114,
+   "tprr": 0.279
+  },
+  "david montgomery": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.361,
+   "routes": 225,
+   "team": "DET",
+   "tgt": 29,
+   "tprr": 0.129
+  },
+  "david njoku": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.644,
+   "routes": 310,
+   "team": "CLE",
+   "tgt": 48,
+   "tprr": 0.155
+  },
+  "david sills": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.565,
+   "routes": 331,
+   "team": "ATL",
+   "tgt": 36,
+   "tprr": 0.109
+  },
+  "davis allen": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.38,
+   "routes": 237,
+   "team": "LAR",
+   "tgt": 33,
+   "tprr": 0.139
+  },
+  "dawson knox": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.551,
+   "routes": 327,
+   "team": "BUF",
+   "tgt": 50,
+   "tprr": 0.153
+  },
+  "deandre hopkins": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.4,
+   "routes": 201,
+   "team": "BAL",
+   "tgt": 39,
+   "tprr": 0.194
+  },
+  "deebo samuel sr": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.826,
+   "routes": 436,
+   "team": "WAS",
+   "tgt": 100,
+   "tprr": 0.229
+  },
+  "demarcus robinson": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.523,
+   "routes": 265,
+   "team": "SF",
+   "tgt": 36,
+   "tprr": 0.136
+  },
+  "demario douglas": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.362,
+   "routes": 222,
+   "team": "NE",
+   "tgt": 46,
+   "tprr": 0.207
+  },
+  "derrick henry": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.388,
+   "routes": 195,
+   "team": "BAL",
+   "tgt": 21,
+   "tprr": 0.108
+  },
+  "devaughn vele": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.497,
+   "routes": 248,
+   "team": "NO",
+   "tgt": 40,
+   "tprr": 0.161
+  },
+  "devin neal": {
+   "gp": 9,
+   "pos": "RB",
+   "route_sh": 0.472,
+   "routes": 171,
+   "team": "NO",
+   "tgt": 19,
+   "tprr": 0.111
+  },
+  "devin singletary": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.263,
+   "routes": 155,
+   "team": "NYG",
+   "tgt": 19,
+   "tprr": 0.123
+  },
+  "devon achane": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.779,
+   "routes": 392,
+   "team": "MIA",
+   "tgt": 85,
+   "tprr": 0.217
+  },
+  "devonta smith": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.904,
+   "routes": 520,
+   "team": "PHI",
+   "tgt": 114,
+   "tprr": 0.219
+  },
+  "dj moore": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.868,
+   "routes": 559,
+   "team": "CHI",
+   "tgt": 85,
+   "tprr": 0.152
+  },
+  "dk metcalf": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.918,
+   "routes": 462,
+   "team": "PIT",
+   "tgt": 99,
+   "tprr": 0.214
+  },
+  "dontayvion wicks": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.514,
+   "routes": 237,
+   "team": "GB",
+   "tgt": 46,
+   "tprr": 0.194
+  },
+  "donte thornton jr": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.504,
+   "routes": 249,
+   "team": "LV",
+   "tgt": 30,
+   "tprr": 0.12
+  },
+  "drake london": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.947,
+   "routes": 394,
+   "team": "ATL",
+   "tgt": 113,
+   "tprr": 0.287
+  },
+  "drew sample": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.423,
+   "routes": 292,
+   "team": "CIN",
+   "tgt": 20,
+   "tprr": 0.068
+  },
+  "durham smythe": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.172,
+   "routes": 111,
+   "team": "CHI",
+   "tgt": 6,
+   "tprr": 0.054
+  },
+  "dyami brown": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.402,
+   "routes": 202,
+   "team": "JAX",
+   "tgt": 37,
+   "tprr": 0.183
+  },
+  "dylan sampson": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.279,
+   "routes": 157,
+   "team": "CLE",
+   "tgt": 40,
+   "tprr": 0.255
+  },
+  "elic ayomanor": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.841,
+   "routes": 501,
+   "team": "TEN",
+   "tgt": 89,
+   "tprr": 0.178
+  },
+  "elijah arroyo": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.425,
+   "routes": 162,
+   "team": "SEA",
+   "tgt": 26,
+   "tprr": 0.16
+  },
+  "elijah higgins": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.41,
+   "routes": 307,
+   "team": "ARI",
+   "tgt": 37,
+   "tprr": 0.121
+  },
+  "elijah moore": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.331,
+   "routes": 108,
+   "team": "BUF",
+   "tgt": 17,
+   "tprr": 0.157
+  },
+  "emanuel wilson": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.313,
+   "routes": 166,
+   "team": "GB",
+   "tgt": 18,
+   "tprr": 0.108
+  },
+  "emari demercado": {
+   "gp": 11,
+   "pos": "RB",
+   "route_sh": 0.292,
+   "routes": 141,
+   "team": "ARI",
+   "tgt": 20,
+   "tprr": 0.142
+  },
+  "emeka egbuka": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.831,
+   "routes": 535,
+   "team": "TB",
+   "tgt": 128,
+   "tprr": 0.239
+  },
+  "evan engram": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.579,
+   "routes": 373,
+   "team": "DEN",
+   "tgt": 77,
+   "tprr": 0.206
+  },
+  "gabe davis": {
+   "gp": 6,
+   "pos": "WR",
+   "route_sh": 0.613,
+   "routes": 133,
+   "team": "BUF",
+   "tgt": 18,
+   "tprr": 0.135
+  },
+  "gage larvadain": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.283,
+   "routes": 132,
+   "team": "CLE",
+   "tgt": 15,
+   "tprr": 0.114
+  },
+  "garrett wilson": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.95,
+   "routes": 226,
+   "team": "NYJ",
+   "tgt": 60,
+   "tprr": 0.265
+  },
+  "george kittle": {
+   "gp": 11,
+   "pos": "TE",
+   "route_sh": 0.854,
+   "routes": 317,
+   "team": "SF",
+   "tgt": 69,
+   "tprr": 0.218
+  },
+  "george pickens": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.889,
+   "routes": 608,
+   "team": "DAL",
+   "tgt": 138,
+   "tprr": 0.227
+  },
+  "grant calcaterra": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.29,
+   "routes": 148,
+   "team": "PHI",
+   "tgt": 13,
+   "tprr": 0.088
+  },
+  "greg dortch": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.398,
+   "routes": 215,
+   "team": "ARI",
+   "tgt": 33,
+   "tprr": 0.153
+  },
+  "greg dulcich": {
+   "gp": 10,
+   "pos": "TE",
+   "route_sh": 0.512,
+   "routes": 146,
+   "team": "MIA",
+   "tgt": 34,
+   "tprr": 0.233
+  },
+  "gunnar helm": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.47,
+   "routes": 287,
+   "team": "TEN",
+   "tgt": 55,
+   "tprr": 0.192
+  },
+  "harold fannin jr": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.755,
+   "routes": 461,
+   "team": "CLE",
+   "tgt": 108,
+   "tprr": 0.234
+  },
+  "hunter henry": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.842,
+   "routes": 517,
+   "team": "NE",
+   "tgt": 87,
+   "tprr": 0.168
+  },
+  "hunter long": {
+   "gp": 9,
+   "pos": "TE",
+   "route_sh": 0.412,
+   "routes": 150,
+   "team": "JAX",
+   "tgt": 17,
+   "tprr": 0.113
+  },
+  "hunter luepke": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.174,
+   "routes": 119,
+   "team": "DAL",
+   "tgt": 15,
+   "tprr": 0.126
+  },
+  "hunter renfrow": {
+   "gp": 6,
+   "pos": "WR",
+   "route_sh": 0.661,
+   "routes": 148,
+   "team": "CAR",
+   "tgt": 26,
+   "tprr": 0.176
+  },
+  "ian thomas": {
+   "gp": 14,
+   "pos": "TE",
+   "route_sh": 0.293,
+   "routes": 149,
+   "team": "LV",
+   "tgt": 13,
+   "tprr": 0.087
+  },
+  "isaac teslaa": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.47,
+   "routes": 293,
+   "team": "DET",
+   "tgt": 27,
+   "tprr": 0.092
+  },
+  "isaiah bond": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.572,
+   "routes": 342,
+   "team": "CLE",
+   "tgt": 44,
+   "tprr": 0.129
+  },
+  "isaiah davis": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.372,
+   "routes": 219,
+   "team": "NYJ",
+   "tgt": 29,
+   "tprr": 0.132
+  },
+  "isaiah hodgins": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.858,
+   "routes": 206,
+   "team": "NYG",
+   "tgt": 19,
+   "tprr": 0.092
+  },
+  "isaiah likely": {
+   "gp": 14,
+   "pos": "TE",
+   "route_sh": 0.614,
+   "routes": 251,
+   "team": "BAL",
+   "tgt": 36,
+   "tprr": 0.143
+  },
+  "isaiah williams": {
+   "gp": 11,
+   "pos": "WR",
+   "route_sh": 0.563,
+   "routes": 215,
+   "team": "NYJ",
+   "tgt": 36,
+   "tprr": 0.167
+  },
+  "isiah pacheco": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.524,
+   "routes": 265,
+   "team": "KC",
+   "tgt": 26,
+   "tprr": 0.098
+  },
+  "jack bech": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.376,
+   "routes": 196,
+   "team": "LV",
+   "tgt": 29,
+   "tprr": 0.148
+  },
+  "jackson hawes": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.236,
+   "routes": 140,
+   "team": "BUF",
+   "tgt": 19,
+   "tprr": 0.136
+  },
+  "jacory croskey merritt": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.305,
+   "routes": 173,
+   "team": "WAS",
+   "tgt": 13,
+   "tprr": 0.075
+  },
+  "jahan dotson": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.718,
+   "routes": 413,
+   "team": "PHI",
+   "tgt": 36,
+   "tprr": 0.087
+  },
+  "jahmyr gibbs": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.705,
+   "routes": 440,
+   "team": "DET",
+   "tgt": 94,
+   "tprr": 0.214
+  },
+  "jake ferguson": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.776,
+   "routes": 531,
+   "team": "DAL",
+   "tgt": 103,
+   "tprr": 0.194
+  },
+  "jake tonges": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.497,
+   "routes": 248,
+   "team": "SF",
+   "tgt": 46,
+   "tprr": 0.185
+  },
+  "jakobi meyers": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.928,
+   "routes": 527,
+   "team": "JAX",
+   "tgt": 110,
+   "tprr": 0.209
+  },
+  "jalen coker": {
+   "gp": 11,
+   "pos": "WR",
+   "route_sh": 0.801,
+   "routes": 289,
+   "team": "CAR",
+   "tgt": 45,
+   "tprr": 0.156
+  },
+  "jalen nailor": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.729,
+   "routes": 419,
+   "team": "MIN",
+   "tgt": 54,
+   "tprr": 0.129
+  },
+  "jalen tolbert": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.514,
+   "routes": 264,
+   "team": "DAL",
+   "tgt": 35,
+   "tprr": 0.133
+  },
+  "jalin hyatt": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.421,
+   "routes": 109,
+   "team": "NYG",
+   "tgt": 14,
+   "tprr": 0.128
+  },
+  "jamari thrash": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.36,
+   "routes": 134,
+   "team": "CLE",
+   "tgt": 15,
+   "tprr": 0.112
+  },
+  "jamarr chase": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.965,
+   "routes": 630,
+   "team": "CIN",
+   "tgt": 185,
+   "tprr": 0.294
+  },
+  "james cook": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.497,
+   "routes": 279,
+   "team": "BUF",
+   "tgt": 40,
+   "tprr": 0.143
+  },
+  "james proche": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.339,
+   "routes": 112,
+   "team": "TEN",
+   "tgt": 12,
+   "tprr": 0.107
+  },
+  "jameson williams": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.955,
+   "routes": 596,
+   "team": "DET",
+   "tgt": 102,
+   "tprr": 0.171
+  },
+  "jatavion sanders": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.581,
+   "routes": 245,
+   "team": "CAR",
+   "tgt": 34,
+   "tprr": 0.139
+  },
+  "jauan jennings": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.859,
+   "routes": 463,
+   "team": "SF",
+   "tgt": 93,
+   "tprr": 0.201
+  },
+  "javonte williams": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.688,
+   "routes": 453,
+   "team": "DAL",
+   "tgt": 51,
+   "tprr": 0.113
+  },
+  "jaxon smith njigba": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.933,
+   "routes": 485,
+   "team": "SEA",
+   "tgt": 163,
+   "tprr": 0.336
+  },
+  "jayden higgins": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.56,
+   "routes": 363,
+   "team": "HOU",
+   "tgt": 69,
+   "tprr": 0.19
+  },
+  "jayden reed": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.536,
+   "routes": 112,
+   "team": "GB",
+   "tgt": 22,
+   "tprr": 0.196
+  },
+  "jaylen waddle": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.807,
+   "routes": 406,
+   "team": "MIA",
+   "tgt": 100,
+   "tprr": 0.246
+  },
+  "jaylen warren": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.426,
+   "routes": 242,
+   "team": "PIT",
+   "tgt": 45,
+   "tprr": 0.186
+  },
+  "jaylin lane": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.412,
+   "routes": 202,
+   "team": "WAS",
+   "tgt": 32,
+   "tprr": 0.158
+  },
+  "jaylin noel": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.313,
+   "routes": 203,
+   "team": "HOU",
+   "tgt": 35,
+   "tprr": 0.172
+  },
+  "jeremy mcnichols": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.424,
+   "routes": 241,
+   "team": "WAS",
+   "tgt": 32,
+   "tprr": 0.133
+  },
+  "jeremy ruckert": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.387,
+   "routes": 237,
+   "team": "NYJ",
+   "tgt": 29,
+   "tprr": 0.122
+  },
+  "jerome ford": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.442,
+   "routes": 223,
+   "team": "CLE",
+   "tgt": 32,
+   "tprr": 0.143
+  },
+  "jerry jeudy": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.917,
+   "routes": 588,
+   "team": "CLE",
+   "tgt": 106,
+   "tprr": 0.18
+  },
+  "jk dobbins": {
+   "gp": 10,
+   "pos": "RB",
+   "route_sh": 0.385,
+   "routes": 147,
+   "team": "DEN",
+   "tgt": 14,
+   "tprr": 0.095
+  },
+  "john bates": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.38,
+   "routes": 196,
+   "team": "WAS",
+   "tgt": 16,
+   "tprr": 0.082
+  },
+  "john fitzpatrick": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.279,
+   "routes": 141,
+   "team": "GB",
+   "tgt": 15,
+   "tprr": 0.106
+  },
+  "john metchie iii": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.501,
+   "routes": 257,
+   "team": "NYJ",
+   "tgt": 48,
+   "tprr": 0.187
+  },
+  "johnny mundt": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.263,
+   "routes": 161,
+   "team": "JAX",
+   "tgt": 19,
+   "tprr": 0.118
+  },
+  "jonathan taylor": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.803,
+   "routes": 486,
+   "team": "IND",
+   "tgt": 56,
+   "tprr": 0.115
+  },
+  "jonnu smith": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.541,
+   "routes": 321,
+   "team": "PIT",
+   "tgt": 55,
+   "tprr": 0.171
+  },
+  "jordan addison": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.904,
+   "routes": 443,
+   "team": "MIN",
+   "tgt": 79,
+   "tprr": 0.178
+  },
+  "jordan mason": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.402,
+   "routes": 221,
+   "team": "MIN",
+   "tgt": 16,
+   "tprr": 0.072
+  },
+  "jordan whittington": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.384,
+   "routes": 224,
+   "team": "LAR",
+   "tgt": 25,
+   "tprr": 0.112
+  },
+  "josh downs": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.663,
+   "routes": 341,
+   "team": "IND",
+   "tgt": 88,
+   "tprr": 0.258
+  },
+  "josh jacobs": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.519,
+   "routes": 266,
+   "team": "GB",
+   "tgt": 44,
+   "tprr": 0.165
+  },
+  "josh oliver": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.319,
+   "routes": 158,
+   "team": "MIN",
+   "tgt": 20,
+   "tprr": 0.127
+  },
+  "josh palmer": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.555,
+   "routes": 237,
+   "team": "BUF",
+   "tgt": 37,
+   "tprr": 0.156
+  },
+  "josh reynolds": {
+   "gp": 5,
+   "pos": "WR",
+   "route_sh": 0.857,
+   "routes": 162,
+   "team": "NYJ",
+   "tgt": 22,
+   "tprr": 0.136
+  },
+  "juju smith schuster": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.562,
+   "routes": 387,
+   "team": "KC",
+   "tgt": 45,
+   "tprr": 0.116
+  },
+  "julian hill": {
+   "gp": 14,
+   "pos": "TE",
+   "route_sh": 0.428,
+   "routes": 189,
+   "team": "MIA",
+   "tgt": 21,
+   "tprr": 0.111
+  },
+  "justice hill": {
+   "gp": 10,
+   "pos": "RB",
+   "route_sh": 0.528,
+   "routes": 163,
+   "team": "BAL",
+   "tgt": 27,
+   "tprr": 0.166
+  },
+  "justin jefferson": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.962,
+   "routes": 553,
+   "team": "MIN",
+   "tgt": 142,
+   "tprr": 0.257
+  },
+  "juwan johnson": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.826,
+   "routes": 554,
+   "team": "NO",
+   "tgt": 102,
+   "tprr": 0.184
+  },
+  "kalif raymond": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.406,
+   "routes": 215,
+   "team": "DET",
+   "tgt": 30,
+   "tprr": 0.14
+  },
+  "kareem hunt": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.466,
+   "routes": 321,
+   "team": "KC",
+   "tgt": 25,
+   "tprr": 0.078
+  },
+  "kavontae turpin": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.394,
+   "routes": 243,
+   "team": "DAL",
+   "tgt": 38,
+   "tprr": 0.156
+  },
+  "kayshon boutte": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.731,
+   "routes": 375,
+   "team": "NE",
+   "tgt": 46,
+   "tprr": 0.123
+  },
+  "keenan allen": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.686,
+   "routes": 467,
+   "team": "LAC",
+   "tgt": 122,
+   "tprr": 0.261
+  },
+  "kendrick bourne": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.602,
+   "routes": 355,
+   "team": "SF",
+   "tgt": 53,
+   "tprr": 0.149
+  },
+  "kenneth walker iii": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.437,
+   "routes": 227,
+   "team": "SEA",
+   "tgt": 36,
+   "tprr": 0.159
+  },
+  "kenny gainwell": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.592,
+   "routes": 351,
+   "team": "PIT",
+   "tgt": 85,
+   "tprr": 0.242
+  },
+  "keon coleman": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.708,
+   "routes": 318,
+   "team": "BUF",
+   "tgt": 62,
+   "tprr": 0.195
+  },
+  "kevin austin jr": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.494,
+   "routes": 153,
+   "team": "NO",
+   "tgt": 23,
+   "tprr": 0.15
+  },
+  "khalil shakir": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.746,
+   "routes": 385,
+   "team": "BUF",
+   "tgt": 97,
+   "tprr": 0.252
+  },
+  "kimani vidal": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.581,
+   "routes": 298,
+   "team": "LAC",
+   "tgt": 22,
+   "tprr": 0.074
+  },
+  "konata mumpfield": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.298,
+   "routes": 176,
+   "team": "LAR",
+   "tgt": 23,
+   "tprr": 0.131
+  },
+  "kyle monangai": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.41,
+   "routes": 264,
+   "team": "CHI",
+   "tgt": 30,
+   "tprr": 0.114
+  },
+  "kyle pitts": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.956,
+   "routes": 560,
+   "team": "ATL",
+   "tgt": 119,
+   "tprr": 0.212
+  },
+  "kyle williams": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.292,
+   "routes": 179,
+   "team": "NE",
+   "tgt": 21,
+   "tprr": 0.117
+  },
+  "kyren williams": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.729,
+   "routes": 455,
+   "team": "LAR",
+   "tgt": 50,
+   "tprr": 0.11
+  },
+  "ladd mcconkey": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.892,
+   "routes": 563,
+   "team": "LAC",
+   "tgt": 106,
+   "tprr": 0.188
+  },
+  "lequint allen jr": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.311,
+   "routes": 201,
+   "team": "JAX",
+   "tgt": 11,
+   "tprr": 0.055
+  },
+  "liljordan humphrey": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.442,
+   "routes": 175,
+   "team": "DEN",
+   "tgt": 25,
+   "tprr": 0.143
+  },
+  "luke farrell": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.251,
+   "routes": 158,
+   "team": "SF",
+   "tgt": 14,
+   "tprr": 0.089
+  },
+  "luke mccaffrey": {
+   "gp": 7,
+   "pos": "WR",
+   "route_sh": 0.433,
+   "routes": 106,
+   "team": "WAS",
+   "tgt": 16,
+   "tprr": 0.151
+  },
+  "luke musgrave": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.41,
+   "routes": 227,
+   "team": "GB",
+   "tgt": 31,
+   "tprr": 0.137
+  },
+  "luke schoonmaker": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.262,
+   "routes": 179,
+   "team": "DAL",
+   "tgt": 23,
+   "tprr": 0.128
+  },
+  "luther burden iii": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.431,
+   "routes": 242,
+   "team": "CHI",
+   "tgt": 60,
+   "tprr": 0.248
+  },
+  "mack hollins": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.625,
+   "routes": 349,
+   "team": "NE",
+   "tgt": 65,
+   "tprr": 0.186
+  },
+  "malik heath": {
+   "gp": 11,
+   "pos": "WR",
+   "route_sh": 0.269,
+   "routes": 100,
+   "team": "GB",
+   "tgt": 7,
+   "tprr": 0.07
+  },
+  "malik nabers": {
+   "gp": 4,
+   "pos": "WR",
+   "route_sh": 0.848,
+   "routes": 134,
+   "team": "NYG",
+   "tgt": 35,
+   "tprr": 0.261
+  },
+  "malik washington": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.662,
+   "routes": 353,
+   "team": "MIA",
+   "tgt": 65,
+   "tprr": 0.184
+  },
+  "mark andrews": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.722,
+   "routes": 363,
+   "team": "BAL",
+   "tgt": 70,
+   "tprr": 0.193
+  },
+  "marquez valdes scantling": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.548,
+   "routes": 229,
+   "team": "PIT",
+   "tgt": 29,
+   "tprr": 0.127
+  },
+  "marquise brown": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.604,
+   "routes": 392,
+   "team": "KC",
+   "tgt": 74,
+   "tprr": 0.189
+  },
+  "marvin harrison jr": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.771,
+   "routes": 383,
+   "team": "ARI",
+   "tgt": 74,
+   "tprr": 0.193
+  },
+  "marvin mims jr": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.452,
+   "routes": 274,
+   "team": "DEN",
+   "tgt": 51,
+   "tprr": 0.186
+  },
+  "mason taylor": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.848,
+   "routes": 397,
+   "team": "NYJ",
+   "tgt": 66,
+   "tprr": 0.166
+  },
+  "mason tipton": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.368,
+   "routes": 177,
+   "team": "NO",
+   "tgt": 17,
+   "tprr": 0.096
+  },
+  "matthew golden": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.586,
+   "routes": 268,
+   "team": "GB",
+   "tgt": 44,
+   "tprr": 0.164
+  },
+  "michael carter": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.461,
+   "routes": 279,
+   "team": "ARI",
+   "tgt": 45,
+   "tprr": 0.161
+  },
+  "michael mayer": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.551,
+   "routes": 260,
+   "team": "LV",
+   "tgt": 50,
+   "tprr": 0.192
+  },
+  "michael pittman": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.891,
+   "routes": 539,
+   "team": "IND",
+   "tgt": 114,
+   "tprr": 0.212
+  },
+  "michael wilson": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.846,
+   "routes": 633,
+   "team": "ARI",
+   "tgt": 127,
+   "tprr": 0.201
+  },
+  "mike evans": {
+   "gp": 8,
+   "pos": "WR",
+   "route_sh": 0.716,
+   "routes": 229,
+   "team": "TB",
+   "tgt": 62,
+   "tprr": 0.271
+  },
+  "mike gesicki": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.49,
+   "routes": 252,
+   "team": "CIN",
+   "tgt": 43,
+   "tprr": 0.171
+  },
+  "mitchell evans": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.262,
+   "routes": 153,
+   "team": "CAR",
+   "tgt": 25,
+   "tprr": 0.163
+  },
+  "mitchell tinsley": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.213,
+   "routes": 147,
+   "team": "CIN",
+   "tgt": 24,
+   "tprr": 0.163
+  },
+  "mo alie cox": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.309,
+   "routes": 187,
+   "team": "IND",
+   "tgt": 20,
+   "tprr": 0.107
+  },
+  "nick chubb": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.291,
+   "routes": 170,
+   "team": "HOU",
+   "tgt": 20,
+   "tprr": 0.118
+  },
+  "nick westbrook ikhine": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.488,
+   "routes": 218,
+   "team": "MIA",
+   "tgt": 20,
+   "tprr": 0.092
+  },
+  "nico collins": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.836,
+   "routes": 479,
+   "team": "HOU",
+   "tgt": 121,
+   "tprr": 0.253
+  },
+  "noah fant": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.348,
+   "routes": 218,
+   "team": "CIN",
+   "tgt": 41,
+   "tprr": 0.188
+  },
+  "noah gray": {
+   "gp": 16,
+   "pos": "TE",
+   "route_sh": 0.456,
+   "routes": 296,
+   "team": "KC",
+   "tgt": 38,
+   "tprr": 0.128
+  },
+  "olamide zaccheaus": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.569,
+   "routes": 341,
+   "team": "CHI",
+   "tgt": 66,
+   "tprr": 0.194
+  },
+  "ollie gordon ii": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.214,
+   "routes": 114,
+   "team": "MIA",
+   "tgt": 9,
+   "tprr": 0.079
+  },
+  "omarion hampton": {
+   "gp": 9,
+   "pos": "RB",
+   "route_sh": 0.612,
+   "routes": 219,
+   "team": "LAC",
+   "tgt": 35,
+   "tprr": 0.16
+  },
+  "oronde gadsden ii": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.686,
+   "routes": 417,
+   "team": "LAC",
+   "tgt": 69,
+   "tprr": 0.165
+  },
+  "parker washington": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.666,
+   "routes": 408,
+   "team": "JAX",
+   "tgt": 97,
+   "tprr": 0.238
+  },
+  "pat bryant": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.515,
+   "routes": 307,
+   "team": "DEN",
+   "tgt": 49,
+   "tprr": 0.16
+  },
+  "pat freiermuth": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.56,
+   "routes": 332,
+   "team": "PIT",
+   "tgt": 54,
+   "tprr": 0.163
+  },
+  "payne durham": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.163,
+   "routes": 105,
+   "team": "TB",
+   "tgt": 4,
+   "tprr": 0.038
+  },
+  "puka nacua": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.792,
+   "routes": 467,
+   "team": "LAR",
+   "tgt": 166,
+   "tprr": 0.355
+  },
+  "quentin johnston": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.871,
+   "routes": 487,
+   "team": "LAC",
+   "tgt": 84,
+   "tprr": 0.172
+  },
+  "quinshon judkins": {
+   "gp": 14,
+   "pos": "RB",
+   "route_sh": 0.35,
+   "routes": 187,
+   "team": "CLE",
+   "tgt": 36,
+   "tprr": 0.193
+  },
+  "rachaad white": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.587,
+   "routes": 378,
+   "team": "TB",
+   "tgt": 45,
+   "tprr": 0.119
+  },
+  "raheem mostert": {
+   "gp": 12,
+   "pos": "RB",
+   "route_sh": 0.242,
+   "routes": 100,
+   "team": "LV",
+   "tgt": 12,
+   "tprr": 0.12
+  },
+  "rashee rice": {
+   "gp": 8,
+   "pos": "WR",
+   "route_sh": 0.773,
+   "routes": 266,
+   "team": "KC",
+   "tgt": 79,
+   "tprr": 0.297
+  },
+  "rashid shaheed": {
+   "gp": 18,
+   "pos": "WR",
+   "route_sh": 0.751,
+   "routes": 480,
+   "team": "SEA",
+   "tgt": 92,
+   "tprr": 0.192
+  },
+  "rashod bateman": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.787,
+   "routes": 318,
+   "team": "BAL",
+   "tgt": 39,
+   "tprr": 0.123
+  },
+  "ray ray mccloud": {
+   "gp": 6,
+   "pos": "WR",
+   "route_sh": 0.606,
+   "routes": 137,
+   "team": "NYG",
+   "tgt": 15,
+   "tprr": 0.109
+  },
+  "rhamondre stevenson": {
+   "gp": 14,
+   "pos": "RB",
+   "route_sh": 0.681,
+   "routes": 341,
+   "team": "NE",
+   "tgt": 38,
+   "tprr": 0.111
+  },
+  "ricky pearsall": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.846,
+   "routes": 281,
+   "team": "SF",
+   "tgt": 53,
+   "tprr": 0.189
+  },
+  "rico dowdle": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.506,
+   "routes": 296,
+   "team": "CAR",
+   "tgt": 50,
+   "tprr": 0.169
+  },
+  "rj harvey": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.429,
+   "routes": 290,
+   "team": "DEN",
+   "tgt": 58,
+   "tprr": 0.2
+  },
+  "roman wilson": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.356,
+   "routes": 154,
+   "team": "PIT",
+   "tgt": 21,
+   "tprr": 0.136
+  },
+  "rome odunze": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.905,
+   "routes": 412,
+   "team": "CHI",
+   "tgt": 91,
+   "tprr": 0.221
+  },
+  "romeo doubs": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.767,
+   "routes": 412,
+   "team": "GB",
+   "tgt": 86,
+   "tprr": 0.209
+  },
+  "ryan flournoy": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.45,
+   "routes": 272,
+   "team": "DAL",
+   "tgt": 56,
+   "tprr": 0.206
+  },
+  "sam laporta": {
+   "gp": 9,
+   "pos": "TE",
+   "route_sh": 0.923,
+   "routes": 275,
+   "team": "DET",
+   "tgt": 49,
+   "tprr": 0.178
+  },
+  "samaje perine": {
+   "gp": 14,
+   "pos": "RB",
+   "route_sh": 0.403,
+   "routes": 226,
+   "team": "CIN",
+   "tgt": 21,
+   "tprr": 0.093
+  },
+  "saquon barkley": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.783,
+   "routes": 415,
+   "team": "PHI",
+   "tgt": 51,
+   "tprr": 0.123
+  },
+  "scott miller": {
+   "gp": 12,
+   "pos": "WR",
+   "route_sh": 0.242,
+   "routes": 102,
+   "team": "PIT",
+   "tgt": 14,
+   "tprr": 0.137
+  },
+  "stefon diggs": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.673,
+   "routes": 413,
+   "team": "NE",
+   "tgt": 102,
+   "tprr": 0.247
+  },
+  "sterling shepard": {
+   "gp": 13,
+   "pos": "WR",
+   "route_sh": 0.715,
+   "routes": 354,
+   "team": "TB",
+   "tgt": 54,
+   "tprr": 0.153
+  },
+  "tanner conner": {
+   "gp": 9,
+   "pos": "TE",
+   "route_sh": 0.387,
+   "routes": 123,
+   "team": "MIA",
+   "tgt": 15,
+   "tprr": 0.122
+  },
+  "tanner hudson": {
+   "gp": 12,
+   "pos": "TE",
+   "route_sh": 0.221,
+   "routes": 112,
+   "team": "CIN",
+   "tgt": 24,
+   "tprr": 0.214
+  },
+  "tee higgins": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.878,
+   "routes": 526,
+   "team": "CIN",
+   "tgt": 99,
+   "tprr": 0.188
+  },
+  "terrance ferguson": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.362,
+   "routes": 171,
+   "team": "LAR",
+   "tgt": 25,
+   "tprr": 0.146
+  },
+  "terry mclaurin": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.769,
+   "routes": 260,
+   "team": "WAS",
+   "tgt": 60,
+   "tprr": 0.231
+  },
+  "tetairoa mcmillan": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.935,
+   "routes": 547,
+   "team": "CAR",
+   "tgt": 122,
+   "tprr": 0.223
+  },
+  "tez johnson": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.495,
+   "routes": 296,
+   "team": "TB",
+   "tgt": 44,
+   "tprr": 0.149
+  },
+  "theo johnson": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.886,
+   "routes": 488,
+   "team": "NYG",
+   "tgt": 74,
+   "tprr": 0.152
+  },
+  "tim patrick": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.285,
+   "routes": 164,
+   "team": "JAX",
+   "tgt": 24,
+   "tprr": 0.146
+  },
+  "tj hockenson": {
+   "gp": 15,
+   "pos": "TE",
+   "route_sh": 0.872,
+   "routes": 450,
+   "team": "MIN",
+   "tgt": 66,
+   "tprr": 0.147
+  },
+  "tommy tremble": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.515,
+   "routes": 301,
+   "team": "CAR",
+   "tgt": 37,
+   "tprr": 0.123
+  },
+  "tony pollard": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.563,
+   "routes": 364,
+   "team": "TEN",
+   "tgt": 41,
+   "tprr": 0.113
+  },
+  "tory horton": {
+   "gp": 8,
+   "pos": "WR",
+   "route_sh": 0.591,
+   "routes": 137,
+   "team": "SEA",
+   "tgt": 22,
+   "tprr": 0.161
+  },
+  "travis etienne": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.54,
+   "routes": 349,
+   "team": "JAX",
+   "tgt": 52,
+   "tprr": 0.149
+  },
+  "travis kelce": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.871,
+   "routes": 600,
+   "team": "KC",
+   "tgt": 109,
+   "tprr": 0.182
+  },
+  "tre harris": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.427,
+   "routes": 291,
+   "team": "LAC",
+   "tgt": 43,
+   "tprr": 0.148
+  },
+  "tre tucker": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.965,
+   "routes": 579,
+   "team": "LV",
+   "tgt": 92,
+   "tprr": 0.159
+  },
+  "treveyon henderson": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.445,
+   "routes": 273,
+   "team": "NE",
+   "tgt": 42,
+   "tprr": 0.154
+  },
+  "trey mcbride": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.943,
+   "routes": 705,
+   "team": "ARI",
+   "tgt": 170,
+   "tprr": 0.241
+  },
+  "treylon burks": {
+   "gp": 8,
+   "pos": "WR",
+   "route_sh": 0.602,
+   "routes": 153,
+   "team": "WAS",
+   "tgt": 22,
+   "tprr": 0.144
+  },
+  "troy franklin": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.719,
+   "routes": 486,
+   "team": "DEN",
+   "tgt": 107,
+   "tprr": 0.22
+  },
+  "tucker kraft": {
+   "gp": 8,
+   "pos": "TE",
+   "route_sh": 0.862,
+   "routes": 237,
+   "team": "GB",
+   "tgt": 44,
+   "tprr": 0.186
+  },
+  "tutu atwell": {
+   "gp": 10,
+   "pos": "WR",
+   "route_sh": 0.353,
+   "routes": 141,
+   "team": "LAR",
+   "tgt": 15,
+   "tprr": 0.106
+  },
+  "ty johnson": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.406,
+   "routes": 241,
+   "team": "BUF",
+   "tgt": 33,
+   "tprr": 0.137
+  },
+  "tyjae spears": {
+   "gp": 13,
+   "pos": "RB",
+   "route_sh": 0.535,
+   "routes": 266,
+   "team": "TEN",
+   "tgt": 50,
+   "tprr": 0.188
+  },
+  "tyler allgeier": {
+   "gp": 17,
+   "pos": "RB",
+   "route_sh": 0.234,
+   "routes": 137,
+   "team": "ATL",
+   "tgt": 16,
+   "tprr": 0.117
+  },
+  "tyler badie": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.26,
+   "routes": 167,
+   "team": "DEN",
+   "tgt": 31,
+   "tprr": 0.186
+  },
+  "tyler higbee": {
+   "gp": 10,
+   "pos": "TE",
+   "route_sh": 0.585,
+   "routes": 203,
+   "team": "LAR",
+   "tgt": 36,
+   "tprr": 0.177
+  },
+  "tyler johnson": {
+   "gp": 11,
+   "pos": "WR",
+   "route_sh": 0.421,
+   "routes": 167,
+   "team": "NYJ",
+   "tgt": 18,
+   "tprr": 0.108
+  },
+  "tyler lockett": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.579,
+   "routes": 373,
+   "team": "LV",
+   "tgt": 56,
+   "tprr": 0.15
+  },
+  "tyler warren": {
+   "gp": 17,
+   "pos": "TE",
+   "route_sh": 0.894,
+   "routes": 541,
+   "team": "IND",
+   "tgt": 114,
+   "tprr": 0.211
+  },
+  "tyquan thornton": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.429,
+   "routes": 255,
+   "team": "KC",
+   "tgt": 37,
+   "tprr": 0.145
+  },
+  "tyreek hill": {
+   "gp": 4,
+   "pos": "WR",
+   "route_sh": 0.75,
+   "routes": 102,
+   "team": "MIA",
+   "tgt": 29,
+   "tprr": 0.284
+  },
+  "tyrell shavers": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.374,
+   "routes": 210,
+   "team": "BUF",
+   "tgt": 23,
+   "tprr": 0.11
+  },
+  "tyrone tracy jr": {
+   "gp": 15,
+   "pos": "RB",
+   "route_sh": 0.583,
+   "routes": 322,
+   "team": "NYG",
+   "tgt": 48,
+   "tprr": 0.149
+  },
+  "van jefferson": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.602,
+   "routes": 368,
+   "team": "TEN",
+   "tgt": 52,
+   "tprr": 0.141
+  },
+  "wandale robinson": {
+   "gp": 16,
+   "pos": "WR",
+   "route_sh": 0.927,
+   "routes": 543,
+   "team": "NYG",
+   "tgt": 141,
+   "tprr": 0.26
+  },
+  "will dissly": {
+   "gp": 9,
+   "pos": "TE",
+   "route_sh": 0.28,
+   "routes": 104,
+   "team": "LAC",
+   "tgt": 16,
+   "tprr": 0.154
+  },
+  "woody marks": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.525,
+   "routes": 321,
+   "team": "HOU",
+   "tgt": 36,
+   "tprr": 0.112
+  },
+  "xavier hutchinson": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.627,
+   "routes": 406,
+   "team": "HOU",
+   "tgt": 57,
+   "tprr": 0.14
+  },
+  "xavier legette": {
+   "gp": 15,
+   "pos": "WR",
+   "route_sh": 0.763,
+   "routes": 397,
+   "team": "CAR",
+   "tgt": 64,
+   "tprr": 0.161
+  },
+  "xavier smith": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.296,
+   "routes": 150,
+   "team": "LAR",
+   "tgt": 24,
+   "tprr": 0.16
+  },
+  "xavier weaver": {
+   "gp": 9,
+   "pos": "WR",
+   "route_sh": 0.487,
+   "routes": 199,
+   "team": "ARI",
+   "tgt": 13,
+   "tprr": 0.065
+  },
+  "xavier worthy": {
+   "gp": 14,
+   "pos": "WR",
+   "route_sh": 0.733,
+   "routes": 418,
+   "team": "KC",
+   "tgt": 73,
+   "tprr": 0.175
+  },
+  "zach charbonnet": {
+   "gp": 16,
+   "pos": "RB",
+   "route_sh": 0.513,
+   "routes": 256,
+   "team": "SEA",
+   "tgt": 24,
+   "tprr": 0.094
+  },
+  "zach ertz": {
+   "gp": 13,
+   "pos": "TE",
+   "route_sh": 0.802,
+   "routes": 372,
+   "team": "WAS",
+   "tgt": 73,
+   "tprr": 0.196
+  },
+  "zay flowers": {
+   "gp": 17,
+   "pos": "WR",
+   "route_sh": 0.95,
+   "routes": 478,
+   "team": "BAL",
+   "tgt": 119,
+   "tprr": 0.249
+  },
+  "zay jones": {
+   "gp": 8,
+   "pos": "WR",
+   "route_sh": 0.527,
+   "routes": 173,
+   "team": "ARI",
+   "tgt": 18,
+   "tprr": 0.104
+  }
+ }
+}

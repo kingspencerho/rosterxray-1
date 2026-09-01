@@ -230,14 +230,53 @@ for (const m of bq.matchAll(/\[([^\]]+)\]\(#([^)]+)\)/g)) {
 }
 
 // Every section the contract names must actually exist, in order.
-const wanted = ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9", "§10", "§11", "§12"];
+const wanted = ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9", "§10",
+                "§11", "§12", "§13", "§14"];
 let last = -1, ordered = true;
 for (const w of wanted) {
   const at = doc.indexOf(`## ${w} ·`);
   if (at < 0 || at < last) ordered = false;
   last = at;
 }
-ok("all thirteen sections exist and are in order", ordered);
+ok(`all ${wanted.length} sections exist and are in order`, ordered);
+
+// ---- 4b. §13 COVERS EVERY INPUT, IN PLAIN ENGLISH ----
+// §13 is the reading entry point: every metric, grouped by the question a human
+// asks. The assertion runs from the INDEX outward, so a new input cannot ship
+// without a plain-English sentence — the same shape as the glossary guard on the
+// player card, and for the same reason. A number a reader cannot interpret is a
+// number they cannot act on.
+console.log("\nplain-english guide");
+
+const gStart = doc.indexOf("## §13 ·");
+const gEnd = doc.indexOf("## §14 ·");
+ok("§13 sits before §14", gStart > 0 && gEnd > gStart);
+const guide = doc.slice(gStart, gEnd);
+
+for (const r of indexRows) {
+  // ⚠ indexRows.anchor is stored WITHOUT the leading "#" (the row regex captures
+  // inside the hash). Searching for it verbatim matches nothing, silently, and
+  // every assertion in this block fails at once — which is how this was caught.
+  const esc = r.anchor.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+  const hits = (guide.match(new RegExp(`\\(#${esc}\\)`, "g")) || []).length;
+  ok(`"${r.name}" has a plain-English line in §13`, hits === 1,
+    hits === 0 ? "every input needs one sentence a non-analyst understands"
+               : `appears ${hits} times — one line each, or the guide drifts into a second reference`);
+}
+
+// It must stay NAVIGATION. Restating §5 here would create a second copy of every
+// explanation, which is exactly how a reference doubles in length and starts
+// disagreeing with itself.
+ok("§13 says §5 wins on any disagreement", /disagree[^.]*§5 wins/i.test(guide));
+ok("§13 states the two-axis distinction", /high stickiness/i.test(guide) && /high importance/i.test(guide));
+
+// §14 is an AUDIT of the app against the calendar, and an audit that does not
+// say when it was taken is a claim with no shelf life — the same rule R19 puts
+// on a Tier C rejection.
+const road = doc.slice(gEnd);
+ok("§14 carries the date it was audited", /[Aa]udited against the code on \w+ \d+ \d{4}/.test(road));
+ok("§14 states the frozen-file constraint",
+  /frozen all season/i.test(road) && /context-only current-season twin/i.test(road));
 
 // ---- 5. THE SOURCE HIERARCHY DEFINES A FIELD THE REST OF THE FILE USES ----
 // `rank` appears on every §5 entry and in the §1 index legend, and until §3

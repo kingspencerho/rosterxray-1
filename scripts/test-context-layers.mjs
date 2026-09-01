@@ -61,7 +61,8 @@ console.log("context-only containment");
 
 ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 
-const ACCESSORS = ["getNgsRec", "getCareerArc", "getVacated", "getRedZone", "getAvailability"];
+const ACCESSORS = ["getNgsRec", "getCareerArc", "getVacated", "getRedZone", "getAvailability",
+                   "getRoutes", "getCoverage"];
 // Every reviewed consumer. Adding a name here is a deliberate act; a call site
 // that is not on this list fails the run whether or not it looks harmless.
 const ALLOWED = [
@@ -69,7 +70,10 @@ const ALLOWED = [
   "deploymentContext",     // AI prompt
   "arcContext",            // AI prompt
   "vacatedContext",        // AI prompt
+  "routesContext",         // AI prompt
 ];
+// ⚠️ getCoverage has NO prompt consumer, and that is a decision rather than an
+// omission — see the man/zone assertions below.
 
 for (const fn of ACCESSORS) {
   const defRe = new RegExp(`const ${fn} = `);
@@ -84,8 +88,15 @@ for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
     ok(`${engine.match(/analyze\w+/)[0]} never calls ${fn}`, !body.includes(`${fn}(`),
       "a context layer reaching the scoring engine moves grades and invalidates every recorded calibration");
   }
-  for (const tbl of ["NGS_RECEIVING", "CAREER_ARC", "VACATED", "REDZONE", "AVAILABILITY"]) {
-    ok(`${engine.match(/analyze\w+/)[0]} never reads ${tbl}`, !body.includes(tbl));
+  for (const tbl of ["NGS_RECEIVING", "CAREER_ARC", "VACATED", "REDZONE", "AVAILABILITY",
+                     "ROUTES", "COVERAGE"]) {
+    // Identifier boundaries, not a substring search. "COVERAGE" and "ROUTES"
+    // are ordinary English the engine uses in weakness strings ("no W17
+    // coverage"), and a guard that false-fails on prose gets ignored — which is
+    // exactly how eleven duplicate keys accumulated behind eleven build
+    // warnings.
+    const re = new RegExp(`(^|[^A-Za-z0-9_$])${tbl}[.\\[]`);
+    ok(`${engine.match(/analyze\w+/)[0]} never reads ${tbl}`, !re.test(body));
   }
 }
 
@@ -269,6 +280,123 @@ ok("the phase label matches the band it claims",
   "a label that disagrees with its own number reads as confirmation");
 
 ok("vacated covers all 32 teams", Object.keys(VAC.teams).length === 32);
+
+// ---- 4c. ROUTES AND COVERAGE (added Sep 1 2026) ----
+// Both came out of Tier C on a false premise: this repo claimed the NFL
+// participation feed died after 2023 and that no free routes source existed.
+// Neither was true, and the claim survived because it was CITED rather than
+// re-tested. What is guarded here is the pair of decisions the measurement
+// forced, because both are easy to undo by accident.
+console.log("\nroutes and coverage");
+
+const RT = rd("grading/data/routes_2025.json");
+const COV = rd("grading/data/coverage_2025.json");
+
+ok("routes has its own percentile table and function",
+  app.includes("const ROUTES_PERCENTILES") && app.includes("const routesPercentile"));
+ok("routes prints its own population gate", app.includes("const ROUTES_POP_GATE"));
+ok("the card's TPRR row uses routesPercentile, not cardPercentile",
+  /routesPercentile\(pos, "tprr"/.test(app));
+ok("coverage has its own percentile table and function",
+  app.includes("const COV_PERCENTILES") && app.includes("const covPercentile"));
+ok("coverage prints its own population gate", app.includes("const COV_POP_GATE"));
+
+// FIVE populations now, five gates. Same rule the NGS and red-zone blocks
+// carry: a rank borrowed from another table is printed under a label that does
+// not describe it.
+const POP_FNS = ["cardPercentile", "ngsPercentile", "rzPercentile",
+                 "routesPercentile", "covPercentile"];
+for (const fn of POP_FNS) {
+  ok(`${fn} is defined exactly once`,
+    (app.match(new RegExp(`const ${fn} = `, "g")) || []).length === 1);
+}
+
+// ⚠️ THE LOAD-BEARING ONE. The man/zone edge measured r=0.161 year over year —
+// below every number in the AI prompt including per-touch efficiency, which is
+// carried only with explicit warnings. Withholding a coin flip is cheaper and
+// more reliable than warning a model about it, so getCoverage has NO prompt
+// consumer and must not acquire one without a fresh measurement.
+ok("the man/zone edge is recorded as a coin flip", COV._meta.stability.edge.r < 0.30);
+ok("coverage declares itself descriptive-only",
+  COV._meta.descriptive_only === true && COV._meta.in_ai_prompt === false);
+ok("there is no coverageContext prompt builder", !/const coverageContext\b/.test(app),
+  "adding one puts an r=0.16 figure in front of the model — re-measure first");
+for (const tmpl of ["deploymentContext ?", "routesContext ?"]) {
+  ok(`prompt template mentions ${tmpl.split(" ")[0]}`, app.includes(tmpl));
+}
+// Assert the CONSUMER, not the absence of a string. The first version of this
+// forbade "${...COVERAGE...}" anywhere and false-failed on COV_POP_GATE, which
+// is the card's own gate label — a guard that fails on correct code is a guard
+// someone deletes.
+{
+  const sites = [...app.matchAll(/getCoverage\(/g)].map(m => m.index)
+    .filter(i => !app.slice(Math.max(0, i - 40), i).includes("const getCoverage = "));
+  ok("getCoverage has exactly one call site", sites.length === 1, `found ${sites.length}`);
+  const cardAt = app.lastIndexOf("const buildPlayerCard", sites[0] ?? 0);
+  ok("getCoverage's only consumer is buildPlayerCard", sites.length === 1 && cardAt >= 0,
+    "a prompt consumer would hand the model an r=0.16 figure");
+}
+
+// The edge is NOT centred on zero — man coverage suppresses yards per target
+// league-wide. A reader shown a bare "-1.2" reads it as bad when it is above
+// the WR median of -1.48, so the card must never print the number without a
+// percentile and the position median beside it.
+ok("the position medians are negative for WR and TE, so the sign is not the read",
+  COV._meta.medians.WR < 0 && COV._meta.medians.TE < 0);
+ok("the coverage card section prints the position median",
+  /median is \$\{card\.coverage\.median\}/.test(app));
+// The note tells the reader to use the percentile instead of the sign. On a
+// position whose pool is under the ranking minimum there IS no percentile, and
+// a note pointing at a number that is not on screen is the same defect as a
+// label disagreeing with its own value. 2025 clears 89 WRs, 31 TEs and 7 RBs.
+ok("the note branches on whether a percentile actually rendered",
+  /card\.coverage\.ranked\s*\n?\s*\?/.test(app) && /too few to rank against/.test(app));
+ok("the unranked branch names the pool size", /card\.coverage\.pool/.test(app));
+ok("at least one position really is below the ranking minimum",
+  Object.values(COV._meta.counts).some(n => n < 12),
+  "if every pool clears the minimum the unranked branch is dead code");
+ok("the man edge row carries a percentile",
+  /label="Man edge"[\s\S]{0,220}card\.coverage\.edgePct/.test(app));
+ok("coverage renders in the dim REFERENCE group",
+  /coverage: CARD_GROUP_ACCENT\.reference/.test(app),
+  "promoting a coin flip to a bright group tells the reader it should move an opinion");
+
+// route_sh restates snap_sh at r=0.957. It is emitted as TPRR's DENOMINATOR and
+// the row has to say so, or the card silently claims two signals where it has
+// one — the duplicate-definition failure in data rather than in code.
+ok("route share is declared a denominator, not an independent input",
+  /NOT an independent input/.test(RT._meta.stability.route_sh.tier));
+ok("the route share row tells the reader it restates snap share",
+  /echo: "restates snap share/.test(app));
+ok("the overlap with snap share is recorded", RT._meta.overlap.route_sh_vs_snap_share > 0.9);
+ok("TPRR is recorded as NOT a restatement of volume",
+  RT._meta.overlap.tprr_vs_targets_per_game < 0.95);
+
+// The denominator is pass-snap participation, not charted routes, so protection
+// snaps deflate blocking tight ends and backs. The card says so on their cards
+// and only on theirs.
+ok("the blocking caveat is gated to RB and TE",
+  /blocking: pos === "RB" \|\| pos === "TE"/.test(app));
+ok("the blocking caveat renders", /card\.routesMeta\.blocking \?/.test(app));
+
+// Both files are what they claim to be.
+ok("routes rows all clear the stated gate",
+  Object.values(RT.players).every(r => r.routes >= RT._meta.min_routes));
+ok("tprr equals targets over routes",
+  Object.values(RT.players).every(r =>
+    Math.abs(r.tprr - r.tgt / r.routes) < 0.0011));
+ok("no route share exceeds 1.0",
+  Object.values(RT.players).every(r => r.route_sh <= 1.0),
+  "a season-level primary team breaks the denominator for every mid-season mover");
+ok("coverage rows clear the split gate in BOTH buckets",
+  Object.values(COV.players).every(r =>
+    r.tgt_man >= COV._meta.min_split_targets && r.tgt_zone >= COV._meta.min_split_targets));
+ok("edge equals man minus zone",
+  Object.values(COV.players).every(r =>
+    Math.abs(r.edge - (r.ypt_man - r.ypt_zone)) < 0.011));
+ok("aDOT-by-coverage is recorded as not emitted, with its reason",
+  typeof COV._meta.not_emitted.adot_man === "number" &&
+  /already carried/.test(COV._meta.not_emitted.note));
 
 console.log(fail ? `\n${fail} FAILED` : "\nall passed");
 process.exit(fail ? 1 : 0);

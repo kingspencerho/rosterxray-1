@@ -9,6 +9,11 @@ it records how things were built and what broke, in date order.
 screen. Read this one to understand the analysis, that one before changing code,
 and the personas before changing what the app shows, hides, orders or names.
 
+**New here?** Start at [§13, the plain-English guide](#13--plain-english-guide--every-metric-grouped-by-the-question-it-answers).
+It groups every metric by the question it answers and links into the detail.
+[§14](#14--seasonal-coverage--what-the-app-is-for-and-when) is what the app
+covers in draft season, in season and in the offseason.
+
 **Structure guarded by:** `scripts/test-analyst-reference.mjs` (guard 23)
 
 ---
@@ -85,6 +90,8 @@ every entry that now disagrees.
 | §10 Standing rules | **append-only, never renumber** | a rule earns its number by costing a session |
 | §11 Build queue | **prunable** | delete shipped items; they live in §5 now |
 | §12 Changelog | **capped at 12** | drop the oldest. Full history is in git |
+| §13 Plain-English guide | **one line per input** | navigation only. Detail stays in §5; if they disagree, §5 wins |
+| §14 Seasonal coverage | rewrite in place | an audit of the app against the calendar. Re-audit before trusting it |
 
 **§10 and §11 pull in opposite directions on purpose.** Rules accumulate because
 each one is a scar and forgetting it costs the same session twice. The build
@@ -132,9 +139,9 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | — | 4 | A | live | no |
 | [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 5 | A | live | **yes — schedule** |
 | [RB carries / game](#rb-carries--game--r--073--rank-2) | 0.73 | 2 | B | proposed | no |
-| [Targets per route run](#targets-per-route-run--r----rank-2) | — | 2 | C | rejected | no |
+| [Targets per route run](#targets-per-route-run--r--067--rank-2) | 0.67 | 2 | A | live | no |
 | [Offensive line rank](#offensive-line-rank--r----rank) | — | — | C | rejected | no |
-| [Coverage-scheme splits](#coverage-scheme-splits--r----rank-3) | — | 3 | C | rejected | no |
+| [Coverage-scheme splits](#coverage-scheme-splits--r--016--rank) | 0.16 | — | A | live | no |
 | [Player-level motion](#player-level-motion--r----rank) | — | — | C | rejected | no |
 
 ---
@@ -164,6 +171,8 @@ repeatable).
 | Target share | 0.729 | anchor |
 | Snap share (RB) | 0.728 | anchor |
 | Snap share (WR/TE) | 0.709 | anchor |
+| Route share | 0.756 | anchor — but see the entry: it restates snap share |
+| Targets per route run | 0.674 | reliable |
 | Dud rate | 0.667 | reliable |
 | Separation | 0.663 | reliable |
 | Usable rate | 0.652 | reliable |
@@ -176,6 +185,10 @@ repeatable).
 | TD per touch | 0.198 | weak |
 | Catch rate (RB) | 0.103 | noise |
 | **RB yards per carry** | **0.022** | **coin flip** |
+| Man rate faced | 0.335 | weak |
+| Yards per target vs zone | 0.294 | weak |
+| Yards per target vs man | 0.235 | weak |
+| **Coverage-scheme splits (man/zone edge)** | **0.161** | **coin flip** |
 | Matchup data (FPA) — RB | 0.245 | least stable input in the app |
 | Matchup data (FPA) — TE | 0.192 | |
 | Matchup data (FPA) — QB | 0.049 | |
@@ -650,10 +663,91 @@ That distinction is what finds a breakout before the market does:
 carrying a top-decile target share. A contested-catch alpha, not a get-open
 alpha. Invisible in every other number on his card.
 
+**⚠️ RAW SEPARATION IS CONFOUNDED BY ROUTE DEPTH, and heavily.** Measured across
+the pool, `corr(separation, intended air yards) = −0.69`: a deeper route gives
+the defender more time to close, so separation falls monotonically with aDOT
+(WR means run 3.62 at aDOT 0-7 down to 2.45 at 13+). **A raw separation ranking
+is therefore substantially a "how short are his routes" ranking**, which rewards
+slot and screen usage and punishes every boundary X in the league.
+
+`scripts/ngs-targets.mjs` prints **sep+** beside it — separation over expected at
+the depth he is actually used, from a within-position least-squares fit. The
+correction is large: Alec Pierce goes from 4th percentile raw to 72nd adjusted on
+a 19.0 aDOT, and Khalil Shakir falls from 93rd to 65th once his 3.5-yard aDOT is
+accounted for.
+
+**Both are kept.** `sep+` answers *does he beat his assignment*; raw separation
+answers *how much space does he actually catch it in*, and a best-ball ceiling
+case cares about the second as well as the first. Use `sep+` for a talent claim
+and never the raw column alone.
+
+**⚠️ IT ALSO CANNOT ISOLATE MAN COVERAGE.** The figure averages across every
+coverage a player faced, so a contested-catch specialist — who beats man by
+out-positioning rather than by separating — scores low by construction. The
+man/zone split that would qualify it is
+[now live](#coverage-scheme-splits--r--016--rank) — and it turned out to measure
+r=0.16, so it describes one season and does not settle anything about talent.
+**"Beats man coverage" and "creates separation" are different claims, and this
+metric only measures the second.** Tee Higgins is the worked example: 0th percentile raw,
+83rd of 85 even after the depth adjustment, on a 13.5 aDOT boundary role with 19%
+of his team's red-zone targets. The coverage layer says his man/zone split is the
+44th percentile — ordinary — so the two together read as a contested-catch profile
+that is not converting, rather than as a man-beater the separation metric misses.
+
 **Gotchas.** Position medians differ (WR 2.78 · TE 3.45) — read the percentile.
 **NGS has its OWN population** (40+ targets in 2025), which is not the card's
 draftable/8-game gate. The two ranks are not interchangeable and never share a
 table.
+
+---
+
+### Targets per route run · r = 0.67 · rank 2
+
+| | |
+|---|---|
+| **File** | `routes_2025.json` |
+| **Field** | `tprr` · `routes` · `route_sh` · `tgt` · `gp` |
+| **Surfaces** | player card (Route workload) · The Read · `routesContext` in both AI prompts |
+| **Status** | live |
+
+**Plain English.** How often he is thrown at on the pass plays he is on the
+field for.
+
+**Why it matters.** **It is the only per-OPPORTUNITY rate in the app.** Every
+other receiving input measures what a coach GAVE him — target share, WOPR,
+targets per game, snap share. This measures what he EARNS when he is out there.
+Volume ceiling = routes x rate, so route share caps everything else no matter
+how good the rate is: the Josh Downs gate.
+
+**It is not a restatement of volume.** Measured on 2025 it runs r = 0.871
+against targets per game and 0.817 against target share. Correlated, as it has
+to be — but a quarter of the variance is independent, and the DIVERGENCES are
+the whole point. A high rate on ordinary volume is a player earning looks he is
+not getting, which is the contingency profile the Shough Rule is about. The
+reverse is a role being fed to him that a depth-chart change removes.
+
+**Worked example.** 2025 leaders: Puka Nacua 35.5%, Jaxon Smith-Njigba 33.6%,
+Amon-Ra St. Brown 30.4%, Ja'Marr Chase 29.4%, against a WR median of 16.9%.
+
+**Gotchas.** **⚠️ THE DENOMINATOR IS PASS-SNAP PARTICIPATION, NOT CHARTED
+ROUTES.** The feed records who was on the field, never who released into a
+pattern, so protection snaps inflate the denominator for blocking tight ends
+and backs and deflate their rate. Read RB and TE figures as a FLOOR on the true
+number — the card says so on their cards and only on theirs — and note the
+stability is weaker there too (RB 0.515 against WR/TE 0.687). **Its own
+population** (100+ routes in 2025) is not the card's draftable/8-game gate and
+not the NGS 40-target gate; five populations now, five printed gates.
+
+**`route_sh` is emitted here and is NOT an independent input.** It correlates
+with `snap_sh` at r = 0.957 (WR 0.966). It is TPRR's denominator, shown because
+a rate without its sample is unreadable, and the card row says so in place
+rather than letting the reader count two signals where there is one. Where the
+two do diverge they diverge honestly: Derrick Henry 0.388 route share against
+0.545 snap share, because he leaves the field on passing downs.
+
+**⚠️ This spent weeks in Tier C on a false premise.** See
+[R19](#analysis) — the claim that the participation feed died after 2023 was
+written once, was plausible, and was cited rather than re-tested.
 
 ---
 
@@ -919,6 +1013,55 @@ offense used motion, never which player moved.
 
 ---
 
+### Coverage-scheme splits · r = 0.16 · rank —
+
+| | |
+|---|---|
+| **File** | `coverage_2025.json` |
+| **Field** | `ypt_man` · `ypt_zone` · `edge` · `man_rate` + target counts |
+| **Surfaces** | player card only (Man vs zone, REFERENCE group, dimmed) |
+| **Status** | live — **descriptive, deliberately absent from the AI prompt** |
+
+**Plain English.** What he did against man coverage versus zone, last season.
+
+**Why it matters.** It is the qualifier
+[separation](#separation--r--066--rank-3) invites and cannot supply: `avg_sep`
+averages across every coverage a receiver faced, so a contested-catch profile
+who wins by out-positioning rather than by getting open scores low with no way
+to say so. This is the only place in the app that can look at that split.
+
+**Worked example.** Tee Higgins, whose reputation is as a man beater: 7.79 y/t
+against man on 43 targets, 9.57 against zone on 56 — an edge of **-1.78, the
+44th percentile of qualified WRs.** So the honest read is ORDINARY, not poor.
+
+**Gotchas.** **⚠️ IT DOES NOT CARRY. r = 0.161** (23>24 0.199, 24>25 0.122),
+which puts it beside RB yards per carry in the coin-flip band, below every
+number in the AI prompt. Three consequences, all deliberate: it renders in the
+card's REFERENCE group beside per-touch efficiency, **it is the one context
+layer withheld from the model entirely** — warning a model about a coin flip is
+less reliable than not handing it the number — and nothing scores off it.
+
+**⚠️ THE EDGE IS NOT CENTRED ON ZERO. READ THE PERCENTILE, NEVER THE SIGN.**
+Man coverage suppresses yards per target league-wide, so almost everyone is
+negative: the 2025 WR median is **-1.48** and the TE median **-1.10**. A
+receiver at -1.2 is ABOVE his position median. Anyone reading the bare minus
+sign mis-reads most of the league — which is exactly what an earlier reading of
+Higgins' -1.78 as "reputation not supported" did.
+
+**⚠️ IT IS NOT A ROUTE-WINNING METRIC.** It inherits separation's aDOT confound
+(a deep target is worth more yards whoever is covering), and man coverage puts a
+linebacker on a running back, which is a personnel mismatch rather than a skill:
+5 of the 7 qualified backs are positive against a WR median of -1.48. **An
+earlier ungated pass produced a much louder version of that — a leaderboard
+topped by backs at +6 to +11 — and it did not survive the 15-target gate.** The
+direction was real; the magnitude was single-digit samples.
+
+**Only 7 RBs clear the gate**, under the 12-player ranking minimum, so RB cards
+show no percentile and say why rather than pointing at a number that is not
+there.
+
+---
+
 ### Matchup data (FPA) · r = — · rank 5
 
 | | |
@@ -1056,28 +1199,11 @@ else.
 
 ## §7 · Tier C — deliberately not built
 
-### Targets per route run · r = — · rank 2
-
-| | |
-|---|---|
-| **File** | — |
-| **Field** | — |
-| **Surfaces** | — |
-| **Status** | rejected — paywalled |
-
-**Plain English.** How often he is targeted on the routes he actually runs.
-
-**Why it matters.** The sharpest single metric in receiving analysis: it
-separates *the coach throws to him* from *he earns it every snap*. It is what
-shows James Cook's TPRR trailing his own backups, and Saquon's collapsing from
-18%+ to 13.1% on arrival in Philadelphia.
-
-**Gotchas.** **No free routes source has existed since the NFL participation feed
-died after 2023.** `snap_sh` is the participation proxy and WOPR proxies
-per-route volume. **Never substitute target share for TPRR** — they answer
-different questions.
-
----
+> **Every rejection here states the date its impossibility was last verified.**
+> Two entries sat in this section on a false premise until Sep 1 2026, because
+> "no free source exists" was written once and then cited rather than re-tested.
+> Both are now built and live in §5. A rejection ages exactly like a player
+> verdict. Re-checking a feed costs one command — see [R19](#analysis).
 
 ### Offensive line rank · r = — · rank —
 
@@ -1086,7 +1212,7 @@ different questions.
 | **File** | — |
 | **Field** | — |
 | **Surfaces** | — |
-| **Status** | rejected — no free data |
+| **Status** | rejected — no free data · last verified Sep 1 2026 |
 
 **Plain English.** How good is the line in front of him.
 
@@ -1098,24 +1224,6 @@ makes his line look better than it is.
 
 ---
 
-### Coverage-scheme splits · r = — · rank 3
-
-| | |
-|---|---|
-| **File** | — |
-| **Field** | — |
-| **Surfaces** | — |
-| **Status** | rejected — paywalled and thin |
-
-**Plain English.** Is he better against man or zone.
-
-**Why it matters.** It would qualify separation, which currently blends both.
-
-**Gotchas.** Paywalled, **and** the per-player per-season sample is small enough
-to be noise even if it were free.
-
----
-
 ### Player-level motion · r = — · rank —
 
 | | |
@@ -1123,7 +1231,7 @@ to be noise even if it were free.
 | **File** | `motion_2025.json` — **play-level only** |
 | **Field** | `ypt_lift_pct` |
 | **Surfaces** | AI prompt, at a 20%+ split only |
-| **Status** | rejected as a player metric; retained as a team screen |
+| **Status** | rejected as a player metric; retained as a team screen · last verified Jul 26 2026 |
 
 **Plain English.** Does he produce when the offense uses motion.
 
@@ -1169,6 +1277,8 @@ npm test && git add grading/data && git commit
 | File | Answers | Rank |
 |---|---|---|
 | `ngs_receiving_2025.json` | does he get open, and where is he used | 2 & 3 |
+| `routes_2025.json` | how often is he thrown at per route he runs | 2 |
+| `coverage_2025.json` | man vs zone last season — **reference, not in the prompt** | — |
 | `career_arc_2026.json` | is the calendar with him | — |
 | `vacated_2026.json` | who left, how big is the opening | **1** |
 | `redzone_2025.json` | does he score, or just catch | **1** |
@@ -1340,6 +1450,11 @@ players carry a null rank rather than a flattering one.
 **R18.** **Separate standalone value from contingent value explicitly**, in every
 analysis.
 
+**R19.** **A "this is impossible" note has no freshness rule and needs one.** Two
+Tier C rejections survived on a premise that was false when written down and
+never re-tested. Date every rejection, and re-check the feed before citing it —
+it costs one command.
+
 ---
 
 ## §11 · Build queue
@@ -1353,6 +1468,22 @@ analysis.
 | 1 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
 | 2 | Decide whether separation should SCORE | a real data decision | **yes** |
 | 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
+| 4 | Re-verify the remaining Tier C rejections against their stated dates | one command each | no |
+| 5 | **Fix `tgt_sh` for mid-season movers in `build-player-metrics.py`** | one denominator change | **only when the scored file is next legitimately regenerated** |
+
+**On #5.** Found Sep 1 2026 by validating the volume twin against 2025: nine
+players disagree by more than five points, all traded mid-season, all inflated,
+because the builder divides a full-season target count by one team's totals.
+**It has never moved a grade** — neither engine reads `tgt_sh`. **Do NOT
+regenerate the frozen file to fix it**; that moves every grade and invalidates
+every calibration on file. It rides along with the next legitimate rebuild.
+
+**Shipped Sep 1 2026 and pruned from this queue:** targets per route run and
+coverage-scheme splits. Both now live in §5. **The lesson worth keeping is the
+measurement order** — TPRR came out at r=0.674 and shipped as a real input,
+while the man/zone edge came out at r=0.161 and shipped as reference the model
+never sees. Neither outcome was knowable before it was measured, and building
+both and then deciding is what kept a coin flip out of the prompt.
 
 **On #2.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
@@ -1370,6 +1501,10 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
+| Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
+| Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
+| Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
 | Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
 | Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
@@ -1378,12 +1513,222 @@ own calibration run and its own cap.**
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 | Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
-| Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
-| Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
-| Aug 31 2026 | This file created |
-| Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
 
 ---
+
+
+---
+
+## §13 · Plain-English guide — every metric, grouped by the question it answers
+
+> **START HERE if you are new to the file, or writing for a non-analyst reader.**
+>
+> **This section is NAVIGATION, not content.** One line per input, grouped by the
+> question a human actually asks, each linking to its full entry in §5. It exists
+> because §1 lists inputs in stickiness order, which is the right order for
+> deciding what to trust and the wrong order for learning what things mean.
+>
+> **Keep the one-liners short and keep the detail in §5.** Guard 23 asserts every
+> §1 input appears here exactly once, so a new input cannot be added without a
+> plain-English sentence. If a line here and its §5 entry ever disagree, §5 wins.
+
+### 1. "Is his job changing?" — the most causal thing you can know
+
+These override everything below them. That is the whole point of rank 1: a
+confirmed role change **invalidates the sticky baseline** rather than competing
+with it.
+
+| Metric | In plain English |
+|---|---|
+| [Snap trajectory](#snap-trajectory--r----rank-1) | Was he on the field more in December than in September |
+| [Vacated targets](#vacated-targets--r----rank-1) | How much of last year's target pie left the building |
+| [Red-zone opportunity share](#red-zone-opportunity-share--r----rank-1) | Does he get the ball where points actually happen |
+| [HVT / game](#hvt--game--r----rank-1) | Touches that score, as opposed to touches that pad yardage |
+
+### 2. "How much work does he get?" — the volume floor
+
+Volume is a job description, and job descriptions carry over. This is the most
+repeatable family in the app and the one to build a projection on.
+
+| Metric | In plain English |
+|---|---|
+| [Targets / game](#targets--game--r--077--rank-2) | Raw volume. Nothing else survives this being low |
+| [Air yards share](#air-yards-share--r--078--rank-2) | Of all the yardage his QB throws toward, how much is aimed at him |
+| [Target share](#target-share--r--073--rank-2) | How central he is, independent of how often his team throws |
+| [WOPR](#wopr--r--075--rank-2) | Targets and air yards blended into one number |
+| [Snap share](#snap-share--r--071--rank-2) | Is he even on the field |
+| [Targets per route run](#targets-per-route-run--r--067--rank-2) | **How often he is thrown at per route he runs.** The only per-opportunity rate here |
+| [Intended air yards](#intended-air-yards--r--083--rank-2) | How far downfield he is used. The stickiest player number in the app |
+| [QB rushing attempts / game](#qb-rushing-attempts--game--r--082--rank-2) | The single most repeatable thing a quarterback does |
+| [QB pass attempts / game](#qb-pass-attempts--game--r--061--rank-2) | How much his offence throws at all |
+| [RB carries / game](#rb-carries--game--r--073--rank-2) | Ground volume. Queued, not built |
+| [Teammate absence](#teammate-absence--r----rank-2) | Did his numbers arrive with the alpha hurt |
+| [On-field rate](#on-field-rate--r----rank-2) | How often he plays at all, measured across his career |
+
+### 3. "Is he good, separate from what he is given?"
+
+The only family that measures the PLAYER rather than his opportunity. Everything
+above says what a coach handed him; this says whether he is earning it.
+
+| Metric | In plain English |
+|---|---|
+| [Separation](#separation--r--066--rank-3) | Yards of space between him and the defender when the ball arrives |
+
+### 4. "What did he actually do?" — descriptive, never predictive
+
+Read these to explain what happened. Never to argue what will happen.
+
+| Metric | In plain English |
+|---|---|
+| [Spike rate](#spike-rate--r--048--rank-4) | How often he won you a week outright |
+| [Usable rate](#usable-rate--r--065--rank-4) | How often he was startable |
+| [Dud rate](#dud-rate--r--067--rank-4) | How often he cost you one |
+| [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | Yards per carry, per target. Among the least repeatable numbers in football |
+| [Coverage-scheme splits](#coverage-scheme-splits--r--016--rank) | What he did against man versus zone. A coin flip year to year |
+
+### 5. "What could change it?" — the outlook
+
+| Metric | In plain English |
+|---|---|
+| [Career arc](#career-arc--r----rank) | Is the calendar with him or against him |
+
+### 6. "When do his points arrive?" — format, not talent
+
+**A player never makes or misses a list because of his December schedule.** This
+family SORTS a shortlist. It never builds one.
+
+| Metric | In plain English |
+|---|---|
+| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | How generous his opponents are. The least stable input in the building |
+
+### 7. Considered and not built
+
+| Metric | Why not |
+|---|---|
+| [Offensive line rank](#offensive-line-rank--r----rank) | No free per-player data, and team pressure rate is confounded by the quarterback |
+| [Player-level motion](#player-level-motion--r----rank) | The feed says the OFFENCE used motion, never which player moved |
+
+### The two rankings, and why they disagree
+
+**Importance** is how causal a metric is. **Stickiness** is whether last year's
+number is still true. They are different axes and the app needs both.
+
+| | High stickiness | Low stickiness |
+|---|---|---|
+| **High importance** | targets/gm · air yards share · TPRR · QB rush att | **role change · vacated targets · dated news** |
+| **Low importance** | (a jersey number would score 1.00) | RB yards per carry · man/zone edge |
+
+**Top-left is your default assumption. Top-right is what overrides it.**
+
+Rank 1 is deliberately the least sticky family in the app. Two failure modes fall
+out of collapsing the axes:
+
+- **Rank by stickiness alone** and you project from last season forever, missing
+  every breakout the moment a role changes.
+- **Rank by importance alone** and you chase every camp report with no baseline
+  to weigh it against.
+
+### The order to work in, on the clock
+
+1. **Did something change?** News, trajectory, vacancy, team change. If yes, much
+   of what follows describes a job he no longer holds.
+2. **Volume floor.** Targets/gm and air yards share. Route share is the ceiling:
+   he cannot beat what he is not on the field for.
+3. **Is the volume earned?** TPRR and separation. **The divergence from step 2 is
+   the signal** — a high rate on modest volume is the contingency profile, the
+   reverse is a fed role one depth-chart move removes.
+4. **Scoring equity.** Red zone. Volume between the 20s and goal-line work are
+   different assets.
+5. **Ceiling shape.** Spike rate. Capped at ±0.5 in the grade for a reason.
+6. **Schedule.** Sorts the shortlist. Never builds it.
+
+---
+
+## §14 · Seasonal coverage — what the app is for, and when
+
+> **Audited against the code on Sep 1 2026, not asserted.** Re-audit before
+> trusting this section; it describes an architecture that is being changed.
+
+The app was built for draft season and its architecture says so. That is worth
+stating plainly, because every gap below follows from it.
+
+### Draft season — complete
+
+26 inputs, 14 tournament configs, best-ball ADP from a like-for-like source,
+stack geometry, positional archetypes, the playoff-schedule engine. Nothing
+material missing.
+
+### In season — the machinery exists and points at the wrong weeks
+
+**THE SINGLE LARGEST FINDING: "today" existed and reached exactly one panel.**
+
+⚠️ **A first pass of this audit reported that no current-week state existed
+anywhere. That was wrong** — `getNflWeek()` has been in the file since before
+this audit, deriving the week from `SEASON_START`. The grep that produced the
+claim was case-sensitive and missed it. Corrected here rather than quietly, per
+the same rule that governs a stale verdict.
+
+What was actually true:
+
+- `lineupConfidence` computes start/sit intel for **all 17 weeks**. Built, works.
+- `getNflWeek()` existed with **exactly one consumer**: the redraft lineup-
+  confidence week strip.
+- **The AI prompt ignored it entirely** and filtered to `week >= 15`.
+- Nothing else consumed it: not the weekly grid, not bench moves, not best ball,
+  not the data-vintage footer.
+- It is **calendar-derived**, so it says Week 8 whether or not the weekly data
+  refresh has been run since Week 3.
+
+So the app knew the date and almost nothing acted on it, and what did act on it
+could not tell the reader its data was stale.
+
+**Closed Sep 1 2026.** `seasonNow()` is now the single definition and carries
+the calendar week AND the data vintage together. Both AI prompts open by naming
+the week; the start/sit filter is `week >= 15 || week === current`; the lineup
+panel warns when the refresh has fallen behind. **A lag of exactly 1 is the
+healthy steady state** — after week N is played the data covers N and the
+decision is N+1 — so only a larger gap warns. Guard 24.
+
+**Four remaining gaps, in priority order:**
+
+| # | Gap | Why it matters |
+|---|---|---|
+| 1 | **No free-agent pool** | The app grades a roster you already hold. The #1 weekly job in redraft is "who do I add," and nothing ranks players you do NOT roster |
+| 2 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days |
+| 3 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
+| 4 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
+
+**Closed Sep 1 2026: the anchors now update.** `volume_2026.json` is a
+context-only twin of the frozen scored file, carrying targets/gm, target share,
+air yards share, WOPR and carries/gm on the current season. It costs no extra
+network — the weekly job already downloads `stats_player_week_<season>.csv` for
+the QB profile and the game logs, so this is a third parse of a file on disk.
+Red-zone share and TPRR are NOT twinned, because they need the pbp and
+participation releases, which are large weekly downloads. That trade has not
+been made.
+
+### Offseason — better covered than it looks
+
+Vacated targets, career arc with draft capital, coaching adjustments and the
+situations corpus already make a real offseason toolkit: *who left, who aged, who
+changed staff, whose role opened.* What is missing is **rookie evaluation** (no
+prospect model; draft capital exists in `career_arc` and nothing else does) and
+**dynasty value curves**.
+
+### ⚠️ The constraint that shapes every in-season answer
+
+**`player_metrics_2025.json` is frozen all season and must stay frozen.** It
+feeds four scored inputs, so refreshing it would move every grade for reasons
+unrelated to the roster and silently invalidate every calibration on file.
+
+The consequence is easy to miss: **the scored anchors describe LAST season for
+the whole of this one.** The fix is never to thaw the frozen file. It is to ship
+a **context-only current-season twin** and render both vintages, which is the
+same pattern `snap_trajectory`, `qb_profile` and `gamelogs` already use.
+
+**Both vintages are always shown. Never swapped.** "38% in 2025, 61% through W7"
+says more than either number alone, and a layer that silently changes which year
+it describes is the stale-data trap in a new costume.
 
 ### One closing observation
 

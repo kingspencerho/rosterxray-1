@@ -1,0 +1,32 @@
+{
+ "_meta": {
+  "context_only": true,
+  "counts": {
+   "QB": 0,
+   "RB": 0,
+   "TE": 0,
+   "WR": 0
+  },
+  "denominator": "team targets/air yards summed over GAMES PLAYED, never the full season",
+  "hierarchy_rank": {
+   "all": "2 \u2014 opportunity volume"
+  },
+  "min_gp": 2,
+  "pairs_with": {
+   "file": "player_metrics_2025.json",
+   "rule": "BOTH vintages render, always. The prior season is never overwritten and the current one never silently replaces it."
+  },
+  "season": 2026,
+  "season_complete": false,
+  "source": "nflverse stats_player (weekly, REG only)",
+  "stability": {
+   "ay_sh": 0.78,
+   "car_pg": 0.73,
+   "tgt_pg": 0.774,
+   "tgt_sh": 0.729,
+   "wopr": 0.752
+  },
+  "weeks_covered": 0
+ },
+ "players": {}
+}

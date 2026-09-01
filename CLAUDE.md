@@ -548,7 +548,7 @@ Governs how competing signals get weighed in any player evaluation, breakout lis
 
 ### Metric hierarchy (most → least predictive for projection)
 1. **Role/opportunity CHANGE** — vacated targets/alignment, confirmed role moves, draft capital, coaching scheme fit. Most causal, freshest.
-2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. Target/air-yard shares are computed over GAMES PLAYED (full-season denominators understated partial-season players until Jul 16, 2026). (True YPRR/TPRR and route participation would slot here — no public routes data exists, the NFL participation feed died after 2023; `snap_sh` in player_metrics is the route-participation proxy, and WOPR + target share proxy per-route volume. Volume ceiling = routes x TPRR, so a low snap/route share caps everything else — the Josh Downs gate.)
+2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. Target/air-yard shares are computed over GAMES PLAYED (full-season denominators understated partial-season players until Jul 16, 2026). (TPRR and true route participation slot here. ⚠️ **CORRECTED Sep 1 2026: the claim that the participation feed died after 2023 was FALSE and shaped several decisions before it was checked.** `nflreadpy.load_participation()` returns 2025 with 45,184 rows, and its `offense_players` column is populated on 100% of them, so routes run and therefore TPRR ARE computable for free — verified by computing them: Nacua 35.3%, JSN 33.3%, ARSB 30.2%, Chase 29.2%. `snap_sh` remains the shipped proxy because no TPRR layer is built yet, not because none can be. Volume ceiling = routes x TPRR, so a low route share caps everything else — the Josh Downs gate.)
 3. **Talent-in-isolation** — charting success rates, prospect-model scores, breakout-age priors. Identifies who deserves volume before they get it.
 4. **Ceiling shape** — spike/usable/dud/nuclear week rates. Descriptive of last season; use for best-ball classification, not projection.
 5. **Matchup data (FPA)** — least stable input. Format decisions only.
@@ -4214,7 +4214,7 @@ Week 1.
 | Availability rate | — | Every metric here is per-game; nothing expresses "he plays" |
 | Red-zone target share | — | Lens 1 calls it standalone scoring equity and the app cannot see it |
 | Carries per game (RB) | 0.730 | `build-player-metrics.py` emits no carry count |
-| Targets per route run | — | **Paywalled.** No free routes source since the 2023 feed died. Never substitute target share for it. |
+| Targets per route run | 0.674 | **SHIPPED Sep 1 2026** — `routes_2025.json`. Never substitute target share for it. |
 | Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
 
 ### SHIPPED Aug 31 2026: the two free anchors now reach the model
@@ -4741,3 +4741,322 @@ fallback.
 - Every date pinned to a primary source; where only a month was confirmable, the
   month-only form is used rather than an invented day.
 - `report-stale-news.mjs` returns **zero** players past the 45-day rule.
+
+
+---
+
+## The Participation Feed Is Alive, and Two "Impossible" Layers Are Not (Sep 1, 2026)
+
+Prompted by a user asking whether man/zone coverage data exists anywhere outside
+PFF. Checking instead of repeating this file's own claim found that **two of the
+Tier C rejections in `ANALYST-REFERENCE.md` were wrong**, and had been shaping
+decisions for weeks.
+
+### What this file said, and what is actually true
+
+| Claim here | Reality, verified Sep 1 2026 |
+|---|---|
+| "the NFL participation feed died after 2023" | `load_participation(2025)` returns **45,184 rows** |
+| "no public routes data exists" | `offense_players` is populated on **100%** of them |
+| "TPRR — paywalled, no free routes source" | **Computed it.** Nacua 35.3%, JSN 33.3%, Chase 29.2% |
+| "man/zone splits — paywalled" | `defense_man_zone_type` on **22,055 classified 2025 pass plays** |
+
+The participation release also carries `defense_coverage_type` (COVER_0/1/2/3/4/6,
+2_MAN), `route`, `time_to_throw`, `was_pressure`, `ngs_air_yards`,
+`offense_formation` and `offense_personnel`.
+
+**FTN charting is a separate release and has no coverage field**, but it does
+carry `is_contested_ball`, `is_created_reception`, `is_catchable_ball`,
+`is_drop`, `n_blitzers` and `n_pass_rushers` — none of which are used yet.
+
+### How the wrong claim survived
+
+It was written once, was plausible (the feed genuinely had a gap), and was then
+**cited rather than re-tested** — including by me, in the sentence rejecting the
+man/zone split as impossible. **A "this is impossible" note ages exactly like a
+player verdict and has no freshness rule on it.** The 30-45 day re-validation
+rule covers `RECENT_NEWS`; nothing covered a data-availability claim.
+
+**Rule this produces: a Tier C rejection must carry the date it was last
+verified, and re-checking a feed costs one command.**
+
+### What the coverage data says about the question that prompted it
+
+Tee Higgins' reputation is as a man-coverage beater. Measured on 2025 targets
+with a classified coverage:
+
+```
+Tee Higgins    man 7.79 y/t on 43 targets  |  zone 9.57 on 56  |  edge −1.78
+```
+
+**The reputation is not supported by this measure.** Nor is it a Cincinnati
+artefact — Chase runs −2.22 on the same offence.
+
+⚠️ **But read the leaderboard before trusting the metric.** The top of it is
+James Cook +11.41, D'Andre Swift +9.97, Jaylen Warren +7.24, Saquon Barkley
++6.40 — **running backs**, because man coverage puts a linebacker on a back and
+that is a mismatch rather than a route-winning skill. So yards per target against
+man measures MISMATCH EXPLOITATION at least as much as it measures beating man,
+and it inherits the same aDOT confound separation has. Treat it as a screen.
+
+### Nothing was built here
+
+This is a correction to the record and a verified availability note, not a layer.
+Building TPRR or coverage splits properly means a builder script, a stability
+measurement, percentile populations, prompt wiring and a containment guard — the
+same bar every other layer cleared. The point of this entry is that the door is
+open, and this file said it was locked.
+
+
+---
+
+## TPRR and Man/Zone Coverage Built (Sep 1, 2026)
+
+Both items the previous section corrected out of Tier C are now layers.
+**CONTEXT ONLY — 51 grades byte-identical** (14 tournaments x 3 fixtures, plus
+9 redraft). Guarded by the additions to `scripts/test-context-layers.mjs`.
+
+| File | Script | Answers |
+|---|---|---|
+| `routes_2025.json` | `build-routes.py` | how often is he thrown at per route he runs |
+| `coverage_2025.json` | `build-coverage.py` | what did he do against man versus zone |
+
+One `participation` release feeds both, the same economy the game-log layer got
+from the weekly stats file.
+
+### THE MEASUREMENT DECIDED WHAT SHIPPED, AND IT SPLIT THE TWO APART
+
+Both were built, then measured across 23>24 and 24>25 before either was wired to
+anything:
+
+```
+route_sh   0.756   anchor-adjacent
+tprr       0.674   reliable — above dud rate (0.667) and separation (0.663)
+man_rate   0.335   weak
+ypt_zone   0.294   weak
+ypt_man    0.235   weak
+edge       0.161   COIN FLIP
+```
+
+So **TPRR ships as a real rank-2 input, in the prompt and on the card. The
+man/zone edge ships as REFERENCE the model never sees.** At 0.161 it sits beside
+RB yards per carry and below every number already in the prompt — including
+per-touch efficiency, which is carried only with explicit warnings. **Warning a
+model about a coin flip is less reliable than not handing it the number**, so
+`getCoverage` has exactly one consumer and it is the player card. The guard
+asserts that, and a `coverageContext` builder fails the run.
+
+Neither outcome was knowable in advance. Building both and then deciding is what
+kept the coin flip out of the prompt.
+
+### `route_sh` is a DENOMINATOR, not a second signal
+
+It correlates with `snap_sh` at **r=0.957 (WR 0.966)** — the same input. Per the
+reference file's own rule, a second entry saying the same thing does not get
+added; it is emitted because a rate without its sample is unreadable, and the
+card row carries a neutral `≈ restates snap share` mark so nobody counts two
+findings where there is one.
+
+**A new `echo` prop was needed rather than reusing `caution`.** On this card
+`caution` is gold and means THIS NUMBER DISAGREES with another one — a real
+conflict. `echo` is neutral and means THIS NUMBER RESTATES one. Spending the
+gold mark on a non-conflict devalues it everywhere it appears.
+
+TPRR itself is **not** a restatement of volume: r=0.871 against targets per game,
+0.817 against target share. Correlated, as it must be, and the divergences are
+the point — high rate on ordinary volume is the contingency profile, the reverse
+is a fed role a depth-chart change removes.
+
+### ⚠️ THE DENOMINATOR IS PASS SNAPS, NOT CHARTED ROUTES
+
+Participation records who was ON THE FIELD, never who released into a pattern.
+For a WR they are nearly the same; for a blocking TE or a protecting back they
+are not, so protection snaps deflate the rate. RB/TE cards carry the caveat and
+only they do, and the stability is weaker there too (RB 0.515 vs WR/TE 0.687).
+
+### ⚠️ A SEASON-LEVEL PRIMARY TEAM BREAKS EVERY MID-SEASON MOVER
+
+The first denominator assigned each player one team for the year and produced
+route shares **above 1.0** — Rashid Shaheed at 1.368. Team dropbacks are now
+counted per (player, game). **Any denominator built from a season-level team
+assignment is wrong for exactly the players whose role changed**, which is the
+population that matters most. The guard asserts no route share exceeds 1.0.
+
+### ⚠️ THE MAN/ZONE EDGE IS NOT CENTRED ON ZERO
+
+Man coverage suppresses yards per target league-wide, so almost everyone is
+negative: **WR median -1.48, TE median -1.10.** A receiver at -1.2 is ABOVE his
+position median.
+
+**This corrects what was reported to the user earlier the same day.** Tee
+Higgins' -1.78 was read as "the man-beater reputation is not supported"; it is
+the **44th percentile of qualified WRs**, which is ORDINARY, not poor. Reading
+the bare sign mis-reads most of the league. The card now refuses to print an edge
+without a percentile and the position median.
+
+**A second claim from that reading also did not survive.** An ungated pass
+produced a leaderboard topped by running backs at +6 to +11 (Cook +11.41, Swift
++9.97, Barkley +6.40) and the RB mismatch was reported at that magnitude. At the
+15-target-per-bucket gate those were single-digit samples and vanish: the real
+qualified RB pool is 7, top edge +2.48. **The direction is real, the magnitude
+was noise. Gate first, then look at the leaderboard.**
+
+### The note must not point at a number that is not on screen
+
+Only **7 RBs** clear the split gate, below the 12-player ranking minimum, so RB
+cards show no percentile — while the note still said "read the percentile, never
+the sign." A note instructing the reader to use something absent is the same
+defect class as a label disagreeing with its own value. The note now branches and
+names the pool size. Guard asserts both branches, and that at least one position
+really is below the minimum so the branch is not dead code.
+
+### FIVE percentile populations now, five printed gates
+
+```
+CARD_PERCENTILES     draftable, 8+ games       Opportunity, Week outcomes
+NGS_PERCENTILES      40+ targets 2025          Deployment
+RZ_PERCENTILES       5+ red-zone opportunities Red zone
+ROUTES_PERCENTILES   100+ routes 2025          Route workload
+COV_PERCENTILES      15+ tgts vs each coverage Man vs zone
+```
+
+Merging any two prints a rank under a population label that does not describe it.
+
+### ⚠️ A `## ` HEADER WAS SWALLOWED BY A `### ` CUT — AGAIN
+
+Moving the two entries out of Tier B used a cut that ran to the next `### `
+heading. The last entry in a section has no following `### `, so the cut ran
+through `## §7 · Tier C` and deleted the section header and its intro. **This is
+the third instance of the swallowed-block failure recorded in this file**, and
+the first that a guard caught rather than a human noticing weeks later — guard 23
+failed on "sections exist and are in order" immediately. **When cutting a block
+by heading, anchor the end on `^(### |## )`, not on the child level alone.**
+
+### Regenerate
+
+```
+pip install nflreadpy      # participation ships parquet-only; there is no csv.gz asset
+python3 scripts/build-routes.py   --season 2025 --out grading/data/routes_2025.json
+python3 scripts/build-coverage.py --season 2025 --out grading/data/coverage_2025.json
+```
+
+Both are ANNUAL under the split refresh cadence. Neither feeds a scored input.
+
+### Also verified in a real browser
+
+Rendered at 430px: Route workload and Man vs zone both present, the blocking
+caveat fires on RB and TE cards and not on WR, The Read picks up TPRR at the
+tails only, **0 tap targets under 32px, 0 page errors.** Five failure paths
+negative-tested — a scoring leak, coverage promoted to a bright group, a
+coverage prompt builder, route share losing its restatement mark, and TPRR
+ranked against the card's population — all exit non-zero.
+
+
+---
+
+## The In-Season Transition (Sep 1, 2026)
+
+Two builds that turn a draft-season tool into one that says something useful in
+October. **CONTEXT AND PRESENTATION ONLY — 51 grades byte-identical.** Guards 15
+(extended) and 24 (new).
+
+### 1. The app knew the date and almost nothing acted on it
+
+⚠️ **An audit earlier the same day reported "no current-week state exists
+anywhere in App.jsx." That was FALSE**, and the grep that produced it was
+case-sensitive and missed `getNflWeek`. Corrected in `ANALYST-REFERENCE.md` §14
+rather than quietly. What was actually true:
+
+- `lineupConfidence` computed start/sit intel for **all 17 weeks**.
+- `getNflWeek()` existed with **exactly one consumer**, the redraft week strip.
+- **The AI prompt ignored it** and filtered to `wk.week >= 15` unconditionally,
+  so from September to December the model was handed December's start/sit calls
+  and nothing about the week being played.
+- It is calendar-derived, so it said Week 8 whether or not the weekly refresh
+  had been run since Week 3.
+
+**`seasonNow()` is now the single definition** and carries the calendar week AND
+the data vintage together, because they answer different questions and only one
+of them is on a clock.
+
+```
+const seasonNow = (now) => { week, inSeason, dataWeeks, lag, stale }
+```
+
+**⚠️ A LAG OF EXACTLY 1 IS THE HEALTHY STEADY STATE, NOT A WARNING.** After week
+N is played the refresh covers N and the decision in front of the user is N+1.
+A guard or a banner that fired on the steady state would train everyone to
+ignore it. Only a larger gap warns, and the warning names both numbers.
+
+Both prompts now open with `whenContext`: the week, what the in-season data
+covers, and an explicit line when that data is behind. Out of season the string
+says the season has not started and every number is 2025, which is what the
+model needed to stop writing about an October roster as though the draft had
+just finished.
+
+### 2. The frozen scored file made the anchors describe last season all year
+
+`player_metrics_2025.json` feeds four scored inputs and is frozen on purpose.
+The consequence is easy to miss: **targets/gm (r=0.77), air yards share (0.78)
+and target share (0.73) — the anchors everything else leans on — described 2025
+for the whole of 2026.**
+
+**The fix is never to thaw the frozen file.** `build-volume-current.py` emits
+`volume_<season>.json`, a CONTEXT twin of the same measurements on the current
+season. Both vintages render, never swapped, exactly as trajectory, QB profile
+and game logs already do.
+
+**It costs no extra network.** `refresh-inseason.sh` already downloads
+`stats_player_week_<season>.csv` for two builders; this is a third parse of a
+file on disk. Red-zone share and TPRR are deliberately NOT twinned — they need
+the pbp and participation releases, which are large weekly downloads.
+
+### ⚠️ THE DRY RUN FOUND A REAL BUG IN THE FROZEN FILE
+
+Validating the twin against 2025 (mean abs diff on `tgt_sh`: **0.0056**)
+surfaced nine players who disagree by more than five points, **all mid-season
+movers, all inflated in the scored file**:
+
+```
+brandin cooks     scored 0.293   correct 0.089
+rashid shaheed    scored 0.341   correct 0.167
+adonai mitchell   scored 0.312   correct 0.150
+jakobi meyers     scored 0.372   correct 0.228
+adam thielen      scored 0.179   correct 0.078
++ 4 more
+```
+
+Cooks had 36 targets across 13 games in which his teams threw 403 times. That is
+**8.9%**, and 29.3% would require his offence to have thrown 9.5 times a game.
+`build-player-metrics.py` divides a traded player's full-season targets by a
+single team's totals.
+
+**It has never moved a grade** — verified: neither `analyzeRoster` nor
+`analyzeRedraft` reads `tgt_sh`, which is context. It reached the AI prompt and
+the card, and shipping the twin corrects those nine players this season.
+
+**The frozen file stays frozen anyway.** Its scored fields are unaffected and
+regenerating it mid-season is the thing the whole cadence exists to prevent. Fix
+it in the next legitimate regeneration, not now.
+
+### Two rendering rules the guard pins
+
+1. **The current figure NEVER carries a percentile.** `CARD_PERCENTILES` is
+   built from the 2025 population; ranking a partial season against it prints a
+   rank under a population that does not describe it. The number shows, the rank
+   does not, and the section note says why.
+2. **Both values render on ONE row, current second, with an arrow.** One value
+   slot means one vintage and the reader cannot tell which season they are
+   looking at. `11.6 → 12.4` with the note naming both seasons is the finding.
+
+### Verified
+
+```
+51 grades byte-identical · 25 guards pass · dual-file identical
+Live-season dry run: 2025 rows relabelled as "2026 through W8" render
+  Targets / game  11.6→12.4   Air yards share 35%→42%
+  Target share    32%→36%     WOPR 0.72→0.84
+  Snap share      94% (no twin — needs snap counts, correctly absent)
+Placeholder restored afterwards; refresh-inseason.sh no-ops before Week 1.
+Six failure paths negative-tested across guards 15 and 24.
+```
