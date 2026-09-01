@@ -1563,6 +1563,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | The Rottweiler added — the first format whose two weekly gates are exactly equal |
 | Sep 1 2026 | §14a — the three open in-season gaps, written as a handoff |
 | Sep 1 2026 | Waiver-target pool: the first feature that ranks players you do NOT roster |
 | Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
@@ -1574,7 +1575,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
 | Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
-| Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 
 ---
 
