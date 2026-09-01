@@ -1338,6 +1338,51 @@ everyone:
 explains the past and never forecasts · a rookie returns a stated reason, never
 an empty answer or a guess.
 
+#### `/predraft` — `.claude/skills/predraft/SKILL.md`
+
+**Triggers on:** being about to draft or grade for real. Also *"predraft"*,
+*"is the data current"*, *"check the data"*, *"what's stale"*.
+
+**Does:** runs the four read-only reports in order — `report-stale-news.mjs`,
+`refresh-adp.py` (both tables), `refresh-inseason.sh`, `npm test` — and reports
+current / drifted / stale per layer.
+
+**Exists because** §9's *"run before any draft"* instruction on
+`report-stale-news.mjs` was a table row inside a 1,700-line file, which is a
+place instructions go to be unread. **It reads and never writes**; applying any
+drift stays a deliberate act.
+
+⚠️ **A pass is narrower than it looks.** It ages notes against the clock. It
+cannot tell you a note is WRONG, only that it is OLD — and a note written
+yesterday and already inverted by a transaction reports as current. That gap is
+GAP 1 in §14a and this skill does not close it.
+
+#### `/notecheck` — `.claude/skills/notecheck/SKILL.md`
+
+**Triggers on:** adding, editing or reviewing any `RECENT_NEWS` / `SITUATIONS`
+entry, `trendNote`, verdict or reason. Also *"notecheck"*, *"check this note"*.
+
+**Does:** seven checks in order — team against `ADP_DATA` ([R1](#data),
+[R10](#prose)) · date present, real and the note's own ([R8](#prose),
+[R9](#prose)) · no superseded claim restated inside the correction
+([R7](#prose)) · assertion weighed against its evidence · label agrees with its
+own number ([R13](#code)) · borrowed priors declared ([R4](#data)) · hierarchy,
+where role CHANGE outranks every number.
+
+**Exists because** this is the most repeated failure class in the repo — the
+seven wrong notes in the Aug 3 2026 re-validation, the Diggs bug that returned
+*because the correction quoted the superseded claim*, the eleven role and injury
+corrections on the draft-report branch, and the stale-team-label class. The
+rules were already written; nothing ran them. `test-stale-verdicts`,
+`test-player-data` and `test-no-quoted-negations` cover the mechanical half.
+**This is the judgement half.**
+
+⚠️ **The reason it outranks its apparent size:** `RECENT_NEWS` reaches the model
+under the header *"breaking updates — override everything above for these
+players"*, which makes it the **highest-authority block in the prompt**, above
+the situations block labelled ground truth. A wrong note overrules the metrics
+rather than sitting beside them.
+
 ### CLI
 
 | Command | What it does |
