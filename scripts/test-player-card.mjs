@@ -441,6 +441,54 @@ for (const k of ["absence", "redzone", "deployment", "trajectory"]) {
 for (const k of ["availability", "arc", "vacated", "news"]) {
   ok(`${k} sits with the outlook group`, groups[k] === "outlook", groups[k]);
 }
+// ---- AN ABSENT AVAILABILITY RATE MUST STATE ITS REASON ----
+// ⚠️ THIS IS THE ONE LAYER WHERE ABSENCE INVERTS. The population is gated to
+// players with 2+ seasons who held an 8+ game role at least once. Both gates
+// are right — without the first, the league median came out at 25% and was
+// measuring roster churn. But the consequence is that the metric built to
+// measure availability SILENTLY OMITS THE PLAYERS WHOSE AVAILABILITY IS MOST IN
+// QUESTION: a back too fragile to ever hold a role never qualifies for the
+// durability number, so the section rendered nothing and a reader could not
+// tell "no data" from "no concern".
+//
+// THE TWO EXCLUSIONS MEAN OPPOSITE THINGS and the guard keeps them apart:
+//   2+ seasons, still no row  -> he never held the role. THE FINDING.
+//   under 2 seasons on file   -> sample size. NOT a durability signal, and
+//                                conflating them would libel every rookie.
+console.log("\nan absent on-field rate states its reason");
+{
+  const rows = draftable.map(([n, v]) => [n, v, e.buildPlayerCard(n, v.pos, v.team)]);
+  const missing = rows.filter(([, , c]) => !c.availability);
+  ok("some draftable players are excluded from the population", missing.length > 0);
+  ok("EVERY excluded player carries a stated reason",
+    missing.every(([, , c]) => typeof c.availabilityReason === "string" && c.availabilityReason.length > 20),
+    missing.filter(([, , c]) => !c.availabilityReason).map(([n]) => n).slice(0, 5).join(", "));
+  ok("no player carries both a rate and a reason",
+    !rows.some(([, , c]) => c.availability && c.availabilityReason));
+
+  const never = missing.filter(([, , c]) => /never held/.test(c.availabilityReason));
+  const thin = missing.filter(([, , c]) => /sample-size limit/.test(c.availabilityReason));
+  ok("the never-held-a-role branch is exercised by real players", never.length > 0,
+    "if nothing reaches it the branch is dead code and the finding is invisible");
+  ok("the sample-size branch is exercised too", thin.length > 0);
+  ok("the two branches are disjoint", !missing.some(([, , c]) =>
+    /never held/.test(c.availabilityReason) && /sample-size limit/.test(c.availabilityReason)));
+  // A rookie must never be described as failing a durability gate.
+  ok("a player with no NFL seasons is called sample size, never a durability finding",
+    never.every(([n, , c]) => !/no NFL seasons yet/.test(c.availabilityReason)));
+  ok("the sample-size wording disclaims any durability reading",
+    thin.every(([, , c]) => /says nothing about his durability/.test(c.availabilityReason)));
+  // The section must actually render on this branch, or the reason is unread.
+  ok("the excluded branch renders the section",
+    /!card\.availability && card\.availabilityReason && \(/.test(app));
+  ok("...and prints the population gate beside it",
+    /card\.availabilityGates\?\.established_games/.test(app));
+  // The gate numbers come from the data file, never hand-typed a second time.
+  ok("the reason reads its thresholds from _meta.gates",
+    /AVAILABILITY\._meta\.gates/.test(app),
+    "a second hand-typed 8 is the duplicate-definition class this repo has hit six times");
+}
+
 // Efficiency is descriptive of 2025 and would read as production, but it belongs
 // with reference for the same reason the glossary does: it is consulted, never
 // concluded from. Brightness on this card means "this should move your opinion".
