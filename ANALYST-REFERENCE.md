@@ -1501,6 +1501,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Waiver-target pool: the first feature that ranks players you do NOT roster |
 | Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
 | Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
 | Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
@@ -1512,7 +1513,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
-| Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
 
 ---
 
@@ -1693,10 +1693,21 @@ decision is N+1 — so only a larger gap warns. Guard 24.
 
 | # | Gap | Why it matters |
 |---|---|---|
-| 1 | **No free-agent pool** | The app grades a roster you already hold. The #1 weekly job in redraft is "who do I add," and nothing ranks players you do NOT roster |
+| ~~1~~ | ~~No free-agent pool~~ | **CLOSED Sep 1 2026** — see below |
 | 2 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days |
 | 3 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
 | 4 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
+
+**Closed Sep 1 2026: the waiver pool.** `buildFreeAgentPool` ranks every player
+not on your roster, scored on role change, volume, targets per route,
+availability and separation — Source Hierarchy order, **with matchup data
+deliberately absent from the score.** Redraft only: Underdog best-ball rosters
+lock after the draft, so a waiver pool there is a feature that cannot be acted on.
+
+**⚠️ It states its own limit on screen, because the limit is real: the app does
+not know the other rosters in your league.** It ranks players not on YOUR roster
+that a league of this depth plausibly leaves unrostered, and offers an exclusion
+box rather than pretending to see a waiver wire it cannot. Guard 25.
 
 **Closed Sep 1 2026: the anchors now update.** `volume_2026.json` is a
 context-only twin of the frozen scored file, carrying targets/gm, target share,

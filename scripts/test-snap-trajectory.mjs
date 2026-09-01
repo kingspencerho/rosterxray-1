@@ -58,6 +58,14 @@ const ALLOWED_CONSUMERS = [
   // analyzed.allStarters; sits at module level, outside both scoring paths,
   // which the analyzeRoster/analyzeRedraft assertions below keep true.
   { name: "buildRoleContext", start: "const buildRoleContext", end: "\n  return out;" },
+  // Reviewed Sep 1 2026: the redraft waiver-target ranking. Role CHANGE is
+  // rank 1 in the Source Hierarchy and is the heaviest component of that score,
+  // which is exactly why it reads this layer. It sits at module level and is
+  // invoked from the REACT COMPONENT rather than from analyzeRedraft — the pool
+  // reads six context layers and putting it inside the engine would have made
+  // the engine unprovable. The analyzeRoster/analyzeRedraft assertions below
+  // are what keep that true.
+  { name: "scoreFreeAgent", start: "const scoreFreeAgent", end: "\n};" },
 ];
 const uses = [...app.matchAll(/getSnapTrend\(/g)].length;
 ok(`getSnapTrend has exactly ${ALLOWED_CONSUMERS.length} call sites`, uses === ALLOWED_CONSUMERS.length,

@@ -7151,6 +7151,197 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   };
 };
 
+// ============ FREE-AGENT POOL (redraft only, CONTEXT ONLY) ============
+//
+// THE GAP THIS CLOSES. Every layer in this app describes a player who is
+// already on your roster. The single most common in-season decision — "who do
+// I add this week" — had no support at all, because nothing ranked players you
+// do NOT roster.
+//
+// ⚠️ BEST BALL IS DELIBERATELY OUT OF SCOPE. Underdog rosters lock after the
+// draft; there are no waivers, so a free-agent pool there would be a feature
+// that cannot be acted on. Redraft only.
+//
+// ⚠️⚠️ THE HONEST LIMIT, STATED IN THE UI AS WELL AS HERE: **THE APP CANNOT
+// KNOW WHO IS ACTUALLY AVAILABLE IN YOUR LEAGUE.** It knows your roster and it
+// knows the player universe. It does not know the other eleven rosters. So this
+// ranks "players who are not on YOUR roster", biased toward the ones a league
+// of this size plausibly leaves unrostered, and the reader still has to check
+// their own waiver wire. Presenting it as "your best available add" would be
+// asserting something the app cannot see. The optional exclusion list is how a
+// user closes that gap by hand.
+//
+// SCORING FOLLOWS THE SOURCE HIERARCHY, AND MATCHUP DATA IS ABSENT FROM IT.
+// Rank 5 is the least stable input measured here (WR FPA is NEGATIVE year over
+// year), so a schedule must never GENERATE a shortlist — it may only sort one.
+// The opponent is shown beside each candidate as an annotation and contributes
+// zero to the score. Same rule that keeps man/zone coverage out of the prompt.
+const FA_WEIGHTS = {
+  roleChange:   3.0,   // rank 1 — the most causal thing you can know
+  vacancy:      1.0,   // rank 1, but team-level, so it locates an opening only
+  volume:       2.0,   // rank 2 — targets or carries per game
+  tprr:         1.5,   // rank 2 — the per-opportunity rate
+  availability: 1.0,   // rank 2 — a per-game rate assumes he plays
+  separation:   0.75,  // rank 3 — talent in isolation
+};
+
+// Percentile of `v` within `arr` (pre-sorted ascending). Returns null under a
+// 12-player pool, the same floor every other ranking in this app uses: a rank
+// against eight players is a flattering number, not information.
+const faPct = (arr, v) => {
+  if (!arr || arr.length < 12 || v == null) return null;
+  let below = 0;
+  for (const x of arr) { if (x < v) below++; else break; }
+  return below / arr.length;
+};
+
+// Position pools for the volume and TPRR components, built once from the same
+// data the cards use. Volume prefers the CURRENT season when the weekly refresh
+// has run — a Week 8 target rate is a better read on a Week 9 add than last
+// year's — and falls back to 2025 otherwise.
+const FA_POOLS = (() => {
+  const vol = {}, rate = {}, sep = {};
+  const push = (o, k, v) => { if (typeof v === "number") (o[k] ||= []).push(v); };
+  for (const [name, m] of Object.entries(PLAYER_METRICS)) {
+    if (!m || !m.gp || m.gp < 4) continue;
+    push(vol, m.pos, m.pos === "RB" ? null : m.tgt / m.gp);
+  }
+  for (const r of Object.values(ROUTES.players || {})) push(rate, r.pos, r.tprr);
+  for (const r of Object.values(NGS_RECEIVING.players || {})) push(sep, r.pos, r.sep);
+  for (const o of [vol, rate, sep]) for (const a of Object.values(o)) a.sort((x, y) => x - y);
+  return { vol, rate, sep };
+})();
+
+// One candidate's score, plus the EVIDENCE behind it. The reasons array is not
+// decoration: a ranked list a reader cannot audit is a black box, and the whole
+// argument of this app is that its numbers are checkable.
+const scoreFreeAgent = (name, pos, team) => {
+  const reasons = [];
+  let score = 0, has = 0;
+
+  const add = (key, unit, label) => {
+    if (unit == null) return;
+    score += unit * FA_WEIGHTS[key];
+    has++;
+    reasons.push({ key, label, unit });
+  };
+
+  // 1. ROLE CHANGE (rank 1). Current season first — this is exactly the signal
+  //    a season average buries, and it is why RJ Harvey graded fade on four
+  //    rosters off a 42% snap share while his real role had grown to 56%.
+  const trajCur = getSnapTrendCur(name);
+  const traj = trajCur || getSnapTrend(name);
+  if (traj && traj.trend === "rising" && traj.delta != null) {
+    const unit = Math.min(1, traj.delta / 0.30);
+    add("roleChange", unit,
+      `role growing — ${Math.round(traj.early * 100)}% of snaps early, ${Math.round(traj.late * 100)}% late${trajCur ? " (this season)" : " (2025)"}`);
+  }
+
+  // 2. TEAM VACANCY (rank 1, team-level). It locates an opening. It does NOT
+  //    say he is the one who fills it, and the label says so.
+  const vac = getVacated(team);
+  if (vac && typeof vac.vacated_pct === "number" && vac.vacated_pct >= 20) {
+    add("vacancy", Math.min(1, (vac.vacated_pct - 20) / 30),
+      `${Math.round(vac.vacated_pct)}% of ${team} targets left the roster — an opening, not a promise it is his`);
+  }
+
+  // 3. VOLUME (rank 2). Current season when live, else 2025.
+  const cur = getVolumeCur(name);
+  const m = getMetrics(name);
+  if (pos === "RB") {
+    const carPg = cur?.car_pg ?? null;
+    if (carPg != null && carPg >= 6) {
+      add("volume", Math.min(1, carPg / 16), `${carPg.toFixed(1)} carries a game this season`);
+    } else if (m?.hvt_pg >= 3) {
+      add("volume", Math.min(1, m.hvt_pg / 8), `${m.hvt_pg} high-value touches a game in 2025`);
+    }
+  } else {
+    const tpg = cur?.tgt_pg ?? (m?.gp ? m.tgt / m.gp : null);
+    const pct = faPct(FA_POOLS.vol[pos], tpg);
+    if (pct != null) add("volume", pct,
+      `${tpg.toFixed(1)} targets a game${cur ? " this season" : " in 2025"} — above ${Math.round(pct * 100)}% of ${pos}s`);
+  }
+
+  // 4. TPRR (rank 2). The per-opportunity rate, and the one that separates a
+  //    player earning looks in limited snaps from one nobody throws to.
+  const rt = getRoutes(name);
+  const rPct = faPct(FA_POOLS.rate[pos], rt?.tprr);
+  if (rPct != null) add("tprr", rPct,
+    `thrown at on ${(rt.tprr * 100).toFixed(1)}% of his routes — above ${Math.round(rPct * 100)}% of ${pos}s`);
+
+  // 5. AVAILABILITY (rank 2). Every other number here is a per-game rate, which
+  //    silently assumes he plays.
+  const av = getAvailability(name);
+  const med = AVAILABILITY._meta?.medians?.[pos];
+  if (av && med) {
+    const useVal = av.recent ?? av.career;
+    add("availability", Math.max(0, Math.min(1, (useVal - med) / (1 - med) )),
+      `on the field for ${Math.round(useVal * 100)}% of his team's games`);
+  }
+
+  // 6. SEPARATION (rank 3). The only talent-in-isolation input the app carries.
+  const ngs = getNgsRec(name);
+  const sPct = faPct(FA_POOLS.sep[pos], ngs?.sep);
+  if (sPct != null) add("separation", sPct,
+    `${ngs.sep.toFixed(2)} yds of separation — above ${Math.round(sPct * 100)}% of ${pos}s`);
+
+  // A candidate with one signal is not comparable to one with five. Normalise
+  // by the weight actually available so a thin profile cannot outrank a full
+  // one purely by having less to be measured on.
+  const maxAvail = reasons.reduce((t, r) => t + FA_WEIGHTS[r.key], 0);
+
+  // ⚠️ A REASON IS EVIDENCE *FOR* ADDING HIM, NOT EVERY NUMBER MEASURED.
+  // The first render listed "thrown at on 11.1% of his routes — above 21% of
+  // RBs" as a bullet under a recommendation. A 21st-percentile figure is an
+  // argument AGAINST, and printing it as support is the label-disagrees-with-
+  // its-own-number failure in a new costume. Weak signals still drag the score
+  // (that is what normalising is for); they just never get displayed as a case.
+  const SUPPORT = 0.4;
+  const support = reasons.filter(r => r.unit >= SUPPORT);
+  return {
+    score: maxAvail > 0 ? score / maxAvail : 0,
+    // The gate counts things that actually RECOMMEND him. Two supporting
+    // signals, not two signals of any kind.
+    coverage: support.length,
+    measured: has,
+    reasons: support.sort((a, b) => b.unit * FA_WEIGHTS[b.key] - a.unit * FA_WEIGHTS[a.key]),
+  };
+};
+
+// The pool itself. `excluded` is the user's optional "already taken" list.
+const buildFreeAgentPool = (rosteredKeys, league, adpTable, excluded = new Set()) => {
+  // How deep is this league actually rostered? teams x (starters + bench).
+  // Everything shallower than that is presumed taken, which is the honest
+  // default: a 12-team league with 13 spots has ~156 players off the board.
+  const starters = Object.values(league?.lineup || {}).reduce((a, b) => a + b, 0) || 7;
+  const depth = (league?.teams || 12) * (starters + (league?.benchSize || 6));
+
+  const out = [];
+  for (const [key, row] of Object.entries(adpTable)) {
+    if (!row || !row.pos || row.pos === "K" || row.pos === "DEF") continue;
+    // ⚠️ NO TEAM MEANS NO ROLE. Unsigned free agents carry "-" in the ADP
+    // tables and surfaced in the first render as waiver targets — Tyreek Hill
+    // ranked sixth while his own dated news entry says he will not sign before
+    // the season. A player with no team has no snap count, no opponent and no
+    // way to help this week.
+    if (!row.team || row.team === "-" || row.team === "FA") continue;
+    if (rosteredKeys.has(key) || excluded.has(key)) continue;
+    // Alias keys ("cmc", "jsn") would double-list a player under two names.
+    if (!key.includes(" ")) continue;
+    const scored = scoreFreeAgent(key, row.pos, row.team);
+    // Two signals minimum. One number is an anecdote, and a list built from
+    // anecdotes is worse than no list.
+    if (scored.coverage < 2) continue;
+    out.push({
+      name: key, pos: row.pos, team: row.team, adp: row.adp,
+      likelyRostered: typeof row.adp === "number" && row.adp <= depth,
+      ...scored,
+    });
+  }
+  out.sort((a, b) => b.score - a.score || (a.adp ?? 999) - (b.adp ?? 999));
+  return { depth, candidates: out };
+};
+
 // ============ CURRENT NFL WEEK ============
 // Season opener is the Thursday after Labor Day 2026.
 //
@@ -7807,6 +7998,7 @@ const SECTION_INDEX = {
     { id: "rxr-byeconflicts", label: "Byes" },
     { id: "rxr-playoffs",     label: "Playoffs" },
     { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-freeagents",   label: "Waivers" },
     { id: "rxr-bench",        label: "Bench" },
   ],
 };
@@ -8677,6 +8869,12 @@ export default function RosterScorer() {
   const [redraftDropdownOpen, setRedraftDropdownOpen] = useState(false);
   const [analysisMode, setAnalysisMode] = useState("bestball"); // "bestball" | "redraft"
   const [redraftLeague, setRedraftLeague] = useState("yahoo_std");
+  // FREE-AGENT POOL. Deliberately computed in the COMPONENT, not inside
+  // analyzeRedraft: the engine must stay provably clean of every context layer,
+  // and this reads six of them. Same architecture as buildPlayerCard.
+  const [faOpen, setFaOpen] = useState(false);
+  const [faTaken, setFaTaken] = useState("");
+  const [faPos, setFaPos] = useState("ALL");
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
   const [customExpanded, setCustomExpanded] = useState(false);
   const [benchExpanded, setBenchExpanded] = useState(false);
@@ -9027,6 +9225,20 @@ export default function RosterScorer() {
       })
       .catch(() => {});
   }, []);
+
+  const freeAgents = useMemo(() => {
+    if (!analyzed || analyzed.mode !== "redraft") return null;
+    const rostered = new Set((analyzed.valid || []).map(p => normalize(p.name)));
+    // The user's own "already taken" list. One name per line or comma
+    // separated; anything that resolves is excluded. This is the only way the
+    // app can learn about the other eleven rosters, so it is offered rather
+    // than assumed.
+    const taken = new Set(
+      faTaken.split(/[\n,]/).map(x => normalize(x.trim())).filter(Boolean)
+    );
+    const league = redraftLeague === "custom" ? buildLeagueFromConfig(customConfig) : REDRAFT_LEAGUES[redraftLeague];
+    return buildFreeAgentPool(rostered, league, ADP_YAHOO, taken);
+  }, [analyzed, faTaken, redraftLeague, customConfig]);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
   const resolveLeague = (leagueKey, cfg) => {
@@ -14944,6 +15156,129 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               ))}
             </div>
+
+            {/* === FREE-AGENT POOL === */}
+            {freeAgents && freeAgents.candidates.length > 0 && (() => {
+              const shown = freeAgents.candidates
+                .filter(c => faPos === "ALL" || c.pos === faPos)
+                .filter(c => !c.likelyRostered)
+                .slice(0, 12);
+              const deep = freeAgents.candidates.filter(c => !c.likelyRostered).length;
+              return (
+                <div style={{ marginBottom: "20px" }}>
+                  <SectionH2
+                    id="rxr-freeagents"
+                    title="WAIVER TARGETS"
+                    open={faOpen}
+                    onToggle={() => setFaOpen(o => !o)}
+                    hint={`${deep} ranked`}
+                  />
+                  {faOpen && (<>
+                    {/* ⚠️ THE LIMIT, STATED FIRST. The app knows your roster and
+                        the player universe. It does not know the other eleven
+                        rosters, so this cannot be "your best available add" and
+                        must not be worded as one. */}
+                    <div style={{
+                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-secondary)",
+                      background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
+                      borderRadius: "4px", padding: "9px 11px", marginBottom: "12px",
+                    }}>
+                      <strong style={{ color: "var(--text-primary)" }}>This app cannot see your league's waiver wire.</strong>{" "}
+                      It knows your roster and it knows every player; it does not know the other{" "}
+                      {(freeAgents.depth / 13).toFixed(0) - 1} rosters. So this ranks players who are
+                      not on <em>your</em> roster and who a {freeAgents.depth}-deep league plausibly leaves
+                      unrostered. Check the names against your actual wire, and paste anyone already
+                      taken below to drop them.
+                      <div style={{ marginTop: "7px", color: "var(--text-muted)" }}>
+                        Ranked on role change, volume, targets per route, availability and separation —
+                        in Source Hierarchy order. <strong style={{ color: "var(--text-secondary)" }}>Schedule is not
+                        in the score.</strong> Matchup data is the least stable input measured here, so it
+                        sorts a shortlist and never builds one.
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
+                      {["ALL", "RB", "WR", "TE", "QB"].map(pp => (
+                        <button
+                          key={pp}
+                          data-compact
+                          onClick={() => setFaPos(pp)}
+                          style={{
+                            fontSize: "11px", padding: "6px 11px", minHeight: "32px",
+                            borderRadius: "3px", cursor: "pointer", fontWeight: 700,
+                            letterSpacing: "0.04em",
+                            background: faPos === pp ? "var(--bg-elevated)" : "transparent",
+                            border: `1px solid ${faPos === pp ? "var(--border-default)" : "transparent"}`,
+                            color: faPos === pp ? "var(--text-primary)" : "var(--text-muted)",
+                          }}>
+                          {pp}
+                        </button>
+                      ))}
+                    </div>
+
+                    {shown.length === 0 ? (
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)", padding: "10px 0" }}>
+                        No {faPos === "ALL" ? "" : `${faPos} `}candidate clears the two-signal minimum.
+                        A ranking built on one number is an anecdote, so nothing is shown rather than
+                        something weak.
+                      </div>
+                    ) : shown.map((c, i) => (
+                      <div
+                        key={c.name}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openCard({ name: c.name, pos: c.pos, team: c.team })}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard({ name: c.name, pos: c.pos, team: c.team }); } }}
+                        aria-label={`Open player card for ${c.name}`}
+                        style={{
+                          padding: "10px 0", cursor: "pointer",
+                          borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
+                        }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", color: posColor(c.pos).text }}>
+                            {c.pos}
+                          </span>
+                          <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", textTransform: "capitalize" }}>
+                            {c.name}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.team}</span>
+                          <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>
+                            ADP {typeof c.adp === "number" ? c.adp.toFixed(0) : "—"}
+                          </span>
+                        </div>
+                        {/* THE EVIDENCE, NOT JUST THE RANK. A ranked list a reader
+                            cannot audit is a black box, and checkable numbers are
+                            the entire argument of this app. */}
+                        <ul style={{ margin: "5px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
+                          {c.reasons.slice(0, 3).map(r => (
+                            <li key={r.key} style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                              {r.label}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+
+                    <div style={{ marginTop: "12px" }}>
+                      <div style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--ui-accent)", fontWeight: 700, marginBottom: "5px" }}>
+                        ALREADY TAKEN IN YOUR LEAGUE
+                      </div>
+                      <textarea
+                        value={faTaken}
+                        onChange={(e) => setFaTaken(e.target.value)}
+                        placeholder={"One name per line, or comma separated.\nAnything you paste here drops out of the list above."}
+                        style={{
+                          width: "100%", minHeight: "62px", fontSize: "12px", padding: "8px",
+                          background: "var(--bg-raised)", color: "var(--text-primary)",
+                          border: "1px solid var(--border-default)", borderRadius: "3px",
+                          fontFamily: "inherit", resize: "vertical",
+                        }}
+                      />
+                    </div>
+                  </>)}
+                </div>
+              );
+            })()}
 
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
