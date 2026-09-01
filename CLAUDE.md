@@ -5152,3 +5152,62 @@ working as designed.
 
 News is hand-maintained, there is no opponent awareness in redraft, and
 `sos_2026.json` is a static full-season figure with no rest-of-season view.
+
+
+---
+
+## An Absent Availability Rate Now States Its Reason (Sep 1, 2026)
+
+Raised by the user from domain knowledge, not by a test: *"Lloyd has never been
+healthy his entire career."* Checking that against the app found the metric
+built to measure it had **no row for him**, and the card rendered nothing.
+**CONTEXT ONLY — 51 grades byte-identical.** Guarded in
+`scripts/test-player-card.mjs`.
+
+### ⚠️ THIS IS THE ONE LAYER WHERE ABSENCE INVERTS
+
+`build-availability.py` gates the population two ways: **2+ covered seasons**,
+and **an 8+ game role in at least one of them**. Both gates are correct —
+without the second the league-wide median came out at 25% and was measuring
+roster churn rather than durability.
+
+**The consequence is that the durability metric silently omitted the players
+whose durability is most in question.** A back too fragile to ever hold a role
+never qualifies for the number that would say so, his card skipped the section
+entirely, and a reader could not tell "no data" from "no concern". That is the
+silent-drop failure the Jul 27 2026 extraction rules forbid, in a new costume.
+
+### THE TWO EXCLUSIONS MEAN OPPOSITE THINGS AND MUST NOT SHARE A SENTENCE
+
+```
+2+ seasons, still no row   -> he never held the role.  THE FINDING.
+under 2 seasons on file    -> sample size.  NOT a durability signal.
+```
+
+Conflating them would libel every rookie, so the branch reads `CAREER_ARC.exp`
+and the guard asserts a player with no NFL seasons is never described as failing
+a durability gate.
+
+Measured across the draftable pool: **200 carry a rate, 4 never held a role, 83
+are sample-size, 0 fall through with no reason at all.** The four are Jonathon
+Brooks (RB CAR, ADP 80.1), Chig Okonkwo (TE WAS, 143.8), MarShawn Lloyd (RB GB,
+162.5) and George Holani (RB SEA, 212.5) — a small bucket, and every one of them
+a player whose price assumes availability the app could not previously speak to.
+
+### Rules this produced
+
+- **Thresholds are read from `AVAILABILITY._meta.gates`, never hand-typed.** A
+  second literal `8` is the duplicate-definition class this repo has now hit six
+  times.
+- **The section renders on the excluded branch**, with the population gate
+  printed beside the reason. A missing section reads as "no concern"; the point
+  is to make the exclusion visible.
+- The guard asserts BOTH branches are exercised by real players, so neither can
+  rot into dead code. Three failure paths negative-tested: removing the branch,
+  describing a rookie as a durability failure, and rendering nothing.
+
+**The general lesson is about gates, not about this metric.** Any population
+gate that exists to keep a median honest will exclude somebody, and the excluded
+set is not random — it is systematically the players at the tail the metric was
+built to describe. **When a gate drops a player, say so where the number would
+have been.**

@@ -3547,6 +3547,33 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       window: AVAILABILITY._meta.seasons_covered,
       recentWindow: AVAILABILITY._meta.recent_window,
     };
+  } else {
+    // ⚠️ AN ABSENT RATE IS NOT AN ABSENT CONCERN, AND THIS IS THE ONE LAYER
+    // WHERE THAT INVERTS. The population is gated to players who held an 8+
+    // game role in at least one covered season, and to players with 2+ covered
+    // seasons. Both gates are correct — without the first, the league median
+    // came out at 25% and was measuring roster churn rather than durability.
+    //
+    // The consequence is that the metric built to measure availability SILENTLY
+    // OMITS THE PLAYERS WHOSE AVAILABILITY IS MOST IN QUESTION. A back too
+    // fragile to ever hold a role never qualifies for the durability number, so
+    // his card rendered nothing and a reader could not tell "no data" from "no
+    // concern". That is the silent-drop failure the Jul 27 2026 extraction
+    // rules forbid, wearing a new costume.
+    //
+    // THE TWO EXCLUSIONS MEAN OPPOSITE THINGS AND MUST NOT SHARE A SENTENCE:
+    //   2+ seasons and still no row  -> he never held an 8-game role. THE FINDING.
+    //   fewer than 2 seasons on file -> sample size. NOT a durability signal,
+    //                                   and saying so protects every rookie.
+    const g = AVAILABILITY._meta.gates || {};
+    const exp = getCareerArc(name)?.exp;
+    card.availabilityReason =
+      exp == null
+        ? "Not in the 2026 roster file, so nothing here can be concluded either way."
+        : exp >= (g.min_seasons ?? 2)
+          ? `No on-field rate: across ${exp} seasons he has never held an ${g.established_games ?? 8}-game role, which is the gate this metric requires. That absence IS the finding, not missing data.`
+          : `No on-field rate: ${exp === 0 ? "no NFL seasons yet" : `only ${exp} season on file`}, below the ${g.min_seasons ?? 2}-season minimum. This is a sample-size limit and says nothing about his durability.`;
+    card.availabilityGates = g;
   }
 
   // === THE READ ===
@@ -8681,7 +8708,7 @@ const PlayerCardModal = ({ card, onClose }) => {
           </>
         )}
 
-        {(card.availability || card.arc || card.vacated) && (
+        {(card.availability || card.availabilityReason || card.arc || card.vacated) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
         )}
         {/* CAREER ARC AND TEAM TURNOVER SIT ABOVE THE no-data BRANCH ON PURPOSE.
@@ -8691,6 +8718,24 @@ const PlayerCardModal = ({ card, onClose }) => {
             branch below would hide them from him, which is the silent-drop
             failure this card exists to avoid. Both are collapsed, so the cost
             to a full card is two lines. */}
+        {/* The excluded case. It renders the SECTION so the reader sees the
+            heading he expects, and states why there is no number in place of
+            it. A missing section reads as "no concern"; this reads as what it
+            is. Same rule the card's no-data branch and the news section follow:
+            absence must be visible. */}
+        {!card.availability && card.availabilityReason && (
+          <CardSection
+            title="On-field rate"
+            accent={CARD_ACCENTS.availability}
+            collapsible
+            hint="no rate"
+            note={`Population: players with ${card.availabilityGates?.min_seasons ?? 2}+ seasons who held an ${card.availabilityGates?.established_games ?? 8}+ game role at least once. Without that gate the league median measures roster churn rather than durability.`}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55, padding: "4px 0" }}>
+              {card.availabilityReason}
+            </div>
+          </CardSection>
+        )}
+
         {card.availability && (
           <CardSection
             title="On-field rate"
