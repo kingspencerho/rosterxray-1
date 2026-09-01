@@ -1069,6 +1069,46 @@ const TOURNAMENTS = {
   // Deliberately NOT in the uniqueness-leverage branch — 6,240 entries is a
   // small field, so best-player-available beats contrarian differentiation.
   boxer: { name: "The Boxer", entries: "6.2k", weights: [1, 0.75, 2.5], advanceWeight: 0.75, note: "Softest gates anywhere (R1 4/12, W15 2/5, W16 2/4) — reaching the 416-seat final is 1-in-15, but surviving pays $9 on an $18 entry. Everything is W17 placement: top ten take 49.7% of the pool. Small field, so draft best-available over correlation. Max 3 entries", format: "standard" },
+  // The Rottweiler (added Sep 1 2026, read off the in-app rules).
+  // $25 entry · 4,500 entries · $100k prizes · 11.1% rake · 18 rounds · 12-man
+  // drafts · MAX 4 ENTRIES · closes 9/9/26.
+  //
+  //   R1 Qualifier  W1-14  375 groups of 12, 2 advance (16.7%)  4,500 -> 750
+  //   R2 Quarter    W15    150 groups of  5, 1 advance (20.0%)    750 -> 150
+  //   R3 Semi       W16     30 groups of  5, 1 advance (20.0%)    150 ->  30
+  //   R4 Final      W17    one 30-seat group                        30 ->   1
+  //
+  // Every figure reconciles against the rules text and there is NO typo here,
+  // unlike the Pit Bull ("156 6-person Groups" for 5) and the Frenchie (its R2
+  // numbers reversed). The ladder was still recomputed from the group counts.
+  //
+  // ⚠️ W15 AND W16 ARE EXACTLY EQUAL — THE FIRST SYMMETRIC PAIR ON THIS BOARD.
+  // Both 1-of-5. Every other format has an asymmetry: Puppy 3 and Puppy 4 make
+  // W15 the kill shot, the Husky and both Frenchies make it W16, BBM makes both
+  // brutal. Here neither week is the trap and neither is the coast, so they
+  // carry EQUAL weight — 1.5 rather than the 1.25 a lone 20% gate earns
+  // (Schnauzer), because you must clear two of them CONSECUTIVELY: 4.0%
+  // combined, between Pit Bull's 3.34% and the Husky's 4.18%.
+  //
+  // W17 GETS 2 BECAUSE THE FINAL IS BOTH TINY AND REACHABLE. Thirty seats is by
+  // far the smallest final here (next is the Frenchie 13 at 131, then Field
+  // General at 118), 1st alone is $25k of $100k — 25%, second only to the
+  // Frenchie Sprint's 50% — and the top six take 68.4%. Reaching it is 0.667%,
+  // one in 150: more reachable than Pit Bull, Field General, both Puppies and
+  // BBM. Reachable money is worth more in expectation than unreachable money,
+  // which is exactly why BBM holds its W17 at 1.5 and this one does not.
+  //
+  // advanceWeight 1.5 — the R1 qualifier is the standard 2-of-12 that Puppy 3,
+  // Puppy 4, Pit Bull, Schnauzer and Field General all carry at 1.5.
+  //
+  // ⚠️ 4,500 IS THE SMALLEST FIELD ON THE BOARD and the first config UNDER the
+  // Field Size Overlay's 5,000-entry line, where the framework says individual
+  // upside beats correlation and best-available beats stack fit. Deliberately
+  // NOT in the uniqueness-leverage branch, which is for massive fields — at
+  // this size the overlay points the opposite way. Worth knowing that the
+  // engine is stack-centric by design, so a Rottweiler grade rewards
+  // correlation slightly more than the overlay thinks it should.
+  rottweiler: { name: "The Rottweiler", entries: "4.5k", weights: [1.5, 1.5, 2], advanceWeight: 1.5, note: "The only format where W15 and W16 are IDENTICAL (both 1-of-5) — neither week is the kill shot, so you cannot punt one and do not need to load one. Clear both, then place in a 30-seat final, the smallest here, where 1st alone is 25% of the pool and the top six take 68.4%. Reaching it is 1-in-150. Smallest field on the board (4.5k) — under the overlay's 5k line, so best-available beats stack fit at the margin. Max 4 entries", format: "standard" },
   fastpuppy: { name: "The Fast Puppy", entries: "225k", weights: [1, 1, 1], note: "3-week gauntlet: W15, W16, W17 are each an independent must-win single-week cut (~1-of-10, then 1-of-10, then top-of-375). Every week needs its OWN spike stack — no dead weeks, floor is worthless, and ceiling piled into one week is wasted", format: "standard" },
   // The Frenchie Sprint 2 (2026 6-man season, read off the in-app rules Aug 24 2026).
   // $10 entry · 11,268 entries · $100k prizes · 11.3% rake · 18 rounds · 6-MAN
@@ -5509,6 +5549,40 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     }
     if (w15Only.length >= 1) {
       weaknesses.push(`${w15Only.length} stack(s) peak in W15 and fade after — W15 is only 1-of-4 here, so that ceiling buys a gate you were already 75% to clear`);
+    }
+  } else if (tournamentKey === "rottweiler") {
+    // The Rottweiler: the FIRST format on this board whose two weekly gates are
+    // EXACTLY EQUAL — W15 is 1-of-5 and W16 is 1-of-5. Every other branch here
+    // asks "which week is the kill shot"; the honest answer in this format is
+    // "neither, and that is the point". So this branch deliberately does NOT
+    // single out either week, and it carries NO W15-only trap warning — a
+    // ceiling parked in W15 is not buying a gate you were already likely to
+    // clear, it is buying exactly half of what you need.
+    //
+    // The shape that wins is a stack live in BOTH. You cannot punt one week and
+    // you gain nothing from loading one at the other's expense, because the two
+    // cuts are the same size and consecutive. Combined weekly survival is 4.0%.
+    //
+    // W17 carries the full 2 because the 30-seat final is the SMALLEST on the
+    // board and 1st alone is 25% of the pool with the top six taking 68.4% —
+    // and it is reachable at 1-in-150, more so than Pit Bull, Field General,
+    // both Puppies and BBM. Reachable money is worth more than unreachable.
+    const w15Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[0] >= 4);
+    const w16Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[1] >= 4);
+    const w17Elite = qualifiedStackGrades.filter(s => s.avgPerWeek[2] >= 4);
+    const bothGates = qualifiedStackGrades.filter(s => s.avgPerWeek[0] >= 4 && s.avgPerWeek[1] >= 4);
+    const oneGateOnly = qualifiedStackGrades.filter(s => (s.avgPerWeek[0] >= 4) !== (s.avgPerWeek[1] >= 4));
+    if (bothGates.length >= 1) {
+      strengths.push(`${bothGates.length} stack(s) clear BOTH W15 and W16 — the two gates are identical here (1-of-5 each), so covering both is the only shape that reaches the final`);
+    } else if (w15Elite.length >= 1 || w16Elite.length >= 1) {
+      weaknesses.push(`${oneGateOnly.length} stack(s) cover only one of W15/W16 — both gates are 1-of-5 in this format, so a week you cannot win is a week you cannot survive, whichever one it is`);
+    } else if (qualifiedStackGrades.length > 0) {
+      weaknesses.push(`No stack clears either weekly gate — W15 and W16 are both 1-of-5 here and must be won back to back, a 4.0% combined path`);
+    }
+    if (w17Elite.length >= 1) {
+      strengths.push(`${w17Elite.length} stack(s) live for the 30-seat final — the smallest on this board, where 1st alone is 25% of the pool and the top six take 68.4%`);
+    } else if (bothGates.length >= 1) {
+      weaknesses.push(`Stacks survive the gates but go dark in W17 — the 30-seat final is one week and 68.4% of the pool sits in its top six, so arriving without a live W17 wastes the hard part`);
     }
   } else if (tournamentKey === "husky") {
     // The Husky: W16 (1-of-6) is the ONLY gate that tightens — R1 and W15 are

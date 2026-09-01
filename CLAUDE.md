@@ -5524,3 +5524,102 @@ rather than the source.
 reader cannot tell an exclusion from a bug.** Name the section, name its gate,
 and distinguish *did not qualify* from *does not apply*. Three failure paths
 negative-tested.
+
+---
+
+## The Rottweiler — added Sep 1, 2026
+
+Fifteenth tournament in `TOURNAMENTS`, key `rottweiler`. Read off the in-app rules.
+$25 · 4,500 entries · $100k prizes · 11.1% rake · 18 rounds · 12-man drafts ·
+half-PPR, 4pt passing TD · QB1/RB2/WR3/TE1/FLEX1/BENCH10 · **max 4 entries** ·
+closes 9/9/26.
+
+| Round | Weeks | Groups | Advance | Field |
+|---|---|---|---|---|
+| R1 Qualifier | W1-14 | 375 × 12 | 2 (16.7%) | 4,500 → 750 |
+| R2 Quarterfinal | W15 | 150 × 5 | **1 (20.0%)** | 750 → 150 |
+| R3 Semifinal | W16 | 30 × 5 | **1 (20.0%)** | 150 → 30 |
+| R4 Championship | W17 | one 30-seat group, all paid | 1 | 30 → 1 |
+
+P(reach the final) = **0.667%, one in 150.** Every figure reconciles against the
+rules text; the ladder was still recomputed from the group counts rather than
+trusted, per the Pit Bull / Frenchie / shared-template typos already recorded.
+
+### THE FIRST FORMAT WHOSE TWO WEEKLY GATES ARE EXACTLY EQUAL
+
+**W15 is 1-of-5 and W16 is 1-of-5.** Every other config on this board is
+asymmetric, and every existing scoring branch is built around the question
+"which week is the kill shot." **Here the honest answer is "neither, and that is
+the point."**
+
+That single fact drives the whole config:
+
+- `weights: [1.5, 1.5, 2]` — **the first symmetric weekly pair here.** Two 20%
+  gates sit on the same plateau the Schnauzer (20%) and Pit Bull (20% W16)
+  already occupy at 1.25-1.5.
+- **The scoring branch carries NO W15-only trap warning**, unlike every
+  W16-inverted branch (Frenchie, Field General, Husky). Those warn that a
+  W15 ceiling buys a gate you were already likely to clear. **Not true here** —
+  a W15 ceiling buys exactly half of what you need. The branch instead flags
+  *covering only one of the two*, whichever one it is.
+- Combined weekly survival is **4.0%**.
+
+### W17 earns a full 2 because the final is small AND reachable
+
+The **30-seat final is the smallest on the board** (Husky 117, Field General
+118, Frenchie 13 131). **1st alone is 25% of the pool** — second only to the
+Frenchie Sprint's 50% — and **the top six take 68.4%.** Arriving is 1-in-150,
+more reachable than Pit Bull, Field General, both Puppies and BBM.
+
+**Reachable money is worth more in expectation than unreachable money**, which
+is exactly why BBM VII holds its W17 at 1.5 and this one does not.
+
+`advanceWeight: 1.5` — the R1 qualifier is the standard 2-of-12 that Puppy 3,
+Puppy 4, Pit Bull, Schnauzer and Field General all carry at 1.5.
+
+### ⚠️ 4,500 IS THE FIRST CONFIG UNDER THE FIELD SIZE OVERLAY'S 5,000 LINE
+
+Section 6 says that in a **small expert field (under 5k)** individual upside
+beats correlation, floor matters slightly more, and **best player available beats
+stack fit.** This is the only format here in that bucket — everything else is
+mid-field (10k-100k) or massive (100k+).
+
+**The engine is stack-centric by design**, so a Rottweiler grade rewards
+correlation slightly more than the overlay thinks it should. That is recorded
+rather than corrected: re-weighting the stack engine per field size would move
+every grade in every format and is a separate calibration, not a config
+addition. It is deliberately **NOT** in the `bbm7 || puppy || puppy4`
+uniqueness-leverage branch — at this size the overlay points the opposite way.
+
+**Max 4 entries** is the second-lowest portfolio here (Boxer 3), which argues
+against spray-and-pray construction for the same reason the Husky and Pit Bull
+do at 10.
+
+### Updated ladder, ordered by weekly gate severity
+
+```
+                weights          gates W15/W16   P(final)   advanceWeight   field
+BBM VII      [2,    2,    1.5]     7.1 / 8.3      0.099%       1.75      massive
+Puppy 4      [2,    2,    1.75]   10.0 / 10.0     0.167%       1.5       massive
+Puppy 3      [2,    1.5,  2]      10.0 / 20.0     0.333%       1.5       massive
+Field Genl   [1.5,  2,    1.75]   16.7 / 8.3      0.347%       1.5       mid
+Pit Bull 2   [1.5,  1.25, 2]      16.7 / 20.0     0.556%       1.5       mid
+Rottweiler   [1.5,  1.5,  2]      20.0 / 20.0     0.667%       1.5       SMALL
+Husky        [1.25, 2,    2]      25.0 / 16.7     1.042%       1.25      mid
+Schnauzer    [1.25, 1,    2]      20.0 / 25.0       —          1.5       mid
+Frenchie 13  [1.25, 2,    2]      33.3 / 16.7       —          1.25      mid
+Boxer        [1,    0.75, 2.5]    40.0 / 50.0     6.67%        0.75      mid
+```
+
+**Puppy 4 and the Rottweiler are the only two symmetric formats**, at very
+different depths (10.0/10.0 against 20.0/20.0) — and Puppy 4 is massive-field
+while this is the only small-field config on the board.
+
+### Calibration — nothing else moved
+
+```
+14 pre-existing tournaments x 3 fixtures + 9 redraft = 51 grades BYTE-IDENTICAL
+The Rottweiler (new):  ref1 A 9.29 · ref2 C+ 1.43 · ref3 B+ 5.39
+All five branch paths verified firing — four on real fixtures, the
+  survive-the-gates-but-dark-in-W17 path against a synthetic stack grade.
+```
