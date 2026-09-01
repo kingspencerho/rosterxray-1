@@ -92,6 +92,7 @@ every entry that now disagrees.
 | §12 Changelog | **capped at 12** | drop the oldest. Full history is in git |
 | §13 Plain-English guide | **one line per input** | navigation only. Detail stays in §5; if they disagree, §5 wins |
 | §14 Seasonal coverage | rewrite in place | an audit of the app against the calendar. Re-audit before trusting it |
+| §14a Open gaps | **prunable** | a handoff. Delete a gap when it closes, like §11 |
 
 **§10 and §11 pull in opposite directions on purpose.** Rules accumulate because
 each one is a scar and forgetting it costs the same session twice. The build
@@ -1501,6 +1502,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | §14a — the three open in-season gaps, written as a handoff |
 | Sep 1 2026 | Waiver-target pool: the first feature that ranks players you do NOT roster |
 | Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
 | Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
@@ -1512,7 +1514,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
-| Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 
 ---
 
@@ -1694,9 +1695,9 @@ decision is N+1 — so only a larger gap warns. Guard 24.
 | # | Gap | Why it matters |
 |---|---|---|
 | ~~1~~ | ~~No free-agent pool~~ | **CLOSED Sep 1 2026** — see below |
-| 2 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days |
-| 3 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
-| 4 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
+| 1 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days. **Needs a sourcing decision, not just code — see §14a** |
+| 2 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
+| 3 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
 
 **Closed Sep 1 2026: the waiver pool.** `buildFreeAgentPool` ranks every player
 not on your roster, scored on role change, volume, targets per route,
@@ -1740,6 +1741,122 @@ same pattern `snap_trajectory`, `qb_profile` and `gamelogs` already use.
 **Both vintages are always shown. Never swapped.** "38% in 2025, 61% through W7"
 says more than either number alone, and a layer that silently changes which year
 it describes is the stale-data trap in a new costume.
+
+## §14a · The three open in-season gaps — a handoff
+
+> **Written Sep 1 2026 for a session picking this up cold.** Sources below were
+> probed on that date and returned 200; re-check before building, per
+> [R19](#analysis).
+
+### GAP 1 — News is hand-maintained, and October breaks the freshness rule
+
+**Current state, measured:** `RECENT_NEWS` holds **87 entries (66KB)** and
+`SITUATIONS` **143 (88KB)**, all written by hand. `parseNewsDate` extracts a
+date from the prose (or reads a structured `date` field), and the card ages each
+note against the framework's **30-45 day** re-validation rule.
+`scripts/report-stale-news.mjs` enumerates what has expired; it currently
+returns zero.
+
+**Why it breaks in season.** Thirty days is a reasonable shelf life for an
+August camp report. In October a depth chart can invert in a week, and this
+season already produced two entries that inverted inside 48 hours (Alec Pierce
+activated off PUP; Josh Jacobs to the Commissioner's Exempt List the day after
+an entry described an open review).
+
+### ⚠️ THE DECISION IS NOT "REPLACE THE PROSE WITH A FEED". IT IS A SPLIT.
+
+The layer is carrying two different things and only one of them is automatable:
+
+| | Automatable | Example |
+|---|---|---|
+| **Structured status** | **yes, free, weekly** | out / questionable, depth-chart slot, team change, PUP |
+| **Analytical judgement** | **no** | *"the filing carries no domestic-violence designation, which weakens the case for the six-game baseline"* |
+
+**No free feed produces the second kind, and it is the reason the entries are
+worth reading.** So the shape to aim at is: automate the facts, keep the
+argument by hand, and let each carry its own freshness clock.
+
+### The two free sources, both verified Sep 1 2026
+
+**A. nflverse `injuries` release** — `injuries_<season>.csv.gz`, HTTP 200,
+124KB, **6,068 rows for 2025, weeks 1-22.**
+
+```
+gsis_id · full_name · team · week · position
+report_status            Out 1,396 · Questionable 1,281 · Doubtful 106
+practice_status          Full / Limited / Did Not Participate
+report_primary_injury    body part
+```
+
+- **Joins on `gsis_id`**, the same key every other layer uses.
+- **Drops straight into `refresh-inseason.sh`** as a fourth builder.
+- ⚠️ **It is the official injury report and nothing else.** No trades, no
+  suspensions, no depth-chart moves, no coaching changes. Jacobs on the exempt
+  list, Kaleb Johnson traded to GB, Penix winning a job — this source sees none
+  of them.
+- ⚠️ Game-week cadence, so it lags a mid-week transaction.
+
+**B. Sleeper public players API** — `api.sleeper.app/v1/players/nfl`, no auth,
+HTTP 200, **14.6MB, 12,225 players.**
+
+```
+injury_status · injury_body_part · injury_notes · status (Active/Inactive/PUP)
+depth_chart_order · news_updated (epoch ms)
+```
+
+- **`depth_chart_order` is the valuable field.** Role change is rank 1 in the
+  hierarchy and the app currently infers it only from snap trajectory, which
+  lags by a week. A depth-chart slot is same-day.
+- **`news_updated` gives a real timestamp**, which is exactly what
+  `parseNewsDate` has to reconstruct from prose today.
+- ⚠️ **14.6MB must never be committed.** A builder extracts the draftable
+  players and writes a small file, the way every other layer does.
+- ⚠️ Third-party, unversioned, and it can change shape without notice — unlike
+  a pinned nflverse release. Treat availability as a runtime risk.
+
+### What a session needs to decide, in order
+
+1. **Do the two clocks get different thresholds?** Recommended: status ~7 days
+   in season, analytical prose 21-30. Today one rule covers both.
+2. **Which source, or both?** nflverse is the safer dependency and covers the
+   injury report; Sleeper adds depth chart and a real timestamp. They are not
+   redundant.
+3. **What happens on a CONFLICT** between a fetched status and a hand-written
+   note? The existing rule says the freshest dated entry wins, but a same-day
+   feed will out-date every prose note permanently, which would quietly demote
+   the analysis to decoration. **This is the part most likely to go wrong.**
+4. **Does any of it reach the AI prompt?** `RECENT_NEWS` is pasted verbatim
+   today ([R7](#prose)), so a fetched field lands in front of the model the
+   moment it is added.
+
+**Constraint that does not move:** whatever ships is CONTEXT. It must not reach
+`analyzeRoster` or `analyzeRedraft`, and it needs a containment guard like every
+layer since Jul 26 2026.
+
+### GAP 2 — No opponent awareness in redraft
+
+The app grades a roster against the schedule. It never asks **who you are
+playing this week**, which is what decides whether you want floor or ceiling.
+A heavy favourite wants floor; a big underdog needs variance.
+
+Smallest honest version: one input for the opponent's projected total, and a
+line on the lineup panel saying which way to lean. **The app cannot see the
+other manager's roster**, so anything more is asserting what it does not know —
+same rule the waiver pool follows.
+
+### GAP 3 — `sos_2026.json` has no rest-of-season view
+
+It is a static full-season figure. In Week 10 the played half is noise and the
+number is describing games that already happened. A `remaining` field computed
+from the current week would fix it, and the current week is now available from
+`seasonNow()`.
+
+⚠️ Inherits the standing caveat: defensive quality is pinned at 2025 for both
+seasons, and **the SOS rank convention is INVERTED** relative to
+`getMatchupTier` (rank 1 = easiest slate there, softest single opponent here).
+Never compare the two numbers directly.
+
+---
 
 ### One closing observation
 
