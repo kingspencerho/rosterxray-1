@@ -441,6 +441,45 @@ for (const k of ["absence", "redzone", "deployment", "trajectory"]) {
 for (const k of ["availability", "arc", "vacated", "news"]) {
   ok(`${k} sits with the outlook group`, groups[k] === "outlook", groups[k]);
 }
+// ---- THE GAME LOG RESOLVES, AND ITS ABSENCE STATES A REASON ----
+// A user asked why he "could not access" Luther Burden's game log. Three
+// separate name bugs were dropping 18 draftable players, and the section
+// rendered NOTHING for each, so an absence read as a broken app:
+//   1. the builder did not strip suffixes  -> Burden III, Fannin Jr, Thomas Jr
+//   2. it replaced "." with a space        -> "a j brown", not "aj brown"
+//   3. gameLogFor was a second hand-rolled lookup that missed the alias table
+// Plus Travis Hunter, whom nflverse files as CB because he plays both ways.
+console.log("\nthe game log resolves for everyone whose season did");
+{
+  const rows = draftable.map(([n, v]) => [n, v, e.buildPlayerCard(n, v.pos, v.team)]);
+  // The strongest assertion available: if his SEASON TOTALS resolved, his
+  // week-by-week rows must resolve too. They come from different files, so a
+  // name bug in either shows up here and nowhere else.
+  const orphaned = rows.filter(([, , c]) =>
+    !c.gameLog && !c.gameLogCur && /missed him/.test(c.gameLogReason || ""));
+  ok("no draftable player has season metrics but no game log", orphaned.length === 0,
+    orphaned.map(([n]) => n).join(", "));
+
+  // Named regressions, one per bug class.
+  for (const [n, why] of [["luther burden", "suffix"], ["harold fannin", "suffix"],
+                          ["aj brown", "initials"], ["tj hockenson", "initials"],
+                          ["kenneth gainwell", "reverse alias"], ["travis hunter", "two-way position"]]) {
+    const v = e.ADP_DATA[n] || {};
+    const c = e.buildPlayerCard(n, v.pos, v.team);
+    ok(`${n} resolves a game log (${why})`, !!(c.gameLog || c.gameLogCur));
+  }
+
+  ok("an absent game log states why", rows.every(([, , c]) =>
+    (c.gameLog || c.gameLogCur) || (typeof c.gameLogReason === "string" && c.gameLogReason.length > 20)));
+  ok("the section renders on the no-log branch",
+    /if \(!cur && !prior\) \{[\s\S]{0,200}reason/.test(app));
+  ok("gameLogFor is not a second hand-rolled lookup",
+    /const gameLogFor = \(src, name\) => lookupPlayer\(src, name\);/.test(app),
+    "seventh instance of the duplicate-definition class");
+  ok("the alias table resolves in both directions",
+    /METRIC_NAME_ALIASES_REV/.test(app));
+}
+
 // ---- AN ABSENT AVAILABILITY RATE MUST STATE ITS REASON ----
 // ⚠️ THIS IS THE ONE LAYER WHERE ABSENCE INVERTS. The population is gated to
 // players with 2+ seasons who held an 8+ game role at least once. Both gates

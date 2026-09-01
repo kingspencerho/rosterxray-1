@@ -5390,3 +5390,70 @@ hand-maintained**, which is correct — nothing can automate it. What remains: t
 unwired pending the watch period, and a depth-chart CHANGE is undetectable without history.
 **GAP 2** (no opponent awareness in redraft) and **GAP 3** (`sos_2026.json` has no
 rest-of-season view) are untouched.
+
+
+---
+
+## Three Name Bugs Were Hiding 18 Game Logs (fixed Sep 1, 2026)
+
+Reported as a question, not a bug: *"Why can't I access Burden's game log?"*
+That phrasing is the finding. **The section rendered NOTHING when a log was
+missing, so an absence read as a broken app rather than as missing data.**
+**CONTEXT ONLY — 51 grades byte-identical.** Guarded in
+`scripts/test-player-card.mjs`.
+
+`gamelogs_2025.json` went from **213 players to 231**, with nothing lost.
+
+### Four distinct causes, three of them name resolution
+
+**1. The builder did not strip suffixes.** The weekly stats release prints
+"Luther Burden III"; `ADP_DATA` keys `luther burden`. The membership test
+`n not in draft` failed and the player was dropped silently. Ten lost this way,
+including **Brian Thomas Jr, Chris Godwin Jr, Deebo Samuel Sr, Harold Fannin Jr,
+Michael Penix Jr and Tyrone Tracy Jr.**
+
+**The tell is who SURVIVED:** Kenneth Walker III and Marvin Harrison Jr, purely
+because `ADP_DATA` happens to spell them WITH the suffix. The filter was testing
+whether two hand-maintained tables agreed on spelling, not whether a player was
+draftable.
+
+**2. The builder replaced `.` with a space; the app deletes it.**
+`"A.J. Brown"` became `a j brown` instead of `aj brown`. Five more lost:
+**A.J. Brown, C.J. Stroud, J.K. Dobbins, T.J. Hockenson, J.J. McCarthy.**
+
+⚠️ **Any divergence from `App.jsx`'s `normalize()` is a silent drop.** The
+builder now mirrors it exactly and says so in the docstring.
+
+**3. `gameLogFor` was a SECOND hand-rolled lookup.** It tried the key and its
+suffix-stripped form and nothing else, so it missed the alias table and the
+base index `lookupPlayer` uses. `kenneth gainwell` resolved his metrics and not
+his game log, which is filed under `kenny gainwell`. **Seventh instance of the
+duplicate-definition class in this repo.** Now `lookupPlayer(src, name)`.
+
+**The alias also had to work BOTH ways.** `METRIC_NAME_ALIASES` mapped
+`kenny -> kenneth`; `player_metrics` keys one side and `gamelogs` the other, so
+a one-directional alias resolves one file and not the other.
+`METRIC_NAME_ALIASES_REV` closes it.
+
+**4. Travis Hunter is filed as `CB`.** He plays both ways and nflverse records
+him on defense, so a position filter read off the STATS FILE dropped a top-160
+fantasy WR. **Position now comes from `ADP_DATA`, which is the app's own answer
+to what a player plays.**
+
+### The rule this produces
+
+**A builder that filters against a hand-maintained table must normalise both
+sides with the SAME function the app uses, and must take a player's position
+from that table rather than from the data source.** Every one of these four was
+invisible: no error, no warning, just a player with no chart.
+
+And the section now says why it is empty. **"No week-by-week chart: he recorded
+no 2025 regular-season stat line"** is data; a blank space is a bug report
+waiting to be filed.
+
+### Guard
+
+The strongest available assertion, and it is cheap: **if a player's SEASON
+TOTALS resolved, his WEEK-BY-WEEK rows must resolve too.** They come from
+different files, so a name bug in either shows up there and nowhere else. Plus
+one named regression per bug class, and three failure paths negative-tested.

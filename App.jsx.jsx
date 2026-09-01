@@ -2478,6 +2478,13 @@ const SUFFIX_RE = /\s+(jr|sr|ii|iii|iv|v)$/;
 const METRIC_NAME_ALIASES = {
   "kenny gainwell": "kenneth gainwell",
 };
+// ⚠️ THE ALIAS HAS TO WORK BOTH WAYS, because different data files pick
+// different sides of the same pair. player_metrics keys "kenneth gainwell";
+// the weekly stats release prints "Kenny Gainwell", so gamelogs keys the other
+// one. A one-directional alias resolved his metrics and not his game log.
+const METRIC_NAME_ALIASES_REV = Object.fromEntries(
+  Object.entries(METRIC_NAME_ALIASES).map(([a, b]) => [b, a])
+);
 
 // Suffix-insensitive index, built once per table and cached.
 //
@@ -2526,7 +2533,9 @@ const lookupPlayer = (table, name) => {
   const base = key.replace(SUFFIX_RE, "");
   if (table[base]) return table[base];
   const hit = getBaseIndex(table)[base];
-  return hit ? table[hit] : null;
+  if (hit) return table[hit];
+  const rev = METRIC_NAME_ALIASES_REV[key];
+  return rev && table[rev] ? table[rev] : null;
 };
 
 const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
@@ -2575,10 +2584,12 @@ const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.pla
 // Rows are fixed-width arrays; `_meta.cols` names the columns per position.
 // Objects would triple the file for no added meaning.
 const GAME_LOG_CUR_LIVE = (GAME_LOGS_CUR._meta?.weeks_covered || 0) > 0;
-const gameLogFor = (src, name) => {
-  const k = normalize(name);
-  return src[k] || src[k.replace(SUFFIX_RE, "")] || null;
-};
+// ⚠️ ONE LOOKUP, NOT TWO. This was a hand-rolled resolver that tried the key
+// and its suffix-stripped form and nothing else, so it missed the alias table
+// and the base index that lookupPlayer uses — "kenneth gainwell" resolved
+// metrics but not his game log, because the log is filed under "kenny
+// gainwell". Seventh time this repo has hit the duplicate-definition class.
+const gameLogFor = (src, name) => lookupPlayer(src, name);
 const getGameLog = (name) => gameLogFor(GAME_LOGS, name);
 const getGameLogCur = (name) => (GAME_LOG_CUR_LIVE ? gameLogFor(GAME_LOGS_CUR, name) : null);
 
@@ -3307,6 +3318,15 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   };
   card.gameLog = buildLog(getGameLog(name), GAME_LOGS._meta || {});
   card.gameLogCur = buildLog(getGameLogCur(name), GAME_LOGS_CUR._meta || {});
+  // ⚠️ SAY WHY THERE IS NO CHART. Rendering nothing made a reader ask why he
+  // "could not access" the log — an invisible absence reads as a broken app.
+  // The file covers draftable players who recorded a stat line, so a player
+  // with no row either did not play in 2025 or is not in the ADP tables.
+  if (!card.gameLog && !card.gameLogCur) {
+    card.gameLogReason = getMetrics(name)
+      ? "No week-by-week chart for him, although his season totals above did resolve. That combination means the game-log build missed him rather than that he did not play — worth reporting."
+      : "No week-by-week chart: he recorded no 2025 regular-season stat line, so there are no games to draw.";
+  }
 
   // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
   // in the 2026 offseason that is not his current job — say so on the card
@@ -8193,9 +8213,22 @@ const WeeklyBars = ({ log }) => {
 // index rules. Both pills always show both years, so "2025" is a visible,
 // tappable fact even while 2026 is selected — absence of the toggle (single
 // vintage) means there is genuinely only one season of data.
-const GameLogSection = ({ cur, prior }) => {
+// ⚠️ A MISSING GAME LOG USED TO RENDER NOTHING, and a reader asked why he
+// "could not access" it — which is the tell: an invisible absence reads as a
+// broken app, not as missing data. Same silent-drop class the availability
+// section was fixed for. `reason` is the population gate, stated in place.
+const GameLogSection = ({ cur, prior, reason }) => {
   const [season, setSeason] = useState(cur ? "cur" : "prior");
-  if (!cur && !prior) return null;
+  if (!cur && !prior) {
+    if (!reason) return null;
+    return (
+      <CardSection title="Weekly output" accent={CARD_ACCENTS.gamelog} collapsible hint="no log">
+        <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55, padding: "4px 0" }}>
+          {reason}
+        </div>
+      </CardSection>
+    );
+  }
   const log = season === "cur" && cur ? cur : (prior || cur);
   const both = !!(cur && prior);
   return (
@@ -8697,7 +8730,7 @@ const PlayerCardModal = ({ card, onClose }) => {
               <CardGroupHeader group="production" label="What he produced" hint="2025 output" nested />
             )}
 
-            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
+            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
 
             {card.descriptive.length > 0 && (
               <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
