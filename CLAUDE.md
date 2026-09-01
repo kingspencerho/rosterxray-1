@@ -4214,7 +4214,7 @@ Week 1.
 | Availability rate | — | Every metric here is per-game; nothing expresses "he plays" |
 | Red-zone target share | — | Lens 1 calls it standalone scoring equity and the app cannot see it |
 | Carries per game (RB) | 0.730 | `build-player-metrics.py` emits no carry count |
-| Targets per route run | — | **AVAILABLE, not paywalled — corrected Sep 1 2026.** Computable from participation `offense_players`; verified. Not built yet. Never substitute target share for it. |
+| Targets per route run | 0.674 | **SHIPPED Sep 1 2026** — `routes_2025.json`. Never substitute target share for it. |
 | Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
 
 ### SHIPPED Aug 31 2026: the two free anchors now reach the model
@@ -4806,3 +4806,147 @@ Building TPRR or coverage splits properly means a builder script, a stability
 measurement, percentile populations, prompt wiring and a containment guard — the
 same bar every other layer cleared. The point of this entry is that the door is
 open, and this file said it was locked.
+
+
+---
+
+## TPRR and Man/Zone Coverage Built (Sep 1, 2026)
+
+Both items the previous section corrected out of Tier C are now layers.
+**CONTEXT ONLY — 51 grades byte-identical** (14 tournaments x 3 fixtures, plus
+9 redraft). Guarded by the additions to `scripts/test-context-layers.mjs`.
+
+| File | Script | Answers |
+|---|---|---|
+| `routes_2025.json` | `build-routes.py` | how often is he thrown at per route he runs |
+| `coverage_2025.json` | `build-coverage.py` | what did he do against man versus zone |
+
+One `participation` release feeds both, the same economy the game-log layer got
+from the weekly stats file.
+
+### THE MEASUREMENT DECIDED WHAT SHIPPED, AND IT SPLIT THE TWO APART
+
+Both were built, then measured across 23>24 and 24>25 before either was wired to
+anything:
+
+```
+route_sh   0.756   anchor-adjacent
+tprr       0.674   reliable — above dud rate (0.667) and separation (0.663)
+man_rate   0.335   weak
+ypt_zone   0.294   weak
+ypt_man    0.235   weak
+edge       0.161   COIN FLIP
+```
+
+So **TPRR ships as a real rank-2 input, in the prompt and on the card. The
+man/zone edge ships as REFERENCE the model never sees.** At 0.161 it sits beside
+RB yards per carry and below every number already in the prompt — including
+per-touch efficiency, which is carried only with explicit warnings. **Warning a
+model about a coin flip is less reliable than not handing it the number**, so
+`getCoverage` has exactly one consumer and it is the player card. The guard
+asserts that, and a `coverageContext` builder fails the run.
+
+Neither outcome was knowable in advance. Building both and then deciding is what
+kept the coin flip out of the prompt.
+
+### `route_sh` is a DENOMINATOR, not a second signal
+
+It correlates with `snap_sh` at **r=0.957 (WR 0.966)** — the same input. Per the
+reference file's own rule, a second entry saying the same thing does not get
+added; it is emitted because a rate without its sample is unreadable, and the
+card row carries a neutral `≈ restates snap share` mark so nobody counts two
+findings where there is one.
+
+**A new `echo` prop was needed rather than reusing `caution`.** On this card
+`caution` is gold and means THIS NUMBER DISAGREES with another one — a real
+conflict. `echo` is neutral and means THIS NUMBER RESTATES one. Spending the
+gold mark on a non-conflict devalues it everywhere it appears.
+
+TPRR itself is **not** a restatement of volume: r=0.871 against targets per game,
+0.817 against target share. Correlated, as it must be, and the divergences are
+the point — high rate on ordinary volume is the contingency profile, the reverse
+is a fed role a depth-chart change removes.
+
+### ⚠️ THE DENOMINATOR IS PASS SNAPS, NOT CHARTED ROUTES
+
+Participation records who was ON THE FIELD, never who released into a pattern.
+For a WR they are nearly the same; for a blocking TE or a protecting back they
+are not, so protection snaps deflate the rate. RB/TE cards carry the caveat and
+only they do, and the stability is weaker there too (RB 0.515 vs WR/TE 0.687).
+
+### ⚠️ A SEASON-LEVEL PRIMARY TEAM BREAKS EVERY MID-SEASON MOVER
+
+The first denominator assigned each player one team for the year and produced
+route shares **above 1.0** — Rashid Shaheed at 1.368. Team dropbacks are now
+counted per (player, game). **Any denominator built from a season-level team
+assignment is wrong for exactly the players whose role changed**, which is the
+population that matters most. The guard asserts no route share exceeds 1.0.
+
+### ⚠️ THE MAN/ZONE EDGE IS NOT CENTRED ON ZERO
+
+Man coverage suppresses yards per target league-wide, so almost everyone is
+negative: **WR median -1.48, TE median -1.10.** A receiver at -1.2 is ABOVE his
+position median.
+
+**This corrects what was reported to the user earlier the same day.** Tee
+Higgins' -1.78 was read as "the man-beater reputation is not supported"; it is
+the **44th percentile of qualified WRs**, which is ORDINARY, not poor. Reading
+the bare sign mis-reads most of the league. The card now refuses to print an edge
+without a percentile and the position median.
+
+**A second claim from that reading also did not survive.** An ungated pass
+produced a leaderboard topped by running backs at +6 to +11 (Cook +11.41, Swift
++9.97, Barkley +6.40) and the RB mismatch was reported at that magnitude. At the
+15-target-per-bucket gate those were single-digit samples and vanish: the real
+qualified RB pool is 7, top edge +2.48. **The direction is real, the magnitude
+was noise. Gate first, then look at the leaderboard.**
+
+### The note must not point at a number that is not on screen
+
+Only **7 RBs** clear the split gate, below the 12-player ranking minimum, so RB
+cards show no percentile — while the note still said "read the percentile, never
+the sign." A note instructing the reader to use something absent is the same
+defect class as a label disagreeing with its own value. The note now branches and
+names the pool size. Guard asserts both branches, and that at least one position
+really is below the minimum so the branch is not dead code.
+
+### FIVE percentile populations now, five printed gates
+
+```
+CARD_PERCENTILES     draftable, 8+ games       Opportunity, Week outcomes
+NGS_PERCENTILES      40+ targets 2025          Deployment
+RZ_PERCENTILES       5+ red-zone opportunities Red zone
+ROUTES_PERCENTILES   100+ routes 2025          Route workload
+COV_PERCENTILES      15+ tgts vs each coverage Man vs zone
+```
+
+Merging any two prints a rank under a population label that does not describe it.
+
+### ⚠️ A `## ` HEADER WAS SWALLOWED BY A `### ` CUT — AGAIN
+
+Moving the two entries out of Tier B used a cut that ran to the next `### `
+heading. The last entry in a section has no following `### `, so the cut ran
+through `## §7 · Tier C` and deleted the section header and its intro. **This is
+the third instance of the swallowed-block failure recorded in this file**, and
+the first that a guard caught rather than a human noticing weeks later — guard 23
+failed on "sections exist and are in order" immediately. **When cutting a block
+by heading, anchor the end on `^(### |## )`, not on the child level alone.**
+
+### Regenerate
+
+```
+pip install nflreadpy      # participation ships parquet-only; there is no csv.gz asset
+python3 scripts/build-routes.py   --season 2025 --out grading/data/routes_2025.json
+python3 scripts/build-coverage.py --season 2025 --out grading/data/coverage_2025.json
+```
+
+Both are ANNUAL under the split refresh cadence. Neither feeds a scored input.
+
+### Also verified in a real browser
+
+Rendered at 430px: Route workload and Man vs zone both present, the blocking
+caveat fires on RB and TE cards and not on WR, The Read picks up TPRR at the
+tails only, **0 tap targets under 32px, 0 page errors.** Five failure paths
+negative-tested — a scoring leak, coverage promoted to a bright group, a
+coverage prompt builder, route share losing its restatement mark, and TPRR
+ranked against the card's population — all exit non-zero.

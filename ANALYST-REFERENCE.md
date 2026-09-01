@@ -132,9 +132,9 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | — | 4 | A | live | no |
 | [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 5 | A | live | **yes — schedule** |
 | [RB carries / game](#rb-carries--game--r--073--rank-2) | 0.73 | 2 | B | proposed | no |
-| [Targets per route run](#targets-per-route-run--r----rank-2) | — | 2 | B | proposed | no |
+| [Targets per route run](#targets-per-route-run--r--067--rank-2) | 0.67 | 2 | A | live | no |
 | [Offensive line rank](#offensive-line-rank--r----rank) | — | — | C | rejected | no |
-| [Coverage-scheme splits](#coverage-scheme-splits--r----rank-3) | — | 3 | B | proposed | no |
+| [Coverage-scheme splits](#coverage-scheme-splits--r--016--rank) | 0.16 | — | A | live | no |
 | [Player-level motion](#player-level-motion--r----rank) | — | — | C | rejected | no |
 
 ---
@@ -164,6 +164,8 @@ repeatable).
 | Target share | 0.729 | anchor |
 | Snap share (RB) | 0.728 | anchor |
 | Snap share (WR/TE) | 0.709 | anchor |
+| Route share | 0.756 | anchor — but see the entry: it restates snap share |
+| Targets per route run | 0.674 | reliable |
 | Dud rate | 0.667 | reliable |
 | Separation | 0.663 | reliable |
 | Usable rate | 0.652 | reliable |
@@ -176,6 +178,10 @@ repeatable).
 | TD per touch | 0.198 | weak |
 | Catch rate (RB) | 0.103 | noise |
 | **RB yards per carry** | **0.022** | **coin flip** |
+| Man rate faced | 0.335 | weak |
+| Yards per target vs zone | 0.294 | weak |
+| Yards per target vs man | 0.235 | weak |
+| **Coverage-scheme splits (man/zone edge)** | **0.161** | **coin flip** |
 | Matchup data (FPA) — RB | 0.245 | least stable input in the app |
 | Matchup data (FPA) — TE | 0.192 | |
 | Matchup data (FPA) — QB | 0.049 | |
@@ -671,17 +677,70 @@ and never the raw column alone.
 **⚠️ IT ALSO CANNOT ISOLATE MAN COVERAGE.** The figure averages across every
 coverage a player faced, so a contested-catch specialist — who beats man by
 out-positioning rather than by separating — scores low by construction. The
-man/zone split that would settle it is
-[buildable and sits in Tier B](#coverage-scheme-splits--r----rank-3) — measured
-Sep 1 2026, not yet a layer. **"Beats man coverage" and "creates separation" are
-different claims, and this metric only measures the second.** Tee Higgins is the worked example: 0th percentile raw,
+man/zone split that would qualify it is
+[now live](#coverage-scheme-splits--r--016--rank) — and it turned out to measure
+r=0.16, so it describes one season and does not settle anything about talent.
+**"Beats man coverage" and "creates separation" are different claims, and this
+metric only measures the second.** Tee Higgins is the worked example: 0th percentile raw,
 83rd of 85 even after the depth adjustment, on a 13.5 aDOT boundary role with 19%
-of his team's red-zone targets.
+of his team's red-zone targets. The coverage layer says his man/zone split is the
+44th percentile — ordinary — so the two together read as a contested-catch profile
+that is not converting, rather than as a man-beater the separation metric misses.
 
 **Gotchas.** Position medians differ (WR 2.78 · TE 3.45) — read the percentile.
 **NGS has its OWN population** (40+ targets in 2025), which is not the card's
 draftable/8-game gate. The two ranks are not interchangeable and never share a
 table.
+
+---
+
+### Targets per route run · r = 0.67 · rank 2
+
+| | |
+|---|---|
+| **File** | `routes_2025.json` |
+| **Field** | `tprr` · `routes` · `route_sh` · `tgt` · `gp` |
+| **Surfaces** | player card (Route workload) · The Read · `routesContext` in both AI prompts |
+| **Status** | live |
+
+**Plain English.** How often he is thrown at on the pass plays he is on the
+field for.
+
+**Why it matters.** **It is the only per-OPPORTUNITY rate in the app.** Every
+other receiving input measures what a coach GAVE him — target share, WOPR,
+targets per game, snap share. This measures what he EARNS when he is out there.
+Volume ceiling = routes x rate, so route share caps everything else no matter
+how good the rate is: the Josh Downs gate.
+
+**It is not a restatement of volume.** Measured on 2025 it runs r = 0.871
+against targets per game and 0.817 against target share. Correlated, as it has
+to be — but a quarter of the variance is independent, and the DIVERGENCES are
+the whole point. A high rate on ordinary volume is a player earning looks he is
+not getting, which is the contingency profile the Shough Rule is about. The
+reverse is a role being fed to him that a depth-chart change removes.
+
+**Worked example.** 2025 leaders: Puka Nacua 35.5%, Jaxon Smith-Njigba 33.6%,
+Amon-Ra St. Brown 30.4%, Ja'Marr Chase 29.4%, against a WR median of 16.9%.
+
+**Gotchas.** **⚠️ THE DENOMINATOR IS PASS-SNAP PARTICIPATION, NOT CHARTED
+ROUTES.** The feed records who was on the field, never who released into a
+pattern, so protection snaps inflate the denominator for blocking tight ends
+and backs and deflate their rate. Read RB and TE figures as a FLOOR on the true
+number — the card says so on their cards and only on theirs — and note the
+stability is weaker there too (RB 0.515 against WR/TE 0.687). **Its own
+population** (100+ routes in 2025) is not the card's draftable/8-game gate and
+not the NGS 40-target gate; five populations now, five printed gates.
+
+**`route_sh` is emitted here and is NOT an independent input.** It correlates
+with `snap_sh` at r = 0.957 (WR 0.966). It is TPRR's denominator, shown because
+a rate without its sample is unreadable, and the card row says so in place
+rather than letting the reader count two signals where there is one. Where the
+two do diverge they diverge honestly: Derrick Henry 0.388 route share against
+0.545 snap share, because he leaves the field on passing downs.
+
+**⚠️ This spent weeks in Tier C on a false premise.** See
+[R19](#analysis) — the claim that the participation feed died after 2023 was
+written once, was plausible, and was cited rather than re-tested.
 
 ---
 
@@ -947,6 +1006,55 @@ offense used motion, never which player moved.
 
 ---
 
+### Coverage-scheme splits · r = 0.16 · rank —
+
+| | |
+|---|---|
+| **File** | `coverage_2025.json` |
+| **Field** | `ypt_man` · `ypt_zone` · `edge` · `man_rate` + target counts |
+| **Surfaces** | player card only (Man vs zone, REFERENCE group, dimmed) |
+| **Status** | live — **descriptive, deliberately absent from the AI prompt** |
+
+**Plain English.** What he did against man coverage versus zone, last season.
+
+**Why it matters.** It is the qualifier
+[separation](#separation--r--066--rank-3) invites and cannot supply: `avg_sep`
+averages across every coverage a receiver faced, so a contested-catch profile
+who wins by out-positioning rather than by getting open scores low with no way
+to say so. This is the only place in the app that can look at that split.
+
+**Worked example.** Tee Higgins, whose reputation is as a man beater: 7.79 y/t
+against man on 43 targets, 9.57 against zone on 56 — an edge of **-1.78, the
+44th percentile of qualified WRs.** So the honest read is ORDINARY, not poor.
+
+**Gotchas.** **⚠️ IT DOES NOT CARRY. r = 0.161** (23>24 0.199, 24>25 0.122),
+which puts it beside RB yards per carry in the coin-flip band, below every
+number in the AI prompt. Three consequences, all deliberate: it renders in the
+card's REFERENCE group beside per-touch efficiency, **it is the one context
+layer withheld from the model entirely** — warning a model about a coin flip is
+less reliable than not handing it the number — and nothing scores off it.
+
+**⚠️ THE EDGE IS NOT CENTRED ON ZERO. READ THE PERCENTILE, NEVER THE SIGN.**
+Man coverage suppresses yards per target league-wide, so almost everyone is
+negative: the 2025 WR median is **-1.48** and the TE median **-1.10**. A
+receiver at -1.2 is ABOVE his position median. Anyone reading the bare minus
+sign mis-reads most of the league — which is exactly what an earlier reading of
+Higgins' -1.78 as "reputation not supported" did.
+
+**⚠️ IT IS NOT A ROUTE-WINNING METRIC.** It inherits separation's aDOT confound
+(a deep target is worth more yards whoever is covering), and man coverage puts a
+linebacker on a running back, which is a personnel mismatch rather than a skill:
+5 of the 7 qualified backs are positive against a WR median of -1.48. **An
+earlier ungated pass produced a much louder version of that — a leaderboard
+topped by backs at +6 to +11 — and it did not survive the 15-target gate.** The
+direction was real; the magnitude was single-digit samples.
+
+**Only 7 RBs clear the gate**, under the 12-player ranking minimum, so RB cards
+show no percentile and say why rather than pointing at a number that is not
+there.
+
+---
+
 ### Matchup data (FPA) · r = — · rank 5
 
 | | |
@@ -1082,78 +1190,13 @@ else.
 
 ---
 
-### Targets per route run · r = — · rank 2
-
-| | |
-|---|---|
-| **File** | would be built from the nflverse `participation` release |
-| **Field** | `offense_players` — routes run, differenced against targets |
-| **Surfaces** | would join Opportunity and `metricsContext` |
-| **Status** | proposed |
-
-**Plain English.** How often he is targeted on the routes he actually runs.
-
-**Why it matters.** The sharpest single metric in receiving analysis: it
-separates *the coach throws to him* from *he earns it every snap*. It is what
-shows James Cook's TPRR trailing his own backups, and Saquon's collapsing from
-18%+ to 13.1% on arrival in Philadelphia. Volume ceiling = routes x TPRR, so a
-low route share caps everything else — the Josh Downs gate.
-
-**Worked example.** Computed Sep 1 2026 from the 2025 release: Puka Nacua 35.3%,
-Jaxon Smith-Njigba 33.3%, Amon-Ra St. Brown 30.2%, Ja'Marr Chase 29.2%.
-
-**Gotchas.** **⚠️ THIS WAS TIER C UNTIL SEP 1 2026 ON A FALSE PREMISE.** Both
-this file and `CLAUDE.md` said the NFL participation feed died after 2023 and
-that no free routes source existed. `load_participation(2025)` returns **45,184
-rows** with `offense_players` populated on **100%** of them. The claim was
-written once, was plausible, and was then cited rather than re-tested — including
-by me, in the entry below. `snap_sh` remains the shipped proxy because no TPRR
-layer is built yet, **not** because none can be. **Never substitute target share
-for TPRR** — they answer different questions.
-
----
-
-### Coverage-scheme splits · r = — · rank 3
-
-| | |
-|---|---|
-| **File** | would be built from the nflverse `participation` release |
-| **Field** | `defense_man_zone_type` · `defense_coverage_type` |
-| **Surfaces** | would qualify Separation on the card and in `deploymentContext` |
-| **Status** | proposed |
-
-**Plain English.** Is he better against man or against zone.
-
-**Why it matters.** It would qualify [separation](#separation--r--066--rank-3),
-which today blends every coverage a player faced. **"Beats man coverage" and
-"creates separation" are different claims**, and the app can currently only
-measure the second — so a contested-catch specialist who wins by out-positioning
-scores low by construction with no way to say so.
-
-**Worked example.** 2025, on targets with a classified coverage: Tee Higgins
-**7.79 y/t against man on 43 targets vs 9.57 against zone on 56 — an edge of
-−1.78.** His reputation as a man-beater is not supported by this measure, and it
-is not a Cincinnati artefact: Chase runs −2.22 on the same offence.
-
-**Gotchas.** **⚠️ READ THE LEADERBOARD BEFORE TRUSTING THE METRIC.** The top of
-it is James Cook +11.41, D'Andre Swift +9.97, Jaylen Warren +7.24, Saquon Barkley
-+6.40 — **running backs**, because man coverage puts a linebacker on a back and
-that is a mismatch rather than a route-winning skill. Yards per target against
-man therefore measures MISMATCH EXPLOITATION at least as much as beating man, and
-it inherits the same aDOT confound separation has. **Sample is the other
-constraint**: 22,055 of 2025's pass plays carry a coverage label, which is real
-but splits thin per player per season. Any build needs a stated gate and its own
-percentile population.
-
----
-
 ## §7 · Tier C — deliberately not built
 
 > **Every rejection here states the date its impossibility was last verified.**
 > Two entries sat in this section on a false premise until Sep 1 2026, because
 > "no free source exists" was written once and then cited rather than re-tested.
-> A rejection ages exactly like a player verdict. Re-checking a feed costs one
-> command — see [R19](#analysis).
+> Both are now built and live in §5. A rejection ages exactly like a player
+> verdict. Re-checking a feed costs one command — see [R19](#analysis).
 
 ### Offensive line rank · r = — · rank —
 
@@ -1227,6 +1270,8 @@ npm test && git add grading/data && git commit
 | File | Answers | Rank |
 |---|---|---|
 | `ngs_receiving_2025.json` | does he get open, and where is he used | 2 & 3 |
+| `routes_2025.json` | how often is he thrown at per route he runs | 2 |
+| `coverage_2025.json` | man vs zone last season — **reference, not in the prompt** | — |
 | `career_arc_2026.json` | is the calendar with him | — |
 | `vacated_2026.json` | who left, how big is the opening | **1** |
 | `redzone_2025.json` | does he score, or just catch | **1** |
@@ -1413,21 +1458,19 @@ it costs one command.
 
 | # | Item | Effort | Moves grades? |
 |---|---|---|---|
-| 1 | [Targets per route run](#targets-per-route-run--r----rank-2) | new builder | no — context only |
-| 2 | [Coverage-scheme splits](#coverage-scheme-splits--r----rank-3) | new builder | no — context only |
-| 3 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
-| 4 | Decide whether separation should SCORE | a real data decision | **yes** |
-| 5 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
+| 1 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
+| 2 | Decide whether separation should SCORE | a real data decision | **yes** |
+| 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
+| 4 | Re-verify the remaining Tier C rejections against their stated dates | one command each | no |
 
-**On #1 and #2.** Both were Tier C until Sep 1 2026 and both come from the SAME
-nflverse `participation` release, so one download serves both — the same economy
-the game-log layer got from the weekly stats file. **#1 is the higher-value
-half**: TPRR is rank 2 and would sit beside the anchors, where #2 is rank 3 and
-qualifies an existing metric rather than adding one. Each still needs its own
-gate, its own percentile population and a containment guard, and **neither may
-touch the scoring engine**, per the scoring wall in §4.
+**Shipped Sep 1 2026 and pruned from this queue:** targets per route run and
+coverage-scheme splits. Both now live in §5. **The lesson worth keeping is the
+measurement order** — TPRR came out at r=0.674 and shipped as a real input,
+while the man/zone edge came out at r=0.161 and shipped as reference the model
+never sees. Neither outcome was knowable before it was measured, and building
+both and then deciding is what kept a coin flip out of the prompt.
 
-**On #4.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
+**On #2.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
 full of players who cannot get open is genuinely worse than one full of players
 who can, and no current input sees that. **Against:** separation on 40 targets is
@@ -1443,7 +1486,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
-| Sep 1 2026 | TPRR and coverage splits move Tier C → B — the participation feed is alive |
+| Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
 | Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
