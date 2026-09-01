@@ -650,6 +650,33 @@ That distinction is what finds a breakout before the market does:
 carrying a top-decile target share. A contested-catch alpha, not a get-open
 alpha. Invisible in every other number on his card.
 
+**⚠️ RAW SEPARATION IS CONFOUNDED BY ROUTE DEPTH, and heavily.** Measured across
+the pool, `corr(separation, intended air yards) = −0.69`: a deeper route gives
+the defender more time to close, so separation falls monotonically with aDOT
+(WR means run 3.62 at aDOT 0-7 down to 2.45 at 13+). **A raw separation ranking
+is therefore substantially a "how short are his routes" ranking**, which rewards
+slot and screen usage and punishes every boundary X in the league.
+
+`scripts/ngs-targets.mjs` prints **sep+** beside it — separation over expected at
+the depth he is actually used, from a within-position least-squares fit. The
+correction is large: Alec Pierce goes from 4th percentile raw to 72nd adjusted on
+a 19.0 aDOT, and Khalil Shakir falls from 93rd to 65th once his 3.5-yard aDOT is
+accounted for.
+
+**Both are kept.** `sep+` answers *does he beat his assignment*; raw separation
+answers *how much space does he actually catch it in*, and a best-ball ceiling
+case cares about the second as well as the first. Use `sep+` for a talent claim
+and never the raw column alone.
+
+**⚠️ IT ALSO CANNOT ISOLATE MAN COVERAGE.** The figure averages across every
+coverage a player faced, so a contested-catch specialist — who beats man by
+out-positioning rather than by separating — scores low by construction. The
+man/zone split that would settle it is paywalled and sits in Tier C. **"Beats man
+coverage" and "creates separation" are different claims, and this metric only
+measures the second.** Tee Higgins is the worked example: 0th percentile raw,
+83rd of 85 even after the depth adjustment, on a 13.5 aDOT boundary role with 19%
+of his team's red-zone targets.
+
 **Gotchas.** Position medians differ (WR 2.78 · TE 3.45) — read the percentile.
 **NGS has its OWN population** (40+ targets in 2025), which is not the card's
 draftable/8-game gate. The two ranks are not interchangeable and never share a
@@ -1370,6 +1397,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
 | Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
 | Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
@@ -1381,7 +1409,6 @@ own calibration run and its own cap.**
 | Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
 | Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
 | Aug 31 2026 | This file created |
-| Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
 
 ---
 
