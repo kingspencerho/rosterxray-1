@@ -9,6 +9,11 @@ it records how things were built and what broke, in date order.
 screen. Read this one to understand the analysis, that one before changing code,
 and the personas before changing what the app shows, hides, orders or names.
 
+**New here?** Start at [§13, the plain-English guide](#13--plain-english-guide--every-metric-grouped-by-the-question-it-answers).
+It groups every metric by the question it answers and links into the detail.
+[§14](#14--seasonal-coverage--what-the-app-is-for-and-when) is what the app
+covers in draft season, in season and in the offseason.
+
 **Structure guarded by:** `scripts/test-analyst-reference.mjs` (guard 23)
 
 ---
@@ -85,6 +90,8 @@ every entry that now disagrees.
 | §10 Standing rules | **append-only, never renumber** | a rule earns its number by costing a session |
 | §11 Build queue | **prunable** | delete shipped items; they live in §5 now |
 | §12 Changelog | **capped at 12** | drop the oldest. Full history is in git |
+| §13 Plain-English guide | **one line per input** | navigation only. Detail stays in §5; if they disagree, §5 wins |
+| §14 Seasonal coverage | rewrite in place | an audit of the app against the calendar. Re-audit before trusting it |
 
 **§10 and §11 pull in opposite directions on purpose.** Rules accumulate because
 each one is a scar and forgetting it costs the same session twice. The build
@@ -1486,6 +1493,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
 | Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
@@ -1497,9 +1505,193 @@ own calibration run and its own cap.**
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 | Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
 | Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
-| Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
 
 ---
+
+
+---
+
+## §13 · Plain-English guide — every metric, grouped by the question it answers
+
+> **START HERE if you are new to the file, or writing for a non-analyst reader.**
+>
+> **This section is NAVIGATION, not content.** One line per input, grouped by the
+> question a human actually asks, each linking to its full entry in §5. It exists
+> because §1 lists inputs in stickiness order, which is the right order for
+> deciding what to trust and the wrong order for learning what things mean.
+>
+> **Keep the one-liners short and keep the detail in §5.** Guard 23 asserts every
+> §1 input appears here exactly once, so a new input cannot be added without a
+> plain-English sentence. If a line here and its §5 entry ever disagree, §5 wins.
+
+### 1. "Is his job changing?" — the most causal thing you can know
+
+These override everything below them. That is the whole point of rank 1: a
+confirmed role change **invalidates the sticky baseline** rather than competing
+with it.
+
+| Metric | In plain English |
+|---|---|
+| [Snap trajectory](#snap-trajectory--r----rank-1) | Was he on the field more in December than in September |
+| [Vacated targets](#vacated-targets--r----rank-1) | How much of last year's target pie left the building |
+| [Red-zone opportunity share](#red-zone-opportunity-share--r----rank-1) | Does he get the ball where points actually happen |
+| [HVT / game](#hvt--game--r----rank-1) | Touches that score, as opposed to touches that pad yardage |
+
+### 2. "How much work does he get?" — the volume floor
+
+Volume is a job description, and job descriptions carry over. This is the most
+repeatable family in the app and the one to build a projection on.
+
+| Metric | In plain English |
+|---|---|
+| [Targets / game](#targets--game--r--077--rank-2) | Raw volume. Nothing else survives this being low |
+| [Air yards share](#air-yards-share--r--078--rank-2) | Of all the yardage his QB throws toward, how much is aimed at him |
+| [Target share](#target-share--r--073--rank-2) | How central he is, independent of how often his team throws |
+| [WOPR](#wopr--r--075--rank-2) | Targets and air yards blended into one number |
+| [Snap share](#snap-share--r--071--rank-2) | Is he even on the field |
+| [Targets per route run](#targets-per-route-run--r--067--rank-2) | **How often he is thrown at per route he runs.** The only per-opportunity rate here |
+| [Intended air yards](#intended-air-yards--r--083--rank-2) | How far downfield he is used. The stickiest player number in the app |
+| [QB rushing attempts / game](#qb-rushing-attempts--game--r--082--rank-2) | The single most repeatable thing a quarterback does |
+| [QB pass attempts / game](#qb-pass-attempts--game--r--061--rank-2) | How much his offence throws at all |
+| [RB carries / game](#rb-carries--game--r--073--rank-2) | Ground volume. Queued, not built |
+| [Teammate absence](#teammate-absence--r----rank-2) | Did his numbers arrive with the alpha hurt |
+| [On-field rate](#on-field-rate--r----rank-2) | How often he plays at all, measured across his career |
+
+### 3. "Is he good, separate from what he is given?"
+
+The only family that measures the PLAYER rather than his opportunity. Everything
+above says what a coach handed him; this says whether he is earning it.
+
+| Metric | In plain English |
+|---|---|
+| [Separation](#separation--r--066--rank-3) | Yards of space between him and the defender when the ball arrives |
+
+### 4. "What did he actually do?" — descriptive, never predictive
+
+Read these to explain what happened. Never to argue what will happen.
+
+| Metric | In plain English |
+|---|---|
+| [Spike rate](#spike-rate--r--048--rank-4) | How often he won you a week outright |
+| [Usable rate](#usable-rate--r--065--rank-4) | How often he was startable |
+| [Dud rate](#dud-rate--r--067--rank-4) | How often he cost you one |
+| [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | Yards per carry, per target. Among the least repeatable numbers in football |
+| [Coverage-scheme splits](#coverage-scheme-splits--r--016--rank) | What he did against man versus zone. A coin flip year to year |
+
+### 5. "What could change it?" — the outlook
+
+| Metric | In plain English |
+|---|---|
+| [Career arc](#career-arc--r----rank) | Is the calendar with him or against him |
+
+### 6. "When do his points arrive?" — format, not talent
+
+**A player never makes or misses a list because of his December schedule.** This
+family SORTS a shortlist. It never builds one.
+
+| Metric | In plain English |
+|---|---|
+| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | How generous his opponents are. The least stable input in the building |
+
+### 7. Considered and not built
+
+| Metric | Why not |
+|---|---|
+| [Offensive line rank](#offensive-line-rank--r----rank) | No free per-player data, and team pressure rate is confounded by the quarterback |
+| [Player-level motion](#player-level-motion--r----rank) | The feed says the OFFENCE used motion, never which player moved |
+
+### The two rankings, and why they disagree
+
+**Importance** is how causal a metric is. **Stickiness** is whether last year's
+number is still true. They are different axes and the app needs both.
+
+| | High stickiness | Low stickiness |
+|---|---|---|
+| **High importance** | targets/gm · air yards share · TPRR · QB rush att | **role change · vacated targets · dated news** |
+| **Low importance** | (a jersey number would score 1.00) | RB yards per carry · man/zone edge |
+
+**Top-left is your default assumption. Top-right is what overrides it.**
+
+Rank 1 is deliberately the least sticky family in the app. Two failure modes fall
+out of collapsing the axes:
+
+- **Rank by stickiness alone** and you project from last season forever, missing
+  every breakout the moment a role changes.
+- **Rank by importance alone** and you chase every camp report with no baseline
+  to weigh it against.
+
+### The order to work in, on the clock
+
+1. **Did something change?** News, trajectory, vacancy, team change. If yes, much
+   of what follows describes a job he no longer holds.
+2. **Volume floor.** Targets/gm and air yards share. Route share is the ceiling:
+   he cannot beat what he is not on the field for.
+3. **Is the volume earned?** TPRR and separation. **The divergence from step 2 is
+   the signal** — a high rate on modest volume is the contingency profile, the
+   reverse is a fed role one depth-chart move removes.
+4. **Scoring equity.** Red zone. Volume between the 20s and goal-line work are
+   different assets.
+5. **Ceiling shape.** Spike rate. Capped at ±0.5 in the grade for a reason.
+6. **Schedule.** Sorts the shortlist. Never builds it.
+
+---
+
+## §14 · Seasonal coverage — what the app is for, and when
+
+> **Audited against the code on Sep 1 2026, not asserted.** Re-audit before
+> trusting this section; it describes an architecture that is being changed.
+
+The app was built for draft season and its architecture says so. That is worth
+stating plainly, because every gap below follows from it.
+
+### Draft season — complete
+
+26 inputs, 14 tournament configs, best-ball ADP from a like-for-like source,
+stack geometry, positional archetypes, the playoff-schedule engine. Nothing
+material missing.
+
+### In season — the machinery exists and points at the wrong weeks
+
+**THE SINGLE LARGEST FINDING: there was no concept of "today."**
+
+- `lineupConfidence` computes start/sit intel for **all 17 weeks**. Built, works.
+- The AI prompt then filtered it to **`week >= 15` only**.
+- No current-week state existed anywhere in `App.jsx`.
+
+So the weekly intel was aimed at December. In October it had nothing to say about
+October. (Addressed by the current-week work; see the changelog.)
+
+**Four remaining gaps, in priority order:**
+
+| # | Gap | Why it matters |
+|---|---|---|
+| 1 | **No free-agent pool** | The app grades a roster you already hold. The #1 weekly job in redraft is "who do I add," and nothing ranks players you do NOT roster |
+| 2 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days |
+| 3 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
+| 4 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
+
+### Offseason — better covered than it looks
+
+Vacated targets, career arc with draft capital, coaching adjustments and the
+situations corpus already make a real offseason toolkit: *who left, who aged, who
+changed staff, whose role opened.* What is missing is **rookie evaluation** (no
+prospect model; draft capital exists in `career_arc` and nothing else does) and
+**dynasty value curves**.
+
+### ⚠️ The constraint that shapes every in-season answer
+
+**`player_metrics_2025.json` is frozen all season and must stay frozen.** It
+feeds four scored inputs, so refreshing it would move every grade for reasons
+unrelated to the roster and silently invalidate every calibration on file.
+
+The consequence is easy to miss: **the scored anchors describe LAST season for
+the whole of this one.** The fix is never to thaw the frozen file. It is to ship
+a **context-only current-season twin** and render both vintages, which is the
+same pattern `snap_trajectory`, `qb_profile` and `gamelogs` already use.
+
+**Both vintages are always shown. Never swapped.** "38% in 2025, 61% through W7"
+says more than either number alone, and a layer that silently changes which year
+it describes is the stale-data trap in a new costume.
 
 ### One closing observation
 
