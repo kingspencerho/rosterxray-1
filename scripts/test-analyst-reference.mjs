@@ -80,11 +80,11 @@ ok("index has rows", indexRows.length >= 20, `${indexRows.length} found`);
 
 // Entries are `### <Name> · r = <v> · <rank>` inside §4/§5/§6.
 const tierBounds = {
-  A: [doc.indexOf("## §4 ·"), doc.indexOf("## §5 ·")],
-  B: [doc.indexOf("## §5 ·"), doc.indexOf("## §6 ·")],
-  C: [doc.indexOf("## §6 ·"), doc.indexOf("## §7 ·")],
+  A: [doc.indexOf("## §5 ·"), doc.indexOf("## §6 ·")],
+  B: [doc.indexOf("## §6 ·"), doc.indexOf("## §7 ·")],
+  C: [doc.indexOf("## §7 ·"), doc.indexOf("## §8 ·")],
 };
-ok("§4, §5, §6 and §7 are all present and in order",
+ok("§5, §6, §7 and §8 are all present and in order",
   Object.values(tierBounds).every(([a, b]) => a > 0 && b > a));
 
 const entries = [];
@@ -197,9 +197,9 @@ console.log("\nsection growth behaviour");
 
 // Standing rules: contiguous from R1, never reused. They are cited by number,
 // so a renumber silently rewrites every citation elsewhere.
-const rulesStart = doc.indexOf("## §9 ·");
-const rulesEnd = doc.indexOf("## §10 ·");
-ok("§9 and §10 present", rulesStart > 0 && rulesEnd > rulesStart);
+const rulesStart = doc.indexOf("## §10 ·");
+const rulesEnd = doc.indexOf("## §11 ·");
+ok("§10 and §11 present", rulesStart > 0 && rulesEnd > rulesStart);
 const ruleNums = [...doc.slice(rulesStart, rulesEnd).matchAll(/^\*\*R(\d+)\.\*\*/gm)].map(m => +m[1]);
 ok("standing rules exist", ruleNums.length >= 15, `${ruleNums.length} found`);
 ok("standing rules are unique", new Set(ruleNums).size === ruleNums.length);
@@ -207,18 +207,18 @@ ok("standing rules start at R1", ruleNums[0] === 1);
 ok("standing rules are contiguous and ascending",
   ruleNums.every((n, i) => n === i + 1),
   `got ${ruleNums.join(",")} — never renumber, rules are cited by number`);
-ok("§9 declares itself append-only", /Append-only\. Never renumber/.test(doc));
+ok("§10 declares itself append-only", /Append-only\. Never renumber/.test(doc));
 
 // Changelog: capped, so it cannot grow into a worse version of git log.
-const clStart = doc.indexOf("## §11 ·");
+const clStart = doc.indexOf("## §12 ·");
 const clRows = [...doc.slice(clStart).matchAll(/^\|\s*[A-Z][a-z]{2} \d{1,2} \d{4}\s*\|/gm)].length;
 ok("changelog is capped at 12", clRows <= 12, `${clRows} entries — drop the oldest, git has the rest`);
 ok("changelog declares its cap", /Capped at 12 entries/.test(doc));
 
 // Build queue: prunable, and every linked item must still exist. A shipped item
 // left here is worse than no queue — the reader cannot tell what is still true.
-const bqStart = doc.indexOf("## §10 ·");
-const bqEnd = doc.indexOf("## §11 ·");
+const bqStart = doc.indexOf("## §11 ·");
+const bqEnd = doc.indexOf("## §12 ·");
 const bq = doc.slice(bqStart, bqEnd);
 ok("build queue declares itself prunable", /Prunable\. Delete a line the moment it ships/.test(bq));
 for (const m of bq.matchAll(/\[([^\]]+)\]\(#([^)]+)\)/g)) {
@@ -230,14 +230,74 @@ for (const m of bq.matchAll(/\[([^\]]+)\]\(#([^)]+)\)/g)) {
 }
 
 // Every section the contract names must actually exist, in order.
-const wanted = ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9", "§10", "§11"];
+const wanted = ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9", "§10", "§11", "§12"];
 let last = -1, ordered = true;
 for (const w of wanted) {
   const at = doc.indexOf(`## ${w} ·`);
   if (at < 0 || at < last) ordered = false;
   last = at;
 }
-ok("all twelve sections exist and are in order", ordered);
+ok("all thirteen sections exist and are in order", ordered);
+
+// ---- 5. THE SOURCE HIERARCHY DEFINES A FIELD THE REST OF THE FILE USES ----
+// `rank` appears on every §5 entry and in the §1 index legend, and until §3
+// existed it was never defined anywhere. A field used 28 times with no
+// definition is the silent-drop failure in prose form: the reader sees "rank 2"
+// and has no way to act on it.
+console.log("\nthe source hierarchy");
+
+const hStart = doc.indexOf("## §3 ·");
+const hEnd = doc.indexOf("## §4 ·");
+const hier = doc.slice(hStart, hEnd);
+for (const n of [1, 2, 3, 4, 5]) {
+  ok(`rank ${n} is defined`, new RegExp(`^### Rank ${n} — `, "m").test(hier));
+}
+ok("all five ranks and no more", (hier.match(/^### Rank \d/gm) || []).length === 5);
+
+// TWO SCALES LIVE IN THIS FILE and confusing them is the obvious failure: rank
+// 1-5 is trust, Tier A/B/C is build status. An input can be rank 1 and Tier B.
+ok("the rank-vs-tier collision is called out explicitly",
+   /TWO DIFFERENT SCALES LIVE IN THIS FILE/.test(hier),
+   "a reader meeting 'rank 2' and 'Tier B' needs to be told they are different scales");
+
+// The generator/sorter rule is the whole reason the hierarchy is ordered.
+ok("the generate-versus-sort rule is stated",
+   /Ranks 1-4 GENERATE the list\. Rank 5 SORTS it\./.test(hier));
+ok("...and says a schedule never makes or misses a list",
+   /never makes or misses a target list because of his December/.test(hier));
+
+// Rank 1 is the part that is NOT sticky, which reads as a contradiction against
+// §2 unless the file resolves it. It must.
+ok("the rank-1 versus stickiness tension is resolved in the text",
+   /invalidates the sticky baseline/.test(hier));
+
+// ⚠ THE INDEX RANK MUST MATCH ITS ENTRY HEADING, not merely be a legal value.
+// The first version of this only checked the value was 1-5, and passed over FOUR
+// rows whose index rank was one lower than the heading they linked to. A rank
+// that is legal and wrong is worse than one that is out of range, because
+// nothing looks off. Same both-directions check already applied to tier and
+// status.
+const idxRanks = [...indexBlock.matchAll(/^\|\s*\[([^\]]+)\]\([^)]+\)\s*\|[^|]*\|\s*([^|]*?)\s*\|/gm)]
+  .map(m => ({ name: m[1].trim(), rank: m[2].trim() }));
+ok("index rows expose a rank", idxRanks.length >= 20, `${idxRanks.length}`);
+ok("every rank used in the index is one §3 defines",
+   idxRanks.every(r => r.rank === "—" || /^[1-5]$/.test(r.rank)),
+   [...new Set(idxRanks.map(r => r.rank))].join(", "));
+
+const rankMismatch = [];
+for (const row of idxRanks) {
+  const ent = entries.find(x => x.name === row.name);
+  if (!ent) continue;
+  const want = (ent.rank.match(/rank (\d|—)/) || [])[1] ?? "—";
+  if (row.rank !== want) rankMismatch.push(`${row.name}: index ${row.rank}, entry ${want}`);
+}
+ok("every index rank matches its entry heading", rankMismatch.length === 0,
+   rankMismatch.slice(0, 4).join(" | "));
+
+// The §1 legend must point at the definition rather than re-glossing it — two
+// copies of a definition is one copy and one future lie.
+ok("the index legend links to §3 rather than re-defining rank",
+   /\[Source Hierarchy\]\(#3--the-source-hierarchy/.test(indexBlock));
 
 // The two documents must point at each other, or one of them gets forgotten.
 const claude = readFileSync(path.join(process.cwd(), "CLAUDE.md"), "utf8");
