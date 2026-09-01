@@ -548,7 +548,7 @@ Governs how competing signals get weighed in any player evaluation, breakout lis
 
 ### Metric hierarchy (most → least predictive for projection)
 1. **Role/opportunity CHANGE** — vacated targets/alignment, confirmed role moves, draft capital, coaching scheme fit. Most causal, freshest.
-2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. Target/air-yard shares are computed over GAMES PLAYED (full-season denominators understated partial-season players until Jul 16, 2026). (True YPRR/TPRR and route participation would slot here — no public routes data exists, the NFL participation feed died after 2023; `snap_sh` in player_metrics is the route-participation proxy, and WOPR + target share proxy per-route volume. Volume ceiling = routes x TPRR, so a low snap/route share caps everything else — the Josh Downs gate.)
+2. **Opportunity volume** — target share, WOPR, HVT/game, snap share. Volume is stable; efficiency is not. Target/air-yard shares are computed over GAMES PLAYED (full-season denominators understated partial-season players until Jul 16, 2026). (TPRR and true route participation slot here. ⚠️ **CORRECTED Sep 1 2026: the claim that the participation feed died after 2023 was FALSE and shaped several decisions before it was checked.** `nflreadpy.load_participation()` returns 2025 with 45,184 rows, and its `offense_players` column is populated on 100% of them, so routes run and therefore TPRR ARE computable for free — verified by computing them: Nacua 35.3%, JSN 33.3%, ARSB 30.2%, Chase 29.2%. `snap_sh` remains the shipped proxy because no TPRR layer is built yet, not because none can be. Volume ceiling = routes x TPRR, so a low route share caps everything else — the Josh Downs gate.)
 3. **Talent-in-isolation** — charting success rates, prospect-model scores, breakout-age priors. Identifies who deserves volume before they get it.
 4. **Ceiling shape** — spike/usable/dud/nuclear week rates. Descriptive of last season; use for best-ball classification, not projection.
 5. **Matchup data (FPA)** — least stable input. Format decisions only.
@@ -4214,7 +4214,7 @@ Week 1.
 | Availability rate | — | Every metric here is per-game; nothing expresses "he plays" |
 | Red-zone target share | — | Lens 1 calls it standalone scoring equity and the app cannot see it |
 | Carries per game (RB) | 0.730 | `build-player-metrics.py` emits no carry count |
-| Targets per route run | — | **Paywalled.** No free routes source since the 2023 feed died. Never substitute target share for it. |
+| Targets per route run | — | **AVAILABLE, not paywalled — corrected Sep 1 2026.** Computable from participation `offense_players`; verified. Not built yet. Never substitute target share for it. |
 | Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
 
 ### SHIPPED Aug 31 2026: the two free anchors now reach the model
@@ -4741,3 +4741,68 @@ fallback.
 - Every date pinned to a primary source; where only a month was confirmable, the
   month-only form is used rather than an invented day.
 - `report-stale-news.mjs` returns **zero** players past the 45-day rule.
+
+
+---
+
+## The Participation Feed Is Alive, and Two "Impossible" Layers Are Not (Sep 1, 2026)
+
+Prompted by a user asking whether man/zone coverage data exists anywhere outside
+PFF. Checking instead of repeating this file's own claim found that **two of the
+Tier C rejections in `ANALYST-REFERENCE.md` were wrong**, and had been shaping
+decisions for weeks.
+
+### What this file said, and what is actually true
+
+| Claim here | Reality, verified Sep 1 2026 |
+|---|---|
+| "the NFL participation feed died after 2023" | `load_participation(2025)` returns **45,184 rows** |
+| "no public routes data exists" | `offense_players` is populated on **100%** of them |
+| "TPRR — paywalled, no free routes source" | **Computed it.** Nacua 35.3%, JSN 33.3%, Chase 29.2% |
+| "man/zone splits — paywalled" | `defense_man_zone_type` on **22,055 classified 2025 pass plays** |
+
+The participation release also carries `defense_coverage_type` (COVER_0/1/2/3/4/6,
+2_MAN), `route`, `time_to_throw`, `was_pressure`, `ngs_air_yards`,
+`offense_formation` and `offense_personnel`.
+
+**FTN charting is a separate release and has no coverage field**, but it does
+carry `is_contested_ball`, `is_created_reception`, `is_catchable_ball`,
+`is_drop`, `n_blitzers` and `n_pass_rushers` — none of which are used yet.
+
+### How the wrong claim survived
+
+It was written once, was plausible (the feed genuinely had a gap), and was then
+**cited rather than re-tested** — including by me, in the sentence rejecting the
+man/zone split as impossible. **A "this is impossible" note ages exactly like a
+player verdict and has no freshness rule on it.** The 30-45 day re-validation
+rule covers `RECENT_NEWS`; nothing covered a data-availability claim.
+
+**Rule this produces: a Tier C rejection must carry the date it was last
+verified, and re-checking a feed costs one command.**
+
+### What the coverage data says about the question that prompted it
+
+Tee Higgins' reputation is as a man-coverage beater. Measured on 2025 targets
+with a classified coverage:
+
+```
+Tee Higgins    man 7.79 y/t on 43 targets  |  zone 9.57 on 56  |  edge −1.78
+```
+
+**The reputation is not supported by this measure.** Nor is it a Cincinnati
+artefact — Chase runs −2.22 on the same offence.
+
+⚠️ **But read the leaderboard before trusting the metric.** The top of it is
+James Cook +11.41, D'Andre Swift +9.97, Jaylen Warren +7.24, Saquon Barkley
++6.40 — **running backs**, because man coverage puts a linebacker on a back and
+that is a mismatch rather than a route-winning skill. So yards per target against
+man measures MISMATCH EXPLOITATION at least as much as it measures beating man,
+and it inherits the same aDOT confound separation has. Treat it as a screen.
+
+### Nothing was built here
+
+This is a correction to the record and a verified availability note, not a layer.
+Building TPRR or coverage splits properly means a builder script, a stability
+measurement, percentile populations, prompt wiring and a containment guard — the
+same bar every other layer cleared. The point of this entry is that the door is
+open, and this file said it was locked.
