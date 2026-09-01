@@ -27,8 +27,8 @@ Four rules keep it that way. Guard 23 enforces all four.
 ### Rule 1 — The INDEX is the entry point. Add the row first.
 
 Every input has exactly one row in [§1](#1--index) and exactly one entry in
-[§4](#4--tier-a--the-inputs-that-carry-the-analysis), [§5](#5--tier-b--worth-building-next) or
-[§6](#6--tier-c--deliberately-not-built). **A row without an entry, or an entry without a row,
+[§5](#5--tier-a--the-inputs-that-carry-the-analysis), [§6](#6--tier-b--worth-building-next) or
+[§7](#7--tier-c--deliberately-not-built). **A row without an entry, or an entry without a row,
 fails the build.** So does the same input appearing in two tiers.
 
 That single constraint is what stops this file drifting into two half-maintained
@@ -75,17 +75,18 @@ every entry that now disagrees.
 |---|---|---|
 | §1 Index | **yes, one row per input** | the only place that lists everything |
 | §2 Stickiness table | rarely | canonical. Changing a number here is a measurement, not an edit |
-| §3 Scoring wall | **no** | rewrite in place when the engine changes |
-| §4 Tier A | **yes** | new entries; Tier B graduates in |
-| §5 Tier B | churns | an item **MOVES** to §4 when built. Never copy |
-| §6 Tier C | rarely | add only with the reason it is impossible |
-| §7 Data inventory | yes | one row per file |
-| §8 Skills & tooling | yes | one entry per skill or command |
-| §9 Standing rules | **append-only, never renumber** | a rule earns its number by costing a session |
-| §10 Build queue | **prunable** | delete shipped items; they live in §4 now |
-| §11 Changelog | **capped at 12** | drop the oldest. Full history is in git |
+| §3 Source Hierarchy | **no** | the rank definitions. Changing one re-weights every entry |
+| §4 Scoring wall | **no** | rewrite in place when the engine changes |
+| §5 Tier A | **yes** | new entries; Tier B graduates in |
+| §6 Tier B | churns | an item **MOVES** to §5 when built. Never copy |
+| §7 Tier C | rarely | add only with the reason it is impossible |
+| §8 Data inventory | yes | one row per file |
+| §9 Skills & tooling | yes | one entry per skill or command |
+| §10 Standing rules | **append-only, never renumber** | a rule earns its number by costing a session |
+| §11 Build queue | **prunable** | delete shipped items; they live in §5 now |
+| §12 Changelog | **capped at 12** | drop the oldest. Full history is in git |
 
-**§9 and §10 pull in opposite directions on purpose.** Rules accumulate because
+**§10 and §11 pull in opposite directions on purpose.** Rules accumulate because
 each one is a scar and forgetting it costs the same session twice. The build
 queue is a snapshot of intent and goes stale — a shipped item left there is worse
 than no queue, because the next reader cannot tell what is still true.
@@ -104,20 +105,20 @@ Every input the app carries or has considered. **One row each. This table is the
 entry point.**
 
 Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
-**Rank:** position in the Source Hierarchy (1 = role change, most causal;
-5 = matchup data, least stable).
+**Rank:** position in the [Source Hierarchy](#3--the-source-hierarchy--how-inputs-get-weighed)
+— 1 = role change, most causal; 5 = matchup data, least stable. §3 defines all five.
 
 | Input | r | Rank | Tier | Status | Scored? |
 |---|---|---|---|---|---|
-| [Intended air yards](#intended-air-yards--r--083--rank-2) | 0.83 | 1 | A | live | no |
+| [Intended air yards](#intended-air-yards--r--083--rank-2) | 0.83 | 2 | A | live | no |
 | [QB rushing attempts / game](#qb-rushing-attempts--game--r--082--rank-2) | 0.82 | 2 | A | live | no |
 | [Air yards share](#air-yards-share--r--078--rank-2) | 0.78 | 2 | A | live | no |
 | [Targets / game](#targets--game--r--077--rank-2) | 0.77 | 2 | A | live | no |
 | [WOPR](#wopr--r--075--rank-2) | 0.75 | 2 | A | live | no |
 | [Target share](#target-share--r--073--rank-2) | 0.73 | 2 | A | live | no |
 | [Snap share](#snap-share--r--071--rank-2) | 0.71 | 2 | A | live | no |
-| [Dud rate](#dud-rate--r--067--rank-4) | 0.67 | 3 | A | live | **yes — Floor** |
-| [Separation](#separation--r--066--rank-3) | 0.66 | 2 | A | live | no |
+| [Dud rate](#dud-rate--r--067--rank-4) | 0.67 | 4 | A | live | **yes — Floor** |
+| [Separation](#separation--r--066--rank-3) | 0.66 | 3 | A | live | no |
 | [Usable rate](#usable-rate--r--065--rank-4) | 0.65 | 4 | A | live | **yes — Advance, Floor** |
 | [QB pass attempts / game](#qb-pass-attempts--game--r--061--rank-2) | 0.61 | 2 | A | live | no |
 | [Spike rate](#spike-rate--r--048--rank-4) | 0.48 | 4 | A | live | **yes — Ceiling** |
@@ -129,7 +130,7 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [HVT / game](#hvt--game--r----rank-1) | — | 1 | A | live | **yes — Naked RB gate** |
 | [Career arc](#career-arc--r----rank) | — | — | A | live | no |
 | [Per-touch efficiency](#per-touch-efficiency--r----rank-4) | — | 4 | A | live | no |
-| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 4 | A | live | **yes — schedule** |
+| [Matchup data (FPA)](#matchup-data-fpa--r----rank-5) | — | 5 | A | live | **yes — schedule** |
 | [RB carries / game](#rb-carries--game--r--073--rank-2) | 0.73 | 2 | B | proposed | no |
 | [Targets per route run](#targets-per-route-run--r----rank-2) | — | 2 | C | rejected | no |
 | [Offensive line rank](#offensive-line-rank--r----rank) | — | — | C | rejected | no |
@@ -217,7 +218,162 @@ baseline**.
 
 ---
 
-## §3 · The scoring wall
+## §3 · The Source Hierarchy — how inputs get weighed
+
+Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a
+**rank**. This is what it means.
+
+> ⚠️ **TWO DIFFERENT SCALES LIVE IN THIS FILE. Do not confuse them.**
+> **Rank 1-5** is the Source Hierarchy: *how much do I trust this input.*
+> **Tier A/B/C** is build status: *is it built, queued, or impossible.*
+> An input can be rank 1 and Tier B — important and not built yet.
+
+The ordering question is always: **when two things disagree, which do I
+believe?** Higher rank wins.
+
+---
+
+### Rank 1 — Did his JOB change?
+
+*What is different about his situation right now that was not true last year.*
+
+A player traded into a starting role. A target hog who left town. A coach naming
+a starter. Draft capital. A scheme that fits him.
+
+**Why it is first:** it is the only rank that describes NOW. Everything below
+describes what already happened. And it is **causal** — a role change does not
+correlate with production, it creates it.
+
+**The apparent contradiction, and the resolution.** Every other rank is ordered
+by how REPEATABLE it is. Rank 1 is by definition the part that is NOT
+repeatable. That is exactly why it outranks the rest: **a confirmed role change
+invalidates the sticky baseline.** Rank 1 is the input that tells you when to
+stop trusting ranks 2-4.
+
+**Inputs:** vacated targets · snap trajectory · recent news · career arc ·
+red-zone share (the scoring half of opportunity)
+
+---
+
+### Rank 2 — How much does he get?
+
+*How many chances at the ball, and what share of his team's chances.*
+
+**Why it is second: it is the most repeatable thing in football.**
+
+```
+targets/game     0.77        snap share       0.71
+air yards share  0.78        RB carries/gm    0.73
+target share     0.73        QB rush att/gm   0.82
+```
+
+**Volume is a job description, and job descriptions carry over.**
+
+**The gate inside it:** snap share caps everything else. Volume ceiling =
+routes x targets per route, so a player off the field cannot be rescued by
+talent — the Josh Downs gate.
+
+**Inputs:** targets/gm · target share · air yards share · WOPR · snap share ·
+HVT/gm · QB volume profile · on-field rate · teammate absence
+
+---
+
+### Rank 3 — Does he deserve it?
+
+*Is he winning, or is a coach simply feeding him.*
+
+**Why it is third: it is the only rank that measures the PLAYER rather than what
+someone gave him.** Every rank above it measures opportunity handed down. This
+one finds a breakout before the volume shows up — high separation on modest
+volume is what that looks like.
+
+**Why not higher:** measured at `0.66`, real but less repeatable than volume.
+And talent without opportunity scores zero.
+
+**Inputs:** separation. It is the only rank-3 input the app carries, and the app
+had none at all before Aug 31 2026.
+
+---
+
+### Rank 4 — What did his weeks look like?
+
+*When he hit, how big. And how often did he hand you a zero.*
+
+**Why it is fourth:** it DESCRIBES last season rather than predicting the next
+one. Spike rate is `0.48`, barely better than a coin flip.
+
+**Why it still matters in best ball:** you win a week with a spike. So this is a
+**classifier** — it says what KIND of asset a player is — never a projection.
+
+⚠️ **The honest tension.** Dud rate (`0.67`) is far more repeatable than spike
+rate (`0.48`). **In best ball the more reliable number is the less useful one.**
+That is why the Ceiling Shape Layer is capped at ±0.5 rather than trusted.
+
+**Inputs:** spike · nuclear · usable · dud · game logs · per-touch efficiency
+
+---
+
+### Rank 5 — Who is he playing?
+
+*Is the defense in front of him any good.*
+
+**Why it is last, and this is the number that should surprise a reader:**
+
+```
+RB matchup data   0.245
+TE                0.192
+QB                0.049
+WR               −0.073   ← NEGATIVE
+```
+
+A defense that was soft against receivers last year is **very slightly more
+likely than chance to be tough this year**. The best figure on that board
+explains 6% of next season's variance.
+
+**So why carry it at all?** Because it answers a different question. Ranks 1-4
+ask *is he good*. Rank 5 asks *when do his points arrive* — and in a format
+where a single week is a 1-of-6 cut, timing is worth real money.
+
+**Inputs:** FPA · season SOS · playoff schedule tiers
+
+---
+
+### The rule that ties it together
+
+> **Ranks 1-4 GENERATE the list. Rank 5 SORTS it.**
+
+**A player never makes or misses a target list because of his December
+schedule.** His ranking WITHIN a list may move because of it.
+
+Getting this backwards is the most expensive mistake available here, because the
+output looks reasonable either way. A worked example from a real W16 screen:
+
+| Player | Rank 5 said | Ranks 1-4 said | Correct call |
+|---|---|---|---|
+| Ja'Marr Chase | Smash | elite on all four | **buy** — everything agrees |
+| Jonathan Taylor | Smash | 35% nuclear, 67% of goal line | **buy** |
+| Chase Brown | *Even* | 56% of inside-10 carries | **buy anyway** — rank 2 beats rank 5 |
+| Alec Pierce | *Hard* | 19.0 aDOT, 40% air-yards share | **live** — good rank 2, bad rank 5 |
+| TJ Hockenson | Smash | **0% spike rate** | **pass** — rank 4 kills it |
+| Bhayshul Tuten | Smash | **11th percentile snaps** | **pass** — rank 2 kills it |
+
+The four middle rows are where the hierarchy earns its keep. **Led by rank 5,
+all six of those calls invert.**
+
+---
+
+### Where each rank's confidence comes from
+
+Rank order is about CAUSAL priority. [§2](#2--stickiness--the-canonical-table)
+measures a different axis — whether last year's number is still true. The two are
+complementary, and both are needed:
+
+- **§2 tells you what to assume by default.**
+- **The hierarchy tells you what overrides the default.**
+
+---
+
+## §4 · The scoring wall
 
 Two systems, kept apart on purpose.
 
@@ -263,7 +419,7 @@ Enforced by guard 15, not left as a convention.
 
 ---
 
-## §4 · Tier A — the inputs that carry the analysis
+## §5 · Tier A — the inputs that carry the analysis
 
 ### Intended air yards · r = 0.83 · rank 2
 
@@ -347,7 +503,7 @@ in `/scout`: alpha 32-40%, median ~27%.
 
 **Gotchas.** **Useless for running backs** (`0.261`). The RB tiebreaker is
 HVT/game plus snap share. Also: currently **absent from the AI prompt** despite
-being loaded — see [§5](#targetsgm--ay-share-in-the-prompt--r---rank-2).
+being loaded — see [§6](#targetsgm--ay-share-in-the-prompt--r---rank-2).
 
 ---
 
@@ -369,7 +525,7 @@ there is. **Nothing else on a receiver's card matters if this is low.**
 
 **Gotchas.** Computed over **games played**, not a 17-game denominator. Before
 Jul 16 2026 full-season denominators understated every partial-season player.
-Also absent from the AI prompt — see [§5](#targetsgm--ay-share-in-the-prompt--r---rank-2).
+Also absent from the AI prompt — see [§6](#targetsgm--ay-share-in-the-prompt--r---rank-2).
 
 ---
 
@@ -874,7 +1030,7 @@ blocking TE and a zero-target WR, and put the median at **63%**).
 
 ---
 
-## §5 · Tier B — worth building next
+## §6 · Tier B — worth building next
 
 ### RB carries / game · r = 0.73 · rank 2
 
@@ -898,7 +1054,7 @@ else.
 
 ---
 
-## §6 · Tier C — deliberately not built
+## §7 · Tier C — deliberately not built
 
 ### Targets per route run · r = — · rank 2
 
@@ -983,7 +1139,7 @@ this file as a player-level motion split.**
 
 ---
 
-## §7 · Data layer inventory
+## §8 · Data layer inventory
 
 ### Scored — FROZEN all season
 
@@ -1027,7 +1183,7 @@ npm test && git add grading/data && git commit
 
 ---
 
-## §8 · Skills and tooling
+## §9 · Skills and tooling
 
 ### Skills
 
@@ -1115,7 +1271,7 @@ build-sos.py                full-season schedule strength
 
 ---
 
-## §9 · Standing rules
+## §10 · Standing rules
 
 > **Append-only. Never renumber — rules get cited by number.**
 > A rule earns a number by costing a debugging session.
@@ -1186,9 +1342,9 @@ analysis.
 
 ---
 
-## §10 · Build queue
+## §11 · Build queue
 
-> **Prunable. Delete a line the moment it ships — it lives in §4 then.**
+> **Prunable. Delete a line the moment it ships — it lives in §5 then.**
 > A shipped item left here is worse than no queue, because the next reader cannot
 > tell what is still true.
 
@@ -1208,12 +1364,13 @@ own calibration run and its own cap.**
 
 ---
 
-## §11 · Changelog
+## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
 | Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
 | Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
 | Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
@@ -1225,7 +1382,6 @@ own calibration run and its own cap.**
 | Aug 31 2026 | §0 maintenance contract, §1 index, fixed entry template, guard 23 |
 | Aug 31 2026 | This file created |
 | Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
-| Aug 30 2026 | Floor Layer (scored, redraft, ±0.5) + redraft role context |
 
 ---
 
