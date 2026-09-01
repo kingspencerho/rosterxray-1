@@ -215,5 +215,76 @@ rosterGated === 2
   ? ok("the roster chip is wired to its own keyframes")
   : bad("the roster chip must select animation-name: rosterCta");
 
+// ---- THE PAGE MUST MOVE WHEN A GRADE ARRIVES ----
+//
+// Measured before the fix: after Analyze, scrollY stayed at 0 while the grade
+// letter sat at y=1243 in both modes. Every user scrolled ~1,200px past the form
+// they had just filled in to reach their own result — and the portfolio drafter
+// does that on every one of forty entries. It is the single worst pain point
+// either page had.
+//
+// THREE ATTEMPTS LANDED IN THE WRONG PLACE, ALL SILENTLY, which is why this is
+// guarded structurally rather than left to a future eyeball:
+//   1. no scroll at all
+//   2. scrolling from inside the layout effect — measured y=686 while the tree
+//      was still expanding; Chromium then cancelled the in-flight smooth scroll
+//   3. scrolling after two animation frames — measured y=2031 while the page was
+//      still SHRINKING, overshooting the real target by 814px
+// scrollTo was called every time and nothing ever errored.
+console.log("\nresults come into view on analyze");
+
+// ⚠ THIS FILE'S ASSERTION IDIOM IS `cond ? ok(msg) : bad(msg)`. Its ok() takes
+// ONE argument and always prints a pass, so the ok(label, condition) form used
+// by the other guards silently asserts nothing here. The first version of this
+// block was written that way and both negative tests passed — the same
+// one-argument ok() trap already recorded for guards 19 and 20.
+/className="fade-in" ref=\{resultsRef\}/.test(src)
+  ? ok("a ref is attached to the results root")
+  : bad("the results root needs ref={resultsRef} or nothing can scroll to it");
+
+(src.match(/className="fade-in" ref=\{resultsRef\}/g) || []).length === 2
+  ? ok("both modes carry the ref")
+  : bad("best ball and redraft each have their own results root; both need the ref");
+
+const eff = src.slice(src.indexOf("const resultsRef = useRef"), src.indexOf("const handleAnalyze"));
+
+eff.includes("window.scrollTo")
+  ? ok("the scroll effect exists")
+  : bad("no scroll effect — the grade renders 1,200px below the fold");
+
+// KEYED ON A COUNTER, NOT ON `analyzed`. Restoring a saved grade on page load
+// must not yank a reader who did not ask for it.
+/\}, \[analyzeTick\]\);/.test(eff)
+  ? ok("the effect is keyed on the analyze counter")
+  : bad("key the scroll on the analyze counter, not on the result object");
+
+!/\}, \[analyzed\]\);/.test(eff)
+  ? ok("it is not keyed on the result object")
+  : bad("keying on `analyzed` scrolls on a restored grade the reader did not request");
+
+(src.match(/setAnalyzeTick\(/g) || []).length === 2
+  ? ok("the counter moves only in handleAnalyze, once per mode")
+  : bad("setAnalyzeTick must fire exactly twice — one per mode branch");
+
+// WAIT FOR LAYOUT. The measurement must happen after the page stops resizing.
+eff.includes("scrollHeight") && eff.includes("requestAnimationFrame")
+  ? ok("it waits for a stable page height before measuring")
+  : bad("measuring during the commit reads a height the page is about to leave");
+
+/frames < \d+/.test(eff)
+  ? ok("the stability poll is capped")
+  : bad("a page that never settles must still scroll rather than poll forever");
+
+eff.includes("cancelAnimationFrame")
+  ? ok("the animation frame is cancelled on unmount")
+  : bad("an uncancelled rAF loop survives the component");
+
+// ⚠ ASSERT THE FLAG IS USED, not merely present. The first version checked for
+// the string "prefers-reduced-motion" and passed when the behavior was
+// hard-coded to "smooth" with the media query still sitting unused above it.
+eff.includes("prefers-reduced-motion") && /behavior: reduce \? "auto" : "smooth"/.test(eff)
+  ? ok("reduced motion is respected, and the flag actually drives the behavior")
+  : bad("a smooth scroll must degrade to an instant one under reduced motion");
+
 console.log(failed ? `\n${failed} disclosure check(s) failed` : "\nall disclosure guards passed");
 process.exit(failed ? 1 : 0);

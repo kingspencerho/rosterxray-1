@@ -400,11 +400,68 @@ ok("the no-absence branch is exercised", someQuiet);
 // The section must not be the only thing keeping a blank card alive.
 ok("the no-data branch accounts for absence", /!card\.absence\.length/.test(app));
 
-// It qualifies OPPORTUNITY, so it wears opportunity's colour rather than a new one.
-ok("the absence accent reuses the opportunity token",
-   /absence: "var\(--accent-purple-light\)"/.test(app));
+// THE ACCENT NAMES A GROUP, NOT A SECTION, and the group names the QUESTION a
+// reader is asking. See USER-PERSONAS.md. The card reached fourteen sections and
+// a per-section accent had collapsed to two colours across fourteen slots, which
+// is a channel carrying no information.
+//
+// The mapping is asserted rather than the literal tokens, so a deliberate
+// palette re-tune stays legal and a hand-written colour beside grouped ones does
+// not.
+const groups = {};
+for (const m of app.matchAll(/^  (\w+): CARD_GROUP_ACCENT\.(\w+),/gm)) groups[m[1]] = m[2];
 
-// It reports, it does not conclude.
+ok("CARD_GROUP_ACCENT is declared once", (app.match(/const CARD_GROUP_ACCENT = /g) || []).length === 1);
+ok("exactly four groups are in use", new Set(Object.values(groups)).size === 4, JSON.stringify(groups));
+ok("the four groups are the four reader questions",
+   ["job", "production", "outlook", "reference"].every(g => Object.values(groups).includes(g)),
+   JSON.stringify([...new Set(Object.values(groups))]));
+
+// Absence QUALIFIES the opportunity numbers, so the two are one idea and must
+// share a group. Red zone and deployment are opportunity too — different
+// sources, same question.
+for (const k of ["absence", "redzone", "deployment", "trajectory"]) {
+  ok(`${k} sits with the job group`, groups[k] === "job", groups[k]);
+}
+// Availability, the calendar and team turnover are what could CHANGE the job.
+// The first regrouping filed them under "who he is", which is a description of
+// the sections rather than a question anyone asks.
+for (const k of ["availability", "arc", "vacated", "news"]) {
+  ok(`${k} sits with the outlook group`, groups[k] === "outlook", groups[k]);
+}
+// Efficiency is descriptive of 2025 and would read as production, but it belongs
+// with reference for the same reason the glossary does: it is consulted, never
+// concluded from. Brightness on this card means "this should move your opinion".
+ok("efficiency and the glossary share the reference group",
+   groups.efficiency === "reference" && groups.glossary === "reference");
+ok("the reference group is the dim token",
+   /reference: "var\(--text-dim\)"/.test(app),
+   "painting efficiency brighter would undo the card's second channel");
+
+// THE GROUPS MUST RENDER IN THE READER'S OWN ORDER. Reference last, because
+// every persona consults it last; outlook after the job it could change. The
+// first build put reference before outlook because one lived inside the no-data
+// branch and one outside it.
+const order = [...app.matchAll(/CardGroupHeader group="(\w+)"/g)].map(m => m[1]);
+ok("group headers render in reader order",
+   JSON.stringify(order) === JSON.stringify(["job", "production", "outlook", "reference"]),
+   JSON.stringify(order));
+
+// A group header must never appear alone. An empty group is a bare label.
+for (const g of ["job", "production", "outlook", "reference"]) {
+  const at = app.indexOf(`CardGroupHeader group="${g}"`);
+  const before = app.slice(Math.max(0, at - 220), at);
+  ok(`the ${g} header is guarded on having content`, /&& \(|\? \(|!card\.reason/.test(before),
+     "a header with no sections under it is a label pointing at nothing");
+}
+
+// The game log is OUTPUT and must sit under production, not under the job group.
+const glAt = app.indexOf("<GameLogSection");
+ok("the game log sits in the production group",
+   glAt > app.indexOf('CardGroupHeader group="production"') &&
+   glAt < app.indexOf('CardGroupHeader group="outlook"'));
+
+// It reports, it does not conclude.// It reports, it does not conclude.
 ok("the section note refuses to assert causation",
    /does not prove the volume was hollow/.test(app));
 

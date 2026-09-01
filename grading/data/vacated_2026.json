@@ -1,0 +1,812 @@
+{
+ "_meta": {
+  "denominator": "team's own measured 2025 target share, not 1.00 \u2014 the metrics cover drafted players only, so a team's shares do not sum to 100% and the percentage is 'share of the measured pool that left', which is the comparable figure",
+  "hierarchy_rank": "1 \u2014 role/opportunity CHANGE, the most causal input in the framework",
+  "listed_cutoff": "individual departures listed at 3%+ target share",
+  "normalisation": "lowercase, punctuation stripped, SUFFIXES STRIPPED before differencing \u2014 the known bug that read 'brian robinson jr' as a departure and inflated WAS to 82.4%",
+  "not_a_projection": "This says targets are AVAILABLE. It does NOT say who inherits them; per Lens 1 you must still project who absorbs the share before ADP does.",
+  "season_from": 2025,
+  "season_to": 2026,
+  "source": "player_metrics_2025 (2025 team) differenced against nflverse roster_2026 (current team)"
+ },
+ "teams": {
+  "ARI": {
+   "gone": [
+    {
+     "name": "michael carter",
+     "pos": "RB",
+     "status": "now TEN",
+     "tgt_sh": 0.089
+    },
+    {
+     "name": "zay jones",
+     "pos": "WR",
+     "status": "now HOU",
+     "tgt_sh": 0.085
+    },
+    {
+     "name": "greg dortch",
+     "pos": "WR",
+     "status": "now DET",
+     "tgt_sh": 0.074
+    },
+    {
+     "name": "emari demercado",
+     "pos": "RB",
+     "status": "now KC",
+     "tgt_sh": 0.049
+    }
+   ],
+   "measured_tgt_sh": 1.407,
+   "vacated_pct": 22.7,
+   "vacated_tgt_sh": 0.32
+  },
+  "ATL": {
+   "gone": [
+    {
+     "name": "darnell mooney",
+     "pos": "WR",
+     "status": "now NYG",
+     "tgt_sh": 0.16
+    },
+    {
+     "name": "khadarel hodge",
+     "pos": "WR",
+     "status": "now SF",
+     "tgt_sh": 0.099
+    },
+    {
+     "name": "david sills",
+     "pos": "WR",
+     "status": "now TB",
+     "tgt_sh": 0.098
+    },
+    {
+     "name": "casey washington",
+     "pos": "WR",
+     "status": "now CAR",
+     "tgt_sh": 0.085
+    },
+    {
+     "name": "tyler allgeier",
+     "pos": "RB",
+     "status": "now ARI",
+     "tgt_sh": 0.031
+    }
+   ],
+   "measured_tgt_sh": 1.301,
+   "vacated_pct": 36.4,
+   "vacated_tgt_sh": 0.473
+  },
+  "BAL": {
+   "gone": [
+    {
+     "name": "isaiah likely",
+     "pos": "TE",
+     "status": "now NYG",
+     "tgt_sh": 0.133
+    },
+    {
+     "name": "deandre hopkins",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.095
+    },
+    {
+     "name": "charlie kolar",
+     "pos": "TE",
+     "status": "now LAC",
+     "tgt_sh": 0.053
+    },
+    {
+     "name": "keaton mitchell",
+     "pos": "RB",
+     "status": "now LAC",
+     "tgt_sh": 0.044
+    }
+   ],
+   "measured_tgt_sh": 1.132,
+   "vacated_pct": 28.7,
+   "vacated_tgt_sh": 0.325
+  },
+  "BUF": {
+   "gone": [
+    {
+     "name": "brandin cooks",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.293
+    },
+    {
+     "name": "gabe davis",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.101
+    },
+    {
+     "name": "elijah moore",
+     "pos": "WR",
+     "status": "now PHI",
+     "tgt_sh": 0.063
+    }
+   ],
+   "measured_tgt_sh": 1.529,
+   "vacated_pct": 29.9,
+   "vacated_tgt_sh": 0.457
+  },
+  "CAR": {
+   "gone": [
+    {
+     "name": "hunter renfrow",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.136
+    },
+    {
+     "name": "rico dowdle",
+     "pos": "RB",
+     "status": "now PIT",
+     "tgt_sh": 0.104
+    }
+   ],
+   "measured_tgt_sh": 1.286,
+   "vacated_pct": 18.7,
+   "vacated_tgt_sh": 0.24
+  },
+  "CHI": {
+   "gone": [
+    {
+     "name": "dj moore",
+     "pos": "WR",
+     "status": "now BUF",
+     "tgt_sh": 0.159
+    },
+    {
+     "name": "olamide zaccheaus",
+     "pos": "WR",
+     "status": "now ATL",
+     "tgt_sh": 0.15
+    }
+   ],
+   "measured_tgt_sh": 1.196,
+   "vacated_pct": 25.8,
+   "vacated_tgt_sh": 0.309
+  },
+  "CIN": {
+   "gone": [
+    {
+     "name": "noah fant",
+     "pos": "TE",
+     "status": "now NO",
+     "tgt_sh": 0.085
+    }
+   ],
+   "measured_tgt_sh": 1.199,
+   "vacated_pct": 7.1,
+   "vacated_tgt_sh": 0.085
+  },
+  "CLE": {
+   "gone": [
+    {
+     "name": "david njoku",
+     "pos": "TE",
+     "status": "now LAC",
+     "tgt_sh": 0.124
+    },
+    {
+     "name": "trayveon williams",
+     "pos": "RB",
+     "status": "now DET",
+     "tgt_sh": 0.088
+    },
+    {
+     "name": "jerome ford",
+     "pos": "RB",
+     "status": "now WAS",
+     "tgt_sh": 0.076
+    }
+   ],
+   "measured_tgt_sh": 1.274,
+   "vacated_pct": 22.6,
+   "vacated_tgt_sh": 0.288
+  },
+  "DAL": {
+   "gone": [
+    {
+     "name": "jalen tolbert",
+     "pos": "WR",
+     "status": "now MIA",
+     "tgt_sh": 0.091
+    },
+    {
+     "name": "miles sanders",
+     "pos": "RB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.048
+    }
+   ],
+   "measured_tgt_sh": 1.209,
+   "vacated_pct": 11.5,
+   "vacated_tgt_sh": 0.139
+  },
+  "DEN": {
+   "gone": [],
+   "measured_tgt_sh": 1.194,
+   "vacated_pct": 0.0,
+   "vacated_tgt_sh": 0.0
+  },
+  "DET": {
+   "gone": [
+    {
+     "name": "kalif raymond",
+     "pos": "WR",
+     "status": "now CHI",
+     "tgt_sh": 0.074
+    },
+    {
+     "name": "anthony firkser",
+     "pos": "TE",
+     "status": "now WAS",
+     "tgt_sh": 0.057
+    },
+    {
+     "name": "david montgomery",
+     "pos": "RB",
+     "status": "now HOU",
+     "tgt_sh": 0.053
+    }
+   ],
+   "measured_tgt_sh": 1.197,
+   "vacated_pct": 15.4,
+   "vacated_tgt_sh": 0.184
+  },
+  "GB": {
+   "gone": [
+    {
+     "name": "romeo doubs",
+     "pos": "WR",
+     "status": "now NE",
+     "tgt_sh": 0.19
+    },
+    {
+     "name": "dontayvion wicks",
+     "pos": "WR",
+     "status": "now PHI",
+     "tgt_sh": 0.128
+    },
+    {
+     "name": "john fitzpatrick",
+     "pos": "TE",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.056
+    },
+    {
+     "name": "emanuel wilson",
+     "pos": "RB",
+     "status": "now SEA",
+     "tgt_sh": 0.041
+    }
+   ],
+   "measured_tgt_sh": 1.341,
+   "vacated_pct": 30.9,
+   "vacated_tgt_sh": 0.415
+  },
+  "HOU": {
+   "gone": [
+    {
+     "name": "christian kirk",
+     "pos": "WR",
+     "status": "now SF",
+     "tgt_sh": 0.146
+    },
+    {
+     "name": "dare ogunbowale",
+     "pos": "RB",
+     "status": "now LV",
+     "tgt_sh": 0.042
+    },
+    {
+     "name": "nick chubb",
+     "pos": "RB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.04
+    }
+   ],
+   "measured_tgt_sh": 1.197,
+   "vacated_pct": 19.0,
+   "vacated_tgt_sh": 0.228
+  },
+  "IND": {
+   "gone": [
+    {
+     "name": "michael pittman",
+     "pos": "WR",
+     "status": "now PIT",
+     "tgt_sh": 0.213
+    },
+    {
+     "name": "ameer abdullah",
+     "pos": "RB",
+     "status": "now JAX",
+     "tgt_sh": 0.043
+    }
+   ],
+   "measured_tgt_sh": 1.055,
+   "vacated_pct": 25.5,
+   "vacated_tgt_sh": 0.269
+  },
+  "JAX": {
+   "gone": [
+    {
+     "name": "dyami brown",
+     "pos": "WR",
+     "status": "now WAS",
+     "tgt_sh": 0.103
+    },
+    {
+     "name": "travis etienne",
+     "pos": "RB",
+     "status": "now NO",
+     "tgt_sh": 0.095
+    },
+    {
+     "name": "tim patrick",
+     "pos": "WR",
+     "status": "now NYJ",
+     "tgt_sh": 0.055
+    },
+    {
+     "name": "johnny mundt",
+     "pos": "TE",
+     "status": "now PHI",
+     "tgt_sh": 0.053
+    }
+   ],
+   "measured_tgt_sh": 1.6,
+   "vacated_pct": 19.1,
+   "vacated_tgt_sh": 0.306
+  },
+  "KC": {
+   "gone": [
+    {
+     "name": "marquise brown",
+     "pos": "WR",
+     "status": "now PHI",
+     "tgt_sh": 0.142
+    },
+    {
+     "name": "juju smith schuster",
+     "pos": "WR",
+     "status": "now NYG",
+     "tgt_sh": 0.088
+    },
+    {
+     "name": "isiah pacheco",
+     "pos": "RB",
+     "status": "now DET",
+     "tgt_sh": 0.064
+    },
+    {
+     "name": "kareem hunt",
+     "pos": "RB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.045
+    },
+    {
+     "name": "dameon pierce",
+     "pos": "RB",
+     "status": "now PHI",
+     "tgt_sh": 0.033
+    }
+   ],
+   "measured_tgt_sh": 1.275,
+   "vacated_pct": 29.2,
+   "vacated_tgt_sh": 0.372
+  },
+  "LA": {
+   "gone": [],
+   "measured_tgt_sh": 1.28,
+   "vacated_pct": 0.0,
+   "vacated_tgt_sh": 0.0
+  },
+  "LAC": {
+   "gone": [
+    {
+     "name": "keenan allen",
+     "pos": "WR",
+     "status": "now IND",
+     "tgt_sh": 0.224
+    },
+    {
+     "name": "will dissly",
+     "pos": "TE",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.059
+    },
+    {
+     "name": "tyler conklin",
+     "pos": "TE",
+     "status": "now DET",
+     "tgt_sh": 0.045
+    }
+   ],
+   "measured_tgt_sh": 1.274,
+   "vacated_pct": 29.6,
+   "vacated_tgt_sh": 0.377
+  },
+  "LV": {
+   "gone": [
+    {
+     "name": "tyler lockett",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.176
+    },
+    {
+     "name": "zamir white",
+     "pos": "RB",
+     "status": "now NO",
+     "tgt_sh": 0.038
+    },
+    {
+     "name": "raheem mostert",
+     "pos": "RB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.036
+    }
+   ],
+   "measured_tgt_sh": 1.233,
+   "vacated_pct": 20.3,
+   "vacated_tgt_sh": 0.25
+  },
+  "MIA": {
+   "gone": [
+    {
+     "name": "tyreek hill",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.238
+    },
+    {
+     "name": "jaylen waddle",
+     "pos": "WR",
+     "status": "now DEN",
+     "tgt_sh": 0.227
+    },
+    {
+     "name": "darren waller",
+     "pos": "TE",
+     "status": "now CAR",
+     "tgt_sh": 0.167
+    },
+    {
+     "name": "nick westbrook ikhine",
+     "pos": "WR",
+     "status": "now IND",
+     "tgt_sh": 0.076
+    },
+    {
+     "name": "julian hill",
+     "pos": "TE",
+     "status": "now NE",
+     "tgt_sh": 0.07
+    },
+    {
+     "name": "tanner conner",
+     "pos": "TE",
+     "status": "now NYG",
+     "tgt_sh": 0.067
+    }
+   ],
+   "measured_tgt_sh": 1.569,
+   "vacated_pct": 56.6,
+   "vacated_tgt_sh": 0.888
+  },
+  "MIN": {
+   "gone": [
+    {
+     "name": "jalen nailor",
+     "pos": "WR",
+     "status": "now LV",
+     "tgt_sh": 0.114
+    }
+   ],
+   "measured_tgt_sh": 1.054,
+   "vacated_pct": 10.8,
+   "vacated_tgt_sh": 0.114
+  },
+  "NE": {
+   "gone": [
+    {
+     "name": "stefon diggs",
+     "pos": "WR",
+     "status": "now WAS",
+     "tgt_sh": 0.211
+    },
+    {
+     "name": "kayshon boutte",
+     "pos": "WR",
+     "status": "now HOU",
+     "tgt_sh": 0.116
+    },
+    {
+     "name": "austin hooper",
+     "pos": "TE",
+     "status": "now ATL",
+     "tgt_sh": 0.07
+    }
+   ],
+   "measured_tgt_sh": 1.102,
+   "vacated_pct": 37.8,
+   "vacated_tgt_sh": 0.417
+  },
+  "NO": {
+   "gone": [
+    {
+     "name": "dante pettis",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.073
+    },
+    {
+     "name": "foster moreau",
+     "pos": "TE",
+     "status": "now HOU",
+     "tgt_sh": 0.04
+    },
+    {
+     "name": "jack stoll",
+     "pos": "TE",
+     "status": "now CLE",
+     "tgt_sh": 0.038
+    },
+    {
+     "name": "taysom hill",
+     "pos": "QB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.038
+    }
+   ],
+   "measured_tgt_sh": 1.274,
+   "vacated_pct": 15.2,
+   "vacated_tgt_sh": 0.194
+  },
+  "NYG": {
+   "gone": [
+    {
+     "name": "ray ray mccloud",
+     "pos": "WR",
+     "status": "now CHI",
+     "tgt_sh": 0.469
+    },
+    {
+     "name": "wandale robinson",
+     "pos": "WR",
+     "status": "now TEN",
+     "tgt_sh": 0.298
+    },
+    {
+     "name": "daniel bellinger",
+     "pos": "TE",
+     "status": "now TEN",
+     "tgt_sh": 0.07
+    }
+   ],
+   "measured_tgt_sh": 1.992,
+   "vacated_pct": 42.0,
+   "vacated_tgt_sh": 0.837
+  },
+  "NYJ": {
+   "gone": [
+    {
+     "name": "john metchie iii",
+     "pos": "WR",
+     "status": "now CAR",
+     "tgt_sh": 0.194
+    },
+    {
+     "name": "josh reynolds",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.155
+    },
+    {
+     "name": "tyler johnson",
+     "pos": "WR",
+     "status": "now DAL",
+     "tgt_sh": 0.077
+    },
+    {
+     "name": "allen lazard",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.062
+    },
+    {
+     "name": "khalil herbert",
+     "pos": "RB",
+     "status": "now SF",
+     "tgt_sh": 0.046
+    }
+   ],
+   "measured_tgt_sh": 1.886,
+   "vacated_pct": 28.5,
+   "vacated_tgt_sh": 0.538
+  },
+  "PHI": {
+   "gone": [
+    {
+     "name": "aj brown",
+     "pos": "WR",
+     "status": "now NE",
+     "tgt_sh": 0.294
+    },
+    {
+     "name": "jahan dotson",
+     "pos": "WR",
+     "status": "now ATL",
+     "tgt_sh": 0.09
+    }
+   ],
+   "measured_tgt_sh": 1.154,
+   "vacated_pct": 34.8,
+   "vacated_tgt_sh": 0.402
+  },
+  "PIT": {
+   "gone": [
+    {
+     "name": "adam thielen",
+     "pos": "WR",
+     "status": "now MIN",
+     "tgt_sh": 0.179
+    },
+    {
+     "name": "kenneth gainwell",
+     "pos": "RB",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.162
+    },
+    {
+     "name": "marquez valdes scantling",
+     "pos": "WR",
+     "status": "now DAL",
+     "tgt_sh": 0.162
+    },
+    {
+     "name": "calvin austin iii",
+     "pos": "WR",
+     "status": "now NYG",
+     "tgt_sh": 0.129
+    },
+    {
+     "name": "jonnu smith",
+     "pos": "TE",
+     "status": "now GB",
+     "tgt_sh": 0.105
+    },
+    {
+     "name": "scott miller",
+     "pos": "WR",
+     "status": "now CHI",
+     "tgt_sh": 0.08
+    }
+   ],
+   "measured_tgt_sh": 1.451,
+   "vacated_pct": 57.1,
+   "vacated_tgt_sh": 0.828
+  },
+  "SEA": {
+   "gone": [
+    {
+     "name": "kenneth walker iii",
+     "pos": "RB",
+     "status": "now KC",
+     "tgt_sh": 0.079
+    }
+   ],
+   "measured_tgt_sh": 1.361,
+   "vacated_pct": 5.8,
+   "vacated_tgt_sh": 0.079
+  },
+  "SF": {
+   "gone": [
+    {
+     "name": "jauan jennings",
+     "pos": "WR",
+     "status": "now MIN",
+     "tgt_sh": 0.199
+    },
+    {
+     "name": "kendrick bourne",
+     "pos": "WR",
+     "status": "now ARI",
+     "tgt_sh": 0.114
+    }
+   ],
+   "measured_tgt_sh": 1.29,
+   "vacated_pct": 26.0,
+   "vacated_tgt_sh": 0.336
+  },
+  "TB": {
+   "gone": [
+    {
+     "name": "mike evans",
+     "pos": "WR",
+     "status": "now SF",
+     "tgt_sh": 0.23
+    },
+    {
+     "name": "sterling shepard",
+     "pos": "WR",
+     "status": "now HOU",
+     "tgt_sh": 0.128
+    },
+    {
+     "name": "rachaad white",
+     "pos": "RB",
+     "status": "now WAS",
+     "tgt_sh": 0.083
+    }
+   ],
+   "measured_tgt_sh": 1.38,
+   "vacated_pct": 32.0,
+   "vacated_tgt_sh": 0.441
+  },
+  "TEN": {
+   "gone": [
+    {
+     "name": "chig okonkwo",
+     "pos": "TE",
+     "status": "now WAS",
+     "tgt_sh": 0.149
+    },
+    {
+     "name": "van jefferson",
+     "pos": "WR",
+     "status": "now WAS",
+     "tgt_sh": 0.12
+    },
+    {
+     "name": "james proche",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.062
+    }
+   ],
+   "measured_tgt_sh": 1.133,
+   "vacated_pct": 29.2,
+   "vacated_tgt_sh": 0.331
+  },
+  "WAS": {
+   "gone": [
+    {
+     "name": "deebo samuel sr",
+     "pos": "WR",
+     "status": "now SF",
+     "tgt_sh": 0.247
+    },
+    {
+     "name": "zach ertz",
+     "pos": "TE",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.203
+    },
+    {
+     "name": "chris moore",
+     "pos": "WR",
+     "status": "now BAL",
+     "tgt_sh": 0.115
+    },
+    {
+     "name": "noah brown",
+     "pos": "WR",
+     "status": "not on a 2026 roster",
+     "tgt_sh": 0.094
+    }
+   ],
+   "measured_tgt_sh": 1.443,
+   "vacated_pct": 46.6,
+   "vacated_tgt_sh": 0.672
+  }
+ }
+}

@@ -33,6 +33,20 @@ pushed here directly.
 
 ---
 
+## Companion Document
+
+`USER-PERSONAS.md` is the PRODUCT reference — who uses this app, what each
+persona is trying to do, and the design rules that fall out of it. Read it before
+changing what the app shows, hides, collapses, orders or names.
+
+`ANALYST-REFERENCE.md` is the ANALYSIS reference — every input the app measures,
+its year-over-year stability, a plain-language explanation of why it matters, the
+skills and CLI inventory, and the ranked list of what to build next. This file
+stays the ENGINEERING record: how things were built, what broke, and the rules
+that came out of it. Update both when a change touches both.
+
+---
+
 ## Role & Core Directive
 
 Skeptical, analytical assistant focused on personal agency and critical thinking. Function: execute rigorous, data-driven fantasy football Best Ball roster and playoff schedule matrix evaluations for the 2026 season.
@@ -4048,3 +4062,537 @@ the ladder on $40:  clear R1 -> $40 (breakeven)  ·  clear W15 -> $75-150
 The Husky (new):  ref1 A 10.73 · ref2 C+ 0.96 · ref3 B+ 4.21
 All four branch paths verified firing in both directions.
 ```
+
+---
+
+## Three Context Layers: Deployment, Career Arc, Vacated Targets (added Aug 31, 2026)
+
+The app graded structure well and knew almost nothing about the players in it.
+Of everything the AI saw, the receiving block was opportunity handed down by a
+coach, and the matchup tier is the LEAST stable input measured here. These three
+files close the gap. **CONTEXT ONLY — 39 grades byte-identical (36 best ball
+across 12 tournaments x 3 fixtures, plus 3 redraft).** Guard 22:
+`scripts/test-context-layers.mjs`.
+
+| File | Script | Rank | What it answers |
+|---|---|---|---|
+| `ngs_receiving_2025.json` | `build-ngs-receiving.py` | 2 and 3 | Where is he used, and does he get open |
+| `career_arc_2026.json` | `build-career-arc.py` | — | Is the calendar with him or against him |
+| `vacated_2026.json` | `build-vacated.py` | **1** | Who left, and how big is the opening |
+
+### Separation is the FIRST talent-in-isolation input this app has carried
+
+Every other receiving number here — target share, WOPR, snap share, targets per
+game — measures what a coach GAVE a player. `sep` (yards of space at the catch
+point, from the tracking chip) measures whether he is EARNING it. That is rank 3
+in the Source Hierarchy, a rank the app had no data for at all.
+
+**Measured r = 0.663** (23>24 0.595, 24>25 0.732, n=85 at 40+ targets) — above
+`spike_rate` at 0.475, which the Ceiling Shape Layer already trusts enough to
+score. AJ Brown at 2.24 against a WR median of 2.78 is an 8th-percentile
+separation profile carrying a top-decile target share; that tension is exactly
+what the card could not previously show.
+
+### Intended air yards is the stickiest player input in the project
+
+**r = 0.826** (0.832 / 0.820), ahead of QB rushing attempts at 0.815. It is
+sticky for the reason aDOT already is: **deployment is a role property, not a
+performance one.** Where a coach lines a receiver up and what routes he calls
+persist; whether the ball arrives does not. Two receivers with identical target
+counts are different assets when one is at 6.3 and the other at 14.1.
+
+**Four NGS fields were measured and deliberately LEFT OUT**, recorded in
+`_meta.not_emitted` with their r: `catch_percentage` 0.492, `avg_yac` 0.458,
+`avg_cushion` 0.415, `avg_yac_above_expectation` 0.358. The reason a field was
+rejected is worth as much as the ones kept, and guard 22 asserts they stay
+recorded — otherwise a future session re-adds one on intuition.
+
+### ⚠️ NGS HAS ITS OWN POPULATION AND MUST NEVER SHARE THE CARD'S
+
+`CARD_PERCENTILES` ranks against draftable players with 8+ games. NGS ranks
+against **40+ targets in 2025** — a different, smaller pool. Merging the two
+tables would print a percentile under a population label that does not describe
+it, which is the vintage trap in a new costume. Hence `NGS_PERCENTILES`,
+`ngsPercentile` and `NGS_POP_GATE` as separate definitions, a separate
+`Deployment` card section, and a note saying the two ranks are not
+interchangeable. Guarded, and negative-tested by swapping in `cardPercentile`.
+
+### The aging bands are PRIORS. Say so every time they render.
+
+`CAREER_ARC._meta.bands` (RB decline 27, WR 30, TE 31, QB 35) are **published
+career-arc priors, NOT measured in this repo.** One season of data cannot
+produce an aging curve and a cross-sectional read is confounded by survivorship.
+The age itself is measured; the band around it is borrowed. The file says so,
+the card says so, and the AI prompt says so — an inherited curve rendered as a
+finding is the same failure as a stale verdict rendered as current.
+
+**The prompt emits only the TAILS.** A player inside his peak band tells the
+model nothing his other numbers did not, so silence there means the calendar is
+neutral rather than that data is missing — stated in the header, the same rule
+`trajectoryContext` follows.
+
+### Vacated targets is rank 1, and the app had no view of it
+
+Lens 1 says to project who absorbs a vacated share before ADP reflects it. There
+was no file that could see the vacancy. Now there is, per team:
+
+```
+PIT 57.1%   MIA 56.6%   WAS 46.6%   NYG 42.0%   NE 37.8%   ATL 36.4%
+```
+
+**It locates the opening. It does not name who fills it** — that stays a
+judgement, and the file, the card and the prompt all say so rather than letting
+a team number read as a player projection.
+
+**⚠️ TWO SCALES IN ONE FILE.** `vacated_pct` is stored in PERCENT units (46.6)
+while `gone[].tgt_sh` is a FRACTION (0.247). Anything reading them must not
+assume — a `* 100` on the wrong one rendered **4660%** on the card for one build.
+Guard 22 asserts the units directly.
+
+The denominator is the team's **own measured 2025 share**, not 1.00: the metrics
+cover drafted players only, so a team's shares do not sum to 100% and the honest
+comparable figure is "share of the measured pool that left". That qualifier is
+printed on the card beneath the number, because a percentage without its
+denominator is a number nobody can act on.
+
+`norm()` strips SUFFIXES before differencing. The known bug read
+`brian robinson jr` as a departure and inflated WAS to 82.4%; it now reads 46.6%
+and the guard pins that.
+
+### CAREER ARC AND TURNOVER RENDER ABOVE THE no-data BRANCH
+
+The first version put all three sections inside the card's `card.reason ? … : …`
+else-branch, and **a rookie got none of them** — Carnell Tate's card showed only
+"No 2025 NFL data" while age 21, drafted 4th overall and a 29% TEN vacancy were
+sitting right there. A rookie is precisely the player for whom those two facts
+are the ONLY useful information on the card.
+
+Both now mount above the branch, collapsed. Tate 289px -> 451px; a full card
+pays two lines. **Deployment stays inside the branch** because it needs 2025
+receiving volume, so a no-data player never has it either way.
+
+Also fixed on the way in: the position median was riding in a row's `caution`
+slot, which on this card MEANS "this number disagrees with another one above it"
+and renders with a warning mark. A reference value is not a conflict, and
+dressing one as a warning devalues the mark everywhere it appears. It moved to
+the section note.
+
+### Guard 22 — containment is the assertion that matters
+
+The three accessors are enumerated, **every call site is checked against an
+allowlist of reviewed consumers** (`buildPlayerCard`, `deploymentContext`,
+`arcContext`, `vacatedContext`), and `analyzeRoster` / `analyzeRedraft` are
+asserted clean of both the accessors and the raw tables.
+
+Structural rather than behavioural on purpose: a leak can move one roster by 0.01
+and pass a spot check, and a layer that starts scoring **silently invalidates
+every calibration figure in this file** — nothing errors, the numbers just stop
+meaning what they meant. Three failure paths negative-tested: a read inside
+`analyzeRoster`, an unreviewed call site outside the engines, and the merged
+percentile population. All exit non-zero.
+
+### Regenerate
+
+```
+pip install nflreadpy
+python3 scripts/build-ngs-receiving.py   # nextgen_stats/ngs_receiving
+python3 scripts/build-career-arc.py      # rosters/roster_2026
+python3 scripts/build-vacated.py         # player_metrics_2025 x roster_2026
+```
+
+All three are ANNUAL under the split refresh cadence. None feeds a scored input,
+so a mid-season regeneration would be safe — it is simply not worth the network:
+NGS is a closed 2025 season, ages move once a year, and a vacancy is settled by
+Week 1.
+
+### Still open, and why each was left
+
+| Item | Stability | Why not built |
+|---|---|---|
+| Targets per game in the prompt | 0.774 | **free — `tgt` and `gp` already loaded.** One line. |
+| Air yards share in the prompt | 0.780 | **free — `ay_sh` already loaded, unprinted.** One line. |
+| Availability rate | — | Every metric here is per-game; nothing expresses "he plays" |
+| Red-zone target share | — | Lens 1 calls it standalone scoring equity and the app cannot see it |
+| Carries per game (RB) | 0.730 | `build-player-metrics.py` emits no carry count |
+| Targets per route run | — | **Paywalled.** No free routes source since the 2023 feed died. Never substitute target share for it. |
+| Offensive line ranks | — | No free per-player data. Team pressure rate is confounded by the QB. |
+
+### SHIPPED Aug 31 2026: the two free anchors now reach the model
+
+`metricsContext` printed target share, WOPR and snap share and never printed the
+two numbers those three depend on. **Targets/gm (0.774) and air yards share
+(0.780) are the most repeatable figures in the receiving block**, both were
+already loaded, and both were invisible to the AI.
+
+- **They LEAD the receiving line**, ahead of target share and WOPR. Targets/gm is
+  the raw volume nothing else survives being low; air yards share is where on the
+  field that volume is aimed, which separates an alpha from a high-volume slot
+  player at the same target count.
+- **Backs get targets/gm and NOT air yards share.** `ay_sh` is r=0.26 for RBs and
+  discriminates nothing, so printing it would invite the model to read a number
+  carrying no information. Targets/gm belongs there because the receiving tier is
+  both a stack qualifier and the garbage-time exemption.
+- **The header now names the stability of everything in the block** — anchors
+  0.77/0.78, then 0.73/0.75/0.71, then spike rate at 0.48 flagged as descriptive
+  of 2025. The model previously had no way to know which of six numbers to lean
+  on.
+- Computed over GAMES PLAYED, never a 17-game denominator.
+
+**39 grades byte-identical** — prompt content cannot reach the scoring engine.
+
+The remaining rows in the table above are unchanged.
+
+---
+
+## Red Zone & On-Field Rate (added Sep 1, 2026)
+
+Two more context layers, both free from nflverse, both closing a gap the
+framework itself had already named. **CONTEXT ONLY — 39 grades byte-identical.**
+Guarded by the additions to `scripts/test-context-layers.mjs` (guard 22).
+
+### Red zone: `hvt_pg` was a COUNT and Lens 1 asks for a SHARE
+
+Lens 1 calls red zone and goal line touches standalone scoring equity and says
+to track them separately from snap share. `hvt_pg` was the nearest thing the app
+carried, and being a per-game count it cannot distinguish **a back on a team
+that never reaches the red zone from one on a team that lives there.** The share
+isolates the player's claim on the scoring chances, which is the part that
+survives a change in team scoring rate.
+
+Three zones, because they answer different questions: inside 20 (opportunity),
+inside 10 (where scores are decided, noisier), inside 5 (goal line, almost
+entirely a personnel decision).
+
+**⚠️ THE COUNT TRAVELS WITH THE SHARE, EVERYWHERE.** Red-zone volume is a
+fraction of total volume, so every share here is a ratio of two small numbers.
+The card prints `31% of 22`, the prompt prints `31% of team red-zone targets
+(22)`, and the prompt header forbids quoting a share without its count. A share
+is emitted only when the player AND his team clear a gate, so **a count with no
+share means the sample is too thin to express as a rate** — that absence is
+information. Goal line is a count only; a share there would be two or three
+plays wearing a percentage sign.
+
+**⚠️ pbp NEVER carries a usable name.** It prints `A.St. Brown` and `H.Henry`,
+which normalise to `ast brown` and `hhenry` and match nothing in any ADP table.
+The first build shipped exactly that. The player id is the only real join key,
+so display names come from the weekly stats release and a player absent from it
+is DROPPED rather than published under an abbreviation nobody can look up.
+
+### On-field rate: the DENOMINATOR is the whole measurement
+
+Every metric in the app is a per-game rate, which is right for comparability and
+means nothing expressed whether a player plays.
+
+Two ways to get this wrong, both of which were built and measured before being
+rejected:
+
+1. **Counting games played against 17** skips a fully lost season entirely — an
+   August Achilles produces no rows, the year is silently omitted, and the
+   player reports as durable. So the denominator is **team games in every season
+   he appears on a ROSTER**, played or not.
+2. **Counting STAT LINES as the numerator** put the league median at **63%**,
+   because a blocking TE, a receiver who ran routes and drew no targets, and a
+   QB who handed off twice all record zero stats while playing. The numerator is
+   **offensive snaps** from `snap_counts`.
+
+A third correction was needed on the population: the roster file carries ~3,100
+rows a season including the practice squad and everyone cut in camp, and
+counting those seasons put the median at **25%** — a number describing roster
+churn, not durability. Fixed by gating status to `ACT`/`RES`/`INA` and requiring
+the player to have held a real role (8+ games) in some covered season. Final
+medians: all 0.70, QB 0.53, TE 0.74, WR 0.70, RB 0.68.
+
+**⚠️ IT IS NAMED FOR WHAT IT MEASURES.** The gameday inactive list would
+separate hurt from healthy-and-not-playing and nflverse does not ship it, so
+this **blends availability with role**. A backup who dresses weekly and never
+plays scores low — correct for fantasy, and not a medical finding. It also
+cannot separate injury from a coaching decision, a suspension or a holdout.
+
+**Career and recent are both shown and never averaged.** Nick Chubb is the
+worked example: **71.8% career against 49.0% over the last three.** One number
+cannot say both, and the split is the finding.
+
+### Three percentile populations now, three tables, three printed gates
+
+```
+CARD_PERCENTILES   draftable, 8+ games          Opportunity, Week outcomes
+NGS_PERCENTILES    40+ targets in 2025          Deployment
+RZ_PERCENTILES     5+ red-zone opportunities    Red zone
+```
+
+Merging any two prints a rank under a population label that does not describe
+it. Guard 22 asserts all three stay separate and that each section prints its
+own gate.
+
+### `grade-cli` now validates its flags
+
+`--mode redraft` is not a flag and was **silently ignored**, so a redraft roster
+graded through the BEST BALL engine and printed a plausible answer. Same
+silent-wrong-answer class the app itself has fixed five times. Unknown flags,
+unknown tournament keys and value-less flags now exit 2 with a hint naming the
+correct flag. Verified both valid paths still run.
+
+---
+
+## The Read, and One Accent Per GROUP (added Sep 1, 2026)
+
+Reported as wanting the card to work for beginners through experts. Measured
+first: **the card had reached 14 sections and 1,732px**, and the accents had
+stopped differentiating — **six sections shared `--ui-accent` and five shared
+`--accent-purple-light`**, so the colour channel was carrying two values across
+fourteen slots. **Presentation only — 39 grades byte-identical.**
+
+### The real problem was an ENTRY POINT, not density
+
+Every one of the fourteen sections is individually justified. Collectively they
+present a reader with fourteen equally-weighted peers **in the order they were
+added**, which is neither importance order nor reading order. A beginner has no
+idea where to start; an expert scrolls past six things to reach one number.
+
+`card.read` answers that with plain-English sentences derived from numbers the
+card is already showing, ordered by the **Source Hierarchy** — role change,
+volume, talent, scoring equity, durability, calendar. A reader who stops after
+two lines has read the two that matter most.
+
+```
+He wins little separation — 2.24 yds, more than only 8% of WRs.
+  A contested-catch profile rather than a get-open one.
+He owns the scoring work — 22% of his team's throws inside the 20.
+```
+
+**⚠️ IT ISSUES NO VERDICT, and that constraint is load-bearing.** A verdict
+rendered as current is the Diggs failure, and it is exactly why
+`PLAYER_VERDICTS` was kept off this card in the first place. Every line
+**describes** a number visible further down, in the reader's own language —
+"wins little separation for the position" is a restatement of 8th percentile,
+never a judgement about whether to draft him. Guard 14 asserts the block never
+reaches for a verdict table.
+
+### Three defects the first version shipped, all caught by measuring
+
+1. **THE SUMMARY CONTRADICTED ITSELF.** RJ Harvey read *"his role grew — 29% of
+   snaps early, 56% late"* and then, two lines down, *"he is off the field a
+   lot — 42% of snaps."* `snap_sh` is a SEASON AVERAGE and the card already
+   flags it as stale when the role moved; the summary was restating the stale
+   number as current. **A summary that disagrees with itself is worse than one
+   that omits a line.** The snap line is now suppressed whenever the trajectory
+   says the role moved, and the guard sweeps every draftable card for the pair.
+2. **A line with no number is a verdict wearing a sentence.** The goal-line line
+   asserted something the reader could not check. Every line now carries the
+   figure behind it — the team-change line is the one exception, because it
+   names a TEAM and inventing a number for it would be worse.
+3. **"below 92% of WRs" inverts on the reader.** Percentiles now run one
+   direction only: "more than only 8% of WRs".
+
+### One accent per GROUP, not per section
+
+A colour that appears six times has stopped being a signal. `CARD_GROUP_ACCENT`
+now names **which of four questions** a section answers, and every section in a
+group wears the same one:
+
+```
+WHO HE IS    grey    news · on-field rate · career arc · team turnover
+HIS ROLE     purple  trajectory · volume · opportunity · deployment · red zone · absence
+WHAT HE DID  blue    week outcomes · game log
+REFERENCE    dim     efficiency · glossary
+```
+
+Four meanings, four colours, learned once instead of fourteen times.
+
+**The dim group stays dim.** Brightness on this card means "this should move
+your opinion", so efficiency and the glossary are grey on purpose — painting
+either brighter undoes the second channel entirely. Guard 14 asserts the
+reference group resolves to `--text-dim`.
+
+**The guard now asserts the MAPPING rather than a literal token**, so a
+deliberate palette re-tune stays legal and a hand-written colour beside grouped
+ones fails. That replaces an assertion which string-matched one section's exact
+hex token and broke on a refactor that preserved its intent exactly.
+
+### Deployment and Red zone are collapsed now
+
+Both are summarised in The Read, so they cost a tap instead of a scroll. Same
+reading-frequency rule the results page uses: **what stays open is what is read
+on every visit, not what is small.**
+
+### Measured
+
+```
+                 before          after
+AJ Brown         1656px  13 s    1721px  13 s
+Bijan Robinson   1732px  14 s    1738px  16 s
+Carnell Tate      451px   3 s     547px   5 s
+0 sub-32px tap targets · no page errors
+```
+
+The card is roughly the same height and now opens with a paragraph anyone can
+read. That is the trade that was wanted: **the height was never the complaint,
+the lack of a starting point was.**
+
+---
+
+## Personas First, Then the Card (Sep 1, 2026)
+
+Reported as: establish who the user is *before* making UI updates. That
+reordering changed the answer, so it is worth recording why.
+**Presentation only — 39 grades byte-identical.** `USER-PERSONAS.md` is the new
+product document; guard 14 now asserts the card matches it.
+
+### The first regrouping was wrong, and personas are what showed it
+
+The card had been regrouped into **who he is / his role / what he did /
+reference**. That is a description of the SECTIONS. It is not a question anyone
+asks. Written down against a real reader, it falls apart immediately:
+**availability and career arc are not identity — they are the things that could
+change the role.**
+
+Regrouped against the reader's own questions instead:
+
+```
+HIS JOB                purple  trajectory · opportunity · deployment · red zone · absence
+WHAT HE PRODUCED       blue    game log · week outcomes
+WHAT COULD CHANGE IT   grey    news · on-field rate · career arc · team turnover
+REFERENCE              dim     efficiency · glossary
+```
+
+### The two axes, and why designing against one produced a bad card
+
+**INTENT** (what they are doing now) controls what they need to SEE.
+**EXPERTISE** (how much vocabulary they have) controls how it needs to be SAID.
+They are independent — a portfolio drafter on his 40th entry may not know what
+WOPR is, and a first-time user may be an analyst.
+
+The card had been designed against expertise alone, which is why it was right
+for one quadrant and wrong for three. **The hardest and most common quadrant is
+someone mid-draft, on a phone, with 30 seconds, who does not know which of
+fourteen sections to look at.**
+
+### The persona that decides the hard calls is P2, the on-the-clock drafter
+
+Under 30 seconds, timer running, no taps to spend. He is why:
+
+- **The Read is first and needs no interaction.** It was rendering fourth,
+  behind three sections, which made it useless to the only reader who needs it
+  most.
+- **The groups are DIVIDERS, not collapsible wrappers.** Nesting his role data
+  one level deeper would cost him the thing he came for.
+- **There is no skill-level toggle.** A toggle is a tap. One design that works
+  at a glance beats two behind a switch — and it is also one design to maintain.
+
+### Two ordering bugs the render caught
+
+1. **The game log sat under HIS JOB.** It is output, not role.
+2. **REFERENCE rendered before WHAT COULD CHANGE IT**, because reference lived
+   inside the `card.reason` data branch and outlook lived outside it. Both of
+   its sections already guard on their own content, so it moved out of the
+   branch and to the end where every persona actually consults it.
+
+A third was caught by the browser rather than the source: the reference block
+was pasted **inside** the Team target turnover `CardSection`, so it rendered
+only when that collapsed section was open. **The source read correctly and the
+page did not** — the same reason the localStorage flag bug needed a real render
+to find.
+
+### What guard 14 now pins
+
+- Four groups, named `job` / `production` / `outlook` / `reference`
+- Each section's group membership, individually — so a future session cannot
+  quietly file availability under the job it qualifies
+- **Group headers render in reader order**, asserted as an exact sequence
+- Every header is guarded on having content, so an empty group never shows a
+  bare label pointing at nothing
+- The game log sits between the production and outlook headers
+- Reference resolves to `--text-dim`
+
+Both failure paths negative-tested: moving reference out of reader order, and
+regrouping availability under `job`, each exit non-zero.
+
+### Rookie cards prove the grouping degrades correctly
+
+Carnell Tate has no 2025 role, so he renders `RECENT NEWS · THE READ · WHAT
+COULD CHANGE IT` and nothing else — 615px. The groups that have no content
+simply do not appear, which is the behaviour the guard's content-gating
+assertion exists to protect.
+
+---
+
+## Persona Sweep of Both Sides (Sep 1, 2026)
+
+Full audit of best ball and redraft against `USER-PERSONAS.md`, at three
+viewports. **One real defect found, and it was the worst pain point either page
+had. 39 grades byte-identical.**
+
+### THE PAGE DID NOT MOVE WHEN A GRADE ARRIVED
+
+Measured: after Analyze, `scrollY` stayed at **0** while the grade letter sat at
+**y=1243** (best ball) and **y=1232** (redraft). **Every user scrolled roughly
+1,200px past the form they had just filled in to reach their own result** — and
+P1, the portfolio drafter, does that on every one of forty entries.
+
+Now lands the results root at the top of the viewport in both modes and at every
+width tested.
+
+### ⚠️ THREE ATTEMPTS LANDED IN THE WRONG PLACE, ALL SILENTLY
+
+This is the part worth keeping. `scrollTo` was called every time and nothing
+ever errored:
+
+1. **No scroll at all.** The original state.
+2. **Scrolling from inside the layout effect** — measured y=686 while the
+   results tree was still EXPANDING. The page then grew to put the grade at
+   1243, and Chromium **cancelled the in-flight smooth scroll**. `scrollTo` was
+   called with a sane number and `scrollY` stayed 0.
+3. **Scrolling after two animation frames** — measured y=2031 while the page was
+   still SHRINKING (the paste help collapses on analyze), **overshooting the
+   real target of 1218 by 814px** and putting the grade above the viewport.
+
+The fix polls `document.body.scrollHeight` until it is unchanged across two
+consecutive frames, then measures once and scrolls. Capped at 40 frames so a
+page that never settles still scrolls rather than hanging.
+
+**A scroll that goes to the wrong place is the same class as a filter that drops
+a player: the code ran, nothing complained, and only a real render shows it.**
+
+Keyed on a COUNTER rather than on `analyzed`, so restoring a saved grade on page
+load does not yank a reader who did not ask for it.
+
+### ⚠️ `test-disclosure.mjs` USES A DIFFERENT ASSERTION IDIOM
+
+Its `ok()` takes **one argument and always prints a pass**; the file's idiom is
+`cond ? ok(msg) : bad(msg)`. The first version of this guard was written in the
+`ok(label, condition)` form the other guards use, so **every assertion in it was
+a no-op and both negative tests passed.** Same one-argument `ok()` trap already
+recorded for guards 19 and 20 — it has now bitten three times, so check the
+assertion signature of the file you are editing before adding to it.
+
+A fourth assertion was also too loose: it checked that the string
+`prefers-reduced-motion` appeared, and passed when the behavior was hard-coded
+to `"smooth"` with the media query sitting unused above it. **Assert the flag is
+USED, not merely present.** All four failure paths now exit non-zero.
+
+### What the sweep confirmed was already right
+
+Both modes, phone / tablet / desktop: **0 sub-32px tap targets, no horizontal
+overflow, no page errors.** First screen after analyze now reads grade → counts
+→ match counter → roster → lookup → nutshell → strengths → weaknesses, in both
+modes, without a scroll.
+
+Sticky index, data-vintage footer, "how is this grade calculated" and the match
+counter are all present in both modes.
+
+### Three findings that were MEASUREMENT ARTEFACTS, not defects
+
+Recorded because each cost a cycle and the same traps will recur:
+
+- **`innerText` returns text-transformed output.** Searching page text for
+  `nutshell` found nothing because CSS renders it uppercase. The nutshell was
+  there the whole time.
+- **A crude "is this jargon defined nearby" regex produced false positives.**
+  `bring-back` has a full plain-English intro paragraph, `Smash` has a
+  five-tier `MatchupLegend` used in four places, and the grade explainer defines
+  stacks and construction. The vocabulary support is in place.
+- **`scrollY` capping at exactly 1024 on desktop looked like clamping.** It is
+  not: `rootTop` is 1036 and the target is `rootTop - 12`. The grade sits lower
+  in the viewport there only because the banner is a taller grid at width.
+
+**Verify a suspicious measurement before reporting it as a finding.**
