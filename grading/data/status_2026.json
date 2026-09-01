@@ -1,0 +1,47 @@
+{
+ "_meta": {
+  "built_at": "2026-09-01T05:04:23Z",
+  "conflict_rule": "The feed NEVER overwrites, outranks or out-dates a hand-written note. It raises a flag a human clears. A hand-written note keeps its own date until it is edited by hand. Both render; neither replaces the other.",
+  "context_only": true,
+  "counts": {
+   "QB": 0,
+   "RB": 0,
+   "TE": 0,
+   "WR": 0
+  },
+  "dropped_no_name": 0,
+  "hard_status": [
+   "IR",
+   "PUP",
+   "Out",
+   "Sus",
+   "NFI",
+   "DNR"
+  ],
+  "hard_status_count": 0,
+  "hierarchy_rank": {
+   "all": "1 - role and availability CHANGE"
+  },
+  "join_key": "normalize(full_name), a mirror of App.jsx:2469. NOT gsis_id, which Sleeper carries on only 18% of skill players and which no layer in grading/data/ uses.",
+  "reaches_ai_prompt": false,
+  "renders": false,
+  "renders_reason": "Approved Sep 1 2026: build it, ship it reading, do not render until the feed has been watched for a week. The committed file stays at zero rows until that watch is done, so there is nothing to render by construction.",
+  "row_fields": [
+   "pos",
+   "team",
+   "status",
+   "injury_status",
+   "injury_body_part",
+   "depth_chart_order",
+   "depth_chart_position",
+   "news_updated"
+  ],
+  "season": 2026,
+  "source": "Sleeper /v1/players/nfl (public, no auth, unversioned)",
+  "source_probed": "2026-09-01",
+  "stability": null,
+  "why_not_freshest_wins": "A same-day feed would out-date all 140 RECENT_NEWS entries permanently. 7 of 15 sampled entries are pure judgement the feed has no opinion about, so freshest-wins would demote the analysis to decoration on day one.",
+  "with_depth_chart": 0
+ },
+ "players": {}
+}

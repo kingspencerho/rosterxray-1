@@ -5211,3 +5211,316 @@ gate that exists to keep a median honest will exclude somebody, and the excluded
 set is not random — it is systematically the players at the tail the metric was
 built to describe. **When a gate drops a player, say so where the number would
 have been.**
+---
+
+## The Status Layer: Availability & Depth Chart (added Sep 1, 2026)
+
+GAP 1 from `ANALYST-REFERENCE.md` §14a, half-closed on purpose. `scripts/build-status.py`
+-> `grading/data/status_2026.json`, from Sleeper. **CONTEXT ONLY, AND NOT WIRED TO ANYTHING
+YET — 51 grades byte-identical** (14 tournaments x 3 fixtures, plus 9 redraft). Guard 26:
+`scripts/test-status-layer.mjs`.
+
+### THE DECISION WAS NEVER "REPLACE THE PROSE WITH A FEED", AND THE SPLIT IS MEASURED
+
+Fifteen `RECENT_NEWS` entries sampled at random and classified:
+
+```
+0 of 15   could be supplied by a feed on its own
+7 of 15   are pure analytical judgement with no feed component at all
+8 of 15   carry a feed-supplyable FACT wrapped in a judgement
+```
+
+**Nothing in the sample could be replaced.** Tyler Allgeier's entry opens *"Listed RB1 on
+ARI's first depth chart"* — that is `depth_chart_order` — and then says *"2yr/$12.25M; 19 GZ
+carries in 2025"*, which no feed produces. George Kittle's PUP tag is `injury_status`;
+*"Achilles at his age is the real risk, not the PUP tag itself"* is why the entry exists.
+
+**So a feed can CONFIRM or CONTRADICT a fact inside an entry. It can never write one.**
+
+⚠️ Also measured while sampling: `RECENT_NEWS` is **87 prose strings and 53 objects**;
+`SITUATIONS` is **461 objects, zero strings**. Anything writing into either has two shapes
+to respect, not one.
+
+### ⛔ nflverse WAS THE OBVIOUS SOURCE AND IT PUBLISHES NOTHING FOR THIS SEASON
+
+Both re-probed Sep 1 2026, per **R19**:
+
+```
+injuries_2026.csv.gz   HTTP 404 — the newest file in the whole release is 2025,
+                       last updated 2026-03-18. It publishes once games are played.
+injuries_2025.csv.gz   HTTP 200, 6,068 rows, W1-22, shape unchanged from §14a.
+                       report_status is BLANK on 3,285 of them (54%).
+Sleeper players/nfl    HTTP 200, 14.6MB, 12,225 players, ~1s. 812 skill players
+                       with a team, 544 with a depth-chart slot.
+```
+
+**Coverage decided it, not stability.** nflverse is the safer dependency and carries only
+the official injury report — no trades, no suspensions, no depth-chart moves. Of the eight
+mixed entries above, the feed-supplyable fact was a **depth-chart slot** more often than an
+injury status, and nflverse cannot see that field at all. Role change is rank 1; the app
+infers it from snap trajectory, which lags a week. A depth-chart slot is same-day.
+
+**The cost is real and does not go away: Sleeper is third-party and unversioned.**
+`_meta.source_probed` records when it was last known good.
+
+### ⚠️⚠️ §14a's JOIN CLAIM IS WRONG IN BOTH HALVES
+
+It says the injury feed *"joins on `gsis_id`, the same key every other layer uses."*
+
+1. **Sleeper carries `gsis_id` on 147 of 812 skill players — 18%.**
+2. **No layer in `grading/data/` keys on `gsis_id`.** All 19 files key on a lowercased full
+   name. Checked, not assumed.
+
+So this is a **name-resolution problem**, the class that produced `findPlayer`, the alias
+table and three guards. `normalize()` in the builder is a character-for-character mirror of
+`App.jsx:2469` and guard 26 asserts App.jsx's version still has that shape — if App.jsx
+changes, the guard fails and points at the builder. **Suffixes and `METRIC_NAME_ALIASES` are
+deliberately NOT reimplemented**; the app's resolver handles them at read time, and a second
+resolver is a second thing to drift.
+
+### THE CONFLICT RULE: THE FEED NEVER WINS. IT FLAGS.
+
+**A fetched status may not overwrite, outrank or out-date a hand-written note.**
+
+This is the part §14a called most likely to go wrong, and it is right. Under
+freshest-dated-wins a same-day feed would **out-date all 140 `RECENT_NEWS` entries
+permanently**, and the 7-of-15 that are pure judgement — the ones that are the reason the
+corpus is worth reading — would be demoted to decoration on day one.
+
+`report-stale-news.mjs` gained a second section instead. Its first section is unchanged and
+still ages prose against the framework's 30-45 day rule.
+
+```
+STRUCTURED STATUS   out / IR / PUP / depth slot     ~7 days, IN SEASON ONLY
+ANALYTICAL PROSE    the argument around the fact    30-45 days, unchanged
+```
+
+⚠️ **What it can detect is narrow, and the report says so on screen.** It cannot read a note
+and decide it is wrong; no tool can. It detects one mechanical thing: **the feed reports a
+HARD unavailability (IR/PUP/Out/Sus/NFI/DNR) and the freshest note predates that report.**
+A note written *after* the feed already knew is not flagged. A depth-chart CHANGE is not
+detectable at all — the file is a snapshot with no history — so a note made stale by a role
+move will not surface. Output is headed **QUESTIONS, NOT CORRECTIONS**.
+
+First live run flagged **11 players**, and the two ends of the range show why the framing
+matters: `adam randall` carries a `trendNote` updated Aug 30 describing a rising rookie
+while the feed has him **IR as of Aug 31** — a real contradiction. `zach charbonnet`'s note
+already says Reserve/PUP and is simply older than the feed — a false positive a human closes
+in two seconds.
+
+### ⛔ NOTHING REACHES THE AI PROMPT, AND THE CASE IS STRONGER THAN §14a STATES
+
+`newsContext` is assembled at `App.jsx:9777` and reaches the model at `:10246` under:
+
+> *Recent news (breaking updates — **override everything above for these players**)*
+
+**`RECENT_NEWS` is the highest-authority block in the prompt**, explicitly outranking the
+situations block labelled *ground truth*. Putting an unattended third-party feed there hands
+it veto power over every measured input in the app. `_meta.reaches_ai_prompt` is `false` and
+guard 26 asserts it.
+
+### ⛔ IT DOES NOT RENDER YET, AND THAT IS ENFORCED RATHER THAN INTENDED
+
+Approved Sep 1 2026: **build it, ship it reading, do not render until the feed has been
+watched for a week.** So **App.jsx has no consumer of any kind** — guard 26 asserts the
+absence of `status_2026`, `STATUS_LAYER`, `getStatus(`, `statusContext` and
+`getPlayerStatus`, so wiring one fails the build until this file and that guard are updated
+on purpose. Verified independently in a browser: `status_2026.json` does not appear in the
+network log while every other layer does.
+
+`report-stale-news.mjs` reads the JSON **directly** rather than through App.jsx, which is
+what makes containment true by construction instead of by promise.
+
+### The committed file is a zero-row placeholder, generated by the real builder
+
+Same convention as `snap_trajectory_2026` and `volume_2026`: run the actual builder against
+an empty input so **the shape cannot drift from what a live run emits**. Verified — `_meta`
+keys are identical between the empty build and the 812-player build.
+
+⚠️ **One consequence worth knowing: the row-shape assertion is vacuous while the file is
+empty.** It was exercised against all 812 real rows during the build and negative-tested by
+adding a `gsis_id` field, but in CI it will not bite until a real refresh is committed.
+
+### `refresh-inseason.sh` is now 5 steps, and step 5 is the odd one out
+
+It **cannot reuse a download** — steps 1-4 are nflverse season releases, this is a
+third-party live snapshot on a different host. It is also **the only step that returns data
+before Week 1**, which is the point: the hand-written notes are at their most wrong in the
+weeks the nflverse releases do not publish.
+
+⚠️ **The script used to lie about a partial run.** With Sleeper succeeding and the season
+releases 404ing — the NORMAL pre-season outcome — it printed *"Nothing refreshed."* A script
+that misreports its own result is how a stale layer survives a refresh nobody doubted. There
+is now a `got_any` flag and a **"Partly refreshed"** branch. Guard 26 asserts it.
+
+⚠️ **The 14.6MB raw payload lives in `$TMP` and dies with the trap.** Only the ~200KB extract
+reaches `grading/data/`. Guard 26 fails if the raw dump is ever pointed at the repo.
+
+### ⚠️ A LITERAL `\n` REACHED A LINE CONTINUATION AND `bash -n` PASSED IT
+
+While wiring step 5, an editing slip put the two characters `\` `n` where a line
+continuation belonged. **Shell syntax checking accepted it** — outside quotes `\n` is just an
+escaped `n`, so it became an extra ARGUMENT and shifted `argv`, making the builder read the
+output path as its season. Caught only by actually running the script.
+
+**`bash -n` proves a script parses, never that its arguments are the ones you meant.** Run
+the thing.
+
+### Calibration
+
+```
+51 grades BYTE-IDENTICAL — 14 tournaments x 3 fixtures, plus 3 leagues x 3 fixtures
+  Compared against a pristine git worktree at HEAD, not against numbers recorded here.
+26 guards pass (1,142 assertions) · cmp App.jsx App.jsx.jsx byte-identical
+Rendered at 430px: 0 tap targets under 32px, no horizontal overflow, and the only
+  console error is the documented POST /api/analyze 404 that Vite always produces.
+21 failure paths negative-tested, ALL exit non-zero — including three separate ways
+  of leaking into analyzeRoster, each caught by two independent assertions.
+```
+
+⚠️ **One negative test initially reported a MISS and the test was the bug** — it replaced a
+string with itself, so it mutated nothing. Rewritten to inject a real `STATUS_LAYER` read
+inside `analyzeRoster`'s body. **Same lesson this file already records twice: assert the
+behaviour, and check that the negative test actually changes something.**
+
+### Still open from §14a
+
+**GAP 1 is half closed.** The status half is built; **the prose half is unchanged and still
+hand-maintained**, which is correct — nothing can automate it. What remains: the layer is
+unwired pending the watch period, and a depth-chart CHANGE is undetectable without history.
+**GAP 2** (no opponent awareness in redraft) and **GAP 3** (`sos_2026.json` has no
+rest-of-season view) are untouched.
+
+
+---
+
+## Three Name Bugs Were Hiding 18 Game Logs (fixed Sep 1, 2026)
+
+Reported as a question, not a bug: *"Why can't I access Burden's game log?"*
+That phrasing is the finding. **The section rendered NOTHING when a log was
+missing, so an absence read as a broken app rather than as missing data.**
+**CONTEXT ONLY — 51 grades byte-identical.** Guarded in
+`scripts/test-player-card.mjs`.
+
+`gamelogs_2025.json` went from **213 players to 231**, with nothing lost.
+
+### Four distinct causes, three of them name resolution
+
+**1. The builder did not strip suffixes.** The weekly stats release prints
+"Luther Burden III"; `ADP_DATA` keys `luther burden`. The membership test
+`n not in draft` failed and the player was dropped silently. Ten lost this way,
+including **Brian Thomas Jr, Chris Godwin Jr, Deebo Samuel Sr, Harold Fannin Jr,
+Michael Penix Jr and Tyrone Tracy Jr.**
+
+**The tell is who SURVIVED:** Kenneth Walker III and Marvin Harrison Jr, purely
+because `ADP_DATA` happens to spell them WITH the suffix. The filter was testing
+whether two hand-maintained tables agreed on spelling, not whether a player was
+draftable.
+
+**2. The builder replaced `.` with a space; the app deletes it.**
+`"A.J. Brown"` became `a j brown` instead of `aj brown`. Five more lost:
+**A.J. Brown, C.J. Stroud, J.K. Dobbins, T.J. Hockenson, J.J. McCarthy.**
+
+⚠️ **Any divergence from `App.jsx`'s `normalize()` is a silent drop.** The
+builder now mirrors it exactly and says so in the docstring.
+
+**3. `gameLogFor` was a SECOND hand-rolled lookup.** It tried the key and its
+suffix-stripped form and nothing else, so it missed the alias table and the
+base index `lookupPlayer` uses. `kenneth gainwell` resolved his metrics and not
+his game log, which is filed under `kenny gainwell`. **Seventh instance of the
+duplicate-definition class in this repo.** Now `lookupPlayer(src, name)`.
+
+**The alias also had to work BOTH ways.** `METRIC_NAME_ALIASES` mapped
+`kenny -> kenneth`; `player_metrics` keys one side and `gamelogs` the other, so
+a one-directional alias resolves one file and not the other.
+`METRIC_NAME_ALIASES_REV` closes it.
+
+**4. Travis Hunter is filed as `CB`.** He plays both ways and nflverse records
+him on defense, so a position filter read off the STATS FILE dropped a top-160
+fantasy WR. **Position now comes from `ADP_DATA`, which is the app's own answer
+to what a player plays.**
+
+### The rule this produces
+
+**A builder that filters against a hand-maintained table must normalise both
+sides with the SAME function the app uses, and must take a player's position
+from that table rather than from the data source.** Every one of these four was
+invisible: no error, no warning, just a player with no chart.
+
+And the section now says why it is empty. **"No week-by-week chart: he recorded
+no 2025 regular-season stat line"** is data; a blank space is a bug report
+waiting to be filed.
+
+### Guard
+
+The strongest available assertion, and it is cheap: **if a player's SEASON
+TOTALS resolved, his WEEK-BY-WEEK rows must resolve too.** They come from
+different files, so a name bug in either shows up there and nowhere else. Plus
+one named regression per bug class, and three failure paths negative-tested.
+
+
+---
+
+## The Card Audit: No Section Vanishes Silently (Sep 1, 2026)
+
+Reported as *"having the same issue with Brian Thomas — can you audit my player
+cards"*. Thomas was already fixed on the branch; **he was still broken because
+the fix had not reached `main`, and rosterxray.com serves `main`.** The audit is
+what the request actually earned.
+
+**CONTEXT ONLY — 51 grades byte-identical.** Guarded in
+`scripts/test-player-card.mjs`.
+
+### The measurement
+
+Across **287 draftable cards**, counting sections that were absent AND said
+nothing about it:
+
+```
+deployment      182 silent      efficiency        76
+man vs zone     177             opportunity       51   <- the core block
+route workload  101             week outcomes     18
+red zone         78             turnover           8
+game log          0             availability       0   <- already fixed
+```
+
+Two sections had been fixed one at a time. **Seven more had the same defect**,
+and Opportunity — the block the whole card is built around — was silent on 51
+players.
+
+### ⚠️ ONE LINE PER GROUP, NOT ONE PANEL PER SECTION
+
+The obvious fix is the wrong one. A "no data" panel per gated section puts a
+dozen empty blocks on a rookie card, which is noise rather than information.
+**The absence has to be visible; it does not have to be loud.**
+
+`card.omitted` collects `{group, label, why}` and `OmittedNote` renders one
+muted line per group:
+
+> *Not shown: Red zone (needs 5+ red-zone opportunities) · Man vs zone (needs
+> 15+ targets against each coverage in 2025). Population gates, not missing
+> data.*
+
+### Two false explanations the first pass shipped
+
+Both are worse than saying nothing, and both were caught by reading real output
+rather than the source.
+
+1. **`card.reason` is assigned FURTHER DOWN than the omissions block**, so
+   reading the flag there always saw `undefined` and a rookie card listed seven
+   gates directly beneath its own "no 2025 NFL data" line. The block now tests
+   the same CONDITION the branch uses rather than the flag it sets.
+2. **A SECTION THAT DOES NOT APPLY IS NOT A GATE HE FAILED.**
+   `CARD_METRICS.QB` is empty **by design** — a quarterback's volume lives in
+   Volume profile — so telling a Burrow reader that Opportunity "needs 8+
+   games" is a false explanation. QBs now read *"receiving tracking does not
+   apply to him"* and skip the sections that are structurally absent.
+
+**Result: 0 silent absences and 0 false explanations across all 287 cards.**
+
+### The rule
+
+**Any population gate that keeps a median honest will exclude somebody, and a
+reader cannot tell an exclusion from a bug.** Name the section, name its gate,
+and distinguish *did not qualify* from *does not apply*. Three failure paths
+negative-tested.

@@ -76,10 +76,39 @@ def points(r):
                + num(r["receiving_fumbles_lost"])) * SCORE["fum"])
 
 
+# ⚠️ SUFFIXES MUST BE STRIPPED ON BOTH SIDES OF THE DRAFTABLE TEST.
+# The weekly stats release prints "Luther Burden III"; ADP_DATA keys him as
+# "luther burden". Without stripping, the membership test below fails and the
+# player is DROPPED SILENTLY — he simply has no game log and the card shows
+# nothing. Ten draftable players were lost that way, including Brian Thomas Jr,
+# Chris Godwin Jr, Deebo Samuel Sr and Harold Fannin Jr.
+#
+# The two who survived (Kenneth Walker III, Marvin Harrison Jr) did so only
+# because ADP_DATA happens to spell them WITH the suffix, which is the tell:
+# the filter was testing whether two hand-maintained tables agreed on spelling,
+# not whether the player was draftable. Same class as the Jul 26 2026 bug where
+# suffixes poisoned the last-name index.
+SUFFIX = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
 def normalize(s):
-    s = s.lower().replace(".", " ").replace("-", " ").replace("'", "")
+    """Mirror of App.jsx normalize(), plus suffix stripping.
+
+    ⚠️ THE PERIOD IS DELETED, NOT REPLACED WITH A SPACE. App.jsx strips
+    ".,'" outright, so "A.J. Brown" becomes "aj brown". This builder used to
+    substitute a space and produced "a j brown", which matched no ADP key and
+    silently dropped A.J. Brown, C.J. Stroud, J.K. Dobbins, T.J. Hockenson and
+    J.J. McCarthy. Any divergence from the app's normalize is a silent drop.
+    """
+    s = s.lower().strip()
+    s = re.sub(r"[.,'\u2019]", "", s)
+    s = s.replace("-", " ")
     s = re.sub(r"[^a-z ]", "", s)
-    return re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"\s+", " ", s).strip()
+    parts = s.split()
+    while len(parts) > 1 and parts[-1] in SUFFIX:
+        parts.pop()
+    return " ".join(parts)
 
 
 def draftable_names(app_path):
@@ -96,7 +125,10 @@ def draftable_names(app_path):
             if depth == 0:
                 block = src[j:x + 1]
                 break
-    return {normalize(m.group(1)) for m in re.finditer(r'"([^"]+)":\s*\{\s*adp:', block)}
+    # name -> position, because the ADP table is the app's own answer to "what
+    # does he play" and the stats release is not. See the CB note in main().
+    return {normalize(m.group(1)): m.group(2)
+            for m in re.finditer(r'"([^"]+)":\s*\{\s*adp:[^}]*?pos:\s*"(\w+)"', block)}
 
 
 def main():
@@ -106,15 +138,19 @@ def main():
     src_csv, out_path = sys.argv[1], sys.argv[2]
     season = int(sys.argv[3]) if len(sys.argv) > 3 else 2025
 
+    # ⚠️ POSITION COMES FROM THE ADP TABLE, NOT THE STATS RELEASE. Travis
+    # Hunter plays both ways and nflverse files him as CB, so a position filter
+    # read off the stats file dropped a top-160 fantasy WR entirely. The app
+    # calls him a WR; the app's table is the authority on that.
     rows = [r for r in csv.DictReader(open(src_csv, encoding="utf-8"))
-            if r.get("season_type") == "REG" and r.get("position") in ("QB", "RB", "WR", "TE")]
+            if r.get("season_type") == "REG"]
     draft = draftable_names("App.jsx")
 
     teams = sorted({r["opponent_team"] for r in rows if r.get("opponent_team")})
     tidx = {t: i for i, t in enumerate(teams)}
 
-    def row_for(r):
-        pos, wk = r["position"], int(r["week"])
+    def row_for(r, pos):
+        wk = int(r["week"])
         opp = tidx.get(r["opponent_team"], -1)
         pts = round(points(r), 1)
         tds = int(num(r["passing_tds"]) + num(r["rushing_tds"]) + num(r["receiving_tds"]))
@@ -135,8 +171,11 @@ def main():
         n = normalize(r["player_display_name"])
         if n not in draft:
             continue
-        by[n].append(row_for(r))
-        pos_of[n] = r["position"]
+        pos = draft[n]
+        if pos not in ("QB", "RB", "WR", "TE"):
+            continue
+        by[n].append(row_for(r, pos))
+        pos_of[n] = pos
 
     # AN EMPTY BUILD MUST REPORT ZERO WEEKS. `or [0]` gave weeks_covered = 1 on a
     # header-only input, which would make the 2026 placeholder read as LIVE and

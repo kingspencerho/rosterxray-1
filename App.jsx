@@ -2478,6 +2478,13 @@ const SUFFIX_RE = /\s+(jr|sr|ii|iii|iv|v)$/;
 const METRIC_NAME_ALIASES = {
   "kenny gainwell": "kenneth gainwell",
 };
+// ⚠️ THE ALIAS HAS TO WORK BOTH WAYS, because different data files pick
+// different sides of the same pair. player_metrics keys "kenneth gainwell";
+// the weekly stats release prints "Kenny Gainwell", so gamelogs keys the other
+// one. A one-directional alias resolved his metrics and not his game log.
+const METRIC_NAME_ALIASES_REV = Object.fromEntries(
+  Object.entries(METRIC_NAME_ALIASES).map(([a, b]) => [b, a])
+);
 
 // Suffix-insensitive index, built once per table and cached.
 //
@@ -2526,7 +2533,9 @@ const lookupPlayer = (table, name) => {
   const base = key.replace(SUFFIX_RE, "");
   if (table[base]) return table[base];
   const hit = getBaseIndex(table)[base];
-  return hit ? table[hit] : null;
+  if (hit) return table[hit];
+  const rev = METRIC_NAME_ALIASES_REV[key];
+  return rev && table[rev] ? table[rev] : null;
 };
 
 const getMetrics = (name) => lookupPlayer(PLAYER_METRICS, name);
@@ -2575,10 +2584,12 @@ const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.pla
 // Rows are fixed-width arrays; `_meta.cols` names the columns per position.
 // Objects would triple the file for no added meaning.
 const GAME_LOG_CUR_LIVE = (GAME_LOGS_CUR._meta?.weeks_covered || 0) > 0;
-const gameLogFor = (src, name) => {
-  const k = normalize(name);
-  return src[k] || src[k.replace(SUFFIX_RE, "")] || null;
-};
+// ⚠️ ONE LOOKUP, NOT TWO. This was a hand-rolled resolver that tried the key
+// and its suffix-stripped form and nothing else, so it missed the alias table
+// and the base index that lookupPlayer uses — "kenneth gainwell" resolved
+// metrics but not his game log, because the log is filed under "kenny
+// gainwell". Seventh time this repo has hit the duplicate-definition class.
+const gameLogFor = (src, name) => lookupPlayer(src, name);
 const getGameLog = (name) => gameLogFor(GAME_LOGS, name);
 const getGameLogCur = (name) => (GAME_LOG_CUR_LIVE ? gameLogFor(GAME_LOGS_CUR, name) : null);
 
@@ -3307,6 +3318,15 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   };
   card.gameLog = buildLog(getGameLog(name), GAME_LOGS._meta || {});
   card.gameLogCur = buildLog(getGameLogCur(name), GAME_LOGS_CUR._meta || {});
+  // ⚠️ SAY WHY THERE IS NO CHART. Rendering nothing made a reader ask why he
+  // "could not access" the log — an invisible absence reads as a broken app.
+  // The file covers draftable players who recorded a stat line, so a player
+  // with no row either did not play in 2025 or is not in the ADP tables.
+  if (!card.gameLog && !card.gameLogCur) {
+    card.gameLogReason = getMetrics(name)
+      ? "No week-by-week chart for him, although his season totals above did resolve. That combination means the game-log build missed him rather than that he did not play — worth reporting."
+      : "No week-by-week chart: he recorded no 2025 regular-season stat line, so there are no games to draw.";
+  }
 
   // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
   // in the 2026 offseason that is not his current job — say so on the card
@@ -3574,6 +3594,52 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
           ? `No on-field rate: across ${exp} seasons he has never held an ${g.established_games ?? 8}-game role, which is the gate this metric requires. That absence IS the finding, not missing data.`
           : `No on-field rate: ${exp === 0 ? "no NFL seasons yet" : `only ${exp} season on file`}, below the ${g.min_seasons ?? 2}-season minimum. This is a sample-size limit and says nothing about his durability.`;
     card.availabilityGates = g;
+  }
+
+  // === WHAT WAS GATED OUT, AND WHY ===
+  //
+  // Seven sections have their own population gate and every one of them used
+  // to vanish SILENTLY. An audit across 287 draftable cards found 182 silent
+  // Deployment omissions, 177 for Man vs zone, 101 for Route workload and 51
+  // for Opportunity — the core block. A reader could not tell "he did not
+  // qualify" from "the app is broken", which is exactly how a missing game log
+  // got reported as an access bug.
+  //
+  // ⚠️ ONE LINE PER GROUP, NOT ONE PANEL PER SECTION. Rendering a "no data"
+  // panel for each would put a dozen empty blocks on a rookie card, which is
+  // noise rather than information. The absence has to be visible; it does not
+  // have to be loud.
+  //
+  // Skipped entirely when `card.reason` is set — that branch already says he
+  // has no 2025 role, and re-listing seven gates under it would repeat it.
+  // ⚠️ `card.reason` is assigned FURTHER DOWN, so it cannot be read here. The
+  // no-data branch is the same condition it uses: no season metrics at all.
+  // Reading the flag instead of the condition listed seven gates under a card
+  // that already says "no 2025 NFL data", which is the same sentence twice.
+  const hasAnySeason = !!getMetrics(name);
+  if (hasAnySeason) {
+    const rzGate = REDZONE._meta?.gates?.min_player_rz_opp;
+    const omit = [];
+    const gated = (cond, group, label, why) => { if (cond) omit.push({ group, label, why }); };
+    // ⚠️ A SECTION THAT DOES NOT APPLY IS NOT A GATE HE FAILED. CARD_METRICS.QB
+    // is empty BY DESIGN — a quarterback's volume lives in Volume profile — so
+    // telling a QB reader that Burrow "needs 8+ games" for Opportunity is a
+    // false explanation, which is worse than no explanation.
+    const isQB = pos === "QB";
+    gated(!isQB && !card.metrics.length, "job", "Opportunity", `needs ${CARD_POP_GATE}`);
+    gated(!card.deployment.length, "job", "Deployment",
+      pos === "WR" || pos === "TE" ? `needs ${NGS_POP_GATE}`
+        : isQB ? "receiving tracking does not apply to him"
+        : "Next Gen Stats receiving tracking covers WR and TE only");
+    gated(!isQB && !card.routes.length, "job", "Route workload", `needs ${ROUTES_POP_GATE}`);
+    gated(!card.redzone.length, "job", "Red zone", rzGate ? `needs ${rzGate}+ red-zone opportunities` : "no qualifying red-zone volume");
+    gated(!isQB && !card.descriptive.length, "production", "Week outcomes", `needs ${CARD_POP_GATE}`);
+    gated(!card.coverage, "reference", "Man vs zone",
+      pos === "QB" ? "a passing split does not apply to him" : `needs ${COV_POP_GATE}`);
+    gated(!card.efficiency.length, "reference", "Efficiency", "no qualifying 2025 per-touch volume");
+    card.omitted = omit;
+  } else {
+    card.omitted = [];
   }
 
   // === THE READ ===
@@ -7758,6 +7824,27 @@ const CARD_ACCENTS = {
   glossary: CARD_GROUP_ACCENT.reference,
 };
 
+// One muted line naming the sections a population gate removed, so an absence
+// is visible without costing a panel each. See the omissions block in
+// buildPlayerCard for why this is one line rather than seven empty sections.
+const OmittedNote = ({ items, group }) => {
+  const mine = (items || []).filter(x => x.group === group);
+  if (!mine.length) return null;
+  return (
+    <div style={{
+      fontSize: "10px", color: "var(--text-dim)", lineHeight: 1.6,
+      padding: "6px 0 2px", borderTop: "1px solid var(--bg-raised)", marginTop: "2px",
+    }}>
+      Not shown: {mine.map((x, i) => (
+        <span key={x.label}>
+          {i > 0 && " · "}
+          <span style={{ color: "var(--text-muted)" }}>{x.label}</span> ({x.why})
+        </span>
+      ))}. Population gates, not missing data.
+    </div>
+  );
+};
+
 // A labelled break between groups, so the reader meets FOUR things rather than
 // fourteen. Deliberately a divider and not a collapsible wrapper: the
 // on-the-clock drafter has no taps to spend, and burying his role data one
@@ -8193,9 +8280,22 @@ const WeeklyBars = ({ log }) => {
 // index rules. Both pills always show both years, so "2025" is a visible,
 // tappable fact even while 2026 is selected — absence of the toggle (single
 // vintage) means there is genuinely only one season of data.
-const GameLogSection = ({ cur, prior }) => {
+// ⚠️ A MISSING GAME LOG USED TO RENDER NOTHING, and a reader asked why he
+// "could not access" it — which is the tell: an invisible absence reads as a
+// broken app, not as missing data. Same silent-drop class the availability
+// section was fixed for. `reason` is the population gate, stated in place.
+const GameLogSection = ({ cur, prior, reason }) => {
   const [season, setSeason] = useState(cur ? "cur" : "prior");
-  if (!cur && !prior) return null;
+  if (!cur && !prior) {
+    if (!reason) return null;
+    return (
+      <CardSection title="Weekly output" accent={CARD_ACCENTS.gamelog} collapsible hint="no log">
+        <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55, padding: "4px 0" }}>
+          {reason}
+        </div>
+      </CardSection>
+    );
+  }
   const log = season === "cur" && cur ? cur : (prior || cur);
   const both = !!(cur && prior);
   return (
@@ -8693,11 +8793,13 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur) && (
+            <OmittedNote items={card.omitted} group="job" />
+
+            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
               <CardGroupHeader group="production" label="What he produced" hint="2025 output" nested />
             )}
 
-            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} />
+            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
 
             {card.descriptive.length > 0 && (
               <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
@@ -8707,6 +8809,8 @@ const PlayerCardModal = ({ card, onClose }) => {
 
           </>
         )}
+
+        <OmittedNote items={card.omitted} group="production" />
 
         {(card.availability || card.availabilityReason || card.arc || card.vacated) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
@@ -8837,9 +8941,11 @@ const PlayerCardModal = ({ card, onClose }) => {
           </CardSection>
         )}
 
-        {(card.efficiency.length > 0 || card.coverage || (card.glossary || []).length > 0) && (
+        {(card.efficiency.length > 0 || card.coverage || (card.glossary || []).length > 0
+          || (card.omitted || []).some(x => x.group === "reference")) && (
           <CardGroupHeader group="reference" label="Reference" hint="consult, do not conclude" nested />
         )}
+        <OmittedNote items={card.omitted} group="reference" />
 
         {card.coverage && (
           <CardSection
