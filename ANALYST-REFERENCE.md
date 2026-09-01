@@ -1214,6 +1214,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
 | Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
 | Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
@@ -1225,7 +1226,6 @@ own calibration run and its own cap.**
 | Aug 31 2026 | This file created |
 | Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
 | Aug 30 2026 | Floor Layer (scored, redraft, ±0.5) + redraft role context |
-| Aug 30 2026 | Sanctioned archetypes stopped being charged as flaws |
 
 ---
 
