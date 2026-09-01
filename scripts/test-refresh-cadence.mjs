@@ -57,7 +57,8 @@ for (const fn of ["analyzeRoster", "analyzeRedraft"]) {
   const i = app.indexOf(`const ${fn} = `);
   const j = app.indexOf("\nconst ", i + 10);
   const body = i === -1 ? "" : app.slice(i, j === -1 ? app.length : j);
-  const dirty = ["SNAP_TRAJECTORY_CUR", "QB_PROFILE_CUR", "getSnapTrendCur", "getQbProfileCur"].filter(t => body.includes(t));
+  const dirty = ["SNAP_TRAJECTORY_CUR", "QB_PROFILE_CUR", "VOLUME_CUR",
+                 "getSnapTrendCur", "getQbProfileCur", "getVolumeCur"].filter(t => body.includes(t));
   ok(`${fn} reads no current-season layer`, i > -1 && dirty.length === 0, dirty.join(", "));
 }
 
@@ -65,12 +66,14 @@ for (const fn of ["analyzeRoster", "analyzeRedraft"]) {
 console.log("\nempty placeholders degrade to 2025-only");
 ok("both current-season layers gate on weeks_covered",
    /CUR_SEASON_LIVE\s*=\s*\(SNAP_TRAJECTORY_CUR\._meta\?\.weeks_covered\s*\|\|\s*0\)\s*>\s*0/.test(app) &&
-   /CUR_QB_LIVE\s*=\s*\(QB_PROFILE_CUR\._meta\?\.weeks_covered\s*\|\|\s*0\)\s*>\s*0/.test(app));
+   /CUR_QB_LIVE\s*=\s*\(QB_PROFILE_CUR\._meta\?\.weeks_covered\s*\|\|\s*0\)\s*>\s*0/.test(app) &&
+   /CUR_VOLUME_LIVE\s*=\s*\(VOLUME_CUR\._meta\?\.weeks_covered\s*\|\|\s*0\)\s*>\s*0/.test(app));
 ok("the accessors return null when the gate is closed",
    /getSnapTrendCur = \(name\) => \(CUR_SEASON_LIVE \?/.test(app) &&
-   /getQbProfileCur = \(name\) => \(CUR_QB_LIVE \?/.test(app));
+   /getQbProfileCur = \(name\) => \(CUR_QB_LIVE \?/.test(app) &&
+   /getVolumeCur = \(name\) => \(CUR_VOLUME_LIVE \?/.test(app));
 
-for (const f of ["snap_trajectory_2026.json", "qb_profile_2026.json"]) {
+for (const f of ["snap_trajectory_2026.json", "qb_profile_2026.json", "volume_2026.json"]) {
   const d = readJson(f);
   const m = d._meta || {};
   ok(`${f} carries the vintage fields a consumer needs`,
@@ -97,6 +100,58 @@ ok("the 2025 trajectory file is still populated", Object.keys(prior.players).len
    `${Object.keys(prior.players).length} rows`);
 ok("and is marked complete", prior._meta.season_complete === true);
 ok("the 2025 QB profile is still populated", Object.keys(readJson("qb_profile_2025.json").players).length > 30);
+
+
+// ---- 5. THE VOLUME TWIN IS A TWIN, NOT A REPLACEMENT ----
+// The whole reason this file exists is that the SCORED metrics file is frozen
+// all season, so its anchors describe last season for the whole of this one.
+// The fix is a context copy rendered BESIDE the frozen one, never instead of
+// it. Two ways that goes wrong and both are silent:
+//   - the current figure replaces the prior one on the card, and the reader
+//     cannot tell which season a number describes
+//   - the current figure is ranked against the 2025 percentile population,
+//     printing a rank under a population that does not describe it
+console.log("\nthe volume twin renders beside 2025, never instead of it");
+
+ok("the card row takes a separate `cur` value",
+   /const CardMetricRow = \(\{[^}]*\bcur\b/.test(app),
+   "one value slot means one vintage, and the comparison is the finding");
+ok("both vintages render when both exist",
+   /\{cur != null && <>[\s\S]{0,240}\{value\}/.test(app) && /\{cur != null \? cur : value\}/.test(app));
+ok("the current-season figure carries NO percentile",
+   !/pct: cardPercentile\(pos, d\.key, cur\)/.test(app),
+   "CARD_PERCENTILES is the 2025 population — ranking a partial season against it mislabels the rank");
+ok("the Opportunity note names both vintages when the twin is live",
+   /card\.volumeCur \?/.test(app) && /Rows showing/.test(app));
+
+ok("the prompt block states that the current season outranks the frozen one",
+   /THIS OUTRANKS THE 2025 BLOCK ABOVE/.test(app));
+ok("...and each prompt line carries the 2025 figure beside it",
+   /\(2025: \$\{fmt\(was\)\}\)/.test(app));
+ok("...and it warns about small samples",
+   /a share over two or three games is not a season/.test(app));
+ok("the twin reaches BOTH prompts",
+   (app.match(/\$\{volumeCurContext\}/g) || []).length === 2);
+
+// The weekly job must actually build it, or the placeholder never fills.
+ok("the weekly refresh builds the volume twin",
+   /build-volume-current\.py/.test(sh));
+ok("...from the download it already makes, not a new one",
+   /reusing the same download[\s\S]{0,400}build-volume-current\.py/.test(sh),
+   "a fourth network fetch for a third parse of one file");
+
+// The builder must not be able to write the scored file by mistake.
+const volBuilder = readFileSync(path.join(repoRoot, "scripts/build-volume-current.py"), "utf8");
+// ⚠️ Check the OUTPUT PATH, not the presence of the string. The docstring
+// legitimately names player_metrics_2025.json to explain why the twin exists,
+// and a substring search fails on correct prose — a guard that fails on
+// documentation is a guard someone deletes.
+ok("the volume builder's default output is a volume file",
+   /OUT = sys\.argv\[2\][^\n]*grading\/data\/volume_\d{4}\.json/.test(volBuilder));
+ok("the volume builder opens nothing but its own output for writing",
+   (volBuilder.match(/open\(([^,)]+),\s*"w"\)/g) || []).every(m => m.includes("OUT")));
+ok("the volume builder documents the games-played denominator",
+   /GAMES PLAYED, never the full season|per \(player, game\)/i.test(volBuilder));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall refresh-cadence guards passed");
 process.exit(fail ? 1 : 0);

@@ -1469,6 +1469,14 @@ it costs one command.
 | 2 | Decide whether separation should SCORE | a real data decision | **yes** |
 | 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
 | 4 | Re-verify the remaining Tier C rejections against their stated dates | one command each | no |
+| 5 | **Fix `tgt_sh` for mid-season movers in `build-player-metrics.py`** | one denominator change | **only when the scored file is next legitimately regenerated** |
+
+**On #5.** Found Sep 1 2026 by validating the volume twin against 2025: nine
+players disagree by more than five points, all traded mid-season, all inflated,
+because the builder divides a full-season target count by one team's totals.
+**It has never moved a grade** — neither engine reads `tgt_sh`. **Do NOT
+regenerate the frozen file to fix it**; that moves every grade and invalidates
+every calibration on file. It rides along with the next legitimate rebuild.
 
 **Shipped Sep 1 2026 and pruned from this queue:** targets per route run and
 coverage-scheme splits. Both now live in §5. **The lesson worth keeping is the
@@ -1493,6 +1501,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
 | Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
 | Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
@@ -1504,7 +1513,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
 | Sep 1 2026 | Red-zone share and on-field rate — context only, 39 grades identical |
 | Sep 1 2026 | grade-cli validates its flags rather than ignoring a typo |
-| Aug 31 2026 | Targets/gm + air yards share reach the AI prompt — the two anchors it never saw |
 
 ---
 
@@ -1652,14 +1660,34 @@ material missing.
 
 ### In season — the machinery exists and points at the wrong weeks
 
-**THE SINGLE LARGEST FINDING: there was no concept of "today."**
+**THE SINGLE LARGEST FINDING: "today" existed and reached exactly one panel.**
+
+⚠️ **A first pass of this audit reported that no current-week state existed
+anywhere. That was wrong** — `getNflWeek()` has been in the file since before
+this audit, deriving the week from `SEASON_START`. The grep that produced the
+claim was case-sensitive and missed it. Corrected here rather than quietly, per
+the same rule that governs a stale verdict.
+
+What was actually true:
 
 - `lineupConfidence` computes start/sit intel for **all 17 weeks**. Built, works.
-- The AI prompt then filtered it to **`week >= 15` only**.
-- No current-week state existed anywhere in `App.jsx`.
+- `getNflWeek()` existed with **exactly one consumer**: the redraft lineup-
+  confidence week strip.
+- **The AI prompt ignored it entirely** and filtered to `week >= 15`.
+- Nothing else consumed it: not the weekly grid, not bench moves, not best ball,
+  not the data-vintage footer.
+- It is **calendar-derived**, so it says Week 8 whether or not the weekly data
+  refresh has been run since Week 3.
 
-So the weekly intel was aimed at December. In October it had nothing to say about
-October. (Addressed by the current-week work; see the changelog.)
+So the app knew the date and almost nothing acted on it, and what did act on it
+could not tell the reader its data was stale.
+
+**Closed Sep 1 2026.** `seasonNow()` is now the single definition and carries
+the calendar week AND the data vintage together. Both AI prompts open by naming
+the week; the start/sit filter is `week >= 15 || week === current`; the lineup
+panel warns when the refresh has fallen behind. **A lag of exactly 1 is the
+healthy steady state** — after week N is played the data covers N and the
+decision is N+1 — so only a larger gap warns. Guard 24.
 
 **Four remaining gaps, in priority order:**
 
@@ -1669,6 +1697,15 @@ October. (Addressed by the current-week work; see the changelog.)
 | 2 | **News is hand-maintained** | A 30-45 day freshness rule is right for August. In October it is three days |
 | 3 | **No opponent awareness** | Weekly head-to-head decides whether you need floor or ceiling this week |
 | 4 | **Rest-of-season SOS** | `sos_2026.json` is a static full-season figure. In Week 10 the played half is noise |
+
+**Closed Sep 1 2026: the anchors now update.** `volume_2026.json` is a
+context-only twin of the frozen scored file, carrying targets/gm, target share,
+air yards share, WOPR and carries/gm on the current season. It costs no extra
+network — the weekly job already downloads `stats_player_week_<season>.csv` for
+the QB profile and the game logs, so this is a third parse of a file on disk.
+Red-zone share and TPRR are NOT twinned, because they need the pbp and
+participation releases, which are large weekly downloads. That trade has not
+been made.
 
 ### Offseason — better covered than it looks
 

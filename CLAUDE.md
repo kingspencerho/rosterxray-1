@@ -4950,3 +4950,113 @@ tails only, **0 tap targets under 32px, 0 page errors.** Five failure paths
 negative-tested — a scoring leak, coverage promoted to a bright group, a
 coverage prompt builder, route share losing its restatement mark, and TPRR
 ranked against the card's population — all exit non-zero.
+
+
+---
+
+## The In-Season Transition (Sep 1, 2026)
+
+Two builds that turn a draft-season tool into one that says something useful in
+October. **CONTEXT AND PRESENTATION ONLY — 51 grades byte-identical.** Guards 15
+(extended) and 24 (new).
+
+### 1. The app knew the date and almost nothing acted on it
+
+⚠️ **An audit earlier the same day reported "no current-week state exists
+anywhere in App.jsx." That was FALSE**, and the grep that produced it was
+case-sensitive and missed `getNflWeek`. Corrected in `ANALYST-REFERENCE.md` §14
+rather than quietly. What was actually true:
+
+- `lineupConfidence` computed start/sit intel for **all 17 weeks**.
+- `getNflWeek()` existed with **exactly one consumer**, the redraft week strip.
+- **The AI prompt ignored it** and filtered to `wk.week >= 15` unconditionally,
+  so from September to December the model was handed December's start/sit calls
+  and nothing about the week being played.
+- It is calendar-derived, so it said Week 8 whether or not the weekly refresh
+  had been run since Week 3.
+
+**`seasonNow()` is now the single definition** and carries the calendar week AND
+the data vintage together, because they answer different questions and only one
+of them is on a clock.
+
+```
+const seasonNow = (now) => { week, inSeason, dataWeeks, lag, stale }
+```
+
+**⚠️ A LAG OF EXACTLY 1 IS THE HEALTHY STEADY STATE, NOT A WARNING.** After week
+N is played the refresh covers N and the decision in front of the user is N+1.
+A guard or a banner that fired on the steady state would train everyone to
+ignore it. Only a larger gap warns, and the warning names both numbers.
+
+Both prompts now open with `whenContext`: the week, what the in-season data
+covers, and an explicit line when that data is behind. Out of season the string
+says the season has not started and every number is 2025, which is what the
+model needed to stop writing about an October roster as though the draft had
+just finished.
+
+### 2. The frozen scored file made the anchors describe last season all year
+
+`player_metrics_2025.json` feeds four scored inputs and is frozen on purpose.
+The consequence is easy to miss: **targets/gm (r=0.77), air yards share (0.78)
+and target share (0.73) — the anchors everything else leans on — described 2025
+for the whole of 2026.**
+
+**The fix is never to thaw the frozen file.** `build-volume-current.py` emits
+`volume_<season>.json`, a CONTEXT twin of the same measurements on the current
+season. Both vintages render, never swapped, exactly as trajectory, QB profile
+and game logs already do.
+
+**It costs no extra network.** `refresh-inseason.sh` already downloads
+`stats_player_week_<season>.csv` for two builders; this is a third parse of a
+file on disk. Red-zone share and TPRR are deliberately NOT twinned — they need
+the pbp and participation releases, which are large weekly downloads.
+
+### ⚠️ THE DRY RUN FOUND A REAL BUG IN THE FROZEN FILE
+
+Validating the twin against 2025 (mean abs diff on `tgt_sh`: **0.0056**)
+surfaced nine players who disagree by more than five points, **all mid-season
+movers, all inflated in the scored file**:
+
+```
+brandin cooks     scored 0.293   correct 0.089
+rashid shaheed    scored 0.341   correct 0.167
+adonai mitchell   scored 0.312   correct 0.150
+jakobi meyers     scored 0.372   correct 0.228
+adam thielen      scored 0.179   correct 0.078
++ 4 more
+```
+
+Cooks had 36 targets across 13 games in which his teams threw 403 times. That is
+**8.9%**, and 29.3% would require his offence to have thrown 9.5 times a game.
+`build-player-metrics.py` divides a traded player's full-season targets by a
+single team's totals.
+
+**It has never moved a grade** — verified: neither `analyzeRoster` nor
+`analyzeRedraft` reads `tgt_sh`, which is context. It reached the AI prompt and
+the card, and shipping the twin corrects those nine players this season.
+
+**The frozen file stays frozen anyway.** Its scored fields are unaffected and
+regenerating it mid-season is the thing the whole cadence exists to prevent. Fix
+it in the next legitimate regeneration, not now.
+
+### Two rendering rules the guard pins
+
+1. **The current figure NEVER carries a percentile.** `CARD_PERCENTILES` is
+   built from the 2025 population; ranking a partial season against it prints a
+   rank under a population that does not describe it. The number shows, the rank
+   does not, and the section note says why.
+2. **Both values render on ONE row, current second, with an arrow.** One value
+   slot means one vintage and the reader cannot tell which season they are
+   looking at. `11.6 → 12.4` with the note naming both seasons is the finding.
+
+### Verified
+
+```
+51 grades byte-identical · 25 guards pass · dual-file identical
+Live-season dry run: 2025 rows relabelled as "2026 through W8" render
+  Targets / game  11.6→12.4   Air yards share 35%→42%
+  Target share    32%→36%     WOPR 0.72→0.84
+  Snap share      94% (no twin — needs snap counts, correctly absent)
+Placeholder restored afterwards; refresh-inseason.sh no-ops before Week 1.
+Six failure paths negative-tested across guards 15 and 24.
+```
