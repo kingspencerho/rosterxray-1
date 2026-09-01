@@ -275,6 +275,26 @@ ok("§13 states the two-axis distinction", /high stickiness/i.test(guide) && /hi
 // on a Tier C rejection.
 const road = doc.slice(gEnd);
 ok("§14 carries the date it was audited", /[Aa]udited against the code on \w+ \d+ \d{4}/.test(road));
+// §14a is the handoff a cold session picks up. This file has lost a block to a
+// heading-anchored cut THREE times, so the section is asserted rather than
+// trusted — and its two probed sources must keep the date they were verified,
+// which is the same rule R19 puts on a Tier C rejection.
+{
+  const a = doc.indexOf("## §14a ·");
+  ok("§14a exists", a > 0);
+  ok("§14a sits after §14's own content", a > doc.indexOf("### ⚠️ The constraint that shapes"));
+  const h = a > 0 ? doc.slice(a) : "";
+  ok("§14a carries the date it was written for a cold session",
+    /Written \w+ \d+ \d{4} for a session picking this up cold/.test(h));
+  ok("§14a names both probed sources", /nflverse `injuries` release/.test(h) && /Sleeper public players API/.test(h));
+  ok("§14a states the split rather than 'replace the prose with a feed'",
+    /IS A SPLIT/.test(h) && /Analytical judgement/.test(h));
+  ok("§14a names the conflict question, which is the risky one",
+    /what happens on a CONFLICT/i.test(h));
+  ok("§14a restates the containment constraint",
+    /must not reach\s*\n?`analyzeRoster` or `analyzeRedraft`/.test(h) || /must not reach[\s\S]{0,60}analyzeRedraft/.test(h));
+}
+
 ok("§14 states the frozen-file constraint",
   /frozen all season/i.test(road) && /context-only current-season twin/i.test(road));
 
