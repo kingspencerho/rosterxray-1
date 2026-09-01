@@ -1389,10 +1389,10 @@ rather than sitting beside them.
 |---|---|
 | `node scripts/grade-cli.mjs <roster> --tournament <key>` | grade headlessly. Unknown flags and unknown tournament keys exit non-zero with a hint — `--mode redraft` was silently ignored until Sep 1 2026 and graded a redraft roster through the best-ball engine |
 | `node scripts/scout.mjs "Name" [--format …]` | the data behind `/scout` |
-| `node scripts/report-stale-news.mjs [date]` | **run before any draft.** Lists players whose every note is past the 45-day re-validation rule. Takes a date, so you can ask what will be stale on Sept 5 |
-| `bash scripts/refresh-inseason.sh [season]` | the weekly job. Two downloads. No-ops safely before Week 1 |
+| `node scripts/report-stale-news.mjs [date]` | **run before any draft.** TWO sections since Sep 1 2026: (1) players whose every note is past the 45-day re-validation rule, (2) **CONTRADICTED** — the status feed reports a hard unavailability the freshest note predates. Section 2 asks questions and never edits a note. Takes a date |
+| `bash scripts/refresh-inseason.sh [season]` | the weekly job, **5 steps since Sep 1 2026**. Three downloads. Steps 1-4 no-op safely before Week 1; **step 5 (Sleeper) is the only one that returns data pre-season**, so a partial run is normal and is reported as `Partly refreshed` |
 | `python3 scripts/refresh-adp.py [--source underdog\|ffc] [--table data\|yahoo] [--apply]` | ADP drift report. **Reports by default, never auto-applies** |
-| `npm test` | 23 guards |
+| `npm test` | 26 guards |
 | `npm run build` | Vite production build |
 
 ### Builders
@@ -1411,6 +1411,7 @@ build-efficiency.py         per-touch efficiency ranks
 build-airyards.py           RB aDOT, team RB air yards, dropback drain
 build-motion.py             team-scheme motion split (PLAY-level)
 build-sos.py                full-season schedule strength
+build-status.py             availability + depth-chart slot (Sleeper, NOT nflverse)
 ```
 
 ### Guards — every one exists because something broke
@@ -1420,7 +1421,7 @@ build-sos.py                full-season schedule strength
 | **Name resolution & ADP** | `findplayer` · `adp-delta` · `alias-adp-sync` · `table-coverage` · `no-duplicate-keys` |
 | **Roster ingestion** | `extraction-filters` · `extraction-blocks` · `yahoo-share` · `loose-json` |
 | **Prose safety** | `no-quoted-negations` · `stale-verdicts` · `player-data` |
-| **Scoring containment** | `snap-trajectory` · `refresh-cadence` · `floor-layer` · `context-layers` |
+| **Scoring containment** | `snap-trajectory` · `refresh-cadence` · `floor-layer` · `context-layers` · `status-layer` |
 | **Scoring correctness** | `playoff-boosts` · `archetypes` |
 | **UI** | `player-card` · `color-roles` · `disclosure` · `player-lookup` |
 | **This file** | `analyst-reference` |
@@ -1500,6 +1501,12 @@ analysis.
 Tier C rejections survived on a premise that was false when written down and
 never re-tested. Date every rejection, and re-check the feed before citing it —
 it costs one command.
+
+**R20.** **`bash -n` proves a script PARSES, never that its arguments are the ones you
+meant.** A literal `
+` reached a line continuation in `refresh-inseason.sh`; outside quotes
+that is an escaped `n`, so it became an extra ARGUMENT and shifted `argv`. Syntax check
+passed. Run the script.
 
 ---
 
@@ -1795,6 +1802,13 @@ it describes is the stale-data trap in a new costume.
 
 ### GAP 1 — News is hand-maintained, and October breaks the freshness rule
 
+> ## ✅ HALF CLOSED, Sep 1 2026. The STATUS half shipped as `grading/data/status_2026.json`
+> ## (Sleeper, context-only, **not wired to App.jsx at all** pending a one-week watch of the
+> ## feed). The PROSE half is unchanged and correctly stays hand-written — the split below
+> ## was MEASURED afterwards and 0 of 15 sampled entries could be supplied by a feed.
+> ## Full record: CLAUDE.md § The Status Layer. **What remains open: the layer is unwired,
+> ## and a depth-chart CHANGE is undetectable because the file is a snapshot with no history.**
+
 **Current state, measured:** `RECENT_NEWS` holds **87 entries (66KB)** and
 `SITUATIONS` **143 (88KB)**, all written by hand. `parseNewsDate` extracts a
 date from the prose (or reads a structured `date` field), and the card ages each
@@ -1833,7 +1847,7 @@ practice_status          Full / Limited / Did Not Participate
 report_primary_injury    body part
 ```
 
-- **Joins on `gsis_id`**, the same key every other layer uses.
+- ~~**Joins on `gsis_id`**, the same key every other layer uses.~~ ⛔ **CORRECTED Sep 1 2026, and BOTH HALVES WERE WRONG.** nflverse does carry `gsis_id`, but **no layer in `grading/data/` keys on it** — all 19 files key on a LOWERCASED FULL NAME (checked, not assumed). And the source that shipped, Sleeper, carries `gsis_id` on **147 of 812 skill players, 18%**. So this is a NAME-RESOLUTION problem, the class that produced `findPlayer`, the alias table and three guards — see `build-status.py`'s header.
 - **Drops straight into `refresh-inseason.sh`** as a fourth builder.
 - ⚠️ **It is the official injury report and nothing else.** No trades, no
   suspensions, no depth-chart moves, no coaching changes. Jacobs on the exempt
