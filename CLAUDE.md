@@ -5060,3 +5060,95 @@ Live-season dry run: 2025 rows relabelled as "2026 through W8" render
 Placeholder restored afterwards; refresh-inseason.sh no-ops before Week 1.
 Six failure paths negative-tested across guards 15 and 24.
 ```
+
+
+---
+
+## The Waiver-Target Pool (added Sep 1, 2026)
+
+The first feature in this app that ranks players **not** on your roster.
+**CONTEXT ONLY — 51 grades byte-identical.** Guard 25.
+
+Every layer built before this describes a player you already hold. The most
+common in-season decision in redraft — *who do I add this week* — had no support
+at all, because nothing looked at the player universe minus your roster.
+
+### ⚠️ BEST BALL IS OUT OF SCOPE, AND THAT IS THE FIRST DESIGN DECISION
+
+Underdog rosters lock after the draft. There are no waivers, so a pool there
+would be a feature that cannot be acted on. `analyzed.mode !== "redraft"` returns
+null, and the guard asserts it.
+
+### ⚠️⚠️ THE APP CANNOT SEE YOUR LEAGUE'S WAIVER WIRE, AND SAYS SO ON SCREEN
+
+It knows your roster and it knows every player. It does **not** know the other
+eleven rosters. So this ranks players not on YOUR roster that a league of this
+depth (`teams x (starters + bench)`, 156 for a standard 12-team) plausibly leaves
+unrostered — and an **exclusion box** lets the reader close the gap by hand.
+
+Calling it "your best available add" would assert something unknowable. The panel
+leads with the limit rather than burying it.
+
+### IT IS BUILT IN THE COMPONENT, NOT THE ENGINE
+
+The pool reads **six context layers** (trajectory, vacated, volume, routes,
+availability, NGS). Putting it inside `analyzeRedraft` would have made the engine
+unprovable, so it sits at module level and is invoked from a `useMemo`, exactly
+as `buildPlayerCard` is. Guard 25 asserts both engines never reference it.
+
+**Guard 13 caught the new consumer immediately** — `getSnapTrend` had exactly
+three reviewed call sites and this made four. That is the allowlist working as
+designed: `scoreFreeAgent` was added deliberately, with the reason recorded, not
+by relaxing the assertion.
+
+### MATCHUP DATA IS DELIBERATELY ABSENT FROM THE SCORE
+
+```
+roleChange   3.0    rank 1 — the most causal thing you can know
+volume       2.0    rank 2 — targets or carries per game
+tprr         1.5    rank 2 — the per-opportunity rate
+vacancy      1.0    rank 1, team level — locates an opening only
+availability 1.0    rank 2 — a per-game rate assumes he plays
+separation   0.75   rank 3 — talent in isolation
+```
+
+Rank 5 is the least stable input measured in this project and **WR FPA is
+negative year over year.** A schedule may SORT a shortlist; it must never
+GENERATE one. The opponent renders as an annotation and contributes zero. Same
+rule that keeps man/zone coverage out of the AI prompt.
+
+The score is normalised by the weight actually available, so a thin profile
+cannot outrank a full one by having less to be measured on.
+
+### Two defects the first browser render exposed
+
+Both were invisible in the source and obvious on screen, which is why the render
+is not optional.
+
+1. **A REASON MUST BE EVIDENCE *FOR*, NOT EVERY NUMBER MEASURED.** The list
+   showed *"thrown at on 11.1% of his routes — above 21% of RBs"* as a bullet
+   under a recommendation. A 21st-percentile figure argues AGAINST. Weak signals
+   still drag the score, which is what normalising is for; they are no longer
+   displayed as a case. Reasons now sort by CONTRIBUTION (`unit x weight`) rather
+   than by raw weight, and the two-signal gate counts SUPPORTING signals only.
+2. **NO TEAM MEANS NO ROLE.** Unsigned free agents carry `"-"` in the ADP tables.
+   Tyreek Hill ranked sixth while his own dated news entry says he will not sign
+   before the season. A player with no team has no snaps, no opponent and no way
+   to help this week.
+
+### The evidence is the point
+
+Every candidate renders the two or three facts that ranked him, in plain
+language, and the row opens his player card. **A ranked list a reader cannot
+audit is a black box**, and checkable numbers are the entire argument of this
+app.
+
+Sample output on a real roster: Travis Hunter (79th percentile targets, 81st
+separation), Colby Parkinson (41% -> 73% snaps), Adonai Mitchell (25% -> 76%
+snaps, 82nd percentile TPRR). Role change surfacing at the top is the layer
+working as designed.
+
+### Still open from the in-season audit
+
+News is hand-maintained, there is no opponent awareness in redraft, and
+`sos_2026.json` is a static full-season figure with no rest-of-season view.
