@@ -4659,3 +4659,85 @@ check of the same intent — the date is derived, never invented.
 Four failure paths negative-tested: removing the `reason` fallback, ignoring the
 structured date, allowing a future structured date, and letting the structured
 date always win. All exit non-zero.
+
+---
+
+## Cutdown-Day News Sweep — Sep 1, 2026
+
+Final 53-man cuts landed Aug 30 2026 and the roster picture moved more in that
+weekend than in the six weeks before it. Seven entries refreshed, two team
+corrections, one player added to the best-ball tables. **39 grades
+byte-identical** — prose carries no score.
+
+### The one that inverts a top-50 pick
+
+**Josh Jacobs (RB GB, ADP 41) is on the Commissioner's Exempt List** as of Aug
+30 2026. He is off the 53-man roster, cannot practise and cannot attend games.
+**The exempt list is not a suspension and has no fixed length** — it holds until
+the league resolves its review, so there is no date to plan around. Green Bay
+traded a 2028 sixth to Pittsburgh for Kaleb Johnson the same day, which is a club
+telling you how it reads its own odds.
+
+The entry written Aug 29 described an open review a GM said the club was
+preparing for. That was accurate on Aug 29 and describes a world that ended a
+day later. **This is the freshness rule paying for itself twice in four days** —
+Alec Pierce on Aug 28, Jacobs now.
+
+### Everything else that moved
+
+| Player | ADP | Change |
+|---|---|---|
+| **Josh Jacobs** RB GB | 41 | Commissioner's Exempt List, no timeline. fade -> **HARD FADE** |
+| **Javonte Williams** RB DAL | 36 | Blue and Mafah waived; the RB2 competition named in his entry is over. stable -> rising |
+| **Jordyn Tyson** WR NO | 63 | IR **confirmed** with a return designation, minimum four games, ~mid-Oct |
+| **MarShawn Lloyd** RB GB | 162.5 | The Jacobs contingency landed, and gained a competitor the same day |
+| **Malik Davis** RB DAL | 215.1 | RB2 **confirmed** by attrition |
+| **Kaleb Johnson** RB GB | — | Traded PIT -> GB. New entry, added to the best-ball tables |
+| **Emari Demercado** RB DAL | 215.9 | Claimed off waivers from KC Aug 31. **His whole thesis was a KC role** |
+| **Ashton Jeanty** RB LV | 11 | Questionable for Week 1, full strength expected by W2-3 |
+
+### ⚠️ THE STALE-ARTICLE TRAP FIRED AGAIN, ON THE SAME DAY'S NEWS
+
+A search for running-back depth charts returned a well-written summary
+describing **Jaydon Blue as a Cowboys sleeper who gives Dallas a change-of-pace
+threat opposite Javonte Williams.** Blue had been waived hours earlier. The
+article was pre-cutdown and the summary carried no date.
+
+Same shape as the Rachaad White trap recorded Aug 16. **The defence that worked
+was checking every player-team and depth-chart claim against `ADP_DATA` before
+writing it**, and verifying the load-bearing ones against a primary source
+individually rather than trusting an aggregated summary.
+
+Two claims from that same result were verified separately and kept (Kamara's
+MCL, dated Aug 19 2026). Two were dropped for lack of a dated source.
+
+### Kaleb Johnson's ADP is a RESOLUTION PLACEHOLDER, and says so
+
+He exists only in `ADP_YAHOO` at 278 and **no best-ball quote exists** — his
+price is moving hourly on the Jacobs news. Per the ADP source-of-truth rule a
+number enters `ADP_DATA` only from a best-ball source, so the 278 is carried
+across explicitly flagged as an estimate. **It is safe only because `adpFlags`
+excludes `adp >= 200` from reach/value logic**, so the number drives resolution
+and ordering and nothing else. Replace it with a real quote.
+
+### A guard failed because a prose improvement made it stop applying
+
+`malik davis` was the corpus's last `reason`-only entry, and this sweep gave him
+a `trendNote`. The guard added Sep 1 asserted that a reason-only entry EXISTS,
+on the reasoning that a fallback nothing exercises is untested — so **an
+improvement to the prose made the guard fail.**
+
+The corpus can legitimately hold zero reason-only rows at any time; the fallback
+still has to work for the next one. It is now tested **directly**, by injecting a
+synthetic row into `SITUATIONS` and asserting the behaviour — including that an
+undated reason-only row is still withheld, since the no-date rule outranks the
+fallback.
+
+**Assert the behaviour, not that the corpus happens to exercise it.**
+
+### Method
+
+- Every player-team claim checked against `ADP_DATA` before it was written.
+- Every date pinned to a primary source; where only a month was confirmable, the
+  month-only form is used rather than an invented day.
+- `report-stale-news.mjs` returns **zero** players past the 45-day rule.

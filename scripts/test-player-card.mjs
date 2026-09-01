@@ -513,9 +513,32 @@ for (const [, v] of situations) {
   const r = typeof v.reason === "string" && v.reason.trim();
   if (t && r) shapes.both++; else if (t) shapes.trendNote++; else if (r) shapes.reason++;
 }
-ok("the reason-only shape is actually exercised", shapes.reason > 0,
-   "if this is 0 the fallback is untested, not unnecessary");
 console.log(`       ${shapes.trendNote} trendNote-only · ${shapes.reason} reason-only · ${shapes.both} both`);
+
+// ⚠ THE FALLBACK IS TESTED DIRECTLY, NOT VIA THE CORPUS.
+// The first version asserted that a reason-only entry EXISTS, on the reasoning
+// that a fallback nothing exercises is untested. That inverted the moment the
+// last reason-only entry gained a trendNote — a prose improvement made the guard
+// fail, which is the guard punishing the right change. The corpus can legitimately
+// hold zero reason-only rows at any time; the fallback still has to work for the
+// next one. So inject a synthetic row and assert the behaviour.
+const SYNTH = "__guard_reason_only__";
+e.SITUATIONS[SYNTH] = { verdict: "hold", reason: "Synthetic reason-only row, dated Aug 20 2026." };
+const synthNote = e.buildPlayerNews(SYNTH, nowFixed).find(n => n.source === "situation");
+ok("a reason-only entry reaches the card", !!synthNote && /Synthetic reason-only/.test(synthNote.text));
+ok("...and carries the date parsed from its reason text", synthNote?.date === "Aug 20 2026");
+
+// The structured date works on the reason path too.
+e.SITUATIONS[SYNTH] = { verdict: "hold", date: "2026-07-04", reason: "Reason text with no date in it at all." };
+ok("a reason-only entry with only a structured date still reaches the card",
+   e.buildPlayerNews(SYNTH, nowFixed).find(n => n.source === "situation")?.date === "Jul 4 2026");
+
+// And an UNDATED one is still withheld — the no-date rule outranks the fallback.
+e.SITUATIONS[SYNTH] = { verdict: "hold", reason: "Reason text with no date anywhere." };
+ok("an undated reason-only entry is still withheld",
+   !e.buildPlayerNews(SYNTH, nowFixed).some(n => n.source === "situation"),
+   "the no-date rule outranks the fallback");
+delete e.SITUATIONS[SYNTH];
 
 // trendNote WINS where both exist — it is written for this surface.
 const bothRow = situations.find(([, v]) =>
