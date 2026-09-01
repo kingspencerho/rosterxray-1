@@ -1196,20 +1196,15 @@ analysis.
 |---|---|---|---|
 | 1 | [RB carries / game](#rb-carries--game--r--073--rank-2) | builder change | **⚠️ regenerates the scored file** |
 | 2 | Decide whether separation should SCORE | a real data decision | **yes** |
-| 3 | Structured `date` field on `RECENT_NEWS` | maintenance | no |
-| 4 | Close the `reason`-shaped `SITUATIONS` gap | maintenance | no |
+| 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
 
-**On #4.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
+**On #2.** At `0.663` separation is more stable than `spike_rate` (`0.475`),
 which the Ceiling Shape Layer already trusts enough to score. **For:** a roster
 full of players who cannot get open is genuinely worse than one full of players
 who can, and no current input sees that. **Against:** separation on 40 targets is
 thin, the population is WR/TE only so it would systematically ignore half a
 roster, and it would move every grade. **If it ships, it ships alone, with its
 own calibration run and its own cap.**
-
-**On #6.** 128 `SITUATIONS` entries are `trendNote`-shaped, 4 are `reason`-shaped,
-and `buildPlayerNews` reads `trendNote` only — so those never render on the card
-however fresh they are. One remains unconverted. **No guard catches this.**
 
 ---
 
@@ -1219,6 +1214,7 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 
 | Date | Change |
 |---|---|
+| Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
 | Sep 1 2026 | Persona sweep of both sides: results now scroll into view on analyze |
 | Sep 1 2026 | USER-PERSONAS.md, and the card regrouped into the four questions a reader asks |
 | Sep 1 2026 | The Read on the player card, and one accent per group rather than per section |
@@ -1230,7 +1226,6 @@ however fresh they are. One remains unconverted. **No guard catches this.**
 | Aug 31 2026 | NGS deployment, career arc, vacated targets — context only, 39 grades identical |
 | Aug 30 2026 | Floor Layer (scored, redraft, ±0.5) + redraft role context |
 | Aug 30 2026 | Sanctioned archetypes stopped being charged as flaws |
-| Aug 29 2026 | Game logs on the player card |
 
 ---
 

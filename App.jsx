@@ -2792,22 +2792,53 @@ const parseNewsDate = (text, nowTs = Date.now()) => {
 const NEWS_FRESH_DAYS = 30;
 const NEWS_STALE_DAYS = 45;
 
+// A SITUATIONS row can carry a STRUCTURED `date`, and until Sep 1 2026 nothing
+// read it — dates were parsed out of the prose only. Four entries carry the
+// field; one of them (`malik davis`) has no date in its prose at all, so the
+// card rendered nothing for it while a perfectly good date sat in the object.
+//
+// The structured date does NOT simply win. The file's existing rule is that the
+// LATEST date in an entry is its currency, because notes get appended to — an
+// entry stamped 2026-06-07 whose prose was updated in August is an August note.
+// So both are read and the later one wins, and a future date is discarded on
+// both paths for the reason parseNewsDate already documents.
+const NEWS_ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const newsDateFor = (row, text, nowTs) => {
+  const prose = parseNewsDate(text, nowTs);
+  const iso = typeof row === "object" && row && typeof row.date === "string"
+    ? NEWS_ISO.exec(row.date) : null;
+  if (!iso) return prose;
+  const ts = Date.UTC(+iso[1], +iso[2] - 1, +iso[3]);
+  if (Number.isNaN(ts) || ts > nowTs) return prose;
+  const structured = { ts, label: `${NEWS_MON_LABEL[+iso[2] - 1]} ${+iso[3]} ${iso[1]}`, precise: true };
+  return prose && prose.ts > ts ? prose : structured;
+};
+
 const buildPlayerNews = (name, nowTs = Date.now()) => {
   const key = normalize(name);
   const alt = key.replace(SUFFIX_RE, "");
   const out = [];
   const seen = new Set();
-  for (const [label, table, field] of [
+  // SITUATIONS HAS TWO PROSE SHAPES AND ONLY ONE WAS READ. 138 entries are
+  // `trendNote`-shaped and a handful are `reason`-shaped; `reason` is what the
+  // AI prompt reads at the verdictAlignments line, so it is live data that the
+  // card was simply blind to. A fresh reason-only entry could never reach a
+  // reader, and no guard caught it — the silent-drop failure in a new costume.
+  // trendNote is preferred where both exist: it is written for this surface.
+  for (const [label, table, fields] of [
     ["news", RECENT_NEWS, null],
-    ["situation", SITUATIONS, "trendNote"],
+    ["situation", SITUATIONS, ["trendNote", "reason"]],
   ]) {
     for (const k of [key, alt]) {
       const row = table[k];
       if (!row || seen.has(k + label)) continue;
       seen.add(k + label);
-      const text = field ? row[field] : row;
+      const text = fields
+        ? fields.map(f => row[f]).find(v => typeof v === "string" && v.trim())
+        : row;
       if (typeof text !== "string" || !text.trim()) continue;
-      const d = parseNewsDate(text, nowTs);
+      const d = newsDateFor(row, text, nowTs);
       if (!d) continue;                       // rule 1: no date, no render
       const ageDays = Math.floor((nowTs - d.ts) / 86400000);
       out.push({

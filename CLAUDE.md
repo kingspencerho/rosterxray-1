@@ -4596,3 +4596,66 @@ Recorded because each cost a cycle and the same traps will recur:
   in the viewport there only because the banner is a taller grid at width.
 
 **Verify a suspicious measurement before reporting it as a finding.**
+
+---
+
+## The `reason`-Shaped Gap, and a Structured Date Nobody Read (fixed Sep 1, 2026)
+
+**39 grades byte-identical.** Guarded in `scripts/test-player-card.mjs`.
+
+### Two silent gaps, same shape
+
+`SITUATIONS` has **two prose shapes** and `buildPlayerNews` read one of them.
+138 entries are `trendNote`-shaped, 1 is `reason`-shaped, 3 carry both. **`reason`
+is live data** — the AI prompt reads it at the `verdictAlignments` line — so a
+fresh reason-only entry could never reach a card reader, and no guard caught it.
+
+Separately and worse: **a `SITUATIONS` row can carry a structured `date` field,
+and nothing read it.** Dates were parsed out of the prose only. `malik davis`
+carries `date: "2026-06-07"` with no date anywhere in its prose, so the card
+rendered nothing for him while a perfectly good date sat in the object two keys
+away. He now renders, correctly stamped `86D AGO · RE-VALIDATE`.
+
+Coverage: 4 of 142 entries carry the structured field, 3 of those also have a
+prose date. The value is less the one entry recovered than that the field is now
+authoritative, so future entries can use it instead of hiding a date in a
+sentence.
+
+### The structured date does NOT simply win
+
+The file's existing rule is that **the LATEST date in an entry is its currency**,
+because notes get appended to. An entry stamped `2026-06-07` whose prose was
+updated in August is an August note. So `newsDateFor` reads both and takes the
+later, and discards a future date on **both** paths for the reason
+`parseNewsDate` already documents — a court date, a return window and a contract
+deadline all parse identically to an update stamp.
+
+`trendNote` still wins over `reason` where both exist: it is written for this
+surface.
+
+### A WHOLE GUARD SECTION HAD BEEN SILENTLY LOST
+
+Found while adding this one. The Sep 1 guard for **The Read** was written, it
+passed, and a later edit replacing a neighbouring section spanned to the same
+end marker and **swallowed it whole**. The suite kept passing, because a guard
+that no longer exists cannot fail. It was caught only by grepping the committed
+file for a symbol it should have contained.
+
+**A deleted assertion is invisible in exactly the way a failing one is not.**
+When replacing a block in a guard file by index range, check the section count
+afterwards — or anchor on a marker that belongs to the block being replaced
+rather than to the one after it.
+
+The read guard is restored, with that history recorded in its own header.
+
+### Also corrected here
+
+An existing assertion re-derived every rendered note's date with
+`parseNewsDate(n.text)`. That was valid when prose was the only source; a
+structured date legitimately produces a label the prose does not contain. It now
+re-derives through `newsDateFor` from the **source row**, which is a stronger
+check of the same intent — the date is derived, never invented.
+
+Four failure paths negative-tested: removing the `reason` fallback, ignoring the
+structured date, allowing a future structured date, and letting the structured
+date always win. All exit non-zero.
