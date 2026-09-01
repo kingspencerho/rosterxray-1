@@ -44,7 +44,7 @@ watch is you checking it behaves for a week before letting it near anything.
 ⭐ **You are not testing code. The code is tested — 26 guards, 21 negative tests. You are
 testing whether a stranger's data feed is trustworthy.**
 
-## The two commands, once a day
+## The daily command
 
 Open PowerShell, then:
 
@@ -52,17 +52,18 @@ Open PowerShell, then:
 cd "C:\Users\spenc\OneDrive\Desktop\Projects\Claude Projects\rosterxray-audit"
 ```
 
-**Pull the fresh data:**
+**One command — it pulls the data and prints the report:**
 
 ```bash
-& "C:\Program Files\Git\bin\bash.exe" scripts/refresh-inseason.sh 2026
+& "C:\Program Files\Git\bin\bash.exe" scripts/refresh-inseason.sh 2026; node scripts/report-stale-news.mjs
 ```
 
-**Read what it found:**
-
-```bash
-node scripts/report-stale-news.mjs
-```
+⛔ **The two halves are easy to confuse, and only the FIRST one changes anything.**
+`report-stale-news.mjs` READS the file; it never rebuilds it. So running it alone — or running
+the `built_at` check alone — leaves the data exactly as it was. **If the timestamp did not
+move, the refresh did not run.** *(This happened on day 1: the check was run on its own and
+returned the timestamp of an earlier build, which reads exactly like a successful run and is
+not one.)*
 
 ⚠️ **`bash` on its own does NOT work in PowerShell here** — it is not on the PATH. The full
 path with the `&` call operator in front of it is required, and it is why the first version of
@@ -135,8 +136,8 @@ measured input is not a trade worth making. That one is permanent, not part of t
 
 | Day | Date | players | depth_chart | hard_status | contradictions | Notes |
 |---|---|---|---|---|---|---|
-| 0 | Sep 1 (build) | 812 | 544 | 75 | 11 | First-ever pull, during the build. Baseline. |
-| 1 | Sep 1 | 812 | 544 | 75 | 11 | Identical to the build pull. ⚠️ Two pulls on the same day is not a stability signal — day 2 is the first real one. |
+| 0 | Sep 1 | 812 | 544 | 75 | 11 | **Baseline. Both pulls this day were mine, during the build and while verifying the PowerShell command** — so this is ONE reading, not two, and it is not yet evidence of stability. |
+| 1 | Sep 1 | | | | | |
 | 2 | Sep 2 | | | | | |
 | 3 | Sep 3 | | | | | |
 | 4 | Sep 4 | | | | | |
