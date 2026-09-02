@@ -5696,3 +5696,93 @@ ever read `trendNote`, so a `reason`-shaped entry was unchecked.
 Three paths tested: a restored prohibition and a bare negated affiliation both
   exit non-zero; the own-team negation still passes.
 ```
+
+---
+
+## A One-Character Misread, and a Guard That Could Not Fail (fixed Sep 2, 2026)
+
+**Reported from a screenshot upload: `UNMATCHED · Greg Dulchich`, 17/18.** The
+roster card said `Greg Dulcich` and all three ADP tables key him correctly. The
+extractor read one inserted `h` off the image, and **no step in `findPlayer`
+tolerated it** — the surname index is keyed on the exact last name, so steps 3,
+4 and 4b all looked up a bucket that does not exist.
+
+**This is fixable where the Cam Skattebo case was not.** That was a row the
+extractor never read at all. Here the query arrives and is almost right.
+
+### findPlayer step 5 — and the gates ARE the design
+
+The standing rule is that a wrong match grades the wrong player and is
+**strictly worse than a miss**, so every gate was set from a census of the
+actual corpus rather than by feel:
+
+```
+union of all three tables      338 keys
+edit-distance-1 surname pairs   20   (two DIFFERENT players)
+...sharing a compatible first    0
+transposition-only pairs          1   (hurts/hurst, both 5 chars)
+```
+
+**The short names are the entire trap.** `hall/hill`, `bell/dell`, `rice/price`,
+`maye/mayer`, `bech/beck`, `lane/lance` are all real, distinct players and
+several flip position. **`SURNAME_REPAIR_MIN_LEN = 6` removes every one of
+them.** What survives (`walker/waller`, `collins/hollins`, `johnston/johnson`)
+is then killed by the first-name gate, because zero of the 20 pairs share a
+prefix-compatible first name.
+
+```
+two words       a lone misspelled surname has no first name to confirm against
+length >= 6     on BOTH sides; see the census
+one edit        insert / delete / substitute / adjacent swap
+prefix-compatible first name — the SAME rule step 4b uses, never an initial
+exactly one candidate — ambiguity returns null rather than guessing
+```
+
+**Transposition was included because it was MEASURED, not assumed.** Exactly one
+pair in the corpus has transposed surnames — Jalen Hurts against Ted Hurst — and
+at 5 characters it sits below the length floor anyway. **Ted Hurst was on the
+user's roster in the same session**, which is a fair illustration of why the
+floor is not decoration.
+
+### ⚠️⚠️ `test-findplayer.mjs` COULD NOT FAIL, AND ITS OWN HEADER SAID IT COULD
+
+It printed `FAILURES: n` and **exited 0**. It runs second in `npm test`, so the
+chain moved straight past it. It was the **only** guard in `scripts/` with no
+exit call at all — every other one carries `process.exit(fail ? 1 : 0)`.
+
+CLAUDE.md has claimed since Jul 26 2026 that it "exits non-zero on failure."
+That was false the whole time.
+
+**It was found by negative-testing, not by reading.** Four separate sabotages of
+step 5 all reported "caught"— then all four reported MISS once the pass/fail
+logic was examined, which is impossible for four independent breakages and
+pointed at the guard rather than the code.
+
+### The other half: a gate with no case is not tested
+
+With the exit fixed, three of four sabotages failed correctly and **the
+first-name gate did not.** None of the existing assertions could distinguish
+prefix-matching from initial-matching, so that gate — the one the whole
+`mike washington` / `malik washington` precedent exists to protect — was
+decorative.
+
+Fixed by carrying that precedent into step 5 directly. The table holds Mike
+(RB LV), Malik (WR MIA) and Darnell (TE PIT) Washington, so a one-edit surname
+query has three candidates and only the first name separates them. Under prefix
+matching each resolves to its own player; under a shared initial `mike` and
+`malik` collide and all three become misses.
+
+**The rule, now recorded for the fifth time in a different costume: assert the
+BEHAVIOUR, and confirm the negative test actually changes something.** Adding
+assertions to a guard file is not finished until you have sabotaged the code and
+watched the run exit non-zero.
+
+### Verified
+
+```
+54 grades BYTE-IDENTICAL — 15 tournaments x 3 fixtures + 9 redraft
+27 guards pass · dual-file identical · cross-table sweep 0 unresolved · 0 position flips
+Four failure paths negative-tested, ALL exit non-zero: step 5 disabled, the
+  length floor lowered to 4, the first-name gate loosened to an initial, and
+  ambiguity guessing instead of declining.
+```
