@@ -5623,3 +5623,76 @@ The Rottweiler (new):  ref1 A 9.29 · ref2 C+ 1.43 · ref3 B+ 5.39
 All five branch paths verified firing — four on real fixtures, the
   survive-the-gates-but-dark-in-W17 path against a synthetic stack grade.
 ```
+
+---
+
+## A Negated Affiliation Is Still an Affiliation (fixed Sep 2, 2026)
+
+**Reported by the user from a production nutshell, not by a test.** The roster card
+rendered `Deebo Samuel — WR SF`, and the AI summary on the same screen said:
+
+> *"Deebo Samuel's situation note places them on different teams — Samuel is now
+> WAS WR2, not an SF piece — so the SF stack is effectively Purdy and Stribling"*
+
+**It then RE-PLANNED THE ROSTER around the invented team**, recommending the user
+replace "the now-mismatched SF stack framing". Every other layer had him right:
+all three ADP tables key him `SF`, the roster strip printed SF, and the stack
+engine grouped him with SF correctly. There is no `SITUATIONS` entry for him at
+all — the "situation note" the nutshell cites does not exist.
+
+### The source was the entry written to prevent exactly this
+
+```
+"HE IS A 49ER. Deebo Samuel plays for SAN FRANCISCO — signed 1yr/up to $7M on
+ Aug 1 2026 ... Do not describe him as a Commander, a Washington player, or a
+ free agent; any such reference is wrong for 2026."
+```
+
+The model lifted **"Washington"** out of the prohibition and dropped the
+prohibition. **Third instance of this class** — Stribling (an out player named
+inside a present-tense depth chart), Diggs (a quoted "unsigned and effectively
+retired"), now this.
+
+**The generalisation the first two did not reach: it is not about QUOTES.** The
+Deebo entry was written affirmatively and led with the truth in capitals. It
+still failed, because it enumerated the false teams in order to rule them out.
+**A negated affiliation is still an affiliation; naming the wrong team is what
+makes it available, and the negation is the part that gets dropped.**
+
+Say only what is true. Never list what is false in order to forbid it.
+
+### Guard 12 gained rule 3
+
+`test-no-quoted-negations.mjs` now fails any entry naming a team the subject does
+NOT play for inside a negation, resolved against that player's `ADP_DATA.team`.
+
+Three scoping decisions, each the answer to a false positive:
+
+1. **NICKNAMES AND CITIES ONLY, never abbreviations.** `NO`, `LV` and `WAS`
+   collide with "no", "LV" mid-line and "was". An abbreviation match fires on
+   half the corpus, and a noisy guard is one nobody reads — which is precisely
+   how eleven duplicate keys accumulated behind eleven build warnings.
+2. **THE TEAM WORD MUST BE IN THE SAME CLAUSE AS THE NEGATION.** A window-based
+   first draft failed a CORRECT entry: David Njoku's reads *"THIS IS NOT THE
+   DEPTH CHART, IT IS THE PLAY CALLER. Mike McDaniel's Miami offenses ranked
+   THIRD..."* — an ordinary analytical negation, followed one **sentence** later
+   by a true affirmative mention of another team. `is not the` is no longer a
+   trigger, and no sentence break may sit between the negation and the team.
+3. **His OWN team is always legal to name in a negation.** "He is not a
+   full-time San Francisco slot receiver" is analysis, not a false affiliation.
+
+Analytical prohibitions that assert no false fact still pass — three exist
+(`jj mccarthy`, `jaylin noel`, `david njoku`: "do not treat him as a stackable
+QB"). The rule targets false FACTS, not the imperative mood.
+
+`SITUATIONS.reason` was added to the swept set while in there; guard 12 had only
+ever read `trendNote`, so a `reason`-shaped entry was unchecked.
+
+### Verified
+
+```
+234 prose entries pass · 54 grades BYTE-IDENTICAL (15 tournaments x 3 fixtures + 9 redraft)
+27 guards pass · dual-file identical
+Three paths tested: a restored prohibition and a bare negated affiliation both
+  exit non-zero; the own-team negation still passes.
+```
