@@ -3843,6 +3843,41 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
 };
 
 // Build a reverse index of lastName -> [{key, entry}] for initial-based matching (Yahoo "C. McCaffrey")
+// Exactly one edit apart: an insertion, a deletion, a substitution, or a
+// transposition of two ADJACENT characters (Damerau). Returns FALSE for
+// identical strings — distance 0 is an exact match and every caller above has
+// already tried that. Used only by findPlayer step 5; see the gates there.
+//
+// Transposition is included because it is a real misread class the other three
+// do not cover ("Singelton" for "Singleton"), and because it was MEASURED to be
+// safe rather than assumed: across the union of all three ADP tables exactly ONE
+// pair of different players has transposed surnames — hurts/hurst, Jalen Hurts
+// against Ted Hurst — and at 5 characters that pair is already below
+// SURNAME_REPAIR_MIN_LEN, quite apart from failing the first-name gate.
+const isOneEditApart = (a, b) => {
+  if (a === b) return false;
+  const d = a.length - b.length;
+  if (d > 1 || d < -1) return false;
+  if (a.length === b.length) {
+    const diff = [];
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { diff.push(i); if (diff.length > 2) return false; }
+    if (diff.length === 1) return true;
+    // adjacent swap
+    return diff.length === 2 && diff[1] === diff[0] + 1
+      && a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]];
+  }
+  const [short, long] = a.length < b.length ? [a, b] : [b, a];
+  let i = 0, j = 0, skips = 0;
+  while (i < short.length && j < long.length) {
+    if (short[i] === long[j]) { i++; j++; }
+    else { if (++skips > 1) return false; j++; }
+  }
+  return true;
+};
+// DERIVED FROM THE CORPUS, NOT CHOSEN. Every edit-distance-1 surname collision
+// between two real, different players in the three ADP tables involves a name
+// shorter than this. Lowering it re-admits hall/hill and bell/dell.
+const SURNAME_REPAIR_MIN_LEN = 6;
 const buildLastNameIndex = (table) => {
   const idx = {};
   for (const key of Object.keys(table)) {
@@ -4016,6 +4051,62 @@ const findPlayer = (name, format = "standard") => {
     } else if (candidates.length > 1) {
       candidates.sort((a, b) => a.entry.adp - b.entry.adp);
       return mk(candidates[0].key, candidates[0].entry, { ambiguous: true });
+    }
+  }
+
+  // 5. SINGLE-CHARACTER SURNAME REPAIR (added Sep 2 2026). LAST STEP ON PURPOSE:
+  // it runs only after every exact path above has missed.
+  //
+  // WHY IT EXISTS. The screenshot path is how rosters actually arrive, and its
+  // characteristic failure is a one-character misread of a name. Greg Dulcich
+  // came off a roster image as "Greg Dulchich" — one inserted 'h' — and no step
+  // in this chain tolerates it: the surname index is keyed on the exact last
+  // name, so steps 3, 4 and 4b all look up a bucket that does not exist. The
+  // player showed as UNMATCHED with the correct name one character away in all
+  // three tables. Unlike the Cam Skattebo case (a row the extractor never read
+  // at all, which is not fixable here) this one IS fixable, because the query
+  // arrives and is almost right.
+  //
+  // ⚠️ THE GATES ARE THE WHOLE DESIGN. The standing rule is that a wrong match
+  // grades the wrong player and is STRICTLY WORSE THAN A MISS, so every gate
+  // below was set from a measurement of the actual corpus rather than by feel.
+  // Across the union of all three tables there are 20 pairs of DIFFERENT
+  // players whose surnames sit at edit distance 1, and the short ones are the
+  // trap — hall/hill, bell/dell, rice/price, maye/mayer, bech/beck, lane/lance
+  // are all real, distinct players and several flip position. A length floor of
+  // 6 removes every one of them. What survives (walker/waller, collins/hollins,
+  // johnston/johnson) is then killed by the first-name gate: ZERO of the 20
+  // pairs share a prefix-compatible first name, so no wrong match is reachable.
+  //
+  //   two words        a bare misspelled surname has no first name to confirm
+  //                    against, and guessing from one token is how "mike
+  //                    washington" would become "malik washington"
+  //   length >= 6      on BOTH sides; see the pair census above
+  //   one edit apart  insert / delete / substitute / adjacent swap; distance 0
+  //                  is an exact match, already handled by steps 1-2
+  //   prefix-compatible first name, the SAME rule step 4b uses — not merely a
+  //                    shared initial, which is far too loose
+  //   exactly one candidate — ambiguity returns null rather than guessing
+  if (normWords.length >= 2) {
+    const qParts = normWords.filter(w => !/^(jr|sr|ii|iii|iv|v)$/.test(w));
+    const qLast = qParts[qParts.length - 1];
+    const qFirst = qParts[0];
+    if (qLast && qLast.length >= SURNAME_REPAIR_MIN_LEN && qFirst) {
+      const prefixOk = (a, b) => a.length >= 3 && b.length >= 3 && (a.startsWith(b) || b.startsWith(a));
+      const idx = getLastNameIndex(table);
+      const hits = [];
+      for (const last of Object.keys(idx)) {
+        if (last.length < SURNAME_REPAIR_MIN_LEN) continue;
+        if (!isOneEditApart(qLast, last)) continue;
+        for (const c of idx[last]) {
+          if (prefixOk(qFirst, c.key.split(" ")[0])) hits.push(c);
+        }
+      }
+      // One and only one. Two survivors means the query is genuinely ambiguous,
+      // and a miss the user can see beats a confident wrong answer.
+      if (hits.length === 1) {
+        return mk(hits[0].key, hits[0].entry, { repairedFrom: qLast });
+      }
     }
   }
 
