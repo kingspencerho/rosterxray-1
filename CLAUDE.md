@@ -5869,3 +5869,97 @@ Guard 27 (`scripts/test-turn-reaches.mjs`). Five failure paths negative-tested,
 all exit non-zero: the consecutive-run walk removed, every reach cleared
 regardless of survival, `null` treated as `false`, the disclosure made silent,
 and redraft unwired.
+
+---
+
+## Yahoo Fantasy API Pull (added Sep 3, 2026)
+
+`scripts/yahoo-pull.py` — pulls YOUR roster, this week's opponent, the real free
+agent list and league settings from the Yahoo Fantasy Sports API. **Nothing in
+App.jsx changed — 54 grades byte-identical.** Guard 28:
+`scripts/test-yahoo-pull.mjs`.
+
+### What it closes
+
+Three in-season features were each one step short of useful because the app
+cannot see the user's actual league:
+
+| Before | With the pull |
+|---|---|
+| Waiver pool leads with *"the app cannot see your league's waiver wire"* and ranks a plausibility heuristic | `status=FA` is the real list |
+| **GAP 2** — redraft has no opponent awareness | `scoreboard;week=N` |
+| Rosters arrive by SCREENSHOT (where the Dulcich misread came from) | live roster pull |
+| Three hardcoded league presets | `league/settings` |
+
+### ⚠️⚠️ THE REPO IS PUBLIC, SO CREDENTIAL SAFETY IS THE DESIGN, NOT A DETAIL
+
+A committed OAuth secret **cannot be undone** — git history keeps it and
+GitHub's API and forks cache independently. Three layers, all guarded:
+
+1. **The script REFUSES** a credentials or token path inside the repo rather
+   than trusting `.gitignore`. `assert_outside_repo` covers BOTH the `--env`
+   path and `save_token`, and the refusal names the reason on screen.
+2. **`.gitignore` is the backstop** for a bypass or a hand-placed file. **This
+   is not belt-and-braces theatre: while negative-testing layer 1, a sabotaged
+   run wrote a dummy token into the repo root within seconds.**
+3. **No credential-shaped literal** may appear in the script; the guard matches
+   Yahoo's `dj0y…` consumer-key prefix, 40-char hex, assigned `YAHOO_CLIENT_*`
+   literals and pasted bearer tokens.
+
+Pulled output also defaults **outside** the repo (`~/.config/rosterxray/`) — a
+roster is personal-track content, which CLAUDE.md rule 4 keeps out of here. An
+explicit `--out` inside the repo is allowed but warns.
+
+### ZERO NEW DEPENDENCIES — stdlib `urllib` only
+
+`yfpy` and `yahoofantasy` are both good wrappers. A public repo is a bad place
+to take on a dependency for ~200 lines of HTTP, and the fewer moving parts
+between a user and a credential the better.
+
+### ⚠️ YAHOO'S JSON IS NOT A LIST OF OBJECTS
+
+Two quirks, and missing either makes the parse **silently return nothing** —
+the silent-drop class this repo has fixed repeatedly:
+
+```
+{"0": {"player": [[{"player_key":"…"}, {"name":{…}}], {"selected_position":…}]},
+ "1": {…}, "count": 2}
+```
+
+- a collection is a dict keyed by **stringified index** with a sibling `count`
+- each element is a **list of single-key dicts** that must be merged first
+
+`flatten()` merges the fragments (recursively — nested fragment lists are real),
+`indexed()` turns the numeric dict back into a list and ignores `count`. Both
+are asserted against recorded shapes in `--self-test`.
+
+### Token handling
+
+`expires_at` is stored **absolute**, because a stored relative `expires_in` is
+meaningless the moment the process ends. Access tokens last an hour; the refresh
+token is what makes this a one-time setup. File is chmod 600.
+
+### ⚠️ THE LIVE API PATH IS UNVERIFIED IN THIS REPO
+
+There are no Yahoo credentials in this environment and there never should be, so
+the network path was written against Yahoo's published contract and **could not
+be exercised**. `--self-test` covers everything that does not need the network.
+**Treat the first real `--auth` run as the actual test.** If the response shape
+disagrees, `flatten`/`indexed` are the two functions to look at first.
+
+### A personal tool, not a product feature
+
+It authorizes ONE account on ONE machine. For rosterxray.com users to connect
+their own leagues you would need a server holding the client secret, per-user
+token storage and a hosted OAuth callback — a much bigger lift and a real
+security surface. Worth doing eventually; a different project.
+
+### The fake assertion, for the fifth time
+
+The first `--self-test` shipped `ok("expires_at is absolute", … or True)`, which
+always passes. Same guard-that-cannot-fail trap as `test-findplayer.mjs`
+(no exit call), `test-disclosure.mjs` (one-arg `ok`) and guards 19/20. It is now
+a real assertion against a temp file, and guard 28 greps for `or True)` so the
+shape cannot come back. **Five negative tests, all exit non-zero:** a hardcoded
+secret, the refusal removed, the token path unguarded, the `.gitignore` backstop
+removed, and an `or True` short-circuit.

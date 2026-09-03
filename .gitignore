@@ -2,3 +2,12 @@ node_modules
 dist
 .env
 .env.local
+
+# Yahoo Fantasy credentials and pulled personal data. yahoo-pull.py REFUSES to
+# write these inside the repo, and this is the backstop for the case where that
+# refusal is bypassed or a file lands here by hand — a committed OAuth secret
+# cannot be undone, because git history keeps it and forks cache independently.
+yahoo.env
+yahoo_token.json
+yahoo_team.json
+*.yahoo.json
