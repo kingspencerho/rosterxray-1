@@ -11,3 +11,7 @@ yahoo.env
 yahoo_token.json
 yahoo_team.json
 *.yahoo.json
+
+# Python bytecode — created by importing the builder/pull scripts during testing
+__pycache__/
+*.pyc
