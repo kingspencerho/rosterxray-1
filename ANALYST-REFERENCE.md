@@ -1563,6 +1563,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 2 2026 | Turn-aware reaches — a reach is only a reach if the player survives to your next pick |
 | Sep 2 2026 | findPlayer step 5 repairs a one-character surname misread; test-findplayer could not fail |
 | Sep 2 2026 | A negated affiliation is still an affiliation — guard 12 rule 3 |
 | Sep 1 2026 | The Rottweiler added — the first format whose two weekly gates are exactly equal |
@@ -1574,7 +1575,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
 | Sep 1 2026 | Cutdown-day news sweep: Jacobs on the exempt list, 7 entries refreshed |
-| Sep 1 2026 | SITUATIONS `reason` entries and structured dates now reach the card |
 
 ---
 
