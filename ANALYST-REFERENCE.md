@@ -1563,13 +1563,13 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 3 2026 | Yahoo Fantasy API pull — real free agents, live roster, this week's opponent |
 | Sep 2 2026 | Turn-aware reaches — a reach is only a reach if the player survives to your next pick |
 | Sep 2 2026 | findPlayer step 5 repairs a one-character surname misread; test-findplayer could not fail |
 | Sep 2 2026 | A negated affiliation is still an affiliation — guard 12 rule 3 |
 | Sep 1 2026 | The Rottweiler added — the first format whose two weekly gates are exactly equal |
 | Sep 1 2026 | §14a — the three open in-season gaps, written as a handoff |
 | Sep 1 2026 | Waiver-target pool: the first feature that ranks players you do NOT roster |
-| Sep 1 2026 | Current-week awareness and a current-season volume twin — the in-season transition |
 | Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
 | Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
