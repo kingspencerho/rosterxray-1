@@ -30,14 +30,25 @@ ZERO NEW DEPENDENCIES. Standard library only (urllib). yfpy and yahoofantasy
     and a credential the better.
 
 SETUP (once)
-    1. https://developer.yahoo.com/apps/create
-       - Application Type: Installed Application
-       - Redirect URI(s): oob
-       - API Permissions: tick "Fantasy Sports" -> Read
+    ⚠️ FANTASY SPORTS ACCESS IS A SEPARATE MANUAL APPROVAL, not a checkbox.
+       The app form no longer lists Fantasy Sports under API Permissions. Apply
+       at https://sports.yahoo.com/developer/access/ describing the product and
+       expected users (personal/single-league use qualifies; read-only is all
+       that is offered). A human reviews it, with no published turnaround, and
+       vague submissions are closed without reply. NOTHING BELOW WORKS UNTIL
+       THAT IS APPROVED.
+
+    1. https://developer.yahoo.com/apps/create/
+       - OAuth Client Type: Confidential Client  (it holds a Client Secret)
+       - Redirect URI(s): https://localhost:8000/   <- NOT "oob", the form rejects it
+       - API Permissions: leave blank; tick OpenID Connect only if the form
+         insists on a selection. Neither grants Fantasy access.
     2. mkdir -p ~/.config/rosterxray && chmod 700 ~/.config/rosterxray
     3. Write ~/.config/rosterxray/yahoo.env:
            YAHOO_CLIENT_ID=...
            YAHOO_CLIENT_SECRET=...
+           # optional, only if you registered something else:
+           # YAHOO_REDIRECT_URI=https://localhost:8000/
     4. chmod 600 ~/.config/rosterxray/yahoo.env
     5. python3 scripts/yahoo-pull.py --auth
        Opens a URL, you approve, paste the code back. The refresh token is
@@ -62,6 +73,18 @@ from pathlib import Path
 AUTH_BASE = "https://api.login.yahoo.com/oauth2"
 API_BASE = "https://fantasysports.yahooapis.com/fantasy/v2"
 DEFAULT_DIR = Path.home() / ".config" / "rosterxray"
+# ⚠️ NOT "oob". Yahoo's OAuth docs still document out-of-band as a valid
+# redirect_uri, and their app-creation FORM rejects it — the form is the source
+# of truth and the docs lag. Registering with a loopback URL is what works now.
+#
+# NOTHING LISTENS ON THIS PORT, and nothing needs to. After you approve, Yahoo
+# redirects the browser to https://localhost:8000/?code=XXXX, the page fails to
+# load, and the CODE IS IN THE URL BAR. That is the value to paste back.
+#
+# It must be BYTE-IDENTICAL between the authorize call and the token exchange or
+# Yahoo returns invalid_grant, which is why it is stored in the token file and
+# reused on refresh rather than re-derived.
+DEFAULT_REDIRECT = "https://localhost:8000/"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -130,18 +153,30 @@ def _post(url: str, data: dict, cid: str, sec: str) -> dict:
         sys.exit(f"Yahoo returned HTTP {e.code} on the token call:\n  {body}")
 
 
-def authorize(cid: str, sec: str, token_path: Path) -> dict:
+def authorize(cid: str, sec: str, token_path: Path, redirect: str) -> dict:
     url = f"{AUTH_BASE}/request_auth?" + urllib.parse.urlencode(
-        {"client_id": cid, "redirect_uri": "oob", "response_type": "code", "language": "en-us"}
+        {"client_id": cid, "redirect_uri": redirect, "response_type": "code", "language": "en-us"}
     )
     print("\n1. Open this URL and approve access:\n")
     print("   " + url + "\n")
-    code = input("2. Paste the code Yahoo shows you: ").strip()
+    if redirect.startswith("http"):
+        print(f"2. Your browser will fail to load {redirect} — that is EXPECTED,")
+        print("   nothing is listening there. Copy the `code` value out of the URL bar:")
+        print(f"      {redirect}?code=THIS_PART\n")
+        prompt = "3. Paste the code: "
+    else:
+        prompt = "2. Paste the code Yahoo shows you: "
+    code = input(prompt).strip()
     if not code:
         sys.exit("No code entered.")
+    # Tolerate a pasted full URL rather than just the code — an easy mistake to
+    # make when the value is being lifted out of an address bar.
+    if "code=" in code:
+        code = urllib.parse.parse_qs(urllib.parse.urlparse(code).query).get("code", [code])[0]
     tok = _post(f"{AUTH_BASE}/get_token",
-                {"client_id": cid, "client_secret": sec, "redirect_uri": "oob",
+                {"client_id": cid, "client_secret": sec, "redirect_uri": redirect,
                  "code": code, "grant_type": "authorization_code"}, cid, sec)
+    tok["redirect_uri"] = redirect
     save_token(tok, token_path)
     print(f"\nAuthorized. Token saved to {token_path} (mode 600).")
     return tok
@@ -166,10 +201,12 @@ def access_token(cid: str, sec: str, token_path: Path) -> str:
         return tok["access_token"]
     # Access tokens last an hour; the refresh token is what makes this a
     # one-time setup rather than a weekly chore.
+    redirect = tok.get("redirect_uri", DEFAULT_REDIRECT)
     fresh = _post(f"{AUTH_BASE}/get_token",
-                  {"client_id": cid, "client_secret": sec, "redirect_uri": "oob",
+                  {"client_id": cid, "client_secret": sec, "redirect_uri": redirect,
                    "refresh_token": tok["refresh_token"], "grant_type": "refresh_token"}, cid, sec)
     fresh.setdefault("refresh_token", tok["refresh_token"])
+    fresh["redirect_uri"] = redirect
     save_token(fresh, token_path)
     return fresh["access_token"]
 
@@ -386,6 +423,8 @@ def main() -> int:
     ap.add_argument("--team", metavar="TEAM_KEY", help="pull roster, opponent and free agents")
     ap.add_argument("--week", type=int, default=None, help="defaults to the league's current week")
     ap.add_argument("--fa-limit", type=int, default=50, help="free agents to pull (default 50)")
+    ap.add_argument("--redirect", default=None,
+                    help=f"redirect URI registered on the Yahoo app (default {DEFAULT_REDIRECT})")
     ap.add_argument("--env", default=str(DEFAULT_DIR / "yahoo.env"), help="credentials file")
     ap.add_argument("--out", default=None, help="write JSON here (default ~/.config/rosterxray/)")
     ap.add_argument("--self-test", action="store_true", help="no network, no credentials")
@@ -402,7 +441,9 @@ def main() -> int:
     cid, sec = creds(env_path)
 
     if a.auth:
-        authorize(cid, sec, token_path)
+        env = load_env(env_path)
+        redirect = a.redirect or env.get("YAHOO_REDIRECT_URI") or DEFAULT_REDIRECT
+        authorize(cid, sec, token_path, redirect)
         return 0
 
     token = access_token(cid, sec, token_path)

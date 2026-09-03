@@ -5947,6 +5947,37 @@ be exercised**. `--self-test` covers everything that does not need the network.
 **Treat the first real `--auth` run as the actual test.** If the response shape
 disagrees, `flatten`/`indexed` are the two functions to look at first.
 
+### ⚠️ CORRECTED Sep 3 2026 — the setup instructions were wrong twice
+
+Both errors came from trusting Yahoo's own documentation over Yahoo's own form.
+**The form is the source of truth; the docs lag.**
+
+1. **`oob` IS REJECTED BY THE APP-CREATION FORM.** Yahoo's OAuth guide still
+   documents out-of-band as a valid `redirect_uri` and the create-app page
+   refuses it. Registration now uses a loopback URL, default
+   `https://localhost:8000/`. **Nothing listens on that port and nothing needs
+   to** — after approval the browser fails to load it and the code is in the URL
+   bar. The value must be BYTE-IDENTICAL between the authorize call and the
+   token exchange or Yahoo returns `invalid_grant`, so it is stored in the token
+   file and reused on refresh rather than re-derived. `--redirect` or
+   `YAHOO_REDIRECT_URI` override it. The prompt also accepts a pasted full URL
+   and extracts the code, since that is the obvious mistake to make when lifting
+   a value out of an address bar.
+
+2. **FANTASY SPORTS IS NO LONGER A CHECKBOX ON THE APP FORM.** It is a SEPARATE
+   MANUAL APPROVAL at https://sports.yahoo.com/developer/access/ — you describe
+   the product and expected user count, a human reviews it, there is no
+   published turnaround, and vague submissions are closed without reply.
+   Personal/single-league use qualifies; read-only is all that is offered.
+   **The API Permissions list on the app form (OpenID Connect, TW Auction) is
+   irrelevant — ticking either grants nothing here.** Until the access request
+   is approved, every call in this script will fail on authorization.
+
+Neither was discoverable from the docs pages that describe the flow. Both were
+found by a user hitting the real form. **Before writing setup instructions for a
+third-party console, say they are from the docs and unverified, or check the
+console.**
+
 ### A personal tool, not a product feature
 
 It authorizes ONE account on ONE machine. For rosterxray.com users to connect
