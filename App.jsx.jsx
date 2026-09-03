@@ -4665,6 +4665,70 @@ const parseLooseJson = (text) => {
 // Converts the raw strengths/weaknesses arrays + grade into a 2-sentence
 // plain-English summary. Beginner-friendly, no jargon, anchored at the top
 // of every results page so users get the headline truth before the data.
+// === TURN-AWARE REACH RECLASSIFICATION (added Sep 2 2026) =================
+//
+// A "reach" is a pick taken earlier than market ADP. Measured against ADP ALONE
+// that is the right default, and at a SNAKE TURN it is the wrong lens.
+//
+// THE CASE THAT PRODUCED THIS. A seat-12 BBM roster took Brock Purdy at 84 and
+// De'Zhaun Stribling at 85 (ADP 103.8 and 103.4 on the user's own board) and the
+// app called them a -20 and a -18 reach. But seat 12 picks 84, 85 and then 108 --
+// a 23-pick gap, nearly two full rounds -- so BOTH players go, on average,
+// BEFORE the next chance to take them. Waiting does not get you a cheaper price,
+// it gets you neither player. The drafter then let Deebo Samuel (ADP 129.6)
+// fall to 132 and got him at VALUE, which is the same plan working in reverse.
+//
+// The framework already says this in Section 1's Conditional Forced Stacking
+// Protocol -- "Evaluate whether the player will survive the turn. If not, a
+// reach of up to 1 round is justifiable." The engine simply never computed it.
+//
+// ⚠️ THE NEXT PICK COMES FROM THE ROSTER, NOT FROM AN INFERRED SEAT. Every pick
+// number is already on the roster, so the gap to the drafter's next pick is a
+// lookup rather than a reconstruction of seat and league size. That matters
+// because seat inference fails on exactly the rosters this is for -- a
+// screenshot that dropped a row, an odd league size, a draft with trades.
+//
+// ⚠️ ADP IS A MEAN, AND THIS CODE CLAIMS NOTHING MORE. `adp < nextPick` means
+// the player is gone before your next pick MORE OFTEN THAN NOT. It is not a
+// probability, and no standard deviation is available to make it one, so the
+// line sits exactly at the mean and the naming says so. A reach is cleared only
+// when the market expects the player off the board before you pick again.
+//
+// ⚠️ NULL IS NOT FALSE. A flag with no next pick (the final selection) or no ADP
+// keeps its original classification. That is what makes this additive: rosters
+// without usable pick data grade exactly as they did before.
+// ⚠️⚠️ CONSECUTIVE PICKS ARE ONE TURN, AND GETTING THIS WRONG DEFEATS THE WHOLE
+// FEATURE. The first version took literally the next pick in the list, so Purdy
+// at 84 looked up 85 -- the drafter's OWN next selection -- and "would he
+// survive to 85" is trivially yes because nobody else picks in between. Purdy
+// stayed flagged while Stribling one pick later was cleared, which is the exact
+// pair the feature exists for. The horizon for BOTH is 108. So the walk runs to
+// the end of the consecutive run first, and only then takes the next pick: at a
+// wheel the drafter is choosing two players before the board moves at all.
+// Handles runs of any length, which a draft with traded picks can produce.
+const TURN_MIN_GAP = 2;
+const annotateTurnReaches = (flags, ownPicks) => {
+  const sorted = [...new Set((ownPicks || []).filter(n => Number.isFinite(n)))].sort((a, b) => a - b);
+  const nextAfterTurn = (pick) => {
+    let i = sorted.indexOf(pick);
+    if (i < 0) return null;
+    while (i + 1 < sorted.length && sorted[i + 1] === sorted[i] + 1) i++;
+    return i + 1 < sorted.length ? sorted[i + 1] : null;
+  };
+  return flags.map(f => {
+    const nextPick = nextAfterTurn(f.actualPick);
+    if (nextPick == null || f.adp == null) return { ...f, nextPick: null, turnGap: null, survivesTurn: null };
+    const turnGap = nextPick - f.actualPick;
+    if (turnGap < TURN_MIN_GAP) return { ...f, nextPick, turnGap, survivesTurn: null };
+    return { ...f, nextPick, turnGap, survivesTurn: f.adp >= nextPick };
+  });
+};
+// A reach counts against the roster only when the player would still have been
+// there at the next pick. survivesTurn === false is correct play, not a flaw;
+// null keeps the pre-existing behaviour.
+const isScoredReach = (f, reachThreshold) =>
+  f.delta <= -reachThreshold && f.survivesTurn !== false;
+
 const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [], primaryStacks = [], eliteStacks = [], verdictAlignments = [] }) => {
   // === Translation layer: strip jargon, return short plain-English phrases ===
   // Returns null if the input string isn't important enough to surface.
@@ -4957,6 +5021,11 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       ...p,
       delta: p.actualPick - p.adp,
     })).filter(p => Math.abs(p.delta) >= detectThreshold);
+    // Reaches are re-read against the drafter's NEXT pick, not against ADP alone.
+    // See annotateTurnReaches. Every pick on the roster feeds the gap, not just
+    // the flagged ones, or the next pick would be wrong wherever a pick between
+    // two flags carries no delta.
+    adpFlags = annotateTurnReaches(adpFlags, valid.map(p => p.actualPick));
   }
 
   // Format-specific construction benchmarks
@@ -5811,7 +5880,10 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   let adpScoreImpact = 0;
   if (hasPickNumbers) {
     const valuePicks = adpFlags.filter(p => p.delta >= valueThreshold);
-    const reaches = adpFlags.filter(p => p.delta <= -reachThreshold);
+    const reaches = adpFlags.filter(p => isScoredReach(p, reachThreshold));
+    // Cleared by the turn: nominally early, but the market has the player off
+    // the board before this drafter picks again. Correct play, not a flaw.
+    const turnCleared = adpFlags.filter(p => p.delta <= -reachThreshold && p.survivesTurn === false);
 
     // Real value picks count toward strength
     if (valuePicks.length >= 2) {
@@ -5819,9 +5891,17 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       adpScoreImpact += Math.min(valuePicks.length * 0.5, 2); // cap at +2
     }
 
+    // ⚠️ NEVER SILENT. A reach removed by the turn check must still be visible,
+    // or the reader cannot tell a cleared flag from one that was never raised —
+    // the same no-silent-drops rule the extraction filters follow. It carries NO
+    // score in either direction: not penalising correct play is not a bonus for it.
+    if (turnCleared.length >= 1) {
+      strengths.push(`${turnCleared.length} pick(s) taken at the turn, not reached for — ${turnCleared.map(p => `${p.name} (ADP ${Math.round(p.adp)}, next pick ${p.nextPick})`).join(", ")}`);
+    }
+
     // Reaches penalize, but capped — never let ADP delta dominate
     if (reaches.length >= 3) {
-      weaknesses.push(`${reaches.length} significant reaches (${reachThreshold}+ picks early)`);
+      weaknesses.push(`${reaches.length} significant reaches (${reachThreshold}+ picks early, and still on the board at your next pick)`);
       adpScoreImpact -= Math.min(reaches.length * 0.4, 1.5); // cap at -1.5
     }
   }
@@ -7027,11 +7107,21 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
       ...p,
       delta: p.actualPick - p.adp,
     })).filter(p => Math.abs(p.delta) >= 8);
+    // Same turn-aware reclassification as best ball. The snake is a property of
+    // the DRAFT, not of the format, so a redraft wheel pick is exactly as
+    // mis-read by a bare ADP delta as a best-ball one. Unlike the competitive
+    // balance thresholds — which are deliberately still redraft's own — there is
+    // nothing format-specific to calibrate here: it is the same arithmetic.
+    adpFlags = annotateTurnReaches(adpFlags, valid.map(p => p.actualPick));
     const valuePicks = adpFlags.filter(p => p.delta >= valueThreshold);
-    const reaches = adpFlags.filter(p => p.delta <= -reachThreshold);
+    const reaches = adpFlags.filter(p => isScoredReach(p, reachThreshold));
+    const turnCleared = adpFlags.filter(p => p.delta <= -reachThreshold && p.survivesTurn === false);
     if (valuePicks.length >= 2) {
       strengths.push(`${valuePicks.length} ADP value picks`);
       score += Math.min(valuePicks.length * 0.4, 1.5);
+    }
+    if (turnCleared.length >= 1) {
+      strengths.push(`${turnCleared.length} pick(s) taken at the turn, not reached for — ${turnCleared.map(p => `${p.name} (ADP ${Math.round(p.adp)}, next pick ${p.nextPick})`).join(", ")}`);
     }
     if (reaches.length >= 3) {
       weaknesses.push(`${reaches.length} significant reaches`);

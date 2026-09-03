@@ -5786,3 +5786,86 @@ Four failure paths negative-tested, ALL exit non-zero: step 5 disabled, the
   length floor lowered to 4, the first-name gate loosened to an initial, and
   ambiguity guessing instead of declining.
 ```
+
+---
+
+## Turn-Aware Reaches (added Sep 2, 2026)
+
+**Raised by the user disagreeing with the app, and the user was right.** A
+seat-12 BBM roster took Brock Purdy at 84 and De'Zhaun Stribling at 85 — ADP
+103.8 and 103.4 on their own board — and the app called them a −20 and a −18
+reach. Seat 12 picks **84, 85, then 108**. Both players go, on average, *before*
+the next chance to take them, so waiting does not buy a cheaper price, it buys
+neither player. The same drafter then let Deebo Samuel (ADP 129.6) fall to 132
+and got him at value, which is the identical plan working in the other
+direction.
+
+**The framework already said this and the engine never computed it.** Section 1,
+Conditional Forced Stacking Protocol: *"Evaluate whether the player will survive
+the turn. If not, a reach of up to 1 round is justifiable."*
+
+### `annotateTurnReaches` — and the next pick comes from the ROSTER
+
+Every pick number is already on the roster, so the gap to the drafter's next
+pick is a lookup rather than a reconstruction of seat and league size. That
+matters because seat inference fails on exactly the rosters this is for — a
+screenshot that dropped a row, an odd league size, a draft with traded picks.
+
+### ⚠️⚠️ CONSECUTIVE PICKS ARE ONE TURN, and getting it wrong defeats the feature
+
+The first implementation took literally the next entry in the pick list, so
+Purdy at 84 looked up **85 — the drafter's own next selection, with nobody
+picking in between** — and "would he survive to 85" is trivially yes. **Purdy
+stayed flagged while Stribling one pick later was cleared**, which is precisely
+the pair the feature exists for. The walk now runs to the end of the consecutive
+run first: at a wheel the drafter is choosing two players before the board moves
+at all, so the horizon for both is 108. Handles runs of any length.
+
+### ⚠️ ADP IS A MEAN, AND THE CODE CLAIMS NOTHING MORE
+
+`adp < nextPick` means the player is gone before your next pick **more often
+than not**. It is not a probability, and no standard deviation is available to
+make it one, so the line sits exactly at the mean and the naming says so.
+
+### ⚠️ NULL IS NOT FALSE
+
+A flag with no next pick (the final selection) or no ADP keeps its original
+classification, and `isScoredReach` treats `null` as scored. That is what makes
+this additive: **rosters without usable pick data grade exactly as before.**
+
+### Never silent, and never a bonus
+
+A cleared reach is disclosed by name with its ADP and the next pick — the reader
+must be able to tell a cleared flag from one never raised, the same
+no-silent-drops rule the extraction filters follow. It carries **no score in
+either direction**: not punishing correct play is not a reward for it, and the
+guard asserts no value-pick bonus appears.
+
+### Applied to BOTH engines, unlike the competitive-balance thresholds
+
+The snake is a property of the DRAFT, not of the format, so a redraft wheel pick
+is exactly as mis-read by a bare ADP delta as a best-ball one. There is nothing
+format-specific to calibrate here — it is the same arithmetic — which is why
+this is wired to `analyzeRedraft` where the Aug 28 boost work deliberately was
+not.
+
+### Calibration
+
+```
+                     old        new       delta
+turn-cleared synth  B  2.23   B+ 3.73    +1.50   <- exactly the capped penalty
+real-reach synth    B  2.21   B  2.21     0.00   <- penalty kept
+the reported BBM    A 10.41   A 10.41     0.00   <- 2 reaches, under the 3 floor
+54 fixture grades   BYTE-IDENTICAL (15 tournaments x 3 fixtures + 9 redraft)
+```
+
+**+1.50 is `Math.min(15 * 0.4, 1.5)` exactly**, so the layer removes the penalty
+and nothing more. The three committed fixtures are drafted from ADP_DATA at a
+snake, so every flag on them is a VALUE pick and the feature never fires —
+which is why the synthetics exist. A layer that cannot move a grade is
+decorative; one that moves the fixtures would need its own re-baselining.
+
+Guard 27 (`scripts/test-turn-reaches.mjs`). Five failure paths negative-tested,
+all exit non-zero: the consecutive-run walk removed, every reach cleared
+regardless of survival, `null` treated as `false`, the disclosure made silent,
+and redraft unwired.
