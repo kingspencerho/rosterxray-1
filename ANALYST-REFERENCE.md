@@ -1563,6 +1563,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
+| Sep 5 2026 | §15 — TEP scoring banked as reference only; the engine stays half-PPR |
 | Sep 3 2026 | Yahoo Fantasy API pull — real free agents, live roster, this week's opponent |
 | Sep 2 2026 | Turn-aware reaches — a reach is only a reach if the player survives to your next pick |
 | Sep 2 2026 | findPlayer step 5 repairs a one-character surname misread; test-findplayer could not fail |
@@ -1570,7 +1571,6 @@ own calibration run and its own cap.**
 | Sep 1 2026 | The Rottweiler added — the first format whose two weekly gates are exactly equal |
 | Sep 1 2026 | §14a — the three open in-season gaps, written as a handoff |
 | Sep 1 2026 | Waiver-target pool: the first feature that ranks players you do NOT roster |
-| Sep 1 2026 | §13 plain-English guide and §14 seasonal coverage audit |
 | Sep 1 2026 | TPRR (r=0.67) and man/zone coverage (r=0.16) built — Tier C to Tier A in one day |
 | Sep 1 2026 | Separation is confounded by route depth (r=−0.69); sep+ added |
 | Sep 1 2026 | §3 defines the Source Hierarchy — the `rank` field was used 28 times and never explained |
@@ -1936,3 +1936,221 @@ now measured as the *least* reliable input in the building.
 The layers added Aug 30-31 put role, deployment, talent, floor and vacancy in
 front of the model. Not to change the grade. **To make the paragraph next to the
 grade worth reading.**
+
+---
+
+## §15 · TEP scoring — the TE-premium variant
+
+> **Banked Sep 5 2026 as REFERENCE ONLY. Nothing here is wired to the app and
+> nothing should be.** The scoring engine is half-PPR throughout; a TEP roster
+> graded through `analyzeRoster` gets its STRUCTURE read correctly and its TIGHT
+> ENDS undervalued. Making the grade TEP-aware would touch every TE evaluation in
+> every format and need its own calibration. **Read this section when a TEP roster
+> arrives; do not act on it in code.**
+
+### What TEP is
+
+**Tight end receptions score 1.0; every other reception scores 0.5.** Underdog
+runs it as a slate variant (The TEP Frenchie, 2026: $5 · 22,320 entries · $100k ·
+18 rounds · QB1/RB2/WR3/TE1/FLEX1/BENCH10). Everything else is standard
+half-PPR with 4pt passing TDs.
+
+### ⚠️ IT IS A McBRIDE TAX, NOT A POSITIONAL RESHUFFLE
+
+The delta is `+0.5 × receptions`, so it scales with volume — and reception counts
+among startable TEs are compressed (4.0-4.8/gm), which makes the effect far
+flatter than the format's reputation.
+
+```
+2025, value over replacement (TE12 baseline)      half-PPR    TEP    change
+TE1  McBride   126 rec                              6.12      8.00   +1.88
+TE2  Kraft      64 rec                              3.90      4.10   +0.20
+TE3  Kittle     57 rec                              3.34      4.07   +0.73
+TE4  Bowers     64 rec                              3.10      3.93   +0.84
+TE6  Pitts      88 rec                              1.06      1.76   +0.70
+TE8  Fannin     72 rec                              0.65      1.07   +0.42
+```
+
+**Only the single elite-volume TE gains meaningfully.** TE2 through TE12 move
++0.20 to +0.85, which is noise at draft-capital scale.
+
+**And the TE curve stays UNDER the WR curve at every rank even in TEP** — TE1
+18.58 against WR1 19.41, TE3 14.65 against WR3 15.69.
+
+### Where it DOES change something: the flex
+
+```
+              half-PPR    TEP
+TE12             8.75    10.58
+WR30             9.52     9.52
+WR36             8.78     8.78
+```
+
+In half-PPR your TE2 and WR4 are interchangeable in the flex. In TEP the tight
+end wins by roughly two points. **That is the real structural shift, and it is an
+argument for MORE tight ends, never for EARLIER ones.**
+
+### ⚠️⚠️ THE CEILING ON TE VALUE IS LOWER THAN SIX OTHER PLAYERS' — STRUCTURAL
+
+The one finding here that does not depend on knowing which TE hits:
+
+```
+CEILING on VOR by position (TEP, 2025, 12-team QB1/RB2/WR3/TE1/FLEX1)
+  RB  McCaffrey   10.45      TE  McBride   8.00   <- TEP's absolute best case
+  WR  Nacua       10.02      QB  Allen     5.33
+
+six non-TEs exceed the best possible TE:
+  McCaffrey 10.45 · Nacua 10.02 · Taylor 8.78 · Bijan 8.31 · JSN 8.29 · Gibbs 8.26
+```
+
+**Even a perfect TE pick is worth less than the top ~6 non-TEs**, so a TE inside
+the first six picks is dominated regardless of which one you take. That is the
+only hard constraint in this section; everything else is market-dependent.
+
+### The marginal-TE gradient — REPRICED AT ACTUAL DRAFT COST
+
+Max-of-N per week on 2025 logs, anchors listed at what they REALLY cost rather
+than at app ADP. **The better and more durable the anchor, the less every
+additional TE is worth — and the room total barely moves across the whole range.**
+
+```
+anchor          went at   TE1 alone   +TE2    +TE3    +TE4    room
+McBride              10      17.79    +2.22   +0.89   +0.08   20.99
+Bowers                6      10.25    +4.64   +2.25   +0.64   17.78
+Kraft                38       6.89    +6.78   +2.56   +1.33   17.56
+Pitts                47      11.71    +3.84   +0.92   +0.54   17.01
+Kelce                95      11.00    +3.63   +1.08   +1.28   16.98
+Kittle               83       9.04    +5.28   +1.59   +0.58   16.49
+Ferguson            105      10.86    +3.22   +1.34   +0.92   16.34
+Warren               22      10.64    +3.61   +1.48   +0.55   16.28
+```
+
+**Every room except McBride's lands between 16.3 and 17.8.** A round-1 tight end
+buys about 1.5 points a week over a tenth-round one, and costs a first-round pick
+to do it.
+
+```
+elite + durable anchor at a fair price   ->  2 TEs
+good + durable anchor                    ->  3 TEs
+no anchor, or a fragile one              ->  4 TEs
+```
+
+A fragile TE1 raises TE2's value sharply, because absences count as zero.
+
+### ⚠️ TESTED END TO END ON A REAL ROSTER — the anchor paths LOSE
+
+Full-season optimal-lineup simulation, seat 9, swapping only what the pick
+actually forces you to give up:
+
+```
+build                                     pts/wk   vs actual
+ACTUAL — Taylor R1, 4 late TEs            127.54       —
+McBRIDE R1 (lose Jon Taylor), 2 TEs       123.56    -3.98
+KITTLE at 57 (lose DJ Moore), 3 TEs       129.29    +1.76
+ACTUAL with Otton instead of Helm         128.19    +0.66
+```
+
+**Taking the best tight end in the format at pick 9 cost 3.98 points a week**,
+because it costs an 8.78-VOR running back and the TE room was already covered.
+**The winning path was the middle-round anchor nobody wanted.**
+
+### ⚠️⚠️ THE ANCHOR COMES TO YOU — BUT YOU HAVE TO ACTUALLY TAKE HIM
+
+The most useful single view is the menu at each of your own picks. George Kittle
+(14.68 TEP/g, 4.10 VOR) **sat on the board through SIX consecutive picks**:
+
+```
+pick   best TE available    VOR      what was taken instead   VOR
+   9   McBride     18.58    8.00     Jonathan Taylor          8.78   correct
+  16   Kittle      14.68    4.10     CeeDee Lamb              3.19   -0.91
+  33   Kittle      14.68    4.10     DeVonta Smith            0.22   -3.88
+  40   Kittle      14.68    4.10     Josh Allen               5.33   correct
+  57   Kittle      14.68    4.10     DJ Moore                -0.72   -4.82
+  64   Kittle      14.68    4.10     Jaylen Warren            1.26   -2.84
+  81   Kittle      14.68    4.10     Dak Prescott             0.75   -3.35
+  88   Goedert     12.34    1.76     RJ Harvey               -0.29   -2.05
+ 105   Ferguson    10.95    0.36     Ferguson                 0.36   taken
+```
+
+**He was the best player available at five of the six**, and went at 83 to
+someone else. Pick 9 (Taylor over McBride) and pick 40 (Allen over Kittle) were
+the only two correct passes.
+
+**So "wait" is only half the rule, and the passive half.** The market's
+overpricing collapses somewhere in the middle rounds and leaves a genuine anchor
+sitting there — the discipline is to notice and take him, not to keep waiting
+until round 12 on principle.
+
+### ⚠️ TE ADP INFLATES, AND THE TOP INFLATES WORST — measure it as a SHARE OF PRICE
+
+From one full 12-team TEP board (216 picks, Sep 5 2026): **38 TEs drafted, 17.6%
+of the draft, 3.17 per team.** Against `ADP_DATA` (half-PPR priced) the median
+TE went **+29.1 picks early**, +35.9 inside the first 110.
+
+**RAW PICK DELTAS LIE AT BOTH ENDS OF A DRAFT, and reading them cost a wrong
+recommendation before it was caught.** +15 picks at pick 6 means passing on
+fifteen first-rounders; +30 at pick 189 costs nearly nothing, because the talent
+curve is flat there. Measured as a share of ADP the ranking inverts completely:
+
+```
+                  picks early    % of ADP        raw-delta read    correct read
+Loveland  pick 12     +34           74%          "modest"          worst reach
+Bowers    pick  6     +15           71%          "cheapest"        2nd worst
+Warren    pick 22     +42           66%
+McBride   pick 10     +15           60%          "cheapest"        4th worst
+Kittle    pick 83     +34           29%          "expensive"       first fair price
+Henry     pick 129    +21           14%          "cheap"           cheapest
+```
+
+**Always express draft-price deviation as a proportion when comparing across
+rounds.** This is the same class as the turn-aware reach fix in CLAUDE.md: a
+pick number is not a constant unit of cost.
+
+### What the early TEs actually cost
+
+VOR against the best non-TE taken in the next twelve picks, same board:
+
+```
+pick   6  Bowers    VOR  3.93   passed on McCaffrey 10.45   COST -6.51
+pick  10  McBride   VOR  8.00   passed on Achane     7.02   WON  +0.98
+pick  12  Loveland  VOR -0.26   passed on Achane     7.02   COST -7.29
+pick  22  Warren    VOR  0.51   passed on Pickens    4.94   COST -4.43
+pick  38  Kraft     VOR  4.07   passed on Josh Allen 5.33   COST -1.27
+pick  39  LaPorta   VOR  1.30   passed on Josh Allen 5.33   COST -4.04
+pick  47  Pitts     VOR  1.82   passed on Lamar     -1.04   WON  +2.86
+```
+
+**Two of seven early TE picks beat their opportunity cost.** Loveland at 12 was a
+BELOW-REPLACEMENT tight end taken in the first round.
+
+### The operational rule
+
+**Cap the premium at ~30% over normal-format ADP.** On the observed board that
+produced a clean crossover: no TE was buyable before **Harold Fannin at pick 71**;
+**Kittle at 83** was the first one worth wanting; 23 of 32 cleared the cap and all
+of them went after 71.
+
+```
+1. Never a TE inside the first six picks.           structural, always holds
+2. Watch the room. 50%+ reaches mean keep waiting.  market-dependent
+3. Buy the moment a real TE is BEST AVAILABLE.      Kittle from pick 16 on
+4. Then take 3-4, because waiting usually means no anchor.
+```
+
+**Step 3 is the one that was nearly missed.** An earlier draft of this section
+said "buy under a ~30% premium, which was pick 71 here" — true, and passive. The
+simulation says the best available path was **Kittle at 57**, fourteen picks
+before the premium rule would have cleared him, because by then he was simply the
+best player on the board.
+
+**"Wait until 70" is NOT a law — it is what this room's bidding produced.** In a
+room that does not reach, the crossover moves earlier and an anchor at a fair
+price is worth taking.
+
+### Confidence
+
+**The market half is 38 real picks and I would trust it directionally.** The
+"which TE was good" half is **one season used as hindsight (points/gm r=0.699)** —
+Kittle looks like the best buy partly because he produced in 11 games, and that
+~80% availability is exactly why he fell to 83. **n = 1 draft board.** Re-measure
+against a second TEP draft before treating any threshold here as settled.
