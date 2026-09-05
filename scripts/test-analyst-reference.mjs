@@ -231,7 +231,7 @@ for (const m of bq.matchAll(/\[([^\]]+)\]\(#([^)]+)\)/g)) {
 
 // Every section the contract names must actually exist, in order.
 const wanted = ["§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9", "§10",
-                "§11", "§12", "§13", "§14"];
+                "§11", "§12", "§13", "§14", "§15"];
 let last = -1, ordered = true;
 for (const w of wanted) {
   const at = doc.indexOf(`## ${w} ·`);
@@ -239,6 +239,20 @@ for (const w of wanted) {
   last = at;
 }
 ok(`all ${wanted.length} sections exist and are in order`, ordered);
+
+// ---- 4a. §15 IS REFERENCE ONLY, AND SAYS SO ----
+// TEP is a SCORING variant. The engine is half-PPR throughout, so wiring this
+// section's findings into a grade would move every TE evaluation in every
+// format. The section exists so a TEP roster can be read correctly by a human;
+// the containment claim is what stops it becoming a silent scoring change.
+const tepStart = doc.indexOf("## §15 ·");
+const tep = tepStart > 0 ? doc.slice(tepStart) : "";
+ok("§15 declares itself reference-only", /REFERENCE ONLY/i.test(tep));
+ok("§15 states the engine is half-PPR", /half-PPR/.test(tep));
+ok("§15 keeps the proportion-not-raw-picks warning",
+   /share of price|proportion/i.test(tep) && /raw pick deltas lie/i.test(tep.toLowerCase()) === false
+     ? /SHARE OF PRICE/i.test(tep) : /SHARE OF PRICE/i.test(tep));
+ok("§15 carries its n=1 limit", /n = 1 draft board|n=1/i.test(tep));
 
 // ---- 4b. §13 COVERS EVERY INPUT, IN PLAIN ENGLISH ----
 // §13 is the reading entry point: every metric, grouped by the question a human
