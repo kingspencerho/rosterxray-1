@@ -6142,3 +6142,114 @@ drift from a live run. ⚠️ **Guard 29 section 7 is therefore vacuous until a 
 refresh is committed** — it was exercised against the full 2025 season (570
 players, 710 label checks) and against a simulated 2026-through-W8 during the
 build.
+
+---
+
+## The Weekly Refresh Runs Itself (added Sep 5, 2026)
+
+`.github/workflows/weekly-data-refresh.yml`. **No App.jsx or grading/data change
+— grades cannot move**, verified: `git status` shows zero files touched under
+either path. Guarded by a new section in `scripts/test-refresh-cadence.mjs`
+(guard 15), which is the right home because it already owns the frozen/weekly
+split.
+
+### The gap it closes, stated precisely
+
+Asked as *"will this render automatically once season starts?"* The answer was
+no, and the reason is worth keeping:
+
+**All four in-season layers are STATIC ES IMPORTS**, bundled at build time.
+Verified rather than assumed — `grep` for a runtime fetch of `grading/data`
+returns **zero**. So the numbers a visitor sees are whatever was committed the
+last time Vercel built, and there was no `.github/workflows` directory at all.
+
+Miss a week and nothing breaks or warns loudly. The app renders older data under
+a vintage label that correctly names an older week. `seasonNow()` catches a lag
+greater than 1 *after the fact*; it cannot fix one.
+
+**And step 4 was the one that bit before**: rosterxray.com serves `main`, which
+is why Brian Thomas stayed broken on the live site after being fixed on the
+branch.
+
+### Four properties carry the whole safety argument, and all four are asserted
+
+1. **THE GUARDS GATE THE COMMIT.** `npm test` runs, and runs BEFORE `git commit`.
+   A refresh that ships bad data is worse than a missed week — a missed week is
+   visible in the vintage label and bad data is not.
+2. **IT NEVER PUSHES TO THE DEFAULT BRANCH.** It pushes a `data/refresh-YYYY-Wnn`
+   branch and opens a PR. CLAUDE.md rule 3, and an unreviewed data commit landing
+   on the branch the live site serves is precisely what the split cadence exists
+   to prevent.
+3. **THE FROZEN FILE IS NEVER REGENERATED.** The guard asserts the workflow never
+   invokes `build-player-metrics` and runs no script but `refresh-inseason.sh`.
+4. **ONLY `grading/data` IS COMMITTED**, and the job hard-errors if the refresh
+   dirtied anything else — otherwise a stray edit rides along inside a PR nobody
+   reads closely because "it is just data".
+
+Seven failure paths negative-tested, all exit non-zero: pushing to main, moving
+`npm test` after the commit, removing the guards, adding the frozen builder as a
+step, committing regardless of the diff, dropping the scope check, and deleting
+the workflow.
+
+### ⚠️ THE EXIT CODE IS NOT THE SIGNAL — THE DIFF IS
+
+`refresh-inseason.sh` **always exits 0**. "Not published yet" is its normal
+pre-season outcome and is not a failure, so a job keyed on the exit code would
+open an empty PR every Tuesday until Week 1. The decision comes from
+`git diff --quiet -- grading/data`.
+
+### ⚠️ TWO ASSERTIONS FAILED ON THE WORKFLOW'S OWN DOCUMENTATION
+
+The frozen-file check was written as "the string `player_metrics_2025` must not
+appear." It failed twice, correctly both times:
+
+- the **header comment** names it to explain why it is untouched
+- the **PR body** repeats that so a reviewer sees it without opening the file
+
+Both are wanted. The property is **never INVOKES it**, not never mentions it —
+and a comment-stripping filter was still wrong, because the PR-body text lives
+inside a `run:` block. Asserting on the builder name and the set of scripts
+called is the version that expresses the real intent.
+
+### ⚠️ AN INDENTED HEREDOC INSIDE A YAML BLOCK SCALAR CANNOT CLOSE
+
+The first version built the commit message and PR body with `<<'BODY'` nested in
+a `run: |`. A heredoc terminator must sit at **column 0**, which is impossible at
+that indent — it would have swallowed the rest of the script and baked leading
+spaces into every line it did emit. Both bodies are built with `printf` into
+`.git/COMMIT_BODY` and `.git/PR_BODY` instead.
+
+**`bash -n` passed the broken version.** This file already records that lesson
+from the `\n`-in-a-line-continuation slip on Sep 1: *syntax checking proves a
+script parses, never that it does what you meant.* Every `run:` block was
+extracted from the YAML and executed for real — which is how the heredoc and the
+body indentation were caught.
+
+### Verified against a real run, not just parsed
+
+```
+bash scripts/refresh-inseason.sh 2026   -> "Partly refreshed", exit 0
+  Sleeper live: 816 players, 572 depth-chart slots, 71 hard statuses
+  the three nflverse releases 404 (correct pre-season)
+git diff -- grading/data   -> changed=true, status_2026.json only
+npm test                   -> ALL 29 GUARDS PASS on live refreshed data
+commit body + PR body      -> generated at column 0, markdown intact
+```
+
+**The guard gate is real rather than decorative**: a live refresh survives it.
+The 816 live rows were then reverted — that is a data change, not part of
+shipping the workflow, and the status layer's watch period is not up.
+
+### ⚠️ ONE REPO SETTING IS REQUIRED AND IS NOT IN THE FILE
+
+`GITHUB_TOKEN` cannot open a PR unless **Settings → Actions → General →
+Workflow permissions → "Allow GitHub Actions to create and approve pull
+requests"** is enabled. Without it the job runs, refreshes, passes the guards,
+and fails on the last step. Nothing in the YAML can grant this.
+
+### Cadence
+
+Tuesday 14:00 UTC — after Monday night settles into the nflverse releases,
+before Wednesday waivers. `workflow_dispatch` runs it on demand. Every in-season
+builder is Python **stdlib only**, so the job needs no `pip install` and has no
+dependency that can break on a release.

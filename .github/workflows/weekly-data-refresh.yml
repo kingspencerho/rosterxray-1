@@ -1,0 +1,157 @@
+# WEEKLY IN-SEASON DATA REFRESH
+#
+# The four in-season layers are STATIC ES IMPORTS bundled at build time — there
+# is no runtime fetch of grading/data anywhere in App.jsx. So the numbers a
+# visitor sees are whatever was committed the last time Vercel built. Without
+# this job the app renders last week's usage under a label that correctly names
+# an older week, and nothing is obviously broken: it just quietly stops being
+# current.
+#
+# WHAT THIS DOES NOT DO, ON PURPOSE
+#
+#   It does not push to the default branch. CLAUDE.md rule 3 keeps development
+#   on a named branch, and more practically an unreviewed data commit going
+#   straight to the branch the live site serves is exactly the failure mode the
+#   split refresh cadence exists to prevent. This opens a PR instead.
+#
+#   It does not touch player_metrics_2025.json. That file feeds four SCORED
+#   inputs and is frozen for the whole season — refreshing it would move every
+#   grade for reasons unrelated to the roster and silently invalidate every
+#   calibration figure in CLAUDE.md. Guard 15 enforces that independently; this
+#   job simply never asks for it.
+#
+#   It does not commit anything if the guards fail. A refresh that ships bad
+#   data is worse than a missed week, because a missed week is visible in the
+#   vintage label and bad data is not.
+name: Weekly data refresh
+
+on:
+  schedule:
+    # Tuesday 14:00 UTC (09:00 ET / 10:00 EDT). AFTER Monday night football has
+    # settled into the nflverse releases and BEFORE Wednesday waivers process,
+    # which is the window where a refreshed target-share trend is worth having.
+    - cron: "0 14 * * 2"
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "Season to refresh (defaults to 2026)"
+        required: false
+        default: "2026"
+
+# Least privilege: write the branch, open the PR, nothing else.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every in-season builder is Python STDLIB ONLY (csv, gzip, json, re) —
+      # verified, and worth keeping that way. nflreadpy is needed for the ANNUAL
+      # layers and deliberately not for this job, so the weekly run has no pip
+      # step and nothing to break on a dependency release.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Refresh the in-season layers
+        id: refresh
+        run: |
+          bash scripts/refresh-inseason.sh "${{ inputs.season || '2026' }}" | tee refresh.log
+          # ⚠️ refresh-inseason.sh ALWAYS exits 0 — "nothing published yet" is
+          # its normal pre-season outcome and is not a failure. The real signal
+          # is whether the committed JSON actually changed, so the decision is
+          # made from the diff below rather than from an exit code.
+          {
+            echo "log<<REFRESH_LOG"
+            cat refresh.log
+            echo "REFRESH_LOG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Did any data actually change?
+        id: diff
+        run: |
+          # Scoped to grading/data on purpose: if the job ever dirties anything
+          # else, that is a bug and this refuses to carry it into the PR.
+          if git diff --quiet -- grading/data; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data changed — nothing published since the last run."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- grading/data
+          fi
+          outside=$(git status --porcelain | grep -v '^.. grading/data/' | grep -v '^?? refresh.log' || true)
+          if [ -n "$outside" ]; then
+            echo "::error::Refresh modified files outside grading/data:"; echo "$outside"; exit 1
+          fi
+
+      # THE GUARDS GATE THE COMMIT. If any of the 29 fail, the job stops here
+      # and no PR is opened — the stale data stays live, which is the safe
+      # direction to fail because its vintage label still tells the truth.
+      - name: Run the guards
+        if: steps.diff.outputs.changed == 'true'
+        run: npm test
+
+      - name: Open the refresh PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          BR="data/refresh-$(date -u +%Y-W%V)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BR"
+          git add grading/data
+
+          # ⚠️ The message and body are built with printf, NOT an indented
+          # heredoc. A heredoc nested inside a YAML block scalar has to close at
+          # column 0 to terminate, which is impossible at this indent level —
+          # the first version of this step would have swallowed the rest of the
+          # script and baked leading spaces into every line it did emit.
+          {
+            printf '%s\n\n' "Weekly in-season data refresh ($(date -u +%Y-%m-%d))"
+            printf '%s\n' "Context layers only. player_metrics_2025.json is frozen and untouched," \
+                           "so no grade can move. All guards passed before this commit was made." "" \
+                           "Refresh log:"
+            sed 's/^/  /' refresh.log
+          } > .git/COMMIT_BODY
+          git commit -F .git/COMMIT_BODY
+
+          git push -f origin "$BR"
+
+          {
+            printf '%s\n' \
+              "Automated in-season refresh of the **context-only** data layers." "" \
+              "- \`snap_trajectory\` · \`qb_profile\` · \`gamelogs\` · \`volume\` (usage trajectory) · \`status\`" \
+              "- **\`player_metrics_2025.json\` is frozen and untouched** — it feeds four scored inputs, so no grade can move from this PR." \
+              "- All 29 guards passed before the commit was made; the job refuses to open a PR if any fail." "" \
+              "Merging is what makes these numbers reach the live site: the data files are static imports bundled at build time, so nothing updates until Vercel rebuilds." "" \
+              "<details><summary>Refresh log</summary>" ""
+            printf '```\n'; cat refresh.log; printf '```\n'
+            printf '\n%s\n' "</details>"
+          } > .git/PR_BODY
+
+          # Reuse this week's PR if the job runs twice.
+          if gh pr view "$BR" --json number >/dev/null 2>&1; then
+            gh pr edit "$BR" --body-file .git/PR_BODY
+          else
+            gh pr create --base "$BASE" --head "$BR" \
+              --title "Weekly data refresh · $(date -u +%Y-%m-%d)" \
+              --body-file .git/PR_BODY
+          fi
