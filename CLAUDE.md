@@ -5994,3 +5994,151 @@ a real assertion against a temp file, and guard 28 greps for `or True)` so the
 shape cannot come back. **Five negative tests, all exit non-zero:** a hardcoded
 secret, the refusal removed, the token path unguarded, the `.gitignore` backstop
 removed, and an `or True` short-circuit.
+
+---
+
+## Usage Trajectory & the Start/Sit Board (added Sep 5, 2026)
+
+Asked for directly: *"target share is also really important to me when evaluating
+players during season in regards to start/sit decisions."* **CONTEXT ONLY — 51
+grades byte-identical** (14 tournaments x 3 fixtures, plus 9 redraft), compared
+against a pristine git worktree at HEAD. Guard 29:
+`scripts/test-target-trend.mjs`.
+
+### ~90% of it already existed, and the missing 10% was the whole point
+
+`build-volume-current.py` already computed target share weekly with the correct
+per-(player, game) denominator, `getVolumeCur` already shipped, the card already
+rendered dual vintage, the prompt already had a current-season block, and
+`refresh-inseason.sh` already downloaded the file it parses. **The builder
+computed a season-to-date aggregate and threw the per-week detail away.**
+
+So the app could say "27% target share through W7" and could not say "11% → 18%
+→ 24%, climbing for a month". For a start/sit decision the second one is the
+entire question, and the first is rank 2 while the second is rank 1.
+
+This is `snap_trajectory`'s exact defect, left unclosed on the better metric:
+**target share r=0.729 and targets/gm 0.774 against snap share's 0.709.**
+
+### ⚠️ THE PASSING SIDE ALONE WOULD HAVE REPRODUCED THE HARVEY MISS
+
+Caught by the dry run against 2025, before anything was wired:
+
+```
+RJ HARVEY 2025
+  target share   8.95% -> 11.63%   delta +0.027   STABLE
+  carry  share  17.67% -> 46.65%   delta +0.290   RISING
+```
+
+He is the player this file records being **graded fade/falling on four separate
+rosters** off a season average. A board reading only targets would have printed
+`stable` for him and reproduced the miss exactly. `trend_car` exists for that
+reason, RB-only — a receiver's carry share is three jet sweeps and printing it
+would invite reading a trend into noise.
+
+### ⚠️ EACH SERIES DERIVES ITS OWN THRESHOLD
+
+Carry share is a far wider distribution than target share. Measured on 2025:
+
+```
+             threshold   median   flagged
+targets        0.0402    0.0000   111/403
+carries        0.1042    0.0051    27/100
+```
+
+One shared threshold flags the wrong tail on one of them — the same class as the
+position-normalisation bug in the Ceiling Shape Layer, which moved grades for the
+wrong reason and **looked like a working feature while it did.** The start/sit
+board's ranking comparator therefore measures magnitude in THRESHOLDS
+(`|delta| / threshold`), never raw picks of share: ranking on raw delta would put
+every back above every receiver for a reason that is purely an artefact of the
+denominator.
+
+**Both thresholds are DERIVED from the run's own distribution (1 SD), never
+hand-typed**, and `delta_median` lands on 0.0000 for targets — the centering that
+makes a threshold mean "this player moved more than most players moved" rather
+than tracking league-wide drift. A partial season derives its own: the W8 dry run
+produced 0.045 in `halves` mode against the full season's 0.040 in `calendar`.
+**The two are never comparable.**
+
+### "insufficient" IS NOT "stable", and the reason is produced centrally
+
+Stable means measured and flat. `insufficient` means not yet measurable. A layer
+that collapses them makes a two-game sample read as a settled role.
+
+`trendWhy()` produces the REASON rather than leaving each caller to invent one —
+a consumer that cannot say why a trend is missing renders silence, and silence
+reads as "no change". At Week 2 every row says
+`19.0% target share over 2 games / no trend yet: needs 4 games to split the
+season — he has 2 — a sample-size gap, not a flat role`. **Both halves are
+required: say what it can, and name the gap.** An earlier version printed only
+the gap and withheld a share the app already had.
+
+`MIN_WINDOW_GP = 2` (not snap trajectory's 3) so the split turns on at 4 games
+(~W4-5) rather than 6. This layer has to be useful in October; the game count
+travels with every number so a thin split is visible rather than implied.
+
+### Two defects only the browser found
+
+Both were invisible in the source, which is why the render is not optional.
+
+1. **TWO SECTIONS TITLED "ROLE TRAJECTORY" ON ONE CARD.** The snap section
+   already owned that name. Renamed to **Usage trajectory**, with the note
+   drawing the distinction explicitly: snaps are *is he on the field*, this is
+   *how much of the ball is his*. Guard 29 asserts the titles stay distinct.
+2. **A row reading `STABLE` above `7.3% → 3.9%`** (Kenneth Walker). Correct —
+   −3.4pp is inside a 4.5pp bar — and it reads as the panel contradicting
+   itself, which is the label-disagrees-with-its-own-number class fixed three
+   times already. **The fix is to show the arithmetic, never to loosen the
+   threshold:** the row now prints `STABLE −3.4pp` and the panel note explains
+   that STABLE beside a visible change means the change is real and smaller
+   than the bar.
+
+### Containment
+
+`analyzeRoster` and `analyzeRedraft` reference none of `getTargetTrend`,
+`getCarryTrend`, `TREND_META`, `buildStartSitBoard`, `trend_car`,
+`startSitMagnitude` or `VOLUME_CUR` — asserted structurally, because a leak can
+move one roster by 0.01, pass a spot check, and **silently invalidate every
+calibration figure in this file.** The board is built at module level and invoked
+from a `useMemo`, exactly as `buildPlayerCard` is.
+
+The sparkline carries **no matchup colour**, guarded: colouring bars by opponent
+difficulty mixes rank 5 — the least stable input in the app — into a rank-1
+reading. Same rule the game log already follows.
+
+**QBs are excluded from the board and the panel says so in words.** Neither share
+describes a passer's role.
+
+### ⚠️ ANOTHER GUARD THAT COULD NOT FAIL — the fourth instance
+
+Six negative tests were run. Five caught; **one MISSED.** The assertion was
+`/delta != null\) return null/.test(source)`, and the sabotage inserted an
+unconditional `return null` ABOVE that line — the string survived intact and the
+guard passed while the behaviour was destroyed.
+
+Same shape as `test-findplayer.mjs` (no exit call at all),
+`test-disclosure.mjs` (one-argument `ok()`) and guards 19/20. **String-matching
+a source file asserts that text exists, never that code behaves.** `trendWhy` is
+pure, so the guard now extracts it with `new Function` and runs it against real
+inputs. All three of its failure paths then exited non-zero.
+
+**Nine failure paths negative-tested in total, all exit non-zero:** an engine
+leak, a label disagreeing with its delta, one shared threshold, three separate
+ways of breaking `trendWhy`, the carry side removed, and a matchup-coloured
+sparkline.
+
+### The weekly job is unchanged
+
+`refresh-inseason.sh` already calls `build-volume-current.py`. The trend comes
+from the same parse of a file already on disk — **no new step, no new download.**
+
+### Pre-season it does not exist
+
+`weeks_covered: 0` in the committed placeholder, so `CUR_VOLUME_LIVE` is false,
+the board returns null and the card section does not mount. The placeholder is
+generated by the real builder against a header-only input so its shape cannot
+drift from a live run. ⚠️ **Guard 29 section 7 is therefore vacuous until a real
+refresh is committed** — it was exercised against the full 2025 season (570
+players, 710 label checks) and against a simulated 2026-through-W8 during the
+build.

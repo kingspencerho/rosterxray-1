@@ -2606,6 +2606,44 @@ const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
 // which season a number describes is the stale-data trap in a new costume.
 const CUR_VOLUME_LIVE = (VOLUME_CUR._meta?.weeks_covered || 0) > 0;
 const getVolumeCur = (name) => (CUR_VOLUME_LIVE ? lookupPlayer(VOLUME_CUR.players, name) : null);
+
+// === TARGET / CARRY TRAJECTORY (CONTEXT ONLY) ===
+// The season-to-date share sitting beside this is rank 2, opportunity volume.
+// This is rank 1, role CHANGE, and averaging the weeks collapses the higher-
+// ranked signal into the lower-ranked one — the exact failure snap_trajectory
+// exists to fix, left unclosed on the better metric. Target share is r=0.729
+// and targets/gm 0.774 against snap share's 0.709.
+//
+// Worked example, Loveland 2025: season 16.5% target share, an ordinary TE
+// number, while the weekly line ran 11.6% early to 29.2% over his last three.
+// The average describes neither player.
+//
+// ⚠️ BOTH SIDES FOR BACKS. `trend` is targets, `trend_car` is carries, and a
+// back can be flat in one while the other moves. RJ Harvey 2025 reads stable
+// on target share (delta +0.027) while his carry share went 17.7% -> 46.7% —
+// he is the player this repo records being graded fade/falling on four
+// separate rosters off a season average. Reading only the passing side would
+// reproduce that miss exactly.
+const TREND_META = VOLUME_CUR._meta?.trend || {};
+const getTargetTrend = (name) => getVolumeCur(name)?.trend || null;
+const getCarryTrend = (name) => getVolumeCur(name)?.trend_car || null;
+
+// ⚠️ "insufficient" IS NOT "stable". Stable means measured and flat; this
+// means not yet measurable. The distinction is the whole early-season
+// contract, so the REASON is produced here rather than left to each caller to
+// invent — a consumer that cannot say why a trend is missing will render
+// silence, and silence reads as "no change" instead of "not enough games".
+const trendWhy = (t, meta) => {
+  const need = 2 * (meta?.min_window_gp || 2);
+  if (!t) return "no games on record this season";
+  if (t.delta != null) return null;
+  if ((t.series?.length || 0) < need) {
+    const gp = t.series?.length || 0;
+    return `needs ${need} games to split the season — he has ${gp === 1 ? "1" : gp}`;
+  }
+  if (meta?.threshold == null) return "too few players league-wide have a split yet to set a threshold";
+  return "his two windows are too thin to compare";
+};
 const getSnapTrendCur = (name) => (CUR_SEASON_LIVE ? lookupPlayer(SNAP_TRAJECTORY_CUR.players, name) : null);
 const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.players, name) : null);
 // Vintage labels. NEVER print a number from these layers without one — a mixed
@@ -2735,6 +2773,88 @@ const buildRoleContext = (players) => {
   });
   out.sos.sort((a, b) => a.rank - b.rank);
   return out;
+};
+
+// === START / SIT BOARD (CONTEXT ONLY, REDRAFT ONLY) ===
+// The weekly question the app could not answer: which of my starters is being
+// used MORE than he was, and which less. Everything else here describes a
+// player in isolation; this ranks a lineup by role CHANGE, rank 1.
+//
+// ⚠️ MOVERS FIRST, IN BOTH DIRECTIONS. A collapsing role is as actionable as a
+// growing one — more so, because it is the start you would otherwise make out
+// of habit. Sorting by signed delta would bury every faller at the bottom.
+//
+// ⚠️ THE TWO SERIES ARE NOT COMPARABLE RAW. Carry share is a far wider
+// distribution than target share (2025: SD 0.104 against 0.040), so a back's
+// +0.06 on carries is ordinary while +0.06 on targets is a real move. Ranking
+// on |delta| alone would put every RB above every receiver for a reason that
+// is purely an artefact of the denominator. Magnitude is therefore measured in
+// THRESHOLDS, which is the same normalisation the Ceiling Shape Layer needed
+// when raw spike rate handed quarterbacks a free bonus.
+const startSitMagnitude = (t, threshold) =>
+  (t && t.delta != null && threshold) ? Math.abs(t.delta) / threshold : null;
+
+const buildStartSitBoard = (players) => {
+  // Pre-season the weekly refresh has not run, so there is nothing to trend
+  // and the board does not exist. Consumers gate on null rather than
+  // rendering an empty table that looks broken.
+  if (!CUR_VOLUME_LIVE) return null;
+  const rows = [];
+  for (const p of players || []) {
+    // QBs are deliberately absent: neither target nor carry share describes a
+    // passer's role, and inventing a row for him would be a number with no
+    // meaning rather than a gap. The panel says so in words.
+    if (!p?.name || !["RB", "WR", "TE"].includes(p.pos)) continue;
+    const v = getVolumeCur(p.name);
+    const tt = v?.trend || null;
+    const ct = p.pos === "RB" ? (v?.trend_car || null) : null;
+    const tMag = startSitMagnitude(tt, TREND_META.trend?.threshold);
+    const cMag = startSitMagnitude(ct, TREND_META.trend_car?.threshold);
+    // For a back, lead with whichever side actually moved.
+    const lead = (cMag != null && (tMag == null || cMag > tMag))
+      ? { t: ct, kind: "carry share", mag: cMag, why: trendWhy(ct, TREND_META.trend_car) }
+      : { t: tt, kind: "target share", mag: tMag, why: trendWhy(tt, TREND_META.trend) };
+    rows.push({
+      name: p.name, pos: p.pos, team: p.team,
+      kind: lead.kind,
+      state: lead.t?.trend || "insufficient",
+      gp: lead.t?.series?.length || 0,
+      early: lead.t?.early ?? null,
+      recent: lead.t?.recent ?? null,
+      last3: lead.t?.last3 ?? null,
+      last3gp: lead.t?.last3_gp ?? 0,
+      // ⚠️ SAY WHAT IT CAN, not only what it cannot. Before a split exists the
+      // season-to-date share is still a real measurement and is the number a
+      // reader actually wants in Week 2. A row that prints only "not enough
+      // games" withholds data the app already has.
+      sofar: lead.kind === "carry share"
+        ? (v?.car_pg != null && lead.t?.series?.length ? lead.t.series.reduce((x, r) => x + r[2], 0) / lead.t.series.length : null)
+        : (v?.tgt_sh ?? null),
+      sofarGp: v?.gp ?? 0,
+      delta: lead.t?.delta ?? null,
+      mag: lead.mag,
+      // Never silent. A row with no trend still renders and says why.
+      why: lead.why,
+      // The other side, so a back's full picture is one row rather than two.
+      alt: (ct && lead.t !== ct) ? { kind: "carry share", ...ct }
+        : (ct && lead.t === ct) ? { kind: "target share", ...(tt || {}) }
+        : null,
+    });
+  }
+  rows.sort((a, b) => {
+    const rank = r => r.delta == null ? 2 : 0;
+    if (rank(a) !== rank(b)) return rank(a) - rank(b);
+    return (b.mag || 0) - (a.mag || 0);
+  });
+  return {
+    rows,
+    vintage: vintageLabel(VOLUME_CUR._meta),
+    splitMode: TREND_META.trend?.split_mode || null,
+    tgtThreshold: TREND_META.trend?.threshold ?? null,
+    carThreshold: TREND_META.trend_car?.threshold ?? null,
+    movers: rows.filter(r => r.state === "rising" || r.state === "falling").length,
+    pending: rows.filter(r => r.delta == null).length,
+  };
 };
 
 // One game -> the band the card already names. Kept beside the data so the
@@ -3420,6 +3540,27 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // pbp), so those rows stay 2025-only and say nothing new.
     const volCur = getVolumeCur(name);
     if (volCur) card.volumeCur = vintageLabel(VOLUME_CUR._meta);
+
+    // ROLE TRAJECTORY on the metric that actually decides a start/sit. It
+    // renders from Week 1 saying what it can and naming what it cannot yet
+    // say: a section that hides until it has a verdict reads as a broken
+    // feature rather than as missing data, which is the silent-drop failure
+    // in a new costume.
+    if (CUR_VOLUME_LIVE) {
+      const tt = getTargetTrend(name);
+      const ct = pos === "RB" ? getCarryTrend(name) : null;
+      card.targetTrend = {
+        vintage: vintageLabel(VOLUME_CUR._meta),
+        splitMode: TREND_META.trend?.split_mode || null,
+        tgt: tt, tgtWhy: trendWhy(tt, TREND_META.trend),
+        tgtThreshold: TREND_META.trend?.threshold ?? null,
+        car: ct, carWhy: ct ? trendWhy(ct, TREND_META.trend_car) : null,
+        carThreshold: TREND_META.trend_car?.threshold ?? null,
+        // The prior season rides along and is never swapped for the current
+        // one. "16.5% in 2025, 29.2% over his last three" is the finding.
+        prior: m?.tgt_sh ?? null,
+      };
+    }
     for (const d of (CARD_METRICS[pos] || [])) {
       const v = d.get(m);
       if (v == null || Number.isNaN(v)) continue;
@@ -8003,6 +8144,69 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution, echo, cur, noTag })
   </div>
 );
 
+const TREND_TONE = {
+  rising: "var(--accent-lime)", falling: "var(--danger)",
+  stable: "var(--text-secondary)", insufficient: "var(--text-dim)",
+};
+const pct1 = (v) => v == null ? "—" : `${(v * 100).toFixed(1)}%`;
+
+// The week-by-week share, drawn. The bars carry NO matchup or difficulty
+// colour: that would mix rank-5 data into a rank-1 reading. Height is the
+// share, and the only colour is the trend the numbers already state.
+const TrendSpark = ({ series, tone }) => {
+  if (!series || series.length < 2) return null;
+  const max = Math.max(...series.map(r => r[2]), 0.01);
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "34px", margin: "6px 0 2px" }}>
+      {series.map(([wk, tgt, sh]) => (
+        <div key={wk} title={`W${wk} · ${tgt} on ${pct1(sh)}`}
+          style={{ flex: 1, minWidth: "3px", height: `${Math.max(6, (sh / max) * 100)}%`,
+                   background: tone, opacity: 0.75, borderRadius: "1px" }} />
+      ))}
+    </div>
+  );
+};
+
+// ⚠️ THE NO-TREND BRANCH IS NOT AN EMPTY STATE, IT IS THE MEASUREMENT SAYING
+// WHAT IT CANNOT YET SAY. An absent section reads as a broken feature; a
+// blank one reads as "no change". Both are wrong in the same direction, and
+// both are the silent-drop failure this codebase has fixed repeatedly.
+const TrendBlock = ({ label, t, why, threshold, splitMode }) => {
+  const tone = TREND_TONE[t?.trend || "insufficient"];
+  const windows = splitMode === "calendar" ? "W1-9 vs W10-18" : "first half vs second half of the weeks played";
+  return (
+    <div style={{ padding: "8px 0", borderTop: "1px solid var(--border-default)" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+        <span style={{ fontSize: "11px", color: "var(--text-dim)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{label}</span>
+        <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: 700, color: tone, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {t?.delta != null ? `${t.trend} ${t.delta > 0 ? "+" : ""}${(t.delta * 100).toFixed(1)}pp` : "not yet measurable"}
+        </span>
+      </div>
+      {t?.series?.length > 0 && <TrendSpark series={t.series} tone={tone} />}
+      {t?.delta != null ? (
+        <div style={{ display: "flex", gap: "10px", fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", flexWrap: "wrap" }}>
+          <span>{pct1(t.early)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>early ({t.early_gp})</span></span>
+          <span style={{ color: "var(--text-dim)" }}>→</span>
+          <span>{pct1(t.recent)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>recent ({t.recent_gp})</span></span>
+          <span style={{ color: "var(--text-dim)" }}>·</span>
+          <span style={{ fontWeight: 700 }}>{pct1(t.last3)} <span style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 400 }}>last {t.last3_gp}</span></span>
+        </div>
+      ) : (
+        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+          {why || "not enough games yet"}
+          {t?.series?.length > 0 && <> — currently <strong style={{ color: "var(--text-secondary)" }}>{pct1(t.series[t.series.length - 1][2])}</strong> in his most recent game.</>}
+          <div style={{ color: "var(--text-dim)", marginTop: "2px" }}>This is a sample-size gap, not a flat role.</div>
+        </div>
+      )}
+      {threshold != null && t?.delta != null && (
+        <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "3px" }}>
+          Split is {windows}. Flagged at {(threshold * 100).toFixed(1)}pp — one standard deviation of every player's move this season.
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Section headers carry a colour so the eye can find its way around the card
 // without reading. The accent is STRUCTURE, not decoration: it names which of
 // the card's four questions a block answers, and the accent bar repeats the
@@ -8054,6 +8258,7 @@ const CARD_GROUP_ACCENT = {
 
 const CARD_ACCENTS = {
   // HIS JOB — what the offense gives him
+  targetTrend: CARD_GROUP_ACCENT.job,
   trajectory: CARD_GROUP_ACCENT.job,
   volume: CARD_GROUP_ACCENT.job,
   opportunity: CARD_GROUP_ACCENT.job,
@@ -8367,6 +8572,7 @@ const SECTION_INDEX = {
     { id: "rxr-byeconflicts", label: "Byes" },
     { id: "rxr-playoffs",     label: "Playoffs" },
     { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-trends",       label: "Trends" },
     { id: "rxr-freeagents",   label: "Waivers" },
     { id: "rxr-bench",        label: "Bench" },
   ],
@@ -9009,6 +9215,33 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
+            {/* ⚠️ NOT "Role trajectory" — that title already belongs to the SNAP
+                section directly above. Two identically-named sections in the
+                same group leave a reader unable to tell which number he is
+                looking at, and they answer different questions: snaps are "is
+                he on the field", this is "how much of the ball is his". Found
+                by rendering the card, not by reading the source. Guard 29
+                asserts the two titles stay distinct. */}
+            {card.targetTrend && (
+              <CardSection
+                title="Usage trajectory"
+                accent={CARD_ACCENTS.targetTrend}
+                hint={card.targetTrend.tgt?.delta != null ? card.targetTrend.tgt.trend : "in progress"}
+                note={`Week-by-week share of his team's work, ${card.targetTrend.vintage} — how much of the ball is his, as opposed to the snap share above, which is only whether he was on the field. This is role CHANGE (rank 1) and it outranks the season averages below, which are rank 2 — an average blends the player before the change with the player after it and describes neither.${card.targetTrend.prior != null ? ` For reference his 2025 target share was ${pct1(card.targetTrend.prior)}; the two seasons are shown side by side, never swapped.` : ""}`}>
+                <TrendBlock label="Target share" t={card.targetTrend.tgt} why={card.targetTrend.tgtWhy}
+                  threshold={card.targetTrend.tgtThreshold} splitMode={card.targetTrend.splitMode} />
+                {card.targetTrend.car && (
+                  <TrendBlock label="Carry share" t={card.targetTrend.car} why={card.targetTrend.carWhy}
+                    threshold={card.targetTrend.carThreshold} splitMode={card.targetTrend.splitMode} />
+                )}
+                {card.targetTrend.car && (
+                  <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                    Both sides are shown because a back can be flat in one and moving in the other. Read them together — a rising carry share on a falling target share is a role getting bigger and less valuable at the same time.
+                  </div>
+                )}
+              </CardSection>
+            )}
+
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}, on ${card.vintage}.${card.volumeCur ? ` Rows showing ${"\u2192"} are 2025 then ${card.volumeCur}; the percentile ranks the 2025 figure, because the current season has no comparable population yet.` : ""}`}>
                 {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
@@ -9356,6 +9589,7 @@ export default function RosterScorer() {
   const [benchMovesOpen, setBenchMovesOpen] = useState(false);
   const [benchListOpen, setBenchListOpen] = useState(false);
   const [roleCtxOpen, setRoleCtxOpen] = useState(false);
+  const [startSitOpen, setStartSitOpen] = useState(true);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -10376,6 +10610,25 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === TARGET / CARRY TRAJECTORY, prompt-side ===
+      // Only players whose role MOVED emit a line. A stable player would just
+      // repeat the season share printed above him, and the header says so, so
+      // absence reads as "the average is fair" rather than as missing data —
+      // the same contract trajectoryContext follows.
+      const targetTrendContext = !CUR_VOLUME_LIVE ? "" : (result.valid || [])
+        .flatMap(p => {
+          const out = [];
+          const push = (t, kind, thr) => {
+            if (!t || t.delta == null || t.trend === "stable") return;
+            const pc = v => `${(v * 100).toFixed(1)}%`;
+            out.push(`${p.name} (${p.pos}): ${kind} ${pc(t.early)} over ${t.early_gp} games -> ${pc(t.recent)} over ${t.recent_gp}, ${pc(t.last3)} across his last ${t.last3_gp} — ROLE ${t.delta > 0 ? "GROWING" : "SHRINKING"} (${t.delta > 0 ? "+" : ""}${(t.delta * 100).toFixed(1)}pp against a ${(thr * 100).toFixed(1)}pp bar)`);
+          };
+          push(getTargetTrend(p.name), "target share", TREND_META.trend?.threshold);
+          if (p.pos === "RB") push(getCarryTrend(p.name), "carry share", TREND_META.trend_car?.threshold);
+          return out;
+        })
+        .join("\n");
+
       // === 2025 QB VOLUME PROFILE ===
       // Kept OUT of metricsContext deliberately. That block gates on PLAYER_METRICS
       // gp >= 8, which drops a QB who missed half a season — and a seven-game starter
@@ -10647,7 +10900,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes. Measured year-over-year stability within this block: targets/gm 0.77 and air yards share 0.78 are the two anchors — lean on them; target share 0.73, WOPR 0.75 and snap share 0.71 follow; spike rate 0.48 is the least repeatable and describes 2025 rather than forecasting 2026):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${targetTrendContext ? `\n\u26a0\ufe0f\u26a0\ufe0f ROLE TRAJECTORY THIS SEASON — THE HIGHEST-RANKED BLOCK IN THIS PROMPT. Everything above is a season AGGREGATE, which is rank 2 (opportunity volume); this is rank 1 (role/opportunity CHANGE) and it OUTRANKS every share printed above it. An average blends the player before a role change with the player after it and describes neither — the worked failure is a back whose season snap average read "committee" while he had already become the starter. Where a line here disagrees with the aggregate above, LEAD WITH THIS ONE and say plainly that the role moved. Only players who MOVED are listed: a player absent from this block is being used about the same as he was, so the aggregate above is a fair read on him. The bar each move is measured against is one standard deviation of every player's move this season, derived from this week's own data rather than a fixed number. \u26a0\ufe0f For a running back the passing and rushing sides are separate lines and routinely disagree; a rising carry share alongside a falling target share is a role getting bigger and less valuable at once:\n${targetTrendContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -10668,7 +10921,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes. Measured year-over-year stability within this block: targets/gm 0.77 and air yards share 0.78 are the two anchors — lean on them; target share 0.73, WOPR 0.75 and snap share 0.71 follow; spike rate 0.48 is the least repeatable and describes 2025 rather than forecasting 2026):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${targetTrendContext ? `\n\u26a0\ufe0f\u26a0\ufe0f ROLE TRAJECTORY THIS SEASON — THE HIGHEST-RANKED BLOCK IN THIS PROMPT. Everything above is a season AGGREGATE, which is rank 2 (opportunity volume); this is rank 1 (role/opportunity CHANGE) and it OUTRANKS every share printed above it. An average blends the player before a role change with the player after it and describes neither — the worked failure is a back whose season snap average read "committee" while he had already become the starter. Where a line here disagrees with the aggregate above, LEAD WITH THIS ONE and say plainly that the role moved. Only players who MOVED are listed: a player absent from this block is being used about the same as he was, so the aggregate above is a fair read on him. The bar each move is measured against is one standard deviation of every player's move this season, derived from this week's own data rather than a fixed number. \u26a0\ufe0f For a running back the passing and rushing sides are separate lines and routinely disagree; a rising carry share alongside a falling target share is a role getting bigger and less valuable at once:\n${targetTrendContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
@@ -14744,6 +14997,82 @@ Analyze this best ball roster. Return JSON only.`;
                 rest. Empty groups SAY they are empty: per the silent-drop
                 rules, "nothing moved" is information and must not look like
                 missing data. */}
+            {(() => {
+              const board = buildStartSitBoard(analyzed.allStarters);
+              // Pre-season, or before the weekly refresh has run, there is
+              // nothing to trend. The panel does not exist rather than
+              // rendering an empty table.
+              if (!board || board.rows.length === 0) return null;
+              const tone = { rising: "var(--accent-lime)", falling: "var(--danger)", stable: "var(--text-secondary)", insufficient: "var(--text-dim)" };
+              return (
+                <div id="rxr-trends" style={{ marginBottom: "20px" }}>
+                  <SectionH2
+                    title="START / SIT · ROLE TRENDS"
+                    open={startSitOpen}
+                    onToggle={() => setStartSitOpen(o => !o)}
+                    hint={board.movers > 0 ? `${board.movers} moving · ${board.vintage}` : board.vintage} />
+                  {startSitOpen && (
+                    <div style={{ padding: "10px 12px", background: "var(--bg-raised)", borderRadius: "0 0 6px 6px" }}>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
+                        Your starters ranked by how much their role has MOVED this season, biggest movers first in both directions — a collapsing role is the start you would otherwise make out of habit. Share of his team's targets, or carries for a back, split {board.splitMode === "calendar" ? "W1-9 against W10-18" : "into halves of the weeks he has played"}. {board.tgtThreshold != null
+                          ? <>A move counts as rising or falling once it clears {(board.tgtThreshold * 100).toFixed(1)}pp of target share{board.carThreshold != null ? ` or ${(board.carThreshold * 100).toFixed(1)}pp of carry share` : ""} — one standard deviation of every player's move this season, so the bar comes from this week's data rather than being picked. STABLE beside a visible change means the change is real but smaller than that bar.</>
+                          : <>It is too early in the season to set a bar: too few players league-wide have enough games to split, so nothing is labelled rising or falling yet and every row shows what it can measure instead.</>}
+                        <div style={{ marginTop: "4px", color: "var(--text-dim)" }}>
+                          Quarterbacks are not listed: neither share describes a passer's role. This never touches your grade{board.pending > 0 ? `, and ${board.pending} starter${board.pending > 1 ? "s do" : " does"} not have enough games yet — those say so rather than reading flat` : ""}.
+                        </div>
+                      </div>
+                      {board.rows.map((r, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", minWidth: "140px" }}>
+                            {r.name}
+                            <span style={{ color: posColor(r.pos), fontWeight: 700, marginLeft: "6px", fontSize: "10px" }}>{r.pos}</span>
+                            <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}> {r.team}</span>
+                          </span>
+                          {r.delta != null ? (
+                            <>
+                              {/* ⚠️ THE DELTA AND THE BAR TRAVEL WITH THE LABEL.
+                                  Without them a row reading "STABLE" above
+                                  "7.3% -> 3.9%" looks like the panel
+                                  contradicting itself — the label-disagrees-
+                                  with-its-own-number class this repo has fixed
+                                  three times. The move IS small in absolute
+                                  terms and the bar is absolute by design, so
+                                  the fix is to show the arithmetic, never to
+                                  loosen the threshold. */}
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: tone[r.state], textTransform: "uppercase", letterSpacing: "0.04em", minWidth: "62px" }}>
+                                {r.state}
+                                <span style={{ fontWeight: 500, textTransform: "none", letterSpacing: 0, color: "var(--text-dim)" }}>
+                                  {" "}{r.delta > 0 ? "+" : ""}{(r.delta * 100).toFixed(1)}pp
+                                </span>
+                              </span>
+                              <span style={{ fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                {pct1(r.early)} <span style={{ color: "var(--text-dim)" }}>→</span> {pct1(r.recent)}
+                                <span style={{ color: "var(--text-dim)", fontSize: "10px" }}> {r.kind}</span>
+                              </span>
+                              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+                                last {r.last3gp}: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{pct1(r.last3)}</span>
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              {r.sofar != null && (
+                                <span style={{ fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                  {pct1(r.sofar)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>{r.kind} over {r.sofarGp} game{r.sofarGp === 1 ? "" : "s"}</span>
+                                </span>
+                              )}
+                              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                                no trend yet: {r.why} <span style={{ color: "var(--text-dim)" }}>— a sample-size gap, not a flat role</span>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {(() => {
               const ctx = buildRoleContext(analyzed.allStarters);
               const n = ctx.moved.length + ctx.absences.length;

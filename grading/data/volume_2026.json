@@ -26,6 +26,48 @@
    "tgt_sh": 0.729,
    "wopr": 0.752
   },
+  "trend": {
+   "trend": {
+    "counts": {
+     "falling": 0,
+     "insufficient": 0,
+     "rising": 0,
+     "stable": 0
+    },
+    "delta_median": null,
+    "delta_n": 0,
+    "delta_stdev": null,
+    "last_n": 3,
+    "metric": "target share, per week",
+    "min_window_gp": 2,
+    "split_mode": "halves",
+    "threshold": null,
+    "threshold_source": "not derived \u2014 only 0 deltas, need 30"
+   },
+   "trend_car": {
+    "counts": {
+     "falling": 0,
+     "insufficient": 0,
+     "rising": 0,
+     "stable": 0
+    },
+    "delta_median": null,
+    "delta_n": 0,
+    "delta_stdev": null,
+    "last_n": 3,
+    "metric": "carry share, per week (RB only)",
+    "min_window_gp": 2,
+    "split_mode": "halves",
+    "threshold": null,
+    "threshold_source": "not derived \u2014 only 0 deltas, need 30"
+   }
+  },
+  "trend_rules": {
+   "both_sides": "`trend` is the PASSING side, `trend_car` the RUSHING side. A back can be flat in one and moving in the other \u2014 RJ Harvey 2025 reads stable on target share while his touches doubled. Read both for RBs.",
+   "insufficient": "means not enough games to split, NOT a flat role. Never render it as stable.",
+   "rank": "1 \u2014 role/opportunity CHANGE, which outranks the season aggregate sitting beside it",
+   "windows": "calendar (W1-9 vs W10-18) only on a complete season, otherwise halves of the weeks covered. The two are different measurements and never comparable."
+  },
   "weeks_covered": 0
  },
  "players": {}
