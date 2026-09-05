@@ -1563,7 +1563,7 @@ own calibration run and its own cap.**
 
 | Date | Change |
 |---|---|
-| Sep 5 2026 | §15 — TEP scoring banked as reference only; the engine stays half-PPR |
+| Sep 5 2026 | §15 — TEP banked (reference only); count corrected to 3 TEs at every anchor tier |
 | Sep 3 2026 | Yahoo Fantasy API pull — real free agents, live roster, this week's opponent |
 | Sep 2 2026 | Turn-aware reaches — a reach is only a reach if the player survives to your next pick |
 | Sep 2 2026 | findPlayer step 5 repairs a one-character surname misread; test-findplayer could not fail |
@@ -2029,13 +2029,67 @@ Warren               22      10.64    +3.61   +1.48   +0.55   16.28
 buys about 1.5 points a week over a tenth-round one, and costs a first-round pick
 to do it.
 
+### ⚠️⚠️ CORRECTED Sep 5 2026 — THE COUNT IS 3, WHATEVER THE ANCHOR
+
+**This section originally read "elite anchor -> 2 TEs, good -> 3, none -> 4."
+That was WRONG, and it was wrong because the gradient above measures the TE SLOT
+ONLY.** Max-of-N asks which tight end fills one lineup spot. It cannot see the
+FLEX — and the flex is the entire structural point of TEP.
+
 ```
-elite + durable anchor at a fair price   ->  2 TEs
-good + durable anchor                    ->  3 TEs
-no anchor, or a fragile one              ->  4 TEs
+                                McBride's TE2 is worth
+max-of-N   (TE slot only)              +2.22
+full roster (slot + FLEX)              +4.31     <- nearly double
 ```
 
-A fragile TE1 raises TE2's value sharply, because absences count as zero.
+Re-run as a full-season optimal lineup across all three anchor tiers, swapping
+only what each path actually forces you to give up:
+
+```
+anchor tier                          1 TE     2 TE     3 TE     4 TE    best
+ELITE   McBride  (10, lose Taylor)  119.25   123.56   124.53   123.15   3 TE
+MID     Kittle   (57, lose Moore)   121.82   130.02   131.91   131.74   3 TE
+NONE    Ferguson-led (actual)       123.64   128.74   129.85   129.70   3 TE
+```
+
+**Three is optimal at every tier and it is not close.** One tight end is
+catastrophic in all three (-4 to -10 a week). Two is a large step up. Four is
+slightly negative, because by then the extra TE is crowding out the receivers
+competing for the same flex slot.
+
+**The anchor changes WHICH tight ends you own and WHAT YOU PAY. It does not
+change how many.**
+
+### A single TE is the worst construction available in this format
+
+Best ball has no waiver wire, so one tight end means a **zero in that slot every
+week he is out** — in the format where that slot is worth the most. McBride
+missed one week in 2025, so the +4.31 baseline is measured on a near-perfect
+season. Simulated across missed time:
+
+```
+games the anchor misses    TE slot solo    with TE2    TE2 is worth
+   0                          17.79          20.01        +2.22
+   2                          15.69          18.81        +3.12
+   4                          13.60          17.65        +4.05
+   6                          11.49          16.42        +4.93
+   8                           9.43          15.28        +5.84
+```
+
+At roster level with four games missed the 2-TE build gains **+6.08** over solo.
+**The insurance case is the part to weight, because it does not depend on the
+anchor repeating a career year.**
+
+### ⚠️ TE2 QUALITY MATTERS — a last-round dart does not function as one
+
+```
+TE2 = Hunter Henry  (pick 129)    +2.22 in the TE slot
+TE2 = Parkinson     (pick 189)    +0.08
+```
+
+Henry at 10.52/gm out-scores McBride in enough weeks to actually win the slot;
+Parkinson at 9.27 almost never does. **Spend a real pick on TE2 — rounds 11-13,
+not round 16.** The third TE is where a late dart belongs.
 
 ### ⚠️ TESTED END TO END ON A REAL ROSTER — the anchor paths LOSE
 
@@ -2134,7 +2188,7 @@ of them went after 71.
 1. Never a TE inside the first six picks.           structural, always holds
 2. Watch the room. 50%+ reaches mean keep waiting.  market-dependent
 3. Buy the moment a real TE is BEST AVAILABLE.      Kittle from pick 16 on
-4. Then take 3-4, because waiting usually means no anchor.
+4. Then take THREE. Not two, not four -- see the correction below.
 ```
 
 **Step 3 is the one that was nearly missed.** An earlier draft of this section
