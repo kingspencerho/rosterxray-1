@@ -212,6 +212,18 @@ ok("the volume builder documents the games-played denominator",
       /git diff --quiet -- grading\/data/.test(wf)
       && /steps\.diff\.outputs\.changed == 'true'/.test(wf));
 
+    // The PR body states how many guards ran. That number was HAND-TYPED as 29
+    // and was already wrong by two the first time the job ran for real — the
+    // same duplicate-definition class this repo has hit repeatedly, in a body
+    // nobody re-reads. It must be derived from the test chain, and no literal
+    // count may appear anywhere in the file.
+    ok("the guard count in the PR body is derived, not hand-typed",
+      /GUARDS=\$\(node -e/.test(wf) && /scripts\.test/.test(wf)
+      && /All \$GUARDS guards/.test(wf));
+    const hardCount = wf.match(/\b(?:all|All)\s+\d+\s+guards?\b/);
+    ok("no literal guard count survives anywhere in the workflow",
+      hardCount === null, hardCount ? hardCount[0] : "");
+
     ok("it is scheduled and manually runnable",
       /schedule:/.test(wf) && /cron:/.test(wf) && /workflow_dispatch:/.test(wf));
     ok("permissions are declared rather than inherited", /^permissions:/m.test(wf));

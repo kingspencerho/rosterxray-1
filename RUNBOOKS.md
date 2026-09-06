@@ -69,6 +69,29 @@ not one.)*
 path with the `&` call operator in front of it is required, and it is why the first version of
 this instruction failed.
 
+## ⭐⭐ THE MANUAL RUN IS NOW MOSTLY SUPERSEDED — a robot does it (added Sep 6 2026)
+
+**A GitHub Action, `weekly-data-refresh`, now runs this exact refresh on a schedule** — cron
+`0 14 * * 2`, so **Tuesdays at 14:00 UTC**. It runs `refresh-inseason.sh`, runs the guards, and
+**opens a PR** rather than pushing. It does not touch the default branch, and it fails the run
+if the refresh dirtied anything outside `grading/data`.
+
+⭐ **So the watch readings can be read off the PR branch instead of typed by hand.** To see the
+latest without running anything:
+
+```bash
+git fetch origin && git show origin/data/refresh-2026-W36:grading/data/status_2026.json | head -40
+```
+
+⚠️ **What the robot does NOT do, and it is the half that matters:** it runs the refresh, never
+`report-stale-news.mjs`. **So the CONTRADICTION count — the number that justifies the whole
+layer — is still a manual read.** Weekly is also not daily; a feed that breaks on a Thursday and
+recovers by Tuesday is invisible to it.
+
+⛔ **A weekly robot reading is WEAKER evidence than seven daily ones for RELIABILITY** (two
+samples cannot show intermittent failure) **and roughly as strong for SHAPE** (five days apart is
+a real test of whether the fields moved). Read the Sep 8 decision with that split in mind.
+
 ## What a healthy pull looks like
 
 ```
@@ -142,7 +165,7 @@ measured input is not a trade worth making. That one is permanent, not part of t
 | 3 | Sep 3 | | | | | |
 | 4 | Sep 4 | | | | | |
 | 5 | Sep 5 | | | | | |
-| 6 | Sep 6 | | | | | |
+| 6 | Sep 6 | **813** | **571** | **71** | — | ⭐⭐ **NOT a manual run — the new `weekly-data-refresh` GitHub Action produced this at 07:34:50Z and opened PR #98 from `data/refresh-2026-W36`.** ⚠️ **Sep 6 is a SATURDAY: this was a `workflow_dispatch` fired by hand to test the repo permission, NOT the Tuesday cron, which has still never run.** The job is proven end to end (refresh → guards → branch → PR); the SCHEDULE is not, and Sep 8 is its first real firing. All four numbers inside the healthy bands **five days after baseline**: players 812→813, depth_chart 544→571 (firming up pre-season, the right direction), hard_status 75→71. Contradictions not recorded — the workflow runs the refresh, not the report. |
 | 7 | Sep 7 | | | | | |
 | — | **Sep 8** | | | | | **DECISION:** |
 

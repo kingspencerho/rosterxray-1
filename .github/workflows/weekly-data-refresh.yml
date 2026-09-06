@@ -99,7 +99,7 @@ jobs:
             echo "::error::Refresh modified files outside grading/data:"; echo "$outside"; exit 1
           fi
 
-      # THE GUARDS GATE THE COMMIT. If any of the 29 fail, the job stops here
+      # THE GUARDS GATE THE COMMIT. If any one of them fails, the job stops here
       # and no PR is opened — the stale data stays live, which is the safe
       # direction to fail because its vintage label still tells the truth.
       - name: Run the guards
@@ -135,12 +135,20 @@ jobs:
 
           git push -f origin "$BR"
 
+          # ⚠️ DERIVED, never hand-typed. This line used to carry a literal
+          # count, and it was already stale by two the first time the job ran
+          # for real — a hard-coded number in a body nobody re-reads is exactly
+          # the duplicate-definition class this repo keeps hitting. The test
+          # chain in package.json is the single source of the count, and guard
+          # 15 fails the build if a literal reappears anywhere in this file.
+          GUARDS=$(node -e "const s=require('./package.json').scripts.test;console.log((s.match(/[.]mjs/g)||[]).length)")
+
           {
             printf '%s\n' \
               "Automated in-season refresh of the **context-only** data layers." "" \
               "- \`snap_trajectory\` · \`qb_profile\` · \`gamelogs\` · \`volume\` (usage trajectory) · \`status\`" \
               "- **\`player_metrics_2025.json\` is frozen and untouched** — it feeds four scored inputs, so no grade can move from this PR." \
-              "- All 29 guards passed before the commit was made; the job refuses to open a PR if any fail." "" \
+              "- All $GUARDS guards passed before the commit was made; the job refuses to open a PR if any fail." "" \
               "Merging is what makes these numbers reach the live site: the data files are static imports bundled at build time, so nothing updates until Vercel rebuilds." "" \
               "<details><summary>Refresh log</summary>" ""
             printf '```\n'; cat refresh.log; printf '```\n'
