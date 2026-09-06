@@ -6701,6 +6701,35 @@ toggles the read-only bit, so the mode reads `0o666`. It passes in CI. Left for 
 rather than silently relaxed: it is a security assertion, and skipping it on Windows deletes
 a real check on the platform where the protection genuinely does not apply.
 
+### ⛔ NEITHER LINE REACHES REDRAFT — verified in a browser Sep 6, 2026
+
+Rendered both modes. Best ball shows both; **redraft shows neither**, and nor does the
+ADP-discipline note. All three sit in the best-ball branch of the results header.
+
+```
+best ball   vs the field · an ordinary entry scores 5.46 here, so this roster sits in the top 10%
+            measured on · 10 of 18 players with 2025 data ...
+redraft     (absent)   (absent)
+```
+
+**That is correct-by-accident rather than by design, and the reason matters:**
+
+1. **The baseline file is keyed by TOURNAMENT** (`main`, `bbm7`, `puppy` …). Redraft is keyed
+   by LEAGUE (`yahoo_std`, `yahoo_ppr`, `yahoo_std_10`). **There is no redraft baseline to
+   show** — `baselines_2026.json` has no `yahoo_std` key.
+2. **The render reads `tournament`, the best-ball state variable.** In redraft that still holds
+   its default `"main"`, so if the line ever leaked out of the branch **it would compare a
+   redraft score against a BEST-BALL field** — a confident, precise, wrong comparison.
+
+⚠️ **A redraft baseline is a genuinely different build, not a config change.** The field there
+is not 12 rosters from one snake off best-ball ADP — it is 12 lineups from a redraft board
+(`ADP_YAHOO`, a different table with a deeper tail), scored by the Floor Layer rather than the
+Ceiling Shape Layer, in leagues whose starter slots and bench depth vary by preset.
+
+**Metric coverage, by contrast, is portable as-is** — it reads `analyzed.valid` and the shared
+`CEILING_GATE`, both of which exist in redraft. It is one render-site addition inside the
+redraft branch, and the Floor Layer uses the same gate, so the number is already the right one.
+
 ### Rebuild
 
 ```
