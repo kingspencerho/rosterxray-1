@@ -5167,10 +5167,16 @@ const fieldPlacement = (score, tournamentKey) => {
   const b = BASELINES?.tournaments?.[tournamentKey];
   if (!b || typeof score !== "number" || !Number.isFinite(score)) return null;
   // Bands are named for what the reader can act on, not for the quartile boundary.
-  const where = score >= b.p90 ? "in the top 10% of the simulated field"
+  // ⚠️ EVERY BAND IS BARE — the CALLER supplies "of a simulated field". Until
+  // Sep 6 2026 the top band alone carried that suffix and the other four did not,
+  // which read fine in the one long sentence that used it and printed "in the top
+  // 10% of the simulated field of a simulated field" the moment a second, shorter
+  // render site was added. A string that is only correct in one caller is the
+  // duplicate-definition class wearing a sentence.
+  const where = score >= b.p90 ? "in the top 10%"
     : score >= b.p75 ? "in the top 25%"
-    : score >= b.median ? "above the middle of the field"
-    : score >= b.p25 ? "below the middle of the field"
+    : score >= b.median ? "above the middle"
+    : score >= b.p25 ? "below the middle"
     : "in the bottom 25%";
   return { median: b.median, where, n: b.n };
 };
@@ -13246,65 +13252,81 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
-                {/* The ADP discipline component declines to score on a plain list
-                    (table ADP carries a +7 tail-compression offset that would be
-                    scored instead of the drafting), in superflex, and without pick
-                    numbers. Per the Jul 27 no-silent-drops rule an absence must be
-                    visible, so the reason renders here — muted, hueless chrome, not
-                    --caution: this is information, not a warning. It renders ONLY
-                    when the component did not fire; when it did, the strengths list
-                    already carries the result. */}
-                {analyzed.advanceLayer?.disciplineWhy && (
-                  <div style={{
-                    marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
-                    color: "var(--text-muted)",
-                  }}>
-                    <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
-                    {" · "}{analyzed.advanceLayer.disciplineWhy}
-                  </div>
-                )}
-                {/* THE FIELD BASELINE. Same muted, hueless treatment as the line above:
-                    a comparison is information, not a warning, so --caution stays reserved
-                    for real ones per the Aug 28 palette rule. It renders whenever a
-                    baseline exists for the selected tournament, which is every best-ball
-                    config — unlike the discipline note, which renders only on absence,
-                    because here the number IS the finding. */}
+                {/* ONE LINE UNDER THE GRADE, NOT THREE — his call Sep 6 2026:
+                    "its way too wordy... there is way too much info around this area."
+                    The three qualifier blocks that lived here (ADP discipline, field
+                    baseline, metric coverage) totalled ~60 words of 11px prose sitting
+                    directly beneath the grade. That is the densest real estate on the
+                    page and the one place P2 in USER-PERSONAS.md — the on-the-clock
+                    drafter, under 30 seconds, timer running — has no taps to spend.
+
+                    Same reading-frequency rule the results view already runs on:
+                    WHAT STAYS AT REST IS THE FINDING, WHAT EARNS A TAP IS THE REASONING.
+                    At rest: "top 10% of a simulated field · graded on 10 of 18 players".
+                    Eleven words carrying both numbers, against sixty.
+
+                    ⛔ THE SIMULATED CAVEAT STAYS AT REST, NOT BEHIND THE TAP. Guard 32
+                    exists because "a percentile against a simulation must never read as
+                    a percentile against the field", so the resting line says "of a
+                    simulated field" and the full sentence renders inside. Compressing
+                    copy may not quietly drop the thing the copy was guarded for.
+
+                    Native <details> rather than a new useState: a hook cannot go inside
+                    this IIFE, and the element is already an idiom in this file. */}
                 {(() => {
                   const fp = fieldPlacement(analyzed.score, tournament);
-                  if (!fp) return null;
-                  return (
-                    <div style={{
-                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
-                      color: "var(--text-muted)",
-                    }}>
-                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
-                      {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
-                      {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
-                    </div>
-                  );
-                })()}
-                {/* METRIC COVERAGE. The match counter says how many NAMES resolved;
-                    this says how many of them the scored metric layers could actually
-                    see. They are different numbers and the gap is invisible without
-                    this line — a roster can read 18/18 matched while eleven players
-                    carry the data. Muted chrome, same as the two lines above: this
-                    qualifies the grade, it does not warn about it. */}
-                {(() => {
                   const mc = metricCoverage(analyzed.valid);
-                  if (!mc || mc.measured >= mc.total) return null;
-                  const thin = mc.measured / mc.total < 0.7;
+                  const why = analyzed.advanceLayer?.disciplineWhy;
+                  // Coverage is a qualifier, so it appears only when it has something to
+                  // say. On a fully measured roster it would be noise on every grade.
+                  const partial = !!mc && mc.measured < mc.total;
+                  if (!fp && !partial && !why) return null;
+                  const thin = partial && mc.measured / mc.total < 0.7;
                   return (
-                    <div style={{
-                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
-                      color: "var(--text-muted)",
-                    }}>
-                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
-                      {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
-                      {" · "}<span style={{ opacity: 0.8 }}>
-                        the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the ceiling, floor and naked-RB checks cannot see them
-                        {thin ? " — this grade rests mostly on construction" : ""}
-                      </span>
-                    </div>
+                    <details style={{ marginTop: "4px" }}>
+                      <summary style={{
+                        cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
+                        display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
+                      }}>
+                        {fp && (
+                          <span><strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong> of a simulated field</span>
+                        )}
+                        {fp && partial && <span style={{ opacity: 0.45 }}>·</span>}
+                        {partial && (
+                          <span>graded on <strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players</span>
+                        )}
+                        <span style={{
+                          marginLeft: "auto", color: "var(--ui-accent)",
+                          fontWeight: 600, letterSpacing: "0.05em",
+                        }}>why ⌄</span>
+                      </summary>
+                      <div style={{ fontSize: "11px", lineHeight: 1.5, color: "var(--text-muted)", paddingBottom: "6px" }}>
+                        {why && (
+                          <div>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
+                            {" · "}{analyzed.advanceLayer.disciplineWhy}
+                          </div>
+                        )}
+                        {fp && (
+                          <div style={{ marginTop: why ? "6px" : 0 }}>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
+                            {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
+                            {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
+                          </div>
+                        )}
+                        {partial && (
+                          <div style={{ marginTop: "6px" }}>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                            {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                            {" · "}<span style={{ opacity: 0.8 }}>
+                              the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the ceiling, floor and naked-RB checks cannot see them
+                              {thin ? " — this grade rests mostly on construction" : ""}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </details>
                   );
                 })()}
                 {/* Best ball rosters are a FIXED size, so anything short means a
@@ -14733,22 +14755,35 @@ Analyze this best ball roster. Return JSON only.`;
                     baseline file is keyed by tournament, redraft is keyed by league,
                     and the render reads the best-ball `tournament` state, so a copy
                     here would compare a redraft score against a best-ball field. */}
+                {/* Compressed to match the best-ball header, same call, same reason:
+                    the count is the finding and the gate is the reasoning. */}
                 {(() => {
                   const mc = metricCoverage(analyzed.valid);
-                  if (!mc || mc.measured >= mc.total) return null;
+                  const partial = !!mc && mc.measured < mc.total;
+                  if (!partial) return null;
                   const thin = mc.measured / mc.total < 0.7;
                   return (
-                    <div style={{
-                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
-                      color: "var(--text-muted)",
-                    }}>
-                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
-                      {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
-                      {" · "}<span style={{ opacity: 0.8 }}>
-                        the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the floor and lineup-confidence checks cannot see them
-                        {thin ? " — this grade rests mostly on construction and schedule" : ""}
-                      </span>
-                    </div>
+                    <details style={{ marginTop: "4px" }}>
+                      <summary style={{
+                        cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
+                        display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
+                      }}>
+                        <span>graded on <strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players</span>
+                        <span style={{
+                          marginLeft: "auto", color: "var(--ui-accent)",
+                          fontWeight: 600, letterSpacing: "0.05em",
+                        }}>why ⌄</span>
+                      </summary>
+                      <div style={{ fontSize: "11px", lineHeight: 1.5, color: "var(--text-muted)", paddingBottom: "6px" }}>
+                        <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                        {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                        {" · "}<span style={{ opacity: 0.8 }}>
+                          the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the floor and lineup-confidence checks cannot see them
+                          {thin ? " — this grade rests mostly on construction and schedule" : ""}
+                        </span>
+                      </div>
+                    </details>
                   );
                 })()}
                 {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),

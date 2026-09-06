@@ -6904,3 +6904,85 @@ asserts `fieldPlacement` keeps exactly one call site for that reason.
 
 **A redraft baseline remains a real build, not a config change** — a different ADP table with
 a deeper tail, scored by the Floor Layer, in leagues whose starter slots vary by preset.
+
+---
+
+## The Grade Header Was Three Paragraphs. Now It Is One Line. (Sep 6, 2026)
+
+**His call, on a screenshot of the live page:** *"its way too wordy... i need all my updates to
+be optimized for user experience... there is way too much info around this area."*
+**PRESENTATION ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures + 3 leagues x 5),
+against a pristine worktree at HEAD. Guards 31 and 32 updated.
+
+### Measured, in a browser, before and after
+
+```
+                    at rest                         opened
+BEFORE   3 stacked blocks · 215px · 100 words       n/a, always on
+AFTER    1 summary line  ·  47px ·  12 words        279px, by choice
+```
+
+**The resting line is now:** *in the top 10% of a simulated field · graded on 10 of 18 players ·
+why ⌄*
+
+⛔ **WHY IT MATTERED MORE HERE THAN ANYWHERE ELSE ON THE PAGE.** Three separate qualifier
+blocks — ADP discipline, field baseline, metric coverage — had each been added on its own merits
+and none of them looked at the other two. **They landed in the densest real estate the app has,
+directly under the grade, which is the one place `USER-PERSONAS.md` P2 (the on-the-clock drafter,
+under 30 seconds, timer running) has no taps to spend.** Each was individually justified; the
+stack of three was not.
+
+⭐ **THE RULE IS THE ONE THE RESULTS VIEW ALREADY RUNS ON, applied one level down: what stays at
+rest is the FINDING, what earns a tap is the REASONING.** Both numbers survive at rest. Every
+sentence of explanation moved inside.
+
+### ⛔ COMPRESSION MAY NOT DROP WHAT THE COPY WAS GUARDED FOR
+
+Guard 32 exists because *a percentile against a simulation must never read as a percentile
+against the field.* **The cheapest way to hit the word count was to move "simulated" behind the
+tap, and that would have been the feature quietly becoming a lie again.** So the resting line
+says **"of a simulated field"** and the full sentence renders inside. **A new assertion pins the
+resting half specifically**, because the old one would pass on a version that only said it once
+the reader opened the disclosure.
+
+### ⚠️ THE RENDER CAUGHT A REAL BUG THE SOURCE DID NOT SHOW
+
+The first build printed **"in the top 10% of the simulated field of a simulated field."**
+`fieldPlacement` returned five bands and **exactly one of them carried the suffix "of the
+simulated field"** while the other four were bare. That read correctly in the single long
+sentence it was written for and broke the moment a second, shorter render site existed.
+
+**All five bands are now bare and the CALLER supplies the context.** ⭐ **A string that is only
+correct in one caller is the duplicate-definition class wearing a sentence** — ninth instance in
+this repo, and the first where the duplication was inside a word rather than a value.
+
+### Native `<details>`, not a new `useState`
+
+A hook cannot go inside the render IIFE, and `<details>` was already an idiom in this file. Zero
+new state, zero new component. Summary is 47px, so **0 tap targets under 32px** in either mode.
+The redraft coverage line got the same treatment so the two modes read identically.
+
+### ⚠️⚠️ TWO PROCESS TRAPS, BOTH CAUGHT BY GUARDS RATHER THAN BY READING
+
+1. **A Python text-mode write silently converted all 17,105 lines of `App.jsx` to CRLF.**
+   `io.open(f, "w")` translates `
+` to `os.linesep` on Windows. Nothing errored, the build was
+   clean, and **guard 29 failed on a regex containing `\{
+` — an assertion about
+   trajectory data, catching a line-ending change.** ⭐ **Always pass `newline=""` when
+   rewriting a source file, and check `git diff --stat` for an implausible line count.**
+2. **Guard 31 asserted its four render properties inside a MAGIC 700-CHARACTER WINDOW.** Moving
+   the reason into the disclosure pushed it past that window and all four failed **on code that
+   was correct**. A fixed byte window asserts "these strings are near each other", which is not a
+   property anybody wants. **It is now bounded to the enclosing render block** — same intent, no
+   magic number, survives any future reshuffle. ⛔ **Note what was NOT done: the assertions were
+   not deleted or loosened.** Rewriting a brittle locator is not relaxing a guard; dropping the
+   check it performs would have been.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL · 33 guards pass · dual-file identical
+rendered at 430px: 0 tap targets under 32px, no new console errors
+  (the /api/analyze 404 is the documented Vite behaviour)
+```

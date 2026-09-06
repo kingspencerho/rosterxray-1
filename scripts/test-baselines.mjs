@@ -178,9 +178,30 @@ ok("the line names which checks go blind",
   app.includes("ceiling, floor and naked-RB checks cannot see them"));
 ok("a thin roster is flagged as resting on construction",
   app.includes("rests mostly on construction") && app.includes("mc.measured / mc.total < 0.7"));
+// The gate moved from an early `mc.measured >= mc.total` return to a named
+// `partial` flag when the header was compressed on Sep 6 2026, because the block
+// now also carries the field baseline and the discipline reason and cannot bail
+// out on coverage alone. Assert the PROPERTY — no coverage line without partial
+// coverage — rather than one literal early-return, which is the same lesson the
+// floor-layer guard learned when CEILING_GATE became a constant.
 ok("it renders ONLY when coverage is incomplete",
-  app.includes("mc.measured >= mc.total) return null"),
+  (app.match(/mc\.measured < mc\.total/g) || []).length === 2
+  && (app.match(/\{partial && \(/g) || []).length >= 1
+  && app.includes("if (!partial) return null;"),
   "on a fully measured roster the qualifier would be noise on every grade");
+
+// ⭐ COMPRESSION MUST NOT DROP WHAT THE COPY WAS GUARDED FOR. The three header
+// qualifiers were folded into one <details> because ~60 words of 11px prose under
+// the grade is unreadable on a phone mid-draft. The caveat that the field is
+// SIMULATED is the one thing that may not move behind the tap: at rest the line
+// reads "<placement> of a simulated field", so a percentile against a model can
+// never be read as a percentile against real opponents even unopened.
+ok("the RESTING line still says the field is simulated",
+  /of a simulated field/.test(app),
+  "the full caveat may live inside the disclosure; the word may not");
+ok("the header qualifiers are one disclosure, not three stacked lines",
+  (app.match(/why ⌄<\/span>/g) || []).length >= 1,
+  "one affordance, opened by choice");
 ok("it is muted chrome, not --caution",
   app.includes("measured on</span>") && !/measured on[\s\S]{0,200}--caution/.test(app));
 

@@ -167,12 +167,26 @@ ok("the results view reads disciplineWhy exactly once", (app.split(whyRef).lengt
 const bbOpen = app.indexOf('analyzed.mode !== "redraft" && (');
 const rdOpen = app.indexOf('analyzed.mode === "redraft" && (');
 ok("it renders inside the BEST BALL branch, before the redraft branch opens", whyIdx > bbOpen && whyIdx < rdOpen, `${bbOpen} < ${whyIdx} < ${rdOpen}`);
-const before = app.slice(Math.max(0, whyIdx - 900), whyIdx);
-const after = app.slice(whyIdx, whyIdx + 700);
-ok("it sits directly after the counts-row button, as a sibling, not inside it", before.includes("</button>") && !after.slice(0, after.indexOf("</div>")).includes("<button"));
-ok("it is muted chrome (--text-muted), not a warning (--caution)", after.includes("var(--text-muted)") && !after.includes("var(--caution)"));
-ok("it names itself so the reader knows which layer declined", after.includes("ADP discipline not scored"));
-ok("it renders the engine's own reason string, not a hand-typed copy", /\{analyzed\.advanceLayer\.disciplineWhy\}/.test(after));
+// WARNING: THE WINDOW USED TO BE A MAGIC 700 CHARACTERS AND THAT WAS THE BUG,
+// NOT THE FEATURE. When the three header qualifiers were compressed into one
+// <details> on Sep 6 2026, the reason moved further from its own guard clause and
+// all four assertions below failed on code that was correct. A fixed byte window
+// asserts "these strings are near each other", which is not a property anyone
+// wants. Bound it to the ENCLOSING RENDER BLOCK instead: same intent, no magic
+// number, and it survives any future reshuffle inside that block.
+const whyStart = app.lastIndexOf("{(() => {", whyIdx);
+const whyEnd = app.indexOf("})()}", whyIdx);
+ok("the reason lives inside one render block", whyStart !== -1 && whyEnd > whyIdx);
+const whyBlock = app.slice(whyStart, whyEnd + 5);
+const whyBefore = app.slice(Math.max(0, whyStart - 3000), whyStart);
+ok("it sits after the counts-row button, as a sibling, not inside it",
+  whyBefore.includes("</button>") && !whyBlock.includes("<button"));
+ok("it is muted chrome (--text-muted), not a warning (--caution)",
+  whyBlock.includes("var(--text-muted)") && !whyBlock.includes("var(--caution)"));
+ok("it names itself so the reader knows which layer declined", whyBlock.includes("ADP discipline not scored"));
+ok("it renders the engine's own reason string, not a hand-typed copy", /\{analyzed\.advanceLayer\.disciplineWhy\}/.test(whyBlock));
+// Compressing the header may not bury the reason with no way back to it.
+ok("the block is a disclosure the reader can open", /<details/.test(whyBlock) && /<summary/.test(whyBlock));
 
 // ------------------------------------------------------- 6. containment
 console.log("\n=== best ball only ===");
