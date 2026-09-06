@@ -629,14 +629,25 @@ ok("the section note refuses to assert causation",
 console.log("\nevery dated situation is reachable");
 
 const nowFixed = Date.UTC(2026, 8, 1);
+//
+// ⚠️ THE TWO CORPUS SWEEPS RUN ON THE REAL CLOCK, NOT ON nowFixed.
+// A pinned clock is right for the unit assertions below — they compare dates
+// against each other and would rot if "now" drifted. It is WRONG for a sweep
+// over hand-written prose: an entry written after the pin is a FUTURE date to
+// the guard, so `newsDateFor` discards it and the entry reports unreachable.
+// That fired on Sep 4 2026 news against a Sep 1 pin, and the failure said
+// nothing about the app. Both sweeps are safe on a live clock because time only
+// moves one way: entries get older, reachability strictly improves, and a note
+// dated ahead of today — the thing this actually guards — still fails.
+const nowReal = Date.now();
 const situations = Object.entries(e.SITUATIONS);
 const unreachable = [];
 for (const [k, v] of situations) {
   const text = [v.trendNote, v.reason].find(t => typeof t === "string" && t.trim());
   const dated = (typeof v.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.date))
-    || (text && e.parseNewsDate(text, nowFixed));
+    || (text && e.parseNewsDate(text, nowReal));
   if (!text || !dated) continue;             // undated is withheld on purpose
-  if (!e.buildPlayerNews(k, nowFixed).some(n => n.source === "situation")) unreachable.push(k);
+  if (!e.buildPlayerNews(k, nowReal).some(n => n.source === "situation")) unreachable.push(k);
 }
 ok("no dated SITUATIONS entry is invisible to the card", unreachable.length === 0,
    unreachable.slice(0, 5).join(", "));
@@ -706,7 +717,7 @@ ok("a plain string row (RECENT_NEWS) still parses from prose",
    e.newsDateFor("signed Aug 20 2026", "signed Aug 20 2026", nowFixed)?.label === "Aug 20 2026");
 
 const futureNotes = [];
-for (const [k] of situations) for (const n of e.buildPlayerNews(k, nowFixed)) if (n.ageDays < 0) futureNotes.push(k);
+for (const [k] of situations) for (const n of e.buildPlayerNews(k, nowReal)) if (n.ageDays < 0) futureNotes.push(k);
 ok("no rendered note is dated in the future", futureNotes.length === 0, futureNotes.slice(0, 3).join(", "));
 
 // ---- THE READ ----

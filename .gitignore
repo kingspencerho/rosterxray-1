@@ -15,3 +15,4 @@ yahoo_team.json
 # Python bytecode — created by importing the builder/pull scripts during testing
 __pycache__/
 *.pyc
+refresh.log

@@ -336,7 +336,8 @@ const ADP_DATA = {
   "cade otton": { adp: 191.9, pos: "TE", team: "TB" },  // ADP refresh 2026-08-16: 185.4 -> 191.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "tre harris": { adp: 161.3, pos: "WR", team: "LAC" },  // ADP refresh 2026-08-16: 167.5 -> 161.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "aaron rodgers": { adp: 179.2, pos: "QB", team: "PIT" },  // ADP refresh 2026-08-16: 187.5 -> 179.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
-  "chris bell": { adp: 214.4, pos: "WR", team: "MIA" },  // ADP refresh 2026-08-16: 188.5 -> 214.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "chris bell": { adp: 214.4, pos: "WR", team: "MIA" },
+  "kyle williams": { adp: 214.4, pos: "WR", team: "NE" },  // read off a real Underdog best-ball board Sep 6 2026 — a user draft screenshot, which the ADP source-of-truth rule ranks above any scrape  // ADP refresh 2026-08-16: 188.5 -> 214.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "kaytron allen": { adp: 212.3, pos: "RB", team: "WAS" },  // ADP refresh 2026-08-16: 198.0 -> 212.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "david njoku": { adp: 212.2, pos: "TE", team: "LAC" },  // ADP refresh 2026-08-16: 190.3 -> 212.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "charlie kolar": { adp: 201.3, pos: "TE", team: "LAC" },  // derived Aug 23 2026 from a real superflex board read of 210.8 minus the measured +9.5 TE band offset — no direct standard best-ball quote exists. adp>=200, so this drives resolution and ordering only.
@@ -722,6 +723,7 @@ const ADP_SUPERFLEX = {
   "justice hill": { adp: 214, pos: "RB", team: "BAL" },
   "jake tonges": { adp: 223, pos: "TE", team: "SF" },
   "chris bell": { adp: 232, pos: "WR", team: "MIA" },
+  "kyle williams": { adp: 232, pos: "WR", team: "NE" },  // DERIVED: 214.4 standard + the measured +17.6 WR offset for the 200-300 band (Aug 20 2026 table). No direct superflex quote exists. adp>=200 so this drives resolution and ordering only.
   "james conner": { adp: 234, pos: "RB", team: "ARI" },
   "tank dell": { adp: 213, pos: "WR", team: "HOU" },
   "de'zhaun stribling": { adp: 198, pos: "WR", team: "SF" },
@@ -1229,6 +1231,21 @@ const BYES = {
 
 // Team chalk rating for stack uniqueness proxy
 // chalk = drafted heavily, leverage = sharp/contrarian
+//
+// ⚠️ THIS IS A PROJECTION, NOT A MEASUREMENT. There is no ownership data
+// anywhere in this app — no file, no field, no feed. TEAM_CHALK is a
+// hand-typed constant with no source and nothing that refreshes it, and the
+// UI said "sharp ownership" until Sep 6 2026, which claimed a measurement
+// that does not exist. Say projected tier, never ownership.
+
+// Leverage thresholds, named so the guard can read them and so no literal is
+// typed twice. The ANCHOR is the EARLIEST pick in a stack, and it is the right
+// test: a stack containing a top-60 player is one a meaningful slice of the
+// field already owns, whatever the cheap piece beside him cost.
+const LEVERAGE_ANCHOR = { sharp: 80, low: 60, chalk: 50 };
+const LEVERAGE_BONUS_PER_STACK = 0.4;
+const LEVERAGE_BONUS_CAP = 1.0;
+
 const TEAM_CHALK = {
   // High chalk — heavily drafted stacks
   BUF: "chalk", DET: "chalk", CIN: "chalk", PHI: "chalk", BAL: "chalk", KC: "chalk", LAR: "chalk",
@@ -1319,8 +1336,9 @@ const RECENT_NEWS = {
   "jordyn tyson": "Drafted 8th overall by NO as Shough's primary weapon. Immediate WR2 role in confirmed 2026 Saints offense with Olave as WR1.",
   "tua tagovailoa": "ATL, not MIA — released by Miami and signed with Atlanta. THE JOB IS NO LONGER HIS BY DEFAULT (updated Aug 28 2026). He opened camp as the clear favorite while Penix rehabbed, and the official depth chart still lists him QB1, but that chart was set when Penix was carried as an injured player. Penix was cleared for 11-on-11 and the two SPLIT FIRST-TEAM REPS on Mon Aug 24 2026. Tua's camp has been inconsistent and his preseason opener vs DEN was 3-of-5 for 22 yards; Ian Rapoport reports Penix has closed the gap, and national reporting now frames the job as Penix's to lose. Both are expected to play the Fri Aug 28 preseason finale vs MIA. He is on a one-year deal. HIS ADP NEAR 208 ALREADY PRICES A BACKUP, so the cost is right for a contingency and wrong for a stack anchor until Atlanta names a starter. ATL W15 @WAS, W16 vs TB and W17 vs NO are three soft weeks for whoever wins it.",
   "michael penix": "ATL — CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). He returned to 11-on-11 for the first time since tearing his left ACL in Week 11 2025, and took first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Ian Rapoport reports he has closed the gap; with Tua inconsistent in camp and 3-of-5 for 22 yards in the preseason opener vs DEN, national reporting now frames the starting job as Penix's to lose. Both quarterbacks are expected to play the Fri Aug 28 preseason finale vs MIA, and Atlanta has not named a Week 1 starter. TWO THINGS TO SEPARATE: the competition is genuinely live, and the knee is nine months from reconstruction with no track record of a full workload behind it. ATL W15 @WAS, W16 vs TB and W17 vs NO is a three-week soft window, and his ADP near 213 pays nothing for it.",
-  "michael penix jr": "ATL — CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap and the job is his to lose after Tua's inconsistent camp and a 3-of-5, 22-yard preseason opener. No Week 1 starter named; both play the Fri Aug 28 finale vs MIA. The knee is nine months from reconstruction with no full-workload track record. ATL W15 @WAS, W16 vs TB, W17 vs NO is a soft three-week window at an ADP near 213.",
-  "drake london": "ATL WR1 in confirmed 2026 offense with Tua as heavy favorite for starting job. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks.",
+  "michael penix jr": "ATL — CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap and the job is his to lose after Tua's inconsistent camp and a 3-of-5, 22-yard preseason opener. No Week 1 starter named. The knee is nine months from reconstruction with no full-workload track record. ATL W15 @WAS, W16 vs TB, W17 vs NO is a soft three-week window at an ADP near 213.",
+  "kyle williams": "NE — MADE THE 53-MAN ROSTER, AND THE PROFILE IS A FIELD-STRETCHER RATHER THAN A VOLUME EARNER (updated Sep 6 2026). New England kept six receivers at the Aug 31 2026 cutdown — A.J. Brown, Romeo Doubs, DeMario Douglas, Mack Hollins, Efton Chism III and Williams — and he projects around fifth in that room. THE BIG-PLAY PATTERN HOLDS ACROSS BOTH SEASONS: all three of his rookie touchdowns travelled 30-plus yards (72 at TB, 33 vs NYG, 37 at BAL) on a total of 10 catches for 209 yards, and he added preseason scores of 69 and 45 yards this August. Third-round pick, 69th overall in 2025 out of Washington State, 4.40 forty and the fastest Senior Bowl GPS speed among receivers in his class. THE VOLUME IS THE OPEN QUESTION: Brown and Doubs are the offseason additions this passing game runs through, Douglas and Hollins take the underneath work, and Williams was seventh in the room with no first-team reps in July before the preseason moved him up. His 4.37 yards per route run came over three preseason games against backup coverage, so treat it as a flag to watch rather than an established rate. Price him as a contingent deep-shot dart at an ADP past 210 — the touchdown equity is real and the target floor is not established.",
+  "drake london": "ATL WR1 (updated Sep 6 2026). THE PLAYOFF WINDOW IS A SPLIT RATHER THAN A BLANKET: ATL WR grades Smash in W15 @WAS, Even in W16 vs TB and Hard in W17 vs NO. W15 is the week this profile is built on and W17 is a wall, so weight the three separately. THE PASSER IS AN OPEN DEPENDENCY AND ITS CURRENT STATE IS MAINTAINED IN THE QB ENTRIES, NOT HERE: as of Sep 6 2026 Atlanta has named no Week 1 starter ahead of the Sept 13 opener, and Penix and Tagovailoa are both healthy and competing for the job. Read those two entries for where it stands. London's target share is the durable half of this profile; the quarterback attached to it is the live question.",
   "jahan dotson": "Dotson signed a 2yr/$15M deal with ATL to compete for the WR2 role behind London — Zachariah Branch (2026 draft pick) is the primary competition. Vacant WR room behind London means real opportunity, but the role isn't confirmed. Same three-week soft window (W15 @WAS, W16 vs TB, W17 vs NO) if he wins the job.",
   "emari demercado": "DAL claimed him off waivers from KC on Aug 31 2026, one day after Dallas waived Jaydon Blue and Phil Mafah. He is third in a three-deep Cowboys room behind bell cow Javonte Williams and RB2 Malik Davis, with no installed role and no time to learn one before Week 1. He was a preseason standout in Kansas City on a 1yr/$1.25M deal, and is a former UDFA out of TCU with three seasons in Arizona behind him. DAL W15 @ MIN, W16 vs LAC, W17 vs WAS — a different playoff slate, and any read of him written before Aug 31 2026 describes a team he is no longer on.",
   "zachariah branch": "ATL \u2014 UPGRADED Aug 15 2026. He is competing with Jahan Dotson for WR2 behind Drake London, with the ATL QB situation gating the whole offense. Camp has been emphatic: he was THE MOST IMPRESSIVE PLAYER OF ATLANTA'S FIRST WEEK, and the specifics matter more than the label. Electric athleticism in both 1-on-1 and team drills, ROUTE RUNNING DESCRIBED AS FAR MORE ADVANCED THAN WHAT HE SHOWED AT GEORGIA, and hands reported as arguably the best of any receiver in the building. The route-running note is the important one, because separation-by-technique is the thing that converts a returner-athlete profile into a real target share, and it is exactly what the pre-camp scouting doubted. He made his preseason debut at Mercedes-Benz Stadium. WHAT HAS NOT CHANGED: he is still behind London, still needs the WR2 job over Dotson (2yr/$15M), and the Atlanta QB situation is still the gate on the whole offense. Three-week window remains soft: W15 @WAS, W16 vs TB, W17 vs NO. Per Lens 4 these are pre-Week-3 reps. Re-check after preseason Week 3.",
@@ -1389,10 +1407,10 @@ const VERDICTS = {
   "travis hunter": { verdict: "hold", date: "2026-08-05", reason: "SUPERSEDES the Jun 7 read, which assumed a settled WR role. He is fully recovered from the torn LCL and cleared for full camp participation, but reporting has him deployed PRIMARILY AT CORNERBACK with a rotational WR package — how much offense he actually plays is explicitly unresolved. Coen year 2 continuity is real; the snap allocation is the open question, and a WR2 projection presumes usage nobody has confirmed.", confidence: "MEDIUM" },
   "chris olave": { verdict: "TARGET", date: "2026-06-10", reason: "Confirmed NO WR1 in fully committed Shough offense. Tyson as WR2 absorbs some targets but Olave remains the primary. Three soft playoff weeks — W15 @TB, W16 vs ARI, W17 @ATL.", confidence: "HIGH" },
   "jordyn tyson": { verdict: "fade", trend: "falling", date: "2026-08-30", reason: "On injured reserve with a designation to return, hamstring, out a minimum of four games.", trendNote: "ON INJURED RESERVE TO OPEN THE SEASON, CONFIRMED AUG 30 2026. New Orleans placed him on IR with a designation to return as it cut to 53, so the minimum absence is four games and a two-month recovery from the Aug 13 joint-practice hamstring points at a mid-October return. The 8th-overall capital and the WR2 role are intact and the NO W15-17 slate is still soft, so the playoff-window case survives entirely. WHAT IT COSTS IS THE QUALIFYING ROUND: four-plus dead weeks land squarely in W1-14, which is the phase the Advance Rate Layer scores and the phase that eliminates most of the field. He also arrived with a durability record that was the stated risk in his draft profile, and this is the second hamstring event on it.", confidence: "MEDIUM-HIGH" },
-  "drake london": { verdict: "TARGET", date: "2026-06-10", reason: "ATL WR1 with Tua as heavy favorite for starting role. W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks. Best non-NO window player at his ADP.", confidence: "HIGH" },
+  "drake london": { verdict: "TARGET", date: "2026-09-06", reason: "ATL WR1 on a split playoff window: Smash W15 @WAS, Even W16 vs TB, Hard W17 vs NO. Atlanta has named no Week 1 starter as of Sep 6 2026, so the passer is an open dependency maintained in the QB entries. Target share is the durable half of the profile; the quarterback is the live question.", confidence: "MEDIUM-HIGH" },
   "zachariah branch": { verdict: "TARGET", trend: "rising", trendNote: "UPGRADED from a speculative dart Aug 15 2026. Named the most impressive player of Atlanta's first week of camp, with route running described as far more advanced than his Georgia tape and hands reported as the best in the building. The route-running detail is the one that matters — it is what turns a returner-athlete profile into a real target share, and it was the specific pre-camp doubt. Still behind Drake London, still needs the WR2 job over Jahan Dotson, and the ATL QB situation still gates the whole offense. Soft three-week window: W15 @WAS, W16 vs TB, W17 vs NO.", situationFlags: ["breakout_profile"], riskFlags: ["qb_uncertainty", "creeping_committee"] },
   "oscar delp": { verdict: "TARGET", date: "2026-06-10", reason: "NO drafted Delp (R2/R3 capital) as TE2 behind Juwan Johnson. 6-5/245, 4.49 40, Kittle comp per Saints Wire. Complementary skill set — blocker/receiver vs. Johnson's gadget/red zone role. Shough play-action scheme targets middle of field. Real target path at near-free ADP in three soft playoff weeks.", confidence: "SPECULATIVE" },
-  "tua tagovailoa": { verdict: "TARGET", date: "2026-06-10", reason: "Signed with ATL as heavy favorite — Penix recovering from torn ACL. ATL W15 @WAS (soft), W16 vs TB (soft), W17 vs NO (soft). Three soft weeks at ~207 ADP. Near-free QB dart with clean window. Confirm starter at camp.", confidence: "MEDIUM-HIGH" },
+  "tua tagovailoa": { verdict: "hold", date: "2026-09-06", reason: "ATL job is open — Atlanta has named no Week 1 starter as of Sep 6 2026 ahead of the Sept 13 opener, with Penix and Tagovailoa both healthy and competing. ATL WR window is a split: Smash W15 @WAS, Even W16 vs TB, Hard W17 vs NO. Hold until Atlanta names a starter; the passer question is maintained here and in the SITUATIONS entry together.", confidence: "MEDIUM" },
   "brian thomas": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "brian thomas jr": { verdict: "TARGET", date: "2026-06-07", reason: "JAX WR1 in Liam Coen's second year — system continuity removes the scheme-learning discount. Thomas posted elite separation metrics in 2025 and Lawrence chemistry is locked in. One of the cleaner WR2 profiles in the range.", confidence: "HIGH" },
   "trevor lawrence": { verdict: "TARGET", date: "2026-06-07", reason: "Coen year 2 removes the offensive system uncertainty that capped Lawrence in 2025. Full offseason in the scheme, established WR room with Thomas and Hunter — QB upside is real if health holds.", confidence: "MEDIUM-HIGH" },
@@ -1433,6 +1451,7 @@ const VERDICTS = {
 //   slot_only    → sub-7 aDOT WR; high target share but no downfield or red zone role; hard TD ceiling cap
 //   rz_dependent → player value almost entirely TD-driven; near-zero floor if not scoring
 const SITUATIONS = {
+  "kyle williams": { verdict: "DART", trend: "rising", date: "2026-09-06", trendNote: "NE WR5 WHO MADE THE 53 AND FLASHED IN AUGUST (updated Sep 6 2026). One of six receivers New England kept at the Aug 31 2026 cutdown, up from seventh in the room with no first-team reps in July. Two preseason touchdowns of 69 and 45 yards. THE SHAPE OF HIS PRODUCTION IS THE THESIS: all three rookie scores travelled 30-plus yards on only 10 catches, so the value is touchdown equity on a small number of deep looks. A.J. Brown and Romeo Doubs are the additions this offense runs through and DeMario Douglas and Mack Hollins hold the short-area work, so a projectable target share is the thing he still lacks. Free dart past ADP 210 in a format that pays for spike weeks; re-validate once Week 1 usage is on tape.", situationFlags: ["breakout_profile"], riskFlags: ["depth_chart_competition", "role_dependent"] },
   "chase brown": { verdict: "hold", trend: "rising", trendNote: "CIN RB1, and the case is a HEALTHY BURROW rather than a role change (updated Aug 30 2026). The role is already established: 225-plus carries and 50-plus catches in each of the last two seasons, and Burrow has said on the record that Brown is second in touches behind Ja Marr Chase. Zac Taylor retains playcalling with Dan Pitcher at OC, and preseason deployment is positionless by design, four touches on the first seven plays of the starters opening series, with snaps in the slot, on jet sweeps, in 20 personnel and motioned in behind a fullback. THE 2025 LINE UNDERSTATES HIM AND THE SPLIT SAYS WHY: Burrow played 8 of his 17 games (toe), and Brown went 17.4 points per game with him against 11.9 without, on FEWER targets in the Burrow games. A backup quarterback manufactures checkdowns; Burrow manufactures red-zone trips. He still produced seven top-12 weekly finishes through that. CAVEAT: eight games is a small sample and his third-biggest game came in a non-Burrow week, so treat 17.4 as a direction rather than a projection. THE MEASURED WEAKNESS IS SCORING EQUITY, NOT VOLUME. His receiving opportunity is elite, 91st percentile in targets per game and 88th in target share among draftable backs, but HVT sits at 1.82 per game (74th percentile) on 12 red-zone and 3 end-zone targets, and 4.97 yards per target marks him a screen and checkdown back. The bull case is that the high-value volume was suppressed by an offence playing without its quarterback; that is plausible and it is a projection, not a measurement. STACK NOTE: 69 receptions clears the 65-plus gate, so he is an ELITE RECEIVING BACK and earns FULL correlation credit as a Burrow stack piece, which most backs never do. FORMAT SPLIT AT ADP 17: a TARGET in redraft, where a 71% usable rate and a 6% dud rate are exactly what wins weekly leagues. A HOLD in best ball, where floor pays nothing and an 18% spike rate at the 58th percentile is a median ceiling for an early-second price. Confidence MEDIUM.", situationFlags: ["role_dependent", "scheme_fit"], riskFlags: [] },
   "adam randall": { verdict: "DART", trend: "rising", trendNote: "BAL JOKER ROOKIE, fifth round 2026 out of Clemson (updated Aug 30 2026). New OC Declan Doyle deploys him as a multi-position piece, fullback through tight end through slot and flexed outside, so this is a ROLE rather than a depth-chart slot. PRESEASON WEEK 3 IS THE SIGNAL AND IT IS A RECEIVING ONE: Aug 28 2026 vs WAS he led the team with 70 scrimmage yards, going 5-25 rushing and 3-45 receiving on 4 targets, 15.0 per catch, the long a second-quarter screen he took 24 by stiff-arming a defensive back. Creating after the catch in space is precisely the job the staff described, and per Lens 4 usage after preseason Week 3 is the primary signal and outranks coachspeak. The running answered its own question too: 5.0 per carry, a tackler shed in the backfield and another broken. HC Jesse Minter is on record with FUNCTIONAL language rather than generic praise, calling the skill set versatile, saying he has learned to be a really physical runner and crediting a really good skill set out of the backfield. Lens 4 grades that as signal. THE PATH IS NOW A NAMED JOB RATHER THAN A DEPTH-CHART NUMBER: the role in play is JUSTICE HILL PASSING-DOWN WORK, which analysts have Randall threatening on the strength of his pass catching. Treat that as a PROJECTION rather than a confirmed role — it rests on one exhibition receiving line, and Hill holds the job today. It matters because a passing-down back carries standalone snaps, so the bet is no longer only a Derrick Henry injury. THE CONSTRAINTS ARE REAL: Henry is clearly ahead of the entire room, and Rasheen Ali is still in the mix and actually LED THE TEAM IN TOUCHES in that same game despite leaving early for the birth of his child, so the backup competition is live rather than settled. STACK CAUTION SPECIFIC TO THIS APP: he is a rookie with no prior NFL season, so he clears neither the Elite Receiving Back nor the Real Receiving Role tier and earns NO receiving-back stack credit, however his camp receiving line reads. Grade a Lamar loop containing him as the QB plus its pass catchers and treat Randall as a same-team dart on top. Baltimore W17 at CIN is the strongest of his three playoff environments. Confidence MEDIUM on the role and SPECULATIVE on weekly output: all of the above was earned against backup defenses in August.", situationFlags: ["role_dependent", "scheme_fit"], riskFlags: ["depth_chart_competition"] },
   "najee harris": { verdict: "dart", trend: "rising", trendNote: "SIGNED WITH THE GIANTS on a one-year deal in mid-August 2026, and preseason Week 3 was the first real evidence (updated Aug 29 2026). He WON THE FIRST-TEAM SNAP COUNT 11-9 OVER TYRONE TRACY and carried 11 times for 39 yards with a 20-yard reception. THE ROOM IS CROWDED — Cam Skattebo, Tracy and Devin Singletary are all here — so this is a competition for the No. 2 job behind Skattebo rather than a path to a workhorse role, and ball security is the stated differentiator between him and Tracy. THE INJURY IS THE WHOLE BET: he tore his left Achilles on a noncontact play Sept 21 2025, three games into his time in Los Angeles, and he is not back to full. An Achilles in the calendar year before is a real availability and explosiveness risk, and his own framing is that the prior production does not carry over. Career volume is the traits case. Free at ADP 201.3, and a 2-of-4 backfield at that price is a contingency, not a starter.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "depth_chart_competition"] },
@@ -1518,9 +1537,9 @@ const SITUATIONS = {
   "kenny gainwell": { verdict: "TARGET", trend: "rising", trendNote: "2yr/$14M TB deal, and Aug 2026 camp confirmed the SHAPE of the role: Zac Robinson uses him as the receiving back and safety valve, not a rotational runner — Irving takes the bulk of carries. Primary receiving option from 21-personnel pony sets, aligned in the backfield and the slot; Robinson's ATL backs totaled 1,435 receiving yards over two seasons. Rushing volume is capped by Irving, so the value is target-driven and game-script sensitive. His 73-reception 2025 line is PIT data under a different QB and OC — re-validate the elite-receiving-back tier rather than assuming it carries.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee", "role_dependent"] },
   // === QB UNCERTAINTY FLAGS ===
   // These suppress stack credit and cap pass-catcher ceilings via qb_uncertainty risk flag
-  "michael penix": { verdict: "DART", trend: "rising", date: "2026-08-28", reason: "Cleared for 11-on-11 and splitting first-team reps with Tua as of Aug 24 2026; reporting frames the ATL job as his to lose. Soft ATL W15-17 window at an ADP near 213. Knee is nine months from reconstruction with no full-workload track record.", confidence: "MEDIUM", trendNote: "CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap, and with Tua inconsistent in camp and 3-of-5 for 22 yards in the preseason opener the job is now framed as his to lose. Atlanta has named no Week 1 starter and both play the Fri Aug 28 finale vs MIA. SEPARATE THE TWO QUESTIONS: the competition is genuinely live, and the knee is nine months from reconstruction with no full-workload track record behind it. ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window and his ADP near 213 pays nothing for it.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "qb_uncertainty"] },
-  "michael penix jr": { verdict: "DART", trend: "rising", date: "2026-08-28", reason: "Cleared for 11-on-11 and splitting first-team reps with Tua as of Aug 24 2026; reporting frames the ATL job as his to lose. Soft ATL W15-17 window at an ADP near 213. Knee is nine months from reconstruction with no full-workload track record.", confidence: "MEDIUM", trendNote: "CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap, and with Tua inconsistent in camp and 3-of-5 for 22 yards in the preseason opener the job is now framed as his to lose. Atlanta has named no Week 1 starter and both play the Fri Aug 28 finale vs MIA. SEPARATE THE TWO QUESTIONS: the competition is genuinely live, and the knee is nine months from reconstruction with no full-workload track record behind it. ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window and his ADP near 213 pays nothing for it.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "qb_uncertainty"] },
-  "tua tagovailoa": { verdict: "hold", trend: "falling", date: "2026-08-28", reason: "ATL job is contested — Penix cleared for 11-on-11 and split first-team reps Aug 24 2026, and reporting frames the job as Penix's to lose after Tua went 3-of-5 for 22 yards in the preseason opener. Soft ATL W15-17 window applies to whoever wins it. Do not stack until Atlanta names a starter.", confidence: "MEDIUM", trendNote: "THE ATL JOB IS CONTESTED AND TRENDING AWAY FROM HIM (updated Aug 28 2026). Penix was cleared for 11-on-11 and the two split first-team reps on Mon Aug 24 2026. Tua's camp has been inconsistent and his preseason opener vs DEN was 3-of-5 for 22 yards; Rapoport reports Penix has closed the gap and national reporting now frames the job as Penix's to lose. The official depth chart still says QB1, but it was set while Penix was listed as an injured player. Both play the Fri Aug 28 finale vs MIA. ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window for whichever quarterback wins it — which is exactly why the naming decision, not the schedule, is the thing to wait on.", situationFlags: ["role_dependent"], riskFlags: ["qb_uncertainty"] },
+  "michael penix": { verdict: "DART", trend: "rising", date: "2026-08-28", reason: "Cleared for 11-on-11 and splitting first-team reps with Tua as of Aug 24 2026; reporting frames the ATL job as his to lose. Soft ATL W15-17 window at an ADP near 213. Knee is nine months from reconstruction with no full-workload track record.", confidence: "MEDIUM", trendNote: "CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap, and with Tua inconsistent in camp and 3-of-5 for 22 yards in the preseason opener the job is now framed as his to lose. Atlanta has named no Week 1 starter. SEPARATE THE TWO QUESTIONS: the competition is genuinely live, and the knee is nine months from reconstruction with no full-workload track record behind it. ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window and his ADP near 213 pays nothing for it.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "qb_uncertainty"] },
+  "michael penix jr": { verdict: "DART", trend: "rising", date: "2026-08-28", reason: "Cleared for 11-on-11 and splitting first-team reps with Tua as of Aug 24 2026; reporting frames the ATL job as his to lose. Soft ATL W15-17 window at an ADP near 213. Knee is nine months from reconstruction with no full-workload track record.", confidence: "MEDIUM", trendNote: "CLEARED FOR FULL TEAM WORK AND SPLITTING FIRST-TEAM REPS (updated Aug 28 2026). Back in 11-on-11 for the first time since the Week 11 2025 ACL tear, taking first-team snaps alongside Tua Tagovailoa on Mon Aug 24 2026. Rapoport reports he has closed the gap, and with Tua inconsistent in camp and 3-of-5 for 22 yards in the preseason opener the job is now framed as his to lose. Atlanta has named no Week 1 starter. SEPARATE THE TWO QUESTIONS: the competition is genuinely live, and the knee is nine months from reconstruction with no full-workload track record behind it. ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window and his ADP near 213 pays nothing for it.", situationFlags: ["role_dependent"], riskFlags: ["injury_history", "qb_uncertainty"] },
+  "tua tagovailoa": { verdict: "hold", trend: "falling", date: "2026-08-28", reason: "ATL job is contested — Penix cleared for 11-on-11 and split first-team reps Aug 24 2026, and reporting frames the job as Penix's to lose after Tua went 3-of-5 for 22 yards in the preseason opener. Soft ATL W15-17 window applies to whoever wins it. Do not stack until Atlanta names a starter.", confidence: "MEDIUM", trendNote: "THE ATL JOB IS CONTESTED AND TRENDING AWAY FROM HIM (updated Aug 28 2026). Penix was cleared for 11-on-11 and the two split first-team reps on Mon Aug 24 2026. Tua's camp has been inconsistent and his preseason opener vs DEN was 3-of-5 for 22 yards; Rapoport reports Penix has closed the gap and national reporting now frames the job as Penix's to lose. The official depth chart still says QB1, but it was set while Penix was listed as an injured player.  ATL W15 @WAS, W16 vs TB and W17 vs NO is a soft three-week window for whichever quarterback wins it — which is exactly why the naming decision, not the schedule, is the thing to wait on.", situationFlags: ["role_dependent"], riskFlags: ["qb_uncertainty"] },
   "aaron rodgers": { verdict: "fade", trend: "falling", trendNote: "Age 42 in 2026, injury history real concern — Howard and Allar capable of pushing for snaps if Rodgers struggles early", situationFlags: [], riskFlags: ["injury_history"] },
   "will howard": { verdict: "fade", trend: "stable", trendNote: "PIT backup competing with Rodgers — only relevant if Rodgers misses time; contingent value only", situationFlags: [], riskFlags: ["qb_uncertainty"] },
   "shedeur sanders": { verdict: "fade", trend: "stable", trendNote: "CLE QB competition with Watson — lowest completion % among QBs with 200+ attempts in 2025, starting role genuinely uncertain", situationFlags: [], riskFlags: ["qb_uncertainty"] },
@@ -1570,7 +1589,7 @@ const SITUATIONS = {
   "tyjae spears": { verdict: "fade", trend: "falling", trendNote: "TEN committee with Pollard — injury-plagued, career-low attempts in 2025, no role clarity expected in 2026", situationFlags: [], riskFlags: ["confirmed_committee", "injury_history"] },
   "rhamondre stevenson": { verdict: "fade", trend: "falling", trendNote: "NE committee with Henderson — clock ticking on his role as Henderson projects as the long-term RB1", situationFlags: [], riskFlags: ["creeping_committee"] },
   "treveyon henderson": { verdict: "TARGET", trend: "rising", trendNote: "RIGHT ANKLE, PRECAUTIONARY, MONITOR (updated Aug 28 2026). He slipped on the turf mid-cut in the Mon Aug 24 practice and left early; New England ran precautionary tests and held him out on Aug 25. Eliot Wolf says he is walking and moving fine, and the club has given no severity finding and no timeline, with Week 1 just over two weeks out. THE THESIS IS UNCHANGED AND THE AVAILABILITY IS THE OPEN QUESTION: the NE RB1 ceiling is real, the Drake Maye offense is ascending and Henderson is the long-term answer with Stevenson\'s clock ticking. Re-check his practice participation before drafting him at cost.", situationFlags: ["breakout_profile"], riskFlags: ["injury_history"] },
-  "josh jacobs": { verdict: "HARD FADE", trend: "falling", date: "2026-08-30", trendNote: "ON THE COMMISSIONER'S EXEMPT LIST AS OF AUG 30 2026, WITH NO TIMELINE. He is not on Green Bay's 53-man roster, cannot practice, and cannot attend games. He is paid, and may enter the facility for meetings, individual workouts and medical treatment only. The exempt list is not a suspension and carries no fixed length — it holds until the league resolves its review, so there is no date to plan around. The underlying charges are two misdemeanors filed Aug 27 2026 by the Brown County DA out of a May 26 arrest, battery and criminal damage to property, with an initial court appearance Nov 17 2026. Green Bay responded the same day by trading a 2028 sixth to Pittsburgh for Kaleb Johnson, which is a club telling you how it reads its own odds. AT AN ADP NEAR 41 THIS IS A ROSTER SLOT WITH NO WEEK-1 FLOOR AND NO KNOWN RETURN, and in a format that scores the W1-14 qualifying round that is the most expensive shape a pick can have.", situationFlags: [], riskFlags: ["contract_year", "injury_history"] },
+  "josh jacobs": { verdict: "fade", trend: "rising", date: "2026-09-04", trendNote: "COURT DATE MOVED UP TO SEP 10 2026, THREE DAYS BEFORE GREEN BAY'S OPENER (reported Sep 4 2026). His initial appearance in Brown County Circuit Court is set for 11am Thursday, moved forward two months, and his attorneys have filed authorization to represent him, so he is expected to be excused from appearing. He remains on the Commissioner's Exempt List, placed Aug 30 2026 — paid, off the 53-man roster, barred from practice and from games — and the league review is open with no announced return. TWO THINGS CHANGED THE SHAPE OF THE BET. First, the legal timeline collapsed from roughly eleven weeks to four days, so the largest unknown resolves at the front of the season rather than in the middle of it. Second, games missed on the exempt list count toward any suspension the league later imposes, with earnings repaid for that period, so exempt time is credited rather than additive and the worst case is shorter than the raw calendar implies. GM Brian Gutekunst says Green Bay hopes he is available at some point this season and is prepared either way. The charges are two misdemeanors filed Aug 27 2026 by the Brown County DA out of a May 26 2026 arrest, battery and criminal damage to property. AT AN ADP NEAR 41 THERE IS STILL NO WEEK-1 FLOOR AND NO CONFIRMED RETURN DATE, and the W1-14 qualifying round is scored, so the cost is real. What the discount now buys is a question with a near-term answer rather than an open-ended one. GB W15 vs MIA and W16 @CHI are the usable playoff weeks; W17 vs HOU is a wall. Re-validate after Sep 10.", situationFlags: [], riskFlags: ["contract_year", "injury_history"] },
   "dylan sampson": { verdict: "fade", trend: "stable", trendNote: "CLE committee — best-case 70% of a putrid offense's backfield touches; upside severely capped by team situation", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "braelon allen": { verdict: "DART", trend: "rising", trendNote: "NYJ RB2 with a CLEAR path, not a committee. Breece Hall strained his groin in an Aug 17 practice and is out 2-3 weeks, and Allen steps into the starting role behind him with only Kene Nwangwu and two undrafted rookies as competition. HC Aaron Glenn asked him simply to run the ball and be himself. THE HONEST LIMIT FOR BEST BALL: Hall is expected back for Week 1, so this is a preseason role, not a W15-17 role. What actually changed is the SHAPE of the contingency \u2014 Allen is now the outright next man up rather than one of two, so an in-season Hall absence hands him the job whole. He is also back from a knee injury that cost him most of last season and is reported bigger and stronger. Re-check after preseason Week 3.", situationFlags: ["target_vacuum"], riskFlags: ["injury_history"] },
   "isaiah davis": { verdict: "fade", trend: "stable", trendNote: "NYJ depth behind Hall and Allen — three-way committee with no clear role definition", situationFlags: [], riskFlags: ["confirmed_committee"] },
@@ -1587,8 +1606,8 @@ const SITUATIONS = {
   "sean tucker": { verdict: "fade", trend: "stable", trendNote: "TB goal-line specialist — carves into Irving's TD equity but has no standalone value without a score; pure TD-or-bust", situationFlags: [], riskFlags: ["confirmed_committee"], roleCeiling: "rz_dependent" },
   // CAR — Hubbard gets another shot with Dowdle gone but Brooks and Trevor Etienne lurk
   "chuba hubbard": { verdict: "fade", trend: "stable", trendNote: "CAR lead back by default with Dowdle gone — but Brooks returning and Trevor Etienne provide real competition; 3.8 YPC and lost starting job in 2025 are hard to ignore", situationFlags: [], riskFlags: ["creeping_committee"] },
-  "marshawn lloyd": { verdict: "TARGET", trend: "rising", date: "2026-08-30", trendNote: "THE GREEN BAY BACKFIELD IS OPEN AND HE IS IN IT, ALONGSIDE A NEW ACQUISITION (updated Aug 30 2026). Josh Jacobs is on the Commissioner's Exempt List with no timeline, so the lead job is vacant for as long as that holds. Lloyd took the majority of first-team snaps through August and came out of his most productive camp healthy, which is the whole thesis on a player whose record is one career NFL game and a season lost on the first day of padded practices. THE COMPLICATION IS SAME-DAY: Green Bay sent a 2028 sixth to Pittsburgh for Kaleb Johnson, a power back who adds a between-the-tackles element Lloyd does not, and Chris Brooks remains the third-down option. So this is a three-way room with no announced starter rather than a handoff. Price it as the highest-upside share of an open job, not as a locked role, and re-validate once Green Bay names a Week 1 back.", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
-  "kaleb johnson": { verdict: "DART", trend: "rising", date: "2026-08-30", trendNote: "TRADED INTO AN OPEN BACKFIELD ON THE DAY IT OPENED (Aug 30 2026). Green Bay sent a 2028 sixth to Pittsburgh for him within hours of Josh Jacobs going on the Commissioner's Exempt List, which is a club acting on its own read of how long Jacobs is unavailable. He brings a power, between-the-tackles element that MarShawn Lloyd does not, so this is a complementary fit rather than a redundant one. THE ROOM IS THREE DEEP AND UNRESOLVED: Lloyd took the majority of first-team snaps through August, Chris Brooks is the third-down option, and Green Bay has named no Week 1 starter. A sixth-round pick is cheap capital, so read the trade as insurance rather than as an anointment. HIS PRICE HAS NO BEST-BALL QUOTE YET — the ADP carried here is an estimate and he is almost certainly cheaper than he should be for a week or two. Re-validate the moment Green Bay names a starter.", situationFlags: [], riskFlags: ["role_dependent", "creeping_committee"] },
+  "marshawn lloyd": { verdict: "TARGET", trend: "rising", date: "2026-09-04", trendNote: "THE GREEN BAY BACKFIELD IS OPEN AND HE IS IN IT, ALONGSIDE A NEW ACQUISITION (updated Sep 4 2026). Josh Jacobs is on the Commissioner's Exempt List, so the lead job is vacant for as long as that holds. THE WINDOW NOW HAS A NEAR EDGE: Jacobs' initial court appearance was moved up two months to Sep 10 2026, three days before the opener, and games he misses on the exempt list count toward any later suspension. So this contingency may be settled early rather than run all autumn — treat the opening as real but potentially short, and re-price it the week of Sep 10. Lloyd took the majority of first-team snaps through August and came out of his most productive camp healthy, which is the whole thesis on a player whose record is one career NFL game and a season lost on the first day of padded practices. THE COMPLICATION IS SAME-DAY: Green Bay sent a 2028 sixth to Pittsburgh for Kaleb Johnson, a power back who adds a between-the-tackles element Lloyd does not, and Chris Brooks remains the third-down option. So this is a three-way room with no announced starter rather than a handoff. Price it as the highest-upside share of an open job, not as a locked role, and re-validate once Green Bay names a Week 1 back.", situationFlags: [], riskFlags: ["injury_history", "creeping_committee"] },
+  "kaleb johnson": { verdict: "DART", trend: "rising", date: "2026-09-04", trendNote: "TRADED INTO AN OPEN BACKFIELD ON THE DAY IT OPENED (updated Sep 4 2026). Josh Jacobs' initial court appearance moved up two months to Sep 10 2026, so the length of this opening is a live question rather than an open-ended one. Green Bay sent a 2028 sixth to Pittsburgh for him within hours of Josh Jacobs going on the Commissioner's Exempt List, which is a club acting on its own read of how long Jacobs is unavailable. He brings a power, between-the-tackles element that MarShawn Lloyd does not, so this is a complementary fit rather than a redundant one. THE ROOM IS THREE DEEP AND UNRESOLVED: Lloyd took the majority of first-team snaps through August, Chris Brooks is the third-down option, and Green Bay has named no Week 1 starter. A sixth-round pick is cheap capital, so read the trade as insurance rather than as an anointment. HIS PRICE HAS NO BEST-BALL QUOTE YET — the ADP carried here is an estimate and he is almost certainly cheaper than he should be for a week or two. Re-validate the moment Green Bay names a starter.", situationFlags: [], riskFlags: ["role_dependent", "creeping_committee"] },
   "chris brooks": { verdict: "fade", trend: "stable", trendNote: "CAR committee threat to Hubbard — returning back with committee upside if Hubbard regresses again", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "trevor etienne": { verdict: "fade", trend: "stable", trendNote: "CAR depth — younger option lurking behind Hubbard, contingent value only until a starter misses time", situationFlags: [], riskFlags: ["confirmed_committee"] },
   // MIN — Jones/Mason committee, Claiborne rookie adds another layer
@@ -2606,6 +2625,44 @@ const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
 // which season a number describes is the stale-data trap in a new costume.
 const CUR_VOLUME_LIVE = (VOLUME_CUR._meta?.weeks_covered || 0) > 0;
 const getVolumeCur = (name) => (CUR_VOLUME_LIVE ? lookupPlayer(VOLUME_CUR.players, name) : null);
+
+// === TARGET / CARRY TRAJECTORY (CONTEXT ONLY) ===
+// The season-to-date share sitting beside this is rank 2, opportunity volume.
+// This is rank 1, role CHANGE, and averaging the weeks collapses the higher-
+// ranked signal into the lower-ranked one — the exact failure snap_trajectory
+// exists to fix, left unclosed on the better metric. Target share is r=0.729
+// and targets/gm 0.774 against snap share's 0.709.
+//
+// Worked example, Loveland 2025: season 16.5% target share, an ordinary TE
+// number, while the weekly line ran 11.6% early to 29.2% over his last three.
+// The average describes neither player.
+//
+// ⚠️ BOTH SIDES FOR BACKS. `trend` is targets, `trend_car` is carries, and a
+// back can be flat in one while the other moves. RJ Harvey 2025 reads stable
+// on target share (delta +0.027) while his carry share went 17.7% -> 46.7% —
+// he is the player this repo records being graded fade/falling on four
+// separate rosters off a season average. Reading only the passing side would
+// reproduce that miss exactly.
+const TREND_META = VOLUME_CUR._meta?.trend || {};
+const getTargetTrend = (name) => getVolumeCur(name)?.trend || null;
+const getCarryTrend = (name) => getVolumeCur(name)?.trend_car || null;
+
+// ⚠️ "insufficient" IS NOT "stable". Stable means measured and flat; this
+// means not yet measurable. The distinction is the whole early-season
+// contract, so the REASON is produced here rather than left to each caller to
+// invent — a consumer that cannot say why a trend is missing will render
+// silence, and silence reads as "no change" instead of "not enough games".
+const trendWhy = (t, meta) => {
+  const need = 2 * (meta?.min_window_gp || 2);
+  if (!t) return "no games on record this season";
+  if (t.delta != null) return null;
+  if ((t.series?.length || 0) < need) {
+    const gp = t.series?.length || 0;
+    return `needs ${need} games to split the season — he has ${gp === 1 ? "1" : gp}`;
+  }
+  if (meta?.threshold == null) return "too few players league-wide have a split yet to set a threshold";
+  return "his two windows are too thin to compare";
+};
 const getSnapTrendCur = (name) => (CUR_SEASON_LIVE ? lookupPlayer(SNAP_TRAJECTORY_CUR.players, name) : null);
 const getQbProfileCur = (name) => (CUR_QB_LIVE ? lookupPlayer(QB_PROFILE_CUR.players, name) : null);
 // Vintage labels. NEVER print a number from these layers without one — a mixed
@@ -2735,6 +2792,88 @@ const buildRoleContext = (players) => {
   });
   out.sos.sort((a, b) => a.rank - b.rank);
   return out;
+};
+
+// === START / SIT BOARD (CONTEXT ONLY, REDRAFT ONLY) ===
+// The weekly question the app could not answer: which of my starters is being
+// used MORE than he was, and which less. Everything else here describes a
+// player in isolation; this ranks a lineup by role CHANGE, rank 1.
+//
+// ⚠️ MOVERS FIRST, IN BOTH DIRECTIONS. A collapsing role is as actionable as a
+// growing one — more so, because it is the start you would otherwise make out
+// of habit. Sorting by signed delta would bury every faller at the bottom.
+//
+// ⚠️ THE TWO SERIES ARE NOT COMPARABLE RAW. Carry share is a far wider
+// distribution than target share (2025: SD 0.104 against 0.040), so a back's
+// +0.06 on carries is ordinary while +0.06 on targets is a real move. Ranking
+// on |delta| alone would put every RB above every receiver for a reason that
+// is purely an artefact of the denominator. Magnitude is therefore measured in
+// THRESHOLDS, which is the same normalisation the Ceiling Shape Layer needed
+// when raw spike rate handed quarterbacks a free bonus.
+const startSitMagnitude = (t, threshold) =>
+  (t && t.delta != null && threshold) ? Math.abs(t.delta) / threshold : null;
+
+const buildStartSitBoard = (players) => {
+  // Pre-season the weekly refresh has not run, so there is nothing to trend
+  // and the board does not exist. Consumers gate on null rather than
+  // rendering an empty table that looks broken.
+  if (!CUR_VOLUME_LIVE) return null;
+  const rows = [];
+  for (const p of players || []) {
+    // QBs are deliberately absent: neither target nor carry share describes a
+    // passer's role, and inventing a row for him would be a number with no
+    // meaning rather than a gap. The panel says so in words.
+    if (!p?.name || !["RB", "WR", "TE"].includes(p.pos)) continue;
+    const v = getVolumeCur(p.name);
+    const tt = v?.trend || null;
+    const ct = p.pos === "RB" ? (v?.trend_car || null) : null;
+    const tMag = startSitMagnitude(tt, TREND_META.trend?.threshold);
+    const cMag = startSitMagnitude(ct, TREND_META.trend_car?.threshold);
+    // For a back, lead with whichever side actually moved.
+    const lead = (cMag != null && (tMag == null || cMag > tMag))
+      ? { t: ct, kind: "carry share", mag: cMag, why: trendWhy(ct, TREND_META.trend_car) }
+      : { t: tt, kind: "target share", mag: tMag, why: trendWhy(tt, TREND_META.trend) };
+    rows.push({
+      name: p.name, pos: p.pos, team: p.team,
+      kind: lead.kind,
+      state: lead.t?.trend || "insufficient",
+      gp: lead.t?.series?.length || 0,
+      early: lead.t?.early ?? null,
+      recent: lead.t?.recent ?? null,
+      last3: lead.t?.last3 ?? null,
+      last3gp: lead.t?.last3_gp ?? 0,
+      // ⚠️ SAY WHAT IT CAN, not only what it cannot. Before a split exists the
+      // season-to-date share is still a real measurement and is the number a
+      // reader actually wants in Week 2. A row that prints only "not enough
+      // games" withholds data the app already has.
+      sofar: lead.kind === "carry share"
+        ? (v?.car_pg != null && lead.t?.series?.length ? lead.t.series.reduce((x, r) => x + r[2], 0) / lead.t.series.length : null)
+        : (v?.tgt_sh ?? null),
+      sofarGp: v?.gp ?? 0,
+      delta: lead.t?.delta ?? null,
+      mag: lead.mag,
+      // Never silent. A row with no trend still renders and says why.
+      why: lead.why,
+      // The other side, so a back's full picture is one row rather than two.
+      alt: (ct && lead.t !== ct) ? { kind: "carry share", ...ct }
+        : (ct && lead.t === ct) ? { kind: "target share", ...(tt || {}) }
+        : null,
+    });
+  }
+  rows.sort((a, b) => {
+    const rank = r => r.delta == null ? 2 : 0;
+    if (rank(a) !== rank(b)) return rank(a) - rank(b);
+    return (b.mag || 0) - (a.mag || 0);
+  });
+  return {
+    rows,
+    vintage: vintageLabel(VOLUME_CUR._meta),
+    splitMode: TREND_META.trend?.split_mode || null,
+    tgtThreshold: TREND_META.trend?.threshold ?? null,
+    carThreshold: TREND_META.trend_car?.threshold ?? null,
+    movers: rows.filter(r => r.state === "rising" || r.state === "falling").length,
+    pending: rows.filter(r => r.delta == null).length,
+  };
 };
 
 // One game -> the band the card already names. Kept beside the data so the
@@ -3420,6 +3559,27 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // pbp), so those rows stay 2025-only and say nothing new.
     const volCur = getVolumeCur(name);
     if (volCur) card.volumeCur = vintageLabel(VOLUME_CUR._meta);
+
+    // ROLE TRAJECTORY on the metric that actually decides a start/sit. It
+    // renders from Week 1 saying what it can and naming what it cannot yet
+    // say: a section that hides until it has a verdict reads as a broken
+    // feature rather than as missing data, which is the silent-drop failure
+    // in a new costume.
+    if (CUR_VOLUME_LIVE) {
+      const tt = getTargetTrend(name);
+      const ct = pos === "RB" ? getCarryTrend(name) : null;
+      card.targetTrend = {
+        vintage: vintageLabel(VOLUME_CUR._meta),
+        splitMode: TREND_META.trend?.split_mode || null,
+        tgt: tt, tgtWhy: trendWhy(tt, TREND_META.trend),
+        tgtThreshold: TREND_META.trend?.threshold ?? null,
+        car: ct, carWhy: ct ? trendWhy(ct, TREND_META.trend_car) : null,
+        carThreshold: TREND_META.trend_car?.threshold ?? null,
+        // The prior season rides along and is never swapped for the current
+        // one. "16.5% in 2025, 29.2% over his last three" is the finding.
+        prior: m?.tgt_sh ?? null,
+      };
+    }
     for (const d of (CARD_METRICS[pos] || [])) {
       const v = d.get(m);
       if (v == null || Number.isNaN(v)) continue;
@@ -4707,6 +4867,16 @@ const parseLooseJson = (text) => {
 // wheel the drafter is choosing two players before the board moves at all.
 // Handles runs of any length, which a draft with traded picks can produce.
 const TURN_MIN_GAP = 2;
+
+// ADP discipline layer constants (added Sep 6 2026). EVERY ONE IS DERIVED —
+// see the component below for what each number came from. A second literal
+// is the duplicate-definition class this repo has hit seven times.
+const DISCIPLINE_PICK_CUTOFF = 156;  // round 13 of a 12-man draft
+const DISCIPLINE_PICK_CLIP   = 20;   // ~p90 of per-pick |delta| at measured drift
+const DISCIPLINE_SATURATE    = 4.6;  // 2 x simulated roster-level SD (2.3)
+const DISCIPLINE_MIN_PICKS   = 10;
+const DISCIPLINE_CAP         = 0.5;  // matches the other advance components
+
 const annotateTurnReaches = (flags, ownPicks) => {
   const sorted = [...new Set((ownPicks || []).filter(n => Number.isFinite(n)))].sort((a, b) => a - b);
   const nextAfterTurn = (pick) => {
@@ -5451,20 +5621,42 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   });
 
   // === STACK UNIQUENESS PROXY ===
-  // Based on team chalk rating + ADP cost of stack pieces
+  // Team chalk tier + the price of the stack's ANCHOR.
+  //
+  // ⚠️ THE MEAN WAS THE WRONG STATISTIC, fixed Sep 6 2026. It averaged every
+  // piece, so a stack could be labelled High Leverage on the strength of one
+  // very late pick dragging the average past the gate. The worked example is a
+  // real roster's CAR stack: Tetairoa McMillan 41.0 with Darren Waller 210.4
+  // averages to 125.7 and cleared the sharp gate of 80 — while the stack is
+  // anchored by a round-four receiver, which is not a contrarian holding by any
+  // reading of the term. Averaging hid the expensive piece behind the cheap one.
+  //
+  // The anchor (earliest pick) is the honest test. A stack is only something the
+  // field lacks if NO piece in it is expensive.
+  //
+  // KNOWN LIMIT, stated because the proxy cannot see it: a cheap QB attached to
+  // a chalk receiver (Darnold onto JSN) is a genuinely differentiated
+  // CONSTRUCTION even though the anchor is a first-rounder, because most JSN
+  // drafters never take that QB. Measuring that needs real ownership data, which
+  // does not exist here. With an unsourced input the conservative read is the
+  // correct one, so those stacks now grade Slight Leverage rather than earning
+  // the scored bonus.
   stackGrades.forEach(stack => {
     const chalkLevel = TEAM_CHALK[stack.team] || "medium";
-    const avgADP = stack.players.reduce((sum, p) => sum + p.adp, 0) / stack.players.length;
+    const adps = stack.players.map(p => p.adp).filter(a => a != null);
+    const anchorAdp = adps.length ? Math.min(...adps) : null;
 
     let uniqueness;
-    if (chalkLevel === "sharp" && avgADP > 80) uniqueness = "High Leverage";
-    else if (chalkLevel === "low" && avgADP > 60) uniqueness = "Moderate Leverage";
-    else if (chalkLevel === "chalk" && avgADP < 50) uniqueness = "Heavy Chalk";
+    if (anchorAdp == null) uniqueness = "Standard";
+    else if (chalkLevel === "sharp" && anchorAdp > LEVERAGE_ANCHOR.sharp) uniqueness = "High Leverage";
+    else if (chalkLevel === "low" && anchorAdp > LEVERAGE_ANCHOR.low) uniqueness = "Moderate Leverage";
+    else if (chalkLevel === "chalk" && anchorAdp < LEVERAGE_ANCHOR.chalk) uniqueness = "Heavy Chalk";
     else if (chalkLevel === "medium") uniqueness = "Standard";
     else uniqueness = chalkLevel === "sharp" || chalkLevel === "low" ? "Slight Leverage" : "Slight Chalk";
 
     stack.uniqueness = uniqueness;
     stack.chalkLevel = chalkLevel;
+    stack.anchorAdp = anchorAdp;
   });
 
   // === VERDICT ALIGNMENT ===
@@ -6138,7 +6330,14 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
       strengths.push(`${leverageStacks.length} under-the-radar stack(s) — good differentiation if the field is large`);
-      score += leverageStacks.length * 0.4;
+      // ⚠️ CAPPED Sep 6 2026. This was `leverageStacks.length * 0.4` with no
+      // clamp, so a five-stack roster took +2.0 — a quarter of its grade, out
+      // of a hand-typed table with no source. Every other layer here is
+      // clamped (ceiling ±0.5, floor ±0.5, advance ±1.25) and the ONE input
+      // that is not measured was the only one that could run away.
+      // 1.0 places it below the advance layer and above the ceiling layer,
+      // which is where a team-level heuristic belongs.
+      score += Math.min(leverageStacks.length * LEVERAGE_BONUS_PER_STACK, LEVERAGE_BONUS_CAP);
     }
   }
 
@@ -6207,15 +6406,86 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const worstBye = Object.entries(byeCounts).sort((a, b) => b[1] - a[1])[0];
     if (worstBye && worstBye[1] >= 4) byePts = -0.25;
 
-    const advScore = Math.max(-1.25, Math.min(1.25, (schedPts + usablePts + byePts))) * advanceWeight;
+    // 4. ADP discipline (added Sep 6 2026) — the CUMULATIVE version of what the
+    // discrete value/reach flags measure one pick at a time.
+    //
+    // The existing ADP block counts EVENTS: a pick 15+ past ADP is a value
+    // pick (+0.5 each, cap +2), a pick 15+ early that survives the turn is a
+    // reach (-0.4 each from three, cap -1.5). That rewards VARIANCE, not
+    // discipline. A drafter who lands eighteen picks at +8 has extracted more
+    // market value than one who lands sixteen at -5 and two at +16, and the
+    // first earns nothing while the second earns +1.0. The roster that
+    // prompted this carried three flags, none past 15, and scored zero on
+    // ADP while being the most disciplined board seen in this project.
+    //
+    // ⚠️ SCORED ONLY WHEN THE ADP CAME FROM THE USER'S BOARD. This was the
+    // whole derivation. Simulating 12-man snakes from ADP_DATA at the
+    // measured drift (sd 9) puts the roster-level mean delta at +5.7 for
+    // picks <= 156, and the reason is IN THE TABLE: mean(rank - adp) over its
+    // top 216 is +7.16 and grows with rank (2.7 / 7.0 / 9.6 / 10.4 by band),
+    // because a late player's ADP is a mean over only the drafts he was taken
+    // in. Against a real Underdog board the same measurement on a real roster
+    // is +1.9. Centering on 0 with table ADP hands every roster a free +7;
+    // centering on +7 with board ADP penalises perfect discipline. Neither is
+    // honest, so the table path does not score, and says why.
+    //
+    // Centre 0 is definitional: ADP is the market's expectation, and a pick
+    // taken exactly there extracted nothing. The scale is the simulation's
+    // roster-level SD (2.3 at picks <= 156), which the table offset shifts but
+    // does not widen; saturation at 2 SD so only an outlier drafter reaches
+    // the cap. Per-pick clip at ~p90 of |delta| (median 8.4, p75 14.0, p90
+    // 19.6) so one long fall cannot carry the mean. Cutoff at round 13: the
+    // Late-Round ADP Flattening Protocol already says picks 160+ carry no ADP
+    // signal, and 156 is the last pick of round 13 in a 12-man draft.
+    // Turn-cleared reaches floor at 0, consistent with isScoredReach.
+    let disciplinePts = 0, disciplineN = 0, disciplineMean = null, disciplineWhy = null;
+    {
+      const cleared = new Set(adpFlags.filter(f => f.survivesTurn === false).map(f => f.name));
+      const q = valid.filter(p => p.actualPick != null && p.adp != null && p.adp < 200 && p.actualPick <= DISCIPLINE_PICK_CUTOFF);
+      const fromBoard = q.filter(p => p.adpSource === "roster");
+      if (format === "superflex") disciplineWhy = "superflex ADP is a seeded ordering rather than a measured market, so discipline against it is directional only";
+      // ⚠️ TWO DIFFERENT STATES ARRIVE AS ONE false. The button path passes
+      // `showPickAnalysis && picks.hasPickNumbers`, so a roster that CARRIES
+      // pick numbers with the checkbox left off reaches here as false — and
+      // "no pick numbers on the roster" would be a false explanation, the
+      // Sep 1 card-audit class (a section that does not apply is not a gate
+      // he failed). The array itself still carries parseRoster's own flag,
+      // so the two are separable. Found by rendering, not by reading.
+      else if (!hasPickNumbers) disciplineWhy = picks.hasPickNumbers
+        ? "pick analysis is switched off — tick the pick-numbers box above the paste area to score ADP discipline against your board"
+        : "no pick numbers on the roster";
+      else if (fromBoard.length === 0) disciplineWhy = "ADP came from the built-in snapshot, whose tail compression (+7 picks, rising with rank) would be scored instead of your drafting — paste a board that carries ADP";
+      else if (fromBoard.length < DISCIPLINE_MIN_PICKS) disciplineWhy = `only ${fromBoard.length} board-priced picks inside the first 13 rounds; needs ${DISCIPLINE_MIN_PICKS}`;
+      else {
+        const ds = fromBoard.map(p => {
+          let d = p.actualPick - p.adp;
+          if (d < 0 && cleared.has(p.name)) d = 0;
+          return Math.max(-DISCIPLINE_PICK_CLIP, Math.min(DISCIPLINE_PICK_CLIP, d));
+        });
+        disciplineN = ds.length;
+        disciplineMean = ds.reduce((s, v) => s + v, 0) / ds.length;
+        disciplinePts = Math.max(-DISCIPLINE_CAP, Math.min(DISCIPLINE_CAP, (disciplineMean / DISCIPLINE_SATURATE) * DISCIPLINE_CAP));
+      }
+    }
+
+    const advScore = Math.max(-1.25, Math.min(1.25, (schedPts + usablePts + byePts + disciplinePts))) * advanceWeight;
     score += advScore;
     advanceLayer = {
       score: Math.round(advScore * 100) / 100,
       schedPts: Math.round(schedPts * 100) / 100,
       usablePts: Math.round(usablePts * 100) / 100,
       byePts,
+      disciplinePts: Math.round(disciplinePts * 100) / 100,
+      disciplineN,
+      disciplineMean: disciplineMean == null ? null : Math.round(disciplineMean * 10) / 10,
+      disciplineWhy,
       coreCount: core.length,
     };
+    if (disciplinePts >= 0.25) {
+      strengths.push(`ADP discipline: your board-priced picks landed ${disciplineMean.toFixed(1)} picks past ADP on average across ${disciplineN} picks in the first 13 rounds — consistent value the 15-pick flags cannot see`);
+    } else if (disciplinePts <= -0.25) {
+      weaknesses.push(`ADP discipline: your board-priced picks landed ${Math.abs(disciplineMean).toFixed(1)} picks EARLY on average across ${disciplineN} picks in the first 13 rounds — consistent reaching that never cleared the 15-pick flag`);
+    }
     if (advScore >= 0.5) {
       strengths.push(`Strong advance-rate profile — core scorers carry a soft W1-14 slate and bankable weekly output for the qualifying round`);
     } else if (advScore <= -0.5) {
@@ -8003,6 +8273,69 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution, echo, cur, noTag })
   </div>
 );
 
+const TREND_TONE = {
+  rising: "var(--accent-lime)", falling: "var(--danger)",
+  stable: "var(--text-secondary)", insufficient: "var(--text-dim)",
+};
+const pct1 = (v) => v == null ? "—" : `${(v * 100).toFixed(1)}%`;
+
+// The week-by-week share, drawn. The bars carry NO matchup or difficulty
+// colour: that would mix rank-5 data into a rank-1 reading. Height is the
+// share, and the only colour is the trend the numbers already state.
+const TrendSpark = ({ series, tone }) => {
+  if (!series || series.length < 2) return null;
+  const max = Math.max(...series.map(r => r[2]), 0.01);
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "34px", margin: "6px 0 2px" }}>
+      {series.map(([wk, tgt, sh]) => (
+        <div key={wk} title={`W${wk} · ${tgt} on ${pct1(sh)}`}
+          style={{ flex: 1, minWidth: "3px", height: `${Math.max(6, (sh / max) * 100)}%`,
+                   background: tone, opacity: 0.75, borderRadius: "1px" }} />
+      ))}
+    </div>
+  );
+};
+
+// ⚠️ THE NO-TREND BRANCH IS NOT AN EMPTY STATE, IT IS THE MEASUREMENT SAYING
+// WHAT IT CANNOT YET SAY. An absent section reads as a broken feature; a
+// blank one reads as "no change". Both are wrong in the same direction, and
+// both are the silent-drop failure this codebase has fixed repeatedly.
+const TrendBlock = ({ label, t, why, threshold, splitMode }) => {
+  const tone = TREND_TONE[t?.trend || "insufficient"];
+  const windows = splitMode === "calendar" ? "W1-9 vs W10-18" : "first half vs second half of the weeks played";
+  return (
+    <div style={{ padding: "8px 0", borderTop: "1px solid var(--border-default)" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+        <span style={{ fontSize: "11px", color: "var(--text-dim)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{label}</span>
+        <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: 700, color: tone, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {t?.delta != null ? `${t.trend} ${t.delta > 0 ? "+" : ""}${(t.delta * 100).toFixed(1)}pp` : "not yet measurable"}
+        </span>
+      </div>
+      {t?.series?.length > 0 && <TrendSpark series={t.series} tone={tone} />}
+      {t?.delta != null ? (
+        <div style={{ display: "flex", gap: "10px", fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", flexWrap: "wrap" }}>
+          <span>{pct1(t.early)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>early ({t.early_gp})</span></span>
+          <span style={{ color: "var(--text-dim)" }}>→</span>
+          <span>{pct1(t.recent)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>recent ({t.recent_gp})</span></span>
+          <span style={{ color: "var(--text-dim)" }}>·</span>
+          <span style={{ fontWeight: 700 }}>{pct1(t.last3)} <span style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 400 }}>last {t.last3_gp}</span></span>
+        </div>
+      ) : (
+        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+          {why || "not enough games yet"}
+          {t?.series?.length > 0 && <> — currently <strong style={{ color: "var(--text-secondary)" }}>{pct1(t.series[t.series.length - 1][2])}</strong> in his most recent game.</>}
+          <div style={{ color: "var(--text-dim)", marginTop: "2px" }}>This is a sample-size gap, not a flat role.</div>
+        </div>
+      )}
+      {threshold != null && t?.delta != null && (
+        <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "3px" }}>
+          Split is {windows}. Flagged at {(threshold * 100).toFixed(1)}pp — one standard deviation of every player's move this season.
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Section headers carry a colour so the eye can find its way around the card
 // without reading. The accent is STRUCTURE, not decoration: it names which of
 // the card's four questions a block answers, and the accent bar repeats the
@@ -8054,6 +8387,7 @@ const CARD_GROUP_ACCENT = {
 
 const CARD_ACCENTS = {
   // HIS JOB — what the offense gives him
+  targetTrend: CARD_GROUP_ACCENT.job,
   trajectory: CARD_GROUP_ACCENT.job,
   volume: CARD_GROUP_ACCENT.job,
   opportunity: CARD_GROUP_ACCENT.job,
@@ -8367,6 +8701,7 @@ const SECTION_INDEX = {
     { id: "rxr-byeconflicts", label: "Byes" },
     { id: "rxr-playoffs",     label: "Playoffs" },
     { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-trends",       label: "Trends" },
     { id: "rxr-freeagents",   label: "Waivers" },
     { id: "rxr-bench",        label: "Bench" },
   ],
@@ -9009,6 +9344,33 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
+            {/* ⚠️ NOT "Role trajectory" — that title already belongs to the SNAP
+                section directly above. Two identically-named sections in the
+                same group leave a reader unable to tell which number he is
+                looking at, and they answer different questions: snaps are "is
+                he on the field", this is "how much of the ball is his". Found
+                by rendering the card, not by reading the source. Guard 29
+                asserts the two titles stay distinct. */}
+            {card.targetTrend && (
+              <CardSection
+                title="Usage trajectory"
+                accent={CARD_ACCENTS.targetTrend}
+                hint={card.targetTrend.tgt?.delta != null ? card.targetTrend.tgt.trend : "in progress"}
+                note={`Week-by-week share of his team's work, ${card.targetTrend.vintage} — how much of the ball is his, as opposed to the snap share above, which is only whether he was on the field. This is role CHANGE (rank 1) and it outranks the season averages below, which are rank 2 — an average blends the player before the change with the player after it and describes neither.${card.targetTrend.prior != null ? ` For reference his 2025 target share was ${pct1(card.targetTrend.prior)}; the two seasons are shown side by side, never swapped.` : ""}`}>
+                <TrendBlock label="Target share" t={card.targetTrend.tgt} why={card.targetTrend.tgtWhy}
+                  threshold={card.targetTrend.tgtThreshold} splitMode={card.targetTrend.splitMode} />
+                {card.targetTrend.car && (
+                  <TrendBlock label="Carry share" t={card.targetTrend.car} why={card.targetTrend.carWhy}
+                    threshold={card.targetTrend.carThreshold} splitMode={card.targetTrend.splitMode} />
+                )}
+                {card.targetTrend.car && (
+                  <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                    Both sides are shown because a back can be flat in one and moving in the other. Read them together — a rising carry share on a falling target share is a role getting bigger and less valuable at the same time.
+                  </div>
+                )}
+              </CardSection>
+            )}
+
             {card.metrics.length > 0 && (
               <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}, on ${card.vintage}.${card.volumeCur ? ` Rows showing ${"\u2192"} are 2025 then ${card.volumeCur}; the percentile ranks the 2025 figure, because the current season has no comparable population yet.` : ""}`}>
                 {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
@@ -9356,6 +9718,7 @@ export default function RosterScorer() {
   const [benchMovesOpen, setBenchMovesOpen] = useState(false);
   const [benchListOpen, setBenchListOpen] = useState(false);
   const [roleCtxOpen, setRoleCtxOpen] = useState(false);
+  const [startSitOpen, setStartSitOpen] = useState(true);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -10376,6 +10739,25 @@ Wan'Dale Robinson`;
         .filter(Boolean)
         .join("\n");
 
+      // === TARGET / CARRY TRAJECTORY, prompt-side ===
+      // Only players whose role MOVED emit a line. A stable player would just
+      // repeat the season share printed above him, and the header says so, so
+      // absence reads as "the average is fair" rather than as missing data —
+      // the same contract trajectoryContext follows.
+      const targetTrendContext = !CUR_VOLUME_LIVE ? "" : (result.valid || [])
+        .flatMap(p => {
+          const out = [];
+          const push = (t, kind, thr) => {
+            if (!t || t.delta == null || t.trend === "stable") return;
+            const pc = v => `${(v * 100).toFixed(1)}%`;
+            out.push(`${p.name} (${p.pos}): ${kind} ${pc(t.early)} over ${t.early_gp} games -> ${pc(t.recent)} over ${t.recent_gp}, ${pc(t.last3)} across his last ${t.last3_gp} — ROLE ${t.delta > 0 ? "GROWING" : "SHRINKING"} (${t.delta > 0 ? "+" : ""}${(t.delta * 100).toFixed(1)}pp against a ${(thr * 100).toFixed(1)}pp bar)`);
+          };
+          push(getTargetTrend(p.name), "target share", TREND_META.trend?.threshold);
+          if (p.pos === "RB") push(getCarryTrend(p.name), "carry share", TREND_META.trend_car?.threshold);
+          return out;
+        })
+        .join("\n");
+
       // === 2025 QB VOLUME PROFILE ===
       // Kept OUT of metricsContext deliberately. That block gates on PLAYER_METRICS
       // gp >= 8, which drops a QB who missed half a season — and a seven-game starter
@@ -10647,7 +11029,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes. Measured year-over-year stability within this block: targets/gm 0.77 and air yards share 0.78 are the two anchors — lean on them; target share 0.73, WOPR 0.75 and snap share 0.71 follow; spike rate 0.48 is the least repeatable and describes 2025 rather than forecasting 2026):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${targetTrendContext ? `\n\u26a0\ufe0f\u26a0\ufe0f ROLE TRAJECTORY THIS SEASON — THE HIGHEST-RANKED BLOCK IN THIS PROMPT. Everything above is a season AGGREGATE, which is rank 2 (opportunity volume); this is rank 1 (role/opportunity CHANGE) and it OUTRANKS every share printed above it. An average blends the player before a role change with the player after it and describes neither — the worked failure is a back whose season snap average read "committee" while he had already become the starter. Where a line here disagrees with the aggregate above, LEAD WITH THIS ONE and say plainly that the role moved. Only players who MOVED are listed: a player absent from this block is being used about the same as he was, so the aggregate above is a fair read on him. The bar each move is measured against is one standard deviation of every player's move this season, derived from this week's own data rather than a fixed number. \u26a0\ufe0f For a running back the passing and rushing sides are separate lines and routinely disagree; a rising carry share alongside a falling target share is a role getting bigger and less valuable at once:\n${targetTrendContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this redraft roster. Return JSON only.`
@@ -10668,7 +11050,7 @@ ${teammateContext ? `\nQuarterbacks on the rostered teams (APP DATA — these te
 ${metricsContext ? `\n2025 production metrics (verified last-season data — describes old roles; situations/news below override on role changes. Measured year-over-year stability within this block: targets/gm 0.77 and air yards share 0.78 are the two anchors — lean on them; target share 0.73, WOPR 0.75 and snap share 0.71 follow; spike rate 0.48 is the least repeatable and describes 2025 rather than forecasting 2026):\n${metricsContext}` : ""}
 ${trajectoryContext ? `\n2025 snap TRAJECTORY (the snap share above is a season AVERAGE; this is the direction it moved. Where the two disagree, the late-season number is the better read on the current role. Only players whose role MOVED are listed — a player absent from this block held a steady role and his season average is a fair read):\n${trajectoryContext}` : ""}${absenceContext ? `\n2025 TEAMMATE ABSENCE (who else was on the field while the volume above was collected. Only players with a qualifying absence are listed — silence means no significant teammate missed time and the shares read at face value. An absence explains where volume came from; it does NOT prove the volume was hollow, and several players produced their best games with the teammate active):\n${absenceContext}` : ""}
 ${qbContext ? `\n2025 QB volume profile (project a QB from THESE, not from his prior-season fantasy points. Measured year-over-year stability: rushing attempts/gm 0.82 — the most repeatable input in football — pass attempts/gm 0.61, passing aDOT 0.49, against fantasy points/gm 0.38. Rushing volume is the part of a QB score that survives a bad passing day):\n${qbContext}` : ""}
-${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
+${deploymentContext ? `\n2025 NGS DEPLOYMENT — the two most repeatable receiving numbers there are, and neither was previously in this prompt. Intended air yards is aDOT measured where the ball was AIMED (r=0.83 year over year, the stickiest player input measured in this project) and describes WHERE a receiver is used — deployment persists even when production does not, so two players with identical target counts are different assets if their aDOTs differ. Separation is yards of space at the catch point (r=0.66) and is the ONLY talent-in-isolation input here: every other receiving figure above measures opportunity a coach handed out, this one measures whether he is earning it. High separation on modest volume is what a breakout looks like before the targets arrive:\n${deploymentContext}` : ""}${volumeCurContext ? `\n⚠️ CURRENT-SEASON VOLUME (${vintageLabel(VOLUME_CUR._meta)}) — THIS OUTRANKS THE 2025 BLOCK ABOVE. The 2025 production block is frozen for the whole season because it feeds the numeric grade; these are the SAME anchor measurements on the season actually being played, and each line carries the 2025 figure beside it so you can see what changed rather than a number whose meaning moved. Role CHANGE is rank 1 in the hierarchy and a shifted target share IS a role change, so where the two disagree, say so explicitly and lead with the current one. ⚠️ Small samples: every line states its game count, and a share over two or three games is not a season:\n${volumeCurContext}` : ""}${targetTrendContext ? `\n\u26a0\ufe0f\u26a0\ufe0f ROLE TRAJECTORY THIS SEASON — THE HIGHEST-RANKED BLOCK IN THIS PROMPT. Everything above is a season AGGREGATE, which is rank 2 (opportunity volume); this is rank 1 (role/opportunity CHANGE) and it OUTRANKS every share printed above it. An average blends the player before a role change with the player after it and describes neither — the worked failure is a back whose season snap average read "committee" while he had already become the starter. Where a line here disagrees with the aggregate above, LEAD WITH THIS ONE and say plainly that the role moved. Only players who MOVED are listed: a player absent from this block is being used about the same as he was, so the aggregate above is a fair read on him. The bar each move is measured against is one standard deviation of every player's move this season, derived from this week's own data rather than a fixed number. \u26a0\ufe0f For a running back the passing and rushing sides are separate lines and routinely disagree; a rising carry share alongside a falling target share is a role getting bigger and less valuable at once:\n${targetTrendContext}` : ""}${routesContext ? `\n2025 ROUTE WORKLOAD — targets per route run (r=0.67 year over year, comparable to dud rate and above spike rate). THIS IS THE ONLY PER-OPPORTUNITY RATE IN THIS PROMPT: every other receiving number above measures volume a coach handed out, this measures how often he is looked for when he is on the field. Read it AGAINST the volume figures — a high rate on ordinary volume is a player earning targets he is not getting, which is the contingency profile; a low rate on high volume is a role being fed to him that a depth-chart change can take away. Volume ceiling = routes x rate, so route share caps everything else. ⚠️ The denominator is pass-snap participation, not charted routes, so protection snaps count against blocking tight ends and backs and their rate reads low by construction:\n${routesContext}` : ""}${arcContext ? `\n2026 CAREER ARC (only players at the tails are listed — a player absent from this block sits inside his position's peak band and the calendar is neutral for him. ⚠️ The age is measured; the aging bands are PUBLISHED PRIORS, not a finding of this app, so weigh them and never quote them as data. RB is the steep curve, TE runs the other way and develops late):\n${arcContext}` : ""}${vacatedContext ? `\n2026 VACATED TARGETS BY TEAM (share of 2025 targets belonging to players no longer on the roster — rank 1 in the Source Hierarchy, role/opportunity CHANGE. Targets do not vanish, they get reassigned, so this locates an opening on the offence. It does NOT say who inherits it: per Lens 1 you must still project who absorbs the share before ADP reflects it. Only teams above 20% are listed):\n${vacatedContext}` : ""}${redzoneContext ? `\n2025 RED-ZONE OPPORTUNITY (scoring equity, which Lens 1 requires be tracked SEPARATELY from overall volume — a player can own a passing game between the 20s and none of it inside them, and those are different assets. Every share carries the COUNT it came from: red-zone volume is a fraction of total volume, so a bare percentage here is a ratio of two small numbers and must never be quoted without its count. ⚠️ Red-zone usage is among the most coaching-dependent things in football — a new OC can reassign a goal-line role in one week, so this describes 2025 deployment and any dated role note supersedes it):\n${redzoneContext}` : ""}${availabilityContext ? `\n2026 ON-FIELD RATE (games with offensive snaps over his team's games in every season he was rostered, so a fully missed season counts against him. Every other metric above is a PER-GAME RATE, which silently assumes he plays — this is that assumption measured, and in best ball a missed week is a zero that cannot be substituted out of. Only players at the tails are listed; a player absent from this block sits near his position's median. ⚠️ It blends availability with ROLE, because the gameday inactive list is unavailable — a backup who dresses and never plays scores low, which is correct for fantasy and is NOT a medical finding. It also cannot separate injury from a coaching decision, a suspension or a holdout):\n${availabilityContext}` : ""}${efficiencyContext ? `\n2025 per-touch efficiency (what a player did with his opportunities, as opposed to how many he got — rushing and receiving are SEPARATE axes and routinely disagree; rank 1 = most efficient in position. ⚠️ EFFICIENCY IS DESCRIPTIVE OF 2025 AND DOES NOT PREDICT 2026: measured year-over-year, RB yards per carry is r=0.02 — a coin flip — yards per target 0.31 and EPA per target 0.27. Use these to explain what happened, NEVER to argue what will happen, and never let an efficiency rank move a verdict on its own):\n${efficiencyContext}` : ""}
 ${situationsContext ? `\nPlayer situations (verified app data — use as ground truth):\n${situationsContext}` : ""}
 ${newsContext ? `\nRecent news (breaking updates — override everything above for these players):\n${newsContext}` : ""}
 Analyze this best ball roster. Return JSON only.`;
@@ -12801,6 +13183,23 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
+                {/* The ADP discipline component declines to score on a plain list
+                    (table ADP carries a +7 tail-compression offset that would be
+                    scored instead of the drafting), in superflex, and without pick
+                    numbers. Per the Jul 27 no-silent-drops rule an absence must be
+                    visible, so the reason renders here — muted, hueless chrome, not
+                    --caution: this is information, not a warning. It renders ONLY
+                    when the component did not fire; when it did, the strengths list
+                    already carries the result. */}
+                {analyzed.advanceLayer?.disciplineWhy && (
+                  <div style={{
+                    marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
+                    color: "var(--text-muted)",
+                  }}>
+                    <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
+                    {" · "}{analyzed.advanceLayer.disciplineWhy}
+                  </div>
+                )}
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18
@@ -13905,7 +14304,7 @@ Analyze this best ball roster. Return JSON only.`;
                   FIELD DIFFERENTIATION
                 </h2>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
-                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives.
+                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here. It reads a fixed team tier against the price of the earliest pick in each stack.
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "8px" }}>
                   {analyzed.stackGrades.map((stack, i) => {
@@ -13927,7 +14326,7 @@ Analyze this best ball roster. Return JSON only.`;
                           {stack.uniqueness?.toUpperCase()}
                         </div>
                         <div style={{ fontSize: "9px", color: "var(--text-muted)", marginTop: "4px" }}>
-                          {stack.chalkLevel} ownership · avg ADP {(stack.players.reduce((s, p) => s + p.adp, 0) / stack.players.length).toFixed(0)}
+                          {stack.chalkLevel} team tier{stack.anchorAdp != null ? ` · anchor ADP ${stack.anchorAdp.toFixed(0)}` : ""}
                         </div>
                       </div>
                     );
@@ -14744,6 +15143,82 @@ Analyze this best ball roster. Return JSON only.`;
                 rest. Empty groups SAY they are empty: per the silent-drop
                 rules, "nothing moved" is information and must not look like
                 missing data. */}
+            {(() => {
+              const board = buildStartSitBoard(analyzed.allStarters);
+              // Pre-season, or before the weekly refresh has run, there is
+              // nothing to trend. The panel does not exist rather than
+              // rendering an empty table.
+              if (!board || board.rows.length === 0) return null;
+              const tone = { rising: "var(--accent-lime)", falling: "var(--danger)", stable: "var(--text-secondary)", insufficient: "var(--text-dim)" };
+              return (
+                <div id="rxr-trends" style={{ marginBottom: "20px" }}>
+                  <SectionH2
+                    title="START / SIT · ROLE TRENDS"
+                    open={startSitOpen}
+                    onToggle={() => setStartSitOpen(o => !o)}
+                    hint={board.movers > 0 ? `${board.movers} moving · ${board.vintage}` : board.vintage} />
+                  {startSitOpen && (
+                    <div style={{ padding: "10px 12px", background: "var(--bg-raised)", borderRadius: "0 0 6px 6px" }}>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
+                        Your starters ranked by how much their role has MOVED this season, biggest movers first in both directions — a collapsing role is the start you would otherwise make out of habit. Share of his team's targets, or carries for a back, split {board.splitMode === "calendar" ? "W1-9 against W10-18" : "into halves of the weeks he has played"}. {board.tgtThreshold != null
+                          ? <>A move counts as rising or falling once it clears {(board.tgtThreshold * 100).toFixed(1)}pp of target share{board.carThreshold != null ? ` or ${(board.carThreshold * 100).toFixed(1)}pp of carry share` : ""} — one standard deviation of every player's move this season, so the bar comes from this week's data rather than being picked. STABLE beside a visible change means the change is real but smaller than that bar.</>
+                          : <>It is too early in the season to set a bar: too few players league-wide have enough games to split, so nothing is labelled rising or falling yet and every row shows what it can measure instead.</>}
+                        <div style={{ marginTop: "4px", color: "var(--text-dim)" }}>
+                          Quarterbacks are not listed: neither share describes a passer's role. This never touches your grade{board.pending > 0 ? `, and ${board.pending} starter${board.pending > 1 ? "s do" : " does"} not have enough games yet — those say so rather than reading flat` : ""}.
+                        </div>
+                      </div>
+                      {board.rows.map((r, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", minWidth: "140px" }}>
+                            {r.name}
+                            <span style={{ color: posColor(r.pos), fontWeight: 700, marginLeft: "6px", fontSize: "10px" }}>{r.pos}</span>
+                            <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}> {r.team}</span>
+                          </span>
+                          {r.delta != null ? (
+                            <>
+                              {/* ⚠️ THE DELTA AND THE BAR TRAVEL WITH THE LABEL.
+                                  Without them a row reading "STABLE" above
+                                  "7.3% -> 3.9%" looks like the panel
+                                  contradicting itself — the label-disagrees-
+                                  with-its-own-number class this repo has fixed
+                                  three times. The move IS small in absolute
+                                  terms and the bar is absolute by design, so
+                                  the fix is to show the arithmetic, never to
+                                  loosen the threshold. */}
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: tone[r.state], textTransform: "uppercase", letterSpacing: "0.04em", minWidth: "62px" }}>
+                                {r.state}
+                                <span style={{ fontWeight: 500, textTransform: "none", letterSpacing: 0, color: "var(--text-dim)" }}>
+                                  {" "}{r.delta > 0 ? "+" : ""}{(r.delta * 100).toFixed(1)}pp
+                                </span>
+                              </span>
+                              <span style={{ fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                {pct1(r.early)} <span style={{ color: "var(--text-dim)" }}>→</span> {pct1(r.recent)}
+                                <span style={{ color: "var(--text-dim)", fontSize: "10px" }}> {r.kind}</span>
+                              </span>
+                              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+                                last {r.last3gp}: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{pct1(r.last3)}</span>
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              {r.sofar != null && (
+                                <span style={{ fontSize: "12px", color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                  {pct1(r.sofar)} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>{r.kind} over {r.sofarGp} game{r.sofarGp === 1 ? "" : "s"}</span>
+                                </span>
+                              )}
+                              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                                no trend yet: {r.why} <span style={{ color: "var(--text-dim)" }}>— a sample-size gap, not a flat role</span>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {(() => {
               const ctx = buildRoleContext(analyzed.allStarters);
               const n = ctx.moved.length + ctx.absences.length;

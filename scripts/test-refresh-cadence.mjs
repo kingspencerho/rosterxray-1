@@ -23,7 +23,7 @@
 //
 // Run: node scripts/test-refresh-cadence.mjs   (exits non-zero on failure)
 
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync, readdirSync, existsSync } from "fs";
 import path from "path";
 
 const repoRoot = process.cwd();
@@ -153,5 +153,71 @@ ok("the volume builder opens nothing but its own output for writing",
 ok("the volume builder documents the games-played denominator",
    /GAMES PLAYED, never the full season|per \(player, game\)/i.test(volBuilder));
 
+// === THE WEEKLY REFRESH WORKFLOW ===
+// The data files are STATIC IMPORTS bundled at build time, so nothing updates
+// until a commit lands and Vercel rebuilds. This workflow is what makes that
+// happen on a schedule, and its entire safety argument is four properties. A
+// future edit could remove any of them and the job would still "work" — it
+// would just start shipping unreviewed or unguarded data.
+{
+  const wfPath = path.join(repoRoot, ".github/workflows/weekly-data-refresh.yml");
+  const wf = existsSync(wfPath) ? readFileSync(wfPath, "utf8") : "";
+  ok("the weekly refresh workflow exists", wf.length > 0);
+  if (wf) {
+    // 1. THE GUARDS GATE THE COMMIT. A refresh that ships bad data is worse
+    //    than a missed week: a missed week is visible in the vintage label and
+    //    bad data is not. `npm test` must run, and must run BEFORE the commit.
+    const testAt = wf.indexOf("npm test");
+    const commitAt = wf.indexOf("git commit");
+    ok("the workflow runs npm test", testAt > 0);
+    ok("npm test runs BEFORE the commit step", testAt > 0 && commitAt > testAt);
+
+    // 2. IT NEVER PUSHES TO THE DEFAULT BRANCH. CLAUDE.md rule 3 keeps
+    //    development on a named branch, and the branch the live site serves
+    //    must not receive unreviewed data commits.
+    ok("it opens a PR rather than pushing to the base branch", /gh pr create/.test(wf));
+    ok("it pushes only to its own data/ branch",
+      /git push -f origin "\$BR"/.test(wf) && /BR="data\/refresh-/.test(wf));
+    ok("no push to a default/main branch anywhere",
+      !/git push[^\n]*\b(main|master|\$BASE)\b/.test(wf));
+
+    // 3. THE FROZEN FILE IS NEVER REGENERATED. Guard 15's whole reason for
+    //    existing. The workflow calls one script and that script has no step
+    //    for it, but a future edit could add one.
+    // ⚠️ THE PROPERTY IS "NEVER INVOKES IT", NOT "NEVER MENTIONS IT".
+    //    Two earlier versions of this assertion failed on the workflow's own
+    //    documentation: the header comment explains why the frozen file is
+    //    untouched, and the PR body repeats it so a reviewer sees it too. Both
+    //    are wanted. What must never appear is the BUILDER being run, or the
+    //    file being written.
+    ok("the workflow never invokes the frozen file's builder",
+      !wf.includes("build-player-metrics"));
+    ok("the workflow never writes the frozen file",
+      !/player_metrics_2025[^\n]*>/.test(wf) && !/>[^\n]*player_metrics_2025/.test(wf));
+    // The only refresh script it may call. If a future edit adds a second one,
+    // this fails and the frozen/weekly split has to be re-argued on purpose.
+    const scripts = [...wf.matchAll(/scripts\/([\w.-]+)/g)].map(m => m[1]);
+    ok("it runs only refresh-inseason.sh",
+      scripts.every(f => f === "refresh-inseason.sh"), scripts.join(", ") || "none");
+    ok("the header still explains WHY the frozen file is untouched",
+      /player_metrics_2025/.test(wf) && /frozen/i.test(wf));
+    ok("it stages only grading/data", /git add grading\/data/.test(wf));
+    ok("it fails if anything outside grading/data changed",
+      /outside grading\/data/.test(wf) && /::error::/.test(wf));
+
+    // A run that changes nothing must not open an empty PR. refresh-inseason.sh
+    // always exits 0 — "not published yet" is its normal pre-season outcome —
+    // so the decision has to come from the diff, never from the exit code.
+    ok("the commit is gated on an actual data diff",
+      /git diff --quiet -- grading\/data/.test(wf)
+      && /steps\.diff\.outputs\.changed == 'true'/.test(wf));
+
+    ok("it is scheduled and manually runnable",
+      /schedule:/.test(wf) && /cron:/.test(wf) && /workflow_dispatch:/.test(wf));
+    ok("permissions are declared rather than inherited", /^permissions:/m.test(wf));
+  }
+}
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall refresh-cadence guards passed");
+
 process.exit(fail ? 1 : 0);

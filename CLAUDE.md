@@ -5994,3 +5994,596 @@ a real assertion against a temp file, and guard 28 greps for `or True)` so the
 shape cannot come back. **Five negative tests, all exit non-zero:** a hardcoded
 secret, the refusal removed, the token path unguarded, the `.gitignore` backstop
 removed, and an `or True` short-circuit.
+
+---
+
+## Usage Trajectory & the Start/Sit Board (added Sep 5, 2026)
+
+Asked for directly: *"target share is also really important to me when evaluating
+players during season in regards to start/sit decisions."* **CONTEXT ONLY — 51
+grades byte-identical** (14 tournaments x 3 fixtures, plus 9 redraft), compared
+against a pristine git worktree at HEAD. Guard 29:
+`scripts/test-target-trend.mjs`.
+
+### ~90% of it already existed, and the missing 10% was the whole point
+
+`build-volume-current.py` already computed target share weekly with the correct
+per-(player, game) denominator, `getVolumeCur` already shipped, the card already
+rendered dual vintage, the prompt already had a current-season block, and
+`refresh-inseason.sh` already downloaded the file it parses. **The builder
+computed a season-to-date aggregate and threw the per-week detail away.**
+
+So the app could say "27% target share through W7" and could not say "11% → 18%
+→ 24%, climbing for a month". For a start/sit decision the second one is the
+entire question, and the first is rank 2 while the second is rank 1.
+
+This is `snap_trajectory`'s exact defect, left unclosed on the better metric:
+**target share r=0.729 and targets/gm 0.774 against snap share's 0.709.**
+
+### ⚠️ THE PASSING SIDE ALONE WOULD HAVE REPRODUCED THE HARVEY MISS
+
+Caught by the dry run against 2025, before anything was wired:
+
+```
+RJ HARVEY 2025
+  target share   8.95% -> 11.63%   delta +0.027   STABLE
+  carry  share  17.67% -> 46.65%   delta +0.290   RISING
+```
+
+He is the player this file records being **graded fade/falling on four separate
+rosters** off a season average. A board reading only targets would have printed
+`stable` for him and reproduced the miss exactly. `trend_car` exists for that
+reason, RB-only — a receiver's carry share is three jet sweeps and printing it
+would invite reading a trend into noise.
+
+### ⚠️ EACH SERIES DERIVES ITS OWN THRESHOLD
+
+Carry share is a far wider distribution than target share. Measured on 2025:
+
+```
+             threshold   median   flagged
+targets        0.0402    0.0000   111/403
+carries        0.1042    0.0051    27/100
+```
+
+One shared threshold flags the wrong tail on one of them — the same class as the
+position-normalisation bug in the Ceiling Shape Layer, which moved grades for the
+wrong reason and **looked like a working feature while it did.** The start/sit
+board's ranking comparator therefore measures magnitude in THRESHOLDS
+(`|delta| / threshold`), never raw picks of share: ranking on raw delta would put
+every back above every receiver for a reason that is purely an artefact of the
+denominator.
+
+**Both thresholds are DERIVED from the run's own distribution (1 SD), never
+hand-typed**, and `delta_median` lands on 0.0000 for targets — the centering that
+makes a threshold mean "this player moved more than most players moved" rather
+than tracking league-wide drift. A partial season derives its own: the W8 dry run
+produced 0.045 in `halves` mode against the full season's 0.040 in `calendar`.
+**The two are never comparable.**
+
+### "insufficient" IS NOT "stable", and the reason is produced centrally
+
+Stable means measured and flat. `insufficient` means not yet measurable. A layer
+that collapses them makes a two-game sample read as a settled role.
+
+`trendWhy()` produces the REASON rather than leaving each caller to invent one —
+a consumer that cannot say why a trend is missing renders silence, and silence
+reads as "no change". At Week 2 every row says
+`19.0% target share over 2 games / no trend yet: needs 4 games to split the
+season — he has 2 — a sample-size gap, not a flat role`. **Both halves are
+required: say what it can, and name the gap.** An earlier version printed only
+the gap and withheld a share the app already had.
+
+`MIN_WINDOW_GP = 2` (not snap trajectory's 3) so the split turns on at 4 games
+(~W4-5) rather than 6. This layer has to be useful in October; the game count
+travels with every number so a thin split is visible rather than implied.
+
+### Two defects only the browser found
+
+Both were invisible in the source, which is why the render is not optional.
+
+1. **TWO SECTIONS TITLED "ROLE TRAJECTORY" ON ONE CARD.** The snap section
+   already owned that name. Renamed to **Usage trajectory**, with the note
+   drawing the distinction explicitly: snaps are *is he on the field*, this is
+   *how much of the ball is his*. Guard 29 asserts the titles stay distinct.
+2. **A row reading `STABLE` above `7.3% → 3.9%`** (Kenneth Walker). Correct —
+   −3.4pp is inside a 4.5pp bar — and it reads as the panel contradicting
+   itself, which is the label-disagrees-with-its-own-number class fixed three
+   times already. **The fix is to show the arithmetic, never to loosen the
+   threshold:** the row now prints `STABLE −3.4pp` and the panel note explains
+   that STABLE beside a visible change means the change is real and smaller
+   than the bar.
+
+### Containment
+
+`analyzeRoster` and `analyzeRedraft` reference none of `getTargetTrend`,
+`getCarryTrend`, `TREND_META`, `buildStartSitBoard`, `trend_car`,
+`startSitMagnitude` or `VOLUME_CUR` — asserted structurally, because a leak can
+move one roster by 0.01, pass a spot check, and **silently invalidate every
+calibration figure in this file.** The board is built at module level and invoked
+from a `useMemo`, exactly as `buildPlayerCard` is.
+
+The sparkline carries **no matchup colour**, guarded: colouring bars by opponent
+difficulty mixes rank 5 — the least stable input in the app — into a rank-1
+reading. Same rule the game log already follows.
+
+**QBs are excluded from the board and the panel says so in words.** Neither share
+describes a passer's role.
+
+### ⚠️ ANOTHER GUARD THAT COULD NOT FAIL — the fourth instance
+
+Six negative tests were run. Five caught; **one MISSED.** The assertion was
+`/delta != null\) return null/.test(source)`, and the sabotage inserted an
+unconditional `return null` ABOVE that line — the string survived intact and the
+guard passed while the behaviour was destroyed.
+
+Same shape as `test-findplayer.mjs` (no exit call at all),
+`test-disclosure.mjs` (one-argument `ok()`) and guards 19/20. **String-matching
+a source file asserts that text exists, never that code behaves.** `trendWhy` is
+pure, so the guard now extracts it with `new Function` and runs it against real
+inputs. All three of its failure paths then exited non-zero.
+
+**Nine failure paths negative-tested in total, all exit non-zero:** an engine
+leak, a label disagreeing with its delta, one shared threshold, three separate
+ways of breaking `trendWhy`, the carry side removed, and a matchup-coloured
+sparkline.
+
+### The weekly job is unchanged
+
+`refresh-inseason.sh` already calls `build-volume-current.py`. The trend comes
+from the same parse of a file already on disk — **no new step, no new download.**
+
+### Pre-season it does not exist
+
+`weeks_covered: 0` in the committed placeholder, so `CUR_VOLUME_LIVE` is false,
+the board returns null and the card section does not mount. The placeholder is
+generated by the real builder against a header-only input so its shape cannot
+drift from a live run. ⚠️ **Guard 29 section 7 is therefore vacuous until a real
+refresh is committed** — it was exercised against the full 2025 season (570
+players, 710 label checks) and against a simulated 2026-through-W8 during the
+build.
+
+---
+
+## The Weekly Refresh Runs Itself (added Sep 5, 2026)
+
+`.github/workflows/weekly-data-refresh.yml`. **No App.jsx or grading/data change
+— grades cannot move**, verified: `git status` shows zero files touched under
+either path. Guarded by a new section in `scripts/test-refresh-cadence.mjs`
+(guard 15), which is the right home because it already owns the frozen/weekly
+split.
+
+### The gap it closes, stated precisely
+
+Asked as *"will this render automatically once season starts?"* The answer was
+no, and the reason is worth keeping:
+
+**All four in-season layers are STATIC ES IMPORTS**, bundled at build time.
+Verified rather than assumed — `grep` for a runtime fetch of `grading/data`
+returns **zero**. So the numbers a visitor sees are whatever was committed the
+last time Vercel built, and there was no `.github/workflows` directory at all.
+
+Miss a week and nothing breaks or warns loudly. The app renders older data under
+a vintage label that correctly names an older week. `seasonNow()` catches a lag
+greater than 1 *after the fact*; it cannot fix one.
+
+**And step 4 was the one that bit before**: rosterxray.com serves `main`, which
+is why Brian Thomas stayed broken on the live site after being fixed on the
+branch.
+
+### Four properties carry the whole safety argument, and all four are asserted
+
+1. **THE GUARDS GATE THE COMMIT.** `npm test` runs, and runs BEFORE `git commit`.
+   A refresh that ships bad data is worse than a missed week — a missed week is
+   visible in the vintage label and bad data is not.
+2. **IT NEVER PUSHES TO THE DEFAULT BRANCH.** It pushes a `data/refresh-YYYY-Wnn`
+   branch and opens a PR. CLAUDE.md rule 3, and an unreviewed data commit landing
+   on the branch the live site serves is precisely what the split cadence exists
+   to prevent.
+3. **THE FROZEN FILE IS NEVER REGENERATED.** The guard asserts the workflow never
+   invokes `build-player-metrics` and runs no script but `refresh-inseason.sh`.
+4. **ONLY `grading/data` IS COMMITTED**, and the job hard-errors if the refresh
+   dirtied anything else — otherwise a stray edit rides along inside a PR nobody
+   reads closely because "it is just data".
+
+Seven failure paths negative-tested, all exit non-zero: pushing to main, moving
+`npm test` after the commit, removing the guards, adding the frozen builder as a
+step, committing regardless of the diff, dropping the scope check, and deleting
+the workflow.
+
+### ⚠️ THE EXIT CODE IS NOT THE SIGNAL — THE DIFF IS
+
+`refresh-inseason.sh` **always exits 0**. "Not published yet" is its normal
+pre-season outcome and is not a failure, so a job keyed on the exit code would
+open an empty PR every Tuesday until Week 1. The decision comes from
+`git diff --quiet -- grading/data`.
+
+### ⚠️ TWO ASSERTIONS FAILED ON THE WORKFLOW'S OWN DOCUMENTATION
+
+The frozen-file check was written as "the string `player_metrics_2025` must not
+appear." It failed twice, correctly both times:
+
+- the **header comment** names it to explain why it is untouched
+- the **PR body** repeats that so a reviewer sees it without opening the file
+
+Both are wanted. The property is **never INVOKES it**, not never mentions it —
+and a comment-stripping filter was still wrong, because the PR-body text lives
+inside a `run:` block. Asserting on the builder name and the set of scripts
+called is the version that expresses the real intent.
+
+### ⚠️ AN INDENTED HEREDOC INSIDE A YAML BLOCK SCALAR CANNOT CLOSE
+
+The first version built the commit message and PR body with `<<'BODY'` nested in
+a `run: |`. A heredoc terminator must sit at **column 0**, which is impossible at
+that indent — it would have swallowed the rest of the script and baked leading
+spaces into every line it did emit. Both bodies are built with `printf` into
+`.git/COMMIT_BODY` and `.git/PR_BODY` instead.
+
+**`bash -n` passed the broken version.** This file already records that lesson
+from the `\n`-in-a-line-continuation slip on Sep 1: *syntax checking proves a
+script parses, never that it does what you meant.* Every `run:` block was
+extracted from the YAML and executed for real — which is how the heredoc and the
+body indentation were caught.
+
+### Verified against a real run, not just parsed
+
+```
+bash scripts/refresh-inseason.sh 2026   -> "Partly refreshed", exit 0
+  Sleeper live: 816 players, 572 depth-chart slots, 71 hard statuses
+  the three nflverse releases 404 (correct pre-season)
+git diff -- grading/data   -> changed=true, status_2026.json only
+npm test                   -> ALL 29 GUARDS PASS on live refreshed data
+commit body + PR body      -> generated at column 0, markdown intact
+```
+
+**The guard gate is real rather than decorative**: a live refresh survives it.
+The 816 live rows were then reverted — that is a data change, not part of
+shipping the workflow, and the status layer's watch period is not up.
+
+### ⚠️ ONE REPO SETTING IS REQUIRED AND IS NOT IN THE FILE
+
+`GITHUB_TOKEN` cannot open a PR unless **Settings → Actions → General →
+Workflow permissions → "Allow GitHub Actions to create and approve pull
+requests"** is enabled. Without it the job runs, refreshes, passes the guards,
+and fails on the last step. Nothing in the YAML can grant this.
+
+### Cadence
+
+Tuesday 14:00 UTC — after Monday night settles into the nflverse releases,
+before Wednesday waivers. `workflow_dispatch` runs it on demand. Every in-season
+builder is Python **stdlib only**, so the job needs no `pip install` and has no
+dependency that can break on a release.
+
+---
+
+## A Pinned Clock in a Guard Ages Against the Corpus (fixed Sep 6, 2026)
+
+**54 grades byte-identical** — 15 tournaments x 3 fixtures plus 9 redraft, against a
+pristine worktree at HEAD. Prose carries no score.
+
+Josh Jacobs' initial court appearance was **moved up two months to Sep 10 2026**, three
+days before Green Bay's opener. Writing that in — dated Sep 4 2026 — **failed guard 14**,
+and the failure said nothing about the app.
+
+`test-player-card.mjs` pinned `nowFixed = Sep 1 2026`. Its sweep asks "is every dated
+SITUATIONS entry reachable on the card"; an entry dated **after the pin is a FUTURE date to
+the guard**, so `newsDateFor` correctly discarded it and the entry reported unreachable.
+Two entries failed for being fresher than the test.
+
+### The pin is right for the unit assertions and wrong for a corpus sweep
+
+The unit cases compare dates against each other (a newer prose date beating an older
+structured one, a `2026-12-01` structured date being discarded) and **would rot if "now"
+drifted**. They keep `nowFixed`.
+
+The two sweeps over hand-written prose now run on `Date.now()`. That is safe because time
+only moves one way: **entries get older, reachability strictly improves, and the thing the
+sweep actually guards — a note dated ahead of today — still fails.** Negative-tested: a
+structured future date with every prose date stripped exits non-zero.
+
+⚠️ **The first negative test did not bite, and the test was wrong rather than the guard.**
+It mutated `App.jsx`; guard 14 bundles **`App.jsx.jsx`**. Same lesson this file already
+records three times over — confirm the sabotage actually changes what the guard reads.
+
+**The general rule: a fixed clock in a guard is a maintenance deadline.** Any assertion
+sweeping hand-maintained prose against a pin will fail the first time someone writes
+something newer than the pin, and the failure names the wrong culprit.
+
+### What the entry now says
+
+`josh jacobs` moved **HARD FADE -> fade, falling -> rising**, dated Sep 4 2026. He is still
+on the Commissioner's Exempt List with no announced return and no Week 1 floor at an ADP
+near 41, so the cost is unchanged. Two facts changed the shape of the bet:
+
+1. **The legal timeline collapsed from roughly eleven weeks to four days**, so the largest
+   unknown resolves at the front of the season instead of the middle of it.
+2. **Games missed on the exempt list count toward any suspension the league later imposes**,
+   with earnings repaid — exempt time is credited rather than additive, so the worst case is
+   shorter than the raw calendar implies.
+
+`fade` carries no scored penalty by design, so this is a prose-layer change only.
+
+**`marshawn lloyd` and `kaleb johnson` were updated in the same edit.** Both described the
+Jacobs absence as open-ended, which is the corpus contradicting itself the moment the date
+moved. Their opening now reads as real but possibly short, with an explicit re-price date.
+
+**Two claims from the reporting were deliberately NOT carried.** The alleged conduct in the
+police report, and the earlier "no domestic-violence designation" reading — the first is not
+load-bearing for a draft decision, and the second could not be re-verified against the
+current filing, so it was dropped rather than preserved on momentum.
+
+---
+
+## Leverage Was Unsourced, Uncapped, and Lying About Its Own Input (fixed Sep 6, 2026)
+
+**Reported as a question, not a bug:** *"how is leverage calibrated on my app... is it fully
+updated?"* The answer was **no, and there was nothing that could have updated it.** Three
+defects in one small block, and the question found all three. Guard 30:
+`scripts/test-leverage.mjs`.
+
+### 1. THE UI CLAIMED A MEASUREMENT THAT DOES NOT EXIST
+
+The Field Differentiation cards printed **`sharp ownership`** and **`low ownership`**.
+
+**There is no ownership data anywhere in this app.** No file, no field, no feed — checked, not
+assumed. `TEAM_CHALK` is a **hand-typed 32-team constant with no source, no date stamp, and
+nothing in `scripts/` that writes it.** It has never been refreshed by any process because no
+process exists.
+
+The user's own definition of the terms was correct — chalk is what the field owns, leverage is
+what it does not. **The app was approximating that concept and rendering the approximation as
+the measurement.** Same class as the tier labels that disagreed with their own scores and the
+stale verdicts rendered as current: a label asserting more than the data behind it carries.
+
+The panel now says **"This is a projection, not a measurement: no ownership data exists here"**
+and the card prints `sharp team tier · anchor ADP 97`.
+
+### 2. ⚠️ THE BONUS WAS UNCAPPED, AND IT WAS THE ONLY LAYER THAT WAS
+
+```js
+score += leverageStacks.length * 0.4;   // no clamp
+```
+
+A real five-stack roster took **+2.0 — roughly a quarter of its grade — out of an unsourced
+hand-typed table.** Every other layer here is clamped:
+
+```
+Ceiling Shape   ±0.5     derived, guarded, negative-tested
+Floor Layer     ±0.5     derived from a starter-pool median
+Advance Rate    ±1.25    three measured components
+Leverage        UNCAPPED  <- the one input that is not measured
+```
+
+**The single input with no source was the only one that could run away.** Capped at
+`LEVERAGE_BONUS_CAP = 1.0`, which places it below the advance layer and above the ceiling
+layer — where a team-level heuristic belongs.
+
+### 3. THE MEAN WAS THE WRONG STATISTIC
+
+The classifier averaged every piece's ADP, so **one very late pick could drag a stack past the
+gate.** The worked example is from the roster that prompted the question:
+
+```
+CAR   Tetairoa McMillan 41.0  +  Darren Waller 210.4   =  mean 125.7  ->  HIGH LEVERAGE
+```
+
+A stack anchored by a **round-four receiver** is not a contrarian holding by any reading of the
+term. **Averaging hid the expensive piece behind the cheap one.**
+
+The **anchor** — the earliest pick — is the honest test. A stack is only something the field
+lacks if NO piece in it is expensive. `LEVERAGE_ANCHOR = { sharp: 80, low: 60, chalk: 50 }`,
+applied to `Math.min(...adps)`.
+
+### ⚠️ KNOWN LIMIT, stated because the proxy cannot see it
+
+**A cheap QB attached to a chalk receiver is a genuinely differentiated CONSTRUCTION even
+though its anchor is a first-rounder** — most JSN drafters never take Darnold. Measuring that
+needs real ownership data, which does not exist here and has no free source (Underdog does not
+publish exposure, and Chromium cannot reach external hosts from this sandbox per the Aug 15
+note). **With an unsourced input the conservative read is the correct one**, so those stacks
+now grade `Slight Leverage` and earn no scored bonus. Recorded rather than hidden.
+
+### ⚠️⚠️ ref1, ref2 AND ref3 ARE BLIND TO THIS LAYER — that is why `ref4` exists
+
+All three committed fixtures produce **ZERO leverage stacks, under the old rule and the new
+one.** They are early-anchored balanced builds, so this branch never fired for them.
+
+**Every calibration ever recorded against those three was silent on this layer, and none of
+them could have caught the uncapped bonus.** A layer no fixture exercises is a layer no
+calibration covers, and that is invisible in exactly the way a failing assertion is not.
+
+`scripts/fixtures/ref4.txt` is a real 3-5-8-2 Triple QB Mutation drafted from `ADP_DATA` at
+seat 7. It classifies **five** stacks as leverage under the old mean rule and **two** under the
+anchor rule, so it moves in both directions and binds against the cap. Guard 30 asserts ref1-3
+still produce zero (recorded, not desired) **and** that ref4 still produces at least one, so
+the guard cannot quietly stop testing anything.
+
+### ⚠️ Calibration — this MOVED GRADES. Re-baseline from here.
+
+```
+72 grades (15 tournaments x 4 fixtures + 3 redraft x 4).  69 BYTE-IDENTICAL.
+
+ref4  bbm7    A  8.36  ->  A  7.16    -1.20
+ref4  puppy   A  7.91  ->  A- 6.71    -1.20   <- letter grade moved
+ref4  puppy4  A  8.31  ->  A  7.11    -1.20
+
+Everything else identical, INCLUDING every non-massive-field tournament on ref4 —
+the Field Size Overlay gate holds. -1.20 = the old +2.0 bonus minus the new +0.8.
+```
+
+**Pre-Sep-6 bbm7 / puppy / puppy4 figures in this file are now high by up to 1.2** for any
+roster carrying three or more leverage stacks. Rosters with two or fewer are unaffected by the
+cap and moved only if the anchor rule reclassified a stack.
+
+### Rules this produced
+
+- **A scored input that is not measured must be capped tighter than the measured ones**, not
+  looser. The reverse is what shipped.
+- **Never render a projection with the vocabulary of a measurement.** "ownership" was one word
+  and it made a heuristic look like a feed.
+- **Use the ANCHOR, not the mean, for any "is this cheap" test on a group.** A mean lets the
+  cheapest member vouch for the most expensive one.
+- **Check that a fixture actually exercises a layer before trusting its calibration.** Zero
+  movement is only evidence when you have confirmed the branch can fire.
+
+Five failure paths negative-tested, all exit non-zero: the cap removed, the mean restored, the
+UI reclaiming ownership, the massive-field gate dropped, and the cap raised past the advance
+layer.
+
+### ⚠️ CORRECTED the same day — the paragraph this replaced was wrong
+
+An earlier version of this section said *"value earns nothing"* and called the ADP block
+*"one-directional"*. **False.** `analyzeRoster` has always paid value picks: `delta >= 15`
+earns +0.5 each, capped at +2.0, from the second one. It was read off the reach branch alone
+and asserted without opening the value branch beside it. The real gap was narrower and more
+interesting, and it is the next section.
+
+---
+
+## ADP Discipline in the Advance Rate Layer (added Sep 6, 2026)
+
+Fourth component of the Advance Rate Layer, **best ball only, scored, ±0.5.** Guard 31:
+`scripts/test-discipline.mjs`. Fixture `scripts/fixtures/ref5.txt`.
+
+### The gap was never "value earns nothing" — it was that the flags count EVENTS
+
+The existing ADP block pays `delta >= 15` at +0.5 each (cap +2) and charges `delta <= -15` that
+survives the turn at -0.4 each from three (cap -1.5). **That rewards VARIANCE, not discipline.**
+A drafter who lands eighteen picks at +8 has extracted more market value than one who lands
+sixteen at -5 and two at +16, and the first earns nothing while the second earns +1.0.
+
+The roster that prompted this carried **three flags on eighteen picks, none past 15**, and
+scored zero on ADP while being the most disciplined board seen in this project. Its discipline
+showed up only as the absence of a penalty, which the app can never tell the drafter about.
+
+This component is the **cumulative** measure: the mean of (pick − ADP) over the picks where ADP
+is a real market, centred at zero, clipped, saturating at two standard deviations.
+
+### ⚠️⚠️ THE DERIVATION FOUND THE TABLE HAS A +7 OFFSET, AND THAT DECIDED THE DESIGN
+
+Simulating 12-man snakes from `ADP_DATA` at the measured drift (sd 9, per the Aug 15 audit's
+median of 9.2) put the roster-level mean delta at **+7.1 over all picks, +5.7 over picks ≤156.**
+Not zero. Three checks located it:
+
+```
+mean(rank - adp), ADP_DATA top 216:   +7.16
+   ranks   1-60     +2.71
+   ranks  61-120    +6.98
+   ranks 121-160    +9.59
+   ranks 161-216   +10.37        the 216th-ranked player has ADP 203.3
+the same roster, REAL Underdog board:  +1.9   (three times lower)
+ref1 / ref2 / ref3 on table ADP:      +39 / +30 / +38   (value-heavy synthetics, not at-ADP drafts)
+```
+
+**It is in the table.** A late player's ADP is a mean over only the drafts he was taken in, so
+the tail is compressed earlier than its rank. Centre on 0 with table ADP and every roster gets a
+free +7. Centre on +7 with board ADP and perfect discipline is penalised. **Neither is honest,
+so the component scores ONLY when the ADP came from the drafter's own board**
+(`adpSource === "roster"`), and the table path reports why it did not fire. This is the biased-
+baseline bug the Ceiling Shape Layer hit on Jul 28, in a new costume, and it is the ADP Source of
+Truth rule applied to a scored input: **the user's board is the market; the snapshot is a proxy.**
+
+### Every number is derived, and the guard reads them rather than re-typing them
+
+```
+DISCIPLINE_PICK_CUTOFF   156    round 13 of a 12-man draft — the Late-Round ADP Flattening
+                                Protocol already says picks 160+ carry no ADP signal
+DISCIPLINE_PICK_CLIP      20    ~p90 of simulated per-pick |delta| at measured drift
+                                (median 8.4, p75 14.0, p90 19.6, p95 23.0)
+DISCIPLINE_SATURATE      4.6    2 x the simulated roster-level SD (2.3 at picks <= 156)
+DISCIPLINE_MIN_PICKS      10
+DISCIPLINE_CAP           0.5    matches schedule and usable_rate
+centre                     0    definitional — a pick taken AT the market's expectation
+                                extracted nothing
+```
+
+**The table offset shifts the mean; it does not widen the SD**, which is why the simulation's
+scale is usable even though its centre is not. **Turn-cleared reaches floor at 0**, consistent
+with `isScoredReach` — on ref5, Lawrence at 79 (ADP 88, next pick 90) contributes 0 rather than
+−9, and the guard asserts the floor moved the mean. **Superflex does not score**: the Aug 20
+finding is that its ADP is a seeded ordering rather than a market, so a continuous measure
+against it would be measuring distance from Underdog's projection.
+
+### It sits INSIDE the existing ±1.25 clamp
+
+Four components can now sum to ±1.75 raw, so the clamp can bind where it never could before.
+Deliberately left at 1.25 — a roster that maxes all four is unusual, and the conservative
+choice is for the new component to redistribute within the existing envelope rather than
+widen it.
+
+### ⚠️ ref1-4 ARE ALL SILENT HERE — that is why `ref5` exists
+
+All four are plain `Name Pick` lists, so all four resolve ADP from the snapshot and the
+component correctly declines to score them. **ref5 is the same eighteen players as ref4 in the
+five-line block format the screenshot extractor emits, carrying the board's own ADP.** It is
+the only fixture on which this fires, and the only fixture that exercises the roster-ADP
+override path at all — which had never had a fixture either.
+
+Guard 31 asserts ref5 fires and ref1-4 report the snapshot reason, so the guard cannot quietly
+stop testing anything. It also **recomputes the formula from the engine's own picks and flags**
+(clip, floor, cutoff) and compares it to what the engine reported, exercises the clip with a
+single +60 fall, saturates both directions by mutating real picks, and checks that a roster
+drafted exactly at its board's ADP scores 0.00.
+
+### ⚠️ Calibration — MOVED, all on ref5, all positive, all proportional
+
+```
+90 grades (15 tournaments x 5 fixtures + 3 redraft x 5).  77 BYTE-IDENTICAL.
+
+ref5 mean delta +2.6 over 13 board-priced picks  ->  disciplinePts +0.28, then x advanceWeight:
+  boxer      +0.21   (0.75)       frenchie / husky     +0.35   (1.25)
+  main       +0.28   (1.0)        puppy / pitbull /    +0.41   (1.5)
+  fastpuppy  +0.28   (1.0)          schnauzer / rottweiler / frenchiesprint / puppy4
+  frenchie14 +0.28   (1.0)        bbm7                 +0.49   (1.75)
+  fieldgeneral / superflex   0.00  <- superflex gate
+  ref1-4                     0.00  <- table gate
+  redraft                    0.00  <- containment
+one letter grade crossed: ref5 puppy A- 6.61 -> A 7.02
+```
+
+**Pre-Sep-6 best-ball figures for any roster graded from a board carrying ADP are now low by
+up to 0.5 × advanceWeight.** Rosters graded from a plain list are unaffected.
+
+### The declined-to-score reason now renders (closed the same day)
+
+One muted line directly under the counts row in the best-ball header, rendered **only when
+the component did not fire**: `ADP discipline not scored · <the engine's own reason>`. On a
+plain list that reads *"ADP came from the built-in snapshot, whose tail compression (+7 picks,
+rising with rank) would be scored instead of your drafting — paste a board that carries ADP"*,
+which is the instruction a drafter can act on.
+
+Three rules held: it is **`--text-muted`, not `--caution`** — a declined component is
+information, not a warning, and the Aug 28 palette rule reserves `--caution` for real ones; it
+is a **sibling after the counts-row `<button>`**, not inside it, so the Aug 27 centring rule
+never applies; and it prints **the engine's string**, never a hand-typed copy of it, so the UI
+cannot drift from the reason the CLI reports. When the component DID fire the line is absent
+and the strengths list carries the result — an absence line beside a strength line would say
+two things about one number.
+
+Guard 31 asserts the read site exists once, lives in the best-ball branch, is a sibling of the
+button, is muted, names itself, and renders the engine's field. Presentation only.
+
+### ⚠️ The render caught a FALSE EXPLANATION the CLI could not see
+
+First render: **both** ref4 and ref5 printed *"no pick numbers on the roster"* — ref5 carries
+eighteen of them and the CLI had just scored it +0.28. Not a bug in the line, and not the
+pre-pass either (`preprocessRoster` was chased and is not on the button path). **The pick-analysis
+checkbox defaults to `useState(false)`, and the button passes `showPickAnalysis &&
+picks.hasPickNumbers`**, so two different states — no numbers parsed, numbers parsed but
+analysis switched off — reach the engine as one `false`. The line then blamed the roster for a
+box the reader had not ticked.
+
+That is the Sep 1 card-audit class exactly: *a section that does not apply is not a gate he
+failed.* The engine cannot see the checkbox, but **the `picks` array it is handed still carries
+`parseRoster`'s own `.hasPickNumbers`** (only `valid` is a filtered copy), so it branches:
+numbers present + gate false → *"pick analysis is switched off — tick the pick-numbers box
+above the paste area…"*; numbers absent → *"no pick numbers on the roster."*
+
+⚠️ **`Array.prototype.filter` drops that flag.** Guard 31's own `parse()` helper filters
+`notFound` rows and so hands the engine an array with `hasPickNumbers === undefined`, which is
+why its earlier no-numbers case passed for the right reason by accident. The toggle-off case is
+tested with the UNFILTERED array. `grade-cli` passes the unfiltered array and is unaffected.
+
+**The CLI, the guard and the calibration all passed while the live page said something false.**
+A code path that exists only when a UI control is in one state is invisible to every test that
+calls the engine directly. Render it, in both states.

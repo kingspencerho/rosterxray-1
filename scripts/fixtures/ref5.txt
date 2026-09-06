@@ -1,0 +1,105 @@
+# RosterXRay calibration fixture — ref5 (seat 7, 12-man snake, 18 rounds, BOARD ADP)
+# Added Sep 6 2026 with the ADP discipline layer. Same eighteen players as ref4,
+# in the five-line block format the screenshot extractor emits, carrying the
+# ADP the drafter's OWN BOARD printed beside each pick.
+#
+# WHY A FIFTH FIXTURE: ref1-4 are plain "Name Pick" lists, so every one of them
+# resolves ADP from the built-in snapshot (adpSource "table"). The discipline
+# layer deliberately does NOT score on table ADP — the table carries a +7 tail-
+# compression offset that would be scored instead of the drafting — so all four
+# are silent on it. This is the only fixture on which it fires. It is also the
+# only fixture that exercises the roster-ADP override path at all.
+#
+# Measured against this board: mean delta +2.6 across 13 board-priced picks in
+# the first 13 rounds (Lawrence at 79 was a turn pick and floors to 0), which is
+# roughly 1.1 SD of discipline and earns +0.28 before advanceWeight.
+Trevor Lawrence
+88.1
+ADP
+79
+Pick
+Jaxson Dart
+108.1
+ADP
+114
+Pick
+Sam Darnold
+144.2
+ADP
+151
+Pick
+Ashton Jeanty
+15.4
+ADP
+18
+Pick
+Jaylen Warren
+69.3
+ADP
+66
+Pick
+Blake Corum
+85.3
+ADP
+90
+Pick
+Chris Rodriguez
+121.3
+ADP
+127
+Pick
+Tank Bigsby
+152.2
+ADP
+162
+Pick
+Jaxon Smith-Njigba
+5.5
+ADP
+7
+Pick
+Tetairoa McMillan
+41.0
+ADP
+42
+Pick
+Parker Washington
+54.0
+ADP
+55
+Pick
+Michael Pittman Jr
+102.9
+ADP
+103
+Pick
+Khalil Shakir
+132.0
+ADP
+138
+Pick
+Malachi Fields
+183.9
+ADP
+175
+Pick
+Omar Cooper
+178.2
+ADP
+186
+Pick
+Isaac TeSlaa
+208.7
+ADP
+199
+Pick
+Trey McBride
+29.6
+ADP
+31
+Pick
+Darren Waller
+210.4
+ADP
+210
+Pick
