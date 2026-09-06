@@ -5383,6 +5383,27 @@ string with itself, so it mutated nothing. Rewritten to inject a real `STATUS_LA
 inside `analyzeRoster`'s body. **Same lesson this file already records twice: assert the
 behaviour, and check that the negative test actually changes something.**
 
+### ⭐ HIS CALL Sep 6, 2026: THE LIVE ROWS ARE COMMITTED. The placeholder era is over.
+
+**813 players, 571 depth-chart slots, 71 hard statuses**, refreshed the day it was committed
+rather than shipping the five-day-old copy that was sitting in the working tree. **The
+zero-row placeholder existed so the file's SHAPE could be pinned before real data existed;
+it is not a safety mechanism and holding it longer bought nothing.**
+
+⛔ **WHAT DOES NOT CHANGE: the layer is still unwired.** Guard 26's no-consumer assertions are
+untouched and still pass — no `status_2026`, `STATUS_LAYER`, `getStatus(`, `statusContext` or
+`getPlayerStatus` exists in App.jsx. **Committing data and rendering it are separate decisions
+and only the first was made.** 33 guards pass on the live rows, which is the point of gating the
+weekly workflow's commit on `npm test`.
+
+⭐ **AND THE ROW-SHAPE ASSERTION IS NO LONGER VACUOUS.** This file recorded that the guard could
+not bite while the file was empty. It bites now.
+
+**The first live report flags 12 players whose freshest note predates a hard status**, four of
+them with no dated note at all. **The live one is `jordyn tyson` (WR NO, ADP 63) — IR as of
+Sep 5 with no dated note anywhere**, a top-70 pick whose availability the app cannot currently
+speak to. Read them as questions, per the report's own header.
+
 ### Still open from §14a
 
 **GAP 1 is half closed.** The status half is built; **the prose half is unchanged and still
