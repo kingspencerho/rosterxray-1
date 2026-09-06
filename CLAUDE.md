@@ -6742,7 +6742,7 @@ node scripts/build-baselines.mjs --drafts 40    # deterministic; same seed, same
 
 **Found by the two-roster test, not by a guard.** Two real BBM VII rosters, same 3-5-8-2
 archetype, graded side by side. One was measured on **13 of 18** players; the other on
-**8 of 18** — and **both reported "18/18 matched"**, because every NAME resolved.
+**10 of 18** — and **both reported "18/18 matched"**, because every NAME resolved.
 
 **So the app presented a grade computed on eight players identically to one computed on
 thirteen, and nothing on screen said which.** The match counter answers *did the parser find
@@ -6791,7 +6791,7 @@ never that code behaves.**
 One muted line under the field baseline, and it appears **only when coverage is incomplete** —
 on a fully measured roster the qualifier would be noise on every grade:
 
-> *measured on **8 of 18** players with 2025 data · the rest are rookies or played too little
+> *measured on **10 of 18** players with 2025 data · the rest are rookies or played too little
 > to rate (8+ games, 35%+ snaps), so the ceiling, floor and naked-RB checks cannot see them —
 > this grade rests mostly on construction*
 
@@ -6811,7 +6811,31 @@ qualifies a grade, it does not warn about one.
 ⚠️ **A number reported earlier in this session was the looser measure and is corrected here.**
 The two rosters were first described as having 2025 rows for **18 of 18** and **11 of 18**.
 That counts *has a row at all*. The number that matters — and the one the app now prints — is
-*clears the gate the scored layers use*: **13 of 18 and 8 of 18.**
+*clears the gate the scored layers use*: **13 of 18 and 10 of 18.**
+
+⛔⛔ **CORRECTED AGAIN Sep 6, 2026, BY RUNNING `metricCoverage` ITSELF — the thinner roster is
+10 of 18, not 8.** Both rosters were rebuilt from the transcript's own tool call and graded
+through the shipped helper rather than counted by hand. ⭐ **Team A reproduced at exactly 13,
+which is what says the rosters are faithful and the 8 was the error.** The two it missed are
+**Tyler Warren (17 gp, 84% snaps)** and **Charlie Kolar (11 gp, 40% snaps)** — both tight ends,
+both comfortably past the gate.
+
+⚠️⚠️ **AND THIS FILE ALREADY CONTAINED THE PROOF, TWO SECTIONS UP.** The browser-render block
+in the field-baseline entry records the live page printing `measured on · 10 of 18 players with
+2025 data` — **the rendered evidence and the prose disagreed inside one document**, and the
+rendered half was right. ⛔ **A file that contradicts itself is worse than one that is simply
+wrong**, because each half looks corroborated by the other until somebody diffs them.
+
+⭐ **THE LESSON IS THE ONE THIS FILE KEEPS RECORDING, POINTED AT A NUMBER RATHER THAN A GUARD:
+a count produced by reading is not a count produced by running.** The figure that reached the
+file came from a hand read of a screenshot; the figure the app prints comes from the gate. **They
+disagreed for three days and only running the shipped code found it.** ⚠️ **Anything quoted as
+"the app says X" must be produced BY the app**, which is the same rule as asserting behaviour
+over string-matching a source file.
+
+**What does NOT change: the finding.** 10 of 18 is still under the 70% floor, still renders the
+rests-mostly-on-construction clause, and the two rosters still differ by three measured players
+while both report 18/18 matched. **The gap the feature exists to show is real at 10 as at 8.**
 
 ---
 
