@@ -14723,6 +14723,34 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
+                {/* METRIC COVERAGE, redraft. Same helper, same shared CEILING_GATE —
+                    and the gate is EXACTLY the one the redraft Floor Layer scores on,
+                    so the number is already the right one for this mode. Added Sep 6
+                    2026 after a browser render showed the best-ball version does not
+                    reach here: the qualifier belongs wherever a grade is shown, and
+                    redraft carries more sub-gate players than best ball, not fewer.
+                    ⛔ The FIELD BASELINE deliberately does NOT come with it — the
+                    baseline file is keyed by tournament, redraft is keyed by league,
+                    and the render reads the best-ball `tournament` state, so a copy
+                    here would compare a redraft score against a best-ball field. */}
+                {(() => {
+                  const mc = metricCoverage(analyzed.valid);
+                  if (!mc || mc.measured >= mc.total) return null;
+                  const thin = mc.measured / mc.total < 0.7;
+                  return (
+                    <div style={{
+                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
+                      color: "var(--text-muted)",
+                    }}>
+                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                      {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                      {" · "}<span style={{ opacity: 0.8 }}>
+                        the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the floor and lineup-confidence checks cannot see them
+                        {thin ? " — this grade rests mostly on construction and schedule" : ""}
+                      </span>
+                    </div>
+                  );
+                })()}
                 {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),
                     so a fixed expectation would cry wolf. The match counter plus the
                     notFound rows carry the signal here instead. */}

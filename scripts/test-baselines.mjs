@@ -153,7 +153,16 @@ ok("metricCoverage is defined exactly once",
   (app.match(/const metricCoverage = /g) || []).length === 1);
 const covCalls = [...app.matchAll(/metricCoverage\(/g)].map(x => x.index)
   .filter(i => !app.slice(Math.max(0, i - 30), i).includes("const metricCoverage = "));
-ok("metricCoverage has exactly one call site", covCalls.length === 1, `${covCalls.length}`);
+// TWO call sites now, one per mode. It renders wherever a grade is shown; the
+// FIELD BASELINE deliberately stays best-ball-only because its file is keyed by
+// tournament and the render reads the best-ball `tournament` state.
+ok("metricCoverage has exactly two call sites (best ball + redraft)", covCalls.length === 2, `${covCalls.length}`);
+ok("the redraft copy names the layers that go blind THERE",
+  app.includes("floor and lineup-confidence checks cannot see them"),
+  "best ball says ceiling/floor/naked-RB; redraft has different consumers");
+ok("the field baseline stays best-ball only",
+  (app.match(/fieldPlacement\(/g) || []).length === 1,
+  "exactly one CALL site; a redraft copy would compare a redraft score against a best-ball field");
 for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
   const body = bodyOf(app, engine); if (!body) continue;
   ok(`${engine.match(/analyze\w+/)[0]} never calls metricCoverage`, !body.includes("metricCoverage("),

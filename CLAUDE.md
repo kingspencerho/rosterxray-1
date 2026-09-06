@@ -6812,3 +6812,50 @@ qualifies a grade, it does not warn about one.
 The two rosters were first described as having 2025 rows for **18 of 18** and **11 of 18**.
 That counts *has a row at all*. The number that matters — and the one the app now prints — is
 *clears the gate the scored layers use*: **13 of 18 and 8 of 18.**
+
+---
+
+## Two Decisions Executed (Sep 6, 2026)
+
+**33 guards pass — ZERO failures for the first time on this machine. 90 grades byte-identical.**
+
+### 1. The Yahoo chmod assertion is now platform-aware, not deleted
+
+**The split was the worst possible one: it passed in CI (Linux) and could NEVER pass on the
+only machine anyone develops on.** `chmod 600` is POSIX; on Windows `os.chmod` toggles the
+read-only bit and nothing else, so the mode reads `0o666` forever. **A permanently red suite
+teaches you to stop reading it**, and this repo already records eleven bugs that accumulated
+behind eleven ignored build warnings.
+
+⛔ **Deleting the assertion was the wrong fix, because the risk is REAL on Windows** — the
+token genuinely is readable by any account on the machine. So the check moved to where it can
+do something:
+
+- **`save_token` now prints a warning at the moment a real token is written on Windows**,
+  naming the file and telling the reader to keep it out of shared or synced folders. Verified
+  firing.
+- **The self-test asserts what IS true and controllable there** — the file exists and lives
+  outside the repo — and keeps the strict `0o600` assertion on POSIX.
+
+⭐ **A warning at the point of risk beats a failing assertion about a platform where the risk
+cannot be removed.**
+
+### 2. Metric coverage now renders in REDRAFT too
+
+**A browser render found the best-ball version does not reach redraft** — nor does the field
+baseline, nor the ADP-discipline note. The qualifier belongs wherever a grade is shown, and
+**redraft carries MORE sub-gate players than best ball, not fewer.**
+
+Same helper, same shared `CEILING_GATE` — **and that gate is exactly what the redraft Floor
+Layer scores on**, so the number was already the right one for the mode. Only the copy
+differs: best ball names *ceiling, floor and naked-RB*; redraft names *floor and
+lineup-confidence*, because those are its actual consumers.
+
+⛔ **THE FIELD BASELINE DELIBERATELY DID NOT COME WITH IT.** `baselines_2026.json` is keyed by
+TOURNAMENT and redraft is keyed by LEAGUE, and the render reads the best-ball `tournament`
+state — which in redraft still holds its default `"main"`. **A copy-paste here would have
+compared a redraft score against a best-ball field**: confident, precise and wrong. The guard
+asserts `fieldPlacement` keeps exactly one call site for that reason.
+
+**A redraft baseline remains a real build, not a config change** — a different ADP table with
+a deeper tail, scored by the Floor Layer, in leagues whose starter slots vary by preset.
