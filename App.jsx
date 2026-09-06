@@ -1231,6 +1231,21 @@ const BYES = {
 
 // Team chalk rating for stack uniqueness proxy
 // chalk = drafted heavily, leverage = sharp/contrarian
+//
+// ⚠️ THIS IS A PROJECTION, NOT A MEASUREMENT. There is no ownership data
+// anywhere in this app — no file, no field, no feed. TEAM_CHALK is a
+// hand-typed constant with no source and nothing that refreshes it, and the
+// UI said "sharp ownership" until Sep 6 2026, which claimed a measurement
+// that does not exist. Say projected tier, never ownership.
+
+// Leverage thresholds, named so the guard can read them and so no literal is
+// typed twice. The ANCHOR is the EARLIEST pick in a stack, and it is the right
+// test: a stack containing a top-60 player is one a meaningful slice of the
+// field already owns, whatever the cheap piece beside him cost.
+const LEVERAGE_ANCHOR = { sharp: 80, low: 60, chalk: 50 };
+const LEVERAGE_BONUS_PER_STACK = 0.4;
+const LEVERAGE_BONUS_CAP = 1.0;
+
 const TEAM_CHALK = {
   // High chalk — heavily drafted stacks
   BUF: "chalk", DET: "chalk", CIN: "chalk", PHI: "chalk", BAL: "chalk", KC: "chalk", LAR: "chalk",
@@ -5596,20 +5611,42 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
   });
 
   // === STACK UNIQUENESS PROXY ===
-  // Based on team chalk rating + ADP cost of stack pieces
+  // Team chalk tier + the price of the stack's ANCHOR.
+  //
+  // ⚠️ THE MEAN WAS THE WRONG STATISTIC, fixed Sep 6 2026. It averaged every
+  // piece, so a stack could be labelled High Leverage on the strength of one
+  // very late pick dragging the average past the gate. The worked example is a
+  // real roster's CAR stack: Tetairoa McMillan 41.0 with Darren Waller 210.4
+  // averages to 125.7 and cleared the sharp gate of 80 — while the stack is
+  // anchored by a round-four receiver, which is not a contrarian holding by any
+  // reading of the term. Averaging hid the expensive piece behind the cheap one.
+  //
+  // The anchor (earliest pick) is the honest test. A stack is only something the
+  // field lacks if NO piece in it is expensive.
+  //
+  // KNOWN LIMIT, stated because the proxy cannot see it: a cheap QB attached to
+  // a chalk receiver (Darnold onto JSN) is a genuinely differentiated
+  // CONSTRUCTION even though the anchor is a first-rounder, because most JSN
+  // drafters never take that QB. Measuring that needs real ownership data, which
+  // does not exist here. With an unsourced input the conservative read is the
+  // correct one, so those stacks now grade Slight Leverage rather than earning
+  // the scored bonus.
   stackGrades.forEach(stack => {
     const chalkLevel = TEAM_CHALK[stack.team] || "medium";
-    const avgADP = stack.players.reduce((sum, p) => sum + p.adp, 0) / stack.players.length;
+    const adps = stack.players.map(p => p.adp).filter(a => a != null);
+    const anchorAdp = adps.length ? Math.min(...adps) : null;
 
     let uniqueness;
-    if (chalkLevel === "sharp" && avgADP > 80) uniqueness = "High Leverage";
-    else if (chalkLevel === "low" && avgADP > 60) uniqueness = "Moderate Leverage";
-    else if (chalkLevel === "chalk" && avgADP < 50) uniqueness = "Heavy Chalk";
+    if (anchorAdp == null) uniqueness = "Standard";
+    else if (chalkLevel === "sharp" && anchorAdp > LEVERAGE_ANCHOR.sharp) uniqueness = "High Leverage";
+    else if (chalkLevel === "low" && anchorAdp > LEVERAGE_ANCHOR.low) uniqueness = "Moderate Leverage";
+    else if (chalkLevel === "chalk" && anchorAdp < LEVERAGE_ANCHOR.chalk) uniqueness = "Heavy Chalk";
     else if (chalkLevel === "medium") uniqueness = "Standard";
     else uniqueness = chalkLevel === "sharp" || chalkLevel === "low" ? "Slight Leverage" : "Slight Chalk";
 
     stack.uniqueness = uniqueness;
     stack.chalkLevel = chalkLevel;
+    stack.anchorAdp = anchorAdp;
   });
 
   // === VERDICT ALIGNMENT ===
@@ -6283,7 +6320,14 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const leverageStacks = stackGrades.filter(s => s.uniqueness === "High Leverage" || s.uniqueness === "Moderate Leverage");
     if (leverageStacks.length >= 1) {
       strengths.push(`${leverageStacks.length} under-the-radar stack(s) — good differentiation if the field is large`);
-      score += leverageStacks.length * 0.4;
+      // ⚠️ CAPPED Sep 6 2026. This was `leverageStacks.length * 0.4` with no
+      // clamp, so a five-stack roster took +2.0 — a quarter of its grade, out
+      // of a hand-typed table with no source. Every other layer here is
+      // clamped (ceiling ±0.5, floor ±0.5, advance ±1.25) and the ONE input
+      // that is not measured was the only one that could run away.
+      // 1.0 places it below the advance layer and above the ceiling layer,
+      // which is where a team-level heuristic belongs.
+      score += Math.min(leverageStacks.length * LEVERAGE_BONUS_PER_STACK, LEVERAGE_BONUS_CAP);
     }
   }
 
@@ -14162,7 +14206,7 @@ Analyze this best ball roster. Return JSON only.`;
                   FIELD DIFFERENTIATION
                 </h2>
                 <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
-                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives.
+                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here. It reads a fixed team tier against the price of the earliest pick in each stack.
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "8px" }}>
                   {analyzed.stackGrades.map((stack, i) => {
@@ -14184,7 +14228,7 @@ Analyze this best ball roster. Return JSON only.`;
                           {stack.uniqueness?.toUpperCase()}
                         </div>
                         <div style={{ fontSize: "9px", color: "var(--text-muted)", marginTop: "4px" }}>
-                          {stack.chalkLevel} ownership · avg ADP {(stack.players.reduce((s, p) => s + p.adp, 0) / stack.players.length).toFixed(0)}
+                          {stack.chalkLevel} team tier{stack.anchorAdp != null ? ` · anchor ADP ${stack.anchorAdp.toFixed(0)}` : ""}
                         </div>
                       </div>
                     );

@@ -6311,3 +6311,130 @@ moved. Their opening now reads as real but possibly short, with an explicit re-p
 police report, and the earlier "no domestic-violence designation" reading — the first is not
 load-bearing for a draft decision, and the second could not be re-verified against the
 current filing, so it was dropped rather than preserved on momentum.
+
+---
+
+## Leverage Was Unsourced, Uncapped, and Lying About Its Own Input (fixed Sep 6, 2026)
+
+**Reported as a question, not a bug:** *"how is leverage calibrated on my app... is it fully
+updated?"* The answer was **no, and there was nothing that could have updated it.** Three
+defects in one small block, and the question found all three. Guard 30:
+`scripts/test-leverage.mjs`.
+
+### 1. THE UI CLAIMED A MEASUREMENT THAT DOES NOT EXIST
+
+The Field Differentiation cards printed **`sharp ownership`** and **`low ownership`**.
+
+**There is no ownership data anywhere in this app.** No file, no field, no feed — checked, not
+assumed. `TEAM_CHALK` is a **hand-typed 32-team constant with no source, no date stamp, and
+nothing in `scripts/` that writes it.** It has never been refreshed by any process because no
+process exists.
+
+The user's own definition of the terms was correct — chalk is what the field owns, leverage is
+what it does not. **The app was approximating that concept and rendering the approximation as
+the measurement.** Same class as the tier labels that disagreed with their own scores and the
+stale verdicts rendered as current: a label asserting more than the data behind it carries.
+
+The panel now says **"This is a projection, not a measurement: no ownership data exists here"**
+and the card prints `sharp team tier · anchor ADP 97`.
+
+### 2. ⚠️ THE BONUS WAS UNCAPPED, AND IT WAS THE ONLY LAYER THAT WAS
+
+```js
+score += leverageStacks.length * 0.4;   // no clamp
+```
+
+A real five-stack roster took **+2.0 — roughly a quarter of its grade — out of an unsourced
+hand-typed table.** Every other layer here is clamped:
+
+```
+Ceiling Shape   ±0.5     derived, guarded, negative-tested
+Floor Layer     ±0.5     derived from a starter-pool median
+Advance Rate    ±1.25    three measured components
+Leverage        UNCAPPED  <- the one input that is not measured
+```
+
+**The single input with no source was the only one that could run away.** Capped at
+`LEVERAGE_BONUS_CAP = 1.0`, which places it below the advance layer and above the ceiling
+layer — where a team-level heuristic belongs.
+
+### 3. THE MEAN WAS THE WRONG STATISTIC
+
+The classifier averaged every piece's ADP, so **one very late pick could drag a stack past the
+gate.** The worked example is from the roster that prompted the question:
+
+```
+CAR   Tetairoa McMillan 41.0  +  Darren Waller 210.4   =  mean 125.7  ->  HIGH LEVERAGE
+```
+
+A stack anchored by a **round-four receiver** is not a contrarian holding by any reading of the
+term. **Averaging hid the expensive piece behind the cheap one.**
+
+The **anchor** — the earliest pick — is the honest test. A stack is only something the field
+lacks if NO piece in it is expensive. `LEVERAGE_ANCHOR = { sharp: 80, low: 60, chalk: 50 }`,
+applied to `Math.min(...adps)`.
+
+### ⚠️ KNOWN LIMIT, stated because the proxy cannot see it
+
+**A cheap QB attached to a chalk receiver is a genuinely differentiated CONSTRUCTION even
+though its anchor is a first-rounder** — most JSN drafters never take Darnold. Measuring that
+needs real ownership data, which does not exist here and has no free source (Underdog does not
+publish exposure, and Chromium cannot reach external hosts from this sandbox per the Aug 15
+note). **With an unsourced input the conservative read is the correct one**, so those stacks
+now grade `Slight Leverage` and earn no scored bonus. Recorded rather than hidden.
+
+### ⚠️⚠️ ref1, ref2 AND ref3 ARE BLIND TO THIS LAYER — that is why `ref4` exists
+
+All three committed fixtures produce **ZERO leverage stacks, under the old rule and the new
+one.** They are early-anchored balanced builds, so this branch never fired for them.
+
+**Every calibration ever recorded against those three was silent on this layer, and none of
+them could have caught the uncapped bonus.** A layer no fixture exercises is a layer no
+calibration covers, and that is invisible in exactly the way a failing assertion is not.
+
+`scripts/fixtures/ref4.txt` is a real 3-5-8-2 Triple QB Mutation drafted from `ADP_DATA` at
+seat 7. It classifies **five** stacks as leverage under the old mean rule and **two** under the
+anchor rule, so it moves in both directions and binds against the cap. Guard 30 asserts ref1-3
+still produce zero (recorded, not desired) **and** that ref4 still produces at least one, so
+the guard cannot quietly stop testing anything.
+
+### ⚠️ Calibration — this MOVED GRADES. Re-baseline from here.
+
+```
+72 grades (15 tournaments x 4 fixtures + 3 redraft x 4).  69 BYTE-IDENTICAL.
+
+ref4  bbm7    A  8.36  ->  A  7.16    -1.20
+ref4  puppy   A  7.91  ->  A- 6.71    -1.20   <- letter grade moved
+ref4  puppy4  A  8.31  ->  A  7.11    -1.20
+
+Everything else identical, INCLUDING every non-massive-field tournament on ref4 —
+the Field Size Overlay gate holds. -1.20 = the old +2.0 bonus minus the new +0.8.
+```
+
+**Pre-Sep-6 bbm7 / puppy / puppy4 figures in this file are now high by up to 1.2** for any
+roster carrying three or more leverage stacks. Rosters with two or fewer are unaffected by the
+cap and moved only if the anchor rule reclassified a stack.
+
+### Rules this produced
+
+- **A scored input that is not measured must be capped tighter than the measured ones**, not
+  looser. The reverse is what shipped.
+- **Never render a projection with the vocabulary of a measurement.** "ownership" was one word
+  and it made a heuristic look like a feed.
+- **Use the ANCHOR, not the mean, for any "is this cheap" test on a group.** A mean lets the
+  cheapest member vouch for the most expensive one.
+- **Check that a fixture actually exercises a layer before trusting its calibration.** Zero
+  movement is only evidence when you have confirmed the branch can fire.
+
+Five failure paths negative-tested, all exit non-zero: the cap removed, the mean restored, the
+UI reclaiming ownership, the massive-field gate dropped, and the cap raised past the advance
+layer.
+
+### Still open, deliberately
+
+**ADP-value credit in the Advance Rate Layer.** That layer's own research basis names ADP value
+as a regular-season advance-rate correlate and it was **never implemented** — its three
+components are schedule strength, `usable_rate` and bye clustering. So reaches are punished up
+to -1.5 and value earns nothing. It is one-directional, and a drafter practising ADP discipline
+sees it only as the absence of a penalty. Building it properly needs the coefficient DERIVED
+rather than invented, which is a measurement session, not an edit.

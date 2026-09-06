@@ -1,0 +1,31 @@
+# RosterXRay calibration fixture — ref4 (seat 7, 12-man snake, 18 rounds)
+# Added Sep 6 2026 with the leverage cap and anchor fix.
+#
+# WHY A FOURTH FIXTURE: ref1, ref2 and ref3 all produce ZERO leverage stacks —
+# they are early-anchored balanced builds, so the massive-field leverage branch
+# never fired for them under the old classifier or the new one. That is why the
+# leverage change showed 54/54 byte-identical on them, and it is also why those
+# three could not have caught the uncapped bonus. A layer no fixture exercises
+# is a layer no calibration covers.
+#
+# This roster is a real 3-5-8-2 Triple QB Mutation that classifies FIVE stacks
+# as leverage under the old mean-ADP rule and TWO under the anchor rule, so it
+# moves in both directions and binds against the cap. Drafted from real ADP_DATA.
+Jaxon Smith Njigba 7
+Ashton Jeanty 18
+Trey Mcbride 31
+Tetairoa Mcmillan 42
+Parker Washington 55
+Jaylen Warren 66
+Trevor Lawrence 79
+Blake Corum 90
+Michael Pittman Jr 103
+Jaxson Dart 114
+Chris Rodriguez 127
+Khalil Shakir 138
+Sam Darnold 151
+Tank Bigsby 162
+Malachi Fields 175
+Omar Cooper 186
+Isaac Teslaa 199
+Darren Waller 210
