@@ -4867,6 +4867,16 @@ const parseLooseJson = (text) => {
 // wheel the drafter is choosing two players before the board moves at all.
 // Handles runs of any length, which a draft with traded picks can produce.
 const TURN_MIN_GAP = 2;
+
+// ADP discipline layer constants (added Sep 6 2026). EVERY ONE IS DERIVED —
+// see the component below for what each number came from. A second literal
+// is the duplicate-definition class this repo has hit seven times.
+const DISCIPLINE_PICK_CUTOFF = 156;  // round 13 of a 12-man draft
+const DISCIPLINE_PICK_CLIP   = 20;   // ~p90 of per-pick |delta| at measured drift
+const DISCIPLINE_SATURATE    = 4.6;  // 2 x simulated roster-level SD (2.3)
+const DISCIPLINE_MIN_PICKS   = 10;
+const DISCIPLINE_CAP         = 0.5;  // matches the other advance components
+
 const annotateTurnReaches = (flags, ownPicks) => {
   const sorted = [...new Set((ownPicks || []).filter(n => Number.isFinite(n)))].sort((a, b) => a - b);
   const nextAfterTurn = (pick) => {
@@ -6396,15 +6406,77 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     const worstBye = Object.entries(byeCounts).sort((a, b) => b[1] - a[1])[0];
     if (worstBye && worstBye[1] >= 4) byePts = -0.25;
 
-    const advScore = Math.max(-1.25, Math.min(1.25, (schedPts + usablePts + byePts))) * advanceWeight;
+    // 4. ADP discipline (added Sep 6 2026) — the CUMULATIVE version of what the
+    // discrete value/reach flags measure one pick at a time.
+    //
+    // The existing ADP block counts EVENTS: a pick 15+ past ADP is a value
+    // pick (+0.5 each, cap +2), a pick 15+ early that survives the turn is a
+    // reach (-0.4 each from three, cap -1.5). That rewards VARIANCE, not
+    // discipline. A drafter who lands eighteen picks at +8 has extracted more
+    // market value than one who lands sixteen at -5 and two at +16, and the
+    // first earns nothing while the second earns +1.0. The roster that
+    // prompted this carried three flags, none past 15, and scored zero on
+    // ADP while being the most disciplined board seen in this project.
+    //
+    // ⚠️ SCORED ONLY WHEN THE ADP CAME FROM THE USER'S BOARD. This was the
+    // whole derivation. Simulating 12-man snakes from ADP_DATA at the
+    // measured drift (sd 9) puts the roster-level mean delta at +5.7 for
+    // picks <= 156, and the reason is IN THE TABLE: mean(rank - adp) over its
+    // top 216 is +7.16 and grows with rank (2.7 / 7.0 / 9.6 / 10.4 by band),
+    // because a late player's ADP is a mean over only the drafts he was taken
+    // in. Against a real Underdog board the same measurement on a real roster
+    // is +1.9. Centering on 0 with table ADP hands every roster a free +7;
+    // centering on +7 with board ADP penalises perfect discipline. Neither is
+    // honest, so the table path does not score, and says why.
+    //
+    // Centre 0 is definitional: ADP is the market's expectation, and a pick
+    // taken exactly there extracted nothing. The scale is the simulation's
+    // roster-level SD (2.3 at picks <= 156), which the table offset shifts but
+    // does not widen; saturation at 2 SD so only an outlier drafter reaches
+    // the cap. Per-pick clip at ~p90 of |delta| (median 8.4, p75 14.0, p90
+    // 19.6) so one long fall cannot carry the mean. Cutoff at round 13: the
+    // Late-Round ADP Flattening Protocol already says picks 160+ carry no ADP
+    // signal, and 156 is the last pick of round 13 in a 12-man draft.
+    // Turn-cleared reaches floor at 0, consistent with isScoredReach.
+    let disciplinePts = 0, disciplineN = 0, disciplineMean = null, disciplineWhy = null;
+    {
+      const cleared = new Set(adpFlags.filter(f => f.survivesTurn === false).map(f => f.name));
+      const q = valid.filter(p => p.actualPick != null && p.adp != null && p.adp < 200 && p.actualPick <= DISCIPLINE_PICK_CUTOFF);
+      const fromBoard = q.filter(p => p.adpSource === "roster");
+      if (format === "superflex") disciplineWhy = "superflex ADP is a seeded ordering rather than a measured market, so discipline against it is directional only";
+      else if (!hasPickNumbers) disciplineWhy = "no pick numbers on the roster";
+      else if (fromBoard.length === 0) disciplineWhy = "ADP came from the built-in snapshot, whose tail compression (+7 picks, rising with rank) would be scored instead of your drafting — paste a board that carries ADP";
+      else if (fromBoard.length < DISCIPLINE_MIN_PICKS) disciplineWhy = `only ${fromBoard.length} board-priced picks inside the first 13 rounds; needs ${DISCIPLINE_MIN_PICKS}`;
+      else {
+        const ds = fromBoard.map(p => {
+          let d = p.actualPick - p.adp;
+          if (d < 0 && cleared.has(p.name)) d = 0;
+          return Math.max(-DISCIPLINE_PICK_CLIP, Math.min(DISCIPLINE_PICK_CLIP, d));
+        });
+        disciplineN = ds.length;
+        disciplineMean = ds.reduce((s, v) => s + v, 0) / ds.length;
+        disciplinePts = Math.max(-DISCIPLINE_CAP, Math.min(DISCIPLINE_CAP, (disciplineMean / DISCIPLINE_SATURATE) * DISCIPLINE_CAP));
+      }
+    }
+
+    const advScore = Math.max(-1.25, Math.min(1.25, (schedPts + usablePts + byePts + disciplinePts))) * advanceWeight;
     score += advScore;
     advanceLayer = {
       score: Math.round(advScore * 100) / 100,
       schedPts: Math.round(schedPts * 100) / 100,
       usablePts: Math.round(usablePts * 100) / 100,
       byePts,
+      disciplinePts: Math.round(disciplinePts * 100) / 100,
+      disciplineN,
+      disciplineMean: disciplineMean == null ? null : Math.round(disciplineMean * 10) / 10,
+      disciplineWhy,
       coreCount: core.length,
     };
+    if (disciplinePts >= 0.25) {
+      strengths.push(`ADP discipline: your board-priced picks landed ${disciplineMean.toFixed(1)} picks past ADP on average across ${disciplineN} picks in the first 13 rounds — consistent value the 15-pick flags cannot see`);
+    } else if (disciplinePts <= -0.25) {
+      weaknesses.push(`ADP discipline: your board-priced picks landed ${Math.abs(disciplineMean).toFixed(1)} picks EARLY on average across ${disciplineN} picks in the first 13 rounds — consistent reaching that never cleared the 15-pick flag`);
+    }
     if (advScore >= 0.5) {
       strengths.push(`Strong advance-rate profile — core scorers carry a soft W1-14 slate and bankable weekly output for the qualifying round`);
     } else if (advScore <= -0.5) {

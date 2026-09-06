@@ -6430,11 +6430,124 @@ Five failure paths negative-tested, all exit non-zero: the cap removed, the mean
 UI reclaiming ownership, the massive-field gate dropped, and the cap raised past the advance
 layer.
 
-### Still open, deliberately
+### ⚠️ CORRECTED the same day — the paragraph this replaced was wrong
 
-**ADP-value credit in the Advance Rate Layer.** That layer's own research basis names ADP value
-as a regular-season advance-rate correlate and it was **never implemented** — its three
-components are schedule strength, `usable_rate` and bye clustering. So reaches are punished up
-to -1.5 and value earns nothing. It is one-directional, and a drafter practising ADP discipline
-sees it only as the absence of a penalty. Building it properly needs the coefficient DERIVED
-rather than invented, which is a measurement session, not an edit.
+An earlier version of this section said *"value earns nothing"* and called the ADP block
+*"one-directional"*. **False.** `analyzeRoster` has always paid value picks: `delta >= 15`
+earns +0.5 each, capped at +2.0, from the second one. It was read off the reach branch alone
+and asserted without opening the value branch beside it. The real gap was narrower and more
+interesting, and it is the next section.
+
+---
+
+## ADP Discipline in the Advance Rate Layer (added Sep 6, 2026)
+
+Fourth component of the Advance Rate Layer, **best ball only, scored, ±0.5.** Guard 31:
+`scripts/test-discipline.mjs`. Fixture `scripts/fixtures/ref5.txt`.
+
+### The gap was never "value earns nothing" — it was that the flags count EVENTS
+
+The existing ADP block pays `delta >= 15` at +0.5 each (cap +2) and charges `delta <= -15` that
+survives the turn at -0.4 each from three (cap -1.5). **That rewards VARIANCE, not discipline.**
+A drafter who lands eighteen picks at +8 has extracted more market value than one who lands
+sixteen at -5 and two at +16, and the first earns nothing while the second earns +1.0.
+
+The roster that prompted this carried **three flags on eighteen picks, none past 15**, and
+scored zero on ADP while being the most disciplined board seen in this project. Its discipline
+showed up only as the absence of a penalty, which the app can never tell the drafter about.
+
+This component is the **cumulative** measure: the mean of (pick − ADP) over the picks where ADP
+is a real market, centred at zero, clipped, saturating at two standard deviations.
+
+### ⚠️⚠️ THE DERIVATION FOUND THE TABLE HAS A +7 OFFSET, AND THAT DECIDED THE DESIGN
+
+Simulating 12-man snakes from `ADP_DATA` at the measured drift (sd 9, per the Aug 15 audit's
+median of 9.2) put the roster-level mean delta at **+7.1 over all picks, +5.7 over picks ≤156.**
+Not zero. Three checks located it:
+
+```
+mean(rank - adp), ADP_DATA top 216:   +7.16
+   ranks   1-60     +2.71
+   ranks  61-120    +6.98
+   ranks 121-160    +9.59
+   ranks 161-216   +10.37        the 216th-ranked player has ADP 203.3
+the same roster, REAL Underdog board:  +1.9   (three times lower)
+ref1 / ref2 / ref3 on table ADP:      +39 / +30 / +38   (value-heavy synthetics, not at-ADP drafts)
+```
+
+**It is in the table.** A late player's ADP is a mean over only the drafts he was taken in, so
+the tail is compressed earlier than its rank. Centre on 0 with table ADP and every roster gets a
+free +7. Centre on +7 with board ADP and perfect discipline is penalised. **Neither is honest,
+so the component scores ONLY when the ADP came from the drafter's own board**
+(`adpSource === "roster"`), and the table path reports why it did not fire. This is the biased-
+baseline bug the Ceiling Shape Layer hit on Jul 28, in a new costume, and it is the ADP Source of
+Truth rule applied to a scored input: **the user's board is the market; the snapshot is a proxy.**
+
+### Every number is derived, and the guard reads them rather than re-typing them
+
+```
+DISCIPLINE_PICK_CUTOFF   156    round 13 of a 12-man draft — the Late-Round ADP Flattening
+                                Protocol already says picks 160+ carry no ADP signal
+DISCIPLINE_PICK_CLIP      20    ~p90 of simulated per-pick |delta| at measured drift
+                                (median 8.4, p75 14.0, p90 19.6, p95 23.0)
+DISCIPLINE_SATURATE      4.6    2 x the simulated roster-level SD (2.3 at picks <= 156)
+DISCIPLINE_MIN_PICKS      10
+DISCIPLINE_CAP           0.5    matches schedule and usable_rate
+centre                     0    definitional — a pick taken AT the market's expectation
+                                extracted nothing
+```
+
+**The table offset shifts the mean; it does not widen the SD**, which is why the simulation's
+scale is usable even though its centre is not. **Turn-cleared reaches floor at 0**, consistent
+with `isScoredReach` — on ref5, Lawrence at 79 (ADP 88, next pick 90) contributes 0 rather than
+−9, and the guard asserts the floor moved the mean. **Superflex does not score**: the Aug 20
+finding is that its ADP is a seeded ordering rather than a market, so a continuous measure
+against it would be measuring distance from Underdog's projection.
+
+### It sits INSIDE the existing ±1.25 clamp
+
+Four components can now sum to ±1.75 raw, so the clamp can bind where it never could before.
+Deliberately left at 1.25 — a roster that maxes all four is unusual, and the conservative
+choice is for the new component to redistribute within the existing envelope rather than
+widen it.
+
+### ⚠️ ref1-4 ARE ALL SILENT HERE — that is why `ref5` exists
+
+All four are plain `Name Pick` lists, so all four resolve ADP from the snapshot and the
+component correctly declines to score them. **ref5 is the same eighteen players as ref4 in the
+five-line block format the screenshot extractor emits, carrying the board's own ADP.** It is
+the only fixture on which this fires, and the only fixture that exercises the roster-ADP
+override path at all — which had never had a fixture either.
+
+Guard 31 asserts ref5 fires and ref1-4 report the snapshot reason, so the guard cannot quietly
+stop testing anything. It also **recomputes the formula from the engine's own picks and flags**
+(clip, floor, cutoff) and compares it to what the engine reported, exercises the clip with a
+single +60 fall, saturates both directions by mutating real picks, and checks that a roster
+drafted exactly at its board's ADP scores 0.00.
+
+### ⚠️ Calibration — MOVED, all on ref5, all positive, all proportional
+
+```
+90 grades (15 tournaments x 5 fixtures + 3 redraft x 5).  77 BYTE-IDENTICAL.
+
+ref5 mean delta +2.6 over 13 board-priced picks  ->  disciplinePts +0.28, then x advanceWeight:
+  boxer      +0.21   (0.75)       frenchie / husky     +0.35   (1.25)
+  main       +0.28   (1.0)        puppy / pitbull /    +0.41   (1.5)
+  fastpuppy  +0.28   (1.0)          schnauzer / rottweiler / frenchiesprint / puppy4
+  frenchie14 +0.28   (1.0)        bbm7                 +0.49   (1.75)
+  fieldgeneral / superflex   0.00  <- superflex gate
+  ref1-4                     0.00  <- table gate
+  redraft                    0.00  <- containment
+one letter grade crossed: ref5 puppy A- 6.61 -> A 7.02
+```
+
+**Pre-Sep-6 best-ball figures for any roster graded from a board carrying ADP are now low by
+up to 0.5 × advanceWeight.** Rosters graded from a plain list are unaffected.
+
+### Still open
+
+**The UI does not render `disciplineWhy`.** The reason a table-ADP roster did not score is in the
+CLI JSON and the result object, but the results page has no row for the advance layer's
+components. A drafter who pastes a plain list gets no line telling them a board with ADP would
+have scored their discipline. That is a silent absence by the Jul 27 rule and should get a
+muted line under the grade header.
