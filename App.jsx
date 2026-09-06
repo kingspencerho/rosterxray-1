@@ -16,6 +16,9 @@ import PLAYER_EFFICIENCY from './grading/data/player_efficiency_2025.json';
 // Built by scripts/build-sos.py. rank 1 = EASIEST (inverse of the internal
 // getMatchupTier rank — do not mix the two scales).
 import SOS from './grading/data/sos_2026.json';
+// The FIELD baseline: what an ordinary entry scores in each tournament.
+// CONTEXT ONLY - display beside the grade, never an input to it. Guard 32.
+import BASELINES from './grading/data/baselines_2026.json';
 // Team scheme motion rates + per-receiver production split on motion snaps.
 // ⚠️ PLAY-level flag: the offense used motion, NOT that this player moved.
 // Built by scripts/build-motion.py. See that file's header before using.
@@ -5110,6 +5113,31 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
   }
 
   return `${firstSentence} Overall: ${verdict.charAt(0).toLowerCase() + verdict.slice(1)}`;
+};
+
+// ⭐⭐ A GRADE WITH NOTHING TO COMPARE IT TO IS A NUMBER, NOT A DECISION.
+//
+// The app has always answered "how good is this roster" with a score and left the
+// reader's real next question — "...compared to what?" — unanswered. `baselines_2026.json`
+// holds the simulated field: 480 rosters drafted off ADP under the construction caps in
+// § BBM 5-Year Benchmarks, graded through this same engine, per tournament.
+//
+// ⛔ IT IS A MODEL OF THE FIELD, NOT THE FIELD, and the copy says so. Real drafters react
+// to news and chase correlation; the simulation only stacks probabilistically. So this is a
+// REFERENCE POINT, never a percentile claim about real opponents.
+//
+// ⛔ CONTEXT ONLY. `analyzeRoster` and `analyzeRedraft` never read it — a baseline that fed
+// the engine would move every grade and silently invalidate every calibration in CLAUDE.md.
+const fieldPlacement = (score, tournamentKey) => {
+  const b = BASELINES?.tournaments?.[tournamentKey];
+  if (!b || typeof score !== "number" || !Number.isFinite(score)) return null;
+  // Bands are named for what the reader can act on, not for the quartile boundary.
+  const where = score >= b.p90 ? "in the top 10% of the simulated field"
+    : score >= b.p75 ? "in the top 25%"
+    : score >= b.median ? "above the middle of the field"
+    : score >= b.p25 ? "below the middle of the field"
+    : "in the bottom 25%";
+  return { median: b.median, where, n: b.n };
 };
 
 const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, useProjected = false) => {
@@ -13200,6 +13228,26 @@ Analyze this best ball roster. Return JSON only.`;
                     {" · "}{analyzed.advanceLayer.disciplineWhy}
                   </div>
                 )}
+                {/* THE FIELD BASELINE. Same muted, hueless treatment as the line above:
+                    a comparison is information, not a warning, so --caution stays reserved
+                    for real ones per the Aug 28 palette rule. It renders whenever a
+                    baseline exists for the selected tournament, which is every best-ball
+                    config — unlike the discipline note, which renders only on absence,
+                    because here the number IS the finding. */}
+                {(() => {
+                  const fp = fieldPlacement(analyzed.score, tournament);
+                  if (!fp) return null;
+                  return (
+                    <div style={{
+                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
+                      color: "var(--text-muted)",
+                    }}>
+                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
+                      {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
+                      {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
+                    </div>
+                  );
+                })()}
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18

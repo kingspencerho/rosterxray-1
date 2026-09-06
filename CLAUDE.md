@@ -6587,3 +6587,122 @@ tested with the UNFILTERED array. `grade-cli` passes the unfiltered array and is
 **The CLI, the guard and the calibration all passed while the live page said something false.**
 A code path that exists only when a UI control is in one state is invisible to every test that
 calls the engine directly. Render it, in both states.
+
+---
+
+## The Field Baseline (added Sep 6, 2026)
+
+Asked for after reading bbmdb, which never gives a number alone: *"you are expected to
+advance 131.9, a baseline portfolio advances 184.7."* **This app has always answered "how
+good is this roster" with a score and left the reader's real next question — "compared to
+what?" — unanswered.** `scripts/build-baselines.mjs` -> `grading/data/baselines_2026.json`.
+**CONTEXT ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures + 3 leagues x 5),
+against a pristine worktree at HEAD. Guard 32: `scripts/test-baselines.mjs`.
+
+### ⛔⛔ THE FAILURE MODE IS FLATTERY, AND THE FIRST BUILD HAD IT
+
+If the simulated field is unrealistic the baseline lands far below any real roster and
+**EVERY user is told they beat the field.** That is not a weak feature, it is an actively
+lying one — and it is invisible, because a too-generous comparison looks exactly like a
+working one.
+
+**The first build shipped that defect and the measurement caught it before the UI did:**
+
+```
+median across tournaments   1.99      real fixtures   ref3 5.43   ref1 7.74
+```
+
+Diagnosed by grading one synthetic roster and reading its weaknesses rather than adjusting
+the number: `Unlooped QBs: Jayden Daniels, Bo Nix, Cj Stroud — no pass catcher from their
+team on this roster`. **The simulation drafted by ADP and never stacked on purpose**, and
+stack integrity is the engine's highest-weighted axis, so every synthetic roster was crushed
+on it. Construction was already fine (3 QB / 4 RB / 9 WR / 2 TE, 18 of 18 matched) — the
+correlation was missing.
+
+**The fix is in the SIMULATION, never in the number.** A drafter now takes a correlated
+piece — a pass catcher on a QB he owns, or a QB for catchers he owns — 55% of the time when
+one is within reach of value. Not always: a field that stacks every pick is as unreal as one
+that never does.
+
+```
+medians   1.99 -> 5.16-5.72 (standard)   4.09-4.25 (superflex)
+```
+
+### The validation is ORDERING, not a threshold
+
+The five committed fixtures place against the field in exactly the order their grades rank
+them, on both `main` and `bbm7`:
+
+```
+ref1  A    top 10% / top 25%
+ref5  A    top 25% / above median
+ref4  A    top 25% / above median
+ref3  B+   below median
+ref2  C+   bottom 25%
+```
+
+Monotonic. **Guard 32 asserts that ordering rather than any particular value**, so a
+deliberate re-derivation stays legal and a flattering one fails. Restoring the original
+median-2.0 file exits non-zero.
+
+### How the field is drafted
+
+12-team snakes off `ADP_DATA`, 40 drafts, **every one of the 12 rosters is a field entry** —
+which is the correct population, not a random sample of players. Construction caps come from
+§ BBM 5-Year Benchmarks (`QB 3 / RB 7 / WR 10 / TE 3`, minimums `2/4/6/2` force-filled late,
+exactly as a human is forced to). Deterministic seed, because a baseline that moves every
+run cannot be calibrated against.
+
+### ⚠️ IT IS A MODEL OF THE FIELD, NOT THE FIELD, and the UI says so
+
+Real drafters react to news, reach on a depth-chart move and chase correlation deliberately;
+this one only stacks probabilistically. So the line reads **"480 simulated rosters drafted
+off ADP, not real opponents"** — a percentile against a simulation must never be read as a
+percentile against the field. Guard 32 fails if that caveat is dropped.
+
+It also inherits `ADP_DATA`'s vintage, including the **+7 tail-compression offset** measured
+in the ADP-discipline section. **Rebuild after any ADP refresh.**
+
+### The render
+
+One muted line under the counts row, same hueless treatment as the ADP-discipline note:
+*vs the field · an ordinary entry scores 5.72 here, so this roster sits in the top 25% · 480
+simulated rosters drafted off ADP, not real opponents.*
+
+`--text-muted`, never `--caution` — a comparison is information, and the Aug 28 palette rule
+reserves that token for real warnings. Unlike the discipline note it renders **always**
+rather than only on absence, because here the number IS the finding.
+
+### ⚠️ THE NEGATIVE TEST REPORTED 10/10 WHILE PROVING NOTHING — the fifth instance
+
+The first sandbox run printed `10/10 caught` and was worthless: **its own baseline exited 1.**
+An earlier crashed run had left mutated files behind, so the "pristine" copy read into memory
+was already broken and every case failed for that reason rather than the sabotage.
+
+It was caught only by printing the baseline exit code beside the results. The harness now
+**asserts a clean exit before every case and aborts if a restore fails**, and 10/10 then held
+for real.
+
+**Same family as `test-findplayer.mjs` (no exit call), `test-disclosure.mjs` (one-argument
+`ok`), guards 19/20, and the Sep 5 string-match sabotage.** The rule has to grow one clause:
+*confirm the sabotage changes something* — and **confirm the un-sabotaged state still passes.**
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL — 15 tournaments x 5 fixtures + 3 leagues x 5 fixtures
+32 guards · cmp App.jsx App.jsx.jsx identical
+10 failure paths negative-tested, all exit non-zero, against a verified-clean baseline
+```
+
+⚠️ **One pre-existing failure is unrelated and still open:** `test-yahoo-pull.mjs` asserts
+the token file is `chmod 600`, which **cannot pass on Windows** — Python's `chmod` there only
+toggles the read-only bit, so the mode reads `0o666`. It passes in CI. Left for a decision
+rather than silently relaxed: it is a security assertion, and skipping it on Windows deletes
+a real check on the platform where the protection genuinely does not apply.
+
+### Rebuild
+
+```
+node scripts/build-baselines.mjs --drafts 40    # deterministic; same seed, same file
+```
