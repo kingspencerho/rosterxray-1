@@ -6253,3 +6253,61 @@ Tuesday 14:00 UTC — after Monday night settles into the nflverse releases,
 before Wednesday waivers. `workflow_dispatch` runs it on demand. Every in-season
 builder is Python **stdlib only**, so the job needs no `pip install` and has no
 dependency that can break on a release.
+
+---
+
+## A Pinned Clock in a Guard Ages Against the Corpus (fixed Sep 6, 2026)
+
+**54 grades byte-identical** — 15 tournaments x 3 fixtures plus 9 redraft, against a
+pristine worktree at HEAD. Prose carries no score.
+
+Josh Jacobs' initial court appearance was **moved up two months to Sep 10 2026**, three
+days before Green Bay's opener. Writing that in — dated Sep 4 2026 — **failed guard 14**,
+and the failure said nothing about the app.
+
+`test-player-card.mjs` pinned `nowFixed = Sep 1 2026`. Its sweep asks "is every dated
+SITUATIONS entry reachable on the card"; an entry dated **after the pin is a FUTURE date to
+the guard**, so `newsDateFor` correctly discarded it and the entry reported unreachable.
+Two entries failed for being fresher than the test.
+
+### The pin is right for the unit assertions and wrong for a corpus sweep
+
+The unit cases compare dates against each other (a newer prose date beating an older
+structured one, a `2026-12-01` structured date being discarded) and **would rot if "now"
+drifted**. They keep `nowFixed`.
+
+The two sweeps over hand-written prose now run on `Date.now()`. That is safe because time
+only moves one way: **entries get older, reachability strictly improves, and the thing the
+sweep actually guards — a note dated ahead of today — still fails.** Negative-tested: a
+structured future date with every prose date stripped exits non-zero.
+
+⚠️ **The first negative test did not bite, and the test was wrong rather than the guard.**
+It mutated `App.jsx`; guard 14 bundles **`App.jsx.jsx`**. Same lesson this file already
+records three times over — confirm the sabotage actually changes what the guard reads.
+
+**The general rule: a fixed clock in a guard is a maintenance deadline.** Any assertion
+sweeping hand-maintained prose against a pin will fail the first time someone writes
+something newer than the pin, and the failure names the wrong culprit.
+
+### What the entry now says
+
+`josh jacobs` moved **HARD FADE -> fade, falling -> rising**, dated Sep 4 2026. He is still
+on the Commissioner's Exempt List with no announced return and no Week 1 floor at an ADP
+near 41, so the cost is unchanged. Two facts changed the shape of the bet:
+
+1. **The legal timeline collapsed from roughly eleven weeks to four days**, so the largest
+   unknown resolves at the front of the season instead of the middle of it.
+2. **Games missed on the exempt list count toward any suspension the league later imposes**,
+   with earnings repaid — exempt time is credited rather than additive, so the worst case is
+   shorter than the raw calendar implies.
+
+`fade` carries no scored penalty by design, so this is a prose-layer change only.
+
+**`marshawn lloyd` and `kaleb johnson` were updated in the same edit.** Both described the
+Jacobs absence as open-ended, which is the corpus contradicting itself the moment the date
+moved. Their opening now reads as real but possibly short, with an explicit re-price date.
+
+**Two claims from the reporting were deliberately NOT carried.** The alleged conduct in the
+police report, and the earlier "no domestic-violence designation" reading — the first is not
+load-bearing for a draft decision, and the second could not be re-verified against the
+current filing, so it was dropped rather than preserved on momentum.
