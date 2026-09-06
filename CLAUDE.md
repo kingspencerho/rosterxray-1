@@ -6544,10 +6544,46 @@ one letter grade crossed: ref5 puppy A- 6.61 -> A 7.02
 **Pre-Sep-6 best-ball figures for any roster graded from a board carrying ADP are now low by
 up to 0.5 × advanceWeight.** Rosters graded from a plain list are unaffected.
 
-### Still open
+### The declined-to-score reason now renders (closed the same day)
 
-**The UI does not render `disciplineWhy`.** The reason a table-ADP roster did not score is in the
-CLI JSON and the result object, but the results page has no row for the advance layer's
-components. A drafter who pastes a plain list gets no line telling them a board with ADP would
-have scored their discipline. That is a silent absence by the Jul 27 rule and should get a
-muted line under the grade header.
+One muted line directly under the counts row in the best-ball header, rendered **only when
+the component did not fire**: `ADP discipline not scored · <the engine's own reason>`. On a
+plain list that reads *"ADP came from the built-in snapshot, whose tail compression (+7 picks,
+rising with rank) would be scored instead of your drafting — paste a board that carries ADP"*,
+which is the instruction a drafter can act on.
+
+Three rules held: it is **`--text-muted`, not `--caution`** — a declined component is
+information, not a warning, and the Aug 28 palette rule reserves `--caution` for real ones; it
+is a **sibling after the counts-row `<button>`**, not inside it, so the Aug 27 centring rule
+never applies; and it prints **the engine's string**, never a hand-typed copy of it, so the UI
+cannot drift from the reason the CLI reports. When the component DID fire the line is absent
+and the strengths list carries the result — an absence line beside a strength line would say
+two things about one number.
+
+Guard 31 asserts the read site exists once, lives in the best-ball branch, is a sibling of the
+button, is muted, names itself, and renders the engine's field. Presentation only.
+
+### ⚠️ The render caught a FALSE EXPLANATION the CLI could not see
+
+First render: **both** ref4 and ref5 printed *"no pick numbers on the roster"* — ref5 carries
+eighteen of them and the CLI had just scored it +0.28. Not a bug in the line, and not the
+pre-pass either (`preprocessRoster` was chased and is not on the button path). **The pick-analysis
+checkbox defaults to `useState(false)`, and the button passes `showPickAnalysis &&
+picks.hasPickNumbers`**, so two different states — no numbers parsed, numbers parsed but
+analysis switched off — reach the engine as one `false`. The line then blamed the roster for a
+box the reader had not ticked.
+
+That is the Sep 1 card-audit class exactly: *a section that does not apply is not a gate he
+failed.* The engine cannot see the checkbox, but **the `picks` array it is handed still carries
+`parseRoster`'s own `.hasPickNumbers`** (only `valid` is a filtered copy), so it branches:
+numbers present + gate false → *"pick analysis is switched off — tick the pick-numbers box
+above the paste area…"*; numbers absent → *"no pick numbers on the roster."*
+
+⚠️ **`Array.prototype.filter` drops that flag.** Guard 31's own `parse()` helper filters
+`notFound` rows and so hands the engine an array with `hasPickNumbers === undefined`, which is
+why its earlier no-numbers case passed for the right reason by accident. The toggle-off case is
+tested with the UNFILTERED array. `grade-cli` passes the unfiltered array and is unaffected.
+
+**The CLI, the guard and the calibration all passed while the live page said something false.**
+A code path that exists only when a UI control is in one state is invisible to every test that
+calls the engine directly. Render it, in both states.

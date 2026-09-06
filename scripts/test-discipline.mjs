@@ -138,9 +138,41 @@ ok("under the minimum pick count it scores 0 and names the count", nine.discipli
 const sfx = e.analyzeRoster(p5, "fieldgeneral", true, false, "superflex").advanceLayer;
 ok("superflex scores 0 and names the seeded-ordering reason", sfx.disciplinePts === 0 && /superflex/.test(sfx.disciplineWhy || ""), sfx.disciplineWhy);
 const noPicks = e.analyzeRoster(p5, "bbm7", false, false, "standard").advanceLayer;
-ok("no pick numbers scores 0 and says so", noPicks.disciplinePts === 0 && /pick numbers/.test(noPicks.disciplineWhy || ""), noPicks.disciplineWhy);
+ok("no pick numbers scores 0 and says so", noPicks.disciplinePts === 0 && /no pick numbers/.test(noPicks.disciplineWhy || ""), noPicks.disciplineWhy);
+// ⚠️ The button path passes `showPickAnalysis && picks.hasPickNumbers`, so a
+// roster that CARRIES numbers with the checkbox off arrives as false. Found by
+// rendering: the line read "no pick numbers on the roster" for a roster with
+// eighteen of them. The UNFILTERED parseRoster array keeps its own flag, and
+// the engine must branch on it. (p5 above is filtered, which drops the flag —
+// that is why the previous case reads as genuinely-no-numbers.)
+const p5raw = e.parseRoster(fx("ref5"), "standard", "bestball");
+ok("parseRoster stamps hasPickNumbers on the array it returns", p5raw.hasPickNumbers === true, p5raw.hasPickNumbers);
+const toggledOff = e.analyzeRoster(p5raw, "bbm7", false, false).advanceLayer;
+ok("checkbox off + numbers present names the SWITCH, never the roster",
+   toggledOff.disciplinePts === 0 && /switched off/.test(toggledOff.disciplineWhy || "") && !/no pick numbers/.test(toggledOff.disciplineWhy || ""),
+   toggledOff.disciplineWhy);
+ok("...and the switch reason tells the reader where the box is", /tick the pick-numbers box/.test(toggledOff.disciplineWhy || ""));
 ok("out-of-window picks are excluded (a pick past the cutoff never counts)",
    p5.filter(p => p.actualPick > e.DISCIPLINE_PICK_CUTOFF).length >= 1 && a5.disciplineN === q5.length);
+
+// ---------------------------------------------- 6. the absence is visible
+// When the component declines to score, the reason must reach the reader on
+// the results page — not only the CLI JSON. A drafter who pastes a plain list
+// would otherwise never learn that a board carrying ADP would have scored their
+// discipline. That is a silent absence by the Jul 27 rule.
+console.log("\n=== the declined-to-score reason renders under the grade header ===");
+const whyRef = "analyzed.advanceLayer?.disciplineWhy";
+const whyIdx = app.indexOf(whyRef);
+ok("the results view reads disciplineWhy exactly once", (app.split(whyRef).length - 1) === 1, app.split(whyRef).length - 1);
+const bbOpen = app.indexOf('analyzed.mode !== "redraft" && (');
+const rdOpen = app.indexOf('analyzed.mode === "redraft" && (');
+ok("it renders inside the BEST BALL branch, before the redraft branch opens", whyIdx > bbOpen && whyIdx < rdOpen, `${bbOpen} < ${whyIdx} < ${rdOpen}`);
+const before = app.slice(Math.max(0, whyIdx - 900), whyIdx);
+const after = app.slice(whyIdx, whyIdx + 700);
+ok("it sits directly after the counts-row button, as a sibling, not inside it", before.includes("</button>") && !after.slice(0, after.indexOf("</div>")).includes("<button"));
+ok("it is muted chrome (--text-muted), not a warning (--caution)", after.includes("var(--text-muted)") && !after.includes("var(--caution)"));
+ok("it names itself so the reader knows which layer declined", after.includes("ADP discipline not scored"));
+ok("it renders the engine's own reason string, not a hand-typed copy", /\{analyzed\.advanceLayer\.disciplineWhy\}/.test(after));
 
 // ------------------------------------------------------- 6. containment
 console.log("\n=== best ball only ===");

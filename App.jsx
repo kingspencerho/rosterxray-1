@@ -6444,7 +6444,16 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
       const q = valid.filter(p => p.actualPick != null && p.adp != null && p.adp < 200 && p.actualPick <= DISCIPLINE_PICK_CUTOFF);
       const fromBoard = q.filter(p => p.adpSource === "roster");
       if (format === "superflex") disciplineWhy = "superflex ADP is a seeded ordering rather than a measured market, so discipline against it is directional only";
-      else if (!hasPickNumbers) disciplineWhy = "no pick numbers on the roster";
+      // ⚠️ TWO DIFFERENT STATES ARRIVE AS ONE false. The button path passes
+      // `showPickAnalysis && picks.hasPickNumbers`, so a roster that CARRIES
+      // pick numbers with the checkbox left off reaches here as false — and
+      // "no pick numbers on the roster" would be a false explanation, the
+      // Sep 1 card-audit class (a section that does not apply is not a gate
+      // he failed). The array itself still carries parseRoster's own flag,
+      // so the two are separable. Found by rendering, not by reading.
+      else if (!hasPickNumbers) disciplineWhy = picks.hasPickNumbers
+        ? "pick analysis is switched off — tick the pick-numbers box above the paste area to score ADP discipline against your board"
+        : "no pick numbers on the roster";
       else if (fromBoard.length === 0) disciplineWhy = "ADP came from the built-in snapshot, whose tail compression (+7 picks, rising with rank) would be scored instead of your drafting — paste a board that carries ADP";
       else if (fromBoard.length < DISCIPLINE_MIN_PICKS) disciplineWhy = `only ${fromBoard.length} board-priced picks inside the first 13 rounds; needs ${DISCIPLINE_MIN_PICKS}`;
       else {
@@ -13174,6 +13183,23 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
+                {/* The ADP discipline component declines to score on a plain list
+                    (table ADP carries a +7 tail-compression offset that would be
+                    scored instead of the drafting), in superflex, and without pick
+                    numbers. Per the Jul 27 no-silent-drops rule an absence must be
+                    visible, so the reason renders here — muted, hueless chrome, not
+                    --caution: this is information, not a warning. It renders ONLY
+                    when the component did not fire; when it did, the strengths list
+                    already carries the result. */}
+                {analyzed.advanceLayer?.disciplineWhy && (
+                  <div style={{
+                    marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
+                    color: "var(--text-muted)",
+                  }}>
+                    <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
+                    {" · "}{analyzed.advanceLayer.disciplineWhy}
+                  </div>
+                )}
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18
