@@ -5128,6 +5128,41 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
 //
 // ⛔ CONTEXT ONLY. `analyzeRoster` and `analyzeRedraft` never read it — a baseline that fed
 // the engine would move every grade and silently invalidate every calibration in CLAUDE.md.
+// ⚠️ ONE DEFINITION OF THE METRIC GATE. Under 8 games or a 35% snap share, a rate
+// is noise, and noise averaged across a roster is still noise.
+//
+// It became a constant on Sep 6 2026 because it was hand-typed TWICE — the Ceiling
+// Shape Layer (best ball) and the Floor Layer (redraft) each carried their own copy
+// of `8` and `0.35`, and a third consumer was about to be added. That is the
+// duplicate-definition class this repo has now hit EIGHT times. One definition or none.
+const CEILING_GATE = { gp: 8, snap: 0.35 };
+
+// ⭐⭐ RESOLVED IS NOT MEASURED, AND THE MATCH COUNTER CANNOT TELL THEM APART.
+//
+// Found Sep 6 2026 by grading two real BBM VII rosters against each other. One had
+// 2025 metrics for 18 of 18 players; the other for 11 of 18 — seven rookies and
+// sub-gate players carrying no spike rate, no dud rate, no HVT, no usable rate.
+// They are invisible to the Ceiling Shape Layer, the Naked RB gate and the Advance
+// Rate Layer's scoring proxy.
+//
+// BOTH ROSTERS REPORTED "18/18 matched", because every NAME resolved. So the app
+// presented a grade computed on eleven players identically to one computed on
+// eighteen, and nothing on screen said which. That is the silent-drop distinction in
+// a new costume — a gate rather than a filter, but equally invisible to the reader.
+//
+// ⛔ CONTEXT ONLY. It reports ON the grade; it is never an input TO it.
+const metricCoverage = (valid) => {
+  if (!Array.isArray(valid) || !valid.length) return null;
+  let measured = 0;
+  for (const p of valid) {
+    const m = getMetrics(p.name);
+    if (!m || m.spike_rate == null) continue;
+    if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) continue;
+    measured++;
+  }
+  return { measured, total: valid.length };
+};
+
 const fieldPlacement = (score, tournamentKey) => {
   const b = BASELINES?.tournaments?.[tournamentKey];
   if (!b || typeof score !== "number" || !Number.isFinite(score)) return null;
@@ -6584,7 +6619,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     valid.forEach(p => {
       const m = getMetrics(p.name);
       if (!m || m.spike_rate == null) return;
-      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) return;
       const base = CEIL_BASE[p.pos];
       if (base == null) return;
       deltas.push((m.spike_rate + (m.nuclear_rate || 0)) - base);
@@ -7538,7 +7573,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     (allStarters || []).forEach(p => {
       const m = getMetrics(p.name);
       if (!m || m.usable_rate == null || m.dud_rate == null) return;
-      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) return;
       const base = FLOOR_BASE[p.pos];
       if (base == null) return;
       deltas.push((m.usable_rate - m.dud_rate) - base);
@@ -13245,6 +13280,30 @@ Analyze this best ball roster. Return JSON only.`;
                       <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
                       {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
                       {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
+                    </div>
+                  );
+                })()}
+                {/* METRIC COVERAGE. The match counter says how many NAMES resolved;
+                    this says how many of them the scored metric layers could actually
+                    see. They are different numbers and the gap is invisible without
+                    this line — a roster can read 18/18 matched while eleven players
+                    carry the data. Muted chrome, same as the two lines above: this
+                    qualifies the grade, it does not warn about it. */}
+                {(() => {
+                  const mc = metricCoverage(analyzed.valid);
+                  if (!mc || mc.measured >= mc.total) return null;
+                  const thin = mc.measured / mc.total < 0.7;
+                  return (
+                    <div style={{
+                      marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
+                      color: "var(--text-muted)",
+                    }}>
+                      <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                      {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                      {" · "}<span style={{ opacity: 0.8 }}>
+                        the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the ceiling, floor and naked-RB checks cannot see them
+                        {thin ? " — this grade rests mostly on construction" : ""}
+                      </span>
                     </div>
                   );
                 })()}

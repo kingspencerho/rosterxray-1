@@ -6706,3 +6706,80 @@ a real check on the platform where the protection genuinely does not apply.
 ```
 node scripts/build-baselines.mjs --drafts 40    # deterministic; same seed, same file
 ```
+
+---
+
+## Metric Coverage: Resolved Is Not Measured (added Sep 6, 2026)
+
+**Found by the two-roster test, not by a guard.** Two real BBM VII rosters, same 3-5-8-2
+archetype, graded side by side. One was measured on **13 of 18** players; the other on
+**8 of 18** — and **both reported "18/18 matched"**, because every NAME resolved.
+
+**So the app presented a grade computed on eight players identically to one computed on
+thirteen, and nothing on screen said which.** The match counter answers *did the parser find
+everyone*; it has never answered *could the scored layers see them*. Those are different
+questions and the gap is invisible without being told.
+
+The seven-to-ten missing players are rookies and sub-gate veterans carrying no `spike_rate`,
+`dud_rate`, `hvt_pg` or `usable_rate`, so they are invisible to the **Ceiling Shape Layer**,
+the **Naked RB gate** and the **Advance Rate Layer's** cumulative scoring proxy. On the
+thinner roster the grade rests almost entirely on construction geometry — which is a fine
+thing for it to rest on, and the reader deserves to know that it does.
+
+### ⚠️ THE GATE WAS ALREADY HAND-TYPED TWICE — the eighth instance
+
+Adding a third consumer would have made three copies of `8` and `0.35`:
+
+```
+Ceiling Shape Layer (best ball)   if ((m.gp||0) < 8 || (m.snap_sh||0) < 0.35) return;
+Floor Layer (redraft)             if ((m.gp||0) < 8 || (m.snap_sh||0) < 0.35) return;
+```
+
+Now `const CEILING_GATE = { gp: 8, snap: 0.35 }`, read by all three — **and printed into the
+UI copy from the constant rather than re-typed there**, so the sentence can never disagree
+with the gate it describes.
+
+⭐ **`CARD_PERCENTILES` keeps its own `gp >= 8` and that is CORRECT, not an oversight.** It
+gates the percentile POPULATION (draftable + 8 games, no snap share) — a different gate that
+happens to share one number. **Unifying them would be worse than the duplication:** a future
+change to the scoring gate would then silently move every percentile on the player card. The
+guard is scoped to the combined gp-and-snap pair for exactly that reason.
+
+### ⚠️ A GUARD CORRECTLY FAILED ON THE REFACTOR
+
+`test-floor-layer.mjs` asserted the LITERAL `(m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35` and
+broke the moment the gate became a constant — **which is the fix it was asking for.** The
+property it wanted is *the floor layer uses the SAME gate as the ceiling layer*, not *a
+particular number is typed at this line*. It now asserts the shared constant is read, plus a
+second assertion that `CEILING_GATE` still holds `8` and `0.35`, **because `FLOOR_BASE`'s
+medians were derived at those values and changing the gate invalidates them.**
+
+Same family as the Sep 5 lesson: **string-matching a source file asserts that text exists,
+never that code behaves.**
+
+### The render
+
+One muted line under the field baseline, and it appears **only when coverage is incomplete** —
+on a fully measured roster the qualifier would be noise on every grade:
+
+> *measured on **8 of 18** players with 2025 data · the rest are rookies or played too little
+> to rate (8+ games, 35%+ snaps), so the ceiling, floor and naked-RB checks cannot see them —
+> this grade rests mostly on construction*
+
+The closing clause fires under 70% coverage. `--text-muted`, never `--caution`: this
+qualifies a grade, it does not warn about one.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL — 15 tournaments x 5 fixtures + 3 leagues x 5
+  The gate refactor touched BOTH engines, so this is the assertion that matters:
+  reading a constant produces the same numbers as reading the literals it replaced.
+33 guards · dual-file identical
+7 failure paths negative-tested, all exit non-zero, against a verified-clean baseline
+```
+
+⚠️ **A number reported earlier in this session was the looser measure and is corrected here.**
+The two rosters were first described as having 2025 rows for **18 of 18** and **11 of 18**.
+That counts *has a row at all*. The number that matters — and the one the app now prints — is
+*clears the gate the scored layers use*: **13 of 18 and 8 of 18.**

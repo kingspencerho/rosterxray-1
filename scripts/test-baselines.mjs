@@ -131,5 +131,49 @@ ok("the UI is muted chrome, not --caution",
   /vs the field<\/span>/.test(app) && !/vs the field[\s\S]{0,200}--caution/.test(app),
   "a comparison is information; --caution is reserved for real warnings");
 
+console.log("\nmetric coverage — resolved is not measured");
+// ONE DEFINITION OF THE GATE. It was hand-typed twice before Sep 6 2026 (Ceiling
+// Shape Layer and Floor Layer) and a third consumer was about to be added. Eighth
+// instance of the duplicate-definition class in this repo.
+ok("CEILING_GATE is defined exactly once",
+  (app.match(/const CEILING_GATE = /g) || []).length === 1);
+// ⚠️ SCOPED TO THE COMBINED gp-AND-snap GATE, deliberately. `CARD_PERCENTILES`
+// carries its own `gp >= 8` for the percentile POPULATION (draftable + 8 games, no
+// snap share) — a different gate that happens to share one number. Unifying them
+// would be WORSE than the duplication: a future change to the scoring gate would
+// then silently move every percentile on the player card.
+ok("no hand-typed copy of the SCORING gate survives",
+  !app.includes("(m.snap_sh || 0) < 0.35"),
+  "a second literal 8 + 0.35 pair is the duplicate-definition class");
+ok("three consumers read the constant",
+  (app.match(/CEILING_GATE\.gp/g) || []).length >= 3,
+  "Ceiling Shape (best ball), Floor (redraft), and the coverage line");
+
+ok("metricCoverage is defined exactly once",
+  (app.match(/const metricCoverage = /g) || []).length === 1);
+const covCalls = [...app.matchAll(/metricCoverage\(/g)].map(x => x.index)
+  .filter(i => !app.slice(Math.max(0, i - 30), i).includes("const metricCoverage = "));
+ok("metricCoverage has exactly one call site", covCalls.length === 1, `${covCalls.length}`);
+for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
+  const body = bodyOf(app, engine); if (!body) continue;
+  ok(`${engine.match(/analyze\w+/)[0]} never calls metricCoverage`, !body.includes("metricCoverage("),
+    "it reports ON the grade and must never be an input TO it");
+}
+
+// The line must give the reader something to act on: the count, the gate, and
+// which checks go blind. A bare "13 of 18" is a number nobody can use.
+ok("the line names the count", app.includes("players with 2025 data"));
+ok("the gate is printed FROM the constant, never re-typed into the copy",
+  app.includes("{CEILING_GATE.gp}+ games") && app.includes("Math.round(CEILING_GATE.snap"));
+ok("the line names which checks go blind",
+  app.includes("ceiling, floor and naked-RB checks cannot see them"));
+ok("a thin roster is flagged as resting on construction",
+  app.includes("rests mostly on construction") && app.includes("mc.measured / mc.total < 0.7"));
+ok("it renders ONLY when coverage is incomplete",
+  app.includes("mc.measured >= mc.total) return null"),
+  "on a fully measured roster the qualifier would be noise on every grade");
+ok("it is muted chrome, not --caution",
+  app.includes("measured on</span>") && !/measured on[\s\S]{0,200}--caution/.test(app));
+
 console.log(fail ? `\n${fail} FAILED` : "\nall passed");
 process.exit(fail ? 1 : 0);
