@@ -179,8 +179,14 @@ const whyEnd = app.indexOf("})()}", whyIdx);
 ok("the reason lives inside one render block", whyStart !== -1 && whyEnd > whyIdx);
 const whyBlock = app.slice(whyStart, whyEnd + 5);
 const whyBefore = app.slice(Math.max(0, whyStart - 3000), whyStart);
+// ⚠️ STRIP COMMENTS BEFORE ANY STRUCTURAL CHECK. The nesting assertion below is
+// about MARKUP, and a comment explaining why a <summary> is not a <button>
+// contains the token "<button" and failed it on correct code (Sep 6 2026). Same
+// shape as the weekly-workflow guard that failed on its own PR body naming the
+// frozen builder: assert what the code DOES, never what the prose mentions.
+const noComments = src => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 ok("it sits after the counts-row button, as a sibling, not inside it",
-  whyBefore.includes("</button>") && !whyBlock.includes("<button"));
+  whyBefore.includes("</button>") && !noComments(whyBlock).includes("<button"));
 ok("it is muted chrome (--text-muted), not a warning (--caution)",
   whyBlock.includes("var(--text-muted)") && !whyBlock.includes("var(--caution)"));
 ok("it names itself so the reader knows which layer declined", whyBlock.includes("ADP discipline not scored"));

@@ -8610,6 +8610,60 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
 // It measures rather than counting characters because the same string wraps to
 // four lines on a tablet and nine on a phone; a length threshold would clamp
 // text that fits and leave text that does not.
+// ⭐⭐ ONE DEFINITION OF "HAS THIS READER GRADED BEFORE" (Sep 6, 2026).
+// It already existed, inline, gating exactly one thing — the paste instructions —
+// and its own comment stated the principle it was never extended past: essential
+// for a first-time reader, pure noise for a returning one. A second inline copy
+// of this try/catch would be the duplicate-definition class, tenth instance.
+// ⚠️⚠️ READ ONCE AT MODULE LOAD, AND THE TIMING IS THE WHOLE POINT.
+// `handleAnalyze` WRITES this flag, and the results tree mounts AFTER it does.
+// So a component that reads the flag in its own useState initialiser sees "1"
+// on a first-time reader's very first grade and closes every explainer — the
+// exact opposite of the intent, with the teaching copy effectively deleted for
+// everybody. MEASURED Sep 6 2026: 0 of 5 open on a cleared localStorage.
+// The source read correctly; only a render caught it.
+// Captured here, before any grade can run, so it describes who ARRIVED.
+const FIRST_VISIT = (() => {
+  try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
+})();
+
+// ⭐⭐ THE SECTION EXPLAINERS ARE THE SAME CLASS OF COPY AS THE PASTE HELP.
+// MEASURED Sep 6 2026 at 430px on a real roster: the results page carried 398
+// words of prose at rest, 223 of them fixed teaching copy identical on every
+// grade, against 105 words about the roster itself. Redraft was worse than four
+// to one. A portfolio drafter grading forty entries read the definition of a
+// stack forty times.
+//
+// ⛔ HIDING IS NOT DELETING, and that is the whole design. The Jul 27 2026
+// no-silent-drops rule applies to copy as much as to players: the way back is
+// always exactly where the text used to be, one tap, labelled. First-time
+// readers see everything expanded — the flag is only set once a grade is run.
+const Explainer = ({ children, label = "what this means" }) => {
+  const [open, setOpen] = useState(FIRST_VISIT);
+  return (
+    <details
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      style={{ marginBottom: "10px" }}
+    >
+      {/* 32px FLOOR, STATED RATHER THAN INHERITED. A 10px uppercase label with
+          6px padding measured 25px and put five sub-32px tap targets on the page,
+          which this repo has driven to zero twice before. `button:not([data-compact])`
+          carries the global floor; a <summary> is not a button and inherits nothing. */}
+      <summary style={{
+        cursor: "pointer", listStyle: "none",
+        display: "flex", alignItems: "center", minHeight: "32px",
+        fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase",
+        color: "var(--ui-accent)", fontWeight: 600,
+      }}>{label} ⌄</summary>
+      <div style={{
+        fontSize: "11px", color: "var(--text-secondary)",
+        lineHeight: 1.5, maxWidth: "640px", paddingBottom: "2px",
+      }}>{children}</div>
+    </details>
+  );
+};
+
 const ClampedText = ({ text, lines = 6, accent = "var(--ui-accent)", label = "summary" }) => {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
@@ -9771,9 +9825,7 @@ export default function RosterScorer() {
   // The paste instructions are the #1 friction point for a FIRST-time user and
   // pure noise for a returning one, so the default follows who is looking.
   // Wrapped because a private window throws on access rather than returning null.
-  const [pasteHelpOpen, setPasteHelpOpen] = useState(() => {
-    try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
-  });
+  const [pasteHelpOpen, setPasteHelpOpen] = useState(FIRST_VISIT);
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [byeMapOpen, setByeMapOpen] = useState(false);
   const [fullRosterOpen, setFullRosterOpen] = useState(false);
@@ -13286,6 +13338,10 @@ Analyze this best ball roster. Return JSON only.`;
                     <details style={{ marginTop: "4px" }}>
                       <summary style={{
                         cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        // minHeight stated: at 11px/1.4 this measured 31px, one pixel
+                        // under the floor. A <summary> is not a <button> and inherits
+                        // nothing from the global button rule.
+                        minHeight: "32px", boxSizing: "content-box",
                         fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
                         display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
                       }}>
@@ -13929,9 +13985,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 STACKS · PLAYOFF MATCHUPS
               </h2>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+              <Explainer>
                 A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>double the upside</span>. The matchup rating shows how favorable their shared playoff schedule is.
-              </div>
+              </Explainer>
               <MatchupLegend />
               {analyzed.stackGrades.length === 0 && (
                 <div style={{ color: "var(--text-muted)", fontSize: "13px", padding: "12px", border: "1px dashed var(--border-strong)", borderRadius: "4px" }}>
@@ -14022,9 +14078,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   BRING-BACK STACKS · SAME GAME
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   You roster players from <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>both sides</span> of the same playoff game. If that game turns into a shootout, multiple players on your team spike at once — stacked upside in the week that matters most.
-                </div>
+                </Explainer>
                 {/* Week color key — categorical, not the matchup scale */}
                 <div style={{ display: "flex", gap: "12px", fontSize: "9px", marginBottom: "12px", letterSpacing: "0.05em", flexWrap: "wrap" }}>
                   <span style={{ color: weekColor(0).text, fontWeight: 600 }}>● W15</span>
@@ -14111,9 +14167,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   SOLO PICKS · NO TEAM STACK
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   Players you drafted <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>without any teammates</span>. Solo picks aren't automatically bad — what matters is their <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>playoff matchup</span>. The chips below show each player's W15/W16/W17 difficulty.
-                </div>
+                </Explainer>
                 <MatchupLegend />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
                   {analyzed.orphans.sort((a, b) => b.normalized - a.normalized).map((o, i) => {
@@ -14432,8 +14488,16 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   FIELD DIFFERENTIATION
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
-                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here. It reads a fixed team tier against the price of the earliest pick in each stack.
+                {/* THE HONESTY HALF DOES NOT GO BEHIND THE TAP. The Sep 6 2026 leverage fix
+                    exists BECAUSE this panel claimed a measurement it does not have, and
+                    guard 30 pins both phrases. A returning reader who never opens the
+                    explainer must still not be able to read a team tier as ownership, so the
+                    teaching half taps and the correction stays put. */}
+                <Explainer>
+                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. It reads a fixed team tier against the price of the earliest pick in each stack.
+                </Explainer>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here.
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "8px" }}>
                   {analyzed.stackGrades.map((stack, i) => {
@@ -14476,9 +14540,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   🎯 ROSTER STANDOUTS
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   Your roster's <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best assets</span> — the picks most likely to win you a week. One highlight per player, picked from your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>biggest edges</span>.
-                </div>
+                </Explainer>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "8px" }}>
                   {analyzed.rosterStandouts.map((s, i) => {
                     const pc = posColor(s.player.pos);
@@ -14592,11 +14656,11 @@ Analyze this best ball roster. Return JSON only.`;
                   twice at rest. */}
               <SectionH2 title="FULL ROSTER" open={fullRosterOpen} onToggle={() => setFullRosterOpen(o => !o)} hint={`${analyzed.picks.length} players`} />
               {fullRosterOpen && <>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 {analyzed.hasPickNumbers
                   ? "Sorted by draft slot — your picks from Round 1 to the wire."
                   : "Your full roster. Add pick numbers to unlock draft slot and ADP value analysis."}
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid var(--border-subtle)",
@@ -14766,6 +14830,10 @@ Analyze this best ball roster. Return JSON only.`;
                     <details style={{ marginTop: "4px" }}>
                       <summary style={{
                         cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        // minHeight stated: at 11px/1.4 this measured 31px, one pixel
+                        // under the floor. A <summary> is not a <button> and inherits
+                        // nothing from the global button rule.
+                        minHeight: "32px", boxSizing: "content-box",
                         fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
                         display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
                       }}>
@@ -15206,9 +15274,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 STARTING LINEUP · OPTIMAL
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 Your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best possible lineup</span> based on ADP — the players most likely to start every week. ADP shown for reference.
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid #2a1a3a",
@@ -15449,9 +15517,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   BYE WEEK CONFLICTS
                 </h2>
-                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+                <Explainer>
                   When multiple starters <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>share the same bye</span>, you're forced to start backups in their place. Critical = your entire position is on bye that week. Warning = partial hole.
-                </p>
+                </Explainer>
                 {analyzed.criticalByeConflicts.map((c, i) => (
                   <div key={i} style={{
                     background: c.severity === "critical" ? "#2e1414" : c.severity === "warning" ? "#2a2618" : "#141414",
@@ -15481,9 +15549,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 PLAYOFF SCHEDULE · STARTERS
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 The playoff weeks that <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "var(--pos)", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "var(--neg)", fontWeight: 600 }}>red flag</span>.
-              </p>
+              </Explainer>
               <MatchupLegend />
               <div style={{
                 background: "var(--bg-surface)",
@@ -15607,9 +15675,9 @@ Analyze this best ball roster. Return JSON only.`;
                 </span>
               </button>
               {weeklyOpen && (<>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+              <Explainer>
                 Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "var(--pos)" }}>smashable</span>; red weeks are <span style={{ color: "var(--neg)" }}>landmines</span>. The <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
-              </div>
+              </Explainer>
               <MatchupLegend />
               <div style={{
                 background: "var(--bg-surface)",
@@ -15920,11 +15988,11 @@ Analyze this best ball roster. Return JSON only.`;
                   }}>
                     LINEUP CONFIDENCE
                   </h2>
-                  <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+                  <Explainer>
                     Who to lock in and who to consider sitting, week by week. Tap a week to see it.
                     {nfl.inSeason && <> Opens on <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>W{nfl.week}</span>, the week you are in.</>}
                     {worst && <> Your tightest week is <span style={{ color: "var(--neg)", fontWeight: 700 }}>W{worst.week}</span> with {worst.concerns.length} tough matchup{worst.concerns.length === 1 ? "" : "s"}.</>}
-                  </p>
+                  </Explainer>
 
                   {/* ⚠️ THE DATE AND THE DATA CAN DISAGREE, AND ONLY ONE OF THEM
                       IS ON A CLOCK. The week comes from the calendar; the role
@@ -16180,9 +16248,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 HANDCUFFS · INSURANCE
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 12px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 A handcuff is the <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>backup RB</span> on the same team as your starter. If your RB1 gets hurt, the handcuff <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>inherits the workload</span> — rostering them means you don't lose the value twice.
-              </p>
+              </Explainer>
               {analyzed.handcuffStatus.map((h, i) => (
                 <div key={i} style={{
                   background: "var(--bg-surface)",
@@ -16394,9 +16462,9 @@ Analyze this best ball roster. Return JSON only.`;
             <div style={{ marginBottom: "20px" }}>
                             <SectionH2 title="BENCH" open={benchListOpen} onToggle={() => setBenchListOpen(o => !o)} hint={`${analyzed.bench.length} players`} />
               {benchListOpen && (<>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 Your non-starters — depth for <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>injuries, byes, matchups</span>. Bye week shown so you can plan ahead.
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid #2a1a3a",

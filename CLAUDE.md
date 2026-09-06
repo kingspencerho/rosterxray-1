@@ -7073,3 +7073,81 @@ text, and that OVER-COUNTED**: the two share three players, so genuine findings 
 looked fixed. **The numbers above are the corrected classification, by reading each block.**
 ⚠️ **One roster per mode. A roster with more stacks or more weaknesses shifts the ratio toward
 findings** — this is a shape measurement, not a census.
+
+---
+
+## The First-Run Default, Applied (Sep 6, 2026)
+
+**His call on the audit above: "apply the first-run default."** Section explainers now open for a
+first-time reader and collapse for a returning one, reusing the flag the paste help already used.
+**PRESENTATION ONLY — 90 grades byte-identical.** Guard 34: `scripts/test-explainers.mjs`.
+
+### Measured, in a browser, at 430px
+
+```
+                       prose at rest      page height    explainers open
+best ball   BEFORE          398 words        7,931px          n/a
+            AFTER           246 words        7,787px          0 of 5
+redraft     BEFORE          211 words        5,551px          n/a
+            AFTER           114 words        5,478px          0 of 5
+FIRST VISIT (flag cleared)  393 words        8,091px          5 of 5
+```
+
+**13 explainer blocks** now route through one `<Explainer>` component. What survives at rest by
+design: the tournament description (decision support at the point of decision, not teaching), the
+data-vintage footer (provenance), the standout badge captions, and the leverage honesty note.
+
+### ⚠️⚠️ THE BUG THAT SHIPPED FIRST, AND ONLY A RENDER COULD FIND IT
+
+**`handleAnalyze` WRITES `rxr_has_analyzed`, and the results tree mounts AFTER it does.** A
+component reading the flag in its own `useState` initialiser therefore sees `"1"` on a
+first-time reader's **very first grade** and closes every explainer.
+
+⛔ **MEASURED on a cleared localStorage: 0 of 5 open.** Not "slightly wrong" — **the teaching copy
+was effectively deleted for everybody, including the exact reader it exists for**, and the feature
+would have looked like it was working because returning readers saw precisely what was intended.
+
+**The source read correctly.** `useState(() => !hasGradedBefore())` is the obvious implementation
+and it is wrong for a reason that is nowhere in the file.
+
+⭐ **The fix is `FIRST_VISIT`, read ONCE at module load, before any grade can run — so it
+describes who ARRIVED rather than what has happened since.** Guard 34 asserts the read is
+module-level and precedes the write.
+
+⭐⭐ **THE GENERAL SHAPE, and this repo has now hit it four times:** *a flag that a handler writes
+cannot be read by anything that mounts after that handler.* Same family as the `localStorage` flag
+hooked to the wrong function on Aug 27, and the scroll that fired while the page was still growing
+on Sep 1. **Render it, in both states.**
+
+### ⛔ THE LEVERAGE HONESTY NOTE DOES NOT GO BEHIND THE TAP
+
+The Sep 6 leverage fix exists *because* that panel claimed a measurement it does not have. So the
+Field Differentiation copy was **split**: the teaching half taps, and **"This is a projection, not
+a measurement: no ownership data exists here"** stays at rest. Guard 30 pins the phrases exist;
+**guard 34 pins they are not inside an `<Explainer>`**, which is the assertion that actually
+protects the reader who never opens the tap.
+
+### Three guard lessons, all from this change
+
+1. **A `<summary>` is not a `<button>` and inherits no tap-target floor.** The 10px label measured
+   25px and put **five sub-32px targets** on a page this repo has twice driven to zero. Both the
+   Explainer and the two header summaries now state `minHeight: "32px"` explicitly.
+2. ⚠️ **Guard 31 failed on a COMMENT.** Its nesting check asserts the block contains no `<button`,
+   and a comment explaining *why a `<summary>` is not a `<button>`* contains that token. **Same
+   shape as the weekly-workflow guard failing on its own PR body.** It now strips comments before
+   any structural check — negative-tested with real markup so the strip did not defang it.
+3. ⚠️⚠️ **A NEGATIVE TEST PASSED BECAUSE THE ASSERTION WAS FILE-WIDE.** "The summary states its
+   32px floor" matched the string **anywhere** in App.jsx, so deleting it from the Explainer left
+   two header summaries to satisfy it. **A guard that an unrelated line can satisfy is not
+   guarding the line it names.** Scoped to the component body; the sabotage then exited non-zero.
+   ⭐ **Fifth instance of the guard-that-cannot-fail class**, and the first where the guard was
+   real and merely aimed too wide.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL · 34 guards pass · dual-file identical
+rendered at 430px, both modes: 0 tap targets under 32px
+4 failure paths negative-tested, all exit non-zero: the timing bug restored,
+  the honesty note pushed behind the tap, the 32px floor removed, the way back removed
+```
