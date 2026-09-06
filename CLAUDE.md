@@ -6986,3 +6986,90 @@ The redraft coverage line got the same treatment so the two modes read identical
 rendered at 430px: 0 tap targets under 32px, no new console errors
   (the /api/analyze 404 is the documented Vite behaviour)
 ```
+
+---
+
+## Wordiness Audit of the Whole Results Page (Sep 6, 2026)
+
+**Asked for after the grade-header fix: "can you audit the rest of the results page for
+wordiness."** MEASURED in a browser at 430px on a real 18-man roster, both modes. **Nothing was
+changed — this is the instrument and the ranked list; the cuts are his call.**
+
+### ⭐⭐ THE HEADLINE: EXPLAINING OUTWEIGHS FINDING, TWO TO ONE
+
+Every visible text run of 9+ words was counted and split by whether it changes with the roster.
+**Roster-specific prose is the product. Fixed explainer copy renders identically on every grade
+anyone ever runs.**
+
+```
+                        page height   prose words   FIXED explainer   roster FINDINGS
+best ball                  7,931px         398            223               105
+redraft                    5,551px         211            172                39
+```
+
+⛔ **Redraft is worse than four to one.** The reader is shown 172 words of teaching to reach 39
+words about their own team.
+
+### The ranked list — fixed copy, by cost, worst first
+
+```
+ words   px   section                    the copy
+   49    99   FIELD DIFFERENTIATION      4 fragments: "Win big tournaments by being
+                                         different…", "…owned by most of your opponents",
+                                         "…yours alone", "no ownership data exists here…"
+   40    52   tournament dropdown        "The two hardest weekly cuts anywhere…" (input screen)
+   37    66   STACKS · PLAYOFF MATCHUPS  "A stack = a QB + at least one pass-catcher…"
+   35    99   ROSTER STANDOUTS badges    three template captions under the player rows
+   29    66   BRING-BACK STACKS          "…of the same playoff game. If that game turns
+                                         into a shootout…"
+   23    43   data-vintage footer        ADP / FPA / EPA adj provenance
+   20    66   SOLO PICKS                 "Solo picks aren't automatically bad…"
+   17    50   ROSTER STANDOUTS           "— the picks most likely to win you a week…"
+   13    29   Season Schedule            "W1–W14 is the round that eliminates most…"
+```
+
+⚠️ **FIELD DIFFERENTIATION is the worst by DENSITY, not by size:** the section is 90 words total
+and **49 of them explain the section rather than report anything.** More than half. Redraft's
+equivalents are the bye-week legend (23 words) and the weekly-matchup explainer (16).
+
+### ⭐⭐ AND THE FIX IS ALREADY BUILT, WIRED TO EXACTLY ONE THING
+
+`localStorage["rxr_has_analyzed"]` exists (App.jsx ~9775) and its own comment states the
+principle:
+
+> *"The paste instructions are the #1 friction point for a FIRST-time user and pure noise for a
+> returning one, so the default follows who is looking."*
+
+**That reasoning was written for the paste help and never applied anywhere else.** It has
+**exactly two references in the file** — the read and the write. ⛔ **So a returning user reads
+"A stack = a QB + at least one pass-catcher from the same team" on every single grade.** For P1
+in `USER-PERSONAS.md`, grading a 40-entry portfolio, that is forty times.
+
+⭐ **The section explainers are the SAME CLASS OF COPY as the paste help: essential once,
+noise forever after.** Extending the existing flag to them is a default change, not a new
+mechanism, and it needs no new state, no new component and no new storage key.
+
+### ⛔ WHAT MUST NOT BE CUT, AND WHY THE DISTINCTION IS NOT COSMETIC
+
+Three of these carry load beyond teaching, and the repo already records why:
+
+- **"no ownership data exists here"** — Sep 6's leverage fix exists *because* the UI claimed a
+  measurement it does not have. **This sentence is the correction.** Guard 30 asserts the UI does
+  not reclaim ownership language.
+- **The data-vintage footer** — the ADP source-of-truth rule forbids printing a date that did not
+  produce the numbers. It is provenance, not explanation.
+- **"Solo picks aren't automatically bad"** — the framework says an orphan is penalised only on
+  three conditions. Dropping it lets a neutral flag read as a verdict.
+
+**A first-run default keeps all three reachable and none of them at rest.** Deleting them does
+not.
+
+### Method, and its limits
+
+Visible text nodes of 9+ words, excluding the textarea and anything already behind a closed
+`<details>`, grouped by nearest heading, measured at 430px.
+⚠️ **The fixed-versus-roster split was first computed by grading two rosters and diffing the
+text, and that OVER-COUNTED**: the two share three players, so genuine findings matched and
+looked fixed. **The numbers above are the corrected classification, by reading each block.**
+⚠️ **One roster per mode. A roster with more stacks or more weaknesses shifts the ratio toward
+findings** — this is a shape measurement, not a census.
