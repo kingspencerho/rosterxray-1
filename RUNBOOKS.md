@@ -165,7 +165,7 @@ measured input is not a trade worth making. That one is permanent, not part of t
 | 3 | Sep 3 | | | | | |
 | 4 | Sep 4 | | | | | |
 | 5 | Sep 5 | | | | | |
-| 6 | Sep 6 | **813** | **571** | **71** | — | ⭐⭐ **NOT a manual run — the new `weekly-data-refresh` GitHub Action produced this at 07:34:50Z and opened PR branch `data/refresh-2026-W36`.** All four numbers inside the healthy bands **five days after baseline**: players 812→813, depth_chart 544→571 (firming up pre-season, the right direction), hard_status 75→71. Contradictions not recorded — the workflow runs the refresh, not the report. |
+| 6 | Sep 6 | **813** | **571** | **71** | — | ⭐⭐ **NOT a manual run — the new `weekly-data-refresh` GitHub Action produced this at 07:34:50Z and opened PR #98 from `data/refresh-2026-W36`.** ⚠️ **Sep 6 is a SATURDAY: this was a `workflow_dispatch` fired by hand to test the repo permission, NOT the Tuesday cron, which has still never run.** The job is proven end to end (refresh → guards → branch → PR); the SCHEDULE is not, and Sep 8 is its first real firing. All four numbers inside the healthy bands **five days after baseline**: players 812→813, depth_chart 544→571 (firming up pre-season, the right direction), hard_status 75→71. Contradictions not recorded — the workflow runs the refresh, not the report. |
 | 7 | Sep 7 | | | | | |
 | — | **Sep 8** | | | | | **DECISION:** |
 
