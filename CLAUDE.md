@@ -5405,6 +5405,27 @@ string with itself, so it mutated nothing. Rewritten to inject a real `STATUS_LA
 inside `analyzeRoster`'s body. **Same lesson this file already records twice: assert the
 behaviour, and check that the negative test actually changes something.**
 
+### ⭐ HIS CALL Sep 6, 2026: THE LIVE ROWS ARE COMMITTED. The placeholder era is over.
+
+**813 players, 571 depth-chart slots, 71 hard statuses**, refreshed the day it was committed
+rather than shipping the five-day-old copy that was sitting in the working tree. **The
+zero-row placeholder existed so the file's SHAPE could be pinned before real data existed;
+it is not a safety mechanism and holding it longer bought nothing.**
+
+⛔ **WHAT DOES NOT CHANGE: the layer is still unwired.** Guard 26's no-consumer assertions are
+untouched and still pass — no `status_2026`, `STATUS_LAYER`, `getStatus(`, `statusContext` or
+`getPlayerStatus` exists in App.jsx. **Committing data and rendering it are separate decisions
+and only the first was made.** 33 guards pass on the live rows, which is the point of gating the
+weekly workflow's commit on `npm test`.
+
+⭐ **AND THE ROW-SHAPE ASSERTION IS NO LONGER VACUOUS.** This file recorded that the guard could
+not bite while the file was empty. It bites now.
+
+**The first live report flags 12 players whose freshest note predates a hard status**, four of
+them with no dated note at all. **The live one is `jordyn tyson` (WR NO, ADP 63) — IR as of
+Sep 5 with no dated note anywhere**, a top-70 pick whose availability the app cannot currently
+speak to. Read them as questions, per the report's own header.
+
 ### Still open from §14a
 
 **GAP 1 is half closed.** The status half is built; **the prose half is unchanged and still
@@ -6612,6 +6633,604 @@ calls the engine directly. Render it, in both states.
 
 ---
 
+## The Field Baseline (added Sep 6, 2026)
+
+Asked for after reading bbmdb, which never gives a number alone: *"you are expected to
+advance 131.9, a baseline portfolio advances 184.7."* **This app has always answered "how
+good is this roster" with a score and left the reader's real next question — "compared to
+what?" — unanswered.** `scripts/build-baselines.mjs` -> `grading/data/baselines_2026.json`.
+**CONTEXT ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures + 3 leagues x 5),
+against a pristine worktree at HEAD. Guard 32: `scripts/test-baselines.mjs`.
+
+### ⛔⛔ THE FAILURE MODE IS FLATTERY, AND THE FIRST BUILD HAD IT
+
+If the simulated field is unrealistic the baseline lands far below any real roster and
+**EVERY user is told they beat the field.** That is not a weak feature, it is an actively
+lying one — and it is invisible, because a too-generous comparison looks exactly like a
+working one.
+
+**The first build shipped that defect and the measurement caught it before the UI did:**
+
+```
+median across tournaments   1.99      real fixtures   ref3 5.43   ref1 7.74
+```
+
+Diagnosed by grading one synthetic roster and reading its weaknesses rather than adjusting
+the number: `Unlooped QBs: Jayden Daniels, Bo Nix, Cj Stroud — no pass catcher from their
+team on this roster`. **The simulation drafted by ADP and never stacked on purpose**, and
+stack integrity is the engine's highest-weighted axis, so every synthetic roster was crushed
+on it. Construction was already fine (3 QB / 4 RB / 9 WR / 2 TE, 18 of 18 matched) — the
+correlation was missing.
+
+**The fix is in the SIMULATION, never in the number.** A drafter now takes a correlated
+piece — a pass catcher on a QB he owns, or a QB for catchers he owns — 55% of the time when
+one is within reach of value. Not always: a field that stacks every pick is as unreal as one
+that never does.
+
+```
+medians   1.99 -> 5.16-5.72 (standard)   4.09-4.25 (superflex)
+```
+
+### The validation is ORDERING, not a threshold
+
+The five committed fixtures place against the field in exactly the order their grades rank
+them, on both `main` and `bbm7`:
+
+```
+ref1  A    top 10% / top 25%
+ref5  A    top 25% / above median
+ref4  A    top 25% / above median
+ref3  B+   below median
+ref2  C+   bottom 25%
+```
+
+Monotonic. **Guard 32 asserts that ordering rather than any particular value**, so a
+deliberate re-derivation stays legal and a flattering one fails. Restoring the original
+median-2.0 file exits non-zero.
+
+### How the field is drafted
+
+12-team snakes off `ADP_DATA`, 40 drafts, **every one of the 12 rosters is a field entry** —
+which is the correct population, not a random sample of players. Construction caps come from
+§ BBM 5-Year Benchmarks (`QB 3 / RB 7 / WR 10 / TE 3`, minimums `2/4/6/2` force-filled late,
+exactly as a human is forced to). Deterministic seed, because a baseline that moves every
+run cannot be calibrated against.
+
+### ⚠️ IT IS A MODEL OF THE FIELD, NOT THE FIELD, and the UI says so
+
+Real drafters react to news, reach on a depth-chart move and chase correlation deliberately;
+this one only stacks probabilistically. So the line reads **"480 simulated rosters drafted
+off ADP, not real opponents"** — a percentile against a simulation must never be read as a
+percentile against the field. Guard 32 fails if that caveat is dropped.
+
+It also inherits `ADP_DATA`'s vintage, including the **+7 tail-compression offset** measured
+in the ADP-discipline section. **Rebuild after any ADP refresh.**
+
+### The render
+
+One muted line under the counts row, same hueless treatment as the ADP-discipline note:
+*vs the field · an ordinary entry scores 5.72 here, so this roster sits in the top 25% · 480
+simulated rosters drafted off ADP, not real opponents.*
+
+`--text-muted`, never `--caution` — a comparison is information, and the Aug 28 palette rule
+reserves that token for real warnings. Unlike the discipline note it renders **always**
+rather than only on absence, because here the number IS the finding.
+
+### ⚠️ THE NEGATIVE TEST REPORTED 10/10 WHILE PROVING NOTHING — the fifth instance
+
+The first sandbox run printed `10/10 caught` and was worthless: **its own baseline exited 1.**
+An earlier crashed run had left mutated files behind, so the "pristine" copy read into memory
+was already broken and every case failed for that reason rather than the sabotage.
+
+It was caught only by printing the baseline exit code beside the results. The harness now
+**asserts a clean exit before every case and aborts if a restore fails**, and 10/10 then held
+for real.
+
+**Same family as `test-findplayer.mjs` (no exit call), `test-disclosure.mjs` (one-argument
+`ok`), guards 19/20, and the Sep 5 string-match sabotage.** The rule has to grow one clause:
+*confirm the sabotage changes something* — and **confirm the un-sabotaged state still passes.**
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL — 15 tournaments x 5 fixtures + 3 leagues x 5 fixtures
+32 guards · cmp App.jsx App.jsx.jsx identical
+10 failure paths negative-tested, all exit non-zero, against a verified-clean baseline
+```
+
+⚠️ **One pre-existing failure is unrelated and still open:** `test-yahoo-pull.mjs` asserts
+the token file is `chmod 600`, which **cannot pass on Windows** — Python's `chmod` there only
+toggles the read-only bit, so the mode reads `0o666`. It passes in CI. Left for a decision
+rather than silently relaxed: it is a security assertion, and skipping it on Windows deletes
+a real check on the platform where the protection genuinely does not apply.
+
+### ⛔ NEITHER LINE REACHES REDRAFT — verified in a browser Sep 6, 2026
+
+Rendered both modes. Best ball shows both; **redraft shows neither**, and nor does the
+ADP-discipline note. All three sit in the best-ball branch of the results header.
+
+```
+best ball   vs the field · an ordinary entry scores 5.46 here, so this roster sits in the top 10%
+            measured on · 10 of 18 players with 2025 data ...
+redraft     (absent)   (absent)
+```
+
+**That is correct-by-accident rather than by design, and the reason matters:**
+
+1. **The baseline file is keyed by TOURNAMENT** (`main`, `bbm7`, `puppy` …). Redraft is keyed
+   by LEAGUE (`yahoo_std`, `yahoo_ppr`, `yahoo_std_10`). **There is no redraft baseline to
+   show** — `baselines_2026.json` has no `yahoo_std` key.
+2. **The render reads `tournament`, the best-ball state variable.** In redraft that still holds
+   its default `"main"`, so if the line ever leaked out of the branch **it would compare a
+   redraft score against a BEST-BALL field** — a confident, precise, wrong comparison.
+
+⚠️ **A redraft baseline is a genuinely different build, not a config change.** The field there
+is not 12 rosters from one snake off best-ball ADP — it is 12 lineups from a redraft board
+(`ADP_YAHOO`, a different table with a deeper tail), scored by the Floor Layer rather than the
+Ceiling Shape Layer, in leagues whose starter slots and bench depth vary by preset.
+
+**Metric coverage, by contrast, is portable as-is** — it reads `analyzed.valid` and the shared
+`CEILING_GATE`, both of which exist in redraft. It is one render-site addition inside the
+redraft branch, and the Floor Layer uses the same gate, so the number is already the right one.
+
+### Rebuild
+
+```
+node scripts/build-baselines.mjs --drafts 40    # deterministic; same seed, same file
+```
+
+---
+
+## Metric Coverage: Resolved Is Not Measured (added Sep 6, 2026)
+
+**Found by the two-roster test, not by a guard.** Two real BBM VII rosters, same 3-5-8-2
+archetype, graded side by side. One was measured on **13 of 18** players; the other on
+**10 of 18** — and **both reported "18/18 matched"**, because every NAME resolved.
+
+**So the app presented a grade computed on eight players identically to one computed on
+thirteen, and nothing on screen said which.** The match counter answers *did the parser find
+everyone*; it has never answered *could the scored layers see them*. Those are different
+questions and the gap is invisible without being told.
+
+The seven-to-ten missing players are rookies and sub-gate veterans carrying no `spike_rate`,
+`dud_rate`, `hvt_pg` or `usable_rate`, so they are invisible to the **Ceiling Shape Layer**,
+the **Naked RB gate** and the **Advance Rate Layer's** cumulative scoring proxy. On the
+thinner roster the grade rests almost entirely on construction geometry — which is a fine
+thing for it to rest on, and the reader deserves to know that it does.
+
+### ⚠️ THE GATE WAS ALREADY HAND-TYPED TWICE — the eighth instance
+
+Adding a third consumer would have made three copies of `8` and `0.35`:
+
+```
+Ceiling Shape Layer (best ball)   if ((m.gp||0) < 8 || (m.snap_sh||0) < 0.35) return;
+Floor Layer (redraft)             if ((m.gp||0) < 8 || (m.snap_sh||0) < 0.35) return;
+```
+
+Now `const CEILING_GATE = { gp: 8, snap: 0.35 }`, read by all three — **and printed into the
+UI copy from the constant rather than re-typed there**, so the sentence can never disagree
+with the gate it describes.
+
+⭐ **`CARD_PERCENTILES` keeps its own `gp >= 8` and that is CORRECT, not an oversight.** It
+gates the percentile POPULATION (draftable + 8 games, no snap share) — a different gate that
+happens to share one number. **Unifying them would be worse than the duplication:** a future
+change to the scoring gate would then silently move every percentile on the player card. The
+guard is scoped to the combined gp-and-snap pair for exactly that reason.
+
+### ⚠️ A GUARD CORRECTLY FAILED ON THE REFACTOR
+
+`test-floor-layer.mjs` asserted the LITERAL `(m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35` and
+broke the moment the gate became a constant — **which is the fix it was asking for.** The
+property it wanted is *the floor layer uses the SAME gate as the ceiling layer*, not *a
+particular number is typed at this line*. It now asserts the shared constant is read, plus a
+second assertion that `CEILING_GATE` still holds `8` and `0.35`, **because `FLOOR_BASE`'s
+medians were derived at those values and changing the gate invalidates them.**
+
+Same family as the Sep 5 lesson: **string-matching a source file asserts that text exists,
+never that code behaves.**
+
+### The render
+
+One muted line under the field baseline, and it appears **only when coverage is incomplete** —
+on a fully measured roster the qualifier would be noise on every grade:
+
+> *measured on **10 of 18** players with 2025 data · the rest are rookies or played too little
+> to rate (8+ games, 35%+ snaps), so the ceiling, floor and naked-RB checks cannot see them —
+> this grade rests mostly on construction*
+
+The closing clause fires under 70% coverage. `--text-muted`, never `--caution`: this
+qualifies a grade, it does not warn about one.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL — 15 tournaments x 5 fixtures + 3 leagues x 5
+  The gate refactor touched BOTH engines, so this is the assertion that matters:
+  reading a constant produces the same numbers as reading the literals it replaced.
+33 guards · dual-file identical
+7 failure paths negative-tested, all exit non-zero, against a verified-clean baseline
+```
+
+⚠️ **A number reported earlier in this session was the looser measure and is corrected here.**
+The two rosters were first described as having 2025 rows for **18 of 18** and **11 of 18**.
+That counts *has a row at all*. The number that matters — and the one the app now prints — is
+*clears the gate the scored layers use*: **13 of 18 and 10 of 18.**
+
+⛔⛔ **CORRECTED AGAIN Sep 6, 2026, BY RUNNING `metricCoverage` ITSELF — the thinner roster is
+10 of 18, not 8.** Both rosters were rebuilt from the transcript's own tool call and graded
+through the shipped helper rather than counted by hand. ⭐ **Team A reproduced at exactly 13,
+which is what says the rosters are faithful and the 8 was the error.** The two it missed are
+**Tyler Warren (17 gp, 84% snaps)** and **Charlie Kolar (11 gp, 40% snaps)** — both tight ends,
+both comfortably past the gate.
+
+⚠️⚠️ **AND THIS FILE ALREADY CONTAINED THE PROOF, TWO SECTIONS UP.** The browser-render block
+in the field-baseline entry records the live page printing `measured on · 10 of 18 players with
+2025 data` — **the rendered evidence and the prose disagreed inside one document**, and the
+rendered half was right. ⛔ **A file that contradicts itself is worse than one that is simply
+wrong**, because each half looks corroborated by the other until somebody diffs them.
+
+⭐ **THE LESSON IS THE ONE THIS FILE KEEPS RECORDING, POINTED AT A NUMBER RATHER THAN A GUARD:
+a count produced by reading is not a count produced by running.** The figure that reached the
+file came from a hand read of a screenshot; the figure the app prints comes from the gate. **They
+disagreed for three days and only running the shipped code found it.** ⚠️ **Anything quoted as
+"the app says X" must be produced BY the app**, which is the same rule as asserting behaviour
+over string-matching a source file.
+
+**What does NOT change: the finding.** 10 of 18 is still under the 70% floor, still renders the
+rests-mostly-on-construction clause, and the two rosters still differ by three measured players
+while both report 18/18 matched. **The gap the feature exists to show is real at 10 as at 8.**
+
+---
+
+## Two Decisions Executed (Sep 6, 2026)
+
+**33 guards pass — ZERO failures for the first time on this machine. 90 grades byte-identical.**
+
+### 1. The Yahoo chmod assertion is now platform-aware, not deleted
+
+**The split was the worst possible one: it passed in CI (Linux) and could NEVER pass on the
+only machine anyone develops on.** `chmod 600` is POSIX; on Windows `os.chmod` toggles the
+read-only bit and nothing else, so the mode reads `0o666` forever. **A permanently red suite
+teaches you to stop reading it**, and this repo already records eleven bugs that accumulated
+behind eleven ignored build warnings.
+
+⛔ **Deleting the assertion was the wrong fix, because the risk is REAL on Windows** — the
+token genuinely is readable by any account on the machine. So the check moved to where it can
+do something:
+
+- **`save_token` now prints a warning at the moment a real token is written on Windows**,
+  naming the file and telling the reader to keep it out of shared or synced folders. Verified
+  firing.
+- **The self-test asserts what IS true and controllable there** — the file exists and lives
+  outside the repo — and keeps the strict `0o600` assertion on POSIX.
+
+⭐ **A warning at the point of risk beats a failing assertion about a platform where the risk
+cannot be removed.**
+
+### 2. Metric coverage now renders in REDRAFT too
+
+**A browser render found the best-ball version does not reach redraft** — nor does the field
+baseline, nor the ADP-discipline note. The qualifier belongs wherever a grade is shown, and
+**redraft carries MORE sub-gate players than best ball, not fewer.**
+
+Same helper, same shared `CEILING_GATE` — **and that gate is exactly what the redraft Floor
+Layer scores on**, so the number was already the right one for the mode. Only the copy
+differs: best ball names *ceiling, floor and naked-RB*; redraft names *floor and
+lineup-confidence*, because those are its actual consumers.
+
+⛔ **THE FIELD BASELINE DELIBERATELY DID NOT COME WITH IT.** `baselines_2026.json` is keyed by
+TOURNAMENT and redraft is keyed by LEAGUE, and the render reads the best-ball `tournament`
+state — which in redraft still holds its default `"main"`. **A copy-paste here would have
+compared a redraft score against a best-ball field**: confident, precise and wrong. The guard
+asserts `fieldPlacement` keeps exactly one call site for that reason.
+
+**A redraft baseline remains a real build, not a config change** — a different ADP table with
+a deeper tail, scored by the Floor Layer, in leagues whose starter slots vary by preset.
+
+---
+
+## The Grade Header Was Three Paragraphs. Now It Is One Line. (Sep 6, 2026)
+
+**His call, on a screenshot of the live page:** *"its way too wordy... i need all my updates to
+be optimized for user experience... there is way too much info around this area."*
+**PRESENTATION ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures + 3 leagues x 5),
+against a pristine worktree at HEAD. Guards 31 and 32 updated.
+
+### Measured, in a browser, before and after
+
+```
+                    at rest                         opened
+BEFORE   3 stacked blocks · 215px · 100 words       n/a, always on
+AFTER    1 summary line  ·  47px ·  12 words        279px, by choice
+```
+
+**The resting line is now:** *in the top 10% of a simulated field · graded on 10 of 18 players ·
+why ⌄*
+
+⛔ **WHY IT MATTERED MORE HERE THAN ANYWHERE ELSE ON THE PAGE.** Three separate qualifier
+blocks — ADP discipline, field baseline, metric coverage — had each been added on its own merits
+and none of them looked at the other two. **They landed in the densest real estate the app has,
+directly under the grade, which is the one place `USER-PERSONAS.md` P2 (the on-the-clock drafter,
+under 30 seconds, timer running) has no taps to spend.** Each was individually justified; the
+stack of three was not.
+
+⭐ **THE RULE IS THE ONE THE RESULTS VIEW ALREADY RUNS ON, applied one level down: what stays at
+rest is the FINDING, what earns a tap is the REASONING.** Both numbers survive at rest. Every
+sentence of explanation moved inside.
+
+### ⛔ COMPRESSION MAY NOT DROP WHAT THE COPY WAS GUARDED FOR
+
+Guard 32 exists because *a percentile against a simulation must never read as a percentile
+against the field.* **The cheapest way to hit the word count was to move "simulated" behind the
+tap, and that would have been the feature quietly becoming a lie again.** So the resting line
+says **"of a simulated field"** and the full sentence renders inside. **A new assertion pins the
+resting half specifically**, because the old one would pass on a version that only said it once
+the reader opened the disclosure.
+
+### ⚠️ THE RENDER CAUGHT A REAL BUG THE SOURCE DID NOT SHOW
+
+The first build printed **"in the top 10% of the simulated field of a simulated field."**
+`fieldPlacement` returned five bands and **exactly one of them carried the suffix "of the
+simulated field"** while the other four were bare. That read correctly in the single long
+sentence it was written for and broke the moment a second, shorter render site existed.
+
+**All five bands are now bare and the CALLER supplies the context.** ⭐ **A string that is only
+correct in one caller is the duplicate-definition class wearing a sentence** — ninth instance in
+this repo, and the first where the duplication was inside a word rather than a value.
+
+### Native `<details>`, not a new `useState`
+
+A hook cannot go inside the render IIFE, and `<details>` was already an idiom in this file. Zero
+new state, zero new component. Summary is 47px, so **0 tap targets under 32px** in either mode.
+The redraft coverage line got the same treatment so the two modes read identically.
+
+### ⚠️⚠️ TWO PROCESS TRAPS, BOTH CAUGHT BY GUARDS RATHER THAN BY READING
+
+1. **A Python text-mode write silently converted all 17,105 lines of `App.jsx` to CRLF.**
+   `io.open(f, "w")` translates `
+` to `os.linesep` on Windows. Nothing errored, the build was
+   clean, and **guard 29 failed on a regex containing `\{
+` — an assertion about
+   trajectory data, catching a line-ending change.** ⭐ **Always pass `newline=""` when
+   rewriting a source file, and check `git diff --stat` for an implausible line count.**
+2. **Guard 31 asserted its four render properties inside a MAGIC 700-CHARACTER WINDOW.** Moving
+   the reason into the disclosure pushed it past that window and all four failed **on code that
+   was correct**. A fixed byte window asserts "these strings are near each other", which is not a
+   property anybody wants. **It is now bounded to the enclosing render block** — same intent, no
+   magic number, survives any future reshuffle. ⛔ **Note what was NOT done: the assertions were
+   not deleted or loosened.** Rewriting a brittle locator is not relaxing a guard; dropping the
+   check it performs would have been.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL · 33 guards pass · dual-file identical
+rendered at 430px: 0 tap targets under 32px, no new console errors
+  (the /api/analyze 404 is the documented Vite behaviour)
+```
+
+---
+
+## Wordiness Audit of the Whole Results Page (Sep 6, 2026)
+
+**Asked for after the grade-header fix: "can you audit the rest of the results page for
+wordiness."** MEASURED in a browser at 430px on a real 18-man roster, both modes. **Nothing was
+changed — this is the instrument and the ranked list; the cuts are his call.**
+
+### ⭐⭐ THE HEADLINE: EXPLAINING OUTWEIGHS FINDING, TWO TO ONE
+
+Every visible text run of 9+ words was counted and split by whether it changes with the roster.
+**Roster-specific prose is the product. Fixed explainer copy renders identically on every grade
+anyone ever runs.**
+
+```
+                        page height   prose words   FIXED explainer   roster FINDINGS
+best ball                  7,931px         398            223               105
+redraft                    5,551px         211            172                39
+```
+
+⛔ **Redraft is worse than four to one.** The reader is shown 172 words of teaching to reach 39
+words about their own team.
+
+### The ranked list — fixed copy, by cost, worst first
+
+```
+ words   px   section                    the copy
+   49    99   FIELD DIFFERENTIATION      4 fragments: "Win big tournaments by being
+                                         different…", "…owned by most of your opponents",
+                                         "…yours alone", "no ownership data exists here…"
+   40    52   tournament dropdown        "The two hardest weekly cuts anywhere…" (input screen)
+   37    66   STACKS · PLAYOFF MATCHUPS  "A stack = a QB + at least one pass-catcher…"
+   35    99   ROSTER STANDOUTS badges    three template captions under the player rows
+   29    66   BRING-BACK STACKS          "…of the same playoff game. If that game turns
+                                         into a shootout…"
+   23    43   data-vintage footer        ADP / FPA / EPA adj provenance
+   20    66   SOLO PICKS                 "Solo picks aren't automatically bad…"
+   17    50   ROSTER STANDOUTS           "— the picks most likely to win you a week…"
+   13    29   Season Schedule            "W1–W14 is the round that eliminates most…"
+```
+
+⚠️ **FIELD DIFFERENTIATION is the worst by DENSITY, not by size:** the section is 90 words total
+and **49 of them explain the section rather than report anything.** More than half. Redraft's
+equivalents are the bye-week legend (23 words) and the weekly-matchup explainer (16).
+
+### ⭐⭐ AND THE FIX IS ALREADY BUILT, WIRED TO EXACTLY ONE THING
+
+`localStorage["rxr_has_analyzed"]` exists (App.jsx ~9775) and its own comment states the
+principle:
+
+> *"The paste instructions are the #1 friction point for a FIRST-time user and pure noise for a
+> returning one, so the default follows who is looking."*
+
+**That reasoning was written for the paste help and never applied anywhere else.** It has
+**exactly two references in the file** — the read and the write. ⛔ **So a returning user reads
+"A stack = a QB + at least one pass-catcher from the same team" on every single grade.** For P1
+in `USER-PERSONAS.md`, grading a 40-entry portfolio, that is forty times.
+
+⭐ **The section explainers are the SAME CLASS OF COPY as the paste help: essential once,
+noise forever after.** Extending the existing flag to them is a default change, not a new
+mechanism, and it needs no new state, no new component and no new storage key.
+
+### ⛔ WHAT MUST NOT BE CUT, AND WHY THE DISTINCTION IS NOT COSMETIC
+
+Three of these carry load beyond teaching, and the repo already records why:
+
+- **"no ownership data exists here"** — Sep 6's leverage fix exists *because* the UI claimed a
+  measurement it does not have. **This sentence is the correction.** Guard 30 asserts the UI does
+  not reclaim ownership language.
+- **The data-vintage footer** — the ADP source-of-truth rule forbids printing a date that did not
+  produce the numbers. It is provenance, not explanation.
+- **"Solo picks aren't automatically bad"** — the framework says an orphan is penalised only on
+  three conditions. Dropping it lets a neutral flag read as a verdict.
+
+**A first-run default keeps all three reachable and none of them at rest.** Deleting them does
+not.
+
+### Method, and its limits
+
+Visible text nodes of 9+ words, excluding the textarea and anything already behind a closed
+`<details>`, grouped by nearest heading, measured at 430px.
+⚠️ **The fixed-versus-roster split was first computed by grading two rosters and diffing the
+text, and that OVER-COUNTED**: the two share three players, so genuine findings matched and
+looked fixed. **The numbers above are the corrected classification, by reading each block.**
+⚠️ **One roster per mode. A roster with more stacks or more weaknesses shifts the ratio toward
+findings** — this is a shape measurement, not a census.
+
+---
+
+## The First-Run Default, Applied (Sep 6, 2026)
+
+**His call on the audit above: "apply the first-run default."** Section explainers now open for a
+first-time reader and collapse for a returning one, reusing the flag the paste help already used.
+**PRESENTATION ONLY — 90 grades byte-identical.** Guard 34: `scripts/test-explainers.mjs`.
+
+### Measured, in a browser, at 430px
+
+```
+                       prose at rest      page height    explainers open
+best ball   BEFORE          398 words        7,931px          n/a
+            AFTER           246 words        7,787px          0 of 5
+redraft     BEFORE          211 words        5,551px          n/a
+            AFTER           114 words        5,478px          0 of 5
+FIRST VISIT (flag cleared)  393 words        8,091px          5 of 5
+```
+
+**13 explainer blocks** now route through one `<Explainer>` component. What survives at rest by
+design: the tournament description (decision support at the point of decision, not teaching), the
+data-vintage footer (provenance), the standout badge captions, and the leverage honesty note.
+
+### ⚠️⚠️ THE BUG THAT SHIPPED FIRST, AND ONLY A RENDER COULD FIND IT
+
+**`handleAnalyze` WRITES `rxr_has_analyzed`, and the results tree mounts AFTER it does.** A
+component reading the flag in its own `useState` initialiser therefore sees `"1"` on a
+first-time reader's **very first grade** and closes every explainer.
+
+⛔ **MEASURED on a cleared localStorage: 0 of 5 open.** Not "slightly wrong" — **the teaching copy
+was effectively deleted for everybody, including the exact reader it exists for**, and the feature
+would have looked like it was working because returning readers saw precisely what was intended.
+
+**The source read correctly.** `useState(() => !hasGradedBefore())` is the obvious implementation
+and it is wrong for a reason that is nowhere in the file.
+
+⭐ **The fix is `FIRST_VISIT`, read ONCE at module load, before any grade can run — so it
+describes who ARRIVED rather than what has happened since.** Guard 34 asserts the read is
+module-level and precedes the write.
+
+⭐⭐ **THE GENERAL SHAPE, and this repo has now hit it four times:** *a flag that a handler writes
+cannot be read by anything that mounts after that handler.* Same family as the `localStorage` flag
+hooked to the wrong function on Aug 27, and the scroll that fired while the page was still growing
+on Sep 1. **Render it, in both states.**
+
+### ⛔ THE LEVERAGE HONESTY NOTE DOES NOT GO BEHIND THE TAP
+
+The Sep 6 leverage fix exists *because* that panel claimed a measurement it does not have. So the
+Field Differentiation copy was **split**: the teaching half taps, and **"This is a projection, not
+a measurement: no ownership data exists here"** stays at rest. Guard 30 pins the phrases exist;
+**guard 34 pins they are not inside an `<Explainer>`**, which is the assertion that actually
+protects the reader who never opens the tap.
+
+### Three guard lessons, all from this change
+
+1. **A `<summary>` is not a `<button>` and inherits no tap-target floor.** The 10px label measured
+   25px and put **five sub-32px targets** on a page this repo has twice driven to zero. Both the
+   Explainer and the two header summaries now state `minHeight: "32px"` explicitly.
+2. ⚠️ **Guard 31 failed on a COMMENT.** Its nesting check asserts the block contains no `<button`,
+   and a comment explaining *why a `<summary>` is not a `<button>`* contains that token. **Same
+   shape as the weekly-workflow guard failing on its own PR body.** It now strips comments before
+   any structural check — negative-tested with real markup so the strip did not defang it.
+3. ⚠️⚠️ **A NEGATIVE TEST PASSED BECAUSE THE ASSERTION WAS FILE-WIDE.** "The summary states its
+   32px floor" matched the string **anywhere** in App.jsx, so deleting it from the Explainer left
+   two header summaries to satisfy it. **A guard that an unrelated line can satisfy is not
+   guarding the line it names.** Scoped to the component body; the sabotage then exited non-zero.
+   ⭐ **Fifth instance of the guard-that-cannot-fail class**, and the first where the guard was
+   real and merely aimed too wide.
+
+### Calibration
+
+```
+90 grades BYTE-IDENTICAL · 34 guards pass · dual-file identical
+rendered at 430px, both modes: 0 tap targets under 32px
+4 failure paths negative-tested, all exit non-zero: the timing bug restored,
+  the honesty note pushed behind the tap, the 32px floor removed, the way back removed
+```
+
+---
+
+## Sep 7, 2026 — The season stat line on the player card
+
+**What it is.** An ordinary box-score line at the top of every player card, above Recent news:
+
+```
+2025  final                                    15 G
+90 tgt · 55-643 rec · 9 TD
+143.8 pts · 9.6/gm · half-PPR · game log
+```
+
+**Why it was missing, and why that mattered.** Every other number on the card is a rate, a share
+or a percentile. **A reader who cannot anchor those to "55 catches for 643 yards" is reading
+fourteen sections of context for a player he cannot picture.** His words: *"is it possible to put
+a player's full season stat line somewhere at the top of the player card."*
+
+**Where it comes from.** Summed inside `buildLog` from the SAME `g` rows the weekly chart draws,
+so the two can never disagree. No new data file — `gamelogs_2025.json` already carried every
+column.
+
+⚠️ **THE TRAP, and it is the reason the guard exists: a QB's `tds` column is TOTAL touchdowns,
+not passing.** Rushing TDs are `tds - pass_td`. Printing `tds` in the passing slot would overstate
+**every running quarterback on the board**, and the number would still look plausible.
+
+⭐ **THE CURRENT-SEASON LINE NEEDS NO CODE.** The strip renders
+`[card.gameLogCur, card.gameLog]`, current season first, prior underneath, never swapped — the
+same dual-vintage rule the trajectory and QB blocks follow. `gamelogs_2026.json` exists with
+`weeks_covered: 0`, and `GAME_LOG_CUR_LIVE` gates on that. **The 2026 line appears on its own the
+week that file gains rows**, labelled `through week N` instead of `final` via the new `partial`
+flag. Refreshing it is `scripts/build-gamelogs.py`, not an app change.
+
+⚠️ **ONE KNOWN DISAGREEMENT, MEASURED, LEFT IN PLACE.** `player_metrics_2025.json` counts **1-3
+more targets** than the game log for **51 of 184 pass-catchers** — always higher, never lower, so
+it is systematic rather than noise (Jennings 93 vs 90, Pittman 114 vs 111). The card therefore
+prints two target figures from two sources: the stat line's total, and Opportunity's per-game
+rate. **The fix is not to blend them** — the stat line must re-sum the chart directly below it or
+it stops being checkable. The line names its source (`game log`) so a reader who spots the gap
+knows which is which. **Running the two sources to ground is unfinished work.**
+
+### Guard 14 gained a section (11 assertions), all negative-tested
+
+The re-sum is computed from the **raw JSON**, not from `buildLog` — an assertion that calls the
+code it tests proves only that the code is self-consistent.
+
+⚠️ **AND ONE ASSERTION WAS BORN UNABLE TO FAIL.** The ordering check compared
+`app.indexOf(marker) < app.indexOf('title="Recent news"')`, and **`indexOf` returns -1 for a
+marker that is GONE — which is less than every real index, so deleting the whole strip would have
+PASSED.** ⭐ **Sixth instance of the guard-that-cannot-fail class.** Now asserts the marker exists
+before comparing positions.
+
+```
+34 guards pass · 1472 assertions · dual-file identical
+rendered at 375px and 1280px: WR, TE, RB and QB lines all correct against a hand re-sum
+5 sabotages, all exit non-zero: QB rush TD printing the total, receptions off by one,
+  season points inflated, a final season labelled partial, the strip deleted outright
+```
 ## A Threshold That Lived in Prose (fixed Sep 8, 2026)
 
 **90 grades byte-identical** (15 tournaments x 5 fixtures, plus 3 leagues x 5), compared against

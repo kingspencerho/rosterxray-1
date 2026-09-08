@@ -16,6 +16,9 @@ import PLAYER_EFFICIENCY from './grading/data/player_efficiency_2025.json';
 // Built by scripts/build-sos.py. rank 1 = EASIEST (inverse of the internal
 // getMatchupTier rank — do not mix the two scales).
 import SOS from './grading/data/sos_2026.json';
+// The FIELD baseline: what an ordinary entry scores in each tournament.
+// CONTEXT ONLY - display beside the grade, never an input to it. Guard 32.
+import BASELINES from './grading/data/baselines_2026.json';
 // Team scheme motion rates + per-receiver production split on motion snaps.
 // ⚠️ PLAY-level flag: the offense used motion, NOT that this player moved.
 // Built by scripts/build-motion.py. See that file's header before using.
@@ -3483,6 +3486,19 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       stats: cols.slice(3).map((label, i) => ({ label, value: g[i + 3] })),
     }));
     const pts = games.map(g => g.pts);
+    // SEASON TOTALS — the box-score line a reader already knows how to read,
+    // summed from the SAME games the chart draws, so the two can never
+    // disagree. Position-specific, because "55-573-4" is unreadable at QB.
+    // ⚠️ A QB's `tds` column is TOTAL touchdowns, so rushing scores are
+    // tds - pass_td. Printing `tds` as passing TDs would overstate every
+    // running quarterback on the board.
+    const sum = label => games.reduce((a, g) => a + (g.stats.find(s => s.label === label)?.value || 0), 0);
+    const tds = sum("tds");
+    const statLine = row.pos === "QB"
+      ? `${sum("att")} att · ${sum("pass_yds")} pass yds · ${sum("pass_td")} pass TD · ${sum("car")}-${sum("rush_yds")} rush · ${tds - sum("pass_td")} rush TD`
+      : row.pos === "RB"
+        ? `${sum("car")}-${sum("rush_yds")} rush · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`
+        : `${sum("tgt")} tgt · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`;
     return {
       season: meta.season,
       maxWeek: meta.max_week || Math.max(...games.map(g => g.week)),
@@ -3491,6 +3507,11 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       gp: games.length,
       best: Math.max(...pts),
       ppg: +(pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1),
+      totalPts: +pts.reduce((a, b) => a + b, 0).toFixed(1),
+      statLine,
+      // "final" vs "through week N" — a partial season read as a full one is
+      // the stale-data trap this app exists to avoid.
+      partial: !meta.season_complete,
       spikes: games.filter(g => g.band === "spike").length,
       duds: games.filter(g => g.band === "dud").length,
     };
@@ -5123,6 +5144,72 @@ const buildNutshell = ({ strengths, weaknesses, grade, score, mode, adpFlags = [
   return `${firstSentence} Overall: ${verdict.charAt(0).toLowerCase() + verdict.slice(1)}`;
 };
 
+// ⭐⭐ A GRADE WITH NOTHING TO COMPARE IT TO IS A NUMBER, NOT A DECISION.
+//
+// The app has always answered "how good is this roster" with a score and left the
+// reader's real next question — "...compared to what?" — unanswered. `baselines_2026.json`
+// holds the simulated field: 480 rosters drafted off ADP under the construction caps in
+// § BBM 5-Year Benchmarks, graded through this same engine, per tournament.
+//
+// ⛔ IT IS A MODEL OF THE FIELD, NOT THE FIELD, and the copy says so. Real drafters react
+// to news and chase correlation; the simulation only stacks probabilistically. So this is a
+// REFERENCE POINT, never a percentile claim about real opponents.
+//
+// ⛔ CONTEXT ONLY. `analyzeRoster` and `analyzeRedraft` never read it — a baseline that fed
+// the engine would move every grade and silently invalidate every calibration in CLAUDE.md.
+// ⚠️ ONE DEFINITION OF THE METRIC GATE. Under 8 games or a 35% snap share, a rate
+// is noise, and noise averaged across a roster is still noise.
+//
+// It became a constant on Sep 6 2026 because it was hand-typed TWICE — the Ceiling
+// Shape Layer (best ball) and the Floor Layer (redraft) each carried their own copy
+// of `8` and `0.35`, and a third consumer was about to be added. That is the
+// duplicate-definition class this repo has now hit EIGHT times. One definition or none.
+const CEILING_GATE = { gp: 8, snap: 0.35 };
+
+// ⭐⭐ RESOLVED IS NOT MEASURED, AND THE MATCH COUNTER CANNOT TELL THEM APART.
+//
+// Found Sep 6 2026 by grading two real BBM VII rosters against each other. One had
+// 2025 metrics for 18 of 18 players; the other for 11 of 18 — seven rookies and
+// sub-gate players carrying no spike rate, no dud rate, no HVT, no usable rate.
+// They are invisible to the Ceiling Shape Layer, the Naked RB gate and the Advance
+// Rate Layer's scoring proxy.
+//
+// BOTH ROSTERS REPORTED "18/18 matched", because every NAME resolved. So the app
+// presented a grade computed on eleven players identically to one computed on
+// eighteen, and nothing on screen said which. That is the silent-drop distinction in
+// a new costume — a gate rather than a filter, but equally invisible to the reader.
+//
+// ⛔ CONTEXT ONLY. It reports ON the grade; it is never an input TO it.
+const metricCoverage = (valid) => {
+  if (!Array.isArray(valid) || !valid.length) return null;
+  let measured = 0;
+  for (const p of valid) {
+    const m = getMetrics(p.name);
+    if (!m || m.spike_rate == null) continue;
+    if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) continue;
+    measured++;
+  }
+  return { measured, total: valid.length };
+};
+
+const fieldPlacement = (score, tournamentKey) => {
+  const b = BASELINES?.tournaments?.[tournamentKey];
+  if (!b || typeof score !== "number" || !Number.isFinite(score)) return null;
+  // Bands are named for what the reader can act on, not for the quartile boundary.
+  // ⚠️ EVERY BAND IS BARE — the CALLER supplies "of a simulated field". Until
+  // Sep 6 2026 the top band alone carried that suffix and the other four did not,
+  // which read fine in the one long sentence that used it and printed "in the top
+  // 10% of the simulated field of a simulated field" the moment a second, shorter
+  // render site was added. A string that is only correct in one caller is the
+  // duplicate-definition class wearing a sentence.
+  const where = score >= b.p90 ? "in the top 10%"
+    : score >= b.p75 ? "in the top 25%"
+    : score >= b.median ? "above the middle"
+    : score >= b.p25 ? "below the middle"
+    : "in the bottom 25%";
+  return { median: b.median, where, n: b.n };
+};
+
 const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, useProjected = false) => {
   const tournament = TOURNAMENTS[tournamentKey];
   const weights = tournament.weights;
@@ -6568,7 +6655,7 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     valid.forEach(p => {
       const m = getMetrics(p.name);
       if (!m || m.spike_rate == null) return;
-      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) return;
       const base = CEIL_BASE[p.pos];
       if (base == null) return;
       deltas.push((m.spike_rate + (m.nuclear_rate || 0)) - base);
@@ -7522,7 +7609,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     (allStarters || []).forEach(p => {
       const m = getMetrics(p.name);
       if (!m || m.usable_rate == null || m.dud_rate == null) return;
-      if ((m.gp || 0) < 8 || (m.snap_sh || 0) < 0.35) return;
+      if ((m.gp || 0) < CEILING_GATE.gp || (m.snap_sh || 0) < CEILING_GATE.snap) return;
       const base = FLOOR_BASE[p.pos];
       if (base == null) return;
       deltas.push((m.usable_rate - m.dud_rate) - base);
@@ -8553,6 +8640,60 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
 // It measures rather than counting characters because the same string wraps to
 // four lines on a tablet and nine on a phone; a length threshold would clamp
 // text that fits and leave text that does not.
+// ⭐⭐ ONE DEFINITION OF "HAS THIS READER GRADED BEFORE" (Sep 6, 2026).
+// It already existed, inline, gating exactly one thing — the paste instructions —
+// and its own comment stated the principle it was never extended past: essential
+// for a first-time reader, pure noise for a returning one. A second inline copy
+// of this try/catch would be the duplicate-definition class, tenth instance.
+// ⚠️⚠️ READ ONCE AT MODULE LOAD, AND THE TIMING IS THE WHOLE POINT.
+// `handleAnalyze` WRITES this flag, and the results tree mounts AFTER it does.
+// So a component that reads the flag in its own useState initialiser sees "1"
+// on a first-time reader's very first grade and closes every explainer — the
+// exact opposite of the intent, with the teaching copy effectively deleted for
+// everybody. MEASURED Sep 6 2026: 0 of 5 open on a cleared localStorage.
+// The source read correctly; only a render caught it.
+// Captured here, before any grade can run, so it describes who ARRIVED.
+const FIRST_VISIT = (() => {
+  try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
+})();
+
+// ⭐⭐ THE SECTION EXPLAINERS ARE THE SAME CLASS OF COPY AS THE PASTE HELP.
+// MEASURED Sep 6 2026 at 430px on a real roster: the results page carried 398
+// words of prose at rest, 223 of them fixed teaching copy identical on every
+// grade, against 105 words about the roster itself. Redraft was worse than four
+// to one. A portfolio drafter grading forty entries read the definition of a
+// stack forty times.
+//
+// ⛔ HIDING IS NOT DELETING, and that is the whole design. The Jul 27 2026
+// no-silent-drops rule applies to copy as much as to players: the way back is
+// always exactly where the text used to be, one tap, labelled. First-time
+// readers see everything expanded — the flag is only set once a grade is run.
+const Explainer = ({ children, label = "what this means" }) => {
+  const [open, setOpen] = useState(FIRST_VISIT);
+  return (
+    <details
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      style={{ marginBottom: "10px" }}
+    >
+      {/* 32px FLOOR, STATED RATHER THAN INHERITED. A 10px uppercase label with
+          6px padding measured 25px and put five sub-32px tap targets on the page,
+          which this repo has driven to zero twice before. `button:not([data-compact])`
+          carries the global floor; a <summary> is not a button and inherits nothing. */}
+      <summary style={{
+        cursor: "pointer", listStyle: "none",
+        display: "flex", alignItems: "center", minHeight: "32px",
+        fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase",
+        color: "var(--ui-accent)", fontWeight: 600,
+      }}>{label} ⌄</summary>
+      <div style={{
+        fontSize: "11px", color: "var(--text-secondary)",
+        lineHeight: 1.5, maxWidth: "640px", paddingBottom: "2px",
+      }}>{children}</div>
+    </details>
+  );
+};
+
 const ClampedText = ({ text, lines = 6, accent = "var(--ui-accent)", label = "summary" }) => {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
@@ -9153,6 +9294,31 @@ const PlayerCardModal = ({ card, onClose }) => {
           </div>
         )}
 
+        {/* SEASON STAT LINE — the ordinary box score, at the top, because it is
+            the one thing every reader already knows how to read. Everything
+            else on this card is a rate, a share or a percentile, and a reader
+            who cannot anchor those to "55 catches for 573 yards" is reading
+            fourteen sections of context for a player he cannot picture.
+            ⚠️ It ISSUES NO VERDICT and ranks nothing — same rule as The read.
+            Current season first, prior season under it, never swapped: the
+            2026 line appears on its own the week gamelogs_2026.json gains
+            rows, with no code change. */}
+        {[card.gameLogCur, card.gameLog].filter(Boolean).map(log => (
+          <div key={log.season} style={{ marginTop: "12px", padding: "8px 10px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", fontSize: "10px", letterSpacing: "0.06em", color: "var(--text-dim)", marginBottom: "4px" }}>
+              <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{log.season}</span>
+              <span>{log.partial ? `through week ${log.maxWeek}` : "final"}</span>
+              <span style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{log.gp} G</span>
+            </div>
+            <div style={{ fontSize: "11.5px", fontFamily: "var(--font-mono)", color: "var(--text-primary)", lineHeight: 1.55, fontVariantNumeric: "tabular-nums" }}>
+              {log.statLine}
+            </div>
+            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "3px", fontVariantNumeric: "tabular-nums" }}>
+              {log.totalPts} pts · {log.ppg}/gm · half-PPR · game log
+            </div>
+          </div>
+        ))}
+
         {/* NEWS SITS OUTSIDE THE no-data BRANCH ON PURPOSE. A rookie with no
             2025 role is precisely the player whose only useful information is
             what happened this month, and burying it behind "no 2025 data" would
@@ -9714,9 +9880,7 @@ export default function RosterScorer() {
   // The paste instructions are the #1 friction point for a FIRST-time user and
   // pure noise for a returning one, so the default follows who is looking.
   // Wrapped because a private window throws on access rather than returning null.
-  const [pasteHelpOpen, setPasteHelpOpen] = useState(() => {
-    try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
-  });
+  const [pasteHelpOpen, setPasteHelpOpen] = useState(FIRST_VISIT);
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [byeMapOpen, setByeMapOpen] = useState(false);
   const [fullRosterOpen, setFullRosterOpen] = useState(false);
@@ -13195,23 +13359,87 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
-                {/* The ADP discipline component declines to score on a plain list
-                    (table ADP carries a +7 tail-compression offset that would be
-                    scored instead of the drafting), in superflex, and without pick
-                    numbers. Per the Jul 27 no-silent-drops rule an absence must be
-                    visible, so the reason renders here — muted, hueless chrome, not
-                    --caution: this is information, not a warning. It renders ONLY
-                    when the component did not fire; when it did, the strengths list
-                    already carries the result. */}
-                {analyzed.advanceLayer?.disciplineWhy && (
-                  <div style={{
-                    marginTop: "6px", fontSize: "11px", lineHeight: 1.5,
-                    color: "var(--text-muted)",
-                  }}>
-                    <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
-                    {" · "}{analyzed.advanceLayer.disciplineWhy}
-                  </div>
-                )}
+                {/* ONE LINE UNDER THE GRADE, NOT THREE — his call Sep 6 2026:
+                    "its way too wordy... there is way too much info around this area."
+                    The three qualifier blocks that lived here (ADP discipline, field
+                    baseline, metric coverage) totalled ~60 words of 11px prose sitting
+                    directly beneath the grade. That is the densest real estate on the
+                    page and the one place P2 in USER-PERSONAS.md — the on-the-clock
+                    drafter, under 30 seconds, timer running — has no taps to spend.
+
+                    Same reading-frequency rule the results view already runs on:
+                    WHAT STAYS AT REST IS THE FINDING, WHAT EARNS A TAP IS THE REASONING.
+                    At rest: "top 10% of a simulated field · graded on 10 of 18 players".
+                    Eleven words carrying both numbers, against sixty.
+
+                    ⛔ THE SIMULATED CAVEAT STAYS AT REST, NOT BEHIND THE TAP. Guard 32
+                    exists because "a percentile against a simulation must never read as
+                    a percentile against the field", so the resting line says "of a
+                    simulated field" and the full sentence renders inside. Compressing
+                    copy may not quietly drop the thing the copy was guarded for.
+
+                    Native <details> rather than a new useState: a hook cannot go inside
+                    this IIFE, and the element is already an idiom in this file. */}
+                {(() => {
+                  const fp = fieldPlacement(analyzed.score, tournament);
+                  const mc = metricCoverage(analyzed.valid);
+                  const why = analyzed.advanceLayer?.disciplineWhy;
+                  // Coverage is a qualifier, so it appears only when it has something to
+                  // say. On a fully measured roster it would be noise on every grade.
+                  const partial = !!mc && mc.measured < mc.total;
+                  if (!fp && !partial && !why) return null;
+                  const thin = partial && mc.measured / mc.total < 0.7;
+                  return (
+                    <details style={{ marginTop: "4px" }}>
+                      <summary style={{
+                        cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        // minHeight stated: at 11px/1.4 this measured 31px, one pixel
+                        // under the floor. A <summary> is not a <button> and inherits
+                        // nothing from the global button rule.
+                        minHeight: "32px", boxSizing: "content-box",
+                        fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
+                        display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
+                      }}>
+                        {fp && (
+                          <span><strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong> of a simulated field</span>
+                        )}
+                        {fp && partial && <span style={{ opacity: 0.45 }}>·</span>}
+                        {partial && (
+                          <span>graded on <strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players</span>
+                        )}
+                        <span style={{
+                          marginLeft: "auto", color: "var(--ui-accent)",
+                          fontWeight: 600, letterSpacing: "0.05em",
+                        }}>why ⌄</span>
+                      </summary>
+                      <div style={{ fontSize: "11px", lineHeight: 1.5, color: "var(--text-muted)", paddingBottom: "6px" }}>
+                        {why && (
+                          <div>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>ADP discipline not scored</span>
+                            {" · "}{analyzed.advanceLayer.disciplineWhy}
+                          </div>
+                        )}
+                        {fp && (
+                          <div style={{ marginTop: why ? "6px" : 0 }}>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
+                            {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
+                            {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
+                          </div>
+                        )}
+                        {partial && (
+                          <div style={{ marginTop: "6px" }}>
+                            <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                            {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                            {" · "}<span style={{ opacity: 0.8 }}>
+                              the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the ceiling, floor and naked-RB checks cannot see them
+                              {thin ? " — this grade rests mostly on construction" : ""}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  );
+                })()}
                 {/* Best ball rosters are a FIXED size, so anything short means a
                     player was missed — most often one the screenshot reader skipped.
                     The old floor of 10 only caught catastrophic failures: a 17-of-18
@@ -13812,9 +14040,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 STACKS · PLAYOFF MATCHUPS
               </h2>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+              <Explainer>
                 A stack = a QB + at least one pass-catcher from the same team. When your QB throws a touchdown, your receiver scores too — <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>double the upside</span>. The matchup rating shows how favorable their shared playoff schedule is.
-              </div>
+              </Explainer>
               <MatchupLegend />
               {analyzed.stackGrades.length === 0 && (
                 <div style={{ color: "var(--text-muted)", fontSize: "13px", padding: "12px", border: "1px dashed var(--border-strong)", borderRadius: "4px" }}>
@@ -13905,9 +14133,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   BRING-BACK STACKS · SAME GAME
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   You roster players from <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>both sides</span> of the same playoff game. If that game turns into a shootout, multiple players on your team spike at once — stacked upside in the week that matters most.
-                </div>
+                </Explainer>
                 {/* Week color key — categorical, not the matchup scale */}
                 <div style={{ display: "flex", gap: "12px", fontSize: "9px", marginBottom: "12px", letterSpacing: "0.05em", flexWrap: "wrap" }}>
                   <span style={{ color: weekColor(0).text, fontWeight: 600 }}>● W15</span>
@@ -13994,9 +14222,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   SOLO PICKS · NO TEAM STACK
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   Players you drafted <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>without any teammates</span>. Solo picks aren't automatically bad — what matters is their <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>playoff matchup</span>. The chips below show each player's W15/W16/W17 difficulty.
-                </div>
+                </Explainer>
                 <MatchupLegend />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "8px" }}>
                   {analyzed.orphans.sort((a, b) => b.normalized - a.normalized).map((o, i) => {
@@ -14315,8 +14543,16 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   FIELD DIFFERENTIATION
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
-                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here. It reads a fixed team tier against the price of the earliest pick in each stack.
+                {/* THE HONESTY HALF DOES NOT GO BEHIND THE TAP. The Sep 6 2026 leverage fix
+                    exists BECAUSE this panel claimed a measurement it does not have, and
+                    guard 30 pins both phrases. A returning reader who never opens the
+                    explainer must still not be able to read a team tier as ownership, so the
+                    teaching half taps and the correction stays put. */}
+                <Explainer>
+                  Win big tournaments by being different from the field. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Chalky teams</span> are owned by most of your opponents — low leverage. <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Leverage teams</span> are yours alone — that's where the edge lives. It reads a fixed team tier against the price of the earliest pick in each stack.
+                </Explainer>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>This is a projection, not a measurement:</span> no ownership data exists here.
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "8px" }}>
                   {analyzed.stackGrades.map((stack, i) => {
@@ -14359,9 +14595,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   🎯 ROSTER STANDOUTS
                 </h2>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "12px", lineHeight: 1.5, maxWidth: "640px" }}>
+                <Explainer>
                   Your roster's <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best assets</span> — the picks most likely to win you a week. One highlight per player, picked from your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>biggest edges</span>.
-                </div>
+                </Explainer>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "8px" }}>
                   {analyzed.rosterStandouts.map((s, i) => {
                     const pc = posColor(s.player.pos);
@@ -14475,11 +14711,11 @@ Analyze this best ball roster. Return JSON only.`;
                   twice at rest. */}
               <SectionH2 title="FULL ROSTER" open={fullRosterOpen} onToggle={() => setFullRosterOpen(o => !o)} hint={`${analyzed.picks.length} players`} />
               {fullRosterOpen && <>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 {analyzed.hasPickNumbers
                   ? "Sorted by draft slot — your picks from Round 1 to the wire."
                   : "Your full roster. Add pick numbers to unlock draft slot and ADP value analysis."}
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid var(--border-subtle)",
@@ -14628,6 +14864,51 @@ Analyze this best ball roster. Return JSON only.`;
                     </span>
                   </span>
                 </button>
+                {/* METRIC COVERAGE, redraft. Same helper, same shared CEILING_GATE —
+                    and the gate is EXACTLY the one the redraft Floor Layer scores on,
+                    so the number is already the right one for this mode. Added Sep 6
+                    2026 after a browser render showed the best-ball version does not
+                    reach here: the qualifier belongs wherever a grade is shown, and
+                    redraft carries more sub-gate players than best ball, not fewer.
+                    ⛔ The FIELD BASELINE deliberately does NOT come with it — the
+                    baseline file is keyed by tournament, redraft is keyed by league,
+                    and the render reads the best-ball `tournament` state, so a copy
+                    here would compare a redraft score against a best-ball field. */}
+                {/* Compressed to match the best-ball header, same call, same reason:
+                    the count is the finding and the gate is the reasoning. */}
+                {(() => {
+                  const mc = metricCoverage(analyzed.valid);
+                  const partial = !!mc && mc.measured < mc.total;
+                  if (!partial) return null;
+                  const thin = mc.measured / mc.total < 0.7;
+                  return (
+                    <details style={{ marginTop: "4px" }}>
+                      <summary style={{
+                        cursor: "pointer", listStyle: "none", padding: "8px 0",
+                        // minHeight stated: at 11px/1.4 this measured 31px, one pixel
+                        // under the floor. A <summary> is not a <button> and inherits
+                        // nothing from the global button rule.
+                        minHeight: "32px", boxSizing: "content-box",
+                        fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
+                        display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
+                      }}>
+                        <span>graded on <strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players</span>
+                        <span style={{
+                          marginLeft: "auto", color: "var(--ui-accent)",
+                          fontWeight: 600, letterSpacing: "0.05em",
+                        }}>why ⌄</span>
+                      </summary>
+                      <div style={{ fontSize: "11px", lineHeight: 1.5, color: "var(--text-muted)", paddingBottom: "6px" }}>
+                        <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>measured on</span>
+                        {" · "}<strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players with 2025 data
+                        {" · "}<span style={{ opacity: 0.8 }}>
+                          the rest are rookies or played too little to rate ({CEILING_GATE.gp}+ games, {Math.round(CEILING_GATE.snap * 100)}%+ snaps), so the floor and lineup-confidence checks cannot see them
+                          {thin ? " — this grade rests mostly on construction and schedule" : ""}
+                        </span>
+                      </div>
+                    </details>
+                  );
+                })()}
                 {/* Redraft stays lenient: league roster sizes genuinely vary (14-18),
                     so a fixed expectation would cry wolf. The match counter plus the
                     notFound rows carry the signal here instead. */}
@@ -15048,9 +15329,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 STARTING LINEUP · OPTIMAL
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 Your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best possible lineup</span> based on ADP — the players most likely to start every week. ADP shown for reference.
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid #2a1a3a",
@@ -15291,9 +15572,9 @@ Analyze this best ball roster. Return JSON only.`;
                 }}>
                   BYE WEEK CONFLICTS
                 </h2>
-                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+                <Explainer>
                   When multiple starters <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>share the same bye</span>, you're forced to start backups in their place. Critical = your entire position is on bye that week. Warning = partial hole.
-                </p>
+                </Explainer>
                 {analyzed.criticalByeConflicts.map((c, i) => (
                   <div key={i} style={{
                     background: c.severity === "critical" ? "#2e1414" : c.severity === "warning" ? "#2a2618" : "#141414",
@@ -15323,9 +15604,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 PLAYOFF SCHEDULE · STARTERS
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 The playoff weeks that <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "var(--pos)", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "var(--neg)", fontWeight: 600 }}>red flag</span>.
-              </p>
+              </Explainer>
               <MatchupLegend />
               <div style={{
                 background: "var(--bg-surface)",
@@ -15449,9 +15730,9 @@ Analyze this best ball roster. Return JSON only.`;
                 </span>
               </button>
               {weeklyOpen && (<>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.5, maxWidth: "640px" }}>
+              <Explainer>
                 Your full season at a glance — every starter, every week. Green weeks are <span style={{ color: "var(--pos)" }}>smashable</span>; red weeks are <span style={{ color: "var(--neg)" }}>landmines</span>. The <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>separator marks</span> where the playoffs begin.
-              </div>
+              </Explainer>
               <MatchupLegend />
               <div style={{
                 background: "var(--bg-surface)",
@@ -15762,11 +16043,11 @@ Analyze this best ball roster. Return JSON only.`;
                   }}>
                     LINEUP CONFIDENCE
                   </h2>
-                  <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+                  <Explainer>
                     Who to lock in and who to consider sitting, week by week. Tap a week to see it.
                     {nfl.inSeason && <> Opens on <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>W{nfl.week}</span>, the week you are in.</>}
                     {worst && <> Your tightest week is <span style={{ color: "var(--neg)", fontWeight: 700 }}>W{worst.week}</span> with {worst.concerns.length} tough matchup{worst.concerns.length === 1 ? "" : "s"}.</>}
-                  </p>
+                  </Explainer>
 
                   {/* ⚠️ THE DATE AND THE DATA CAN DISAGREE, AND ONLY ONE OF THEM
                       IS ON A CLOCK. The week comes from the calendar; the role
@@ -16022,9 +16303,9 @@ Analyze this best ball roster. Return JSON only.`;
               }}>
                 HANDCUFFS · INSURANCE
               </h2>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 12px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 A handcuff is the <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>backup RB</span> on the same team as your starter. If your RB1 gets hurt, the handcuff <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>inherits the workload</span> — rostering them means you don't lose the value twice.
-              </p>
+              </Explainer>
               {analyzed.handcuffStatus.map((h, i) => (
                 <div key={i} style={{
                   background: "var(--bg-surface)",
@@ -16236,9 +16517,9 @@ Analyze this best ball roster. Return JSON only.`;
             <div style={{ marginBottom: "20px" }}>
                             <SectionH2 title="BENCH" open={benchListOpen} onToggle={() => setBenchListOpen(o => !o)} hint={`${analyzed.bench.length} players`} />
               {benchListOpen && (<>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "0 0 10px", maxWidth: "640px", lineHeight: 1.5 }}>
+              <Explainer>
                 Your non-starters — depth for <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>injuries, byes, matchups</span>. Bye week shown so you can plan ahead.
-              </p>
+              </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
                 border: "1px solid #2a1a3a",

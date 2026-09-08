@@ -50,8 +50,15 @@ ok("baselines are per-position (all four present)",
 ok("QB baseline is far above TE (the normalisation that matters)",
    /QB: 0\.8/.test(baseLine) && /TE: 0\.1/.test(baseLine), baseLine);
 ok("the layer reads the STARTERS, not the roster", app.slice(li - 3000, li + 800).includes("(allStarters || [])"));
-ok("the gate matches the ceiling layer's (gp>=8, snap>=0.35)",
-   /\(m\.gp \|\| 0\) < 8 \|\| \(m\.snap_sh \|\| 0\) < 0\.35/.test(app.slice(li, li + 900)));
+// UPDATED Sep 6 2026. This asserted the LITERAL 8 and 0.35, and correctly failed
+// the moment the gate became one shared constant - which is the fix it was asking
+// for. The property is that the floor layer uses THE SAME gate as the ceiling
+// layer, not that a particular number is typed here.
+ok("the floor layer reads the shared CEILING_GATE, not its own copy",
+   app.slice(li, li + 900).includes("CEILING_GATE.gp") && app.slice(li, li + 900).includes("CEILING_GATE.snap"));
+ok("CEILING_GATE still holds the values this layer was calibrated on",
+   app.includes("const CEILING_GATE = { gp: 8, snap: 0.35 }"),
+   "FLOOR_BASE was derived at 8 games / 35% snaps; changing the gate invalidates it");
 
 // -------------------------------------------------------------- calibration
 console.log("\n=== fixtures sit still ===");

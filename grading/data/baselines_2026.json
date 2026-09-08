@@ -1,0 +1,168 @@
+{
+ "_meta": {
+  "built_at": "2026-09-06T08:12:35Z",
+  "drafts": 40,
+  "teams_per_draft": 12,
+  "rounds": 18,
+  "rosters": 480,
+  "seed": 7,
+  "source": "simulated 12-team snake drafts off ADP_DATA, graded through analyzeRoster",
+  "context_only": true,
+  "reaches_ai_prompt": false,
+  "caps": {
+   "QB": 3,
+   "RB": 7,
+   "WR": 10,
+   "TE": 3
+  },
+  "minimums": {
+   "QB": 2,
+   "RB": 4,
+   "WR": 6,
+   "TE": 2
+  },
+  "adp_vintage_note": "Drafted off ADP_DATA, so the baseline inherits that table's vintage. Rebuild after any ADP refresh.",
+  "limits": [
+   "A MODEL of the field, not the field. The simulation drafts near ADP under construction caps; it never stacks, never reacts to news, never chases correlation.",
+   "So it under-represents deliberate QB stacks, and the median will sit BELOW a real field median on stack-weighted tournaments. Read it as a REFERENCE POINT, never as a percentile claim about real opponents.",
+   "Deterministic: same seed, same file. A baseline that moves every run cannot be calibrated against."
+  ]
+ },
+ "tournaments": {
+  "main": {
+   "n": 480,
+   "median": 5.46,
+   "p25": 3.88,
+   "p75": 7.1,
+   "p90": 8.91,
+   "min": -0.72,
+   "max": 13.06
+  },
+  "bbm7": {
+   "n": 480,
+   "median": 5.72,
+   "p25": 4.06,
+   "p75": 7.16,
+   "p90": 8.74,
+   "min": -0.68,
+   "max": 13.05
+  },
+  "puppy": {
+   "n": 480,
+   "median": 5.59,
+   "p25": 3.98,
+   "p75": 7.08,
+   "p90": 8.78,
+   "min": -0.7,
+   "max": 13.53
+  },
+  "puppy4": {
+   "n": 480,
+   "median": 5.65,
+   "p25": 4.1,
+   "p75": 7.12,
+   "p90": 8.69,
+   "min": -0.7,
+   "max": 13.05
+  },
+  "schnauzer": {
+   "n": 480,
+   "median": 5.19,
+   "p25": 3.61,
+   "p75": 7.02,
+   "p90": 8.69,
+   "min": -1.1,
+   "max": 11.93
+  },
+  "pitbull": {
+   "n": 480,
+   "median": 5.21,
+   "p25": 3.58,
+   "p75": 6.76,
+   "p90": 8.57,
+   "min": -1.1,
+   "max": 11.93
+  },
+  "frenchie": {
+   "n": 480,
+   "median": 5.23,
+   "p25": 3.64,
+   "p75": 7.06,
+   "p90": 8.71,
+   "min": -0.71,
+   "max": 13.05
+  },
+  "frenchie14": {
+   "n": 480,
+   "median": 5.25,
+   "p25": 3.67,
+   "p75": 7.05,
+   "p90": 8.72,
+   "min": -0.72,
+   "max": 13.06
+  },
+  "husky": {
+   "n": 480,
+   "median": 5.23,
+   "p25": 3.64,
+   "p75": 7.06,
+   "p90": 8.71,
+   "min": -0.71,
+   "max": 13.05
+  },
+  "boxer": {
+   "n": 480,
+   "median": 5.32,
+   "p25": 3.71,
+   "p75": 7.35,
+   "p90": 9.33,
+   "min": -1.13,
+   "max": 12.85
+  },
+  "rottweiler": {
+   "n": 480,
+   "median": 5.24,
+   "p25": 3.64,
+   "p75": 6.82,
+   "p90": 8.69,
+   "min": -0.7,
+   "max": 13.05
+  },
+  "fastpuppy": {
+   "n": 480,
+   "median": 5.16,
+   "p25": 3.53,
+   "p75": 6.96,
+   "p90": 8.67,
+   "min": -1.24,
+   "max": 13.06
+  },
+  "frenchiesprint": {
+   "n": 480,
+   "median": 5.43,
+   "p25": 3.81,
+   "p75": 7.08,
+   "p90": 8.83,
+   "min": -0.7,
+   "max": 13.05
+  },
+  "fieldgeneral": {
+   "n": 480,
+   "median": 4.09,
+   "p25": 2.05,
+   "p75": 6.5,
+   "p90": 8.36,
+   "min": -6.57,
+   "max": 12.95
+  },
+  "superflex": {
+   "n": 480,
+   "median": 4.25,
+   "p25": 2.15,
+   "p75": 6.62,
+   "p90": 8.53,
+   "min": -6.55,
+   "max": 13.04
+  }
+ }
+}

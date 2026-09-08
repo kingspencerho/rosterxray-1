@@ -791,5 +791,80 @@ const misordered = readCards.filter(([, c]) => {
 ok("role change always precedes volume", misordered.length === 0,
    misordered.slice(0, 3).map(c => c[0]).join(", "));
 
+// ---- 5. THE SEASON STAT LINE ----
+// The ordinary box score at the top of the card. It is the only thing on the
+// card a reader already knows how to read, so it must be RIGHT and it must not
+// drift from the weekly chart it is summed from.
+//
+// WARNING - THE TRAP THIS EXISTS FOR: a QB's `tds` column is TOTAL touchdowns,
+// not passing. Printing it as passing TDs overstates every running quarterback
+// on the board, and the number would still look plausible.
+console.log("\nseason stat line");
+
+const statCards = draftable
+  .map(([n, v]) => [n, e.buildPlayerCard(n, v.pos, v.team, Date.now(), "standard")])
+  .filter(([, c]) => c.gameLog);
+ok("cards with a game log were found to check", statCards.length > 50, `${statCards.length}`);
+
+// Recomputed from the RAW json, not from buildLog - an assertion that calls the
+// code it is testing proves only that the code is self-consistent.
+const glMeta = e.GAME_LOGS._meta;
+const rawTotals = (name) => {
+  const row = e.GAME_LOGS[name];
+  if (!row || !row.g) return null;
+  const cols = glMeta.cols[row.pos] || [];
+  const t = {};
+  for (const g of row.g) cols.slice(3).forEach((lab, i) => { t[lab] = (t[lab] || 0) + (g[i + 3] || 0); });
+  return { pos: row.pos, t, gp: row.g.length, pts: +row.g.reduce((a, g) => a + g[2], 0).toFixed(1) };
+};
+
+const strayNums = [], badGp = [], badPts = [];
+for (const [n, c] of statCards) {
+  const r = rawTotals(n);
+  if (!r) continue;
+  if (c.gameLog.gp !== r.gp) badGp.push(n);
+  if (Math.abs(c.gameLog.totalPts - r.pts) > 0.05) badPts.push(`${n} ${c.gameLog.totalPts}!=${r.pts}`);
+  // Every number printed on the line must appear in the independent re-sum.
+  const nums = (c.gameLog.statLine.match(/\d+/g) || []).map(Number);
+  const allowed = new Set([...Object.values(r.t), r.t.tds - (r.t.pass_td || 0)].map(Number));
+  const stray = nums.filter(x => !allowed.has(x));
+  if (stray.length) strayNums.push(`${n} (${r.pos}): ${stray.join(",")} not in totals`);
+}
+ok("every printed stat re-sums from the raw game log", strayNums.length === 0, strayNums.slice(0, 3).join(" | "));
+ok("games played matches the number of logged games", badGp.length === 0, badGp.slice(0, 3).join(", "));
+ok("season points match the sum of the weekly bars", badPts.length === 0, badPts.slice(0, 3).join(" | "));
+
+// The QB trap, asserted directly rather than inferred from the sweep above.
+const qbLogged = statCards.filter(([, c]) => c.pos === "QB");
+ok("QB cards were found", qbLogged.length > 8, `${qbLogged.length}`);
+const qbBad = qbLogged.filter(([n, c]) => {
+  const r = rawTotals(n);
+  if (!r) return false;
+  const passTd = +(c.gameLog.statLine.match(/(\d+) pass TD/) || [])[1];
+  const rushTd = +(c.gameLog.statLine.match(/(\d+) rush TD/) || [])[1];
+  // Passing TDs come from pass_td, rushing TDs are the remainder. If the two
+  // ever fail to split the total, `tds` leaked into the passing slot.
+  return passTd !== r.t.pass_td || rushTd !== r.t.tds - r.t.pass_td || passTd + rushTd !== r.t.tds;
+}).map(([n]) => n);
+ok("QB passing and rushing TDs split the total, never double-count it",
+   qbBad.length === 0, qbBad.slice(0, 3).join(", "));
+
+// It states, it never judges - same rule as The read, one level up the card.
+const judgedLine = statCards.filter(([, c]) =>
+  /\b(elite|good|bad|weak|strong|poor|great|best|worst|should|avoid)\b/i.test(c.gameLog.statLine));
+ok("the stat line issues no verdict", judgedLine.length === 0, judgedLine.slice(0, 3).map(x => x[0]).join(", "));
+
+// A partial season must SAY it is partial. Reading a 6-game line as a full one
+// is the stale-data trap this app exists to close.
+ok("a completed season is not labelled partial", statCards.every(([, c]) => c.gameLog.partial === false));
+// indexOf returns -1 for a marker that is GONE, and -1 is less than every
+// real index - so "it comes first" would pass on a deleted block. Assert the
+// marker exists before comparing positions, or this guard cannot fail.
+const stripAt = app.indexOf("[card.gameLogCur, card.gameLog].filter(Boolean).map");
+ok("the line renders above Recent news, at the top of the card",
+   stripAt > -1 && stripAt < app.indexOf('title="Recent news"'), `stripAt=${stripAt}`);
+ok("current season is printed first, prior season under it",
+   app.includes("[card.gameLogCur, card.gameLog].filter(Boolean)"));
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);
