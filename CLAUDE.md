@@ -7315,3 +7315,115 @@ Verdict is `hold` rather than `TARGET` deliberately. `TARGET` feeds `activeTarge
 +0.3 each past three with a 1.5 cap, so a verdict upgrade **can** move a grade. It does not here
 (the roster already carries eight), but the general point stands: `fade` is free and `TARGET` is
 not.
+
+---
+
+## Breakout Watch (added Sep 8, 2026)
+
+Asked for directly: *"a tracker for rookies who I have as potential targets to pick up from
+waivers... flags the ones that are potentially about to break out."* Zavion Thomas was the
+worked example — a rookie buried on the Week 1 depth chart who accumulates snaps as the year
+goes. **CONTEXT ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures, plus 3
+leagues x 5), against a pristine worktree at HEAD. Guard 35: `scripts/test-breakout.mjs`.
+
+### ⚠️⚠️ ROOKIES ARE THE POPULATION EVERY GATE IN THIS APP EXCLUDES
+
+That is the design problem, and it is not obvious until you look:
+
+```
+CARD_PERCENTILES     gp >= 8                    ROUTES / NGS / RZ   own gates
+snap trajectory      3 games per window         ceiling + floor     gp>=8 AND snap>=0.35
+usage trajectory     4 games to split
+```
+
+A Week 4 rookie clears **none** of them and has no 2025 row at all, so every existing layer
+renders silence for exactly the player this feature is for. **A league-relative board would
+have found nothing and looked like it was working.**
+
+⭐ **So every threshold here is SELF-REFERENCED.** An 18% share is nothing league-wide and
+everything if he was at 4% three weeks ago. The comparison is always the player against his
+own trailing baseline: the last 2 games against every game before them, measured in units of
+the volume file's OWN derived threshold (~1 SD of that season's delta distribution, read from
+`_meta`, never hand-typed, and each series carries its own because carry share is far wider
+than target share).
+
+### The 2x2 is the anti-noise design, and it follows the Source Hierarchy
+
+```
+                     opportunity moved?
+                   no              yes
+production  no    quiet          WATCH      role moving, points lag
+   moved    yes   NOISE          BREAKOUT
+```
+
+One big game from a 6% share receiver is a broken tackle and a garbage-time score.
+**WATCH is the state worth having: it fires a week BEFORE the box score does.** Production
+bands are the game log's own (spike/usable/dud), so this section and WEEK OUTCOMES cannot
+disagree and no new vocabulary appears.
+
+Verified against a simulated 2026-through-W8 (the real 2025 release relabelled), 311 players:
+
+```
+quiet 154 · watch 39 · breakout 19 · noise 16
+WATCH  DeVonta Smith   target share 20.8% -> 46.4%, no points spike yet
+NOISE  T. McMillan     26.2% -> 29.8% (0.80x, under the bar) with a 13.4-pt game
+```
+
+### ⚠️ NO SIMULATION BUILT FROM A PRIOR SEASON CAN CONTAIN THIS YEAR'S ROOKIES
+
+All 223 rookies in `career_arc` had **zero rows** in the simulated season, correctly, because
+they had not played. So `rookiesOnly: true` returned an empty board — **the fixture's limit,
+not a bug.** The predicate is asserted structurally instead, and the state machine was
+exercised on the general path. **Pre-season the board is dormant by design and guard 35 says
+so on screen rather than asserting nothing quietly**, the same limit guard 29 records.
+
+### Vacancy is CONTEXT, never a ranking input
+
+`vacated_2026` is a **team** number. Scoring it would clump every player on one roster
+together for a reason that says nothing about which of them is winning the job. The
+free-agent pool weights it at 1.0 because it ranks across the league; this board ranks a
+player against himself, so vacancy renders as a `supports: false` annotation and touches
+neither magnitude nor state. Guarded.
+
+### Two defects only the browser found, both invisible in the source
+
+1. **`supports` was COMPUTED AND THROWN AWAY at the render.** Every bullet drew the same
+   neutral mark, so a NOISE row's non-supporting opportunity line looked exactly like real
+   evidence — the Sep 1 waiver-pool lesson (*a reason must be evidence FOR, not every number
+   measured*) reintroduced. ⚠️ **And the guard did not cover it: deleting the mark passed
+   nine other assertions.** Found by a sabotage reporting MISSED, which is the only reason
+   the assertion exists now.
+2. **An empty group gave a FALSE EXPLANATION.** "All 43 have played too few games" was
+   printed for 43 rookies who had played **none**. Two opposite readings sharing one
+   sentence, which is the card-audit class. `flaggedEmptyWhy` now distinguishes
+   has-not-played from too-few-games, and counts them separately.
+
+Three earlier bugs compiled cleanly and would have been runtime failures: `posColor` returns
+an **object**, `findPlayer` takes **two** args and the redraft table is `"yahoo"`, and it
+returns `matchedKey` rather than `key`.
+
+### Watchlist
+
+`localStorage["rxr_watchlist"]`, read once at mount, wrapped both ways — a private window
+throws on access rather than returning null, and the safe direction is an empty list.
+**Watched players bypass both the rookie filter and the rostered filter and render whatever
+their state**, including quiet and blocked; that is the point of curating one. Zavion Thomas
+renders today as *"no current-season usage row: he has not recorded a game this year."*
+
+### ⛔ Scope, and what was deliberately NOT built
+
+- **REDRAFT ONLY.** Underdog rosters lock, so a pickup board in best ball cannot be acted on.
+- **The status feed stays unwired.** A vacancy is the most predictive trigger on this list and
+  `status_2026` carries it, but its watch period is not finished. Wiring it is a separate
+  decision, and a depth-chart CHANGE is still undetectable without history.
+- **It cannot see your league's wire**, the same limit the waiver pool prints.
+- **Weekly cadence, not live** — a Thursday breakout surfaces Tuesday, which is right for
+  waivers and useless for a Sunday start/sit call.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL · 35 guards pass · dual-file identical
+rendered at 430px against a simulated live season: 0 tap targets under 32px, 0 page errors
+14 failure paths negative-tested against a VERIFIED-CLEAN baseline, all exit non-zero
+```

@@ -8059,6 +8059,231 @@ const buildFreeAgentPool = (rosteredKeys, league, adpTable, excluded = new Set()
   return { depth, candidates: out };
 };
 
+// ============ BREAKOUT WATCH ============
+//
+// Asked for directly: "a tracker that tracks these dart targets' performances
+// and flags the ones that are potentially about to break out." Zavion Thomas
+// was the worked example — a rookie buried on the Week 1 depth chart who
+// accumulates snaps as the year goes.
+//
+// ⚠️⚠️ ROOKIES ARE THE POPULATION EVERY GATE IN THIS APP EXCLUDES, and that is
+// the whole design problem. CARD_PERCENTILES needs gp>=8; snap trajectory
+// needs 3 games per window; the ceiling and floor layers need gp>=8 AND
+// snap>=0.35. A Week 4 rookie clears none of them and has no 2025 row at all,
+// so every existing layer renders silence for exactly the player this feature
+// is for. Ranking him against the league would find nothing.
+//
+// ⭐ SO EVERY THRESHOLD HERE IS SELF-REFERENCED, never a league percentile.
+// An 18% route share is nothing league-wide and everything if he was at 4%
+// three weeks ago. The comparison is always the player against his own
+// trailing baseline.
+//
+// ⛔ REDRAFT ONLY. Underdog rosters lock after the draft, so a pickup board in
+// best ball is a feature that cannot be acted on — the same reason the
+// free-agent pool is redraft-only.
+//
+// ⛔ CONTEXT ONLY. Nothing here reaches analyzeRoster or analyzeRedraft.
+
+// The magnitude a signal must clear to count as MOVED, in units of the volume
+// file's OWN derived threshold (~1 SD of that season's delta distribution).
+// Reading the threshold rather than hand-typing one is the rule the start/sit
+// board already follows, and each series carries its own because carry share
+// is a far wider distribution than target share.
+const BREAKOUT_MIN_MOVE = 1.0;
+// A step is measured against the games BEFORE it, so both sides need a real
+// sample. Two is the same floor the volume trend uses.
+const BREAKOUT_MIN_BASE_GP = 2;
+
+// ⭐ THE 2x2 IS THE ANTI-NOISE DESIGN, and it follows the Source Hierarchy:
+// opportunity (rank 1-2) outranks production (an outcome).
+//
+//                        opportunity moved?
+//                      no                yes
+//   production   no    quiet           WATCH   role moving, points lag
+//      moved     yes   NOISE           BREAKOUT
+//
+// One big game from a 6% route-share receiver is a broken tackle and a
+// garbage-time score. Requiring corroboration is what separates the two, and
+// WATCH is the state worth having — it fires a week BEFORE the box score does.
+const BREAKOUT_STATES = {
+  breakout: { rank: 3, label: "BREAKOUT", why: "role grew and the production followed" },
+  watch:    { rank: 2, label: "WATCH",    why: "role is growing, the points have not caught up yet" },
+  noise:    { rank: 1, label: "NOISE",    why: "one loud game with no role change behind it" },
+  quiet:    { rank: 0, label: "quiet",    why: "no move in role or production" },
+};
+
+// ⚠️ "no signal yet" IS NOT "quiet", and collapsing them makes a two-game
+// sample read as a settled role. Same distinction `trendWhy` draws for the
+// start/sit board, and the reason is produced centrally so no caller has to
+// invent one — a consumer that cannot say WHY a signal is missing renders
+// silence, and silence reads as "no change".
+//
+// Pure, so the guard can extract and RUN it rather than string-match the
+// source. Sep 5 recorded a guard that passed while the behaviour it named was
+// destroyed, because it asserted text existed.
+const breakoutWhy = (gp, hasVolume, live) => {
+  if (!live) return "the season has not started — no current-year usage exists yet";
+  if (!hasVolume) return "no current-season usage row: he has not recorded a game this year";
+  if (gp < BREAKOUT_MIN_BASE_GP * 2) {
+    return `only ${gp} game${gp === 1 ? "" : "s"} played — a step needs ${BREAKOUT_MIN_BASE_GP} before and ${BREAKOUT_MIN_BASE_GP} after, so there is nothing to compare yet. A sample-size gap, not a flat role.`;
+  }
+  return null;
+};
+
+// Most recent window vs everything before it, in the file's own threshold
+// units. Returns null when either side is too thin to compare.
+const breakoutStep = (series, threshold) => {
+  if (!Array.isArray(series) || !threshold) return null;
+  const rows = series.filter(r => r && r[2] != null);
+  if (rows.length < BREAKOUT_MIN_BASE_GP * 2) return null;
+  const cut = rows.length - BREAKOUT_MIN_BASE_GP;
+  const base = rows.slice(0, cut), recent = rows.slice(cut);
+  const mean = a => a.reduce((s, r) => s + r[2], 0) / a.length;
+  const b = mean(base), r = mean(recent);
+  return { base: b, recent: r, delta: r - b, units: (r - b) / threshold,
+           baseGp: base.length, recentGp: recent.length };
+};
+
+const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnly = true, limit = 8 }) => {
+  const live = CUR_VOLUME_LIVE;
+  const tTh = TREND_META?.trend?.threshold || null;
+  const cTh = TREND_META?.trend_car?.threshold || null;
+  const bands = GAME_LOGS_CUR?._meta?.bands || GAME_LOGS?._meta?.bands || { usable: 10 };
+  const watchSet = new Set(watchlist);
+
+  const assess = (key, row) => {
+    const vol = getVolumeCur(key);
+    const gp = vol?.gp || 0;
+    const blocked = breakoutWhy(gp, !!vol, live);
+    const out = { key, name: titleCaseName(key), pos: row.pos, team: row.team,
+                  adp: row.adp ?? null, watched: watchSet.has(key), gp,
+                  reasons: [], state: "quiet", magnitude: 0, blocked };
+    if (blocked) return out;
+
+    // OPPORTUNITY — both sides, because a back can be flat on targets while
+    // his carries double. RJ Harvey 2025 is the recorded case.
+    const steps = [];
+    const tgt = breakoutStep(vol?.trend?.series, tTh);
+    if (tgt) steps.push({ ...tgt, what: "target share" });
+    if (row.pos === "RB") {
+      const car = breakoutStep(vol?.trend_car?.series, cTh);
+      if (car) steps.push({ ...car, what: "carry share" });
+    }
+    const best = steps.filter(s => s.units > 0).sort((a, b) => b.units - a.units)[0] || null;
+    const oppMoved = !!best && best.units >= BREAKOUT_MIN_MOVE;
+
+    // PRODUCTION — did he just do something he had not been doing? The bands
+    // are the game log's OWN (spike/usable/dud), so this section and WEEK
+    // OUTCOMES cannot disagree and no new vocabulary is introduced.
+    const log = getGameLogCur(key);
+    const rows = Array.isArray(log?.g) ? log.g : [];
+    let prod = null;
+    if (rows.length >= BREAKOUT_MIN_BASE_GP + 1) {
+      const pts = rows.map(r => r[2]).filter(p => p != null);
+      const last = pts[pts.length - 1], prior = pts.slice(0, -1);
+      const priorMean = prior.reduce((s, p) => s + p, 0) / prior.length;
+      if (last >= bands.usable && priorMean < bands.usable) {
+        prod = { last, priorMean, band: bands.usable };
+      }
+    }
+    const prodMoved = !!prod;
+
+    out.state = oppMoved ? (prodMoved ? "breakout" : "watch") : (prodMoved ? "noise" : "quiet");
+    // Ranked by how far the ROLE moved, in its own noise units. Ranking on raw
+    // points of share would put every back above every receiver for a reason
+    // that is purely an artefact of the denominator.
+    out.magnitude = best ? best.units : 0;
+
+    if (best) {
+      const pp = (v) => `${(v * 100).toFixed(1)}%`;
+      out.reasons.push({
+        key: "opportunity",
+        text: `${best.what} ${pp(best.base)} over his first ${best.baseGp} games, ${pp(best.recent)} over his last ${best.recentGp}`,
+        supports: best.units >= BREAKOUT_MIN_MOVE,
+      });
+    }
+    if (prod) {
+      out.reasons.push({
+        key: "production",
+        text: `${prod.last.toFixed(1)} points last week against a ${prod.priorMean.toFixed(1)} average before it`,
+        supports: true,
+      });
+    }
+    // ⚠️ VACANCY IS CONTEXT, NOT A RANKING INPUT. It is a TEAM number, so
+    // scoring it would clump every player on one roster together for a reason
+    // that says nothing about which of them is winning the job. The free-agent
+    // pool weights it because it ranks across the whole league; this board
+    // ranks a player against himself.
+    const vac = getVacated(row.team);
+    if (vac && vac.vacated_pct >= 35) {
+      out.reasons.push({ key: "vacancy", supports: false,
+        text: `${row.team} vacated ${vac.vacated_pct.toFixed(0)}% of its measured target share this offseason` });
+    }
+    return out;
+  };
+
+  const rookieOf = (key) => (getCareerArc(key)?.exp === 0);
+  const watched = [], flagged = [];
+  // Counted so an empty list can explain itself rather than implying nobody moved.
+  let considered = 0, blockedN = 0, measured = 0, thinN = 0;
+  for (const [key, row] of Object.entries(adpTable)) {
+    if (!row || !row.pos || row.pos === "K" || row.pos === "DEF") continue;
+    if (!row.team || row.team === "-" || row.team === "FA") continue;
+    if (!key.includes(" ")) continue;                 // alias keys double-list
+    if (watchSet.has(key)) { watched.push(assess(key, row)); continue; }
+    if (rosteredKeys.has(key)) continue;              // already yours
+    if (rookiesOnly && !rookieOf(key)) continue;
+    const a = assess(key, row);
+    considered++;
+    // ⚠️ THE TWO BLOCKED REASONS ARE OPPOSITE READINGS AND MUST NOT SHARE A
+    // SENTENCE. "has not played at all" and "has played, too few to split" are
+    // different facts, and the first version collapsed them into "played too
+    // few games" — a false explanation for 43 rookies who had played none.
+    // Same class as the card audit: a section that does not apply is not a
+    // gate he failed.
+    if (a.blocked) { blockedN++; if (a.gp > 0) thinN++; continue; }
+    measured++;
+    if (a.state === "quiet") continue;
+    flagged.push(a);
+  }
+  const byRank = (a, b) =>
+    BREAKOUT_STATES[b.state].rank - BREAKOUT_STATES[a.state].rank ||
+    b.magnitude - a.magnitude ||
+    (a.adp ?? 999) - (b.adp ?? 999);
+  watched.sort(byRank);
+  flagged.sort(byRank);
+  // ⚠️ AN EMPTY LIST MUST SAY WHICH KIND OF EMPTY IT IS. "No player is
+  // flagging" is true whether nobody moved or nobody has played enough games
+  // yet, and those are opposite readings — the same distinction breakoutWhy
+  // draws for one player, drawn for the group.
+  const flaggedEmptyWhy = !live
+    ? "The season has not started, so there is nothing to measure yet."
+    : considered === 0
+      ? `No ${rookiesOnly ? "rookie" : "player"} in the pool has a current-season usage row yet.`
+      : blockedN === considered
+        ? (thinN === 0
+            ? `None of the ${considered} ${rookiesOnly ? "rookies" : "players"} in the pool has recorded a game yet.`
+            : `All ${considered} have played too few games to measure a step — one needs ${BREAKOUT_MIN_BASE_GP * 2}. Check back around Week 4.`)
+        : `${measured} ${rookiesOnly ? "rookies" : "players"} measured, none moved enough to flag. That is a reading, not a gap.`;
+  return { live, watched, flagged: flagged.slice(0, limit), rookiesOnly, flaggedEmptyWhy,
+           threshold: tTh, weeks: VOLUME_CUR?._meta?.weeks_covered || 0 };
+};
+
+// The watchlist is the reader's own, so it lives in their browser. Wrapped
+// both ways: a private window THROWS on access rather than returning null, and
+// the safe direction to fail is an empty list rather than a broken section.
+const WATCHLIST_KEY = "rxr_watchlist";
+const readWatchlist = () => {
+  try {
+    const raw = localStorage.getItem(WATCHLIST_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(x => typeof x === "string") : [];
+  } catch { return []; }
+};
+const writeWatchlist = (list) => {
+  try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(list)); } catch { /* private window */ }
+};
+
 // ============ CURRENT NFL WEEK ============
 // Season opener is the Thursday after Labor Day 2026.
 //
@@ -8856,6 +9081,7 @@ const SECTION_INDEX = {
     { id: "rxr-weekly",       label: "Weekly" },
     { id: "rxr-trends",       label: "Trends" },
     { id: "rxr-freeagents",   label: "Waivers" },
+    { id: "rxr-breakout",     label: "Breakout" },
     { id: "rxr-bench",        label: "Bench" },
   ],
 };
@@ -9821,6 +10047,17 @@ export default function RosterScorer() {
   const [faOpen, setFaOpen] = useState(false);
   const [faTaken, setFaTaken] = useState("");
   const [faPos, setFaPos] = useState("ALL");
+  const [breakoutOpen, setBreakoutOpen] = useState(false);
+  const [breakoutRookiesOnly, setBreakoutRookiesOnly] = useState(true);
+  const [watchInput, setWatchInput] = useState("");
+  // Read ONCE at mount from the reader's own browser. Kept in state so a star
+  // toggle re-renders the board; written through on every change.
+  const [watchlist, setWatchlist] = useState(() => readWatchlist());
+  const toggleWatch = (key) => setWatchlist(prev => {
+    const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key];
+    writeWatchlist(next);
+    return next;
+  });
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
   const [customExpanded, setCustomExpanded] = useState(false);
   const [benchExpanded, setBenchExpanded] = useState(false);
@@ -10184,6 +10421,18 @@ export default function RosterScorer() {
     const league = redraftLeague === "custom" ? buildLeagueFromConfig(customConfig) : REDRAFT_LEAGUES[redraftLeague];
     return buildFreeAgentPool(rostered, league, ADP_YAHOO, taken);
   }, [analyzed, faTaken, redraftLeague, customConfig]);
+
+  // Built at module level and invoked here, exactly as buildPlayerCard and the
+  // free-agent pool are. Putting it inside analyzeRedraft would make the
+  // engine unprovable — it reads five context layers.
+  const breakout = useMemo(() => {
+    if (!analyzed || analyzed.mode !== "redraft") return null;
+    const rostered = new Set((analyzed.valid || []).map(p => normalize(p.name)));
+    return buildBreakoutBoard({
+      rosteredKeys: rostered, adpTable: ADP_YAHOO,
+      watchlist, rookiesOnly: breakoutRookiesOnly,
+    });
+  }, [analyzed, watchlist, breakoutRookiesOnly]);
 
   // Resolve the active redraft league — preset OR synthesized from customConfig
   const resolveLeague = (leagueKey, cfg) => {
@@ -16453,6 +16702,140 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               );
             })()}
+
+            {/* Breakout Watch */}
+            {breakout && (
+              <div style={{ marginBottom: "20px" }}>
+                <SectionH2
+                  id="rxr-breakout"
+                  title="BREAKOUT WATCH"
+                  open={breakoutOpen}
+                  onToggle={() => setBreakoutOpen(o => !o)}
+                  hint={breakout.live
+                    ? `${breakout.flagged.length} flagged · ${breakout.watched.length} watched`
+                    : "pre-season"}
+                />
+                {breakoutOpen && (<>
+                  <Explainer>
+                    Tracks late-round darts and rookies against <strong>their own</strong> earlier
+                    usage, never a league percentile — an 18% share is nothing league-wide and
+                    everything if he was at 4% three weeks ago. A role move and a big game are
+                    scored separately: <strong>WATCH</strong> means the role grew and the points
+                    have not caught up, which is the signal that arrives first.
+                  </Explainer>
+
+                  {!breakout.live && (
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
+                      The season has not started, so there is no current-year usage to compare
+                      against. Add names now and this fills in from Week 4, once there are enough
+                      games to measure a step.
+                    </div>
+                  )}
+
+                  {/* Add to watchlist */}
+                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                    <input
+                      value={watchInput}
+                      onChange={e => setWatchInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key !== "Enter") return;
+                        // ⚠️ "yahoo" is the REDRAFT table, and it must match the table the board
+                        // iterates (ADP_YAHOO) or a name resolves here and then
+                        // never appears in the list. findPlayer returns matchedKey.
+                        const hit = findPlayer(watchInput, "yahoo");
+                        if (hit?.matchedKey) { toggleWatch(hit.matchedKey); setWatchInput(""); }
+                      }}
+                      placeholder="add a player to watch, then press Enter"
+                      style={{
+                        flex: "1 1 220px", minHeight: "32px", padding: "6px 8px", fontSize: "12px",
+                        background: "var(--bg-raised)", color: "var(--text-primary)",
+                        border: "1px solid var(--border-default)", borderRadius: "3px",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                    <button
+                      data-compact
+                      onClick={() => setBreakoutRookiesOnly(r => !r)}
+                      style={{
+                        minHeight: "32px", padding: "6px 10px", fontSize: "11px", fontWeight: 600,
+                        letterSpacing: "0.04em", cursor: "pointer", borderRadius: "3px",
+                        background: "transparent", color: "var(--ui-accent)",
+                        border: "1px solid var(--border-default)", fontFamily: "inherit",
+                      }}
+                    >{breakout.rookiesOnly ? "ROOKIES ONLY" : "ALL PLAYERS"}</button>
+                  </div>
+
+                  {[["YOUR WATCHLIST", breakout.watched, true],
+                    [breakout.rookiesOnly ? "ROOKIES FLAGGING THIS WEEK" : "FLAGGING THIS WEEK", breakout.flagged, false]
+                  ].map(([heading, rows, isWatch]) => (
+                    <div key={heading} style={{ marginBottom: "14px" }}>
+                      <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em",
+                                    color: "var(--ui-accent)", marginBottom: "6px" }}>{heading}</div>
+                      {rows.length === 0 ? (
+                        /* ⚠️ An empty group SAYS SO. Silence reads as "nothing is
+                           happening", which is the silent-drop failure this repo
+                           forbids — the reader cannot tell it apart from a bug. */
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          {isWatch
+                            ? "Nothing on your watchlist yet. Add a name above to track him all season."
+                            : breakout.flaggedEmptyWhy}
+                        </div>
+                      ) : rows.map(r => (
+                        <div key={r.key} style={{
+                          display: "flex", alignItems: "flex-start", gap: "8px",
+                          padding: "8px 0", borderTop: "1px solid var(--border-default)",
+                        }}>
+                          <button
+                            data-compact
+                            onClick={() => toggleWatch(r.key)}
+                            aria-label={r.watched ? `Stop watching ${r.name}` : `Watch ${r.name}`}
+                            style={{
+                              minWidth: "32px", minHeight: "32px", cursor: "pointer",
+                              background: "transparent", border: "none", fontSize: "14px",
+                              color: r.watched ? "var(--text-primary)" : "var(--text-muted)",
+                            }}
+                          >{r.watched ? "★" : "☆"}</button>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>{r.name}</span>
+                              <span style={{ fontSize: "10px", color: posColor(r.pos).text }}>{r.pos} {r.team}</span>
+                              {!r.blocked && r.state !== "quiet" && (
+                                <span style={{
+                                  fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em",
+                                  color: "var(--text-primary)", background: "var(--bg-elevated)",
+                                  border: "1px solid var(--border-default)", borderRadius: "3px",
+                                  padding: "1px 5px",
+                                }}>{BREAKOUT_STATES[r.state].label}</span>
+                              )}
+                            </div>
+                            {/* The reason the engine gives, never a hand-typed copy. */}
+                            <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "2px" }}>
+                              {r.blocked
+                                ? r.blocked
+                                : (<>
+                                    <span>{BREAKOUT_STATES[r.state].why}</span>
+                                    {/* ⚠️ THE MARK IS NOT DECORATION. `supports` is
+                                        computed per reason and the first render threw it
+                                        away, so a NOISE row's non-supporting opportunity
+                                        line looked exactly like real evidence. Same rule
+                                        the waiver pool learned: a reason must be evidence
+                                        FOR, not every number measured. */}
+                                    {r.reasons.map(x => (
+                                      <span key={x.key} style={{ display: "block",
+                                        color: x.supports ? "var(--text-secondary)" : "var(--text-muted)" }}>
+                                        {x.supports ? "+" : "·"} {x.text}
+                                      </span>
+                                    ))}
+                                  </>)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </>)}
+              </div>
+            )}
 
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (
