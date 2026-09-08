@@ -7151,3 +7151,61 @@ rendered at 430px, both modes: 0 tap targets under 32px
 4 failure paths negative-tested, all exit non-zero: the timing bug restored,
   the honesty note pushed behind the tap, the 32px floor removed, the way back removed
 ```
+
+---
+
+## Sep 7, 2026 — The season stat line on the player card
+
+**What it is.** An ordinary box-score line at the top of every player card, above Recent news:
+
+```
+2025  final                                    15 G
+90 tgt · 55-643 rec · 9 TD
+143.8 pts · 9.6/gm · half-PPR · game log
+```
+
+**Why it was missing, and why that mattered.** Every other number on the card is a rate, a share
+or a percentile. **A reader who cannot anchor those to "55 catches for 643 yards" is reading
+fourteen sections of context for a player he cannot picture.** His words: *"is it possible to put
+a player's full season stat line somewhere at the top of the player card."*
+
+**Where it comes from.** Summed inside `buildLog` from the SAME `g` rows the weekly chart draws,
+so the two can never disagree. No new data file — `gamelogs_2025.json` already carried every
+column.
+
+⚠️ **THE TRAP, and it is the reason the guard exists: a QB's `tds` column is TOTAL touchdowns,
+not passing.** Rushing TDs are `tds - pass_td`. Printing `tds` in the passing slot would overstate
+**every running quarterback on the board**, and the number would still look plausible.
+
+⭐ **THE CURRENT-SEASON LINE NEEDS NO CODE.** The strip renders
+`[card.gameLogCur, card.gameLog]`, current season first, prior underneath, never swapped — the
+same dual-vintage rule the trajectory and QB blocks follow. `gamelogs_2026.json` exists with
+`weeks_covered: 0`, and `GAME_LOG_CUR_LIVE` gates on that. **The 2026 line appears on its own the
+week that file gains rows**, labelled `through week N` instead of `final` via the new `partial`
+flag. Refreshing it is `scripts/build-gamelogs.py`, not an app change.
+
+⚠️ **ONE KNOWN DISAGREEMENT, MEASURED, LEFT IN PLACE.** `player_metrics_2025.json` counts **1-3
+more targets** than the game log for **51 of 184 pass-catchers** — always higher, never lower, so
+it is systematic rather than noise (Jennings 93 vs 90, Pittman 114 vs 111). The card therefore
+prints two target figures from two sources: the stat line's total, and Opportunity's per-game
+rate. **The fix is not to blend them** — the stat line must re-sum the chart directly below it or
+it stops being checkable. The line names its source (`game log`) so a reader who spots the gap
+knows which is which. **Running the two sources to ground is unfinished work.**
+
+### Guard 14 gained a section (11 assertions), all negative-tested
+
+The re-sum is computed from the **raw JSON**, not from `buildLog` — an assertion that calls the
+code it tests proves only that the code is self-consistent.
+
+⚠️ **AND ONE ASSERTION WAS BORN UNABLE TO FAIL.** The ordering check compared
+`app.indexOf(marker) < app.indexOf('title="Recent news"')`, and **`indexOf` returns -1 for a
+marker that is GONE — which is less than every real index, so deleting the whole strip would have
+PASSED.** ⭐ **Sixth instance of the guard-that-cannot-fail class.** Now asserts the marker exists
+before comparing positions.
+
+```
+34 guards pass · 1472 assertions · dual-file identical
+rendered at 375px and 1280px: WR, TE, RB and QB lines all correct against a hand re-sum
+5 sabotages, all exit non-zero: QB rush TD printing the total, receptions off by one,
+  season points inflated, a final season labelled partial, the strip deleted outright
+```

@@ -3486,6 +3486,19 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       stats: cols.slice(3).map((label, i) => ({ label, value: g[i + 3] })),
     }));
     const pts = games.map(g => g.pts);
+    // SEASON TOTALS — the box-score line a reader already knows how to read,
+    // summed from the SAME games the chart draws, so the two can never
+    // disagree. Position-specific, because "55-573-4" is unreadable at QB.
+    // ⚠️ A QB's `tds` column is TOTAL touchdowns, so rushing scores are
+    // tds - pass_td. Printing `tds` as passing TDs would overstate every
+    // running quarterback on the board.
+    const sum = label => games.reduce((a, g) => a + (g.stats.find(s => s.label === label)?.value || 0), 0);
+    const tds = sum("tds");
+    const statLine = row.pos === "QB"
+      ? `${sum("att")} att · ${sum("pass_yds")} pass yds · ${sum("pass_td")} pass TD · ${sum("car")}-${sum("rush_yds")} rush · ${tds - sum("pass_td")} rush TD`
+      : row.pos === "RB"
+        ? `${sum("car")}-${sum("rush_yds")} rush · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`
+        : `${sum("tgt")} tgt · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`;
     return {
       season: meta.season,
       maxWeek: meta.max_week || Math.max(...games.map(g => g.week)),
@@ -3494,6 +3507,11 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       gp: games.length,
       best: Math.max(...pts),
       ppg: +(pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1),
+      totalPts: +pts.reduce((a, b) => a + b, 0).toFixed(1),
+      statLine,
+      // "final" vs "through week N" — a partial season read as a full one is
+      // the stale-data trap this app exists to avoid.
+      partial: !meta.season_complete,
       spikes: games.filter(g => g.band === "spike").length,
       duds: games.filter(g => g.band === "dud").length,
     };
@@ -9263,6 +9281,31 @@ const PlayerCardModal = ({ card, onClose }) => {
             ⚠ Every number below is his {card.movedFrom} season. He is on {card.team} in 2026 — treat the role as projected, not established.
           </div>
         )}
+
+        {/* SEASON STAT LINE — the ordinary box score, at the top, because it is
+            the one thing every reader already knows how to read. Everything
+            else on this card is a rate, a share or a percentile, and a reader
+            who cannot anchor those to "55 catches for 573 yards" is reading
+            fourteen sections of context for a player he cannot picture.
+            ⚠️ It ISSUES NO VERDICT and ranks nothing — same rule as The read.
+            Current season first, prior season under it, never swapped: the
+            2026 line appears on its own the week gamelogs_2026.json gains
+            rows, with no code change. */}
+        {[card.gameLogCur, card.gameLog].filter(Boolean).map(log => (
+          <div key={log.season} style={{ marginTop: "12px", padding: "8px 10px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", fontSize: "10px", letterSpacing: "0.06em", color: "var(--text-dim)", marginBottom: "4px" }}>
+              <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{log.season}</span>
+              <span>{log.partial ? `through week ${log.maxWeek}` : "final"}</span>
+              <span style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{log.gp} G</span>
+            </div>
+            <div style={{ fontSize: "11.5px", fontFamily: "var(--font-mono)", color: "var(--text-primary)", lineHeight: 1.55, fontVariantNumeric: "tabular-nums" }}>
+              {log.statLine}
+            </div>
+            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "3px", fontVariantNumeric: "tabular-nums" }}>
+              {log.totalPts} pts · {log.ppg}/gm · half-PPR · game log
+            </div>
+          </div>
+        ))}
 
         {/* NEWS SITS OUTSIDE THE no-data BRANCH ON PURPOSE. A rookie with no
             2025 role is precisely the player whose only useful information is
