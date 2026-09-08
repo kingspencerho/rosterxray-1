@@ -99,6 +99,7 @@ import REDZONE from './grading/data/redzone_2025.json';
 // rostered, which blends availability with role. Built by
 // scripts/build-availability.py. CONTEXT ONLY.
 import AVAILABILITY from './grading/data/availability_2026.json';
+import STATUS_LAYER from './grading/data/status_2026.json';
 
 // ============ DATA ============
 
@@ -2612,6 +2613,31 @@ const getCoverage = (name) => lookupPlayer(COVERAGE.players, name);
 const getCareerArc = (name) => lookupPlayer(CAREER_ARC.players, name);
 // Team-level, so it is keyed by team code rather than through lookupPlayer.
 const getVacated = (team) => (team ? VACATED.teams[team] || null : null);
+
+// ============ AVAILABILITY & DEPTH-CHART STATUS (Sleeper) ============
+//
+// ⛔⛔ THE CONFLICT RULE, AND IT IS THE WHOLE DESIGN: THE FEED NEVER WINS. IT
+// FLAGS. A fetched status may not overwrite, outrank or out-date a hand-written
+// note. Under freshest-dated-wins a same-day feed would out-date all 140
+// RECENT_NEWS entries permanently, and the 7-of-15 that are pure analytical
+// judgement — the reason the corpus is worth reading — would be demoted to
+// decoration on day one.
+//
+// ⛔ AND IT DOES NOT REACH THE AI PROMPT. `newsContext` arrives at the model
+// under "Recent news (breaking updates — override everything above for these
+// players)", the highest-authority block there. Putting an unattended,
+// unversioned third-party feed in it hands that feed veto power over every
+// measured input in the app. `_meta.reaches_ai_prompt` stays false and guard 26
+// asserts it.
+//
+// Reviewed consumers, and only these: buildBreakoutBoard (the depth-chart
+// opening) and buildPlayerCard (the status row). Guard 26 holds the allowlist.
+const STATUS_HARD = new Set(STATUS_LAYER._meta?.hard_status || []);
+const STATUS_LIVE = Object.keys(STATUS_LAYER.players || {}).length > 0;
+const getStatus = (name) => (STATUS_LIVE ? lookupPlayer(STATUS_LAYER.players, name) : null);
+// A hard status is an ACTUAL ABSENCE. "Questionable" is not an opening and must
+// never be treated as one — half the league is questionable on a Friday.
+const isHardOut = (row) => !!row && (STATUS_HARD.has(row.injury_status) || STATUS_HARD.has(row.status));
 const getRedZone = (name) => lookupPlayer(REDZONE.players, name);
 const getAvailability = (name) => lookupPlayer(AVAILABILITY.players, name);
 // Current-season lookups. `hasCurrentSeason` is the single gate every consumer
@@ -3841,6 +3867,28 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
           ? `No on-field rate: across ${exp} seasons he has never held an ${g.established_games ?? 8}-game role, which is the gate this metric requires. That absence IS the finding, not missing data.`
           : `No on-field rate: ${exp === 0 ? "no NFL seasons yet" : `only ${exp} season on file`}, below the ${g.min_seasons ?? 2}-season minimum. This is a sample-size limit and says nothing about his durability.`;
     card.availabilityGates = g;
+  }
+
+  // === AVAILABILITY STATUS (Sleeper, live) ===
+  //
+  // ⛔ THE FEED FLAGS, IT DOES NOT WIN. This renders BESIDE the hand-written
+  // news section, never instead of it, and it carries no date of its own that
+  // could out-date a note. A same-day feed under freshest-wins would demote
+  // every analytical entry in the corpus to decoration on day one.
+  {
+    const st = getStatus(name);
+    if (st) {
+      card.status = {
+        status: st.status || null,
+        injury: st.injury_status || null,
+        part: st.injury_body_part && st.injury_body_part !== "Undisclosed" ? st.injury_body_part : null,
+        slot: st.depth_chart_order ?? null,
+        slotPos: st.depth_chart_position || st.pos || null,
+        team: st.team || null,
+        hard: isHardOut(st),
+        probed: STATUS_LAYER._meta?.source_probed || null,
+      };
+    }
   }
 
   // === WHAT WAS GATED OUT, AND WHY ===
@@ -8132,8 +8180,14 @@ const BREAKOUT_MIN_BASE_GP = 2;
 // garbage-time score. Requiring corroboration is what separates the two, and
 // WATCH is the state worth having — it fires a week BEFORE the box score does.
 const BREAKOUT_STATES = {
-  breakout: { rank: 3, label: "BREAKOUT", why: "role grew and the production followed" },
-  watch:    { rank: 2, label: "WATCH",    why: "role is growing, the points have not caught up yet" },
+  breakout: { rank: 4, label: "BREAKOUT", why: "role grew and the production followed" },
+  watch:    { rank: 3, label: "WATCH",    why: "role is growing, the points have not caught up yet" },
+  // ⭐ THE EARLIEST SIGNAL ON THE BOARD, and the reason the status feed is
+  // wired at all: it fires the day a teammate lands on IR, before a single
+  // snap has moved. Ranked BELOW watch deliberately — watch is a MEASURED
+  // step in his own usage, an opening is a circumstance that has not reached
+  // his snap count yet. Measured evidence about him outranks a prediction.
+  opening:  { rank: 2, label: "OPENING",  why: "the player ahead of him is out — the snaps have not moved yet" },
   noise:    { rank: 1, label: "NOISE",    why: "one loud game with no role change behind it" },
   quiet:    { rank: 0, label: "quiet",    why: "no move in role or production" },
 };
@@ -8170,6 +8224,35 @@ const breakoutStep = (series, threshold) => {
            baseGp: base.length, recentGp: recent.length };
 };
 
+// Who is ahead of him and out? Same team, same depth-chart position, a BETTER
+// (lower) depth_chart_order, carrying a hard status.
+//
+// ⚠️ IT NEEDS HIS OWN SLOT TOO. Without that this would fire for the WR7 every
+// time any starter went down, which is not an opening for him — it is an
+// opening for the man behind the starter. Returns the blocker nearest to him,
+// not the highest-profile one.
+const depthOpening = (key) => {
+  const me = getStatus(key);
+  if (!me || me.depth_chart_order == null || !me.team) return null;
+  if (isHardOut(me)) return null;                       // he is the one who is out
+  const slot = me.depth_chart_position || me.pos;
+  let best = null;
+  for (const [k, row] of Object.entries(STATUS_LAYER.players)) {
+    if (k === key || row.team !== me.team) continue;
+    if ((row.depth_chart_position || row.pos) !== slot) continue;
+    if (row.depth_chart_order == null || row.depth_chart_order >= me.depth_chart_order) continue;
+    if (!isHardOut(row)) continue;
+    if (!best || row.depth_chart_order > best.row.depth_chart_order) best = { k, row };
+  }
+  return best ? {
+    name: titleCaseName(best.k), slot,
+    status: best.row.injury_status || best.row.status,
+    part: best.row.injury_body_part && best.row.injury_body_part !== "Undisclosed"
+      ? best.row.injury_body_part : null,
+    mySlot: me.depth_chart_order, theirSlot: best.row.depth_chart_order,
+  } : null;
+};
+
 const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnly = true, limit = 8 }) => {
   const live = CUR_VOLUME_LIVE;
   const tTh = TREND_META?.trend?.threshold || null;
@@ -8184,7 +8267,22 @@ const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnl
     const out = { key, name: titleCaseName(key), pos: row.pos, team: row.team,
                   adp: row.adp ?? null, watched: watchSet.has(key), gp,
                   reasons: [], state: "quiet", magnitude: 0, blocked };
-    if (blocked) return out;
+
+    // ⚠️⚠️ THE OPENING IS COMPUTED BEFORE THE USAGE GATE, and that ordering is
+    // the point. It needs only the status feed, so it is knowable in September
+    // when no usage exists at all — which is exactly when a waiver claim on the
+    // backup is cheapest. The first build computed it AFTER the `blocked`
+    // early-return, so the feed could never fire before Week 4 and the whole
+    // reason for wiring it was suppressed by an unrelated gate.
+    const opening = depthOpening(key);
+    if (opening) {
+      out.reasons.push({
+        key: "opening", supports: true,
+        text: `${opening.name} (${opening.slot}${opening.theirSlot}) is ${opening.status}` +
+              `${opening.part ? ` — ${opening.part}` : ""}, and he is ${opening.slot}${opening.mySlot}`,
+      });
+    }
+    if (blocked) { out.state = opening ? "opening" : "quiet"; return out; }
 
     // OPPORTUNITY — both sides, because a back can be flat on targets while
     // his carries double. RJ Harvey 2025 is the recorded case.
@@ -8214,7 +8312,12 @@ const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnl
     }
     const prodMoved = !!prod;
 
-    out.state = oppMoved ? (prodMoved ? "breakout" : "watch") : (prodMoved ? "noise" : "quiet");
+    // ⚠️ THE MEASURED STEP DECIDES THE LABEL. An opening only names the state
+    // when his own usage has NOT moved — otherwise breakout/watch is the more
+    // informative reading and the opening rides along as extra evidence.
+    out.state = oppMoved ? (prodMoved ? "breakout" : "watch")
+              : opening ? "opening"
+              : (prodMoved ? "noise" : "quiet");
     // Ranked by how far the ROLE moved, in its own noise units. Ranking on raw
     // points of share would put every back above every receiver for a reason
     // that is purely an artefact of the denominator.
@@ -8235,7 +8338,8 @@ const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnl
         supports: true,
       });
     }
-    // ⚠️ VACANCY IS CONTEXT, NOT A RANKING INPUT. It is a TEAM number, so
+    // ⚠️ THE OFFSEASON TEAM VACANCY IS A DIFFERENT THING FROM THE OPENING
+    // ABOVE, and they must not be confused. It is a TEAM number, so
     // scoring it would clump every player on one roster together for a reason
     // that says nothing about which of them is winning the job. The free-agent
     // pool weights it because it ranks across the whole league; this board
@@ -8267,8 +8371,10 @@ const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnl
     // few games" — a false explanation for 43 rookies who had played none.
     // Same class as the card audit: a section that does not apply is not a
     // gate he failed.
-    if (a.blocked) { blockedN++; if (a.gp > 0) thinN++; continue; }
-    measured++;
+    // A blocked row with a live OPENING still belongs on the board: the usage
+    // side cannot be measured yet, and the depth chart does not need it.
+    if (a.blocked && a.state !== "opening") { blockedN++; if (a.gp > 0) thinN++; continue; }
+    if (!a.blocked) measured++;
     if (a.state === "quiet") continue;
     flagged.push(a);
   }
@@ -8282,8 +8388,11 @@ const buildBreakoutBoard = ({ rosteredKeys, adpTable, watchlist = [], rookiesOnl
   // flagging" is true whether nobody moved or nobody has played enough games
   // yet, and those are opposite readings — the same distinction breakoutWhy
   // draws for one player, drawn for the group.
+  // ⚠️ `!live` CANNOT BE THE FIRST TEST ANY MORE. A depth-chart opening needs
+  // no usage data at all, so "nothing to measure yet" would be false the moment
+  // the status feed had something to say.
   const flaggedEmptyWhy = !live
-    ? "The season has not started, so there is nothing to measure yet."
+    ? "No player in the pool has a depth-chart opening, and there is no current-season usage yet to measure a step against."
     : considered === 0
       ? `No ${rookiesOnly ? "rookie" : "player"} in the pool has a current-season usage row yet.`
       : blockedN === considered
@@ -8762,6 +8871,8 @@ const CARD_GROUP_ACCENT = {
 };
 
 const CARD_ACCENTS = {
+  // WHAT COULD CHANGE IT — availability, depth chart, calendar
+  status: CARD_GROUP_ACCENT.outlook,
   // HIS JOB — what the offense gives him
   targetTrend: CARD_GROUP_ACCENT.job,
   trajectory: CARD_GROUP_ACCENT.job,
@@ -9994,6 +10105,36 @@ const PlayerCardModal = ({ card, onClose }) => {
             {card.arc.note && (
               <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "3px" }}>{card.arc.note}.</div>
             )}
+          </CardSection>
+        )}
+
+        {card.status && (
+          <CardSection
+            title="Availability status"
+            accent={CARD_ACCENTS.status}
+            collapsible
+            hint={card.status.hard
+              ? (card.status.injury || card.status.status)
+              : (card.status.slot != null ? `${card.status.slotPos}${card.status.slot}` : "active")}
+            note={`Live from the Sleeper feed, last probed ${card.status.probed || "unknown"}. It FLAGS, it does not overrule: a hand-written note above keeps its own date and its own reading, and this never reaches the AI summary.`}>
+            <div style={{ fontSize: "13px", color: "var(--text-primary)", lineHeight: 1.6 }}>
+              {card.status.hard ? (
+                <span style={{ color: "var(--caution)", fontWeight: 700 }}>
+                  {card.status.injury || card.status.status}
+                  {card.status.part ? ` — ${card.status.part}` : ""}
+                </span>
+              ) : (
+                <span>{card.status.status || "Active"}
+                  {card.status.injury ? ` · ${card.status.injury}` : ""}
+                  {card.status.part ? ` — ${card.status.part}` : ""}</span>
+              )}
+            </div>
+            <div style={{ fontSize: "11px", color: "var(--text-dim)", lineHeight: 1.6, marginTop: "4px" }}>
+              {card.status.slot != null
+                ? `Depth chart: ${card.status.slotPos}${card.status.slot} on ${card.status.team}.`
+                : `No depth-chart slot published for him on ${card.status.team}.`}
+              {" "}A depth chart is the most reversible label in football; read it as this week's plan.
+            </div>
           </CardSection>
         )}
 
@@ -16865,7 +17006,10 @@ Analyze this best ball roster. Return JSON only.`;
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                               <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>{r.name}</span>
                               <span style={{ fontSize: "10px", color: posColor(r.pos).text }}>{r.pos} {r.team}</span>
-                              {!r.blocked && r.state !== "quiet" && (
+                              {/* ⚠️ NOT gated on `blocked`. OPENING is precisely the state that fires
+                                  while the usage side is unmeasurable, so gating the badge
+                                  on blocked hid the label on the only rows it was new for. */}
+                              {r.state !== "quiet" && (
                                 <span style={{
                                   fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em",
                                   color: "var(--text-primary)", background: "var(--bg-elevated)",
@@ -16876,7 +17020,7 @@ Analyze this best ball roster. Return JSON only.`;
                             </div>
                             {/* The reason the engine gives, never a hand-typed copy. */}
                             <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "2px" }}>
-                              {r.blocked
+                              {r.blocked && !r.reasons.length
                                 ? r.blocked
                                 : (<>
                                     <span>{BREAKOUT_STATES[r.state].why}</span>
@@ -16892,6 +17036,15 @@ Analyze this best ball roster. Return JSON only.`;
                                         {x.supports ? "+" : "·"} {x.text}
                                       </span>
                                     ))}
+                                    {/* A row can carry a live opening AND an
+                                        unmeasurable usage side. Both are shown:
+                                        suppressing the second would imply the
+                                        role move had been checked. */}
+                                    {r.blocked && (
+                                      <span style={{ display: "block", color: "var(--text-dim)" }}>
+                                        · {r.blocked}
+                                      </span>
+                                    )}
                                   </>)}
                             </div>
                           </div>

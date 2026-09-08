@@ -7491,3 +7491,109 @@ renders today as *"no current-season usage row: he has not recorded a game this 
 rendered at 430px against a simulated live season: 0 tap targets under 32px, 0 page errors
 14 failure paths negative-tested against a VERIFIED-CLEAN baseline, all exit non-zero
 ```
+
+---
+
+## The Status Feed Is Wired (Sep 8, 2026)
+
+**His call, after the watch period.** `status_2026.json` went from build-but-do-not-render to two
+reviewed consumers. **CONTEXT ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures, plus
+3 leagues x 5), against a pristine worktree at HEAD. Guards 26 (rewritten) and 35 (extended).
+
+### Guard 26's no-consumer assertion did its job by FAILING
+
+It forbade `status_2026`, `STATUS_LAYER`, `getStatus(`, `statusContext` and `getPlayerStatus`
+anywhere in App.jsx. Wiring the layer broke the build immediately and **forced the guard to be
+rewritten on purpose rather than drifted past**, which is exactly what it was for.
+
+It is now an **allowlist of reviewed consumers** — `depthOpening` and `buildPlayerCard` — the same
+shape guard 13 uses for `getSnapTrend`. ⛔ **Do not relax this to "any number of call sites":** the
+point is that every consumer has been looked at, not that there are few. An unlisted one still
+fails, and `analyzeRoster` / `analyzeRedraft` are still asserted clean, which is the assertion that
+protects the grades.
+
+### ⛔ THE PROMPT REMAINS FORBIDDEN, AND RENDERING DOES NOT CHANGE THAT
+
+`newsContext` reaches the model under *"Recent news (breaking updates — override everything above
+for these players)"*, the highest-authority block in the prompt. An unattended, unversioned
+third-party feed placed there would hold veto power over every measured input in the app.
+**Showing a feed to a human who can judge it is a different act from handing it to the model as
+breaking news.** `reaches_ai_prompt` stays false; guard 26 asserts no prompt builder exists and
+that `newsContext` reads none of the tokens.
+
+The conflict rule is unchanged: **the feed flags, it never wins.** The card row renders BESIDE the
+hand-written news section and carries no date that could out-date a note.
+
+### ⭐ The depth-chart opening: the earliest signal the board has
+
+A teammate at the **same** depth-chart slot, **ahead** of him, carrying a **hard** status. It fires
+the day someone lands on IR, before a single snap moves — which is the whole reason this feed was
+worth wiring to the breakout tracker.
+
+```
+OPENING  Shedeur Sanders (QB CLE)
+   + Dillon Gabriel (QB2) is IR — Back, and he is QB3
+   · the season has not started — no current-year usage exists yet
+```
+
+Four constraints, each of which was a real bug on the way in:
+
+1. **⚠️⚠️ IT IS COMPUTED BEFORE THE USAGE GATE.** The first build put it after the `blocked`
+   early-return, so the feed **could never fire before Week 4** — an unrelated gate suppressing the
+   entire point of the wiring. A depth-chart opening needs no usage data and is knowable in
+   September, when a claim on the backup is cheapest.
+2. **A measured step outranks a predicted one.** `watch` is rank 3, `opening` rank 2. Watch is a
+   measured move in his own usage; an opening is a circumstance that has not reached his snaps.
+   When both exist, breakout/watch names the state and the opening rides along as extra evidence.
+3. **Only a HARD status counts.** `Questionable` is not an opening — half the league is
+   questionable on a Friday.
+4. **The blocker must share his slot and sit ahead of him**, and the NEAREST blocker wins. Without
+   the slot test this fires for the WR7 every time any starter goes down, which is an opening for
+   somebody else.
+
+### ⚠️ September is genuinely quiet, and that is the honest reading
+
+```
+71 hard statuses · 50 with a depth-chart position · 5 holding a slot of 3 or better
+   carter bradley JAX QB3 · dillon gabriel CLE QB2 · graham mertz HOU QB3
+   skylar thompson BAL QB3 · trey sermon ATL RB3
+```
+
+Four of the five are backup quarterbacks. **Exactly one draftable player has a live opening.** This
+layer earns its keep in-season, not in the preseason, and the empty-list copy says so rather than
+implying nobody moved.
+
+### Three defects only the browser found
+
+1. **The OPENING badge was suppressed by the blocked gate** (`!r.blocked && state !== "quiet"`).
+   Opening is precisely the state that fires while usage is unmeasurable, so the label was hidden on
+   the only rows it was new for.
+2. **The empty-list reason checked `!live` FIRST** and said "nothing to measure yet" — false the
+   moment the status feed has something to say, because an opening needs no usage data.
+3. **A row can carry an opening AND an unmeasurable usage side.** The render showed one or the
+   other; suppressing the second would imply the role move had been checked when it had not.
+
+⚠️ **And a JSX insertion landed INSIDE `{card.vacated && (`** rather than beside it, because the
+anchor chosen was the child rather than the sibling. It failed the build loudly, which is the good
+case. **Anchor a JSX insertion on the conditional, not on the element inside it.**
+
+### The card row
+
+`Availability status` in the WHAT COULD CHANGE IT group. Status, injury and body part, with the
+depth-chart slot beneath and the note that *a depth chart is the most reversible label in football*.
+A hard status renders in `--caution` — the token that means an actual warning and nothing else.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL · 35 guards pass · dual-file identical
+rendered at 430px: the OPENING row, the card row, 0 tap targets under 32px, 0 page errors
+8 failure paths negative-tested against a verified-clean baseline, all exit non-zero —
+  including a status leak into analyzeRedraft, a prompt builder, and an unreviewed call site
+```
+
+### Still open
+
+A depth-chart **change** is undetectable: the file is a snapshot with no history, so a note made
+stale by a role move will not surface. Storing week-over-week `depth_chart_order` would close it and
+is the one new piece of data collection this needs.

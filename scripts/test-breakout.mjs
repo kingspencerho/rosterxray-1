@@ -136,7 +136,42 @@ ok("all four states are declared", ["breakout", "watch", "noise", "quiet"]
 // because inverting it is the one change that turns this board into a list of
 // one-week flukes and still looks like it works.
 ok("opportunity AND production -> breakout; production alone -> noise",
-  /oppMoved \? \(prodMoved \? "breakout" : "watch"\) : \(prodMoved \? "noise" : "quiet"\)/.test(board));
+  /oppMoved \? \(prodMoved \? "breakout" : "watch"\)\s*:\s*opening \? "opening"\s*:\s*\(prodMoved \? "noise" : "quiet"\)/.test(board));
+
+// ⭐ THE OPENING IS THE REASON THE STATUS FEED IS WIRED, and three properties
+// carry it. Each was a real bug on the way in.
+//
+// 1. IT IS COMPUTED BEFORE THE USAGE GATE. The first build put it after the
+//    `blocked` early-return, so the feed could never fire before Week 4 — an
+//    unrelated gate suppressing the whole point of the wiring. A depth-chart
+//    opening needs no usage data and is knowable in September.
+ok("the opening is computed BEFORE the usage gate returns",
+  board.indexOf("const opening = depthOpening(key)") < board.indexOf("if (blocked) {"));
+ok("...and a blocked row with an opening still gets that state",
+  /if \(blocked\) \{ out\.state = opening \? "opening" : "quiet"; return out; \}/.test(board));
+
+// 2. A MEASURED STEP OUTRANKS A PREDICTED ONE. `watch` is a measured move in
+//    his own usage; `opening` is a circumstance that has not reached his snap
+//    count. Inverting these would put a guess above evidence.
+ok("watch outranks opening in the ranking",
+  /watch:\s*\{ rank: 3/.test(app) && /opening:\s*\{ rank: 2/.test(app));
+
+// 3. ONLY A HARD STATUS IS AN OPENING. "Questionable" is not one — half the
+//    league is questionable on a Friday.
+ok("only a hard status counts, and Questionable is not one",
+  /const isHardOut = \(row\) => !!row && \(STATUS_HARD\.has\(row\.injury_status\) \|\| STATUS_HARD\.has\(row\.status\)\)/.test(app)
+  && !JSON.parse(readFileSync(path.join(root, "grading/data/status_2026.json"), "utf8"))
+        ._meta.hard_status.includes("Questionable"));
+// The blocker must be AHEAD of him at his OWN slot, or this fires for the WR7
+// every time any starter goes down — which is an opening for someone else.
+const opener = between("const depthOpening = (key)", "\nconst buildBreakoutBoard");
+ok("the blocker must share his depth-chart slot",
+  /\(row\.depth_chart_position \|\| row\.pos\) !== slot/.test(opener));
+ok("...and must sit AHEAD of him", /row\.depth_chart_order >= me\.depth_chart_order/.test(opener));
+ok("...and a player who is himself out gets no opening",
+  /if \(isHardOut\(me\)\) return null;/.test(opener));
+ok("the nearest blocker wins, not the highest-profile one",
+  /row\.depth_chart_order > best\.row\.depth_chart_order/.test(opener));
 ok("ranking is by state first, then magnitude",
   /BREAKOUT_STATES\[b\.state\]\.rank - BREAKOUT_STATES\[a\.state\]\.rank/.test(board)
   && /b\.magnitude - a\.magnitude/.test(board));
@@ -185,8 +220,8 @@ ok("watched players bypass the rookie filter and the rostered filter",
 // Split into two statements when the empty-list reason needed counting, so
 // this asserts the PROPERTY (both are dropped, separately) rather than the one
 // expression that happened to implement it.
-ok("the auto-flagged list drops blocked rows",
-  /if \(a\.blocked\) \{[^}]*continue; \}/.test(board));
+ok("the auto-flagged list drops blocked rows, UNLESS they carry an opening",
+  /if \(a\.blocked && a\.state !== "opening"\) \{[^}]*continue; \}/.test(board));
 ok("...and drops quiet rows too",
   /if \(a\.state === "quiet"\) continue;/.test(board));
 
@@ -215,7 +250,7 @@ ok("career_arc carries a real rookie population to filter on", rookieN > 100, St
 ok("an empty list distinguishes has-not-played from too-few-games",
   /has recorded a game yet/.test(board) && /played too few games to measure a step/.test(board));
 ok("...and the thin counter only counts players who actually played",
-  /if \(a\.blocked\) \{ blockedN\+\+; if \(a\.gp > 0\) thinN\+\+; continue; \}/.test(board));
+  /blockedN\+\+; if \(a\.gp > 0\) thinN\+\+;/.test(board));
 
 // PRE-SEASON THIS BOARD IS DORMANT BY DESIGN, so a behavioural sweep over the
 // committed files would assert nothing - the same limit guard 29 records for
@@ -250,6 +285,8 @@ ok("it renders the ENGINE's reason string, never a hand-typed copy",
 // non-supporting opportunity line was indistinguishable from real evidence.
 // The browser caught it; the guard did not, and deleting the mark still passed
 // nine other checks. A reason must be evidence FOR, not every number measured.
+ok("a row shows its opening AND its unmeasured usage side, not one or the other",
+  /r\.blocked && !r\.reasons\.length/.test(render) && /r\.blocked && \(/.test(render));
 ok("each reason renders its supports mark",
   /x\.supports \? "\+" : "·"/.test(render));
 ok("...and a non-supporting reason is visually demoted, not just re-punctuated",

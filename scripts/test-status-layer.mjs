@@ -66,12 +66,46 @@ console.log("containment");
 
 ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 
-// The layer is deliberately unwired. Each of these is a way it could be
-// consumed; all must be absent until the watch period ends.
+// ⭐ WIRED Sep 8 2026, AFTER THE WATCH PERIOD. This block used to assert that
+// NO consumer existed anywhere, on the approved "build it, ship it reading, do
+// not render" decision. That assertion did its job: wiring the layer failed the
+// build and forced this guard to be rewritten on purpose rather than drifted
+// past.
+//
+// It is now an ALLOWLIST OF REVIEWED CONSUMERS, the same shape guard 13 uses
+// for getSnapTrend. ⛔ DO NOT relax this to "any number of call sites": the
+// point is that every consumer has been looked at, not that there is a small
+// number of them. An unlisted one still fails.
 const CONSUMER_TOKENS = ["status_2026", "STATUS_LAYER", "getStatus(", "statusContext", "getPlayerStatus"];
-for (const tok of CONSUMER_TOKENS) {
-  ok(`App.jsx has no consumer: ${tok}`, !app.includes(tok),
-    "approved Sep 1 2026 as build-but-do-not-render — wiring this is a deliberate act, update this guard first");
+const REVIEWED = ["depthOpening", "buildPlayerCard"];
+{
+  // Every read of the accessor must sit inside a reviewed function.
+  const bodies = REVIEWED.map(fn => bodyOf(app, `const ${fn} = `) || "").join("\n");
+  // The declaration reads `const getStatus = (name) =>` and so does NOT match
+  // `getStatus(` — subtracting it double-counted and failed on correct code.
+  const total = (app.match(/getStatus\(/g) || []).length;
+  const inReviewed = (bodies.match(/getStatus\(/g) || []).length;
+  const declared = (app.match(/^const getStatus = /gm) || []).length;
+  ok("getStatus is declared exactly once", declared === 1, String(declared));
+  ok("every getStatus call site sits inside a reviewed consumer",
+    total > 0 && total === inReviewed, `${total} call(s), ${inReviewed} reviewed`);
+  ok("the reviewed consumers are the ones the file declares",
+    JSON.stringify(STATUS._meta.consumers || []).includes("depthOpening")
+    && JSON.stringify(STATUS._meta.consumers || []).includes("buildPlayerCard"));
+}
+
+// ⛔ THE PROMPT REMAINS FORBIDDEN, and rendering it does not change that.
+// Showing a feed to a human who can judge it is a different act from handing it
+// to the model under "override everything above for these players".
+for (const tok of ["statusContext", "getPlayerStatus"]) {
+  ok(`App.jsx still has no prompt-side consumer: ${tok}`, !app.includes(tok),
+    "a prompt builder for this feed is the one wiring that was never approved");
+}
+{
+  const prompt = bodyOf(app, "const newsContext = ") || "";
+  for (const tok of CONSUMER_TOKENS.concat(["isHardOut", "STATUS_HARD"])) {
+    ok(`newsContext never reads ${tok}`, !prompt.includes(tok));
+  }
 }
 
 // Survives assertion 1 being deliberately relaxed later: even once a reviewed
@@ -99,8 +133,15 @@ const m = STATUS._meta;
 ok("context_only is true", m.context_only === true);
 ok("reaches_ai_prompt is false", m.reaches_ai_prompt === false,
   "RECENT_NEWS reaches the model under 'override everything above for these players' — the highest-authority block in the prompt. An unattended feed must not sit there.");
-ok("renders is false", m.renders === false, "the approved decision was build-but-do-not-render");
+ok("renders is true and names its consumers", m.renders === true
+  && /depthOpening/.test(m.renders_reason || "") && /buildPlayerCard/.test(m.renders_reason || ""),
+  "wired Sep 8 2026; the file must say what reads it");
 ok("renders_reason explains why", typeof m.renders_reason === "string" && m.renders_reason.length > 40);
+ok("why_not_ai_prompt survives the wiring",
+  /override everything above/.test(m.why_not_ai_prompt || ""),
+  "the reasoning is what stops a future session adding a prompt builder now that it renders");
+ok("the hard-status note rules out Questionable",
+  /Questionable' is NOT one|Questionable. is NOT one/.test(m.hard_status_note || ""));
 
 ok("conflict_rule says the feed NEVER overwrites",
   /NEVER overwrites/.test(m.conflict_rule) && /flag/i.test(m.conflict_rule));
