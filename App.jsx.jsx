@@ -1576,7 +1576,7 @@ const SITUATIONS = {
   "aaron jones": { verdict: "fade", trend: "falling", trendNote: "Age cliff + MIN committee — role dependent on Alexander injury; near-zero floor if healthy backfield", situationFlags: [], riskFlags: ["creeping_committee", "injury_history"], roleCeiling: "rz_dependent" },
   // === ADDITIONAL COMMITTEE RB FLAGS (2026) ===
   "jaylen warren": { verdict: "TARGET", trend: "stable", trendNote: "PPR-friendly role, McCarthy now HC at PIT — run-heavy system suits Warren's receiving back profile, but Dowdle added as real competition", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
-  "rico dowdle": { verdict: "fade", trend: "stable", trendNote: "Added to PIT committee — 1300+ scrimmage yards each of past two seasons, McCarthy history, real threat to Warren workload", situationFlags: [], riskFlags: ["confirmed_committee"] },
+  "rico dowdle": { verdict: "hold", trend: "rising", date: "2026-09-08", trendNote: "PITTSBURGH SPLITS THIS BACKFIELD, AND DOWDLE HAS THE SCORING HALF OF THE SPLIT (updated Sep 8 2026). Mike McCarthy calls the room a dynamic one-two punch and Pittsburgh's initial 2026 depth chart lists Warren RB1 and Dowdle RB2, a listing that held through camp and the preseason with both healthy. Beat reporting divides the work by down: Dowdle on early downs, Warren in relief on third down and obvious passing situations, with Warren's 139 receptions over three years cited as the reason. READ THE ROLE, NOT THE LABEL. In 2025 Dowdle took 50% of his team's red-zone carries and 46% inside the 10, which is the same shape Warren posted at Pittsburgh (50% and 48%), and it is the OPPOSITE of the job Gainwell held there — Gainwell was 28.8% of red-zone carries against 22.4% of red-zone targets, a passing-down back. Anyone projecting Dowdle onto Gainwell's 73 receptions is projecting him onto the role Warren is being handed. WHAT MAKES HIM WORTH THE PRICE IS CEILING, NOT VOLUME. His 2025 spike rate was 0.176 and nuclear rate 0.118 against Warren's 0.062 and 0.062, with three games above 27 points. Warren is the more reliable weekly floor (0.688 usable, 0.000 dud) and almost never spikes. Two supporting signals: Warren's snap share fell from 0.599 across the first half of 2025 to 0.437 across the second, and Pittsburgh vacated 57.1% of its measured target share this offseason, the largest opening in the league. HELD HONEST: he is the RB2 on the chart in a genuine committee, so the confirmed_committee risk flag stands and his ceiling is touchdown-dependent rather than volume-driven. Verdict is hold rather than target for that reason.", situationFlags: [], riskFlags: ["confirmed_committee"] },
   // First SITUATIONS row for Love (Aug 15 2026). Until now he had RECENT_NEWS only,
   // which meant the Naked RB gate insulated him purely via the ADP<=36 default rule
   // while the app's own news entry said the opposite — the gate does not read
@@ -4877,6 +4877,17 @@ const DISCIPLINE_SATURATE    = 4.6;  // 2 x simulated roster-level SD (2.3)
 const DISCIPLINE_MIN_PICKS   = 10;
 const DISCIPLINE_CAP         = 0.5;  // matches the other advance components
 
+// ⚠️ NAMED SO THE DOC AND THE CODE CANNOT DRIFT AGAIN. CLAUDE.md described this
+// gate as "HVT 4.5+" alongside a "Gate 2 (zone/PROE 0.65+)" for months. Neither
+// was ever true of this file: the threshold has always been 1.5 and there is no
+// second gate. 4.5 is unreachable in the data — ZERO of the 50 qualified 2025
+// RBs clear it, and the league leader (McCaffrey) is 3.65 — so a reader trusting
+// the doc concluded every naked RB fails by construction, which is the opposite
+// of what happens. 1.5 clears 23 of 50, which is the band a real goal-line or
+// receiving role sits in (2025: Henry 2.47, Gibbs 2.18, Gainwell 1.94).
+// Guard 32 asserts CLAUDE.md still prints this number.
+const NAKED_RB_HVT_GATE = 1.5;
+
 const annotateTurnReaches = (flags, ownPicks) => {
   const sorted = [...new Set((ownPicks || []).filter(n => Number.isFinite(n)))].sort((a, b) => a - b);
   const nextAfterTurn = (pick) => {
@@ -5164,11 +5175,12 @@ const analyzeRoster = (picks, tournamentKey = "main", hasPickNumbers = false, us
     // flag (e.g. Jonathan Taylor, Kyren Williams before their entries existed).
     const hasCommitteeRisk = riskFlags.includes("creeping_committee") || riskFlags.includes("confirmed_committee");
     if (rb.adp <= 36 && !hasCommitteeRisk) return false;
-    // Data-driven Gate 1 (HVT): 2025 red-zone targets + inside-10 carries per game.
-    // 1.5+ on this scale ≈ a real goal-line/receiving role (2025 leaders: Henry 2.47,
-    // Gibbs 2.18) — covers the ~400 players SITUATIONS curation doesn't reach.
+    // Data-driven HVT gate: 2025 red-zone targets + inside-10 carries per game.
+    // See NAKED_RB_HVT_GATE for why the number is 1.5 and not the 4.5 the
+    // framework text used to claim. Covers the ~400 players SITUATIONS curation
+    // does not reach.
     const pm = getMetrics(rb.name);
-    if (pm && pm.hvt_pg >= 1.5 && !hasCommitteeRisk) return false;
+    if (pm && pm.hvt_pg >= NAKED_RB_HVT_GATE && !hasCommitteeRisk) return false;
     return true;
   });
 

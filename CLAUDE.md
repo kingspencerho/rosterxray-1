@@ -132,11 +132,33 @@ Prioritize QB-loop integrity over market ADP. Use scarcity as a guide, not a man
 3. **Low Scarcity (Deep Positional Pools):** Hold for ADP value. The reach threshold scales with actual board scarcity, not assumed scarcity.
 
 ### Naked RB Insulation Protocol
-RBs without a QB or pass-catcher stack on the same team are classified as **Naked RBs** and require an insulation check. A Naked RB must qualify on at least 1 of 2 gates:
-- **Gate 1 — HVT:** 4.5+ high-value touches per game (red zone targets + green zone carries)
-- **Gate 2 — Zone/PROE Scheme:** 0.65+ composite score on zone-scheme fit and positive PROE baseline
+RBs without a QB or pass-catcher stack on the same team are classified as **Naked RBs** and require an insulation check.
 
-If a Naked RB fails both gates, flag as **UNINSULATED_NAKED_RB**. Apply a structural ceiling penalty. Scored deduction, not a warning note.
+⚠️ **CORRECTED Sep 8 2026. This section described a two-gate test at "HVT 4.5+" and
+"zone/PROE 0.65+". NEITHER NUMBER WAS EVER IN THE CODE, and there is no second
+gate.** 4.5 is unreachable: **zero of the 50 qualified 2025 RBs clear it** and the
+league leader, McCaffrey, is 3.65. A reader trusting this text concluded that every
+naked RB fails by construction, which is the opposite of what the engine does. Found
+by reading the implementation after quoting the doc at a user.
+
+A Naked RB is insulated when **any one** of three branches passes:
+
+1. **A curated insulation flag** in `SITUATIONS.situationFlags`: `scheme_fit`,
+   `target_vacuum`, `breakout_profile` or `committee_breaker`.
+2. **Starter-tier draft capital** — `adp <= 36` with no committee risk flag. Without
+   this a bell-cow simply missing from `SITUATIONS` gets a false "no signal" flag.
+3. **The measured HVT gate** — `hvt_pg >= NAKED_RB_HVT_GATE` (**1.5**, red-zone
+   targets plus inside-10 carries per game) with no committee risk flag. **23 of 50
+   qualified RBs clear it**, which is the band a real goal-line or receiving role sits
+   in: Henry 2.47, Gibbs 2.18, Gainwell 1.94, median 1.43.
+
+Branches 2 and 3 are both cancelled by `riskFlags` containing `confirmed_committee`
+or `creeping_committee`. Failing all three flags **UNINSULATED_NAKED_RB**, a scored
+deduction rather than a warning note.
+
+**The threshold lives in ONE place, `NAKED_RB_HVT_GATE` in App.jsx, and guard 32
+asserts this file still prints the same number.** A literal typed here again is the
+duplicate-definition class that produced this correction.
 
 ### Receiving Back Stack Qualifier
 - **Elite Receiving Back (65+ receptions, prior full season):** Full stack/correlation credit alongside WR/TE pass-catchers. Treat as legitimate stack piece when paired with their team's QB.
@@ -493,7 +515,7 @@ For each pick, note ADP delta (pick vs ADP). Flag meaningful reaches and values.
 Trigger: A player is drafted at pick 160 or later. Do not trigger any reach or ADP-based deductions for players selected at pick 160+. Evaluate exclusively on geometric fit or structural necessity. Flag severe reaches (40+ picks) as informational only — no scored penalty.
 
 **Naked RB Insulation Check**
-Every RB without a QB stack partner on the same team gets evaluated. State Gate 1 (HVT 4.5+) and Gate 2 (zone/PROE 0.65+) result explicitly. Flag UNINSULATED_NAKED_RB if both gates fail. Note W17 wall risk separately.
+Every RB without a QB stack partner on the same team gets evaluated. State which of the three insulation branches passed or failed (curated flag, `adp <= 36`, or `hvt_pg >= 1.5`), and name the committee risk flag when it cancels one. Flag UNINSULATED_NAKED_RB when all three fail. Note W17 wall risk separately.
 
 ### Journal Critique: [Strategy Title]
 - **Claims:** What construction thesis is this roster executing?
@@ -6587,3 +6609,90 @@ tested with the UNFILTERED array. `grade-cli` passes the unfiltered array and is
 **The CLI, the guard and the calibration all passed while the live page said something false.**
 A code path that exists only when a UI control is in one state is invisible to every test that
 calls the engine directly. Render it, in both states.
+
+---
+
+## A Threshold That Lived in Prose (fixed Sep 8, 2026)
+
+**90 grades byte-identical** (15 tournaments x 5 fixtures, plus 3 leagues x 5), compared against
+a pristine worktree at HEAD. Guard 32: `scripts/test-naked-rb-gate.mjs`.
+
+### The doc described an engine that does not exist
+
+A user asked for a re-assessment of Rico Dowdle. Explaining the `UNINSULATED_NAKED_RB` flag, I
+quoted this file's own Section 1: *"Gate 1 — HVT: 4.5+"* plus a *"Gate 2 — Zone/PROE 0.65+"*. I
+then measured 4.5 against the data and reported to the user that **the gate was unreachable and
+therefore meaningless**: zero of the 50 qualified 2025 RBs clear it, McCaffrey leads at 3.65.
+
+The measurement was right. **The premise was not. Neither number was ever in App.jsx.** The
+shipped threshold has always been **1.5** (23 of 50 clear it, which is where a real goal-line or
+receiving role sits: Henry 2.47, Gibbs 2.18, Gainwell 1.94, median 1.43) and **there is no second
+gate at all**. The code even carried a comment explaining its own derivation. Nobody had read it
+against the doc.
+
+**This is the duplicate-definition class with a new twist: the second definition was in PROSE.**
+Seven earlier instances (tier/score, competitive balance, `posColor`, five position palettes,
+`gameLogFor`, the band literals, the guard count) were all code-versus-code, where a build warning
+or a guard could eventually see them. **A number a human reads and acts on is a definition whether
+or not a machine parses it**, and this one survived months because no tool was looking at prose.
+
+It surfaced only because someone read the implementation after quoting the doc out loud.
+
+### The fix moves no grades
+
+`NAKED_RB_HVT_GATE` is now the single definition, the check reads it, and Sections 1 and 9
+describe the three branches the engine really has: a curated `situationFlags` entry, `adp <= 36`,
+or `hvt_pg >= NAKED_RB_HVT_GATE`, with branches 2 and 3 cancelled by a committee risk flag.
+
+⚠️ **Guard 32 does NOT assert the value is 1.5.** Re-tuning the gate is a legitimate data decision
+that would move grades and need its own calibration. What must never recur is the doc and the code
+disagreeing, so the guard reads the constant and requires CLAUDE.md to print whatever it says.
+
+**Two assertions failed on the guard's first run, both because they were too broad, and both worth
+keeping as rules:**
+
+1. **`scoreFreeAgent` also tests `hvt_pg >= 3`.** That is a different gate answering a different
+   question (is there evidence of volume for a waiver add). A file-wide sweep would have pushed a
+   future reader toward "unifying" two unrelated thresholds, so the check is scoped to the
+   naked-RB block.
+2. **4.5 may still appear, but only BEHIND the correction marker.** Deleting it outright makes the
+   correction unreadable, and this file is where correction history belongs. The assertion is
+   positional: every occurrence must sit after the ⚠️ paragraph, never before it. Same shape as
+   the Sep 6 guard-count literal, opposite resolution, because that number was emitted into a PR
+   body and this one is history.
+
+Five failure paths negative-tested, all exit non-zero: the doc reverting to the live 4.5 claim,
+the code changing the number without the doc, the check returning to a bare literal, a second
+declaration of the constant, and a branch dropped from the code.
+
+### Rico Dowdle re-sourced, and the comp that prompted it was inverted
+
+`fade/stable`, undated -> **`hold/rising`, dated Sep 8 2026**. The user's read was that Dowdle
+would replicate Gainwell's 2025 PIT production. **The direction is right and the mechanism is
+backwards**, which changes which weeks he wins:
+
+```
+                route_sh  TPRR    tgt  rec  tgt_sh  rz_tgt_sh  rz_car_sh  i5_car  spike
+Gainwell PIT      0.592  0.242    85   73   0.162     0.224      0.288       9    0.176
+Warren   PIT      0.426  0.186    45   40   0.090     0.066      0.500      14    0.062
+Dowdle   CAR      0.506  0.169    50   39   0.104     0.071      0.500       8    0.176
+```
+
+Gainwell was a passing-down back who barely ran near the goal line. **Dowdle's demonstrated role
+is Warren's role**, and the beat reporting assigns the passing work to Warren explicitly. What
+justifies the price is ceiling, not receptions: spike 0.176 / nuclear 0.118 against Warren's
+0.062 / 0.062, plus Warren's snap share falling 0.599 -> 0.437 across 2025 and PIT vacating
+**57.1%** of its measured target share, the largest opening in the league.
+
+⚠️ **His `player_metrics` row reads `team: CAR`.** Every number above is his Carolina season, per
+the Aug 8 rule about 2026 movers. Checked against `ADP_DATA` before anything was written.
+
+**`confirmed_committee` stays, and `situationFlags` stays empty.** None of the four insulation
+flags is true of him: he is the listed RB2 in a genuine committee. Manufacturing one to make the
+engine agree with a better prose read is exactly the "do not loosen a threshold to make a team
+grade better" rule. The scored treatment was right; only the verdict was wrong.
+
+Verdict is `hold` rather than `TARGET` deliberately. `TARGET` feeds `activeTargets`, which pays
++0.3 each past three with a 1.5 cap, so a verdict upgrade **can** move a grade. It does not here
+(the roster already carries eight), but the general point stands: `fade` is free and `TARGET` is
+not.
