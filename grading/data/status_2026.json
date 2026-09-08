@@ -2,6 +2,10 @@
  "_meta": {
   "built_at": "2026-09-06T10:33:46Z",
   "conflict_rule": "The feed NEVER overwrites, outranks or out-dates a hand-written note. It raises a flag a human clears. A hand-written note keeps its own date until it is edited by hand. Both render; neither replaces the other.",
+  "consumers": [
+   "buildBreakoutBoard/depthOpening",
+   "buildPlayerCard"
+  ],
   "context_only": true,
   "counts": {
    "QB": 117,
@@ -19,13 +23,14 @@
    "DNR"
   ],
   "hard_status_count": 71,
+  "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
   "hierarchy_rank": {
    "all": "1 - role and availability CHANGE"
   },
   "join_key": "normalize(full_name), a mirror of App.jsx:2469. NOT gsis_id, which Sleeper carries on only 18% of skill players and which no layer in grading/data/ uses.",
   "reaches_ai_prompt": false,
-  "renders": false,
-  "renders_reason": "Approved Sep 1 2026: build it, ship it reading, do not render until the feed has been watched for a week. The committed file stays at zero rows until that watch is done, so there is nothing to render by construction.",
+  "renders": true,
+  "renders_reason": "Wired Sep 8 2026 after the watch period. TWO REVIEWED CONSUMERS AND NO OTHERS: buildBreakoutBoard reads it for depthOpening (a teammate at the same depth-chart slot, ahead of him, carrying a hard status) and buildPlayerCard renders an availability row. Guard 26 holds the allowlist and still asserts analyzeRoster and analyzeRedraft never read it, which is the assertion that protects the grades.",
   "row_fields": [
    "pos",
    "team",
@@ -40,6 +45,7 @@
   "source": "Sleeper /v1/players/nfl (public, no auth, unversioned)",
   "source_probed": "2026-09-06",
   "stability": null,
+  "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",
   "why_not_freshest_wins": "A same-day feed would out-date all 140 RECENT_NEWS entries permanently. 7 of 15 sampled entries are pure judgement the feed has no opinion about, so freshest-wins would demote the analysis to decoration on day one.",
   "with_depth_chart": 571
  },
