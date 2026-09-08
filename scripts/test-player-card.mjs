@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { newsDateFor, buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand };\n";
+  "\nexport { newsDateFor, buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand, WORK_COLOR };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -865,6 +865,34 @@ ok("the line renders above Recent news, at the top of the card",
    stripAt > -1 && stripAt < app.indexOf('title="Recent news"'), `stripAt=${stripAt}`);
 ok("current season is printed first, prior season under it",
    app.includes("[card.gameLogCur, card.gameLog].filter(Boolean)"));
+// EVERY SEGMENT CAN BE PAINTED. An unknown work type renders with `color:
+// undefined`, which is not an error - it is black text on a black card, the
+// silent-drop failure this repo has closed twice already.
+const unpaintable = [];
+for (const [n, c] of statCards) for (const x of c.gameLog.statParts) {
+  if (!e.WORK_COLOR[x.work]) unpaintable.push(`${n}: ${x.work}`);
+}
+ok("every stat segment has a colour", unpaintable.length === 0, [...new Set(unpaintable)].slice(0, 3).join(", "));
+
+// THE STRING IS DERIVED, NOT WRITTEN TWICE. Two hand-maintained copies of the
+// same line is this repo's most-repeated bug, and the guards above read the
+// string while the card renders the parts - so if they ever diverge, the
+// guards would be checking something the reader never sees.
+const drifted = statCards.filter(([, c]) =>
+  c.gameLog.statLine !== c.gameLog.statParts.map(x => `${x.num} ${x.label}`).join(" · "));
+ok("the plain string is derived from the coloured parts", drifted.length === 0,
+   drifted.slice(0, 2).map(x => x[0]).join(", "));
+
+// Only a QB has typed touchdowns. A back's or receiver's total is combined in
+// the source, so it must stay untyped rather than be assigned a work colour.
+const misTyped = statCards.filter(([, c]) =>
+  c.gameLog.statParts.some(x => x.work === "pass") !== (c.pos === "QB"));
+ok("passing segments appear on QB cards and nowhere else", misTyped.length === 0,
+   misTyped.slice(0, 3).map(x => x[0]).join(", "));
+const untypedScore = statCards.filter(([, c]) => c.pos !== "QB" &&
+  !c.gameLog.statParts.some(x => x.work === "score" && x.label === "TD"));
+ok("a non-QB touchdown total stays untyped", untypedScore.length === 0,
+   untypedScore.slice(0, 3).map(x => x[0]).join(", "));
 
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

@@ -3494,11 +3494,36 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // running quarterback on the board.
     const sum = label => games.reduce((a, g) => a + (g.stats.find(s => s.label === label)?.value || 0), 0);
     const tds = sum("tds");
-    const statLine = row.pos === "QB"
-      ? `${sum("att")} att · ${sum("pass_yds")} pass yds · ${sum("pass_td")} pass TD · ${sum("car")}-${sum("rush_yds")} rush · ${tds - sum("pass_td")} rush TD`
+    // EACH SEGMENT CARRIES THE KIND OF WORK IT DESCRIBES — passing, rushing or
+    // receiving — so the renderer can colour by work type without re-parsing
+    // the sentence. The colour says WHICH JOB, never how well it went; grading
+    // this line would make it a verdict, which is the one thing it must not be.
+    // `num` is split from `label` here rather than in JSX so the split has one
+    // definition and the guard can check it.
+    const seg = (work, num, label) => ({ work, num: String(num), label });
+    const statParts = row.pos === "QB"
+      ? [
+        seg("pass", sum("att"), "att"),
+        seg("pass", sum("pass_yds"), "pass yds"),
+        seg("pass", sum("pass_td"), "pass TD"),
+        seg("rush", `${sum("car")}-${sum("rush_yds")}`, "rush"),
+        seg("rush", tds - sum("pass_td"), "rush TD"),
+      ]
       : row.pos === "RB"
-        ? `${sum("car")}-${sum("rush_yds")} rush · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`
-        : `${sum("tgt")} tgt · ${sum("rec")}-${sum("rec_yds")} rec · ${tds} TD`;
+        ? [
+          seg("rush", `${sum("car")}-${sum("rush_yds")}`, "rush"),
+          seg("rec", `${sum("rec")}-${sum("rec_yds")}`, "rec"),
+          seg("score", tds, "TD"),
+        ]
+        : [
+          seg("rec", sum("tgt"), "tgt"),
+          seg("rec", `${sum("rec")}-${sum("rec_yds")}`, "rec"),
+          seg("score", tds, "TD"),
+        ];
+    // ⛔ ONE DEFINITION. The plain string is DERIVED from the parts, never
+    // written twice — a second copy is this repo's most-repeated bug class and
+    // the two would disagree the first time either changed.
+    const statLine = statParts.map(x => `${x.num} ${x.label}`).join(" · ");
     return {
       season: meta.season,
       maxWeek: meta.max_week || Math.max(...games.map(g => g.week)),
@@ -3509,6 +3534,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       ppg: +(pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1),
       totalPts: +pts.reduce((a, b) => a + b, 0).toFixed(1),
       statLine,
+      statParts,
       // "final" vs "through week N" — a partial season read as a full one is
       // the stale-data trap this app exists to avoid.
       partial: !meta.season_complete,
@@ -8680,6 +8706,32 @@ const POS_ACCENT = {
   TE: { text: "var(--accent-purple)", border: "#8b5cf6", bg: "#1a1230" }, // violet
 };
 
+// THE STAT LINE'S WORK COLOURS — passing, rushing, receiving.
+//
+// ⭐ IT DECLARES NO NEW HUE. Each kind of work is painted in the colour this
+// page ALREADY uses for the position that does that work for a living: passing
+// is the QB amber, rushing the RB cyan, receiving the WR pink. A quarterback's
+// rushing yards genuinely ARE running-back work, so this is the existing
+// meaning applied literally rather than a second palette.
+//
+// ⛔ IT SOURCES FROM POS_ACCENT, never from the raw tokens. Guard 17 caps
+// --accent-cyan at three literal uses and --accent-purple at one, and both are
+// AT their cap — so a hand-written `var(--accent-cyan)` here would break it.
+// Reading through POS_ACCENT is the honest fix, not a way around the count:
+// the cap exists to stop CHROME borrowing a position hue, and this is a
+// position hue being used for that position's own work.
+//
+// ⚠️ TOTAL TOUCHDOWNS TAKE NO HUE. The game log stores one combined figure for
+// a back or a receiver, so there is no work type to claim — painting it either
+// colour would assert a split the data does not contain. Only a QB's are
+// typed, because pass_td is stored separately.
+const WORK_COLOR = {
+  pass: POS_ACCENT.QB.text,
+  rush: POS_ACCENT.RB.text,
+  rec: POS_ACCENT.WR.text,
+  score: "var(--text-primary)",
+};
+
 // FOUR GROUPS, NAMED FOR THE QUESTION A READER IS ASKING.
 //
 // See USER-PERSONAS.md. The card reached fourteen sections and the accents had
@@ -9536,8 +9588,22 @@ const PlayerCardModal = ({ card, onClose }) => {
               <span>{log.partial ? `through week ${log.maxWeek}` : "final"}</span>
               <span style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{log.gp} G</span>
             </div>
-            <div style={{ fontSize: "11.5px", fontFamily: "var(--font-mono)", color: "var(--text-primary)", lineHeight: 1.55, fontVariantNumeric: "tabular-nums" }}>
-              {log.statLine}
+            <div style={{ fontSize: "11.5px", fontFamily: "var(--font-mono)", lineHeight: 1.6, fontVariantNumeric: "tabular-nums" }}>
+              {/* THE SEPARATOR SITS OUTSIDE THE nowrap SPAN, and that is the whole
+                  reason this renders as three lines instead of one that runs off
+                  the card. `nowrap` keeps a number glued to its own label, but
+                  with the dot INSIDE it there was no break opportunity anywhere
+                  in the row, so a QB's five segments overflowed the modal.
+                  Caught by rendering at 375px; the source read fine. */}
+              {log.statParts.map((x, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span style={{ color: "var(--text-faint)" }}>{" · "}</span>}
+                  <span style={{ whiteSpace: "nowrap" }}>
+                    <span style={{ color: WORK_COLOR[x.work], fontWeight: 700 }}>{x.num}</span>
+                    <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>{" "}{x.label}</span>
+                  </span>
+                </React.Fragment>
+              ))}
             </div>
             <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "3px", fontVariantNumeric: "tabular-nums" }}>
               {log.totalPts} pts · {log.ppg}/gm · half-PPR · game log

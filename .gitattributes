@@ -1,0 +1,8 @@
+# The guard suite reads App.jsx as TEXT, and several assertions match on a
+# literal newline. With core.autocrlf=true a checkout rewrites every line to
+# CRLF and those regexes stop matching correct code -- guard 29 has now failed
+# this way twice, once from a text-mode write and once from a merge checkout.
+# Pinning the working tree to LF fixes it at the source, for every clone and
+# every machine, instead of teaching forty guards about carriage returns.
+* text=auto eol=lf
+*.png binary
