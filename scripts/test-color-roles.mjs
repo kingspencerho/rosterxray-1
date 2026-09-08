@@ -73,12 +73,52 @@ else {
 // The two tokens that ARE position colours must not be reachable from chrome.
 // Cyan is allowed on POS_ACCENT.RB and on filled primary CTAs (a solid button
 // is a different channel from coloured text); purple only on POS_ACCENT.TE.
+// COUNT CODE, NOT PROSE. A comment EXPLAINING the cap contains the token it
+// explains, so the un-stripped count made documenting this rule break it - the
+// same shape as guard 31 failing on a comment that said "<button". The strip is
+// negative-tested: a real fourth use in code still trips the cap.
+const noComments = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 for (const [tok, allowed] of [["--accent-cyan", 3], ["--accent-purple", 1]]) {
-  const uses = (src.match(new RegExp(`var\\(${tok}\\)`, "g")) || []).length;
+  const uses = (noComments.match(new RegExp(`var\\(${tok}\\)`, "g")) || []).length;
   uses <= allowed
     ? ok(`${tok} is used ${uses}x (cap ${allowed}) — position + CTA only`)
     : bad(`${tok} is used ${uses}x, over the cap of ${allowed}. Chrome must use --ui-accent.`);
 }
+
+console.log("\nthe stat line colours WORK, never quality");
+
+// The season stat line paints passing / rushing / receiving. The whole risk is
+// that a later session "improves" it into a grade - green for a good line, red
+// for a bad one - which would make the top of the card issue the verdict the
+// rest of the card is built to withhold. These assert it cannot drift there.
+const wcDecls = (src.match(/^const WORK_COLOR = \{/gm) || []).length;
+wcDecls === 1 ? ok("WORK_COLOR is declared once") : bad(`WORK_COLOR declared ${wcDecls} times`);
+
+const wcBody = wcDecls === 1
+  ? src.slice(src.indexOf("const WORK_COLOR = {"), src.indexOf("};", src.indexOf("const WORK_COLOR = {")))
+  : "";
+
+// It must READ the position palette, not restate it. A hand-written hue here
+// would be a sixth copy of the palette, which is the drift this guard exists
+// for - and would also spend a token that is already at its cap.
+for (const [work, pos] of [["pass", "QB"], ["rush", "RB"], ["rec", "WR"]]) {
+  wcBody.includes(`${work}: POS_ACCENT.${pos}.text`)
+    ? ok(`${work} reads POS_ACCENT.${pos}.text`)
+    : bad(`${work} must source from POS_ACCENT.${pos}.text, not a literal hue`);
+}
+
+// NO EVALUATIVE TOKEN, EVER. These are the colours that mean good and bad
+// everywhere else on the page.
+const verdictTok = (wcBody.match(/--(pos|neg|caution|warn|tier)[a-z-]*/g) || []);
+verdictTok.length === 0
+  ? ok("no good/bad token reaches the stat line")
+  : bad(`the stat line borrows a verdict colour: ${[...new Set(verdictTok)].join(", ")}`);
+
+// A combined touchdown figure has no work type to claim, so it must stay
+// neutral. Painting it either colour asserts a split the data does not carry.
+/score:\s*"var\(--text-primary\)"/.test(wcBody)
+  ? ok("untyped touchdowns stay neutral")
+  : bad("the untyped touchdown total must render in --text-primary, claiming no work type");
 
 console.log("\nthe matchup ramp's neutral rung is not a warning colour");
 

@@ -7209,3 +7209,58 @@ rendered at 375px and 1280px: WR, TE, RB and QB lines all correct against a hand
 5 sabotages, all exit non-zero: QB rush TD printing the total, receptions off by one,
   season points inflated, a final season labelled partial, the strip deleted outright
 ```
+
+### Sep 7, 2026 — colour on the stat line: it paints the WORK, never the quality
+
+His ask: *"can we color code this?"*, on a QB card where the line read as one grey wall and you
+could not find the seam between the passing half and the rushing half.
+
+⛔ **THE READING THAT WAS REFUSED, and why it matters more than the one shipped.** The obvious
+meaning of "colour code" is green for good and red for bad. **This page has those colours already
+and they mean exactly that** — so grading the box score would make the FIRST thing on the card the
+verdict the whole card is built to withhold. It is also unanswerable: 15 passing touchdowns is
+good or bad against a baseline the line does not carry.
+
+✅ **WHAT SHIPPED: colour by KIND OF WORK.** Passing amber, rushing cyan, receiving pink — a
+grouping, not a grade.
+
+⭐⭐ **IT DECLARES NO NEW HUE, and that is the whole trick.** Each kind of work wears the colour
+this page already gives the position that does it for a living. A quarterback's rushing yards
+genuinely ARE running-back work, so `WORK_COLOR` reads through `POS_ACCENT` rather than restating
+it. Dart's line runs amber then cyan; Bijan's runs cyan then pink; a receiver's is pink throughout.
+
+⚠️ **A COMBINED TOUCHDOWN TOTAL TAKES NO HUE.** The game log stores one figure for a back or a
+receiver, so there is no split to claim — it renders `--text-primary`. Only a QB's are typed,
+because `pass_td` is stored separately.
+
+**Numbers carry the colour and the weight; labels sit in `--text-dim`.** The eye lands on the
+figures and groups them by hue without reading a word.
+
+### Three failures found by rendering, not by reading
+
+1. ⛔⛔ **DOCUMENTING THE CAP BROKE THE CAP.** Guard 17 caps `--accent-cyan` at three literal uses
+   and **counted comments**, so a comment *explaining the cap* became a fourth use and failed the
+   build. **Same shape as guard 31 failing on a comment containing `<button`** — second instance,
+   and the fix is the same: strip comments before counting. ⭐ **Negative-tested, because a strip
+   that defangs the check is worse than the bug** — a real fourth use in code still trips it.
+2. ⛔ **THE LINE STOPPED WRAPPING AND RAN OFF THE CARD.** `whiteSpace: nowrap` kept each number
+   glued to its label, correctly — but with the `·` separator INSIDE that span there was no break
+   opportunity anywhere in the row, so a QB's five segments overflowed the modal at 375px. The
+   separator now sits outside. **The source read fine; only a render at phone width showed it.**
+3. ⛔ **TWO SABOTAGES DID NOT BITE because they were applied to `App.jsx` while guard 14 reads
+   `App.jsx.jsx`.** Second time this exact mistake has voided a negative test. **A sabotage must
+   be applied to the file the guard actually opens** — check which, every time.
+
+### The rule that keeps this from drifting into a grade
+
+`WORK_COLOR` may not contain `--pos`, `--neg`, `--caution`, `--warn` or any `--tier` token, and
+must source each work type from `POS_ACCENT`. **Asserted, not trusted** — the next session to look
+at a grey stat line will want to make it green.
+
+```
+34 guards pass · 1482 assertions · dual-file identical
+rendered at 375px: QB, RB, WR and TE all wrap inside the card, 0px overflow
+computed colours verified in the browser, not inferred from source
+6 sabotages exit non-zero: green on receiving, a hue on untyped TDs, an unpainted work type,
+  the string decoupled from the parts, a real 4th cyan in code, the strip removed
+```
