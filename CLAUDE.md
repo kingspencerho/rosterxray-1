@@ -7846,3 +7846,136 @@ visual decision.** See `Claude-project-personal/visual-mockups-capability.md`.
 rendered at 375px: redraft selected at rest, svg 250x156, both animations running by name,
   0 tap targets under 32px, no horizontal overflow, reduced-motion rule live in the sheet
 ```
+
+---
+
+## Sep 9, 2026 — Five things he asked for on a phone, and two of them were bugs
+
+**PRESENTATION AND TELEMETRY ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures,
+plus 3 leagues x 5), diffed against a pristine worktree at HEAD. Three of the five came from
+one screenshot session on his own phone; **two turned out to be broken wires rather than
+missing features.**
+
+### 1. Upload opens first
+
+The share-button drawing shipped that morning to answer *"what do I do here"* — and sat behind
+a tab that was not the default, so **a first-time visitor never saw it.**
+
+⚠️ **What the old default was protecting was real, and it was in the wrong place.** Paste needs
+no network; upload calls `/api/analyze`. But that protection never lived in the default — it
+lives in the extract-error branch, which drops the reader back to paste with the error shown.
+**The reliable path is one tap away and is still where a failure lands.**
+
+### 2. ⭐⭐ iOS ZOOMED THE PAGE ON EVERY FOCUSED FIELD
+
+His report: *"when I click the look up any player it automatically zooms up awkwardly."*
+
+**iOS Safari zooms whenever a focused field computes under 16px, and does not zoom back out.**
+The lookup was 14px. **16px is a threshold, not a preference** — 15px still zooms.
+
+```css
+@media (pointer: coarse) { input, textarea { font-size: 16px !important; } }
+```
+
+⭐ **Three decisions inside two lines:**
+
+- **`pointer: coarse`, not a width breakpoint.** It is the device property that actually predicts
+  the behaviour; a width query misses a tablet in landscape and fires on a narrow desktop window
+  where nothing zooms. **Verified: 16px on touch, 14px/13px on desktop.**
+- ⚠️ **`!important` is load-bearing and is not laziness.** Every field in this app carries its size
+  in an inline `style` attribute, **and an inline style beats a stylesheet rule at any
+  specificity.** ⛔ **The first version read perfectly in the source and still computed 14px on a
+  phone. Only rendering it found that.**
+- ⛔ **NOT fixed with `maximum-scale=1`.** That stops the zoom by taking pinch-zoom away from
+  everyone who needs to magnify the page.
+
+`select` is deliberately excluded: it opens a picker rather than a keyboard, and 16px would
+reflow the league-config grid. **If a select ever zooms, add it and re-check that grid at 390px.**
+
+### 3. The data-mode coverage box folds, and its count stays out
+
+His words: *"that box is taking up unnecessary space."* ~90px at rest on the input screen, above
+the thing the reader came to use.
+
+⛔ **WHAT MAY NOT GO BEHIND THE TAP IS THE COUNT.** This panel exists because the UI called 2025
+mode *"ground truth"* until Aug 3, when it turned out to carry a coaching overlay on 9 teams.
+The summary line now reads **`9 of 32 teams carry a 2026 coaching overlay`**, and in projected
+mode it leads with **`Estimates, not measured stats`**. **Same rule the grade header follows: the
+finding rests, the reasoning taps.**
+
+⭐ One disclosure instead of two — `which teams?` was a nested toggle inside a box that is now
+itself a toggle, so it folded in and `adjCoverageOpen` is gone.
+
+### 4. ⛔⛔ THE UPLOAD PATH SET THE GRADE AND TOLD NOBODY
+
+His report: *"once it finishes, the app automatically brings the Grade into focus."* **He was
+asking for a feature that already existed and had never been wired to his path.**
+
+The scroll-into-view effect was built Sep 1 and verified. It is keyed on `setAnalyzeTick`, and
+**`setAnalyzeTick` was only ever called from `handleAnalyze` — the paste button.**
+`extractFromImages` set the grade and moved nothing, so after an upload the page sat exactly
+where it was and the reader hunted ~1,200px down the form they had just filled in.
+
+⚠️⚠️ **AND THE SAME BRANCH WAS MISSING `track("grade")`.** Every grade produced from a screenshot
+was **invisible to telemetry** — and upload became the DEFAULT path the same morning, so **the
+season of grade-distribution data this was built to collect would have been missing most of its
+rows without ever erroring.** Found while fixing the scroll, in the same nine lines.
+
+⭐⭐ **GUARD 18 WAS STRENGTHENED, NOT RELAXED, AND THIS IS THE REUSABLE PART.** It asserted the
+literal count `setAnalyzeTick === 2` — *"once per mode branch in handleAnalyze."* **That was true,
+and it was the wrong property: a second grade-producing path cannot change a number read from the
+first.** It now asserts **PER PRODUCER** — every function that sets a fresh grade must also move
+the counter — so a new path fails the moment it lands. **Negative-tested: stripping the tick from
+`extractFromImages` exits 1 and names the function.**
+
+⛔ **A COUNT IS A PROXY FOR A PROPERTY, AND IT STOPS BEING ONE WHEN THE SHAPE CHANGES.**
+
+### 5. The ceiling leaderboard moved out of the input screen
+
+His call: *"the ceiling rankings don't need to be on the page when users haven't uploaded
+anything yet, it should show after the analysis is rendered."* ⭐ **Right about the seat: before a
+grade exists the reader is trying to get a roster IN, and a league-wide leaderboard is something
+you consult AFTER you have a verdict to weigh it against.**
+
+```
+input screen   panel removed (both modes)
+redraft        takes the slot the WHAT IF swap box occupied
+best ball      rendered above its sticky index, so it does not lose the panel
+               along with the input-screen copy
+```
+
+⛔ **It is a COMPONENT because it now renders twice.** Pasting 55 lines would be the
+duplicate-definition class this repo has paid for nine times. **It reads `POS_ACCENT` directly
+rather than `posColor`, which is itself already declared twice at component scope — a third copy
+is not the fix.**
+
+⚠️ **The redraft WHAT-IF swap box is gone, per his ask. The swap engine and its state are
+untouched**, so restoring it is a render change rather than a rebuild. **Best ball still carries
+its own `WHAT IF YOU HAD` pivot section** — he asked about the one he screenshotted, and deleting
+a different feature in the other mode was not the ask.
+
+### Three process failures on the way, all previously recorded classes
+
+1. ⛔ **A BACKTICK IN A CSS COMMENT BROKE THE BUILD.** The whole stylesheet is a template literal,
+   so a backtick inside it **terminates the literal** and the next word parses as JavaScript.
+   esbuild caught it immediately.
+2. ⛔ **An assertion failed on its own documentation** — the comment explaining that
+   `adjCoverageOpen` was retired had to name it. **Fourth instance** (guard 31 on `<button`,
+   guard 17 on the cyan token, guard 25 on "matchup"). Fixed by stripping comments before the
+   token test.
+3. ⛔ **A sabotage was applied to `App.jsx.jsx` while guard 18 reads `App.jsx`, and reported a
+   MISS. Third instance.** **Check which file the guard opens before writing the sabotage.**
+
+```
+37 guards pass · 1592 assertions · dual-file identical
+90 grades BYTE-IDENTICAL against a pristine worktree
+live at 375x812: upload tab active with the drawing at rest, lookup 16px,
+  coverage one line, ceiling panel absent from input and present in results,
+  redraft what-if gone, 0 tap targets under 32px, no horizontal overflow
+```
+
+⚠️ **ONE THING COULD NOT BE OBSERVED HERE AND IS NOT CLAIMED: the scroll itself.** This browser
+pane reports `visibilityState: "hidden"`, so `requestAnimationFrame` never runs and the effect
+never reaches its `scrollTo`. **The wiring is asserted by guard 18 and is line-for-line the paste
+path that already works in production — but the upload round-trip wants a real upload on the
+live site.**
