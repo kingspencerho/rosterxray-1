@@ -9212,6 +9212,76 @@ const Explainer = ({ children, label = "what this means" }) => {
   );
 };
 
+// ⭐ THE CEILING LEADERBOARD MOVED OFF THE INPUT SCREEN, Sep 9 2026, his call:
+//   "the ceiling rankings don't need to be on the page when users haven't
+//   uploaded anything yet, it should show after the analysis is rendered."
+//   He is right about the seat: before a grade exists the reader is trying to
+//   get a roster IN, and a league-wide leaderboard is something you consult
+//   AFTER you have a verdict to weigh it against.
+//
+// ⛔ IT IS A COMPONENT BECAUSE IT NOW RENDERS IN TWO PLACES (best ball and
+//   redraft results). Pasting 55 lines twice is the duplicate-definition class
+//   this repo has paid for nine times — five hand-rolled position palettes, two
+//   tier helpers, a second game-log lookup, a re-typed band literal.
+//
+// ⚠️ It reads POS_ACCENT directly rather than posColor, which is itself already
+//   declared twice at component scope. A third copy is not the fix.
+const CeilingPanel = ({ open, onToggle }) => (
+  <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
+      <button
+        onClick={() => onToggle()}
+        style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: open ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
+      >
+        {/* The two words wear the colours their own rows already carry —
+            spike cells are --pos, nuclear cells --accent-purple-light — so
+            the header and its data read as one object. Same sanctioned
+            pairing as the Season Schedule header; everything else in this
+            label stays --ui-accent chrome. */}
+        <span style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
+          Ceiling Rankings · <span style={{ color: "var(--pos)" }}>Spike</span> / <span style={{ color: "var(--accent-purple-light)" }}>Nuclear</span> Weeks
+        </span>
+        <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div style={{ background: "var(--bg-surface)", padding: "12px 14px 10px" }}>
+          <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px", maxWidth: "640px" }}>
+            How often each player posted a difference-maker week in 2025. <span style={{ color: "var(--pos)", fontWeight: 600 }}>Spike</span> = 18+ half-PPR points, <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>Nuclear</span> = 28+. SOS = 2026 season schedule rank, <span style={{ fontWeight: 600 }}>1 = easiest</span> of 32. Informational only — a spike profile is last season's shape, not a projection, and role changes override it.
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
+            {["QB", "RB", "WR", "TE"].map(pos => {
+              const pc = POS_ACCENT[pos];
+              return (
+                <div key={pos} style={{ background: "var(--bg-inset)", border: "1px solid var(--bg-raised)", borderRadius: "4px", padding: "10px 12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "11px", color: pc.text, fontWeight: 700, letterSpacing: "0.1em" }}>{pos}</span>
+                    <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>
+                      <span style={{ color: "var(--pos)" }}>SPIKE</span> · <span style={{ color: "var(--accent-purple-light)" }}>NUKE</span> · SOS
+                    </span>
+                  </div>
+                  {CEILING_RANKINGS[pos].map((p, i) => (
+                    <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", borderBottom: i < CEILING_RANKINGS[pos].length - 1 ? "1px solid var(--bg-raised)" : "none", fontSize: "11px" }}>
+                      <span style={{ color: "var(--text-faint)", fontSize: "9px", width: "14px", flexShrink: 0, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>
+                      <span style={{ color: "var(--text-primary)", fontWeight: 600, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textTransform: "capitalize" }}>
+                        {p.name}
+                        <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "9px", textTransform: "uppercase" }}> {p.team}{p.gp < 10 ? " ⚠" : ""}</span>
+                      </span>
+                      <span style={{ color: "var(--pos)", fontWeight: 700, fontSize: "10px", width: "34px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.spike * 100)}%</span>
+                      <span style={{ color: p.nuclear > 0 ? "var(--accent-purple-light)" : "var(--text-faint)", fontWeight: 600, fontSize: "10px", width: "30px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.nuclear * 100)}%</span>
+                      <span style={{ color: p.sos != null && p.sos <= 10 ? "var(--pos)" : p.sos != null && p.sos >= 23 ? "var(--neg)" : "var(--text-muted)", fontSize: "10px", width: "24px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{p.sos ?? "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "10px", letterSpacing: "0.03em", lineHeight: 1.5 }}>
+            ⚠ = under 10 games in 2025, small sample. 8-game minimum to appear. Rates are descriptive of last season at half-PPR thresholds — they rank ceiling access, not expected points.
+          </div>
+        </div>
+      )}
+    </div>
+);
+
 const ClampedText = ({ text, lines = 6, accent = "var(--ui-accent)", label = "summary" }) => {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
@@ -11112,17 +11182,47 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
       setInput(newInput);
       setAiNutshell(null);
       setAiLoading(false);
+      // ⛔⛔ THIS PATH SET THE GRADE AND TOLD NOBODY. Two things handleAnalyze
+      //   does that the screenshot path did not, both reported Sep 9 2026:
+      //
+      //   1. setAnalyzeTick — the effect that scrolls the finished grade to the
+      //      top of the viewport is keyed on it, so after an upload the page just
+      //      sat where it was and the reader had to hunt ~1,200px down the form
+      //      they had already filled in. The scroll was built Sep 1 and verified;
+      //      it was only ever wired to the paste button.
+      //
+      //   2. track("grade") — every grade produced by a screenshot was invisible
+      //      to telemetry. ⚠️ That became the DEFAULT path the same day, so the
+      //      season of grade-distribution data this was built to collect would
+      //      have been missing most of its rows without ever erroring.
       if (analysisMode === "redraft") {
         const picks = parseRosterRedraft(newInput);
         const league = resolveLeague(redraftLeague, customConfig);
         const result = analyzeRedraft(picks, league, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
+        // ⛔ STRUCTURE ONLY, NEVER CONTENT — same contract as the paste path.
+        track("grade", {
+          grade: result.grade, mode: "redraft", league: redraftLeague,
+          source: rxSource, size: rxSizeBucket(picks.length),
+          resolved: (result.valid || []).length, entered: picks.length,
+          visit: rxVisitBucket(RX_VISIT.n),
+        });
+        if (!(result.valid || []).length) track("analyze_empty", { mode: "redraft", source: rxSource });
+        setAnalyzeTick(t => t + 1);
         fetchAiNutshell(result);
       } else {
         const fmt = TOURNAMENTS[tournament].format || "standard";
         const picks = parseRoster(newInput, fmt);
         const result = analyzeRoster(picks, tournament, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
+        track("grade", {
+          grade: result.grade, mode: "bestball", tournament,
+          source: rxSource, size: rxSizeBucket(picks.length),
+          resolved: (result.valid || []).length, entered: picks.length,
+          visit: rxVisitBucket(RX_VISIT.n),
+        });
+        if (!(result.valid || []).length) track("analyze_empty", { mode: "bestball", source: rxSource });
+        setAnalyzeTick(t => t + 1);
         fetchAiNutshell(result);
       }
       setMode("paste");
@@ -13567,65 +13667,6 @@ Analyze this best ball roster. Return JSON only.`;
           </div>
         )}
 
-        {/* === CEILING RANKINGS — informational panel (collapsed by default) ===
-            League-wide spike/nuclear leaderboard per position with season SOS
-            alongside. Pure reference: none of this feeds the score directly
-            (ceiling shape is scored per-roster elsewhere) — this exists so the
-            draft-prep question "who actually spikes?" has an in-app answer. */}
-        <div style={{ marginBottom: "20px", border: "1px solid var(--bg-elevated)", borderRadius: "6px", overflow: "hidden" }}>
-          <button
-            onClick={() => setCeilingOpen(prev => !prev)}
-            style={{ width: "100%", background: "var(--bg-base)", border: "none", borderBottom: ceilingOpen ? "1px solid var(--bg-elevated)" : "none", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "inherit" }}
-          >
-            {/* The two words wear the colours their own rows already carry —
-                spike cells are --pos, nuclear cells --accent-purple-light — so
-                the header and its data read as one object. Same sanctioned
-                pairing as the Season Schedule header; everything else in this
-                label stays --ui-accent chrome. */}
-            <span style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>
-              Ceiling Rankings · <span style={{ color: "var(--pos)" }}>Spike</span> / <span style={{ color: "var(--accent-purple-light)" }}>Nuclear</span> Weeks
-            </span>
-            <span style={{ fontSize: "10px", color: "var(--text-faint)" }}>{ceilingOpen ? "▲" : "▼"}</span>
-          </button>
-          {ceilingOpen && (
-            <div style={{ background: "var(--bg-surface)", padding: "12px 14px 10px" }}>
-              <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px", maxWidth: "640px" }}>
-                How often each player posted a difference-maker week in 2025. <span style={{ color: "var(--pos)", fontWeight: 600 }}>Spike</span> = 18+ half-PPR points, <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>Nuclear</span> = 28+. SOS = 2026 season schedule rank, <span style={{ fontWeight: 600 }}>1 = easiest</span> of 32. Informational only — a spike profile is last season's shape, not a projection, and role changes override it.
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
-                {["QB", "RB", "WR", "TE"].map(pos => {
-                  const pc = posColor(pos);
-                  return (
-                    <div key={pos} style={{ background: "var(--bg-inset)", border: "1px solid var(--bg-raised)", borderRadius: "4px", padding: "10px 12px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
-                        <span style={{ fontSize: "11px", color: pc.text, fontWeight: 700, letterSpacing: "0.1em" }}>{pos}</span>
-                        <span style={{ fontSize: "8px", color: "var(--text-faint)", letterSpacing: "0.05em" }}>
-                          <span style={{ color: "var(--pos)" }}>SPIKE</span> · <span style={{ color: "var(--accent-purple-light)" }}>NUKE</span> · SOS
-                        </span>
-                      </div>
-                      {CEILING_RANKINGS[pos].map((p, i) => (
-                        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", borderBottom: i < CEILING_RANKINGS[pos].length - 1 ? "1px solid var(--bg-raised)" : "none", fontSize: "11px" }}>
-                          <span style={{ color: "var(--text-faint)", fontSize: "9px", width: "14px", flexShrink: 0, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>
-                          <span style={{ color: "var(--text-primary)", fontWeight: 600, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textTransform: "capitalize" }}>
-                            {p.name}
-                            <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "9px", textTransform: "uppercase" }}> {p.team}{p.gp < 10 ? " ⚠" : ""}</span>
-                          </span>
-                          <span style={{ color: "var(--pos)", fontWeight: 700, fontSize: "10px", width: "34px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.spike * 100)}%</span>
-                          <span style={{ color: p.nuclear > 0 ? "var(--accent-purple-light)" : "var(--text-faint)", fontWeight: 600, fontSize: "10px", width: "30px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{Math.round(p.nuclear * 100)}%</span>
-                          <span style={{ color: p.sos != null && p.sos <= 10 ? "var(--pos)" : p.sos != null && p.sos >= 23 ? "var(--neg)" : "var(--text-muted)", fontSize: "10px", width: "24px", textAlign: "right", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>{p.sos ?? "—"}</span>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "10px", letterSpacing: "0.03em", lineHeight: 1.5 }}>
-                ⚠ = under 10 games in 2025, small sample. 8-game minimum to appear. Rates are descriptive of last season at half-PPR thresholds — they rank ceiling access, not expected points.
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Mode toggle */}
         <div style={{ display: "flex", gap: "0", marginBottom: "16px", borderBottom: "1px solid var(--border-subtle)" }}>
           <button
@@ -14522,6 +14563,10 @@ Analyze this best ball roster. Return JSON only.`;
                 </div>
               </div>
             </div>
+
+            {/* Best ball lost the input-screen copy in the same move, so it gets
+                the panel here. Collapsed, so it costs one line at rest. */}
+            <CeilingPanel open={ceilingOpen} onToggle={() => setCeilingOpen(o => !o)} />
 
             <StickyIndex items={SECTION_INDEX.bestball} />
 
@@ -15990,107 +16035,12 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             </div>
 
-            {/* Trade Analyzer */}
-            {analyzed.mode === "redraft" && (
-              <div style={{ marginBottom: "16px", border: "1px solid #6d28d9", borderLeft: "3px solid var(--accent-purple-strong)", borderRadius: "4px" }}>
-                <button
-                  onClick={() => setTradeOpen(o => !o)}
-                  style={{
-                    width: "100%",
-                    background: tradeOpen ? "#0d0a14" : "#09060f",
-                    border: "none",
-                    borderRadius: tradeOpen ? "4px 4px 0 0" : "4px",
-                    padding: "12px 16px",
-                    color: "var(--ui-accent)",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    fontFamily: "var(--font-body)",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
-                    <span>⇄ WHAT IF?</span>
-                    <span style={{ fontSize: "9px", color: "#a78bfa", fontWeight: 600, letterSpacing: "0.05em", textTransform: "none" }}>Swap players and see your new grade</span>
-                  </div>
-                  <span style={{ fontSize: "9px", color: "#a78bfa" }}>{tradeOpen ? "▲" : "▼"}</span>
-                </button>
-                {tradeOpen && (
-                  <div style={{ padding: "14px 16px", borderTop: "1px solid var(--bg-raised)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "6px" }}>
-                      <div>
-                        <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>Swap out</div>
-                        <input
-                          value={tradeGive}
-                          onChange={e => { setTradeGive(e.target.value); setTradeResult(null); setTradeError(null); }}
-                          placeholder="e.g. Jefferson, Adams"
-                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
-                        />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>Swap in</div>
-                        <input
-                          value={tradeGet}
-                          onChange={e => { setTradeGet(e.target.value); setTradeResult(null); setTradeError(null); }}
-                          placeholder="e.g. Hill, Chase"
-                          style={{ width: "100%", background: "var(--bg-base)", border: "1px solid var(--border-strong)", borderRadius: "3px", padding: "7px 10px", color: "var(--text-soft)", fontSize: "12px", fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
-                        />
-                      </div>
-                    </div>
-                    <div style={{ fontSize: "9px", color: "var(--text-faint)", marginBottom: "10px", letterSpacing: "0.03em" }}>Separate multiple players with a comma</div>
-                    <button
-                      onClick={handleTradeAnalysis}
-                      style={{ background: "linear-gradient(90deg, #4c1d95, #5b21b6)", border: "1px solid #6d28d955", borderRadius: "3px", padding: "8px 16px", color: "#c4b5fd", fontSize: "11px", fontWeight: 700, fontFamily: "var(--font-body)", letterSpacing: "0.05em", cursor: "pointer" }}
-                    >
-                      Analyze Swap →
-                    </button>
-                    {tradeError && (
-                      <div style={{ marginTop: "10px", padding: "8px 12px", background: "#1a0f00", border: "1px solid #92400e", borderRadius: "3px", color: "var(--warn)", fontSize: "11px" }}>
-                        {tradeError}
-                      </div>
-                    )}
-                    {tradeResult && (() => {
-                      const scoreDelta = tradeResult.score - analyzed.score;
-                      const gradeUp = scoreDelta > 0;
-                      const newStrengths = tradeResult.strengths.filter(s => !analyzed.strengths.includes(s));
-                      const newWeaknesses = tradeResult.weaknesses.filter(w => !analyzed.weaknesses.includes(w));
-                      return (
-                        <div style={{ marginTop: "14px" }}>
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "10px" }}>
-                            <div style={{ padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
-                              <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Before</div>
-                              <div style={{ fontFamily: "var(--font-display)", fontSize: "52px", color: gradeColor(analyzed.grade), lineHeight: 1 }}>{analyzed.grade}</div>
-                              <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "4px" }}>Score {analyzed.score.toFixed(1)}</div>
-                            </div>
-                            <div style={{ padding: "12px", background: "var(--bg-base)", border: `1px solid ${gradeUp ? "#22c55e44" : "#ef444444"}`, borderRadius: "4px" }}>
-                              <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>After</div>
-                              <div style={{ fontFamily: "var(--font-display)", fontSize: "52px", color: gradeColor(tradeResult.grade), lineHeight: 1 }}>{tradeResult.grade}</div>
-                              <div style={{ fontSize: "11px", color: gradeUp ? "var(--pos)" : "var(--neg)", marginTop: "4px" }}>
-                                {gradeUp ? "+" : ""}{scoreDelta.toFixed(1)} pts
-                              </div>
-                            </div>
-                          </div>
-                          {(newStrengths.length > 0 || newWeaknesses.length > 0) && (
-                            <div style={{ fontSize: "12px" }}>
-                              {newStrengths.map((s, i) => (
-                                <div key={i} style={{ color: "var(--pos)", marginBottom: "3px" }}>+ {s}</div>
-                              ))}
-                              {newWeaknesses.map((w, i) => (
-                                <div key={i} style={{ color: "var(--warn)", marginBottom: "3px" }}>- {w}</div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* ⛔ THE WHAT-IF SWAP TOOL WAS REMOVED HERE, Sep 9 2026, his call —
+                the ceiling leaderboard takes its slot. The swap engine itself is
+                untouched (runSwap and its state remain), so restoring the panel is
+                a render change, not a rebuild. ⚠️ Best ball still carries its own
+                "WHAT IF YOU HAD" pivot section; only the redraft swap box went. */}
+            <CeilingPanel open={ceilingOpen} onToggle={() => setCeilingOpen(o => !o)} />
 
             <StickyIndex items={SECTION_INDEX.redraft} />
 

@@ -262,9 +262,35 @@ eff.includes("window.scrollTo")
   ? ok("it is not keyed on the result object")
   : bad("keying on `analyzed` scrolls on a restored grade the reader did not request");
 
-(src.match(/setAnalyzeTick\(/g) || []).length === 2
-  ? ok("the counter moves only in handleAnalyze, once per mode")
-  : bad("setAnalyzeTick must fire exactly twice — one per mode branch");
+// ⛔⛔ STRENGTHENED Sep 9 2026, AFTER THE BUG IT COULD NOT SEE.
+// This used to assert the literal count 2 — "once per mode branch in
+// handleAnalyze". That was true and it was the wrong property. A SECOND entry
+// point produces grades, extractFromImages (the screenshot path), and it never
+// fired the counter at all: after an upload the page simply did not move, and
+// the reader hunted ~1,200px down the form they had just filled in. The count
+// assertion passed the whole time, because the paths it was not looking at
+// cannot change a number it reads from the paths it was.
+//
+// ⭐ THE PROPERTY IS PER-PRODUCER, NOT A TOTAL: every function that sets a
+// fresh grade must also move the counter. A new grade-producing path now fails
+// this the moment it lands, which is what the old form could not do.
+const tickProducers = ["handleAnalyze", "extractFromImages"];
+const bodyOf = (name) => {
+  const i = src.indexOf(`const ${name} = `);
+  if (i < 0) return "";
+  const j = src.indexOf("\n  };", i);
+  return j < 0 ? src.slice(i) : src.slice(i, j);
+};
+const missingTick = tickProducers.filter(f => !bodyOf(f).includes("setAnalyzeTick("));
+missingTick.length === 0
+  ? ok(`every grade-producing path moves the counter (${tickProducers.join(", ")})`)
+  : bad(`these set a grade and never scroll to it: ${missingTick.join(", ")}`);
+
+// ...and each of them does it once per mode branch, never on a shared line that
+// would fire on a path that did not produce a grade.
+tickProducers.every(f => (bodyOf(f).match(/setAnalyzeTick\(/g) || []).length === 2)
+  ? ok("each fires once per mode branch")
+  : bad("each grade-producing path must fire the counter once per mode branch");
 
 // WAIT FOR LAYOUT. The measurement must happen after the page stops resizing.
 eff.includes("scrollHeight") && eff.includes("requestAnimationFrame")
