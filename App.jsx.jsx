@@ -10376,7 +10376,16 @@ export default function RosterScorer() {
   const [extractError, setExtractError] = useState(null);
   const [debugResponse, setDebugResponse] = useState(null);
   const [dragOver, setDragOver] = useState(false);
-  const [mode, setMode] = useState("paste"); // "upload" | "paste" — paste leads (reliable path; upload requires API)
+  // ⭐ UPLOAD OPENS FIRST — his call, Sep 9 2026, the same day the share-button
+  // hint shipped. The hint exists to answer "what do I do here", and behind a
+  // tab that is not the default a first-time visitor never sees it.
+  //
+  // ⚠️ WHAT THE OLD DEFAULT WAS PROTECTING, because it was a real reason:
+  // paste needs no network, and upload calls /api/analyze. That protection did
+  // not live in the default — it lives in the extract-error branch below, which
+  // drops the user back to paste with the error shown. The reliable path is
+  // still one tap away and is still where a failure lands.
+  const [mode, setMode] = useState("upload"); // "upload" | "paste"
   const [tournament, setTournament] = useState("main");
   const [tournamentDropdownOpen, setTournamentDropdownOpen] = useState(false);
   const [redraftDropdownOpen, setRedraftDropdownOpen] = useState(false);
@@ -10434,7 +10443,6 @@ export default function RosterScorer() {
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
   const [dataMode, setDataMode] = useState("actual");
-  const [adjCoverageOpen, setAdjCoverageOpen] = useState(false);
   const [aiNutshell, setAiNutshell] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   // The AI pass used to fail silently and fall through to the template nutshell,
@@ -12544,6 +12552,36 @@ Analyze this best ball roster. Return JSON only.`;
           }
         }
 
+        /* ⛔ iOS SAFARI ZOOMS THE WHOLE PAGE when a focused field computes to a
+           font-size under 16px, and it does not zoom back out afterwards. Reported
+           Sep 9 2026 on the player lookup (14px): typing a name threw the layout
+           sideways and cut the right-hand edge of the panel off screen.
+
+           16px is a THRESHOLD, not a preference — 15px still zooms.
+
+           ⚠️ SCOPED TO TOUCH, so the desktop type scale is untouched. The
+           pointer:coarse query is the device property that actually predicts the
+           behaviour; a
+           width breakpoint would miss a tablet in landscape and would fire on a
+           narrow desktop window where nothing zooms.
+
+           ⛔ DO NOT "fix" this with maximum-scale=1 on the viewport meta. That
+           stops the zoom by disabling pinch-zoom for everyone, which takes the
+           page away from anyone who needs to magnify it.
+
+           ⚠️ select is deliberately NOT included: it opens a picker rather than
+           a keyboard, and 16px would reflow the league-config grid. If a select
+           ever zooms on focus, add it here and re-check that grid at 390px. */
+        @media (pointer: coarse) {
+          /* ⚠️ !important IS LOAD-BEARING HERE AND IS NOT LAZINESS. Every field in
+             this app carries its size in an inline style attribute, and an inline
+             style beats a stylesheet rule at any specificity — so without this the
+             rule computes to 14px on a phone and the zoom still happens. VERIFIED
+             by rendering: the first version measured 14px on a coarse-pointer
+             viewport and looked correct in the source. */
+          input, textarea { font-size: 16px !important; }
+        }
+
         @media (max-width: 640px) {
           .hero-headline-wrap h1 { font-size: 42px !important; white-space: nowrap !important; }
           .hero-inner-pad { padding: 32px 18px 28px !important; }
@@ -12890,57 +12928,76 @@ Analyze this best ball roster. Return JSON only.`;
             const bg = isProj ? "#1a1200" : "var(--bg-base)";
             const border = isProj ? "#f59e0b55" : "var(--border-subtle)";
             return (
-              <div style={{
-                marginTop: "8px", padding: "7px 10px",
+              // ⭐ IT COLLAPSES, AND THE HEADLINE STAYS OUT. His call Sep 9 2026:
+              //   "that box is taking up unnecessary space." It was ~90px at rest on a
+              //   phone, on the input screen, above the thing the reader came to use.
+              //
+              // ⛔ WHAT MAY NOT GO BEHIND THE TAP, and this is the whole design: the
+              //   COUNT. This panel exists because the UI called 2025 mode "ground
+              //   truth" until Aug 3 2026, when it turned out to carry a coaching
+              //   overlay on 9 teams. Neither mode is uniform. A reader who never opens
+              //   this must still know the data is partial, so the summary line carries
+              //   the count, and in projected mode it carries the word ESTIMATES.
+              //   Same rule the grade header follows: the finding rests, the reasoning taps.
+              //
+              // ⭐ ONE disclosure, not two. "which teams?" was a nested toggle inside a
+              //   box that is now itself a toggle, so it folded in and adjCoverageOpen
+              //   is gone.
+              <details style={{
+                marginTop: "8px", padding: "5px 10px",
                 background: bg, border: `1px solid ${border}`, borderRadius: "4px",
               }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
+                {/* 32px FLOOR, STATED RATHER THAN INHERITED — a <summary> is not a
+                    <button> and inherits nothing from the global tap-target rule. */}
+                <summary style={{
+                  cursor: "pointer", listStyle: "none", display: "flex",
+                  alignItems: "center", gap: "6px", minHeight: "32px",
+                  fontSize: "10px", color: accent, lineHeight: 1.4,
+                }}>
                   <span style={{ fontSize: "11px", flexShrink: 0 }}>{isProj ? "⚠️" : "ℹ️"}</span>
-                  <div style={{ fontSize: "10px", color: accent, lineHeight: 1.5, flex: 1 }}>
+                  <span style={{ flex: 1 }}>
                     {isProj ? (
-                      <>Projected 2026 defensive adjustments — estimates, not measured stats.{" "}
-                      <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams adjusted</strong>; the
-                      other {unadjusted.length} fall through to raw 2025 FPA.</>
+                      <><strong>Estimates, not measured stats</strong> · {adjusted.length} of {ADJ_COVERAGE.total} teams adjusted</>
                     ) : (
-                      <>2025 measured FPA, plus a 2026 coaching overlay on{" "}
-                      <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams</strong>. The other{" "}
-                      {unadjusted.length} are unmodified 2025 data.</>
+                      <><strong>{adjusted.length} of {ADJ_COVERAGE.total} teams</strong> carry a 2026 coaching overlay</>
                     )}
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "5px", paddingLeft: "17px", flexWrap: "wrap" }}>
-                  <button
-                    onClick={() => setAdjCoverageOpen(o => !o)}
-                    style={{
-                      background: "transparent", border: "none", padding: 0, cursor: "pointer",
-                      fontFamily: "inherit", fontSize: "9px", color: accent,
-                      textDecoration: "underline", letterSpacing: "0.02em", opacity: 0.85,
-                    }}
-                  >
-                    {adjCoverageOpen ? "hide" : "which teams?"}
-                  </button>
-                  <span style={{ fontSize: "9px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>
-                    adj. data {ADJ_UPDATED}
                   </span>
+                  <span style={{ fontSize: "9px", color: accent, opacity: 0.8, flexShrink: 0 }}>detail ⌄</span>
+                </summary>
+
+                <div style={{ fontSize: "10px", color: accent, lineHeight: 1.5, paddingBottom: "6px" }}>
+                  {isProj ? (
+                    <>Projected 2026 defensive adjustments — estimates, not measured stats.{" "}
+                    <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams adjusted</strong>; the
+                    other {unadjusted.length} fall through to raw 2025 FPA.</>
+                  ) : (
+                    <>2025 measured FPA, plus a 2026 coaching overlay on{" "}
+                    <strong>{adjusted.length} of {ADJ_COVERAGE.total} teams</strong>. The other{" "}
+                    {unadjusted.length} are unmodified 2025 data.</>
+                  )}
                 </div>
-                {adjCoverageOpen && (
-                  <div style={{ marginTop: "7px", paddingLeft: "17px", fontSize: "9px", lineHeight: 1.7 }}>
-                    <div style={{ color: accent, marginBottom: "3px" }}>
-                      <strong>Adjusted ({adjusted.length}):</strong>{" "}
-                      <span style={{ fontFamily: "var(--font-mono)" }}>{adjusted.join(" ")}</span>
-                    </div>
-                    <div style={{ color: "var(--text-faint)" }}>
-                      <strong>No adjustment ({unadjusted.length}):</strong>{" "}
-                      <span style={{ fontFamily: "var(--font-mono)" }}>{unadjusted.join(" ")}</span>
-                    </div>
-                    <div style={{ color: "var(--text-faint)", marginTop: "5px", fontStyle: "italic", lineHeight: 1.6 }}>
-                      No adjustment means no reliable 2026 signal was recorded for that
-                      defense — not that it was reviewed and confirmed unchanged. Weigh
-                      tiers on these teams accordingly.
-                    </div>
+
+                <div style={{ fontSize: "9px", lineHeight: 1.7, paddingBottom: "6px" }}>
+                  <div style={{ color: accent, marginBottom: "3px" }}>
+                    <strong>Adjusted ({adjusted.length}):</strong>{" "}
+                    <span style={{ fontFamily: "var(--font-mono)" }}>{adjusted.join(" ")}</span>
                   </div>
-                )}
-              </div>
+                  <div style={{ color: "var(--text-faint)" }}>
+                    <strong>No adjustment ({unadjusted.length}):</strong>{" "}
+                    <span style={{ fontFamily: "var(--font-mono)" }}>{unadjusted.join(" ")}</span>
+                  </div>
+                  {/* ⛔ THE DISTINCTION THIS PANEL WAS BUILT FOR. An absent entry means
+                      no reliable 2026 signal was recorded, NEVER reviewed-and-unchanged. */}
+                  <div style={{ color: "var(--text-faint)", marginTop: "5px", fontStyle: "italic", lineHeight: 1.6 }}>
+                    No adjustment means no reliable 2026 signal was recorded for that
+                    defense — not that it was reviewed and confirmed unchanged. Weigh
+                    tiers on these teams accordingly.
+                  </div>
+                  <div style={{ color: "var(--text-faint)", marginTop: "5px", fontFamily: "var(--font-mono)" }}>
+                    adj. data {ADJ_UPDATED}
+                  </div>
+                </div>
+              </details>
             );
           })()}
         </div>
