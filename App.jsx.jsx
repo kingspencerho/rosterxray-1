@@ -10380,7 +10380,15 @@ export default function RosterScorer() {
   const [tournament, setTournament] = useState("main");
   const [tournamentDropdownOpen, setTournamentDropdownOpen] = useState(false);
   const [redraftDropdownOpen, setRedraftDropdownOpen] = useState(false);
-  const [analysisMode, setAnalysisMode] = useState("bestball"); // "bestball" | "redraft"
+  // ⭐ REDRAFT OPENS FIRST — his call, Sep 9 2026. Best-ball drafting season is
+  // over and redraft is the mode with five months of weekly use left in it.
+  // A default is a guess about who is arriving, and in September the guess changed.
+  //
+  // ⚠️ IT IS ONLY THE OPENING STATE. restoreGradeEntry sets the mode explicitly
+  // from the snapshot, so a shared best-ball link still opens in best ball —
+  // checked before changing this, because a default that overrides a share link
+  // would silently regrade somebody else's roster in the wrong format.
+  const [analysisMode, setAnalysisMode] = useState("redraft"); // "bestball" | "redraft"
   const [redraftLeague, setRedraftLeague] = useState("yahoo_std");
   // FREE-AGENT POOL. Deliberately computed in the COMPONENT, not inside
   // analyzeRedraft: the engine must stay provably clean of every context layer,
@@ -12274,6 +12282,27 @@ Analyze this best ball roster. Return JSON only.`;
         .grade-pulse {
           animation: pulse 2.5s ease-in-out infinite;
         }
+        /* THE UPLOAD HINT. Two animations carrying two different jobs: the ring
+           says WHERE the button is, the dot says WHAT TO DO to it. One alone is
+           ambiguous — a bare pulse could mean anything, a bare dot has no target. */
+        @keyframes rxRingPulse {
+          0%   { transform: scale(.55); opacity: .95; }
+          70%  { transform: scale(1.7); opacity: 0; }
+          100% { transform: scale(1.7); opacity: 0; }
+        }
+        @keyframes rxTapTravel {
+          0%   { transform: translate(-44px, 46px) scale(1); opacity: 0; }
+          16%  { opacity: 1; }
+          58%  { transform: translate(0, 0) scale(1); opacity: 1; }
+          68%  { transform: translate(0, 0) scale(.78); opacity: 1; }
+          78%  { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(0, 0) scale(1); opacity: 0; }
+        }
+        .rx-ring { animation: rxRingPulse 2.6s ease-out infinite;
+                   transform-box: fill-box; transform-origin: center; }
+        .rx-tap  { animation: rxTapTravel 2.6s ease-in-out infinite;
+                   transform-box: fill-box; transform-origin: center; }
+
         @keyframes pulse {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.03); }
@@ -12497,6 +12526,11 @@ Analyze this best ball roster. Return JSON only.`;
           .roster-cta-pulse {
             animation: none;
           }
+          /* The hint still READS with no motion: the ring rests open around the
+             share button and the dot sits on it. A pointer that disappears when
+             motion is off takes the instruction with it. */
+          .rx-ring { animation: none; opacity: .5; }
+          .rx-tap  { animation: none; opacity: 1; }
           .hero-diagnose-scan {
             animation: none;
             background-position: 200% center;
@@ -13605,18 +13639,71 @@ Analyze this best ball roster. Return JSON only.`;
                 style={{ display: "none" }}
                 onChange={(e) => handleFiles(e.target.files)}
               />
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>📸</div>
-              <div style={{ fontSize: "14px", color: "var(--text-primary)", marginBottom: "6px", fontWeight: 600 }}>
-                Drop your roster screenshot — see what your league-mates can't
+              {/* ⭐⭐ THE PICTURE REPLACES THE SENTENCE. This box carried four lines
+                  of prose, one of which was a WRITTEN DESCRIPTION OF WHERE A BUTTON
+                  IS — "tap the share icon at the top right of your Team tab". A
+                  drawing of that corner does the same job without being read, which
+                  is the whole point: he reported the friction as "having to read
+                  around the page to figure out what to do".
+
+                  ⛔ IT IS DRAWN, NOT SCREENSHOTTED, AND THAT IS DELIBERATE. A real
+                  Yahoo screenshot would put another company's interface and a
+                  LICENSED PLAYER PHOTOGRAPH into a public repo and onto a live page,
+                  permanently. A generic phone with the standard system share glyph
+                  carries the same instruction, weighs ~2KB inline, needs no network
+                  request, stays sharp at any size, and matches the dark UI instead
+                  of dropping a bright white screenshot into it.
+
+                  ⚠️ COLOUR: the highlight is --ui-accent, the hueless chrome token.
+                  Green here would read as "good" on a page where green means a good
+                  matchup, and a pointer is chrome, not data. Guard 17 caps the
+                  position hues for exactly this reason. */}
+              <svg viewBox="0 0 240 150" role="img"
+                aria-label="Diagram: on the Yahoo Fantasy team screen, tap the share button in the top right corner, then upload the roster card it creates."
+                style={{ width: "100%", maxWidth: "250px", height: "auto", display: "block", margin: "0 auto 10px" }}>
+                {/* the phone, cropped at the top because only the header matters */}
+                <rect x="34" y="6" width="172" height="142" rx="16" fill="var(--bg-surface)" stroke="var(--border-default)" strokeWidth="1.5" />
+                <path d="M54 32 l-5 5 5 5" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                {/* crest + score, the bits that make it read as a fantasy app */}
+                <circle cx="104" cy="37" r="8" fill="var(--bg-elevated)" />
+                <rect x="117" y="31" width="24" height="6" rx="3" fill="var(--text-dim)" />
+                <rect x="117" y="41" width="16" height="4" rx="2" fill="var(--border-strong)" />
+                {/* ⭐ THE TARGET — the share pill in the top right corner */}
+                <rect x="158" y="26" width="40" height="22" rx="11" fill="var(--bg-elevated)" stroke="var(--ui-accent)" strokeWidth="1.5" />
+                <rect x="165" y="34" width="9" height="7" rx="1.5" fill="none" stroke="var(--text-faint)" strokeWidth="1.4" />
+                <path d="M185 42 v-9 M181.5 36 l3.5 -3.5 3.5 3.5" fill="none" stroke="var(--ui-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M180 39 v4.5 h10 V39" fill="none" stroke="var(--ui-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                {/* the ring that says WHERE */}
+                <circle className="rx-ring" cx="185" cy="37" r="14" fill="none" stroke="var(--ui-accent)" strokeWidth="2" />
+                {/* tab row, Team underlined the way the real screen has it */}
+                <rect x="50" y="62" width="24" height="5" rx="2.5" fill="var(--text-secondary)" />
+                <rect x="50" y="71" width="24" height="2" rx="1" fill="var(--accent-purple-mid)" />
+                <rect x="86" y="62" width="30" height="5" rx="2.5" fill="var(--border-strong)" />
+                <rect x="128" y="62" width="26" height="5" rx="2.5" fill="var(--border-strong)" />
+                <rect x="166" y="62" width="26" height="5" rx="2.5" fill="var(--border-strong)" />
+                {/* roster rows, so it is recognisably a lineup underneath */}
+                <g fill="var(--bg-elevated)">
+                  <circle cx="58" cy="92" r="7" /><circle cx="58" cy="113" r="7" /><circle cx="58" cy="134" r="7" />
+                </g>
+                <g fill="var(--border-strong)">
+                  <rect x="72" y="88" width="58" height="5" rx="2.5" /><rect x="72" y="97" width="36" height="4" rx="2" />
+                  <rect x="72" y="109" width="50" height="5" rx="2.5" /><rect x="72" y="118" width="42" height="4" rx="2" />
+                  <rect x="72" y="130" width="62" height="5" rx="2.5" /><rect x="72" y="139" width="32" height="4" rx="2" />
+                </g>
+                {/* the dot that says WHAT TO DO — travels up to the pill and taps */}
+                <g className="rx-tap">
+                  <circle cx="185" cy="37" r="8" fill="var(--ui-accent)" opacity="0.26" />
+                  <circle cx="185" cy="37" r="3.6" fill="var(--ui-accent)" />
+                </g>
+              </svg>
+              <div style={{ fontSize: "14px", color: "var(--text-primary)", marginBottom: "4px", fontWeight: 600 }}>
+                Drop your roster screenshot
               </div>
               <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
-                Underdog · Yahoo · Sleeper · ESPN
+                Yahoo · Underdog · Sleeper · ESPN
               </div>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", letterSpacing: "0.04em", marginTop: "4px" }}>
-                <span style={{ color: "var(--accent-purple-mid)", fontWeight: 700 }}>Yahoo Tip:</span> tap the share icon at the top right of your Team tab → it exports a roster card. Upload that.
-              </div>
-              <div style={{ fontSize: "10px", color: "var(--text-secondary)", letterSpacing: "0.04em", marginTop: "4px" }}>
-                <span style={{ color: "var(--accent-purple-mid)", fontWeight: 700 }}>For Best Results:</span> upload all roster screens · {tournament === "superflex" ? "20 players (superflex)" : "18-20 players (best ball)"} · full roster for redraft · K/DEF auto-filtered
+              <div style={{ fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.04em", marginTop: "5px" }}>
+                every roster screen · K and DEF ignored
               </div>
             </div>
 

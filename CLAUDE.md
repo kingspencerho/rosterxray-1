@@ -7777,3 +7777,72 @@ LOAD SAMPLE ROSTER verified end to end: 1,512 -> 7,130 chars on one click
 3 sabotages exit non-zero: a roster attached to an event, a player name attached,
   a raw visit count shipped unbucketed
 ```
+
+---
+
+## Sep 9, 2026 — Redraft opens first, and a drawing replaces the sentence
+
+Two asks in one pass. **PRESENTATION ONLY — 90 grades byte-identical** (15 tournaments x 5
+fixtures, plus 3 leagues x 5), against a pristine worktree at HEAD.
+
+### 1. The default follows who is arriving
+
+His call: *"best ball season is over and I'd prefer if redraft was the first option available."*
+One line. **A default is a guess about who is walking in, and in September the guess changed.**
+
+⚠️ **The one thing that could have made it risky was checked first: a shared best-ball link still
+opens in best ball.** `restoreGradeEntry` sets `analysisMode` explicitly from the snapshot, so the
+default only governs a cold arrival. **A default that silently overrode a share link would regrade
+somebody else's roster in the wrong format** — and nothing would have errored.
+
+### 2. ⭐⭐ A PICTURE OF A CORNER, INSTEAD OF A SENTENCE DESCRIBING IT
+
+His ask: *"instead of having a box with all those words... just have an example picture... some
+type of animation that points to it."*
+
+The box carried four lines of prose, **one of which was a written description of where a button
+is** — *"tap the share icon at the top right of your Team tab"*. That is the friction he named
+two days earlier in his own words: *"a user having to read around the page to figure out what to
+do."*
+
+```
+63 words  ->  19 words
+```
+
+**Two animations carrying two different jobs.** The ring says WHERE the button is; the travelling
+dot says WHAT TO DO to it. ⛔ **Neither works alone** — a bare pulse could mean anything, and a
+bare dot has no target.
+
+⛔ **IT IS DRAWN, NOT SCREENSHOTTED, AND THAT WAS THE ONE CALL MADE FOR HIM.** A real Yahoo
+screenshot would put another company's interface **and a licensed player photograph** into a
+public repo and onto a live page, permanently. A generic phone with the standard system share
+glyph carries the same instruction, weighs ~2KB inline, needs no network request, stays sharp at
+any size, and **matches the dark UI instead of dropping a bright white screenshot into it.**
+
+⚠️ **The highlight is `--ui-accent`, the hueless chrome token.** Green would read as "good" on a
+page where green means a good matchup, and **a pointer is chrome, not data** — the Aug 28
+one-colour-one-meaning rule, applied to a new element.
+
+⭐ **The hint still READS with motion off.** Under `prefers-reduced-motion` the ring rests open
+around the button and the dot sits on it. **A pointer that disappears when motion is off takes
+the instruction with it**, which would make the accessibility path strictly worse than the prose
+it replaced.
+
+⚠️ **The reduced-motion rules are APPENDED AFTER the existing pair, never between them.** Guard 18
+asserts `.schedule-cta-pulse` and `.roster-cta-pulse` are adjacent, and inserting into that block
+broke it once already — the same day, on the waiver panel.
+
+### He chose from a rendered comparison, not from a description
+
+Three variants were built as a published artifact — the full phone, a zoomed corner, and a
+two-panel before/after — each animated at real size **on the app's own dark background**, with
+the current box included for comparison. He picked A in one message.
+
+⭐⭐ **That is the reusable part, and it is banked separately: showing beats describing for any
+visual decision.** See `Claude-project-personal/visual-mockups-capability.md`.
+
+```
+37 guards pass · 1591 assertions · dual-file identical
+rendered at 375px: redraft selected at rest, svg 250x156, both animations running by name,
+  0 tap targets under 32px, no horizontal overflow, reduced-motion rule live in the sheet
+```
