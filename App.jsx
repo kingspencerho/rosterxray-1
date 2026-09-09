@@ -8007,6 +8007,28 @@ const FA_WEIGHTS = {
   separation:   0.75,  // rank 3 — talent in isolation
 };
 
+// ⭐⭐ THE SAME KEYS, AS SOURCE HIERARCHY RANKS. The weights above already say
+// this in their comments; this makes it readable by the renderer so a waiver
+// bullet can SHOW which rung of the hierarchy it argues from.
+//
+// ⛔ IT IS NOT A SECOND PALETTE. Rank is expressed as BRIGHTNESS, never hue —
+// rank 1 is the most causal thing you can know, so it is the brightest, and
+// rank 3 recedes. Every hue on this page is already spoken for by position or
+// by the tier scale, and a waiver bullet must not borrow one that means good.
+//
+// ⚠️ A guard asserts every FA_WEIGHTS key has a rank here, so the two cannot
+// drift the way five hand-rolled position palettes once did.
+const FA_RANK = {
+  roleChange: 1, vacancy: 1,
+  volume: 2, tprr: 2, availability: 2,
+  separation: 3,
+};
+const FA_RANK_STYLE = {
+  1: { color: "var(--text-primary)", weight: 600 },
+  2: { color: "var(--text-muted)",   weight: 400 },
+  3: { color: "var(--text-dim)",     weight: 400 },
+};
+
 // Percentile of `v` within `arr` (pre-sorted ascending). Returns null under a
 // 12-player pool, the same floor every other ranking in this app uses: a rank
 // against eight players is a flattering number, not information.
@@ -8870,6 +8892,42 @@ const WORK_COLOR = {
   rush: POS_ACCENT.RB.text,
   rec: POS_ACCENT.WR.text,
   score: "var(--text-primary)",
+};
+
+// A WAIVER BULLET, WITH ITS NUMBERS LIFTED OUT OF THE SENTENCE.
+//
+// ⭐ THE PROBLEM IT SOLVES, reported as "there is too much white": the panel
+// was eleven near-identical grey sentences, and the value ramp could not
+// separate them because --text-secondary through --text-faint span 54 values
+// on a 255 scale. Everything read as one brightness.
+//
+// ⭐⭐ TWO CHANNELS, EACH CARRYING A DIFFERENT MEANING, neither inventing a hue:
+//   HUE        = the player's own position colour, on the FIGURES only. It is
+//                already on his row two lines up, so the bullet and the name
+//                read as one object.
+//   BRIGHTNESS = the Source Hierarchy rank of the signal. Role change is the
+//                brightest thing on the row; separation is the dimmest.
+//
+// ⚠️ A FOUR-DIGIT YEAR IS NOT A FIGURE. "in 2025" is a vintage stamp, not
+// evidence, and painting it like a measurement would make the oldest data on
+// the row look like its strongest claim. The pattern matches percentages,
+// decimals and 1-3 digit counts, and nothing else.
+const FA_NUM = /(\d+(?:\.\d+)?%|\d+\.\d+|\b\d{1,3}\b)/g;
+// Anchored and NOT global, deliberately. A /g regex carries lastIndex between
+// calls, so reusing FA_NUM to test the split parts would match every other one
+// and paint half the figures. Two expressions, one job each.
+const FA_IS_NUM = /^(?:\d+(?:\.\d+)?%|\d+\.\d+|\d{1,3})$/;
+const FaReason = ({ label, numColor, rank }) => {
+  const st = FA_RANK_STYLE[rank] || FA_RANK_STYLE[3];
+  return (
+    <li style={{ fontSize: "11px", lineHeight: 1.55, color: st.color, fontWeight: st.weight, marginBottom: "3px" }}>
+      {String(label).split(FA_NUM).map((part, i) => (
+        FA_IS_NUM.test(part)
+          ? <span key={i} style={{ color: numColor, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{part}</span>
+          : <span key={i}>{part}</span>
+      ))}
+    </li>
+  );
 };
 
 // FOUR GROUPS, NAMED FOR THE QUESTION A READER IS ASKING.
@@ -16840,7 +16898,12 @@ Analyze this best ball roster. Return JSON only.`;
                         rosters, so this cannot be "your best available add" and
                         must not be worded as one. */}
                     <div style={{
-                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-secondary)",
+                      // ⚠️ A CAVEAT IS NOT THE CONTENT. This block was the largest
+                      // bright mass on the page and it says what the app CANNOT do —
+                      // the one thing on screen a returning reader never needs again.
+                      // It keeps its bold lead sentence and drops a step behind the
+                      // players, which is where the eye should land.
+                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-muted)",
                       background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
                       borderRadius: "4px", padding: "9px 11px", marginBottom: "12px",
                     }}>
@@ -16850,7 +16913,7 @@ Analyze this best ball roster. Return JSON only.`;
                       not on <em>your</em> roster and who a {freeAgents.depth}-deep league plausibly leaves
                       unrostered. Check the names against your actual wire, and paste anyone already
                       taken below to drop them.
-                      <div style={{ marginTop: "7px", color: "var(--text-muted)" }}>
+                      <div style={{ marginTop: "7px", color: "var(--text-dim)" }}>
                         Ranked on role change, volume, targets per route, availability and separation —
                         in Source Hierarchy order. <strong style={{ color: "var(--text-secondary)" }}>Schedule is not
                         in the score.</strong> Matchup data is the least stable input measured here, so it
@@ -16868,9 +16931,14 @@ Analyze this best ball roster. Return JSON only.`;
                             fontSize: "11px", padding: "6px 11px", minHeight: "32px",
                             borderRadius: "3px", cursor: "pointer", fontWeight: 700,
                             letterSpacing: "0.04em",
-                            background: faPos === pp ? "var(--bg-elevated)" : "transparent",
-                            border: `1px solid ${faPos === pp ? "var(--border-default)" : "transparent"}`,
-                            color: faPos === pp ? "var(--text-primary)" : "var(--text-muted)",
+                            // The SELECTED chip wears that position's own colour,
+                            // the same one its rows carry below. ALL has no position,
+                            // so it stays neutral rather than borrowing one.
+                            background: faPos === pp ? (POS_ACCENT[pp]?.bg || "var(--bg-elevated)") : "transparent",
+                            border: `1px solid ${faPos === pp ? (POS_ACCENT[pp] ? `${POS_ACCENT[pp].border}66` : "var(--border-default)") : "transparent"}`,
+                            color: faPos === pp
+                              ? (POS_ACCENT[pp]?.text || "var(--text-primary)")
+                              : "var(--text-dim)",
                           }}>
                           {pp}
                         </button>
@@ -16910,11 +16978,13 @@ Analyze this best ball roster. Return JSON only.`;
                         {/* THE EVIDENCE, NOT JUST THE RANK. A ranked list a reader
                             cannot audit is a black box, and checkable numbers are
                             the entire argument of this app. */}
-                        <ul style={{ margin: "5px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
+                        {/* Figures in HIS position colour, prose dimmed by Source
+                            Hierarchy rank. See FaReason for why those are two
+                            separate channels and why neither invents a hue. */}
+                        <ul style={{ margin: "6px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
                           {c.reasons.slice(0, 3).map(r => (
-                            <li key={r.key} style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                              {r.label}
-                            </li>
+                            <FaReason key={r.key} label={r.label}
+                              numColor={posColor(c.pos).text} rank={FA_RANK[r.key] || 3} />
                           ))}
                         </ul>
                       </div>

@@ -87,11 +87,57 @@ for (const t of ["getMatchupTier", "PLAYOFFS", "FPA", "matchupScoreFor", "playof
   ok(`the score never reads ${t}`, !scoreBody.includes(t),
     "rank 5 is the least stable input measured here; WR FPA is negative year over year");
 }
+// CODE ONLY, NOT PROSE. A comment explaining WHY matchup data is banned from
+// the score contains the word "matchup", so the un-stripped test made
+// documenting this rule break it. Third instance in this repo of a guard
+// failing on its own explanation (guard 31 on "<button", guard 17 on the cyan
+// token). Negative-tested: a real matchup weight still trips it.
+// The strip is scoped to THIS assertion - the very next one REQUIRES the
+// comments, because it checks that every weight names its hierarchy rank.
+const faStripped = (bodyOf("FA_WEIGHTS") || "")
+  .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 ok("FA_WEIGHTS carries no matchup component",
-  !/matchup|schedule|opponent|fpa/i.test(bodyOf("FA_WEIGHTS") || ""));
+  !/matchup|schedule|opponent|fpa/i.test(faStripped));
 // Every weight names a hierarchy rank in its comment, so nobody adds one blind.
 ok("every FA weight is annotated with its hierarchy rank",
   (bodyOf("FA_WEIGHTS") || "").match(/rank \d/g)?.length >= 5);
+
+// ---- 2b. THE RANK MAP THE RENDERER READS ----
+// FA_RANK exists so a waiver bullet can show which rung of the Source
+// Hierarchy it argues from: rank 1 renders brightest, rank 3 dimmest. That is
+// a SECOND declaration of something FA_WEIGHTS already encodes in prose, and
+// two declarations of one fact drift - this repo has lost that bet before with
+// five hand-rolled position palettes. So they are asserted against each other.
+const rankBody = bodyOf("FA_RANK") || "";
+ok("FA_RANK exists", !!rankBody);
+const weightKeys = [...(bodyOf("FA_WEIGHTS") || "").matchAll(/^\s*(\w+):\s*[\d.]+/gm)].map(m => m[1]);
+const rankKeys = [...rankBody.matchAll(/(\w+):\s*[123]\b/g)].map(m => m[1]);
+ok("every weighted signal has a rank", weightKeys.length > 0 &&
+  weightKeys.every(k => rankKeys.includes(k)),
+  `missing: ${weightKeys.filter(k => !rankKeys.includes(k)).join(", ")}`);
+ok("no rank names a signal that carries no weight",
+  rankKeys.every(k => weightKeys.includes(k)),
+  `extra: ${rankKeys.filter(k => !weightKeys.includes(k)).join(", ")}`);
+
+// The rank the RENDERER uses must match the rank the WEIGHT comment declares.
+// A signal weighted as rank 1 but rendered as rank 3 would tell the reader the
+// opposite of what the score believes, which is worse than no colour at all.
+const weightRank = {};
+for (const m of (bodyOf("FA_WEIGHTS") || "").matchAll(/^\s*(\w+):\s*[\d.]+,\s*\/\/\s*rank (\d)/gm)) {
+  weightRank[m[1]] = Number(m[2]);
+}
+const rankPairs = Object.fromEntries([...rankBody.matchAll(/(\w+):\s*([123])\b/g)].map(m => [m[1], Number(m[2])]));
+const rankMismatch = Object.entries(weightRank).filter(([k, r]) => rankPairs[k] !== r);
+ok("the rendered rank matches the rank its weight declares",
+  Object.keys(weightRank).length >= 5 && rankMismatch.length === 0,
+  rankMismatch.map(([k, r]) => `${k}: weight says ${r}, render says ${rankPairs[k]}`).join(" | "));
+
+// Colour must never encode QUALITY here. Good/bad hues belong to the matchup
+// scale, and a waiver bullet that borrowed one would be issuing a verdict.
+const styleBody = bodyOf("FA_RANK_STYLE") || "";
+ok("rank is expressed as brightness, never as a good/bad hue",
+  !!styleBody && !/--(pos|neg|caution|warn|tier|accent-|pink|gold)/.test(styleBody),
+  styleBody.slice(0, 80));
 
 // ---- 3. REASONS ARE EVIDENCE FOR ----
 console.log("\nreasons are a case, not a data dump");

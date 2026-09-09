@@ -7597,3 +7597,89 @@ rendered at 430px: the OPENING row, the card row, 0 tap targets under 32px, 0 pa
 A depth-chart **change** is undetectable: the file is a snapshot with no history, so a note made
 stale by a role move will not surface. Storing week-over-week `depth_chart_order` would close it and
 is the one new piece of data collection this needs.
+
+---
+
+## Sep 8, 2026 — Colour on the waiver panel: hue says WHO, brightness says HOW STRONG
+
+His report: *"Can you help me color code this section? There's too much white."*
+
+### The diagnosis was not "it needs colour"
+
+**The tokens were already right.** The panel used `--text-secondary`, `--text-muted` and
+`--text-dim` exactly as intended. ⭐⭐ **The problem is that those three live between `#9c9ca8` and
+`#b0b0bb` — a 27-value spread on a 255 scale.** With `--text-faint` included the whole "dim" family
+spans 54 values. **A ramp that narrow is not a ramp; eleven grey sentences all read as one
+brightness.**
+
+### Two channels, each carrying a different meaning, neither inventing a hue
+
+| Channel | Carries | Where it comes from |
+|---|---|---|
+| **HUE** | which player | his own position colour, read from `POS_ACCENT`, applied to the FIGURES only |
+| **BRIGHTNESS** | how strong the signal is | the Source Hierarchy rank of that bullet |
+
+⭐⭐⭐ **THE RANK WAS ALREADY IN THE DATA AND NOBODY WAS SHOWING IT.** Every waiver reason already
+carries a `key` — `roleChange`, `vacancy`, `volume`, `tprr`, `availability`, `separation` — and
+`FA_WEIGHTS` already annotates each with its hierarchy rank in a comment. **`FA_RANK` just makes
+that readable by the renderer.** Rank 1 (role change, the most causal thing you can know) is the
+brightest line on the row; rank 3 (separation, talent in isolation) is the dimmest.
+
+**So a reader now sees, without reading a word, whether a waiver target is recommended because his
+role is growing or merely because he gets open.** That is the app's central idea, finally visible.
+
+⛔ **RANK IS NEVER A HUE.** Green and red mean good and bad everywhere else on this page. A waiver
+bullet that borrowed one would be issuing a verdict, which this panel explicitly does not do.
+
+⚠️ **A FOUR-DIGIT YEAR IS NOT A FIGURE.** `"6.4 targets a game in 2025"` paints `6.4` and leaves
+`2025` alone — it is a vintage stamp, not evidence, and colouring it would make the oldest data on
+the row look like its strongest claim. The pattern matches percentages, decimals and 1-3 digit
+counts only.
+
+**Also:** the "this app cannot see your waiver wire" caveat dropped a step to `--text-muted` and its
+second paragraph to `--text-dim`. **It was the largest bright mass on the page and it says what the
+app CANNOT do** — the one thing a returning reader never needs again. And the selected position
+chip now wears that position's own colour; `ALL` stays neutral because it has no position.
+
+### Four failures, three of them mine
+
+1. ⛔⛔ **THIRD GUARD TO FAIL ON A COMMENT.** My note explaining *why* matchup data is banned from
+   the score contains the word "matchup", which tripped the check that matchup data is banned.
+   **Guard 31 fell to `<button`, guard 17 to the cyan token, this one to `matchup`.** Fixed the same
+   way — strip comments before the token test — **and scoped to that one assertion, because the very
+   next one REQUIRES the comments** (it checks every weight names its rank). Negative-tested.
+2. ⛔ **A `/g` REGEX USED FOR `.test()` PAINTS EVERY OTHER FIGURE.** `lastIndex` carries between
+   calls. Two expressions now: one global for splitting, one anchored and non-global for testing.
+3. ⛔⛔ **`git checkout App.jsx` TO UNDO A SABOTAGE WIPED ALL FIVE EDITS.** The sabotage and the work
+   were in the same file. ⭐ **Restore from a FILE COPY taken before the sabotage, never from git,
+   whenever the file also holds uncommitted work.**
+4. ⚠️ **`.gitattributes` DID NOT RETROACTIVELY NORMALISE THE WORKING TREE.** The Sep 7 fix pins
+   `eol=lf`, but that only applies on checkout — **`scripts/test-free-agents.mjs` was still CRLF on
+   disk**, so a patch anchored on `\n` silently failed to match. **Every file not rewritten since
+   that commit is still CRLF locally.** `git add --renormalize .` would fix it in one pass and is
+   worth doing deliberately, not as a side effect of an unrelated change.
+
+### The guard that keeps it honest
+
+⛔ **`FA_RANK` is a SECOND declaration of something `FA_WEIGHTS` already encodes, and two
+declarations of one fact drift** — this repo has lost that bet before with five hand-rolled position
+palettes. So they are asserted against each other, four ways:
+
+```
+every weighted signal has a rank
+no rank names a signal that carries no weight
+the rendered rank matches the rank its weight comment declares
+rank is expressed as brightness, never as a good/bad hue
+```
+
+⭐ **The third is the one that matters most:** a signal weighted as rank 1 but rendered as rank 3
+would tell the reader the opposite of what the score believes — **worse than no colour at all.**
+
+```
+36 guards pass · 1577 assertions · dual-file identical
+rendered at 375px, computed colours read back from the browser:
+  rank 1 primary/600 · rank 2 muted/400 · rank 3 dim/400 · figures in position hue
+  "2025" correctly left unpainted
+3 sabotages exit non-zero: a signal losing its rank, a rank contradicting its own
+  weight comment, and rank 1 borrowing the good/bad green
+```
