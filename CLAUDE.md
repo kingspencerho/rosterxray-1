@@ -7762,9 +7762,13 @@ would have silently analysed `"[object Object]"`.
    `RegExp` and `"picks["` threw on an unterminated character class. They are literal substrings and
    are now matched as such.
 
-⚠️ **`session` fires TWICE in dev** — `main.jsx` wraps the app in `React.StrictMode`, which
-double-invokes effects in development only. **Verify once on the production bundle before trusting
-any session count**, because a real doubling would halve every conversion rate silently.
+✅ **RESOLVED Sep 9, 2026 — `session` fires ONCE in production.** It fires twice in dev because
+`main.jsx` wraps the app in `React.StrictMode`, which double-invokes effects in development only.
+**Measured on the live site rather than assumed:** two page loads produced exactly two POSTs to
+`/_vercel/insights/event`, one each, and `rxr_visits` read `2`. ⛔ **Do not discount session
+counts for doubling — they are clean.** ⚠️ The check was worth running: a real doubling would
+have halved every conversion rate all season, silently, and the dev console gives exactly the
+wrong impression.
 
 ```
 37 guards pass · 1591 assertions · dual-file identical
