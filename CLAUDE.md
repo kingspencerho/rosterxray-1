@@ -7683,3 +7683,93 @@ rendered at 375px, computed colours read back from the browser:
 3 sabotages exit non-zero: a signal losing its rank, a rank contradicting its own
   weight comment, and rank 1 borrowing the good/bad green
 ```
+
+---
+
+## Sep 8, 2026 — Telemetry that can answer "does anyone come back", and the demo that stopped one step short
+
+His instruction: *"add the tracking before week 1."* His plan, in his own words: *"go thru an entire
+season first and see how my app works in real time and optimize it from there then prepare to
+market it during the offseason once we get enough data from the entire year."*
+
+⚠️ **A CORRECTION FIRST, because a session claim was wrong.** An earlier grep matched only
+`track?.(` and reported *"exactly one custom event."* **There were three** — `grade`,
+`player_card_open`, `export_schedule` — and `grade` was already the most valuable of them, carrying
+grade distribution, mode and league since Jul 16. **The gaps were real; the count was not.**
+
+### What was missing, and it was the whole funnel
+
+The plan depends on season data, and the app could not answer **does anyone come back**, **where do
+people give up**, or **which panels does anyone open**. Six additions close that:
+
+| Event | Answers |
+|---|---|
+| `session` | arrival — fires on mount, so every later event has a denominator |
+| `analyze_empty` | **the friction he named** — someone tried and got nothing usable |
+| `example_run` | did the demo path get taken |
+| `section_open` | which of the many panels anyone actually opens |
+| `input_screenshot` | which input route was used |
+| enriched `grade` | + source, roster size, resolved-vs-entered, visit bucket |
+
+⭐ **`section_open` cost one edit.** Every collapsible panel on the card and in the results renders
+through `CardSection`, so instrumenting the component covers all of them at once. **Only the OPEN
+fires** — a close is not interest, and firing on both would double every count.
+
+### ⭐⭐ RETENTION WITHOUT AN IDENTIFIER — the design decision worth keeping
+
+Pageviews cannot tell ten visits by one person from one visit by ten people, and that distinction
+is the single most important thing a season of data has to produce.
+
+⛔ **`RX_VISIT` assigns no ID and must not.** A counter and a first-seen date in the visitor's own
+browser, reported as **buckets** (`1`, `2-3`, `4-9`, `10+`), answer the question in aggregate with
+nothing that could follow a person. **The app is free and has no login; the telemetry should match.**
+
+### ⛔ AND THE HARD RULE: TELEMETRY DESCRIBES THE APP, NEVER THE USER
+
+People paste their own rosters into this thing. **One player name in an event property is somebody's
+private team leaving their browser permanently into a third-party dashboard** — and it would be
+indefensible in a public repo where anyone can read exactly what is collected.
+
+**Guard 37 (`test-telemetry.mjs`) makes that mechanical rather than a matter of care.** It parses
+every `track()` call and rejects any property carrying `input`, `raw`, `roster`, `picks[`, `.name`,
+`valid[`, `faTaken`, `tradeGive/Get` or a textarea reference. It also asserts the visit counter
+contains no `random`/`uuid`/`crypto`, survives storage throwing, and never ships a raw count.
+
+### ✅ THE DEMO THAT STOPPED ONE STEP SHORT OF BEING A DEMO
+
+He named the friction himself: *"a user having to read around the page to figure out what to do."*
+
+⭐⭐ **`LOAD SAMPLE ROSTER` filled the textarea and did nothing else.** The button promises to show
+what a full diagnosis looks like, then left the visitor staring at a box of names with no signal
+that a second click was required. **A first-timer's one-tap path to seeing the product existed and
+was 90% built.** It now runs the analysis: measured 1,512 → 7,130 characters of rendered output on
+one click.
+
+⚠️ **`handleAnalyze` had to take optional text**, because `setInput` is async and the demo needs to
+analyse a string React has not committed yet. **It is also an onClick handler, and onClick passes an
+EVENT** — so the argument is type-checked rather than trusted. Passing the event straight through
+would have silently analysed `"[object Object]"`.
+
+### Three self-inflicted failures on the way
+
+1. ⛔ **A file-wide string replace nearly hit 15 call sites.** `parseRosterRedraft(input)` appears
+   fifteen times; only the two inside `handleAnalyze` may change. **The `count == 1` assertion caught
+   it before anything was written** — the script writes at the end, so a failed assertion is a safe
+   abort rather than a half-edited file.
+2. ⛔ **A JSX comment in ATTRIBUTE position is a syntax error.** `{/* ... */}` is legal beside an
+   element and illegal inside its props.
+3. ⛔ **A guard that crashes is a guard that never runs.** The banned-token list was passed to
+   `RegExp` and `"picks["` threw on an unterminated character class. They are literal substrings and
+   are now matched as such.
+
+⚠️ **`session` fires TWICE in dev** — `main.jsx` wraps the app in `React.StrictMode`, which
+double-invokes effects in development only. **Verify once on the production bundle before trusting
+any session count**, because a real doubling would halve every conversion rate silently.
+
+```
+37 guards pass · 1591 assertions · dual-file identical
+session verified firing on mount from the browser console, not from source
+LOAD SAMPLE ROSTER verified end to end: 1,512 -> 7,130 chars on one click
+3 sabotages exit non-zero: a roster attached to an event, a player name attached,
+  a raw visit count shipped unbucketed
+```

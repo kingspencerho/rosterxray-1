@@ -9079,8 +9079,17 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
     <div style={nested
       ? { marginTop: "16px" }
       : { marginTop: "22px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
+      {/* ⭐ ONE EDIT COVERS EVERY COLLAPSIBLE PANEL on the card and in the
+          results, because they all render through this component. Only the OPEN
+          is recorded — a close is not a signal of interest, and firing on both
+          would double every count.
+          ⚠️ A JSX comment cannot sit in ATTRIBUTE position, which is where this
+          first went; it has to live beside the element, not inside its props. */}
       <Head
-        {...(collapsible ? { onClick: () => setOpen(o => !o), "aria-expanded": open } : {})}
+        {...(collapsible ? {
+          onClick: () => setOpen(o => { if (!o) track?.("section_open", { section: String(title).slice(0, 40) }); return !o; }),
+          "aria-expanded": open,
+        } : {})}
         style={{
           display: "flex", alignItems: "center", gap: "8px", width: "100%",
           marginBottom: shown && note ? "6px" : shown ? "8px" : "0",
@@ -9130,6 +9139,38 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
 // everybody. MEASURED Sep 6 2026: 0 of 5 open on a cleared localStorage.
 // The source read correctly; only a render caught it.
 // Captured here, before any grade can run, so it describes who ARRIVED.
+// ⭐⭐ RETENTION, WITHOUT AN IDENTIFIER. The one question a season of data has
+// to answer is "does anyone come back", and pageviews cannot tell 10 visits
+// from one person apart from 1 visit from ten people.
+//
+// ⛔ IT DOES NOT ASSIGN AN ID, AND IT MUST NOT. A counter and a first-seen
+// date in this browser, reported as BUCKETS, answers the question in
+// aggregate without anything that could follow a person around. The app is
+// free and has no login; it should stay that way in the telemetry too.
+//
+// ⚠️ Same try/catch as FIRST_VISIT below and for the same reason: private
+// windows and blocked site data throw on access rather than returning null.
+const RX_VISIT = (() => {
+  try {
+    const now = Date.now();
+    const first = Number(localStorage.getItem("rxr_first_seen")) || 0;
+    if (!first) {
+      localStorage.setItem("rxr_first_seen", String(now));
+      localStorage.setItem("rxr_visits", "1");
+      return { n: 1, days: 0 };
+    }
+    const n = (Number(localStorage.getItem("rxr_visits")) || 0) + 1;
+    localStorage.setItem("rxr_visits", String(n));
+    return { n, days: Math.floor((now - first) / 86400000) };
+  } catch { return { n: 0, days: 0 }; }
+})();
+
+// Buckets, never raw counts. A raw visit number is high-cardinality and reads
+// like an identifier in an analytics dashboard even though it is not one.
+const rxVisitBucket = n => (n <= 1 ? "1" : n <= 3 ? "2-3" : n <= 9 ? "4-9" : "10+");
+const rxDayBucket = d => (d <= 0 ? "same-day" : d < 7 ? "1-6d" : d < 30 ? "7-29d" : "30d+");
+const rxSizeBucket = n => (n <= 8 ? "1-8" : n <= 14 ? "9-14" : n <= 20 ? "15-20" : "21+");
+
 const FIRST_VISIT = (() => {
   try { return localStorage.getItem("rxr_has_analyzed") !== "1"; } catch { return true; }
 })();
@@ -10327,6 +10368,10 @@ export default function RosterScorer() {
   const [input, setInput] = useState("");
   const [analyzed, setAnalyzed] = useState(null);
   const [uploadedImages, setUploadedImages] = useState([]);
+  // Which route the roster came in by. It is the top of the funnel he named:
+  // "the friction is the upload of the screenshot". Without it a drop-off
+  // cannot be attributed to the path that caused it.
+  const [rxSource, setRxSource] = useState("paste");
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState(null);
   const [debugResponse, setDebugResponse] = useState(null);
@@ -10428,6 +10473,18 @@ export default function RosterScorer() {
   const [benchListOpen, setBenchListOpen] = useState(false);
   const [roleCtxOpen, setRoleCtxOpen] = useState(false);
   const [startSitOpen, setStartSitOpen] = useState(true);
+
+  // ⭐ THE FUNNEL STARTS HERE. Fires once per page load, before the visitor has
+  // done anything, so every later event can be read as a share OF this one.
+  // Without it a drop-off is invisible: you see the people who finished and
+  // never the people who left.
+  React.useEffect(() => {
+    track("session", {
+      visit: rxVisitBucket(RX_VISIT.n),
+      since_first: rxDayBucket(RX_VISIT.days),
+      returning: !FIRST_VISIT,
+    });
+  }, []);
 
   // The card is a drill-down, not a destination — Escape and backdrop both close.
   React.useEffect(() => {
@@ -10870,6 +10927,8 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
       data: await compressAndEncode(f),
       preview: URL.createObjectURL(f),
     })));
+    setRxSource("screenshot");
+    track("input_screenshot", { count: processed.length });
     setUploadedImages(prev => [...prev, ...processed]);
   };
 
@@ -11898,8 +11957,14 @@ Analyze this best ball roster. Return JSON only.`;
     return () => cancelAnimationFrame(raf);
   }, [analyzeTick]);
 
-  const handleAnalyze = () => {
-    if (!input.trim()) return;
+  // ⚠️ TAKES OPTIONAL TEXT because setInput is async — the example button needs
+  // to analyse text React has not committed to state yet. It is also an onClick
+  // handler, and onClick passes an EVENT, so the argument is type-checked rather
+  // than trusted. Passing the event through as a roster would silently analyse
+  // "[object Object]".
+  const handleAnalyze = (arg) => {
+    const raw = typeof arg === "string" ? arg : input;
+    if (!raw.trim()) return;
     // Once someone has graded a roster they are no longer a first-time user, so
     // the paste instructions stop being the default on every later visit.
     try { localStorage.setItem("rxr_has_analyzed", "1"); } catch {}
@@ -11910,28 +11975,50 @@ Analyze this best ball roster. Return JSON only.`;
     setAiPivotNotes({});
     setAiStandoutDetails({});
     if (analysisMode === "redraft") {
-      const picks = parseRosterRedraft(input);
+      const picks = parseRosterRedraft(raw);
       const league = resolveLeague(redraftLeague, customConfig);
       const result = analyzeRedraft(picks, league, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
       // Anonymous grade-distribution event — grade curve calibration (audit Jul 16 2026)
-      track("grade", { grade: result.grade, mode: "redraft", league: redraftLeague });
+      // ⛔ STRUCTURE ONLY, NEVER CONTENT. Counts and buckets describe how the app
+      // performed; a player name would be the user's own roster leaving the browser.
+      track("grade", {
+        grade: result.grade, mode: "redraft", league: redraftLeague,
+        source: rxSource, size: rxSizeBucket(picks.length),
+        resolved: (result.valid || []).length, entered: picks.length,
+        visit: rxVisitBucket(RX_VISIT.n),
+      });
+      if (!(result.valid || []).length) track("analyze_empty", { mode: "redraft", source: rxSource });
       setAnalyzeTick(t => t + 1);
       fetchAiNutshell(result);
     } else {
       const fmt = TOURNAMENTS[tournament].format || "standard";
-      const picks = parseRoster(input, fmt);
+      const picks = parseRoster(raw, fmt);
       const result = analyzeRoster(picks, tournament, showPickAnalysis && picks.hasPickNumbers, dataMode === "projected");
       setAnalyzed(result);
-      track("grade", { grade: result.grade, mode: "bestball", tournament });
+      track("grade", {
+        grade: result.grade, mode: "bestball", tournament,
+        source: rxSource, size: rxSizeBucket(picks.length),
+        resolved: (result.valid || []).length, entered: picks.length,
+        visit: rxVisitBucket(RX_VISIT.n),
+      });
+      if (!(result.valid || []).length) track("analyze_empty", { mode: "bestball", source: rxSource });
       setAnalyzeTick(t => t + 1);
       fetchAiNutshell(result);
     }
   };
 
+  // ⭐⭐ IT NOW RUNS, IT DOES NOT JUST FILL THE BOX. The button says "see what a
+  // full diagnosis looks like" and used to leave the visitor staring at a
+  // textarea full of names with no indication that a second click was needed.
+  // A demo that stops one step short of the demo is the confusion it was built
+  // to prevent.
   const handleExample = () => {
-    // Pick the example that flexes the active analysis mode's best output.
-    setInput(analysisMode === "redraft" ? exampleRosterRedraft : exampleRosterBestBall);
+    const demo = analysisMode === "redraft" ? exampleRosterRedraft : exampleRosterBestBall;
+    setRxSource("example");
+    setInput(demo);
+    track("example_run", { mode: analysisMode });
+    handleAnalyze(demo);
   };
 
   const tierStyle = (color) => {
