@@ -8091,3 +8091,106 @@ rendered at 375x812: DAL RB shows tier + change + starters · DAL WR silent (pos
 supposedly drives is rushing efficiency, and this repo's own table puts **RB yards per carry at
 r = 0.022**. What it buys is one sentence on a card, on the handful of teams where a real thing just
 happened.
+
+## Week 1 News Sweep, and a Guard That Conflated Availability With Outlook (Sep 11, 2026)
+
+Twenty prose edits across all three tables, sourced from the NFL's official Week 1 injury
+report, NFL.com, the Falcons' own site, and the Legendary Upside Week 1 Walkthrough.
+**90 grades BYTE-IDENTICAL** — 15 tournaments x 5 fixtures plus 3 leagues x 5, against a
+pristine worktree at HEAD. Prose carries no score.
+
+### ⛔ THE ATLANTA QUARTERBACK ENTRIES HAD INVERTED, AND BOTH NAMED PASSERS ARE OUT
+
+All three ATL rows read as an open Penix/Tua competition with no Week 1 starter named.
+Reality as of Sep 11: **Atlanta named Tua the starter, he hurt his oblique in practice on
+Thu Sep 10, Penix was not cleared off the Week 11 2025 ACL, and Cooper Rush starts.**
+
+**The cascade is what made this worth catching.** Drake London, Kyle Pitts and Bijan Robinson
+all inherit a passer who is not playing, and `cooper rush` existed in **none** of the three
+ADP tables and no prose table — so the app could not name Atlanta's actual starter at all.
+
+He is now in `RECENT_NEWS` and `SITUATIONS` and **deliberately NOT in any ADP table.** He
+carries no best-ball quote, and per the ADP source-of-truth rule a fabricated number is worse
+than none. He is a matchup input for the Atlanta skill players, not a rosterable asset.
+
+**Third payout of the 30-45 day freshness rule in two weeks** (Pierce Aug 28, Jacobs Aug 30,
+this). The Tua row was FIVE DAYS OLD and already described a world that had ended.
+
+### ⚠️ A THIRD PROSE TABLE EXISTS, AND THIS FILE NAMES IT WRONG
+
+There are **three** per-player prose tables, not two: `RECENT_NEWS`, **`VERDICTS`**, and
+`SITUATIONS`. The Data File Locations section above calls the middle one `PLAYER_VERDICTS`;
+**the actual constant is `VERDICTS`.** A doc-vs-code naming divergence of exactly the class
+the Sep 8 `NAKED_RB_HVT_GATE` entry records — a name a human reads and acts on is a
+definition whether or not a machine parses it.
+
+Coverage is ragged and must be checked per player, never assumed: `ashton jeanty` and
+`josh jacobs` are SITUATIONS-only, `tucker kraft` and `isiah pacheco` are RECENT_NEWS-only,
+`travis hunter` was RECENT_NEWS + VERDICTS with **no SITUATIONS row**, so nothing he carried
+could reach the player card. He has one now.
+
+### ⚠️ TWO SCRIPTING TRAPS, BOTH CAUGHT BY ASSERTIONS RATHER THAN BY READING
+
+1. **A block span that ends at the next `const NAME = {` is WRONG.** `SITUATIONS` is followed
+   by more ADP tables, so a span running to EOF matched `"tua tagovailoa": { adp: 255.0 }` in
+   `ADP_YAHOO` and reported two hits. Terminate on the block's own `};` at column 0.
+2. Every edit asserts **exactly one** match before replacing. Both failures above aborted
+   before writing, so the tree stayed clean — verified with `git diff --stat` after each.
+
+`newline=""` on both read and write, per the line-endings rule; `git ls-files --eol` confirms
+`i/lf w/lf` after.
+
+### ⭐ GUARD 8 NARROWED: `hold` IS NOT A SELL
+
+`test-stale-verdicts.mjs` rule 2 fired on the new Hunter row — *"RECENT_NEWS confirms
+availability, but SITUATIONS reads verdict hold"*. The guard was right to look and wrong to
+fire, and the reason generalises:
+
+**IT CONFLATED AVAILABILITY WITH FANTASY OUTLOOK.** Those are the same question for almost
+every player and OPPOSITE questions for a two-way one. Travis Hunter is *cleared for full
+participation* AND *projected to play full-time cornerback at ~30% route participation* — he
+is maximally available and minimally useful. The clause tested `NEGATIVE_VERDICT`, which
+includes a bare `hold`; but `hold` is NEUTRAL, not a sell, and a player can be available and
+still a hold for a committee, a bad offence, or a defensive role.
+
+The guard's own header requires each `AVAILABLE` phrase to be one that *"cannot reasonably
+appear in a note arguing the opposite direction."* **`cleared for full participation` turned
+out to be exactly such a phrase.** That is a blind spot in the rule, not a fact to write
+around — rewording the note to dodge the regex would have been silencing the check, which the
+header explicitly forbids.
+
+Narrowed to `fade`/`hard fade`. **The founding Nabers case was `hold` + trend `falling` and is
+still caught by the trend clause**, so nothing the test was built for is lost. Both shapes
+negative-tested and both still exit non-zero; the clean baseline exits 0.
+
+⚠️ **Hunter's trend was ALSO wrong on my side and was fixed first.** I wrote `falling`; the
+Aug 5 row already read "primarily at cornerback," so nothing deteriorated this week — it was
+CONFIRMED and QUANTIFIED. `stable` is the honest label. **Fix your own label before you touch
+the guard**, or you will narrow a rule to accommodate an error.
+
+### The other seventeen edits
+
+| Player | Change |
+|---|---|
+| **travis hunter** | Full-time CB Week 1, ~30% routes. ADP 147 prices a role he is not playing |
+| **ashton jeanty** | No injury designation. The ankle question is closed; TARGET/rising |
+| **alec pierce** | Playing, under full strength. Downs the easier Week 1 trust; Keenan Allen behind them |
+| **tucker kraft** | Returns Week 1 vs MIN, no designation |
+| **marshawn lloyd** | Lead back with Jacobs unavailable, in a three-way room |
+| **isiah pacheco** | IR. Leaves Jacob Saylors as Gibbs' only backup |
+| **jordyn tyson** | RECENT_NEWS row was stale and undated, still reading "immediate WR2 role" with no mention of IR. Now dated, with the hamstring cause and the named beneficiaries |
+| **kayshon boutte** | HOU WR2 after Jayden Higgins' ACL |
+| **greg dulcich** | First coverage in any prose table. MIA TE1 path |
+| **jeremiyah love** | Questionable, ankle, game-time call |
+
+**No verdict crossed into `TARGET` except Jeanty**, who was already `TARGET`. `activeTargets`
+pays +0.3 past three with a 1.5 cap, so verdict changes can move a grade; none here did, and
+the 90-grade run is the proof rather than the claim.
+
+### ⚠️ TWO CLAIMS FROM THE SOURCES WERE DROPPED, NOT CARRIED
+
+The fetched Week 1 injury report listed **"DT Aaron Donald (rest)"** for the Rams and a Bears
+DL whose name belongs to a safety. Neither is plausible for 2026 and neither could be
+confirmed against a second source, so nothing from either line was written. Search summaries
+and page fetches carry no vintage guarantee — the Rachaad White trap from Aug 16, arriving
+through a different door.

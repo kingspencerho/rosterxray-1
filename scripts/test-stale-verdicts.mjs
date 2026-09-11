@@ -142,7 +142,24 @@ for (const [player, sit] of situations) {
     continue;
   }
   // 2. News confirms availability, verdict still trending down. (The Nabers case.)
-  if (hit(n.text, AVAILABLE) && (sit.trend === "falling" || NEGATIVE_VERDICT(sit.verdict))) {
+  //
+  // NARROWED Sep 11 2026. This clause used to fire on NEGATIVE_VERDICT, which
+  // includes a bare "hold" — and that conflated AVAILABILITY with OUTLOOK.
+  // They are the same question for almost every player and opposite questions
+  // for a two-way one: travis hunter is cleared for full participation AND
+  // projected to play full-time cornerback at ~30% route participation, so he
+  // is maximally available and minimally useful. "hold" is a neutral verdict,
+  // not a sell, and a player can be available and still a hold for a committee,
+  // a bad offense, or a defensive role.
+  //
+  // The founding Nabers case was "hold" + trend "falling" and is still caught
+  // by the trend clause below, so no case this test was built for is lost.
+  // A "fade" against confirmed availability is still a real contradiction.
+  // The header's own rule is that each AVAILABLE phrase must be one that
+  // "cannot reasonably appear in a note arguing the opposite direction";
+  // "cleared for full participation" turned out to be exactly such a phrase.
+  const SELL_VERDICT = (v) => /^(fade|hard fade)$/i.test(v);
+  if (hit(n.text, AVAILABLE) && (sit.trend === "falling" || SELL_VERDICT(sit.verdict))) {
     fails.push({ player, sit, n, why: `RECENT_NEWS confirms availability, but SITUATIONS reads verdict "${sit.verdict}" / trend "${sit.trend}"` });
     continue;
   }
