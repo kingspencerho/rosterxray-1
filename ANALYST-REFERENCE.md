@@ -1213,7 +1213,7 @@ else.
 | **File** | — |
 | **Field** | — |
 | **Surfaces** | — |
-| **Status** | rejected — no free data · last verified Sep 1 2026 |
+| **Status** | rejected — see the two reasons below · last verified **Sep 11 2026** |
 
 **Plain English.** How good is the line in front of him.
 
@@ -1222,6 +1222,61 @@ else.
 **Gotchas.** **No free per-player OL data exists** in a rankable form, and
 team pressure rate allowed is **confounded by the quarterback** — a scrambler
 makes his line look better than it is.
+
+> ### ⚠️ RE-VERIFIED Sep 11 2026, AND THE REJECTION SURVIVED FOR A DIFFERENT REASON THAN THE ONE WRITTEN HERE
+>
+> **What was checked:** PFF publishes a free, public, weekly-updated ranking of all
+> 32 offensive lines with the five named starters per team —
+> `pff.com/news/nfl-offensive-line-rankings-2026`. Not paywalled; the full article
+> reads with `defuddle parse <url> --md`.
+>
+> ⛔ **So "no free data" was too strong and is now retired as the reason.** A free
+> TEAM-level source exists. What the original line got right, and what still holds,
+> is the narrower claim: **no free PER-PLAYER OL grade data** — PFF quotes
+> individual grades inside the prose but publishes no dataset.
+>
+> ⛔⛔ **THE REASON IT STAYS REJECTED IS NEW, AND IT IS STRONGER THAN THE OLD ONE:
+> the ranking is a HAND-ASSIGNED OPINION, not a measurement.** The author states the
+> method in the article — each starter is given a score **between 5 and 10 in 0.5
+> increments**, shaped by three years of PFF grades, averaged with extra weight on
+> the tackles. **There is nothing to compute a year-over-year `r` against**, so it can
+> never clear the stability bar every scored input in this app had to clear. ⭐ It is
+> a `SEEN`-class input by the provenance table: good for context and options, never
+> for "this works".
+>
+> ⚠️ **AND THE CHEAP AUTOMATED VERSION DOES NOT EXIST EITHER — MEASURED, not assumed.**
+> The obvious shortcut was to widen `POSITIONS` in `scripts/build-status.py`, since
+> the Sleeper feed already downloads weekly and carries linemen. **It carries the
+> players and publishes no depth chart for them.** Counted against the live feed
+> (12,227 players) on Sep 11 2026:
+>
+> ```
+> pos    on a team    with depth_chart_order
+> OL          248              0
+> OT           66              0
+> T            49              0
+> C            29              0
+> G            59              1
+> (for contrast: WR 312/209 · RB 185/122 · QB 117/92 · TE 197/141)
+> ```
+>
+> ⭐ **So Sleeper can tell you a lineman is hurt and cannot tell you he was a starter.**
+> An IR'd franchise left tackle and an IR'd third-string guard are indistinguishable
+> in that feed. **Identifying the five starters requires the PFF article or hand entry;
+> there is no free feed for it.**
+>
+> ⭐⭐ **WHAT THE ARTICLE IS ACTUALLY GOOD FOR, and it is not the ranking.** Its real
+> content is CHANGE: Tunsil out (Commanders, top-20 → 32nd), both Carolina tackles out
+> (top-12 → 26th), Biadasz out for the season (Chargers), Cade Mays out (Lions, 13th →
+> 19th). **Change outranks level in the Source Hierarchy, and a team that just lost its
+> left tackle is information nothing else in this app can see.** A team sitting 7th all
+> season is not.
+>
+> ⛔ **If it is ever built: context only, RB and QB cards only, rendered as a TIER
+> ("top-10 line") rather than a rank ("7th").** A hand-assigned 0.5-increment score does
+> not support the precision a rank implies — **the same mistake the leverage panel made
+> on Sep 6 2026, when it printed "sharp ownership" for a projection and had to be
+> corrected.**
 
 ---
 
