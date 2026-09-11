@@ -62,7 +62,7 @@ console.log("context-only containment");
 ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 
 const ACCESSORS = ["getNgsRec", "getCareerArc", "getVacated", "getRedZone", "getAvailability",
-                   "getRoutes", "getCoverage"];
+                   "getRoutes", "getCoverage", "getOline"];
 // Every reviewed consumer. Adding a name here is a deliberate act; a call site
 // that is not on this list fails the run whether or not it looks harmless.
 const ALLOWED = [
@@ -89,7 +89,7 @@ for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
       "a context layer reaching the scoring engine moves grades and invalidates every recorded calibration");
   }
   for (const tbl of ["NGS_RECEIVING", "CAREER_ARC", "VACATED", "REDZONE", "AVAILABILITY",
-                     "ROUTES", "COVERAGE"]) {
+                     "ROUTES", "COVERAGE", "OLINE"]) {
     // Identifier boundaries, not a substring search. "COVERAGE" and "ROUTES"
     // are ordinary English the engine uses in weakness strings ("no W17
     // coverage"), and a guard that false-fails on prose gets ignored — which is
@@ -100,14 +100,27 @@ for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
   }
 }
 
+// COMMENTS ARE BLANKED BEFORE THIS SCAN, AND THE LENGTH IS PRESERVED.
+// The property is "every CALL SITE sits inside a reviewed consumer", and a
+// mention inside a comment is not a call site. Sep 11 2026 this failed on the
+// note explaining why getVacated had to be fixed, which had to name it.
+// FIFTH instance in this repo of a guard failing on its own documentation
+// (guard 31 on <button, guard 17 on the cyan token, guard 25 on "matchup",
+// the adjCoverageOpen assertion on Sep 9). Blanking with spaces rather than
+// deleting keeps every reported index pointing at the real file.
+const codeOnly = app
+  .replace(/\/\*[\s\S]*?\*\//g, m => " ".repeat(m.length))
+  .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + " ".repeat(m.length - pre.length));
+ok("comment stripping preserves offsets", codeOnly.length === app.length);
+
 // Every call site of every accessor sits inside a reviewed consumer.
 for (const fn of ACCESSORS) {
-  const sites = [...app.matchAll(new RegExp(`${fn}\\(`, "g"))].map(m => m.index)
-    .filter(i => !app.slice(Math.max(0, i - 40), i).includes(`const ${fn} = `));
+  const sites = [...codeOnly.matchAll(new RegExp(`${fn}\\(`, "g"))].map(m => m.index)
+    .filter(i => !codeOnly.slice(Math.max(0, i - 40), i).includes(`const ${fn} = `));
   ok(`${fn} has at least one call site`, sites.length > 0);
   for (const i of sites) {
     // Nearest preceding declaration of an allowlisted consumer.
-    const before = app.slice(0, i);
+    const before = codeOnly.slice(0, i);
     const owner = ALLOWED
       .map(name => ({ name, at: Math.max(before.lastIndexOf(`const ${name} = `), before.lastIndexOf(`${name} = (`)) }))
       .filter(x => x.at >= 0)
@@ -397,6 +410,100 @@ ok("edge equals man minus zone",
 ok("aDOT-by-coverage is recorded as not emitted, with its reason",
   typeof COV._meta.not_emitted.adot_man === "number" &&
   /already carried/.test(COV._meta.not_emitted.note));
+
+
+// ---- OFFENSIVE LINE: an OPINION, wired as context and nothing else -------
+console.log("\noffensive line");
+
+const OL = rd("grading/data/oline_2026.json");
+const olTeams = Object.entries(OL.teams);
+
+ok("all 32 teams, ranked 1-32 with no gaps", olTeams.length === 32 &&
+  new Set(olTeams.map(([, v]) => v.rank)).size === 32 &&
+  Math.min(...olTeams.map(([, v]) => v.rank)) === 1 &&
+  Math.max(...olTeams.map(([, v]) => v.rank)) === 32);
+
+ok("every team lists five starters", olTeams.every(([, v]) =>
+  ["LT", "LG", "C", "RG", "RT"].every(sl => typeof v.starters[sl] === "string" && v.starters[sl].length > 0)));
+
+// THE RENDER GATE LIVES IN THE DATA so it can be read without opening
+// App.jsx. This asserts the file agrees with its own stated rule.
+ok("notable == a recorded change, or bottom five", olTeams.every(([, v]) =>
+  v.notable === (Boolean(v.change) || v.rank >= OL._meta.bottom_five_rank)));
+
+// THE SILENCE IS THE FEATURE. A line sitting 7th all season repeats what his
+// own volume numbers already said; a line that just lost a starter does not.
+// If this ever approaches the whole league it has stopped being a signal.
+const olNotable = olTeams.filter(([, v]) => v.notable).length;
+ok(`the render gate stays selective (${olNotable} of 32)`, olNotable > 0 && olNotable <= 16,
+  "a gate that fires for most of the league is furniture, not a signal");
+
+// IT IS AN OPINION AND MAY NEVER BE SCORED. Hand-assigned 5-10 in 0.5 steps,
+// so there is no year-over-year r to clear the bar every scored input cleared.
+ok("the file declares itself unscored and prompt-free",
+  OL._meta.scored === false && OL._meta.reaches_ai_prompt === false);
+ok("no prompt builder exists for it", !/olineContext/.test(app),
+  "same call as man/zone coverage: an unmeasured opinion does not go to the model");
+
+// RB AND QB ONLY. A receiver produces through targets, not blocking.
+const olGate = app.indexOf(`if (pos === "RB" || pos === "QB") {`);
+ok("the card build is gated to RB and QB", olGate > 0 &&
+  app.indexOf("getOline(", olGate) > olGate &&
+  app.indexOf("getOline(", olGate) - olGate < 200,
+  "an offensive-line row on a WR card is the clutter this was scoped to avoid");
+
+// TIER, NEVER RANK. A 0.5-increment opinion does not support the precision
+// "7th of 32" implies. The leverage panel made exactly that mistake on Sep 6
+// 2026 by printing "sharp ownership" for a projection with no ownership data.
+ok("the card renders a tier and never the rank number",
+  /card\.oline\.tier/.test(app) && !/card\.oline\.rank/.test(app),
+  "printing the rank claims precision a hand-assigned score does not have");
+
+// ONE TEAM-CODE NORMALISER. The alias existed twice inline and had never been
+// applied to getVacated, so every Rams card silently lost its turnover section.
+ok("teamKey is defined once", (app.match(/const teamKey = /g) || []).length === 1);
+ok("no inline LA alias survives", !/=== "LA" \? "LAR"/.test(codeOnly),
+  "a second copy of the alias is how the first one drifted out of step");
+// EVERY TEAM CODE ADP_DATA CAN HAND THE CARD MUST RESOLVE IN BOTH TABLES.
+// This replaces a text assertion that checked getVacated MENTIONED teamKey.
+// It passed while the fix did not work: the first version normalised LA -> LAR
+// and vacated_2026 is keyed LA, so every Rams lookup still returned null and
+// the guard said nothing. Assert the resolution, never the token.
+const adpSeg = app.slice(app.indexOf("const ADP_DATA"), app.indexOf("const ADP_SUPERFLEX"));
+const adpTeams = [...new Set([...adpSeg.matchAll(/team: "([A-Z]{2,3})"/g)].map(m => m[1]))]
+  .filter(t => t !== "FA");
+const SPELL = { LAR: ["LAR", "LA"], LA: ["LAR", "LA"] };
+const resolves = (tbl, t) => (SPELL[t] || [t]).some(k => tbl[k]);
+ok(`ADP_DATA hands ${adpTeams.length} team codes and every one resolves`, adpTeams.length === 32);
+for (const tbl of [["VACATED", VAC.teams], ["OLINE", OL.teams]]) {
+  const dead = adpTeams.filter(t => !resolves(tbl[1], t));
+  ok(`every ADP team code resolves in ${tbl[0]}`, dead.length === 0,
+    `unreachable: ${dead.join(" ")} — the section silently never renders for them`);
+}
+ok("the lookup helper is defined once", (app.match(/const lookupTeam = /g) || []).length === 1);
+
+// AND THE HELPER IS EXTRACTED AND RUN, not string-matched. Guard 29 learned
+// this the hard way: a regex over source asserts that text exists, never that
+// code behaves. The first version of this fix normalised the wrong direction,
+// and only running it against the real tables shows that.
+const spellSrc = app.slice(app.indexOf("const TEAM_SPELLINGS = "),
+  app.indexOf("};", app.indexOf("const lookupTeam = ")) + 2);
+let liveLookup = null;
+try {
+  liveLookup = new Function(`${spellSrc}; return lookupTeam;`)();
+} catch (e) {
+  liveLookup = null;
+}
+ok("the lookup helper extracts and runs", typeof liveLookup === "function");
+if (typeof liveLookup === "function") {
+  for (const [label, tbl] of [["VACATED", VAC.teams], ["OLINE", OL.teams]]) {
+    const dead = adpTeams.filter(t => !liveLookup(tbl, t));
+    ok(`the REAL helper resolves every ADP code in ${label}`, dead.length === 0,
+      `unreachable: ${dead.join(" ")}`);
+  }
+}
+ok("getVacated goes through it", /const getVacated = [^;]{0,120}lookupTeam/.test(app));
+ok("getOline goes through it", /const getOline = [\s\S]{0,200}lookupTeam/.test(app));
 
 console.log(fail ? `\n${fail} FAILED` : "\nall passed");
 process.exit(fail ? 1 : 0);

@@ -1,0 +1,445 @@
+{
+ "_meta": {
+  "source": "PFF, NFL offensive line rankings 2026 (Sam Monson)",
+  "url": "https://www.pff.com/news/nfl-offensive-line-rankings-2026",
+  "captured": "2026-09-11",
+  "vintage": "2026 preseason",
+  "scored": false,
+  "reaches_ai_prompt": false,
+  "positions": [
+   "RB",
+   "QB"
+  ],
+  "bottom_five_rank": 28,
+  "render_gate": "a recorded change, or rank >= 28 (bottom five of 32)",
+  "method": "PFF's author hand-assigns each starter a score from 5 to 10 in 0.5 increments, shaped by three years of PFF grades and weighted toward pass protection, then averages the five with extra weight on the tackles.",
+  "why_not_scored": "It is an opinion, not a measurement. There is nothing to compute a year-over-year r against, so it cannot clear the stability bar every scored input in this app cleared. SEEN-class by the provenance table.",
+  "why_tier_not_rank": "A hand-assigned 0.5-increment score does not support the precision '7th of 32' implies. The leverage panel made exactly that mistake on Sep 6 2026 by printing 'sharp ownership' for a projection.",
+  "why_rb_qb_only": "A receiver's production runs through targets, not blocking. An offensive-line row on a WR card is clutter.",
+  "refresh": "Occasional and by hand. NOT weekly — PFF re-ranks weekly but no free feed identifies offensive-line starters, so an automated refresh does not exist. Sleeper carries linemen and publishes no depth chart for them: 0 of 248 OL, 0 of 66 OT, 0 of 49 T, 0 of 29 C and 1 of 59 G have depth_chart_order (measured Sep 11 2026).",
+  "team_codes": "ADP_DATA's, because that is the team buildPlayerCard is handed.",
+  "counts": {
+   "teams": 32,
+   "notable": 12,
+   "with_change": 10
+  }
+ },
+ "teams": {
+  "DEN": {
+   "rank": 1,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Garett Bolles",
+    "LG": "Ben Powers",
+    "C": "Luke Wattenberg",
+    "RG": "Quinn Meinerz",
+    "RT": "Mike McGlinchey"
+   },
+   "change": null,
+   "notable": false
+  },
+  "PHI": {
+   "rank": 2,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Jordan Mailata",
+    "LG": "Landon Dickerson",
+    "C": "Cam Jurgens",
+    "RG": "Tyler Steen",
+    "RT": "Lane Johnson"
+   },
+   "change": null,
+   "notable": false
+  },
+  "TB": {
+   "rank": 3,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Tristan Wirfs",
+    "LG": "Ben Bredeson",
+    "C": "Graham Barton",
+    "RG": "Cody Mauch",
+    "RT": "Luke Goedeke"
+   },
+   "change": null,
+   "notable": false
+  },
+  "IND": {
+   "rank": 4,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Bernhard Raimann",
+    "LG": "Quenton Nelson",
+    "C": "Tanor Bortolini",
+    "RG": "Matt Goncalves",
+    "RT": "Jalen Travis"
+   },
+   "change": null,
+   "notable": false
+  },
+  "CHI": {
+   "rank": 5,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Braxton Jones",
+    "LG": "Joe Thuney",
+    "C": "Garrett Bradbury",
+    "RG": "Jonah Jackson",
+    "RT": "Darnell Wright"
+   },
+   "change": "C Drew Dalman retired suddenly; Garrett Bradbury takes over.",
+   "notable": true
+  },
+  "BUF": {
+   "rank": 6,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Dion Dawkins",
+    "LG": "Alec Anderson",
+    "C": "Connor McGovern",
+    "RG": "O'Cyrus Torrence",
+    "RT": "Spencer Brown"
+   },
+   "change": null,
+   "notable": false
+  },
+  "SF": {
+   "rank": 7,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Trent Williams",
+    "LG": "Carver Willis",
+    "C": "Jake Brendel",
+    "RG": "Dominick Puni",
+    "RT": "Colton McKivitz"
+   },
+   "change": null,
+   "notable": false
+  },
+  "KC": {
+   "rank": 8,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Josh Simmons",
+    "LG": "Kingsley Suamataia",
+    "C": "Creed Humphrey",
+    "RG": "Trey Smith",
+    "RT": "Jaylon Moore"
+   },
+   "change": "LT Josh Simmons has a back injury and his Week 1 status is up in the air.",
+   "notable": true
+  },
+  "ATL": {
+   "rank": 9,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Jake Matthews",
+    "LG": "Matthew Bergeron",
+    "C": "Ryan Neuzil",
+    "RG": "Chris Lindstrom",
+    "RT": "Jawaan Taylor"
+   },
+   "change": null,
+   "notable": false
+  },
+  "LAC": {
+   "rank": 10,
+   "tier": "top-10",
+   "starters": {
+    "LT": "Rashawn Slater",
+    "LG": "Kayode Awosika",
+    "C": "Jake Slaughter",
+    "RG": "Cole Strange",
+    "RT": "Joe Alt"
+   },
+   "change": "C Tyler Biadasz is out for the season; a rookie moved to center and the interior reshuffled.",
+   "notable": true
+  },
+  "LAR": {
+   "rank": 11,
+   "tier": "middle",
+   "starters": {
+    "LT": "Alaric Jackson",
+    "LG": "Steve Avila",
+    "C": "Coleman Shelton",
+    "RG": "Kevin Dotson",
+    "RT": "Warren McClendon Jr."
+   },
+   "change": "LT Alaric Jackson may face a personal-conduct suspension; unresolved.",
+   "notable": true
+  },
+  "MIN": {
+   "rank": 12,
+   "tier": "middle",
+   "starters": {
+    "LT": "Christian Darrisaw",
+    "LG": "Donovan Jackson",
+    "C": "Blake Brandel",
+    "RG": "Will Fries",
+    "RT": "Brian O'Neill"
+   },
+   "change": null,
+   "notable": false
+  },
+  "NE": {
+   "rank": 13,
+   "tier": "middle",
+   "starters": {
+    "LT": "Will Campbell",
+    "LG": "Alijah Vera-Tucker",
+    "C": "Jared Wilson",
+    "RG": "Mike Onwenu",
+    "RT": "Morgan Moses"
+   },
+   "change": null,
+   "notable": false
+  },
+  "PIT": {
+   "rank": 14,
+   "tier": "middle",
+   "starters": {
+    "LT": "Troy Fautanu",
+    "LG": "Mason McCormick",
+    "C": "Zach Frazier",
+    "RG": "Spencer Anderson",
+    "RT": "Dylan Cook"
+   },
+   "change": null,
+   "notable": false
+  },
+  "SEA": {
+   "rank": 15,
+   "tier": "middle",
+   "starters": {
+    "LT": "Charles Cross",
+    "LG": "Grey Zabel",
+    "C": "Jalen Sundell",
+    "RG": "Anthony Bradford",
+    "RT": "Abraham Lucas"
+   },
+   "change": null,
+   "notable": false
+  },
+  "NO": {
+   "rank": 16,
+   "tier": "middle",
+   "starters": {
+    "LT": "Kelvin Banks Jr.",
+    "LG": "David Edwards",
+    "C": "Erik McCoy",
+    "RG": "Cesar Ruiz",
+    "RT": "Taliese Fuaga"
+   },
+   "change": null,
+   "notable": false
+  },
+  "DAL": {
+   "rank": 17,
+   "tier": "middle",
+   "starters": {
+    "LT": "Tyler Guyton",
+    "LG": "T.J. Bass",
+    "C": "Cooper Beebe",
+    "RG": "Tyler Booker",
+    "RT": "Terence Steele"
+   },
+   "change": "LG Tyler Smith is out 4-6 weeks with a thumb injury; T.J. Bass starts.",
+   "notable": true
+  },
+  "LV": {
+   "rank": 18,
+   "tier": "middle",
+   "starters": {
+    "LT": "Kolton Miller",
+    "LG": "Spencer Burford",
+    "C": "Tyler Linderbaum",
+    "RG": "Jackson Powers-Johnson",
+    "RT": "DJ Glaze"
+   },
+   "change": null,
+   "notable": false
+  },
+  "DET": {
+   "rank": 19,
+   "tier": "middle",
+   "starters": {
+    "LT": "Penei Sewell",
+    "LG": "Christian Mahogany",
+    "C": "Juice Scruggs",
+    "RG": "Tate Ratledge",
+    "RT": "Blake Miller"
+   },
+   "change": "New starting C Cade Mays is injured. PFF had them 13th with him.",
+   "notable": true
+  },
+  "CIN": {
+   "rank": 20,
+   "tier": "middle",
+   "starters": {
+    "LT": "Orlando Brown Jr.",
+    "LG": "Dylan Fairchild",
+    "C": "Ted Karras",
+    "RG": "Dalton Risner",
+    "RT": "Amarius Mims"
+   },
+   "change": null,
+   "notable": false
+  },
+  "NYJ": {
+   "rank": 21,
+   "tier": "middle",
+   "starters": {
+    "LT": "Olu Fashanu",
+    "LG": "Dylan Parham",
+    "C": "Josh Myers",
+    "RG": "Joe Tippmann",
+    "RT": "Armand Membou"
+   },
+   "change": null,
+   "notable": false
+  },
+  "ARI": {
+   "rank": 22,
+   "tier": "middle",
+   "starters": {
+    "LT": "Paris Johnson Jr.",
+    "LG": "Isaac Seumalo",
+    "C": "Hjalte Froholdt",
+    "RG": "Isaiah Adams",
+    "RT": "Elijah Wilkinson"
+   },
+   "change": null,
+   "notable": false
+  },
+  "NYG": {
+   "rank": 23,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Andrew Thomas",
+    "LG": "Jon Runyan",
+    "C": "John Michael Schmitz Jr.",
+    "RG": "Francis Mauigoa",
+    "RT": "Jermaine Eluemunor"
+   },
+   "change": null,
+   "notable": false
+  },
+  "BAL": {
+   "rank": 24,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Ronnie Stanley",
+    "LG": "John Simpson",
+    "C": "Jovaughn Gwyn",
+    "RG": "Olaivavega Ioane",
+    "RT": "Roger Rosengarten"
+   },
+   "change": null,
+   "notable": false
+  },
+  "MIA": {
+   "rank": 25,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Patrick Paul",
+    "LG": "Kadyn Proctor",
+    "C": "Aaron Brewer",
+    "RG": "Jonah Savaiinaea",
+    "RT": "Austin Jackson"
+   },
+   "change": null,
+   "notable": false
+  },
+  "CAR": {
+   "rank": 26,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Rasheed Walker",
+    "LG": "Damien Lewis",
+    "C": "Luke Fortner",
+    "RG": "Robert Hunt",
+    "RT": "Monroe Freeling"
+   },
+   "change": "Both starting tackles are out to open the year (Ikem Ekwonu, Taylor Moton). PFF had them top-12 with them.",
+   "notable": true
+  },
+  "GB": {
+   "rank": 27,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Jordan Morgan",
+    "LG": "Aaron Banks",
+    "C": "Sean Rhyan",
+    "RG": "Anthony Belton",
+    "RT": "Zach Bako-Bewele"
+   },
+   "change": null,
+   "notable": false
+  },
+  "TEN": {
+   "rank": 28,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Dan Moore Jr.",
+    "LG": "Peter Skoronski",
+    "C": "Austin Schlottmann",
+    "RG": "Fernando Carmona Jr.",
+    "RT": "JC Latham"
+   },
+   "change": null,
+   "notable": true
+  },
+  "JAX": {
+   "rank": 29,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Anton Harrison",
+    "LG": "Emmanuel Pregnon",
+    "C": "Robert Hainsey",
+    "RG": "Ezra Cleveland",
+    "RT": "Cole Van Lanen"
+   },
+   "change": "RT Cole Van Lanen's Week 1 availability is unclear; he may start or back up.",
+   "notable": true
+  },
+  "CLE": {
+   "rank": 30,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Spencer Fano",
+    "LG": "Zion Johnson",
+    "C": "Elgton Jenkins",
+    "RG": "Teven Jenkins",
+    "RT": "Tytus Howard"
+   },
+   "change": null,
+   "notable": true
+  },
+  "HOU": {
+   "rank": 31,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Aireontae Ersery",
+    "LG": "Keylan Rutledge",
+    "C": "Evan Brown",
+    "RG": "Ed Ingram",
+    "RT": "Trent Brown"
+   },
+   "change": "RT Braden Smith is injured; Trent Brown fills in and PFF calls it a dropoff.",
+   "notable": true
+  },
+  "WAS": {
+   "rank": 32,
+   "tier": "bottom-10",
+   "starters": {
+    "LT": "Brandon Coleman",
+    "LG": "Chris Paul",
+    "C": "Nick Allegretti",
+    "RG": "Sam Cosmi",
+    "RT": "Josh Conerly Jr."
+   },
+   "change": "LT Laremy Tunsil is out for a significant stretch. PFF had them just inside the top 20 with him.",
+   "notable": true
+  }
+ }
+}

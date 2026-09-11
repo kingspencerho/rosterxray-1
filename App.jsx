@@ -85,6 +85,7 @@ import CAREER_ARC from './grading/data/career_arc_2026.json';
 // vacancy. It says targets are AVAILABLE; naming who inherits them is still a
 // judgement. Built by scripts/build-vacated.py. CONTEXT ONLY.
 import VACATED from './grading/data/vacated_2026.json';
+import OLINE from './grading/data/oline_2026.json';
 // RED-ZONE OPPORTUNITY SHARE. Lens 1 calls red zone and goal line touches
 // STANDALONE SCORING EQUITY and says to track them separately from snap share;
 // the app could not see them. `hvt_pg` is the nearest thing it carried and it is
@@ -2643,7 +2644,46 @@ const getRoutes = (name) => lookupPlayer(ROUTES.players, name);
 const getCoverage = (name) => lookupPlayer(COVERAGE.players, name);
 const getCareerArc = (name) => lookupPlayer(CAREER_ARC.players, name);
 // Team-level, so it is keyed by team code rather than through lookupPlayer.
-const getVacated = (team) => (team ? VACATED.teams[team] || null : null);
+// ⛔⛔ ONE TEAM-CODE NORMALISER. The data files disagree about the Rams:
+//   LA   career_arc · player_metrics · qb_profile · redzone · snap_trajectory · vacated
+//   LAR  ADP_DATA · airyards · coverage · motion · ngs_receiving · routes · status
+//
+// ⚠️ ADP_DATA is what buildPlayerCard is HANDED, so every team-keyed lookup
+//   receives "LAR" and any file keyed "LA" silently misses.
+//
+// ⛔ MEASURED Sep 11 2026: getVacated("LAR") returned null, so the team
+//   target-turnover section never rendered on a single Rams card and nothing
+//   errored. The alias already existed TWICE as an inline ternary at other
+//   sites and had never been applied here — the duplicate-definition class,
+//   caught because a new team-keyed layer was about to copy the pattern.
+//
+// ⚠️ The Rams currently vacate 0%, so the live cost today is small. The
+//   structural cost is not: a 40% vacancy next season would report nothing.
+const TEAM_ALIAS = { LA: "LAR" };
+// CANONICAL form, for display and for comparing two teams.
+const teamKey = (t) => (t ? TEAM_ALIAS[t] || t : null);
+// ⛔ AND THE OTHER DIRECTION, WHICH IS THE ONE A LOOKUP NEEDS. The card is
+// handed "LAR" and half the data files are keyed "LA", so normalising toward
+// the canonical form alone still misses — that was the first version of this
+// fix, and it changed nothing. A lookup has to try every spelling.
+const TEAM_SPELLINGS = { LAR: ["LAR", "LA"], LA: ["LAR", "LA"] };
+const lookupTeam = (table, t) => {
+  if (!t || !table) return null;
+  for (const k of TEAM_SPELLINGS[t] || [t]) if (table[k]) return table[k];
+  return null;
+};
+
+const getVacated = (team) => lookupTeam(VACATED.teams, team);
+
+// ⭐ OFFENSIVE LINE — CONTEXT ONLY, and the gate lives in the data rather
+// than here so it can be read without opening this file. A team is "notable"
+// when it has a recorded change or sits in the bottom five; everything else
+// returns null and the card stays silent, exactly as trajectoryContext does
+// for a player whose role did not move.
+const getOline = (team) => {
+  const row = lookupTeam(OLINE.teams, team);
+  return row && row.notable ? row : null;
+};
 
 // ============ AVAILABILITY & DEPTH-CHART STATUS (Sleeper) ============
 //
@@ -2964,7 +3004,7 @@ const CEILING_RANKINGS = (() => {
     if (!a) continue;
     // nflverse player stats say "LA" for the Rams; the SOS build normalizes
     // to "LAR". Align here or every Rams player shows a blank SOS.
-    const team = m.team === "LA" ? "LAR" : m.team;
+    const team = teamKey(m.team);
     out[m.pos].push({
       name, team, adp: a.adp, gp: m.gp,
       spike: m.spike_rate, nuclear: m.nuclear_rate,
@@ -3224,6 +3264,11 @@ const CARD_GLOSSARY = {
     term: "Career arc",
     what: "Age, seasons of experience and draft slot, set against the typical aging curve for the position.",
     how: "The cheapest guard against projecting a season forward on a player the calendar is working against. Running back is the steep one; tight end runs the other way, where a 25-year-old is often still pre-breakout. The age is a fact, the curve is a published prior rather than something measured here.",
+  },
+  _oline: {
+    term: "Offensive line",
+    what: "Where PFF ranks the five linemen blocking for him, and whether that group just changed.",
+    how: "It is an opinion rather than a measurement — each starter is hand-scored 5 to 10 and the five are averaged — so it shows as a tier rather than a rank and moves no part of the grade. The half worth reading is the CHANGE: a line that just lost its left tackle is something no other number on this card can see.",
   },
   _vacated: {
     term: "Team target turnover",
@@ -3521,7 +3566,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // section always renders — an empty one says so in words.
     news: buildPlayerNews(name, nowTs),
     gameLog: null, gameLogCur: null,
-    deployment: [], arc: null, vacated: null, redzone: [], availability: null, read: [],
+    deployment: [], arc: null, vacated: null, oline: null, redzone: [], availability: null, read: [],
     routes: [], coverage: null,
   };
 
@@ -3614,7 +3659,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   // 2025 metrics rows carry the team a player PLAYED for. For anyone who moved
   // in the 2026 offseason that is not his current job — say so on the card
   // rather than describing a role he no longer holds.
-  const oldTeam = m?.team === "LA" ? "LAR" : m?.team;
+  const oldTeam = teamKey(m?.team);
   if (oldTeam && team && oldTeam !== team) card.movedFrom = oldTeam;
 
   if (traj) {
@@ -3833,6 +3878,20 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       gone: (vac.gone || []).slice(0, 5),
       denominator: VACATED._meta.denominator,
     };
+  }
+
+  // ⭐ THE LINE IN FRONT OF HIM — RB and QB only, and only when something
+  // actually happened to it. A receiver's production runs through targets
+  // rather than blocking, so an offensive-line row on a WR card is clutter.
+  //
+  // ⛔ IT IS NOT SCORED AND MUST NEVER BE. PFF's author hand-assigns each
+  // starter 5 to 10 in 0.5 increments, so there is nothing to compute a
+  // year-over-year r against and it cannot clear the bar every scored input
+  // in this app cleared. SEEN-class by the provenance table: good for context
+  // and options, never for "this works".
+  if (pos === "RB" || pos === "QB") {
+    const ol = getOline(team);
+    if (ol) card.oline = { ...ol, team: teamKey(team), vintage: OLINE._meta.vintage };
   }
 
   // RED ZONE — scoring equity, which Lens 1 requires be read separately from
@@ -4109,6 +4168,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   for (const d of card.deployment) if (d.key) glossKeys.push(d.key);
   if (card.arc) glossKeys.push("_arc");
   if (card.vacated) glossKeys.push("_vacated");
+  if (card.oline) glossKeys.push("_oline");
   for (const d of card.routes) if (d.key) glossKeys.push(d.key);
   for (const d of card.redzone) if (d.key) glossKeys.push(d.key);
   if (card.coverage) glossKeys.push("_coverage");
@@ -8979,6 +9039,7 @@ const CARD_ACCENTS = {
   availability: CARD_GROUP_ACCENT.outlook,
   arc: CARD_GROUP_ACCENT.outlook,
   vacated: CARD_GROUP_ACCENT.outlook,
+  oline: CARD_GROUP_ACCENT.outlook,
   // REFERENCE — deliberately dim. See the note above before changing either.
   efficiency: CARD_GROUP_ACCENT.reference,
   // Coverage is REFERENCE and not job, on the measurement: the man/zone edge is
@@ -10210,7 +10271,7 @@ const PlayerCardModal = ({ card, onClose }) => {
 
         <OmittedNote items={card.omitted} group="production" />
 
-        {(card.availability || card.availabilityReason || card.arc || card.vacated) && (
+        {(card.availability || card.availabilityReason || card.arc || card.vacated || card.oline) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
         )}
         {/* CAREER ARC AND TEAM TURNOVER SIT ABOVE THE no-data BRANCH ON PURPOSE.
@@ -10334,6 +10395,37 @@ const PlayerCardModal = ({ card, onClose }) => {
                 ? `Depth chart: ${card.status.slotPos}${card.status.slot} on ${card.status.team}.`
                 : `No depth-chart slot published for him on ${card.status.team}.`}
               {" "}A depth chart is the most reversible label in football; read it as this week's plan.
+            </div>
+          </CardSection>
+        )}
+
+        {/* ⭐ RENDERS FOR 12 OF 32 TEAMS, and only on an RB or QB card. The
+            silence is the feature: a line sitting 7th all season repeats what
+            his own volume numbers already said, while a line that just lost a
+            starter is new information. Change outranks level. */}
+        {card.oline && (
+          <CardSection
+            title="Offensive line"
+            accent={CARD_ACCENTS.oline}
+            collapsible
+            hint={card.oline.change ? "changed" : `${card.oline.tier} unit`}
+            note="PFF's ranking, hand-scored rather than measured — shown as a tier because a 0.5-increment opinion does not support the precision a rank implies. It moves no part of the grade.">
+            <div style={{ fontSize: "12px", color: "var(--text-primary)", lineHeight: 1.55, marginBottom: card.oline.change ? "7px" : "9px" }}>
+              <strong>{card.oline.tier === "top-10" ? "Top-10" : card.oline.tier === "middle" ? "Middle-of-the-pack" : "Bottom-10"} line</strong>
+              <span style={{ color: "var(--text-dim)" }}> · {card.oline.team} · {card.oline.vintage}</span>
+            </div>
+            {card.oline.change && (
+              <div style={{ fontSize: "12px", color: "var(--caution)", lineHeight: 1.55, marginBottom: "9px" }}>
+                ⚠ {card.oline.change}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {["LT", "LG", "C", "RG", "RT"].map(slot => (
+                <div key={slot} style={{ minWidth: "92px" }}>
+                  <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.08em" }}>{slot}</div>
+                  <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{card.oline.starters[slot]}</div>
+                </div>
+              ))}
             </div>
           </CardSection>
         )}
