@@ -1200,6 +1200,8 @@ else.
 
 ## §7 · Tier C — deliberately not built
 
+> ⚠️ **"Rejected" here means NOT SCORED, which is not the same as absent.** Offensive line rank was built as a CONTEXT layer on Sep 11 2026 and stays in this section, because the thing that was rejected — letting it move a grade — is still rejected and always will be. ⭐ **A metric can be on a card and out of the engine at the same time; this section is about the engine.**
+
 > **Every rejection here states the date its impossibility was last verified.**
 > Two entries sat in this section on a false premise until Sep 1 2026, because
 > "no free source exists" was written once and then cited rather than re-tested.
@@ -1213,7 +1215,7 @@ else.
 | **File** | — |
 | **Field** | — |
 | **Surfaces** | — |
-| **Status** | rejected — see the two reasons below · last verified **Sep 11 2026** |
+| **Status** | rejected **as a scored input, permanently** — it is an opinion and has no `r`. ⭐ **BUILT Sep 11 2026 AS CONTEXT**: `oline_2026.json`, RB/QB cards only, notable teams only. · last verified **Sep 11 2026** |
 
 **Plain English.** How good is the line in front of him.
 

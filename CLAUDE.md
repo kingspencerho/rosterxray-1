@@ -7979,3 +7979,115 @@ pane reports `visibilityState: "hidden"`, so `requestAnimationFrame` never runs 
 never reaches its `scrollTo`. **The wiring is asserted by guard 18 and is line-for-line the paste
 path that already works in production — but the upload round-trip wants a real upload on the
 live site.**
+
+---
+
+## Sep 11, 2026 — The offensive line, as context, and the team-code bug it uncovered
+
+**CONTEXT ONLY — 90 grades byte-identical** (15 tournaments x 5 fixtures, plus 3 leagues x 5),
+diffed against a pristine worktree at HEAD. Built on his "go" after the Tier C rejection was
+re-verified and the reason underneath it changed.
+
+### 1. What shipped, and what it deliberately is not
+
+`grading/data/oline_2026.json` — 32 teams, five named starters, a tier and a change note, hand
+entered from PFF's public 2026 rankings.
+
+⛔ **IT IS NOT SCORED AND MUST NEVER BE.** The ranking is an opinion: PFF's author hand-assigns
+each starter **5 to 10 in 0.5 increments** and averages the five with extra weight on the tackles.
+**There is nothing to compute a year-over-year `r` against**, so it cannot clear the stability bar
+every scored input in this app cleared. `SEEN`-class by the provenance table — good for context and
+options, never for *"this works."*
+
+⭐⭐ **IT IMPORTS THE CHANGE, NOT THE RANKING, AND THAT IS THE WHOLE DESIGN.** A team sitting 7th
+all season repeats what a player's own volume numbers already said. **A team that just lost its
+left tackle is something nothing else in this app can see**, and change outranks level in the
+Source Hierarchy. ⭐ **Every ranking move in that article is an injury** — Tunsil out drops
+Washington from top-20 to 32nd; both Carolina tackles out drops them from top-12 to 26th.
+
+### 2. The scope IS the anti-clutter mechanism
+
+```
+RB and QB cards only    a receiver produces through targets, not blocking
+notable teams only      a recorded change, or bottom five of 32
+12 of 32 qualify        silent on the other 20
+one line at rest        collapsed, inside the existing outlook group
+tier, never rank        "Middle-of-the-pack line", never "17th of 32"
+no AI prompt            same call as man/zone coverage at r = 0.161
+no results page         nothing above the grade
+```
+
+⭐ **The silence is the feature, and it is a pattern this app already trusts** —
+`trajectoryContext` emits nothing for a player whose role did not move, for the same reason.
+⚠️ **The render gate lives in the DATA (`notable`), not in the component**, so the rule can be read
+without opening `App.jsx` and a guard can assert the file agrees with it.
+
+⛔ **TIER RATHER THAN RANK IS NOT COSMETIC.** A 0.5-increment opinion does not support the precision
+*"7th of 32"* implies. **The leverage panel made exactly that mistake on Sep 6** by printing *"sharp
+ownership"* for a projection with no ownership data behind it, and had to be corrected.
+
+### 3. ⛔⛔ THE BUG COPYING THE PATTERN UNCOVERED
+
+**`getVacated("LAR")` returned null.** `ADP_DATA` keys the Rams `LAR`; `vacated_2026.json` keys them
+`LA`. **Every Rams card silently lost its team-turnover section**, and nothing errored.
+
+⚠️ **The split is wider than one file — six each way:**
+
+```
+LA    career_arc · player_metrics · qb_profile · redzone · snap_trajectory · vacated
+LAR   ADP_DATA · airyards · coverage · motion · ngs_receiving · routes · status
+```
+
+⭐ **The alias already existed TWICE as an inline ternary** (`m.team === "LA" ? "LAR" : m.team`) and
+had never been applied to the accessor — the duplicate-definition class, caught only because a new
+team-keyed layer was about to copy the pattern. One `lookupTeam` helper now serves both.
+
+⚠️ **No ranking moved: the Rams vacate 0%**, which sits below the free-agent pool's 20% gate and the
+breakout board's 35% gate. The only visible change is the section appearing.
+
+### 4. ⭐⭐⭐ MY FIRST FIX WAS WRONG AND THE FIRST GUARD PASSED ANYWAY
+
+**This is the part worth keeping.** The fix normalised toward the canonical form — `LA → LAR` — when
+the table is keyed `LA`. **It changed nothing.** And the assertion I wrote alongside it checked that
+`getVacated` *mentioned* `teamKey`, which it did.
+
+⛔ **A green guard, a committed fix, and the bug still live.** It was caught by rendering a Rams card
+in a browser, not by the suite.
+
+✅ **The guard now EXTRACTS the helper with `new Function` and RUNS it against both real tables** —
+the technique guard 29 adopted after a string-match sabotage slipped through. **Both the original
+bug and my wrong fix are in the sabotage set verbatim, and both now exit non-zero.**
+
+> ⭐ **The rule, stated plainly: a regex over source asserts that text exists, never that code
+> behaves.** If a helper is pure, extract it and run it.
+
+### 5. ⚠️ Fifth instance of a guard failing on its own documentation
+
+The containment sweep tripped on the comment *naming* `getVacated` while explaining why it had to be
+fixed. **Guard 31 on `<button`, guard 17 on the cyan token, guard 25 on "matchup", the
+`adjCoverageOpen` assertion on Sep 9, now this.** It blanks comments **with spaces, preserving
+offsets** so reported indices still point at the real file — and **a real unreviewed call site is in
+the sabotage set** to prove the strip did not defang the check.
+
+### 6. What a weekly version would cost, and why it does not exist
+
+⛔ **No free feed identifies offensive-line starters.** Sleeper carries the players and publishes no
+depth chart for them — **measured against the live feed**: 0 of 248 `OL`, 0 of 66 `OT`, 0 of 49 `T`,
+0 of 29 `C` and 1 of 59 `G` carry `depth_chart_order`, against `WR` 209 of 312 and `RB` 122 of 185.
+**So Sleeper can say a lineman is hurt and cannot say he was a starter.**
+
+⚠️ **Refresh is therefore occasional and by hand, not weekly.** A weekly chore is the failure mode
+`BACKLOG-CLEAR-SHEET.md` already documents — the constraint is the sitting-down.
+
+```
+37 guards · 1619 assertions · dual-file identical
+17 sabotages, 0 missed, against a verified-clean baseline
+rendered at 375x812: DAL RB shows tier + change + starters · DAL WR silent (position gate)
+  · DEN RB silent (notability gate) · LAR RB shows both sections
+  · 0 tap targets under 32px · no horizontal overflow
+```
+
+⚠️ **Honest expected value: modest, and it is not trying to improve a grade.** The thing a good line
+supposedly drives is rushing efficiency, and this repo's own table puts **RB yards per carry at
+r = 0.022**. What it buys is one sentence on a card, on the handful of teams where a real thing just
+happened.
