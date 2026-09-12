@@ -64,7 +64,7 @@ echo
 fail=0
 got_any=0
 
-echo "1/5  snap trajectory (role change)"
+echo "1/6  snap trajectory (role change)"
 # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
 if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
   got_any=1
@@ -78,13 +78,13 @@ echo
 # ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
 # twin all read the same weekly stats file, so the second and third layers cost
 # a parse each and no extra network.
-echo "2/5  QB volume profile"
+echo "2/6  QB volume profile"
 if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
   got_any=1
   python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
     "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
   echo
-  echo "3/5  game logs (reusing the same download)"
+  echo "3/6  game logs (reusing the same download)"
   python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
     "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
   echo
@@ -94,16 +94,16 @@ if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; the
   # LAST season for the whole of this one. This is the same measurements on the
   # current season, context only. Both vintages render; neither replaces the
   # other.
-  echo "4/5  current-season volume (reusing the same download)"
+  echo "4/6  current-season volume (reusing the same download)"
   python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
     "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
 else
   echo "  skipped — placeholder left untouched"; fail=1
   echo
-  echo "3/5  game logs (reusing the same download)"
+  echo "3/6  game logs (reusing the same download)"
   echo "  skipped — the weekly stats file is unavailable"
   echo
-  echo "4/5  current-season volume (reusing the same download)"
+  echo "4/6  current-season volume (reusing the same download)"
   echo "  skipped — the weekly stats file is unavailable"
 fi
 echo
@@ -117,7 +117,7 @@ echo
 #
 # The 14.6MB raw payload is written to $TMP and dies with the trap. Only the
 # ~200KB extract reaches grading/data/. NEVER commit the raw dump.
-echo "5/5  availability + depth chart (Sleeper, live - works pre-season)"
+echo "5/6  availability + depth chart (Sleeper, live - works pre-season)"
 if fetch "https://api.sleeper.app/v1/players/nfl" "$TMP/sleeper.json"; then
   python3 "$ROOT/scripts/build-status.py" "$TMP/sleeper.json" \
     "$ROOT/grading/data/status_$SEASON.json" "$SEASON" && got_any=1 || fail=1
@@ -125,6 +125,46 @@ else
   echo "  skipped - Sleeper unreachable; placeholder left untouched"
   echo "  (third-party and unversioned by design - see build-status.py)"
   fail=1
+fi
+echo
+
+# STEP 6 IS THE SECOND ODD ONE OUT, FOR THE SAME REASON AS STEP 5: a live
+# third-party snapshot rather than an nflverse season release. It is also the
+# only step whose data EXPIRES. Lines move all week, so fetched_at is the
+# vintage and a Tuesday pull is stale by Sunday. That is recorded in the file's
+# own _meta.caveats and printed on the page.
+#
+# THE WEEK COMES FROM ESPN, NOT FROM DATE MATH. A bare scoreboard call reports
+# week.number for the current week, so there is no season-start constant to
+# drift and no off-by-one after a bye or a flexed game.
+#
+# curl does every fetch here on purpose. Measured Sep 12 2026: in the cloud
+# sandbox curl returns 200 for this endpoint on every URL form while python
+# urllib returns 403 through the egress proxy. build-gameenv.py is a PURE PARSE
+# for that reason - see its header.
+echo "6/6  game environment + weekly projections (live - expires, see _meta)"
+ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl"
+if fetch "$ESPN/scoreboard" "$TMP/cur.json"; then
+  WEEK=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print((d.get('week') or {}).get('number') or 0)" "$TMP/cur.json" 2>/dev/null || echo 0)
+else
+  WEEK=0
+fi
+if [ "${WEEK:-0}" -ge 1 ] && [ "${WEEK:-0}" -le 18 ]; then
+  echo "  current week: $WEEK"
+  mkdir -p "$TMP/sum"
+  fetch "$ESPN/scoreboard?seasontype=2&week=$WEEK&dates=$SEASON" "$TMP/sb.json" || true
+  fetch "https://api.sleeper.app/projections/nfl/$SEASON/$WEEK?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&order_by=ppr"     "$TMP/proj.json" || true
+  if [ -s "$TMP/sb.json" ]; then
+    for id in $(python3 -c "import json;print(' '.join(str(e.get('id')) for e in json.load(open('$TMP/sb.json')).get('events',[]) if e.get('id')))" 2>/dev/null); do
+      fetch "$ESPN/summary?event=$id" "$TMP/sum/$id.json" >/dev/null 2>&1 || true
+    done
+  fi
+  python3 "$ROOT/scripts/build-gameenv.py" --season "$SEASON" --week "$WEEK" \
+    --scoreboard "$TMP/sb.json" --summaries "$TMP/sum" --projections "$TMP/proj.json" \
+    --out "$ROOT/grading/data/gameenv_$SEASON.json" && got_any=1 || fail=1
+else
+  echo "  skipped - no current NFL week (out of season, or ESPN unreachable)"
+  echo "  placeholder left untouched; the app renders no game block"
 fi
 echo
 

@@ -101,6 +101,7 @@ import REDZONE from './grading/data/redzone_2025.json';
 // scripts/build-availability.py. CONTEXT ONLY.
 import AVAILABILITY from './grading/data/availability_2026.json';
 import STATUS_LAYER from './grading/data/status_2026.json';
+import GAMEENV from './grading/data/gameenv_2026.json';
 
 // ============ DATA ============
 
@@ -2663,14 +2664,21 @@ const getCareerArc = (name) => lookupPlayer(CAREER_ARC.players, name);
 //
 // ⚠️ The Rams currently vacate 0%, so the live cost today is small. The
 //   structural cost is not: a 40% vacancy next season would report nothing.
-const TEAM_ALIAS = { LA: "LAR" };
+const TEAM_ALIAS = { LA: "LAR", WSH: "WAS" };
 // CANONICAL form, for display and for comparing two teams.
 const teamKey = (t) => (t ? TEAM_ALIAS[t] || t : null);
 // ⛔ AND THE OTHER DIRECTION, WHICH IS THE ONE A LOOKUP NEEDS. The card is
 // handed "LAR" and half the data files are keyed "LA", so normalising toward
 // the canonical form alone still misses — that was the first version of this
 // fix, and it changed nothing. A lookup has to try every spelling.
-const TEAM_SPELLINGS = { LAR: ["LAR", "LA"], LA: ["LAR", "LA"] };
+// ⚠️ ONE alias map, not one per layer. The Sep 11 LA/LAR bug was exactly this:
+// an inline ternary existed twice and had never been applied to the accessor, so
+// every Rams card silently lost a section. WSH joins it for the same reason —
+// ESPN spells Washington WSH while ADP_DATA and Sleeper both say WAS.
+const TEAM_SPELLINGS = {
+  LAR: ["LAR", "LA"], LA: ["LAR", "LA"],
+  WAS: ["WAS", "WSH"], WSH: ["WAS", "WSH"],
+};
 const lookupTeam = (table, t) => {
   if (!t || !table) return null;
   for (const k of TEAM_SPELLINGS[t] || [t]) if (table[k]) return table[k];
@@ -2793,6 +2801,112 @@ const GAME_LOG_CUR_LIVE = (GAME_LOGS_CUR._meta?.weeks_covered || 0) > 0;
 const gameLogFor = (src, name) => lookupPlayer(src, name);
 const getGameLog = (name) => gameLogFor(GAME_LOGS, name);
 const getGameLogCur = (name) => (GAME_LOG_CUR_LIVE ? gameLogFor(GAME_LOGS_CUR, name) : null);
+
+// ============ GAME ENVIRONMENT + WEEKLY PROJECTION (context only) ============
+//
+// ⛔ NEVER SCORED AND NEVER IN THE AI PROMPT. Guard 38 asserts both.
+//
+// It closes three Section 4 rules that have been written down since July with
+// no data behind them for weeks 1-14, because PLAYOFF_GAME_TOTALS carries
+// W15-17 rows only: Blowout Risk, Competitive Balance, and the dome modifier.
+//
+// WHY A LINE IS NOT FPA. The Source Hierarchy puts matchup data at rank 5 and
+// the Aug 25 run measured WR FPA as NEGATIVE year over year. Both true, and
+// neither applies: FPA is a MEMORY of what a defence allowed last season, a
+// line is a FORECAST of this game carrying this week's injuries and weather.
+// It is not trying to be stable across seasons.
+//
+// ⭐ THE THRESHOLDS COME FROM THE FILE. Typing 7/44 and 3/46 again here would
+// be the duplicate-definition class this repo has hit nine times; the builder
+// writes them into _meta.flags and applies them, and this reads them only to
+// print what the gate was.
+const GAMEENV_LIVE = (GAMEENV._meta?.week || 0) > 0
+  && (GAMEENV._meta?.games_covered || 0) > 0;
+const GAMEENV_META = GAMEENV._meta || {};
+const gameEnvFor = (team) => {
+  if (!GAMEENV_LIVE || !team) return null;
+  const want = TEAM_SPELLINGS[team] || [team];
+  return (GAMEENV.games || []).find(
+    g => want.includes(g.away) || want.includes(g.home)) || null;
+};
+const getProj = (name) => (GAMEENV_LIVE ? lookupPlayer(GAMEENV.projections, name) : null);
+
+// A projection is a BLACK BOX — it hands over a number and never shows its
+// work, which is the opposite of everything else in this app. So the product is
+// never the number; it is the DISAGREEMENT between the number and the measured
+// role. This returns null unless both sides exist and actually differ.
+const PROJ_TGT_GAP = 1.5;   // targets per game; below this is noise, not news
+const projDivergence = (name, proj) => {
+  if (!proj || proj.tgt == null) return null;
+  const v = getVolumeCur(name);
+  if (!v || v.tgt_pg == null || (v.gp || 0) < 2) return null;
+  const gap = proj.tgt - v.tgt_pg;
+  if (Math.abs(gap) < PROJ_TGT_GAP) return null;
+  return {
+    gap: Math.round(gap * 10) / 10,
+    projTgt: proj.tgt, measured: v.tgt_pg, gp: v.gp,
+    // Direction is stated from the READER's side, not the market's.
+    text: gap < 0
+      ? `projected ${proj.tgt} targets against ${v.tgt_pg} a game actually run over ${v.gp} — the number has not caught up`
+      : `projected ${proj.tgt} targets against ${v.tgt_pg} a game actually run over ${v.gp} — the number assumes a bigger role than he has had`,
+  };
+};
+
+// ⭐ GAME DATA BELONGS TO THE GAME, NOT THE PLAYER. Twelve starters can sit in
+// eight games, so attaching the total and spread to each PLAYER repeats the
+// same two facts up to three times per game. Grouped by game, this renders
+// fewer rows than the lineup has players.
+const buildGameEnvBoard = (players) => {
+  if (!GAMEENV_LIVE) return null;
+  const byGame = new Map();
+  for (const p of players || []) {
+    if (!p?.name || !p?.team) continue;
+    const g = gameEnvFor(p.team);
+    if (!g) continue;
+    const key = `${g.away}@${g.home}`;
+    if (!byGame.has(key)) byGame.set(key, { game: g, players: [] });
+    const proj = getProj(p.name);
+    byGame.get(key).players.push({
+      name: p.name, pos: p.pos, team: p.team,
+      proj: proj?.pts ?? null,
+      projDetail: proj || null,
+      divergence: projDivergence(p.name, proj),
+    });
+  }
+  const games = [...byGame.values()];
+  for (const row of games) {
+    row.players.sort((a, b) => (b.proj ?? -1) - (a.proj ?? -1));
+    const g = row.game;
+    const mine = TEAM_SPELLINGS[row.players[0].team] || [row.players[0].team];
+    const rawSide = mine.includes(g.home) ? g.home : g.away;
+    const rawOpp = rawSide === g.home ? g.away : g.home;
+    row.implied = g.implied ? (g.implied[rawSide] ?? null) : null;
+    // ⚠️ DISPLAY USES THE CANONICAL CODE. ESPN spells Washington WSH and every
+    // other surface in this app says WAS; rendering the raw feed code would put
+    // two spellings of one team on the same screen.
+    row.side = teamKey(rawSide);
+    row.opp = teamKey(rawOpp);
+    row.rawOpp = rawOpp;
+    // The favourite/underdog framing is what a reader actually uses, and it is
+    // only meaningful once the side is known.
+    row.fav = g.favorite ? (TEAM_SPELLINGS[g.favorite] || [g.favorite]).includes(rawSide) : null;
+    row.defOut = (g.def_out && g.def_out[rawOpp]) || [];
+  }
+  // Highest implied total first: the game most likely to produce points leads.
+  games.sort((a, b) => (b.implied ?? -1) - (a.implied ?? -1));
+  const priced = games.filter(r => r.game.total != null).length;
+  return {
+    games, priced,
+    week: GAMEENV_META.week,
+    fetched: GAMEENV_META.fetched_at,
+    flags: GAMEENV_META.flags || {},
+    projSource: (GAMEENV_META.sources || {}).projections || "",
+    // ⚠️ Surfaced so the page can say it out loud. Lines move all week and a
+    // Tuesday pull is stale by Sunday; a vintage the reader cannot see is a
+    // vintage that will be trusted past its shelf life.
+    projected: GAMEENV_META.players_projected || 0,
+  };
+};
 
 // Title-case a normalized DB key into a clean display name. Capitalize after a
 // hyphen too, or a key that kept one renders "Smith-njigba". ONE definition:
@@ -9508,6 +9622,7 @@ const SECTION_INDEX = {
     { id: "rxr-playoffs",     label: "Playoffs" },
     { id: "rxr-weekly",       label: "Weekly" },
     { id: "rxr-trends",       label: "Trends" },
+    { id: "rxr-gameenv",      label: "Matchups" },
     { id: "rxr-freeagents",   label: "Waivers" },
     { id: "rxr-breakout",     label: "Breakout" },
     { id: "rxr-bench",        label: "Bench" },
@@ -10655,6 +10770,7 @@ export default function RosterScorer() {
   const [benchListOpen, setBenchListOpen] = useState(false);
   const [roleCtxOpen, setRoleCtxOpen] = useState(false);
   const [startSitOpen, setStartSitOpen] = useState(true);
+  const [gameEnvOpen, setGameEnvOpen] = useState(true);
 
   // ⭐ THE FUNNEL STARTS HERE. Fires once per page load, before the visitor has
   // done anything, so every later event can be read as a share OF this one.
@@ -16328,6 +16444,104 @@ Analyze this best ball roster. Return JSON only.`;
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* ⭐ GAME ENVIRONMENT — one block per GAME, not one line per
+                player. Twelve starters can sit in eight games, so attaching the
+                total and spread to each player repeats the same two facts up to
+                three times. CONTEXT ONLY; guard 38 asserts it never reaches a
+                scoring engine or the AI prompt. */}
+            {(() => {
+              const env = buildGameEnvBoard(analyzed.allStarters);
+              // Out of season, or before the weekly refresh has run, there is
+              // no slate. The panel does not exist rather than rendering an
+              // empty table that looks broken.
+              if (!env || env.games.length === 0) return null;
+              const bw = env.flags.blowout || {}, sh = env.flags.shootout || {};
+              return (
+                <div id="rxr-gameenv" style={{ marginBottom: "20px" }}>
+                  <SectionH2
+                    title={`WEEK ${env.week} · GAME ENVIRONMENT`}
+                    open={gameEnvOpen}
+                    onToggle={() => setGameEnvOpen(o => !o)}
+                    hint={`${env.games.length} game${env.games.length === 1 ? "" : "s"}`} />
+                  {gameEnvOpen && (
+                    <div style={{ padding: "10px 0 2px" }}>
+                      {env.games.map((row, i) => {
+                        const g = row.game;
+                        const flags = [];
+                        if (g.shootout) flags.push(["shootout", "var(--accent-lime)"]);
+                        if (g.blowout) flags.push(["blowout risk", "var(--caution)"]);
+                        if (g.indoor) flags.push(["dome", "var(--text-muted)"]);
+                        return (
+                          <div key={i} style={{ marginBottom: "14px", paddingBottom: "12px", borderBottom: i === env.games.length - 1 ? "none" : "1px solid var(--border-default)" }}>
+                            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
+                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                                {row.side} vs {row.opp}
+                              </span>
+                              {g.total != null ? (
+                                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                                  implied <strong style={{ color: "var(--text-primary)" }}>{row.implied ?? "-"}</strong>
+                                  {" · "}{g.total} total
+                                  {g.spread != null && row.fav != null
+                                    ? ` · ${row.fav ? "-" : "+"}${g.spread}`
+                                    : ""}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: "11px", color: "var(--text-dim)" }}>no line posted</span>
+                              )}
+                              {flags.map(([t, c], k) => (
+                                <span key={k} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase", color: c }}>{t}</span>
+                              ))}
+                            </div>
+                            {row.players.map((p, j) => (
+                              <div key={j} style={{ display: "flex", alignItems: "baseline", gap: "8px", padding: "3px 0", fontSize: "12px" }}>
+                                <span style={{ color: posColor(p.pos).text, fontWeight: 600, minWidth: "26px" }}>{p.pos}</span>
+                                <span style={{ color: "var(--text-secondary)", flex: 1 }}>{p.name}</span>
+                                <span style={{ color: p.proj == null ? "var(--text-dim)" : "var(--text-primary)", fontWeight: 600 }}>
+                                  {p.proj == null ? "no proj" : `${p.proj} proj`}
+                                </span>
+                              </div>
+                            ))}
+                            {/* ⭐ THE DISAGREEMENT IS THE PRODUCT. The bare
+                                projection is available on any site; the gap
+                                between it and his measured usage is not. */}
+                            {row.players.filter(p => p.divergence).map((p, j) => (
+                              <div key={`d${j}`} style={{ fontSize: "11px", color: "var(--ui-accent)", padding: "2px 0 0 34px" }}>
+                                {p.name}: {p.divergence.text}
+                              </div>
+                            ))}
+                            {row.defOut.length > 0 && (
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", paddingTop: "4px" }}>
+                                {row.opp} defence out: {row.defOut.map(d => `${d.name} (${d.pos})`).join(", ")}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      <Explainer label="what these numbers are">
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          <strong style={{ color: "var(--text-secondary)" }}>Implied</strong> is how many points the
+                          betting market expects this team to score: the game total split by the spread.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Shootout</strong> is a game inside{" "}
+                          {sh.max_abs_spread} points with a total of {sh.min_total} or more, which lifts both sides.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Blowout risk</strong> is a spread of{" "}
+                          {bw.min_abs_spread}+ with a total under {bw.max_total}.
+                          <br /><br />
+                          The projection is a reference line from {env.projSource}, not a recommendation, and it does
+                          not show its work. Where it disagrees with usage this app has actually measured, that gap is
+                          printed above — it is the part worth acting on.
+                          <br /><br />
+                          <strong style={{ color: "var(--text-secondary)" }}>Lines move all week.</strong> Pulled{" "}
+                          {env.fetched ? String(env.fetched).replace("T", " ").replace("Z", " UTC") : "unknown"}.
+                          Defensive injuries are the opponent's only; your own players are covered elsewhere.
+                          None of this touches your grade.
+                        </div>
+                      </Explainer>
                     </div>
                   )}
                 </div>

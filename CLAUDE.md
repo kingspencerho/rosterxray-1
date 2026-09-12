@@ -8194,3 +8194,177 @@ DL whose name belongs to a safety. Neither is plausible for 2026 and neither cou
 confirmed against a second source, so nothing from either line was written. Search summaries
 and page fetches carry no vintage guarantee — the Rachaad White trap from Aug 16, arriving
 through a different door.
+
+---
+
+## Game Environment + Weekly Projection (added Sep 12, 2026)
+
+`scripts/build-gameenv.py` -> `grading/data/gameenv_2026.json`. **CONTEXT ONLY — 90 grades
+BYTE-IDENTICAL** (15 tournaments x 5 fixtures plus 3 leagues x 5), against a pristine worktree
+at HEAD. Guard 38: `scripts/test-gameenv.mjs`.
+
+### It closes three Section 4 rules that have never had data behind them
+
+Written down since July, unimplementable for weeks 1-14 because `PLAYOFF_GAME_TOTALS` holds
+W15-17 rows only and is hand-typed:
+
+```
+Blowout Risk Check      spread 7+ AND total under 44     -> now computed
+Competitive Balance     |spread| <= 3 AND total >= 46    -> now computed
+Venue / dome modifier   indoor                           -> now read
+Defensive Funnel        run/pass split                   -> NOT built, needs pbp
+Macro Volume            PROE and pace                    -> NOT built, needs pbp
+```
+
+### A BETTING LINE IS NOT THE SAME CLASS OF DATA AS FPA
+
+The Source Hierarchy puts matchup data at rank 5 and the Aug 25 run measured **WR FPA as
+NEGATIVE year over year**. Both true. **Neither applies here, and the distinction is the whole
+justification for the layer:**
+
+> **FPA is a MEMORY** - what a defence allowed last season, r = 0.05 to 0.25.
+> **A line is a FORECAST** - a market price for THIS game, with this week's injuries, weather
+> and starting quarterback already inside it.
+
+It is not trying to be stable across seasons, so the correlation that condemns FPA says nothing
+about it. **Verified before building:** the implied totals derived here reproduce the ones in a
+paid newsletter **to the cent on 9 of 13 games**, and the other 4 had **moved overnight** - which
+is the argument for pulling rather than typing.
+
+### Why Sleeper/Rotowire and not player props
+
+All three probed Sep 12 2026 (R19 - a data-availability claim ages like a verdict):
+
+```
+ESPN public API      game lines only. NO props. The receivingYards field in the
+                     summary endpoint is a SEASON LEADERBOARD label, not a market.
+The Odds API         has props, but free tier is 500 requests a MONTH and props
+                     bill PER GAME PER MARKET.
+Sleeper /projections HTTP 200, no auth, whole league in one call, already in
+                     half-PPR, on a host refresh-inseason.sh already calls.
+```
+
+A prop carries money and a projection carries an opinion. That gap decides everything for
+betting and almost nothing for "is 12 points a reasonable expectation."
+
+### THE PROJECTION IS A BLACK BOX, SO THE DISAGREEMENT IS THE PRODUCT
+
+It hands over a number and never shows its work, which is the opposite of everything else in
+this app. **The moment the UI says "start him, he is projected 12.4" it has become a worse
+version of every other site.** `projDivergence` compares the projected targets against the
+targets per game actually measured this season and prints the gap only when it exceeds
+`PROJ_TGT_GAP` (1.5) - the bare number is available anywhere, the gap is not.
+
+Pre-season `CUR_VOLUME_LIVE` is false, so no divergence line can fire until the weekly refresh
+has two games of usage. The panel reads correctly without it.
+
+### GAME DATA BELONGS TO THE GAME, NOT THE PLAYER
+
+Twelve starters can sit in eight games, so attaching the total and spread to each PLAYER repeats
+the same two facts up to three times per game. **Grouped by game, the panel renders fewer rows
+than the lineup has players.** Games sort by implied total, so the one most likely to produce
+points leads.
+
+### Thresholds live in the data
+
+7/44 and 3/46 are CLAUDE.md Section 4 numbers. Typing them again in App.jsx would be the
+duplicate-definition class this repo has hit **nine** times, so the builder writes them into
+`_meta.flags`, applies them there, and the app reads them only to print what the gate was.
+**Guard 38 asserts `buildGameEnvBoard` never retypes them.**
+
+### THE SHELL FETCHES; THE BUILDER IS A PURE PARSE
+
+Measured Sep 12 2026: **curl returns 200 for the ESPN scoreboard on every URL form tried while
+Python urllib returns 403 through the egress proxy, regardless of User-Agent.** Sleeper works
+from both. A builder that fetched would be green on one machine and red on another for reasons
+that have nothing to do with the data - and `/root/.ccr/README.md` says not to retry proxy 403s.
+
+So `build-gameenv.py` contains **no HTTP client at all** and takes `--scoreboard`,
+`--summaries` and `--projections` as files, exactly as `build-status.py` does. That also makes it
+runnable offline against fixtures. Guard 38 asserts the absence.
+
+### THE WEEK COMES FROM ESPN, NOT DATE MATH
+
+A bare scoreboard call reports `week.number`. **No season-start constant to drift and no
+off-by-one after a bye or a flex.** Step 6 of `refresh-inseason.sh` reads it, then fetches the
+week's board, one summary per game, and the projections.
+
+**This is the only layer whose data EXPIRES.** Lines move all week, so `fetched_at` is the
+vintage, it is printed on the page, and a Tuesday pull is stale by Sunday. If this is ever wanted
+for Sunday-morning lineups it needs a second run late in the week.
+
+### Team codes: ESPN says WSH, everything else says WAS
+
+Exactly one mismatch across all 32 (Sleeper agrees with `ADP_DATA`). **BOTH alias mechanisms
+needed it, for different reasons, and that is not duplication:**
+
+```
+TEAM_ALIAS / teamKey        CANONICAL form, for DISPLAY and comparison
+TEAM_SPELLINGS / lookupTeam EVERY spelling, for LOOKUPS
+```
+
+The Sep 11 note already records that normalising alone was the wrong first fix. Without the
+canonical half the panel printed `WSH vs PHI` while every other surface said `WAS` - **two
+spellings of one team on one screen.** Both negative-tested.
+
+**Guard 38's first version asserted "only one alias map" and failed on the correct file**,
+because two exist on purpose. Re-aimed to "no THIRD map". Same right-shape-wrong-aim error as
+guard 32 on `scoreFreeAgent` and guard 34 on a file-wide 32px check.
+
+### TWO BUGS FOUND BY THE GUARD SUITE, ONE OF THEM PRE-EXISTING
+
+1. **I passed `summary=` to `<Explainer>` and the prop is `label=`.** It was silently ignored and
+   the panel rendered the default caption. Compiled clean.
+2. **Guard 34 counted openers as bare `<Explainer>` while its closer and body regexes accepted
+   props**, so the first prop-carrying Explainer in the file made "every opened Explainer is
+   closed" fail on CORRECT code. **An assertion that breaks on valid code teaches people to edit
+   the assertion.** Fixed and negative-tested with a genuinely unclosed tag.
+
+### A SABOTAGE RUN WHOSE OWN BASELINE FAILS PROVES NOTHING
+
+First negative-test pass reported two misses. **One was a real guard weakness; one was my
+sabotage flipping a flag on an UNPRICED game that the assertion correctly filters out.** A later
+run then showed every case exiting 1 - including the baseline, because a new assertion was
+failing. Both are the trap the Sep 6 baselines entry records. The harness now asserts a clean
+exit before and after every case.
+
+### Measured, in a real browser at 430px
+
+```
+FIRST VISIT   panel 987px   page 5,960px   explainer open   (by design)
+RETURNING     panel 703px   page 5,419px   explainer closed
+0 sub-32px tap targets · no horizontal overflow · 0 page errors
+index pill "Matchups" resolves
+```
+
+**A cross-check worth recording: the panel put Kenneth Walker under `KC vs DEN` and I read that
+as a bug**, because he is a Seahawk in 2025. `ADP_DATA` has him on KC for 2026 with a trendNote
+describing a KC contract, and the independent Sleeper feed says `team=KC opp=DEN`. **The app was
+right and my recollection was the stale input.** Check the data before "fixing" it.
+
+### Scope
+
+- **REDRAFT ONLY.** Underdog rosters lock, so a weekly line cannot be acted on in best ball.
+- **Never scored, never in the AI prompt.** `_meta.scored` and `_meta.reaches_ai_prompt` are both
+  false and guard 38 asserts both, plus that no prompt builder exists.
+- **Opposing DEFENSIVE injuries only.** Your own players are in `status_<season>.json`; the thing
+  nothing else in this app can see is the defence you are facing.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL · 38 guards pass · dual-file identical · LF preserved
+14 sabotages against a verified-clean baseline, ALL exit non-zero - including two
+  separate engine leaks, a prompt builder, an unreviewed consumer, a retyped
+  threshold, a third alias map, raw feed codes reaching the render, and an HTTP
+  client returning to the builder
+refresh-inseason.sh run for real end to end: step 6 reads week 1 from ESPN,
+  16 games (14 priced), 384 projections
+```
+
+### Still open
+
+**PROE, pace and the funnel** need the play-by-play release, a large weekly download, and are the
+Step 2 of this build. **Player props** were assessed and deliberately not built: $30/mo or a
+500-request monthly budget for a market price, when a free half-PPR projection covers the
+baseline question. Revisit only for betting or for hunting market lag specifically.
