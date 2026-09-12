@@ -78,7 +78,12 @@ ok("the summary states its own 32px floor",
   /minHeight: "32px"/.test(expBody),
   "a <summary> is not a <button> and inherits no global tap-target floor");
 
-const uses = (app.match(/<Explainer>/g) || []).length;
+// ⚠️ MATCH THE OPENER THE SAME WAY THE BODY REGEX DOES. This counted a bare
+// `<Explainer>` only, while the closer and body patterns below accept props —
+// so the first `<Explainer label="...">` in the file (a supported prop, see the
+// component) made "every opened Explainer is closed" fail on a CORRECT file.
+// An assertion that breaks on valid code teaches people to edit the assertion.
+const uses = (app.match(/<Explainer(\s[^>]*)?>/g) || []).length;
 ok("it is used across the page, not on one section", uses >= 10, `${uses} call sites`);
 ok("every opened Explainer is closed", uses === (app.match(/<\/Explainer>/g) || []).length);
 

@@ -8091,3 +8091,336 @@ rendered at 375x812: DAL RB shows tier + change + starters · DAL WR silent (pos
 supposedly drives is rushing efficiency, and this repo's own table puts **RB yards per carry at
 r = 0.022**. What it buys is one sentence on a card, on the handful of teams where a real thing just
 happened.
+
+## Week 1 News Sweep, and a Guard That Conflated Availability With Outlook (Sep 11, 2026)
+
+Twenty prose edits across all three tables, sourced from the NFL's official Week 1 injury
+report, NFL.com, the Falcons' own site, and the Legendary Upside Week 1 Walkthrough.
+**90 grades BYTE-IDENTICAL** — 15 tournaments x 5 fixtures plus 3 leagues x 5, against a
+pristine worktree at HEAD. Prose carries no score.
+
+### ⛔ THE ATLANTA QUARTERBACK ENTRIES HAD INVERTED, AND BOTH NAMED PASSERS ARE OUT
+
+All three ATL rows read as an open Penix/Tua competition with no Week 1 starter named.
+Reality as of Sep 11: **Atlanta named Tua the starter, he hurt his oblique in practice on
+Thu Sep 10, Penix was not cleared off the Week 11 2025 ACL, and Cooper Rush starts.**
+
+**The cascade is what made this worth catching.** Drake London, Kyle Pitts and Bijan Robinson
+all inherit a passer who is not playing, and `cooper rush` existed in **none** of the three
+ADP tables and no prose table — so the app could not name Atlanta's actual starter at all.
+
+He is now in `RECENT_NEWS` and `SITUATIONS` and **deliberately NOT in any ADP table.** He
+carries no best-ball quote, and per the ADP source-of-truth rule a fabricated number is worse
+than none. He is a matchup input for the Atlanta skill players, not a rosterable asset.
+
+**Third payout of the 30-45 day freshness rule in two weeks** (Pierce Aug 28, Jacobs Aug 30,
+this). The Tua row was FIVE DAYS OLD and already described a world that had ended.
+
+### ⚠️ A THIRD PROSE TABLE EXISTS, AND THIS FILE NAMES IT WRONG
+
+There are **three** per-player prose tables, not two: `RECENT_NEWS`, **`VERDICTS`**, and
+`SITUATIONS`. The Data File Locations section above calls the middle one `PLAYER_VERDICTS`;
+**the actual constant is `VERDICTS`.** A doc-vs-code naming divergence of exactly the class
+the Sep 8 `NAKED_RB_HVT_GATE` entry records — a name a human reads and acts on is a
+definition whether or not a machine parses it.
+
+Coverage is ragged and must be checked per player, never assumed: `ashton jeanty` and
+`josh jacobs` are SITUATIONS-only, `tucker kraft` and `isiah pacheco` are RECENT_NEWS-only,
+`travis hunter` was RECENT_NEWS + VERDICTS with **no SITUATIONS row**, so nothing he carried
+could reach the player card. He has one now.
+
+### ⚠️ TWO SCRIPTING TRAPS, BOTH CAUGHT BY ASSERTIONS RATHER THAN BY READING
+
+1. **A block span that ends at the next `const NAME = {` is WRONG.** `SITUATIONS` is followed
+   by more ADP tables, so a span running to EOF matched `"tua tagovailoa": { adp: 255.0 }` in
+   `ADP_YAHOO` and reported two hits. Terminate on the block's own `};` at column 0.
+2. Every edit asserts **exactly one** match before replacing. Both failures above aborted
+   before writing, so the tree stayed clean — verified with `git diff --stat` after each.
+
+`newline=""` on both read and write, per the line-endings rule; `git ls-files --eol` confirms
+`i/lf w/lf` after.
+
+### ⭐ GUARD 8 NARROWED: `hold` IS NOT A SELL
+
+`test-stale-verdicts.mjs` rule 2 fired on the new Hunter row — *"RECENT_NEWS confirms
+availability, but SITUATIONS reads verdict hold"*. The guard was right to look and wrong to
+fire, and the reason generalises:
+
+**IT CONFLATED AVAILABILITY WITH FANTASY OUTLOOK.** Those are the same question for almost
+every player and OPPOSITE questions for a two-way one. Travis Hunter is *cleared for full
+participation* AND *projected to play full-time cornerback at ~30% route participation* — he
+is maximally available and minimally useful. The clause tested `NEGATIVE_VERDICT`, which
+includes a bare `hold`; but `hold` is NEUTRAL, not a sell, and a player can be available and
+still a hold for a committee, a bad offence, or a defensive role.
+
+The guard's own header requires each `AVAILABLE` phrase to be one that *"cannot reasonably
+appear in a note arguing the opposite direction."* **`cleared for full participation` turned
+out to be exactly such a phrase.** That is a blind spot in the rule, not a fact to write
+around — rewording the note to dodge the regex would have been silencing the check, which the
+header explicitly forbids.
+
+Narrowed to `fade`/`hard fade`. **The founding Nabers case was `hold` + trend `falling` and is
+still caught by the trend clause**, so nothing the test was built for is lost. Both shapes
+negative-tested and both still exit non-zero; the clean baseline exits 0.
+
+⚠️ **Hunter's trend was ALSO wrong on my side and was fixed first.** I wrote `falling`; the
+Aug 5 row already read "primarily at cornerback," so nothing deteriorated this week — it was
+CONFIRMED and QUANTIFIED. `stable` is the honest label. **Fix your own label before you touch
+the guard**, or you will narrow a rule to accommodate an error.
+
+### The other seventeen edits
+
+| Player | Change |
+|---|---|
+| **travis hunter** | Full-time CB Week 1, ~30% routes. ADP 147 prices a role he is not playing |
+| **ashton jeanty** | No injury designation. The ankle question is closed; TARGET/rising |
+| **alec pierce** | Playing, under full strength. Downs the easier Week 1 trust; Keenan Allen behind them |
+| **tucker kraft** | Returns Week 1 vs MIN, no designation |
+| **marshawn lloyd** | Lead back with Jacobs unavailable, in a three-way room |
+| **isiah pacheco** | IR. Leaves Jacob Saylors as Gibbs' only backup |
+| **jordyn tyson** | RECENT_NEWS row was stale and undated, still reading "immediate WR2 role" with no mention of IR. Now dated, with the hamstring cause and the named beneficiaries |
+| **kayshon boutte** | HOU WR2 after Jayden Higgins' ACL |
+| **greg dulcich** | First coverage in any prose table. MIA TE1 path |
+| **jeremiyah love** | Questionable, ankle, game-time call |
+
+**No verdict crossed into `TARGET` except Jeanty**, who was already `TARGET`. `activeTargets`
+pays +0.3 past three with a 1.5 cap, so verdict changes can move a grade; none here did, and
+the 90-grade run is the proof rather than the claim.
+
+### ⚠️ TWO CLAIMS FROM THE SOURCES WERE DROPPED, NOT CARRIED
+
+The fetched Week 1 injury report listed **"DT Aaron Donald (rest)"** for the Rams and a Bears
+DL whose name belongs to a safety. Neither is plausible for 2026 and neither could be
+confirmed against a second source, so nothing from either line was written. Search summaries
+and page fetches carry no vintage guarantee — the Rachaad White trap from Aug 16, arriving
+through a different door.
+
+---
+
+## Game Environment + Weekly Projection (added Sep 12, 2026)
+
+`scripts/build-gameenv.py` -> `grading/data/gameenv_2026.json`. **CONTEXT ONLY — 90 grades
+BYTE-IDENTICAL** (15 tournaments x 5 fixtures plus 3 leagues x 5), against a pristine worktree
+at HEAD. Guard 38: `scripts/test-gameenv.mjs`.
+
+### It closes three Section 4 rules that have never had data behind them
+
+Written down since July, unimplementable for weeks 1-14 because `PLAYOFF_GAME_TOTALS` holds
+W15-17 rows only and is hand-typed:
+
+```
+Blowout Risk Check      spread 7+ AND total under 44     -> now computed
+Competitive Balance     |spread| <= 3 AND total >= 46    -> now computed
+Venue / dome modifier   indoor                           -> now read
+Defensive Funnel        run/pass split                   -> NOT built, needs pbp
+Macro Volume            PROE and pace                    -> NOT built, needs pbp
+```
+
+### A BETTING LINE IS NOT THE SAME CLASS OF DATA AS FPA
+
+The Source Hierarchy puts matchup data at rank 5 and the Aug 25 run measured **WR FPA as
+NEGATIVE year over year**. Both true. **Neither applies here, and the distinction is the whole
+justification for the layer:**
+
+> **FPA is a MEMORY** - what a defence allowed last season, r = 0.05 to 0.25.
+> **A line is a FORECAST** - a market price for THIS game, with this week's injuries, weather
+> and starting quarterback already inside it.
+
+It is not trying to be stable across seasons, so the correlation that condemns FPA says nothing
+about it. **Verified before building:** the implied totals derived here reproduce the ones in a
+paid newsletter **to the cent on 9 of 13 games**, and the other 4 had **moved overnight** - which
+is the argument for pulling rather than typing.
+
+### Why Sleeper/Rotowire and not player props
+
+All three probed Sep 12 2026 (R19 - a data-availability claim ages like a verdict):
+
+```
+ESPN public API      game lines only. NO props. The receivingYards field in the
+                     summary endpoint is a SEASON LEADERBOARD label, not a market.
+The Odds API         has props, but free tier is 500 requests a MONTH and props
+                     bill PER GAME PER MARKET.
+Sleeper /projections HTTP 200, no auth, whole league in one call, already in
+                     half-PPR, on a host refresh-inseason.sh already calls.
+```
+
+A prop carries money and a projection carries an opinion. That gap decides everything for
+betting and almost nothing for "is 12 points a reasonable expectation."
+
+### THE PROJECTION IS A BLACK BOX, SO THE DISAGREEMENT IS THE PRODUCT
+
+It hands over a number and never shows its work, which is the opposite of everything else in
+this app. **The moment the UI says "start him, he is projected 12.4" it has become a worse
+version of every other site.** `projDivergence` compares the projected targets against the
+targets per game actually measured this season and prints the gap only when it exceeds
+`PROJ_TGT_GAP` (1.5) - the bare number is available anywhere, the gap is not.
+
+Pre-season `CUR_VOLUME_LIVE` is false, so no divergence line can fire until the weekly refresh
+has two games of usage. The panel reads correctly without it.
+
+### GAME DATA BELONGS TO THE GAME, NOT THE PLAYER
+
+Twelve starters can sit in eight games, so attaching the total and spread to each PLAYER repeats
+the same two facts up to three times per game. **Grouped by game, the panel renders fewer rows
+than the lineup has players.** Games sort by implied total, so the one most likely to produce
+points leads.
+
+### Thresholds live in the data
+
+7/44 and 3/46 are CLAUDE.md Section 4 numbers. Typing them again in App.jsx would be the
+duplicate-definition class this repo has hit **nine** times, so the builder writes them into
+`_meta.flags`, applies them there, and the app reads them only to print what the gate was.
+**Guard 38 asserts `buildGameEnvBoard` never retypes them.**
+
+### THE SHELL FETCHES; THE BUILDER IS A PURE PARSE
+
+Measured Sep 12 2026: **curl returns 200 for the ESPN scoreboard on every URL form tried while
+Python urllib returns 403 through the egress proxy, regardless of User-Agent.** Sleeper works
+from both. A builder that fetched would be green on one machine and red on another for reasons
+that have nothing to do with the data - and `/root/.ccr/README.md` says not to retry proxy 403s.
+
+So `build-gameenv.py` contains **no HTTP client at all** and takes `--scoreboard`,
+`--summaries` and `--projections` as files, exactly as `build-status.py` does. That also makes it
+runnable offline against fixtures. Guard 38 asserts the absence.
+
+### THE WEEK COMES FROM ESPN, NOT DATE MATH
+
+A bare scoreboard call reports `week.number`. **No season-start constant to drift and no
+off-by-one after a bye or a flex.** Step 6 of `refresh-inseason.sh` reads it, then fetches the
+week's board, one summary per game, and the projections.
+
+**This is the only layer whose data EXPIRES.** Lines move all week, so `fetched_at` is the
+vintage, it is printed on the page, and a Tuesday pull is stale by Sunday. If this is ever wanted
+for Sunday-morning lineups it needs a second run late in the week.
+
+### Team codes: ESPN says WSH, everything else says WAS
+
+Exactly one mismatch across all 32 (Sleeper agrees with `ADP_DATA`). **BOTH alias mechanisms
+needed it, for different reasons, and that is not duplication:**
+
+```
+TEAM_ALIAS / teamKey        CANONICAL form, for DISPLAY and comparison
+TEAM_SPELLINGS / lookupTeam EVERY spelling, for LOOKUPS
+```
+
+The Sep 11 note already records that normalising alone was the wrong first fix. Without the
+canonical half the panel printed `WSH vs PHI` while every other surface said `WAS` - **two
+spellings of one team on one screen.** Both negative-tested.
+
+**Guard 38's first version asserted "only one alias map" and failed on the correct file**,
+because two exist on purpose. Re-aimed to "no THIRD map". Same right-shape-wrong-aim error as
+guard 32 on `scoreFreeAgent` and guard 34 on a file-wide 32px check.
+
+### TWO BUGS FOUND BY THE GUARD SUITE, ONE OF THEM PRE-EXISTING
+
+1. **I passed `summary=` to `<Explainer>` and the prop is `label=`.** It was silently ignored and
+   the panel rendered the default caption. Compiled clean.
+2. **Guard 34 counted openers as bare `<Explainer>` while its closer and body regexes accepted
+   props**, so the first prop-carrying Explainer in the file made "every opened Explainer is
+   closed" fail on CORRECT code. **An assertion that breaks on valid code teaches people to edit
+   the assertion.** Fixed and negative-tested with a genuinely unclosed tag.
+
+### A SABOTAGE RUN WHOSE OWN BASELINE FAILS PROVES NOTHING
+
+First negative-test pass reported two misses. **One was a real guard weakness; one was my
+sabotage flipping a flag on an UNPRICED game that the assertion correctly filters out.** A later
+run then showed every case exiting 1 - including the baseline, because a new assertion was
+failing. Both are the trap the Sep 6 baselines entry records. The harness now asserts a clean
+exit before and after every case.
+
+### Measured, in a real browser at 430px
+
+```
+FIRST VISIT   panel 987px   page 5,960px   explainer open   (by design)
+RETURNING     panel 703px   page 5,419px   explainer closed
+0 sub-32px tap targets · no horizontal overflow · 0 page errors
+index pill "Matchups" resolves
+```
+
+**A cross-check worth recording: the panel put Kenneth Walker under `KC vs DEN` and I read that
+as a bug**, because he is a Seahawk in 2025. `ADP_DATA` has him on KC for 2026 with a trendNote
+describing a KC contract, and the independent Sleeper feed says `team=KC opp=DEN`. **The app was
+right and my recollection was the stale input.** Check the data before "fixing" it.
+
+### Scope
+
+- **REDRAFT ONLY.** Underdog rosters lock, so a weekly line cannot be acted on in best ball.
+- **Never scored, never in the AI prompt.** `_meta.scored` and `_meta.reaches_ai_prompt` are both
+  false and guard 38 asserts both, plus that no prompt builder exists.
+- **Opposing DEFENSIVE injuries only.** Your own players are in `status_<season>.json`; the thing
+  nothing else in this app can see is the defence you are facing.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL · 38 guards pass · dual-file identical · LF preserved
+14 sabotages against a verified-clean baseline, ALL exit non-zero - including two
+  separate engine leaks, a prompt builder, an unreviewed consumer, a retyped
+  threshold, a third alias map, raw feed codes reaching the render, and an HTTP
+  client returning to the builder
+refresh-inseason.sh run for real end to end: step 6 reads week 1 from ESPN,
+  16 games (14 priced), 384 projections
+```
+
+### Still open
+
+**PROE, pace and the funnel** need the play-by-play release, a large weekly download, and are the
+Step 2 of this build. **Player props** were assessed and deliberately not built: $30/mo or a
+500-request monthly budget for a market price, when a free half-PPR projection covers the
+baseline question. Revisit only for betting or for hunting market lag specifically.
+
+### The late-week pass (added Sep 12, 2026)
+
+**No App.jsx or grading/data change, so no grade can move** — verified: `git status` shows only
+the workflow, the refresh script and guard 15.
+
+**Only HALF this pipeline expires**, which is the whole design:
+
+```
+steps 1-4   nflverse SEASON RELEASES   publish after games, then sit still until
+                                       the next Monday night. Re-fetching them on
+                                       a Saturday is pure waste.
+steps 5-6   LIVE snapshots             move all week - Friday practice
+                                       designations, IR moves, betting lines,
+                                       projections following the news
+```
+
+So `refresh-inseason.sh --live-only` runs 5 and 6 alone, and a second cron fires it
+**Saturday 15:00 UTC**.
+
+**Why Saturday and not Sunday.** Friday afternoon is when the OFFICIAL PRACTICE REPORT lands with
+every out / doubtful / questionable designation, which is the single largest information event of
+the week, and it is settled by Saturday. The job also opens a PULL REQUEST, and a Sunday-morning
+PR cannot realistically be merged before a 13:00 ET kickoff.
+
+⛔ **NOTHING SCHEDULED CAN CATCH FINAL INACTIVES.** They land 90 minutes before kickoff and no
+PR-based flow reaches a built page in that window. **This pass is the practice report, not the
+last word**, and the script's header says so.
+
+**One workflow file, not two.** Two files would be two places to keep the guard list, the
+frozen-file rule and the PR body in step — the duplicate-definition class this repo has paid for
+repeatedly. The pass is derived from `github.event.schedule`, with `workflow_dispatch` able to
+force either.
+
+⚠️ **BOTH PASSES LAND IN THE SAME ISO WEEK**, so the branch name carries a `-live` suffix. Without
+it, Saturday would force-push over Tuesday's unmerged PR and **silently lose the full refresh** —
+a silent-drop failure wearing a git operation. The concurrency group is keyed on the schedule for
+the same reason: cancelling one pass because the other is running would drop a refresh.
+
+### ⚠️ Two testing lessons, both previously recorded and both hit again
+
+1. **`bash -n` proves a script parses, never that it does what you meant.** The live-only mode was
+   RUN for real: it skipped steps 1-4, touched only `status_2026` and `gameenv_2026`, and the
+   unknown-flag path exits 2. Every new `run:` block in the YAML was also extracted and executed
+   under `bash -e` across all four routing cases (Tuesday, Saturday, dispatch-true, dispatch-false)
+   — `set -e` behaviour around an `A && B` chain is exactly where a parsed-but-wrong block hides.
+2. **An assertion aimed too wide passes on broken code.** *"The mode is derived from the schedule"*
+   originally tested for `github.event.schedule` ANYWHERE in the file — and it also appears in the
+   concurrency group, so breaking the real derivation still passed. Scoped to the mode step's own
+   block. **Third instance of this shape**, after guard 32 on `scoreFreeAgent` and guard 34's
+   file-wide 32px check.
+
+Eleven sabotages against a verified-clean baseline, all exit non-zero: the Saturday cron deleted,
+Saturday firing the full refresh, the mode derivation broken three ways, a shared branch name,
+collapsed concurrency, the script losing `--live-only`, `--live-only` no longer skipping steps
+1-4, and unknown flags silently ignored again.
