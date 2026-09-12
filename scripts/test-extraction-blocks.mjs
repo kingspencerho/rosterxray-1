@@ -134,6 +134,125 @@ check('declares the "adp" key', /"adp"/.test(prompt));
 check("warns against swapping ADP and Pick", /NEVER swap ADP and Pick/i.test(prompt));
 check("still tells it to discard Bye", /Bye is never a pick/i.test(prompt));
 
+
+// ---------------------------------------------------------------------------
+// THE LEAGUE SHAPE, READ OFF THE CARD (Sep 12 2026)
+//
+// A Yahoo share card prints the slot the LEAGUE starts beside every row, so the
+// screenshot already describes the league and the reader was re-entering it by
+// hand. This is the FIRST screenshot-derived input that can move a grade —
+// league.lineup is read 19 times inside analyzeRedraft — so the checks below are
+// behavioural, not string matches.
+//
+// The helper is EXTRACTED AND RUN. Sep 11 cost a day to the opposite: a guard
+// asserted that getVacated MENTIONED teamKey, passed, and the fix underneath it
+// did not work. A regex over source proves text exists, never that code behaves.
+console.log("");
+console.log("league shape from slots");
+
+const appSrc = readFileSync(path.join(repoRoot, "App.jsx"), "utf8");
+const cut = (startMarker, endMarker) => {
+  const i = appSrc.indexOf(startMarker);
+  const j = appSrc.indexOf(endMarker, i);
+  return i < 0 || j < 0 ? "" : appSrc.slice(i, j + endMarker.length);
+};
+
+// One slice: every SLOT_ constant plus the function itself. Cutting to the first
+// "};" stopped inside the function, because its own first line ends in one.
+const slotSrc = cut("const SLOT_FLEX = ", "const describeSlotConfig")
+  .replace(/const describeSlotConfig[\s\S]*$/, "");
+
+let fromSlots = null;
+try { fromSlots = new Function(`${slotSrc}; return configFromSlots;`)(); } catch (e) { fromSlots = null; }
+check("configFromSlots extracts and runs", typeof fromSlots === "function");
+
+if (typeof fromSlots === "function") {
+  // His own card, Sep 12 2026: 1QB 2RB 3WR 1TE 1FLEX, 5 bench, 1 IR.
+  const yahoo = [
+    { name: "J. Burrow", slot: "QB" },
+    { name: "O. Hampton", slot: "RB" }, { name: "C. Skattebo", slot: "RB" },
+    { name: "A. St. Brown", slot: "WR" }, { name: "L. Burden III", slot: "WR" },
+    { name: "J. Addison", slot: "WR" },
+    { name: "T. Warren", slot: "TE" },
+    { name: "J. Warren", slot: "WRT" },
+    { name: "E. Pineiro", slot: "K" }, { name: "Vikings", slot: "DEF" },
+    { name: "D. Boston", slot: "BN" }, { name: "D. Stribling", slot: "BN" },
+    { name: "C. Rodriguez Jr.", slot: "BN" }, { name: "M. Andrews", slot: "BN" },
+    { name: "T. Shough", slot: "BN" },
+    { name: "J. Tyson", slot: "IR" },
+  ];
+  const d = fromSlots(yahoo);
+  check("reads his card exactly", !!d &&
+    d.lineup.QB === 1 && d.lineup.RB === 2 && d.lineup.WR === 3 && d.lineup.TE === 1 &&
+    d.lineup.FLEX === 1 && d.lineup.SFLEX === 0 && d.benchSize === 5 && d.irSlots === 1,
+    d ? JSON.stringify(d.lineup) + ` bench ${d.benchSize} ir ${d.irSlots}` : "null");
+
+  // K and DEF occupy slots the app models nowhere. They must not become lineup slots.
+  check("K and DEF are ignored, not counted", !!d && d.ignored === 2 &&
+    Object.values(d.lineup).reduce((a, b) => a + b, 0) === 8);
+
+  // WRT is a flex, QWRT is a superflex, and confusing them changes whether the app
+  // treats the league as superflex at all.
+  const sflex = fromSlots([...yahoo, { name: "X", slot: "QWRT" }]);
+  check("QWRT becomes SFLEX, never FLEX", !!sflex && sflex.lineup.SFLEX === 1 && sflex.lineup.FLEX === 1);
+
+  // ⛔ SILENT-FAIL TO TODAY'S BEHAVIOUR. A card with no tags, or a partial read, must
+  // leave the reader's own settings alone. A half-applied lineup is worse than none
+  // because it looks deliberate.
+  check("no tags at all returns null", fromSlots([{ name: "A" }, { name: "B" }]) === null);
+  check("an empty list returns null", fromSlots([]) === null);
+  check("a too-thin read returns null",
+    fromSlots([{ name: "A", slot: "QB" }, { name: "B", slot: "RB" }]) === null);
+  check("a read with no QB returns null",
+    fromSlots(yahoo.filter(r => r.slot !== "QB")) === null);
+}
+
+// A <select> handed a value with no matching option renders blank or snaps to the
+// first entry — silently. The panel would then show a number the engine is not using.
+let withVal = null;
+try {
+  withVal = new Function(`${cut("const withValue = ", "};")}; return withValue;`)();
+} catch (e) { withVal = null; }
+check("withValue extracts and runs", typeof withVal === "function");
+if (typeof withVal === "function") {
+  check("an off-list value is injected", JSON.stringify(withVal([5, 6, 7], 4)) === "[4,5,6,7]");
+  check("an in-list value changes nothing", JSON.stringify(withVal([5, 6, 7], 6)) === "[5,6,7]");
+  check("it stays sorted", JSON.stringify(withVal([2, 3, 4, 5], 6)) === "[2,3,4,5,6]");
+}
+
+// THE DERIVED OBJECT GRADES, NOT THE STATE. setCustomConfig is async and the grade
+// runs in the same tick, so reading it back would grade the PREVIOUS settings while
+// the panel showed the new ones — the trap handleAnalyze already carries for setInput.
+const extractBody = cut("const extractFromImages = ", "const removeImage");
+check("the extractor derives the config", extractBody.includes("configFromSlots(players)"));
+check("and grades off the derived object, not the state",
+  extractBody.includes("cfg ? buildLeagueFromConfig(cfg)"),
+  "reading customConfig back here grades the previous settings");
+
+// APPLIED AND DISCLOSED. A silent rewrite of somebody's league settings is the same
+// failure class as a filter that drops a player without saying so.
+check("the reader is told what was read", /Read from your screenshot/.test(appSrc));
+check("and told which three it could not read",
+  /Teams, scoring and playoff weeks are not printed/.test(appSrc));
+check("an override retires the banner",
+  cut("const updateCustomConfig = ", "};").includes("setSlotConfig(null)"));
+
+// A NEGATED INSTRUCTION CONTAINS THE SAME WORDS AS AN AFFIRMATIVE ONE. The first
+// version of this passed while the prompt said "Do NOT capture the LINEUP SLOT",
+// because both spellings contain "LINEUP SLOT". So the affirmative phrasing is
+// pinned, and the EXAMPLE the model is shown is parsed and checked.
+check("the prompt asks for the slot, affirmatively",
+  /ALSO capture the LINEUP SLOT/.test(prompt));
+const slotExample = (prompt.match(/\[\{"name":"J\. Burrow"[^\]]*\]/) || [""])[0];
+let ex = [];
+try { ex = JSON.parse(slotExample); } catch (e) { ex = []; }
+check("the worked example carries slots", ex.length >= 4 && ex.every(r => r.slot));
+check("...including a flex and a bench row",
+  ex.some(r => r.slot === "WRT") && ex.some(r => r.slot === "BN"),
+  "the two rows a model is most likely to mislabel");
+check("and tells it to omit rather than guess", /OMIT the slot key/i.test(prompt));
+check("bench rows are BN regardless of their own tag", /return "BN" regardless/i.test(prompt));
+
 console.log("");
 if (failed) {
   console.error(`FAIL  ${failed} check(s) failed — the screenshot path is not carrying ADP correctly.`);

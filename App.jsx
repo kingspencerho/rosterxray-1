@@ -7059,6 +7059,77 @@ const REDRAFT_LEAGUES = {
 };
 
 // Default custom config — starting point when user opens Custom builder
+// ⭐⭐ THE LEAGUE SHAPE, READ OFF THE ROSTER SCREENSHOT (Sep 12 2026, his ask:
+// "have the screenshot itself dictate what the settings are").
+//
+// A Yahoo share card prints the slot the LEAGUE starts beside every row — QB, RB,
+// WR, TE, WRT for a flex, QWRT for a superflex — and a BENCH divider under the
+// starters. That is eight of the eleven config fields, sitting on an image the app
+// already sends to the extractor and already reads names off.
+//
+// ⛔ WHAT IT CANNOT SEE, and these three stay manual: TEAMS (the card never says how
+// many are in the league), SCORING ("H2H Points" is the format, not the rules), and
+// PLAYOFF WEEKS (absent entirely).
+//
+// ⚠️ THIS IS THE FIRST SCREENSHOT-DERIVED INPUT THAT CAN MOVE A GRADE. league.lineup
+// is read 19 times inside analyzeRedraft. So it is applied AND disclosed — the reader
+// is told exactly what was read, rather than trusting a silent rewrite of their
+// settings. Same contract as the ADP source-of-truth rule: the user's own platform
+// wins, and the app says so.
+//
+// ⛔ K AND DEF ARE DELIBERATELY IGNORED. The app models no slot for either and filters
+// them everywhere, so a league with two kickers or none reads identically.
+const SLOT_FLEX = new Set(["WRT", "W/R/T", "FLEX", "WR/T", "RWT"]);
+const SLOT_SFLEX = new Set(["QWRT", "Q/W/R/T", "SFLEX", "SUPERFLEX", "OP"]);
+const SLOT_IGNORE = new Set(["K", "DEF", "DST", "D/ST", "PK"]);
+const SLOT_MIN_STARTERS = 5;   // below this the read is too thin to trust a whole config to
+
+// ⛔ A <select> HANDED A VALUE WITH NO MATCHING OPTION DOES NOT ERROR — it renders
+// blank or snaps to the first entry, and the panel then shows a number the engine is
+// not using. These option lists are hand-written and narrow (WR 2-5, bench 5-7), and
+// a screenshot can legitimately read 1 WR or a 4-man bench. So the current value is
+// injected when it is off-list: the dropdown tells the truth about what is graded, and
+// the reader can still pick any of the normal choices.
+const withValue = (opts, value) => {
+  const v = typeof value === "number" ? value : parseInt(value, 10);
+  if (!isFinite(v) || opts.includes(v)) return opts;
+  return [...opts, v].sort((a, b) => a - b);
+};
+
+const configFromSlots = (players) => {
+  const lineup = { QB: 0, RB: 0, WR: 0, TE: 0, FLEX: 0, SFLEX: 0 };
+  let bench = 0, ir = 0, tagged = 0, ignored = 0;
+  for (const pl of players || []) {
+    const slot = typeof pl?.slot === "string" ? pl.slot.trim().toUpperCase() : "";
+    if (!slot) continue;
+    tagged++;
+    if (slot === "BN" || slot === "BE" || slot === "BENCH") { bench++; continue; }
+    if (slot === "IR" || slot === "IR-R") { ir++; continue; }
+    if (SLOT_IGNORE.has(slot)) { ignored++; continue; }
+    if (SLOT_SFLEX.has(slot)) { lineup.SFLEX++; continue; }
+    if (SLOT_FLEX.has(slot)) { lineup.FLEX++; continue; }
+    if (lineup[slot] !== undefined) lineup[slot]++;
+  }
+  const starters = lineup.QB + lineup.RB + lineup.WR + lineup.TE + lineup.FLEX + lineup.SFLEX;
+  // ⛔ SILENT-FAIL TO TODAY'S BEHAVIOUR. A non-Yahoo card, a bad crop or a partial read
+  // returns null and the config is left exactly as the reader set it. A half-applied
+  // lineup would be worse than none, because it would look deliberate.
+  if (tagged === 0 || starters < SLOT_MIN_STARTERS || lineup.QB < 1) return null;
+  return { lineup, benchSize: bench, irSlots: ir, starters, tagged, ignored };
+};
+
+// The one-line summary the reader sees. It names every number that was applied, so a
+// misread is visible rather than silently graded.
+const describeSlotConfig = (d) => {
+  if (!d) return "";
+  const parts = [`${d.lineup.QB}QB`, `${d.lineup.RB}RB`, `${d.lineup.WR}WR`, `${d.lineup.TE}TE`];
+  if (d.lineup.FLEX) parts.push(`${d.lineup.FLEX}FLEX`);
+  if (d.lineup.SFLEX) parts.push(`${d.lineup.SFLEX}SFLEX`);
+  parts.push(`${d.benchSize} bench`);
+  if (d.irSlots) parts.push(`${d.irSlots} IR`);
+  return parts.join(" · ");
+};
+
 const DEFAULT_CUSTOM_CONFIG = {
   teams: 12,
   scoring: "Half-PPR",
@@ -10579,6 +10650,10 @@ export default function RosterScorer() {
     return next;
   });
   const [customConfig, setCustomConfig] = useState(DEFAULT_CUSTOM_CONFIG);
+  // What the last screenshot said the league looked like. Null until a card is read,
+  // and cleared the moment the reader edits a dropdown — an override is theirs, and a
+  // banner still claiming the screenshot decided it would be a lie.
+  const [slotConfig, setSlotConfig] = useState(null);
   const [customExpanded, setCustomExpanded] = useState(false);
   const [benchExpanded, setBenchExpanded] = useState(false);
   // idle | working | saved | error — drives the export button label only
@@ -11047,6 +11122,9 @@ export default function RosterScorer() {
 
   // Update a single field in customConfig (handles nested lineup keys)
   const updateCustomConfig = (path, value) => {
+    // The reader just overruled the screenshot. Drop the banner rather than leave it
+    // claiming a value that is no longer on screen.
+    setSlotConfig(null);
     setCustomConfig(prev => {
       const next = { ...prev };
       if (path.startsWith("lineup.")) {
@@ -11175,7 +11253,11 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
               if (typeof p === "string") return p.trim().length > 1 ? { name: p.trim() } : null;
               if (p && typeof p === "object" && typeof p.name === "string" && p.name.trim().length > 1) {
                 const num = (v) => (typeof v === "number" && isFinite(v) && v > 0 ? v : undefined);
-                return { name: p.name.trim(), pick: num(p.pick), adp: num(p.adp) };
+                // ⭐ THE LINEUP SLOT, added Sep 12 2026. A share card prints the slot the
+                // LEAGUE starts beside every row, so the roster screenshot already describes
+                // the league shape and the reader was re-entering it by hand.
+                const slot = typeof p.slot === "string" && p.slot.trim() ? p.slot.trim().toUpperCase() : undefined;
+                return { name: p.name.trim(), pick: num(p.pick), adp: num(p.adp), slot };
               }
               return null;
             }).filter(Boolean);
@@ -11289,7 +11371,21 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
       //      have been missing most of its rows without ever erroring.
       if (analysisMode === "redraft") {
         const picks = parseRosterRedraft(newInput);
-        const league = resolveLeague(redraftLeague, customConfig);
+        // ⭐⭐ THE SCREENSHOT DICTATES THE LEAGUE SHAPE.
+        // ⚠️ The DERIVED object grades, not the state. setCustomConfig is async and this
+        // runs in the same tick, so reading customConfig back here would grade the
+        // PREVIOUS settings while the panel showed the new ones — the same trap
+        // handleAnalyze already carries for setInput.
+        const detected = configFromSlots(players);
+        const cfg = detected
+          ? { ...customConfig, lineup: detected.lineup, benchSize: detected.benchSize, irSlots: detected.irSlots }
+          : null;
+        if (cfg) {
+          setCustomConfig(cfg);
+          setRedraftLeague("custom");
+          setSlotConfig(detected);
+        }
+        const league = cfg ? buildLeagueFromConfig(cfg) : resolveLeague(redraftLeague, customConfig);
         const result = analyzeRedraft(picks, league, picks.hasPickNumbers, dataMode === "projected");
         setAnalyzed(result);
         // ⛔ STRUCTURE ONLY, NEVER CONTENT — same contract as the paste path.
@@ -13449,6 +13545,31 @@ Analyze this best ball roster. Return JSON only.`;
               : REDRAFT_LEAGUES[redraftLeague].note}
           </div>
 
+          {/* ⭐⭐ WHAT THE SCREENSHOT DECIDED. This is the first screenshot-derived input
+              that can move a grade — league.lineup is read 19 times inside analyzeRedraft —
+              so it is applied AND named. A silent rewrite of somebody's league settings is
+              the same failure class as a filter that drops a player without saying so.
+
+              ⚠️ It states the three the card CANNOT carry, rather than letting the reader
+              assume everything was read: a share card never prints league size, never says
+              half or full PPR, and never names the playoff weeks. */}
+          {slotConfig && redraftLeague === "custom" && (
+            <div style={{
+              marginTop: "8px", padding: "7px 10px", borderRadius: "4px",
+              background: "var(--bg-base)", border: "1px solid var(--border-subtle)",
+            }}>
+              <div style={{ fontSize: "10px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                <span style={{ color: "var(--pos)", fontWeight: 700 }}>Read from your screenshot</span>
+                {" · "}
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{describeSlotConfig(slotConfig)}</span>
+              </div>
+              <div style={{ fontSize: "9px", color: "var(--text-dim)", lineHeight: 1.5, marginTop: "4px" }}>
+                Teams, scoring and playoff weeks are not printed on a roster card — those three
+                stay yours. Change any dropdown to override.
+              </div>
+            </div>
+          )}
+
           {/* Custom builder dropdowns — inline, mobile-friendly */}
           {redraftLeague === "custom" && customExpanded && (
             <div style={{
@@ -13526,9 +13647,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="1">1 QB</option>
-                    <option value="2">2 QB (SF)</option>
-                    <option value="3">3 QB</option>
+                    {withValue([1, 2, 3], customConfig.lineup.QB).map(o => (
+                      <option key={o} value={o}>{`${o} QB`}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13548,10 +13669,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="1">1 RB</option>
-                    <option value="2">2 RB</option>
-                    <option value="3">3 RB</option>
-                    <option value="4">4 RB</option>
+                    {withValue([1, 2, 3, 4], customConfig.lineup.RB).map(o => (
+                      <option key={o} value={o}>{`${o} RB`}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13571,10 +13691,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="2">2 WR</option>
-                    <option value="3">3 WR</option>
-                    <option value="4">4 WR</option>
-                    <option value="5">5 WR</option>
+                    {withValue([2, 3, 4, 5], customConfig.lineup.WR).map(o => (
+                      <option key={o} value={o}>{`${o} WR`}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13594,9 +13713,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="1">1 TE</option>
-                    <option value="2">2 TE</option>
-                    <option value="3">3 TE</option>
+                    {withValue([1, 2, 3], customConfig.lineup.TE).map(o => (
+                      <option key={o} value={o}>{`${o} TE`}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13616,12 +13735,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
+                    {withValue([0, 1, 2, 3, 4, 5], customConfig.lineup.FLEX).map(o => (
+                      <option key={o} value={o}>{String(o)}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13641,10 +13757,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="0">0</option>
-                    <option value="1">1 (QB/RB/WR/TE)</option>
-                    <option value="2">2 (QB/RB/WR/TE)</option>
-                    <option value="3">3 (QB/RB/WR/TE)</option>
+                    {withValue([0, 1, 2, 3], customConfig.lineup.SFLEX || 0).map(o => (
+                      <option key={o} value={o}>{String(o)}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13664,9 +13779,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
+                    {withValue([5, 6, 7], customConfig.benchSize).map(o => (
+                      <option key={o} value={o}>{String(o)}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -13686,9 +13801,9 @@ Analyze this best ball roster. Return JSON only.`;
                     }}
                     style={selectStyle}
                   >
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
+                    {withValue([0, 1, 2], customConfig.irSlots).map(o => (
+                      <option key={o} value={o}>{String(o)}</option>
+                    ))}
                   </select>
                 </div>
 

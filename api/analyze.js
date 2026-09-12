@@ -36,14 +36,17 @@ Underdog roster screens show three numbers per player, usually left to right wit
 - Bye is never a pick and never an adp. Discard it.
 - If a number is not visible or you are unsure which field it belongs to, OMIT that field rather than guessing. A missing field is recoverable; a wrong one is not.
 
-Yahoo SHARE CARDS (purple "yahoo fantasy" branded lineup image, added 2026): rows read like "QB B. PURDY Thu 5:35PM @ LAR — 18.85". The right-hand decimal is a PROJECTION, never a Pick or ADP — ignore every number on these cards and return name only, with no "pick" or "adp" key. First names are abbreviated to initials; extract the name exactly as shown (e.g. "B. Purdy") and nothing else from the row. A "BENCH" divider separates starters from bench — include both.
+Yahoo SHARE CARDS (purple "yahoo fantasy" branded lineup image, added 2026): rows read like "QB B. PURDY Thu 5:35PM @ LAR — 18.85". The right-hand decimal is a PROJECTION, never a Pick or ADP — ignore every number on these cards and return name only, with no "pick" or "adp" key. First names are abbreviated to initials; extract the name exactly as shown (e.g. "B. Purdy") and nothing else from the row. A "BENCH" divider separates starters from bench — include both. ALSO capture the LINEUP SLOT each row sits in, as "slot". The slot is the small tag at the LEFT of the row, and it is what the league starts — not the player's position. Read it exactly as printed and uppercase it: QB, RB, WR, TE, K, DEF, WRT (a flex), QWRT (a superflex). For any row BELOW the "BENCH" divider, return "BN" regardless of what its tag says — a bench row shows the player's own position and that is not a lineup slot. For a row tagged IR, or carrying an IR / IR-R badge, return "IR". The slot drives the league configuration, so an invented one is worse than a missing one: if a row's tag is unreadable or you are unsure which side of the BENCH divider it falls on, OMIT the slot key for that row rather than guessing.
 
-Return ONLY a JSON array of objects, one per player, in draft order. Each object has "name" (required, the player's full name as printed) plus optional "pick" and "adp" numbers. Omit a key entirely when that value was not visible — do not send null, 0 or a guess. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
+Return ONLY a JSON array of objects, one per player, in draft order. Each object has "name" (required, the player's full name as printed) plus optional "pick" and "adp" numbers and an optional "slot" string. Omit a key entirely when that value was not visible — do not send null, 0 or a guess. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
 
 Example output exactly:
 [{"name":"Bijan Robinson","pick":2,"adp":2.4},{"name":"Tetairoa McMillan","pick":7,"adp":9.1},{"name":"Trey McBride","pick":13},{"name":"Caleb Williams"}]
 
-Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. Deduplicate if the same player appears twice.`;
+And from a Yahoo share card, where slots are present and numbers are not:
+[{"name":"J. Burrow","slot":"QB"},{"name":"O. Hampton","slot":"RB"},{"name":"J. Warren","slot":"WRT"},{"name":"D. Boston","slot":"BN"},{"name":"J. Tyson","slot":"IR"}]
+
+Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. (They occupy lineup slots the app does not model, so nothing is lost by omitting them entirely — do not return them with a slot either.) Deduplicate if the same player appears twice.`;
 
 // Builds the grading system prompt. Mode-specific tail logic mirrors the
 // original client-side construction exactly — same rules, same JSON contract.
