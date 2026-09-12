@@ -1,0 +1,77 @@
+{
+ "_meta": {
+  "caveats": [
+   "PROE and the funnel gap are labelled against the LEAGUE MEAN of this season, never against zero: 2025 league mean pass_oe is -1.74 and the league mean funnel gap is positive because passing is more efficient than running everywhere.",
+   "off describes the team's OWN offence. def describes the defence it fields, which is a fact about the players who FACE it \u2014 never about its own skill players.",
+   "Pace is snap-to-snap elapsed clock and includes the previous play's duration, so it runs ~5s higher than published pace tables. Use the ranking, not the number.",
+   "A partial season's own SD is inflated by sampling noise, so a partial build flags FEWER teams than a complete one. That is the conservative direction and is intended."
+  ],
+  "gate_rule": "mean absolute sampling error <= half the league spread, measured by resampling each team's own 2025 plays",
+  "gates": {
+   "funnel_plays_per_side": 350,
+   "pace_plays": 200,
+   "proe_plays": 300
+  },
+  "generated": "2026-09-12",
+  "league": {},
+  "neutral": {
+   "margin": 7,
+   "max_qtr": 3,
+   "min_half_seconds": 120
+  },
+  "reaches_ai_prompt": false,
+  "scored": false,
+  "season": 2026,
+  "season_complete": false,
+  "source": "nflverse play_by_play (nflfastR); pass_oe/xpass and epa as published",
+  "teams_covered": 4,
+  "threshold_source": "1 SD of this build's own league distribution",
+  "weeks_covered": 1
+ },
+ "teams": {
+  "LA": {
+   "def": {
+    "pass_plays": 34,
+    "rush_plays": 30
+   },
+   "games": 1,
+   "off": {
+    "pace_plays": 17,
+    "proe_plays": 60
+   }
+  },
+  "NE": {
+   "def": {
+    "pass_plays": 26,
+    "rush_plays": 21
+   },
+   "games": 1,
+   "off": {
+    "pace_plays": 31,
+    "proe_plays": 71
+   }
+  },
+  "SEA": {
+   "def": {
+    "pass_plays": 36,
+    "rush_plays": 31
+   },
+   "games": 1,
+   "off": {
+    "pace_plays": 12,
+    "proe_plays": 49
+   }
+  },
+  "SF": {
+   "def": {
+    "pass_plays": 28,
+    "rush_plays": 28
+   },
+   "games": 1,
+   "off": {
+    "pace_plays": 33,
+    "proe_plays": 65
+   }
+  }
+ }
+}

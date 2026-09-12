@@ -267,8 +267,30 @@ ok("the volume builder documents the games-played denominator",
 
     // The script side of the same contract.
     ok("refresh-inseason.sh accepts --live-only", /--live-only\)/.test(sh));
-    ok("--live-only actually skips the nflverse steps",
-      /LIVE_ONLY" = "1"/.test(sh) && /steps 1-4 skipped/i.test(sh));
+    // \u26a0\ufe0f ASSERT THE PROPERTY, NOT THE STEP COUNT. This read
+    // /steps 1-4 skipped/ and broke the moment a seventh step was added, on a
+    // script that was still correct \u2014 a count cannot notice a new step,
+    // which is the whole thing it was standing in for. The real property is
+    // that every nflverse SEASON-RELEASE builder sits inside the full-pass
+    // branch and none of them runs on the live-only path.
+    const NFLVERSE_BUILDERS = ["build-snap-trajectory.py", "build-qb-profile.py",
+      "build-gamelogs.py", "build-volume-current.py", "build-teamtrends.py"];
+    // \u26a0\u26a0 EXTRACT THE BRANCH BODIES, NOT A SLICE UP TO A LATER STEP. A
+    // slice bounded by the next step name measures POSITION IN THE FILE; a step
+    // moved out of the if/else but still above that name passes it. Both
+    // bodies run to the `fi` at column 0.
+    const ifIdx = sh.indexOf('if [ "$LIVE_ONLY" = "1" ]');
+    const elseIdx = sh.indexOf("\nelse\n", ifIdx);
+    const fiIdx = sh.indexOf("\nfi\n", elseIdx);
+    const liveBranch = ifIdx >= 0 && elseIdx > 0 ? sh.slice(ifIdx, elseIdx) : "";
+    const fullOnly = elseIdx > 0 && fiIdx > 0 ? sh.slice(elseIdx, fiIdx) : "";
+    ok("both refresh branches are locatable", liveBranch.length > 0 && fullOnly.length > 0);
+    ok("--live-only branch invokes no nflverse season-release builder",
+      /LIVE_ONLY" = "1"/.test(sh) && NFLVERSE_BUILDERS.every((b) => !liveBranch.includes(b)));
+    ok("every nflverse season-release builder sits inside the full pass",
+      NFLVERSE_BUILDERS.every((b) => fullOnly.includes(b)));
+    ok("the live-only banner names the steps it skips",
+      /steps 1-\d+ skipped/i.test(sh));
     ok("an unknown flag is rejected rather than ignored",
       /unknown flag/.test(sh) && /exit 2/.test(sh));
     ok("permissions are declared rather than inherited", /^permissions:/m.test(wf));

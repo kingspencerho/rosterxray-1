@@ -37,15 +37,15 @@
 #
 # TWO CADENCES, BECAUSE ONLY HALF OF THIS EXPIRES
 # ------------------------------------------------
-# Steps 1-4 read nflverse SEASON RELEASES, which publish after games are played
+# Steps 1-5 read nflverse SEASON RELEASES, which publish after games are played
 # and do not change again until the next Monday night. Re-fetching them on a
 # Saturday is pure waste.
 #
-# Steps 5-6 are LIVE third-party snapshots and both move all week:
+# Steps 6-7 are LIVE third-party snapshots and both move all week:
 #   status      Friday practice designations, IR moves, depth-chart changes
 #   gameenv     betting lines move continuously; projections follow the news
 #
-# So --live-only runs 5 and 6 alone. That is the late-week pass.
+# So --live-only runs 6 and 7 alone. That is the late-week pass.
 #
 # ⛔ NO SCHEDULED JOB CAN CAPTURE FINAL INACTIVES. Those land 90 minutes before
 # kickoff, and a run that opens a pull request cannot be merged into a live page
@@ -53,8 +53,8 @@
 # REPORT — the single largest information event of the week — not the last word.
 #
 # USAGE
-#   bash scripts/refresh-inseason.sh [season]                # all six steps
-#   bash scripts/refresh-inseason.sh [season] --live-only    # steps 5-6 only
+#   bash scripts/refresh-inseason.sh [season]                # all seven steps
+#   bash scripts/refresh-inseason.sh [season] --live-only    # steps 6-7 only
 #
 # Then re-run the guards and commit:
 #   npm test && git add grading/data && git commit
@@ -91,11 +91,11 @@ fail=0
 got_any=0
 
 if [ "$LIVE_ONLY" = "1" ]; then
-  echo "Live-only pass: steps 1-4 skipped (nflverse season releases do not"
-  echo "change between Monday night and the weekend). Refreshing 5-6 only."
+  echo "Live-only pass: steps 1-5 skipped (nflverse season releases do not"
+  echo "change between Monday night and the weekend). Refreshing 6-7 only."
   echo
 else
-  echo "1/6  snap trajectory (role change)"
+  echo "1/7  snap trajectory (role change)"
   # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
   if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
     got_any=1
@@ -109,13 +109,13 @@ else
   # ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
   # twin all read the same weekly stats file, so the second and third layers cost
   # a parse each and no extra network.
-  echo "2/6  QB volume profile"
+  echo "2/7  QB volume profile"
   if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
     got_any=1
     python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
       "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
     echo
-    echo "3/6  game logs (reusing the same download)"
+    echo "3/7  game logs (reusing the same download)"
     python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
       "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
     echo
@@ -125,22 +125,37 @@ else
     # LAST season for the whole of this one. This is the same measurements on the
     # current season, context only. Both vintages render; neither replaces the
     # other.
-    echo "4/6  current-season volume (reusing the same download)"
+    echo "4/7  current-season volume (reusing the same download)"
     python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
       "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
   else
     echo "  skipped — placeholder left untouched"; fail=1
     echo
-    echo "3/6  game logs (reusing the same download)"
+    echo "3/7  game logs (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
     echo
-    echo "4/6  current-season volume (reusing the same download)"
+    echo "4/7  current-season volume (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
+  fi
+  echo
+  # STEP 5 IS THE ONLY ONE THAT NEEDS ITS OWN LARGE DOWNLOAD (~19MB by December).
+  # It is worth it: play-by-play is the only free source for pass rate over
+  # expected, neutral-script pace and the defensive pass/rush EPA split, all
+  # three of which CLAUDE.md Section 4 has specified since July with no data
+  # behind them. It sits INSIDE the full-pass branch because it is an nflverse
+  # season release and does not change between Monday night and the weekend.
+  echo "5/7  team trends: pass rate, pace, defensive funnel"
+  if fetch "$BASE/pbp/play_by_play_$SEASON.csv.gz" "$TMP/pbp.csv.gz"; then
+    got_any=1
+    python3 "$ROOT/scripts/build-teamtrends.py" --pbp "$TMP/pbp.csv.gz" \
+      --season "$SEASON" --out "$ROOT/grading/data/teamtrends_$SEASON.json" || fail=1
+  else
+    echo "  skipped - placeholder left untouched"; fail=1
   fi
   echo
 fi
 
-# STEP 5 IS THE ODD ONE OUT AND THE COMMENT IS THE POINT.
+# STEP 6 IS THE ODD ONE OUT AND THE COMMENT IS THE POINT.
 # It cannot reuse a download above: those are nflverse SEASON RELEASES and this
 # is a third-party live snapshot on a different host. It is also the only step
 # that returns data before Week 1, which is exactly why it exists - the
@@ -149,7 +164,7 @@ fi
 #
 # The 14.6MB raw payload is written to $TMP and dies with the trap. Only the
 # ~200KB extract reaches grading/data/. NEVER commit the raw dump.
-echo "5/6  availability + depth chart (Sleeper, live - works pre-season)"
+echo "6/7  availability + depth chart (Sleeper, live - works pre-season)"
 if fetch "https://api.sleeper.app/v1/players/nfl" "$TMP/sleeper.json"; then
   python3 "$ROOT/scripts/build-status.py" "$TMP/sleeper.json" \
     "$ROOT/grading/data/status_$SEASON.json" "$SEASON" && got_any=1 || fail=1
@@ -160,7 +175,7 @@ else
 fi
 echo
 
-# STEP 6 IS THE SECOND ODD ONE OUT, FOR THE SAME REASON AS STEP 5: a live
+# STEP 7 IS THE SECOND ODD ONE OUT, FOR THE SAME REASON AS STEP 6: a live
 # third-party snapshot rather than an nflverse season release. It is also the
 # only step whose data EXPIRES. Lines move all week, so fetched_at is the
 # vintage and a Tuesday pull is stale by Sunday. That is recorded in the file's
@@ -174,7 +189,7 @@ echo
 # sandbox curl returns 200 for this endpoint on every URL form while python
 # urllib returns 403 through the egress proxy. build-gameenv.py is a PURE PARSE
 # for that reason - see its header.
-echo "6/6  game environment + weekly projections (live - expires, see _meta)"
+echo "7/7  game environment + weekly projections (live - expires, see _meta)"
 ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 if fetch "$ESPN/scoreboard" "$TMP/cur.json"; then
   WEEK=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print((d.get('week') or {}).get('number') or 0)" "$TMP/cur.json" 2>/dev/null || echo 0)
