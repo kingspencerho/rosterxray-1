@@ -1692,6 +1692,69 @@ pre-Aug-16 behaviour (name + pick, table ADP). Only strategy 1 carries ADP.
 
 ---
 
+## The Screenshot Dictates the League Shape (Sep 12, 2026 — also guard 11)
+
+His ask: *"have the screenshot itself dictate what the settings are… so anybody can
+just upload a screenshot with any number of different roster positions and the app
+should be able to identify and count them."*
+
+**A Yahoo share card prints the slot the LEAGUE starts beside every row** — QB, RB,
+WR, TE, `WRT` for a flex, `QWRT` for a superflex — with a BENCH divider under the
+starters. **That is eight of the eleven config fields, on an image the app already
+sends to the extractor.** He was re-typing them into dropdowns.
+
+`EXTRACTION_SYSTEM_PROMPT` now also returns `slot`. `configFromSlots()` counts the
+tags into a lineup, a bench size and an IR count.
+
+### ⛔ WHAT IT CANNOT SEE, and these three stay manual
+
+**TEAMS** (a card never says how many are in the league), **SCORING** ("H2H Points"
+is the format, not the rules) and **PLAYOFF WEEKS** (absent entirely). The
+disclosure names all three by name rather than implying a complete read.
+
+### The four rules, each closing a specific failure
+
+1. ⭐⭐ **THE DERIVED OBJECT GRADES, NOT THE STATE.** `setCustomConfig` is async and
+   the grade runs in the same tick, so reading `customConfig` back would grade the
+   PREVIOUS settings while the panel showed the new ones. Same trap `handleAnalyze`
+   already carries for `setInput`. The guard extracts `extractFromImages` and
+   asserts `buildLeagueFromConfig(cfg)`, not a mention of the helper.
+2. ⛔ **SILENT-FAIL TO TODAY'S BEHAVIOUR.** No tags, fewer than 5 starters, or no QB
+   returns `null` and the reader's own settings are left alone. **A half-applied
+   lineup is worse than none, because it looks deliberate.**
+3. ⛔ **K AND DEF ARE IGNORED.** The app models no slot for either and filters them
+   everywhere, so a league with two kickers or none reads identically.
+4. ⭐ **APPLIED AND DISCLOSED.** This is the **first screenshot-derived input that
+   can move a grade** — `league.lineup` is read 19 times inside `analyzeRedraft` —
+   so the reader is told exactly what was read. Editing any dropdown retires the
+   banner, because an override is theirs and a banner still crediting the
+   screenshot would be a lie.
+
+### ⛔ A `<select>` HANDED AN OFF-LIST VALUE FAILS SILENTLY
+
+It renders blank or snaps to the first option — **no error.** The option lists are
+hand-written and narrow (WR 2-5, bench 5-7), and a real card can read 1 WR or a
+4-man bench; his own league has **5 bench spots because the commissioner removed
+one.** `withValue()` injects the current value when it is off-list, so the panel
+tells the truth about what is being graded. **Verified in a browser, not asserted:**
+a 1-WR, 4-bench config renders `1 WR · 2 WR · 3 WR · 4 WR · 5 WR` and `4 · 5 · 6 · 7`.
+
+⚠️ **The dev server serves `App.jsx.jsx`, not `App.jsx`** (`main.jsx` line 3). A
+render check that edits only `App.jsx` shows the OLD page and proves nothing.
+
+### The guard is behavioural, and one assertion was wrong first
+
+`configFromSlots` and `withValue` are extracted with `new Function` and RUN against
+his real card. **The first prompt assertion was `/LINEUP SLOT/i`, which still
+matched after the sentence was negated to "Do NOT capture the LINEUP SLOT"** — the
+sabotage harness caught it. It now pins the affirmative phrasing and parses the
+worked example, requiring a flex row and a bench row. **11 sabotages, 11 caught.**
+
+**Grades unchanged** — 90 baselines byte-identical. Text fixtures carry no slots,
+so detection returns `null` and nothing moves.
+
+---
+
 ## ADP_DATA Fully Refreshed From a Real Best-Ball Source (Aug 16, 2026)
 
 **`bestballteambuilder.com` publishes Underdog best-ball ADP in a SERVER-RENDERED
