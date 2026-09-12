@@ -31,12 +31,32 @@ on:
     # settled into the nflverse releases and BEFORE Wednesday waivers process,
     # which is the window where a refreshed target-share trend is worth having.
     - cron: "0 14 * * 2"
+    # Saturday 15:00 UTC (10:00 ET / 11:00 EDT) — the LATE-WEEK pass, steps 5-6
+    # only. Two reasons it is Saturday rather than Sunday:
+    #
+    #   Friday afternoon is when the OFFICIAL PRACTICE REPORT lands, carrying
+    #   every out / doubtful / questionable designation. That is the single
+    #   largest information event of the week and it is settled by Saturday.
+    #
+    #   This job opens a PULL REQUEST. A Sunday-morning PR cannot realistically
+    #   be reviewed and merged before a 13:00 ET kickoff, so a run that lands
+    #   Saturday leaves a full day to merge.
+    #
+    # ⛔ NOTHING SCHEDULED CAN CATCH FINAL INACTIVES. They land 90 minutes
+    # before kickoff and no PR-based flow reaches a built page in that window.
+    # This pass is the practice report, not the last word.
+    - cron: "0 15 * * 6"
   workflow_dispatch:
     inputs:
       season:
         description: "Season to refresh (defaults to 2026)"
         required: false
         default: "2026"
+      live_only:
+        description: "Steps 5-6 only (status + game lines). Leave false for a full refresh."
+        required: false
+        type: boolean
+        default: false
 
 # Least privilege: write the branch, open the PR, nothing else.
 permissions:
@@ -44,7 +64,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: weekly-data-refresh
+  group: weekly-data-refresh-${{ github.event.schedule || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -68,10 +88,30 @@ jobs:
 
       - run: npm ci
 
+      # WHICH PASS IS THIS? Derived from the schedule that fired rather than
+      # from a second workflow file — two files would be two places to keep the
+      # guard list, the frozen-file rule and the PR body in step, which is the
+      # duplicate-definition class this repo has paid for repeatedly.
+      - name: Decide the pass
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            LIVE="${{ inputs.live_only }}"
+          elif [ "${{ github.event.schedule }}" = "0 15 * * 6" ]; then
+            LIVE="true"
+          else
+            LIVE="false"
+          fi
+          echo "live=$LIVE" >> "$GITHUB_OUTPUT"
+          [ "$LIVE" = "true" ] && echo "Late-week pass: steps 5-6 only." \
+                               || echo "Full pass: all six steps."
+
       - name: Refresh the in-season layers
         id: refresh
         run: |
-          bash scripts/refresh-inseason.sh "${{ inputs.season || '2026' }}" | tee refresh.log
+          ARGS="${{ inputs.season || '2026' }}"
+          [ "${{ steps.mode.outputs.live }}" = "true" ] && ARGS="$ARGS --live-only"
+          bash scripts/refresh-inseason.sh $ARGS | tee refresh.log
           # ⚠️ refresh-inseason.sh ALWAYS exits 0 — "nothing published yet" is
           # its normal pre-season outcome and is not a failure. The real signal
           # is whether the committed JSON actually changed, so the decision is
@@ -113,7 +153,11 @@ jobs:
           BASE: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          BR="data/refresh-$(date -u +%Y-W%V)"
+          # ⚠️ The pass goes in the branch name. Both runs land in the same ISO
+          # week, so a shared name would make Saturday force-push over Tuesday's
+          # unmerged PR and silently lose the full refresh.
+          SUFFIX=$([ "${{ steps.mode.outputs.live }}" = "true" ] && echo "-live" || echo "")
+          BR="data/refresh-$(date -u +%Y-W%V)$SUFFIX"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BR"

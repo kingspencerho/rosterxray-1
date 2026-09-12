@@ -226,6 +226,51 @@ ok("the volume builder documents the games-played denominator",
 
     ok("it is scheduled and manually runnable",
       /schedule:/.test(wf) && /cron:/.test(wf) && /workflow_dispatch:/.test(wf));
+
+    // ---- THE LATE-WEEK PASS (added Sep 12 2026) ----
+    //
+    // Only HALF of this pipeline expires. Steps 1-4 read nflverse season
+    // releases that do not change between Monday night and the weekend; steps
+    // 5-6 are live snapshots that move all week - Friday practice designations
+    // and betting lines. So a second cron runs 5-6 alone.
+    const crons = [...wf.matchAll(/- cron: "([^"]+)"/g)].map((m) => m[1]);
+    ok("two schedules exist: the full pass and the late-week pass",
+      crons.length === 2, crons.join(" | "));
+    ok("one of them is the Saturday late-week pass",
+      crons.some((c) => /\* \* 6$/.test(c)), crons.join(" | "));
+
+    // ⚠️ THE PASS MUST REACH THE SCRIPT. A second cron that fired the FULL
+    // refresh would re-download three nflverse releases for nothing and, worse,
+    // would look like it was working.
+    ok("the Saturday schedule selects --live-only", /--live-only/.test(wf));
+    // ⚠️ SCOPED TO THE MODE STEP. The first version tested for the string
+    // anywhere in the file, and `github.event.schedule` also appears in the
+    // concurrency group - so breaking the actual derivation still passed. Same
+    // aimed-too-wide error as guard 34's file-wide 32px check.
+    const modeStep = (wf.match(/- name: Decide the pass[\s\S]*?(?=\n      - name:)/) || [""])[0];
+    ok("a step that decides the pass exists", modeStep.length > 0);
+    ok("the mode is derived from the schedule that fired",
+      /github\.event\.schedule/.test(modeStep) && /live=/.test(modeStep));
+    ok("...and a manual run can still force either pass",
+      /inputs\.live_only/.test(modeStep) && /workflow_dispatch/.test(modeStep));
+
+    // ⚠️ BOTH PASSES LAND IN THE SAME ISO WEEK. A shared branch name would make
+    // Saturday force-push over Tuesday's unmerged PR and silently lose the full
+    // refresh - a silent-drop failure wearing a git operation.
+    const brLine = (wf.match(/BR="[^"]*"/) || [""])[0];
+    ok("the branch name distinguishes the two passes",
+      /SUFFIX=/.test(wf) && /SUFFIX/.test(brLine), brLine || "no BR= found");
+
+    // Cancelling one pass because the other is running would drop a refresh.
+    ok("concurrency does not collapse the two passes into one group",
+      /group: weekly-data-refresh-\$\{\{/.test(wf));
+
+    // The script side of the same contract.
+    ok("refresh-inseason.sh accepts --live-only", /--live-only\)/.test(sh));
+    ok("--live-only actually skips the nflverse steps",
+      /LIVE_ONLY" = "1"/.test(sh) && /steps 1-4 skipped/i.test(sh));
+    ok("an unknown flag is rejected rather than ignored",
+      /unknown flag/.test(sh) && /exit 2/.test(sh));
     ok("permissions are declared rather than inherited", /^permissions:/m.test(wf));
   }
 }

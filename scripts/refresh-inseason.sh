@@ -35,8 +35,26 @@
 # that silently swaps vintage underneath the reader is the stale-data trap in a
 # new costume.
 #
+# TWO CADENCES, BECAUSE ONLY HALF OF THIS EXPIRES
+# ------------------------------------------------
+# Steps 1-4 read nflverse SEASON RELEASES, which publish after games are played
+# and do not change again until the next Monday night. Re-fetching them on a
+# Saturday is pure waste.
+#
+# Steps 5-6 are LIVE third-party snapshots and both move all week:
+#   status      Friday practice designations, IR moves, depth-chart changes
+#   gameenv     betting lines move continuously; projections follow the news
+#
+# So --live-only runs 5 and 6 alone. That is the late-week pass.
+#
+# ⛔ NO SCHEDULED JOB CAN CAPTURE FINAL INACTIVES. Those land 90 minutes before
+# kickoff, and a run that opens a pull request cannot be merged into a live page
+# in that window. The late-week pass exists to catch FRIDAY'S OFFICIAL PRACTICE
+# REPORT — the single largest information event of the week — not the last word.
+#
 # USAGE
-#   bash scripts/refresh-inseason.sh [season]     # season defaults to 2026
+#   bash scripts/refresh-inseason.sh [season]                # all six steps
+#   bash scripts/refresh-inseason.sh [season] --live-only    # steps 5-6 only
 #
 # Then re-run the guards and commit:
 #   npm test && git add grading/data && git commit
@@ -46,7 +64,15 @@
 # 2025-only behaviour while `players` is empty.
 
 set -uo pipefail
-SEASON="${1:-2026}"
+SEASON="2026"
+LIVE_ONLY=0
+for arg in "$@"; do
+  case "$arg" in
+    --live-only) LIVE_ONLY=1 ;;
+    -*) echo "refresh-inseason: unknown flag $arg" >&2; exit 2 ;;
+    *)  SEASON="$arg" ;;
+  esac
+done
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -64,49 +90,55 @@ echo
 fail=0
 got_any=0
 
-echo "1/6  snap trajectory (role change)"
-# NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
-if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
-  got_any=1
-  python3 "$ROOT/scripts/build-snap-trajectory.py" "$TMP/snaps.csv.gz" \
-    "$ROOT/grading/data/snap_trajectory_$SEASON.json" "$SEASON" || fail=1
+if [ "$LIVE_ONLY" = "1" ]; then
+  echo "Live-only pass: steps 1-4 skipped (nflverse season releases do not"
+  echo "change between Monday night and the weekend). Refreshing 5-6 only."
+  echo
 else
-  echo "  skipped — placeholder left untouched"; fail=1
-fi
-echo
+  echo "1/6  snap trajectory (role change)"
+  # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
+  if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
+    got_any=1
+    python3 "$ROOT/scripts/build-snap-trajectory.py" "$TMP/snaps.csv.gz" \
+      "$ROOT/grading/data/snap_trajectory_$SEASON.json" "$SEASON" || fail=1
+  else
+    echo "  skipped — placeholder left untouched"; fail=1
+  fi
+  echo
 
-# ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
-# twin all read the same weekly stats file, so the second and third layers cost
-# a parse each and no extra network.
-echo "2/6  QB volume profile"
-if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
-  got_any=1
-  python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
-    "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
+  # ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
+  # twin all read the same weekly stats file, so the second and third layers cost
+  # a parse each and no extra network.
+  echo "2/6  QB volume profile"
+  if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
+    got_any=1
+    python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
+      "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
+    echo
+    echo "3/6  game logs (reusing the same download)"
+    python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
+      "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
+    echo
+    # THE CONTEXT TWIN OF THE FROZEN SCORED FILE. player_metrics_2025.json feeds
+    # four scored inputs and stays frozen all season, which means the anchors it
+    # carries (targets/gm 0.77, air yards share 0.78, target share 0.73) describe
+    # LAST season for the whole of this one. This is the same measurements on the
+    # current season, context only. Both vintages render; neither replaces the
+    # other.
+    echo "4/6  current-season volume (reusing the same download)"
+    python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
+      "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
+  else
+    echo "  skipped — placeholder left untouched"; fail=1
+    echo
+    echo "3/6  game logs (reusing the same download)"
+    echo "  skipped — the weekly stats file is unavailable"
+    echo
+    echo "4/6  current-season volume (reusing the same download)"
+    echo "  skipped — the weekly stats file is unavailable"
+  fi
   echo
-  echo "3/6  game logs (reusing the same download)"
-  python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
-    "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
-  echo
-  # THE CONTEXT TWIN OF THE FROZEN SCORED FILE. player_metrics_2025.json feeds
-  # four scored inputs and stays frozen all season, which means the anchors it
-  # carries (targets/gm 0.77, air yards share 0.78, target share 0.73) describe
-  # LAST season for the whole of this one. This is the same measurements on the
-  # current season, context only. Both vintages render; neither replaces the
-  # other.
-  echo "4/6  current-season volume (reusing the same download)"
-  python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
-    "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
-else
-  echo "  skipped — placeholder left untouched"; fail=1
-  echo
-  echo "3/6  game logs (reusing the same download)"
-  echo "  skipped — the weekly stats file is unavailable"
-  echo
-  echo "4/6  current-season volume (reusing the same download)"
-  echo "  skipped — the weekly stats file is unavailable"
 fi
-echo
 
 # STEP 5 IS THE ODD ONE OUT AND THE COMMENT IS THE POINT.
 # It cannot reuse a download above: those are nflverse SEASON RELEASES and this

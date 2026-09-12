@@ -8368,3 +8368,59 @@ refresh-inseason.sh run for real end to end: step 6 reads week 1 from ESPN,
 Step 2 of this build. **Player props** were assessed and deliberately not built: $30/mo or a
 500-request monthly budget for a market price, when a free half-PPR projection covers the
 baseline question. Revisit only for betting or for hunting market lag specifically.
+
+### The late-week pass (added Sep 12, 2026)
+
+**No App.jsx or grading/data change, so no grade can move** — verified: `git status` shows only
+the workflow, the refresh script and guard 15.
+
+**Only HALF this pipeline expires**, which is the whole design:
+
+```
+steps 1-4   nflverse SEASON RELEASES   publish after games, then sit still until
+                                       the next Monday night. Re-fetching them on
+                                       a Saturday is pure waste.
+steps 5-6   LIVE snapshots             move all week - Friday practice
+                                       designations, IR moves, betting lines,
+                                       projections following the news
+```
+
+So `refresh-inseason.sh --live-only` runs 5 and 6 alone, and a second cron fires it
+**Saturday 15:00 UTC**.
+
+**Why Saturday and not Sunday.** Friday afternoon is when the OFFICIAL PRACTICE REPORT lands with
+every out / doubtful / questionable designation, which is the single largest information event of
+the week, and it is settled by Saturday. The job also opens a PULL REQUEST, and a Sunday-morning
+PR cannot realistically be merged before a 13:00 ET kickoff.
+
+⛔ **NOTHING SCHEDULED CAN CATCH FINAL INACTIVES.** They land 90 minutes before kickoff and no
+PR-based flow reaches a built page in that window. **This pass is the practice report, not the
+last word**, and the script's header says so.
+
+**One workflow file, not two.** Two files would be two places to keep the guard list, the
+frozen-file rule and the PR body in step — the duplicate-definition class this repo has paid for
+repeatedly. The pass is derived from `github.event.schedule`, with `workflow_dispatch` able to
+force either.
+
+⚠️ **BOTH PASSES LAND IN THE SAME ISO WEEK**, so the branch name carries a `-live` suffix. Without
+it, Saturday would force-push over Tuesday's unmerged PR and **silently lose the full refresh** —
+a silent-drop failure wearing a git operation. The concurrency group is keyed on the schedule for
+the same reason: cancelling one pass because the other is running would drop a refresh.
+
+### ⚠️ Two testing lessons, both previously recorded and both hit again
+
+1. **`bash -n` proves a script parses, never that it does what you meant.** The live-only mode was
+   RUN for real: it skipped steps 1-4, touched only `status_2026` and `gameenv_2026`, and the
+   unknown-flag path exits 2. Every new `run:` block in the YAML was also extracted and executed
+   under `bash -e` across all four routing cases (Tuesday, Saturday, dispatch-true, dispatch-false)
+   — `set -e` behaviour around an `A && B` chain is exactly where a parsed-but-wrong block hides.
+2. **An assertion aimed too wide passes on broken code.** *"The mode is derived from the schedule"*
+   originally tested for `github.event.schedule` ANYWHERE in the file — and it also appears in the
+   concurrency group, so breaking the real derivation still passed. Scoped to the mode step's own
+   block. **Third instance of this shape**, after guard 32 on `scoreFreeAgent` and guard 34's
+   file-wide 32px check.
+
+Eleven sabotages against a verified-clean baseline, all exit non-zero: the Saturday cron deleted,
+Saturday firing the full refresh, the mode derivation broken three ways, a shared branch name,
+collapsed concurrency, the script losing `--live-only`, `--live-only` no longer skipping steps
+1-4, and unknown flags silently ignored again.
