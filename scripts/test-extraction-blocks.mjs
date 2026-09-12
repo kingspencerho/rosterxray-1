@@ -234,8 +234,41 @@ check("and grades off the derived object, not the state",
 check("the reader is told what was read", /Read from your screenshot/.test(appSrc));
 check("and told which three it could not read",
   /Teams, scoring and playoff weeks are not printed/.test(appSrc));
-check("an override retires the banner",
-  cut("const updateCustomConfig = ", "};").includes("setSlotConfig(null)"));
+// ⛔ ONLY A CARD-DECIDED FIELD RETIRES THE BANNER. The banner claims the lineup,
+// bench and IR came off the screenshot, and says in its own words that teams,
+// scoring and playoff weeks did not. So changing scoring leaves the claim TRUE,
+// and dropping the banner there erases a true statement — it also deleted the
+// answer to "what did it read" the instant the reader answered the one question
+// the panel asks. The predicate is EXTRACTED AND RUN, because asserting that the
+// source mentions setSlotConfig proves only that the words are present.
+let ownsField = null;
+try {
+  ownsField = new Function(`${cut("const slotOwnsField = ", "irSlots\");")}; return slotOwnsField;`)();
+} catch (e) { ownsField = null; }
+check("slotOwnsField extracts and runs", typeof ownsField === "function");
+if (typeof ownsField === "function") {
+  for (const f of ["lineup.QB", "lineup.WR", "lineup.FLEX", "lineup.SFLEX", "benchSize", "irSlots"])
+    check(`${f} retires the banner`, ownsField(f) === true);
+  for (const f of ["scoring", "teams", "playoffWeeks"])
+    check(`${f} does NOT retire it`, ownsField(f) === false,
+      "the banner never claimed this field, so changing it cannot falsify the banner");
+  check("a junk path is not card-owned", ownsField(undefined) === false && ownsField("") === false);
+}
+check("and the retire is gated on it",
+  /if \(slotOwnsField\(path\)\) setSlotConfig\(null\)/.test(appSrc),
+  "an ungated setSlotConfig(null) is the old behaviour back");
+
+// The panel asks exactly ONE question. Three questions between a screenshot and
+// a grade contradicts the landing page's only promise.
+check("the panel asks about scoring", /How does your league score receptions\?/.test(appSrc));
+check("and STATES the other two rather than asking",
+  /Assuming/.test(appSrc) && /playoffs \{customConfig\.playoffWeeks/.test(appSrc));
+check("the scoring control is a real 32px target",
+  /aria-pressed=\{customConfig\.scoring === val\}/.test(appSrc)
+  && /minHeight: "32px", padding: "6px 13px"/.test(appSrc));
+check("answering it re-grades off the derived object",
+  /applyCustomConfig\("scoring", val, \{ \.\.\.customConfig, scoring: val \}\)/.test(appSrc),
+  "passing the path alone would re-grade the PREVIOUS scoring value");
 
 // A NEGATED INSTRUCTION CONTAINS THE SAME WORDS AS AN AFFIRMATIVE ONE. The first
 // version of this passed while the prompt said "Do NOT capture the LINEUP SLOT",

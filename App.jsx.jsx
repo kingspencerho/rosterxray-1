@@ -7214,6 +7214,17 @@ const withValue = (opts, value) => {
   return [...opts, v].sort((a, b) => a - b);
 };
 
+// ⛔ ONLY A FIELD THE SCREENSHOT ACTUALLY DECIDED MAY RETIRE THE BANNER.
+// The banner claims the LINEUP, BENCH and IR were read off the card. Teams,
+// scoring and playoff weeks were never on the card — the banner says so in
+// those words — so changing one of them leaves the claim TRUE. Retiring it
+// there would erase a true statement and re-hide the read the reader most
+// needs to check. The first version dropped the banner on any edit, which
+// meant answering the scoring question deleted the answer to "what did it read".
+const slotOwnsField = (path) =>
+  typeof path === "string" &&
+  (path.startsWith("lineup.") || path === "benchSize" || path === "irSlots");
+
 const configFromSlots = (players) => {
   const lineup = { QB: 0, RB: 0, WR: 0, TE: 0, FLEX: 0, SFLEX: 0 };
   let bench = 0, ir = 0, tagged = 0, ignored = 0;
@@ -11241,10 +11252,23 @@ export default function RosterScorer() {
   };
 
   // Update a single field in customConfig (handles nested lineup keys)
+  // Write a config field and re-grade if a grade is already on screen. ⚠️ The
+  // caller passes `next` because setCustomConfig is async — reading customConfig
+  // back here would re-grade the PREVIOUS value, the same trap extractFromImages
+  // carries. Every existing dropdown inlines these five lines; new controls use
+  // this instead of making it a ninth copy.
+  const applyCustomConfig = (path, value, next) => {
+    updateCustomConfig(path, value);
+    if (analyzed && redraftLeague === "custom") {
+      const picks = parseRosterRedraft(input);
+      setAnalyzed(analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers));
+    }
+  };
+
   const updateCustomConfig = (path, value) => {
-    // The reader just overruled the screenshot. Drop the banner rather than leave it
-    // claiming a value that is no longer on screen.
-    setSlotConfig(null);
+    // Overruling a field the CARD decided retires the banner; the other three
+    // were never the card's to claim. See slotOwnsField.
+    if (slotOwnsField(path)) setSlotConfig(null);
     setCustomConfig(prev => {
       const next = { ...prev };
       if (path.startsWith("lineup.")) {
@@ -13684,8 +13708,67 @@ Analyze this best ball roster. Return JSON only.`;
                 <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{describeSlotConfig(slotConfig)}</span>
               </div>
               <div style={{ fontSize: "9px", color: "var(--text-dim)", lineHeight: 1.5, marginTop: "4px" }}>
-                Teams, scoring and playoff weeks are not printed on a roster card — those three
-                stay yours. Change any dropdown to override.
+                Teams, scoring and playoff weeks are not printed on a roster card.
+              </div>
+
+              {/* ⭐⭐ ASK ONE, ASSUME TWO — and the split is not cosmetic, it is what each
+                  field actually drives inside analyzeRedraft:
+                    SCORING  five multipliers (wrDepthBonus, rbDepthBonus, wrPenaltyMult,
+                             rbPenaltyMult, tePenaltyMult) — a thin WR corps is penalised
+                             1.3x in full PPR and 0.8x in standard. It moves the grade.
+                    TEAMS    one gate — streaming warnings fire at teamCount >= 12, so
+                             12-vs-14 changes nothing and only 10-vs-12 is a real line.
+                    PLAYOFFS which three weeks the stack map highlights.
+                  Asking for all three would present them as equal decisions. They are not,
+                  and three questions between a screenshot and a grade contradicts the one
+                  promise on the landing page: just a screenshot. */}
+              <div style={{ marginTop: "9px" }}>
+                <div style={{ fontSize: "11px", color: "var(--text-primary)", marginBottom: "6px" }}>
+                  How does your league score receptions?
+                </div>
+                <div style={{ display: "inline-flex", border: "1px solid var(--border-default)", borderRadius: "4px", overflow: "hidden" }}>
+                  {[["Standard", "Standard"], ["Half-PPR", "Half"], ["PPR", "Full PPR"]].map(([val, label], i) => (
+                    <button
+                      key={val}
+                      type="button"
+                      aria-pressed={customConfig.scoring === val}
+                      onClick={() => applyCustomConfig("scoring", val, { ...customConfig, scoring: val })}
+                      style={{
+                        // 32px minimum touch target — the same floor the star and filter
+                        // toggles state. A 24px control is unhittable on a phone.
+                        minHeight: "32px", padding: "6px 13px", cursor: "pointer",
+                        fontFamily: "inherit", fontSize: "11px", letterSpacing: "0.02em",
+                        border: "none", borderLeft: i === 0 ? "none" : "1px solid var(--border-default)",
+                        background: customConfig.scoring === val ? "var(--accent-purple-strong)" : "var(--bg-raised)",
+                        color: customConfig.scoring === val ? "#fff" : "var(--text-muted)",
+                        fontWeight: customConfig.scoring === val ? 600 : 400,
+                      }}
+                    >{label}</button>
+                  ))}
+                </div>
+                <div style={{ fontSize: "9px", color: "var(--text-faint)", marginTop: "5px", lineHeight: 1.5 }}>
+                  This one changes the grade. A thin WR corps is penalised harder in full PPR.
+                </div>
+              </div>
+
+              {/* The other two are STATED, not asked. An assumption the reader can see and
+                  correct is honest; an assumption made silently is the stale-default trap. */}
+              <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "9px", lineHeight: 1.6 }}>
+                Assuming <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{customConfig.teams} teams</span>
+                {" and "}
+                <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>
+                  playoffs {customConfig.playoffWeeks[0] === 14 ? "W14-16" : "W15-17"}
+                </span>
+                {" "}
+                <button
+                  type="button"
+                  onClick={() => setCustomExpanded(true)}
+                  style={{
+                    minHeight: "32px", background: "none", border: "none", padding: "0 2px",
+                    fontFamily: "inherit", fontSize: "10px", cursor: "pointer",
+                    color: "var(--ui-accent-dim)", textDecoration: "underline", textUnderlineOffset: "2px",
+                  }}
+                >change</button>
               </div>
             </div>
           )}
