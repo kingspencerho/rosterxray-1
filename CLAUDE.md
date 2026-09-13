@@ -8428,7 +8428,7 @@ refresh-inseason.sh run for real end to end: step 6 reads week 1 from ESPN,
 ### Still open
 
 **PROE, pace and the funnel** need the play-by-play release, a large weekly download, and are the
-Step 2 of this build. **Player props** were assessed and deliberately not built: $30/mo or a
+Step 2 of this build. **BUILT Sep 12 2026 — see the Team Trends section below.** **Player props** were assessed and deliberately not built: $30/mo or a
 500-request monthly budget for a market price, when a free half-PPR projection covers the
 baseline question. Revisit only for betting or for hunting market lag specifically.
 
@@ -8487,3 +8487,151 @@ Eleven sabotages against a verified-clean baseline, all exit non-zero: the Satur
 Saturday firing the full refresh, the mode derivation broken three ways, a shared branch name,
 collapsed concurrency, the script losing `--live-only`, `--live-only` no longer skipping steps
 1-4, and unknown flags silently ignored again.
+
+---
+
+## Team Trends: Pass Rate, Pace and the Defensive Funnel (added Sep 12, 2026)
+
+`scripts/build-teamtrends.py` -> `grading/data/teamtrends_2025.json` and
+`teamtrends_2026.json`. **CONTEXT ONLY — 90 grades BYTE-IDENTICAL** (15 tournaments x 5
+fixtures plus 3 leagues x 5), against a pristine worktree at HEAD. Guard 39:
+`scripts/test-teamtrends.mjs`.
+
+### It closes three Section 4 rules that have never had data behind them
+
+Written down since July and unimplementable for W1-14, because `PLAYOFF_GAME_TOTALS` is
+hand-typed and holds W15-17 only:
+
+```
+Macro Volume Multipliers   Offensive PROE          -> now computed
+Macro Volume Multipliers   Neutral-script pace     -> now computed
+Defensive Funnel Filter    pass/rush EPA split     -> now computed
+```
+
+### ⛔ MY EARLIER CLAIM WAS WRONG: EXPECTED POINTS IS NOT IN THIS FILE
+
+I told the user *"PROE, pace, funnel and expected points all come from the same file."*
+Three of the four do. **Expected fantasy points comes from `ffopportunity`, a separate
+nflverse release**, and `build-efficiency.py` already consumes it via `nfl.load_ff_opportunity`
+— which needs `nflreadpy` and `polars`, dependencies every in-season builder deliberately
+avoids. It stays ANNUAL and is not part of this download. What it would still buy is
+**surfacing** the raw expected-vs-actual numbers, since the app currently exposes only
+`rush_eff_rank` / `rec_eff_rank`. That is a separate, smaller job.
+
+### ⚠️⚠️ TWO CENTRING TRAPS, BOTH MEASURED, BOTH LOAD-BEARING
+
+1. **THE FUNNEL GAP IS NOT CENTRED ON ZERO.** Passing is more efficient than running
+   league-wide, so **every** defence allows more EPA per pass than per rush. 2025 league
+   mean gap **+0.025**, sd **0.102**. A bare sign test would call most of the league a pass
+   funnel and mean nothing.
+2. **PROE IS NOT CENTRED ON ZERO EITHER.** nflfastR's `xpass` model is fit on history and a
+   season drifts off it: 2025's league mean `pass_oe` is **-1.74**, not 0.00. Labelling off
+   the raw number would call two thirds of the league run-heavy.
+
+**Both raw and league-relative values are stored.** RAW matches the published convention so a
+reader can check it against a public table; RELATIVE is what the label is computed from. Same
+shape as the man/zone edge, which is also not centred on zero — **this is now the third time
+a "just read the sign" metric has turned out to need a league baseline first.**
+
+### ⛔ off AND def ARE NESTED, AND THAT IS THE FPA DIRECTION RULE MADE STRUCTURAL
+
+A team's funnel describes the defence it FIELDS, so it is a fact about the players who FACE
+it. Flat keys (`proe` / `pace` / `funnel` all hanging off "KC") is precisely the shape that
+produces the error CLAUDE.md's FPA Direction Rule forbids. `off` and `def` make the direction
+a property of the data rather than a naming convention, and `getTeamOff` takes YOUR side while
+`getTeamDef` takes the OPPONENT. Guard 39 asserts the pairing in the render and the nesting in
+the file.
+
+### ⚠️ ALL THREE SETTLE SLOWLY. THE GATES ARE DERIVED, NOT CHOSEN.
+
+Measured by resampling each team's own 2025 plays, applying one rule — **mean absolute
+sampling error <= half the league spread**:
+
+```
+metric   league sd    gate              error at the gate   roughly
+PROE      3.33 pp     300 plays          1.67 pp            week 5
+pace      1.08 s      200 neutral snaps  0.47 s             week 5
+funnel    0.102       350 per side       0.047              week 10
+```
+
+**At 100 plays the sampling error on PROE is 3.27pp — larger than the entire league spread.**
+So a current-season team below its gate emits the play COUNT and **no value**, and the panel
+falls back to 2025 with the season printed on the line. The absence says "not readable yet"
+rather than reading as a flat league-average team.
+
+⚠️ **A partial season's own SD is inflated by sampling noise, so a partial build flags FEWER
+teams than a complete one.** That is the conservative direction and is intended.
+
+### ⚠️ PACE IS SNAP-TO-SNAP AND IS NOT A CITABLE FIGURE
+
+It measures elapsed game clock between consecutive snaps on the same drive, which includes the
+previous play's own duration — so the numbers run ~5s higher than tables that measure from the
+end of a play (league mean 32.76s here). **The RANKING is the product.** Neutral script is
+CLAUDE.md's own definition: within 7 points, Q1-Q3, and outside the last two minutes of a half,
+because a two-minute drill is a clock state rather than a tendency.
+
+### What it looks like at rest
+
+2025, 32 teams: **7 pass-heavy / 6 run-heavy**, **4 fast / 3 slow**, **4 pass funnels / 7 run
+funnels**, roughly 20 average on each. **A team appears on the panel only when it is more than
+one SD from the league on one of the three — silence means ordinary, not missing**, and the
+Explainer says so. Same deliberate-silence pattern as `trajectoryContext`.
+
+### Scope
+
+- **REDRAFT ONLY**, rendered inside the existing Week N game-environment panel rather than as a
+  fifteenth section. One line per game, beneath the betting line, above the player rows.
+- **Never scored, never in the AI prompt.** `_meta.scored` and `_meta.reaches_ai_prompt` are
+  both false and guard 39 asserts both plus the absence of any prompt builder.
+- **The app prints the gates from `_meta`**, never a second hand-typed copy — the
+  duplicate-definition class this repo has now hit ten times.
+
+### The weekly job is step 5 of 7
+
+**It is the only step that needs its own large download** (~19MB by December). It sits inside
+the FULL-pass branch, so `--live-only` skips it: play-by-play is an nflverse season release and
+does not change between Monday night and the weekend.
+
+```
+bash scripts/refresh-inseason.sh 2026               # all seven steps
+bash scripts/refresh-inseason.sh 2026 --live-only   # steps 6-7 only
+```
+
+⚠️ Verified by RUNNING both, not by `bash -n` — this file's own repeated lesson. The full pass
+reached step 5 and built the file; the live-only pass printed "steps 1-5 skipped" and touched
+neither team-trends file.
+
+### ⚠️⚠️ TWO GUARDS MEASURED POSITION IN THE FILE AND CALLED IT CONTAINMENT
+
+Adding a seventh step broke **two** assertions on code that was still correct, and the
+second one was a real hole rather than a maintenance chore:
+
+1. **Guard 38 read `/6\/6/`** — the literal step number. A count cannot notice a new step,
+   which is the whole thing it was standing in for. Same class as guard 18's
+   `setAnalyzeTick === 2`.
+2. **Guard 15 read `/steps 1-4 skipped/i`** — the banner text.
+
+Both were re-aimed at the property. But **the re-aimed versions STILL PASSED a sabotage that
+genuinely moved step 5 out of the `if/else` and onto the always-run path**, because both
+sliced the script "from the LIVE_ONLY test to the next step's name" — that is POSITION IN
+THE FILE, not membership of a branch. A step moved out of the block but still above step 6
+sat inside the slice.
+
+⭐ **The fix is to extract the actual branch body**: from the `else` to the `fi` at column 0.
+Both guards now do that and both catch the moved step. **Found only because the sabotage was
+written to move the step for real** — and the first attempt at that sabotage cut and
+re-inserted the block in the same place, changing nothing, which is the "confirm the sabotage
+actually changes something" rule paying out for the fourth time.
+
+### ⚠️ A `\u` ESCAPE IN JSX **TEXT** POSITION IS LITERAL TEXT
+
+Three em dashes in the Explainer copy rendered on the page as the six characters `\u2014`.
+Inside a JS string expression — `{bits.join(" \u00b7 ")}` — it is a real escape and works.
+In JSX text it is not, and **the build was clean, all 38 guards passed, and only a browser
+render showed it.** Write the character, or wrap it in an expression.
+
+### Still open
+
+**PROE and pace for a DEFENCE** (how much do opponents throw against them, and does the defence
+speed the game up) are computable from the same file and were not built — the funnel already
+answers the question the framework asks. **Expected points surfacing** is described above.

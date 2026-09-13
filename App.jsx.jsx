@@ -102,6 +102,8 @@ import REDZONE from './grading/data/redzone_2025.json';
 import AVAILABILITY from './grading/data/availability_2026.json';
 import STATUS_LAYER from './grading/data/status_2026.json';
 import GAMEENV from './grading/data/gameenv_2026.json';
+import TRENDS_PRIOR from './grading/data/teamtrends_2025.json';
+import TRENDS_CUR from './grading/data/teamtrends_2026.json';
 
 // ============ DATA ============
 
@@ -2852,6 +2854,46 @@ const projDivergence = (name, proj) => {
   };
 };
 
+// ---- TEAM TRENDS: offensive PROE + neutral pace, and the defensive funnel.
+// CONTEXT ONLY. Two consumers, both reviewed: buildGameEnvBoard and the
+// Explainer that prints the gates. Neither engine reads any of this.
+//
+// ⚠️ THE off/def SPLIT IS THE FPA DIRECTION RULE MADE STRUCTURAL. A team's
+// funnel describes the defence it FIELDS, so it is a fact about the players
+// who face it and never about its own receivers. Flat keys on one team code
+// is exactly the shape that produces that error, so the file nests them and
+// so does every accessor here: getTeamOff takes YOUR side, getTeamDef takes
+// the OPPONENT.
+const TRENDS_CUR_LIVE = (TRENDS_CUR._meta?.weeks_covered || 0) > 0;
+const TRENDS_GATES = TRENDS_PRIOR._meta?.gates || {};
+const trendVintage = (meta) => {
+  const wk = meta?.weeks_covered || 0;
+  if (!wk) return null;
+  return meta.season_complete ? `${meta.season} season` : `${meta.season} through W${wk}`;
+};
+// ⚠️ NEVER SWAP VINTAGE SILENTLY. The current season is preferred once a team
+// clears its gate, and the season is printed on every line either way. Where
+// both vintages have a value the prior one rides along, because the change is
+// the finding.
+const pickTrend = (half, ready) => {
+  const cur = lookupTeam(TRENDS_CUR.teams || {}, half.team);
+  const prior = lookupTeam(TRENDS_PRIOR.teams || {}, half.team);
+  const curV = TRENDS_CUR_LIVE && cur && ready(cur[half.side]) ? cur : null;
+  const priorV = prior && ready(prior[half.side]) ? prior : null;
+  const live = curV || priorV;
+  if (!live) return null;
+  return {
+    ...live[half.side],
+    games: live.games,
+    vintage: trendVintage(live === curV ? TRENDS_CUR._meta : TRENDS_PRIOR._meta),
+    prior: curV && priorV ? priorV[half.side] : null,
+  };
+};
+const offReady = (o) => o && o.proe != null;
+const defReady = (d) => d && d.funnel != null;
+const getTeamOff = (team) => (team ? pickTrend({ team, side: "off" }, offReady) : null);
+const getTeamDef = (team) => (team ? pickTrend({ team, side: "def" }, defReady) : null);
+
 // ⭐ GAME DATA BELONGS TO THE GAME, NOT THE PLAYER. Twelve starters can sit in
 // eight games, so attaching the total and spread to each PLAYER repeats the
 // same two facts up to three times per game. Grouped by game, this renders
@@ -2891,6 +2933,10 @@ const buildGameEnvBoard = (players) => {
     // only meaningful once the side is known.
     row.fav = g.favorite ? (TEAM_SPELLINGS[g.favorite] || [g.favorite]).includes(rawSide) : null;
     row.defOut = (g.def_out && g.def_out[rawOpp]) || [];
+    // ⚠️ DIRECTION: my side's OFFENCE, the opponent's DEFENCE. Reversing
+    // either of these is the FPA Direction error.
+    row.offTrend = getTeamOff(row.side);
+    row.oppDef = getTeamDef(row.opp);
   }
   // Highest implied total first: the game most likely to produce points leads.
   games.sort((a, b) => (b.implied ?? -1) - (a.implied ?? -1));
@@ -16696,6 +16742,42 @@ Analyze this best ball roster. Return JSON only.`;
                                 <span key={k} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase", color: c }}>{t}</span>
                               ))}
                             </div>
+                            {(row.offTrend || row.oppDef) && (() => {
+                              const bits = [];
+                              const o = row.offTrend;
+                              // \u2b50 THE CHANGE IS THE FINDING. Where both vintages have a
+                              // value the prior one rides along, so a reader sees a team
+                              // that moved rather than a number whose meaning moved.
+                              const shift = (cur, key) => (o && o.prior && o.prior[key] != null
+                                ? ` from ${o.prior[key] > 0 ? "+" : ""}${o.prior[key]}` : "");
+                              if (o) {
+                                if (o.proe_label && o.proe_label !== "average")
+                                  bits.push(`${o.proe_label} (${o.proe_rel > 0 ? "+" : ""}${o.proe_rel} PROE${shift(o.proe_rel, "proe_rel")})`);
+                                if (o.pace_label && o.pace_label !== "average")
+                                  bits.push(`${o.pace_label} (${o.pace}s between snaps)`);
+                              }
+                              const d = row.oppDef;
+                              const funnel = d && d.funnel_label && d.funnel_label !== "average" ? d.funnel_label : null;
+                              if (!bits.length && !funnel) return null;
+                              // \u26a0\ufe0f THE VINTAGE MUST COME FROM THE HALF THAT ACTUALLY
+                              // RENDERED. Offence and defence clear their gates independently,
+                              // so taking it from whichever object exists can name a season
+                              // that did not produce the number beside it.
+                              const vs = [...new Set([bits.length ? o.vintage : null, funnel ? d.vintage : null].filter(Boolean))];
+                              const v = vs.join(" / ");
+                              return (
+                                <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "0 0 5px" }}>
+                                  {bits.length > 0 && (
+                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.side} offence</strong>: {bits.join(" \u00b7 ")}</span>
+                                  )}
+                                  {bits.length > 0 && funnel ? " \u00b7 " : ""}
+                                  {funnel && (
+                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.opp} defence</strong>: {funnel}</span>
+                                  )}
+                                  {v ? <span style={{ color: "var(--text-dim)" }}>{" \u00b7 "}{v}</span> : null}
+                                </div>
+                              );
+                            })()}
                             {row.players.map((p, j) => (
                               <div key={j} style={{ display: "flex", alignItems: "baseline", gap: "8px", padding: "3px 0", fontSize: "12px" }}>
                                 <span style={{ color: posColor(p.pos).text, fontWeight: 600, minWidth: "26px" }}>{p.pos}</span>
@@ -16733,6 +16815,29 @@ Analyze this best ball roster. Return JSON only.`;
                           The projection is a reference line from {env.projSource}, not a recommendation, and it does
                           not show its work. Where it disagrees with usage this app has actually measured, that gap is
                           printed above — it is the part worth acting on.
+                          <br /><br />
+                          <strong style={{ color: "var(--text-secondary)" }}>Pass rate over expected (PROE)</strong> is
+                          how much more a team throws than the situation calls for — down, distance, clock and score.
+                          A plus number is a team that throws by choice, not because it is losing.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Pace</strong> is elapsed clock between
+                          snaps in a close game before the fourth quarter. It includes the previous play, so it runs
+                          a few seconds higher than published pace tables — read the ranking, not the number.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Funnel</strong> is the opponent
+                          defence: tough against the run and soft against the pass pushes offences to throw, and the
+                          reverse pushes them to run.
+                          <br /><br />
+                          Both are measured against the <strong style={{ color: "var(--text-secondary)" }}>league
+                          average of that season, not against zero</strong>, because every defence gives up more per
+                          pass than per run and the whole league drifts off the pass-rate model year to year. A team
+                          only appears here when it is more than one standard deviation from the league on one of the
+                          three; <strong style={{ color: "var(--text-secondary)" }}>silence means ordinary</strong>,
+                          not missing.
+                          <br /><br />
+                          These settle slowly, so the season each line came from is printed on it. A team needs{" "}
+                          {TRENDS_GATES.proe_plays} plays before its pass rate is readable, {TRENDS_GATES.pace_plays}{" "}
+                          close-game snaps for pace and {TRENDS_GATES.funnel_plays_per_side} on each side for the
+                          funnel — roughly week 5 for the first two and week 10 for the third. Until then the
+                          line shows last season and says so.
                           <br /><br />
                           <strong style={{ color: "var(--text-secondary)" }}>Lines move all week.</strong> Pulled{" "}
                           {env.fetched ? String(env.fetched).replace("T", " ").replace("Z", " UTC") : "unknown"}.

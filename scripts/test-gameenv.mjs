@@ -120,7 +120,14 @@ console.log("\n=== 6. the shell fetches; the builder is a pure parse ===");
 t(!/urllib\.request|requests\.get|http\.client/.test(bld.replace(/"""[\s\S]*?"""/g, "").replace(/#[^\n]*/g, "")),
   "build-gameenv.py contains no HTTP client");
 t(/--scoreboard/.test(bld) && /--projections/.test(bld), "it takes files as input");
-t(/6\/6/.test(sh) && /build-gameenv\.py/.test(sh), "refresh-inseason.sh runs it as step 6");
+// \u26a0\ufe0f ASSERT THE PROPERTY, NOT THE STEP NUMBER. This read /6\\/6/ and broke
+// the moment a seventh step was added, on a script that was still correct. The
+// real property is that the refresh runs it AND that it stays on the live-only
+// path, because betting lines move all week.
+t(/build-gameenv\.py/.test(sh), "refresh-inseason.sh runs the builder");
+const liveOnlySkips = sh.slice(sh.indexOf('if [ "$LIVE_ONLY" = "1" ]'), sh.indexOf("build-status.py"));
+t(!liveOnlySkips.includes("build-gameenv.py"),
+  "it is NOT inside the full-pass-only branch \u2014 the late-week pass must refresh it");
 t(/week\.number|\(d\.get\('week'\)/.test(sh) || /'week'\)/.test(sh),
   "the week comes from ESPN rather than date math");
 
