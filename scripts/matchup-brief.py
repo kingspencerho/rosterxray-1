@@ -312,6 +312,31 @@ def q2_play_caller(team):
             "   evidence of continuity — check the staff before pricing the number."]
 
 
+def q5_dc(team):
+    """Who runs this defence in 2026, so the EPA split above can be read for what
+    it is.
+
+    # THE FUNNEL IS A SCHEME PROPERTY, so a new coordinator is exactly what breaks
+    # it -- the same argument as Q2, pointed at the other side of the ball. 19 of
+    # 32 defences changed coordinator for 2026.
+    #
+    # WORKED CASE. Tampa prints pass EPA +0.068 / rush EPA -0.072, i.e. a pass
+    # funnel: stiffer against the run, so opponents throw. That read was used
+    # against two Cincinnati unders. Tampa's DC did NOT change (Todd Bowles, 2019),
+    # so there the 2025 split is honest -- but had it changed, the whole read would
+    # have been describing a staff that left, and nothing in the output said so.
+    """
+    row = sub_team(PC, "teams", team) or {}
+    st = row.get("dc_status")
+    if st == "changed":
+        return [f"⛔ NEW DC: {row.get('dc') or '?'} — the EPA split above is the OLD",
+                f"   defensive staff's. A funnel is scheme, so it may not survive."]
+    if st == "same":
+        return [f"✅ DC unchanged — {row.get('dc') or '?'} ({row.get('dc_note') or ''})"]
+    return ["⚠️ DC NOT VERIFIED for 2026 — " + (row.get("dc_note") or "unknown"),
+            "   Absent is not the same as unchanged; check before using the funnel."]
+
+
 def q5_def_weakness(team):
     t, vintage = trends(team)
     d = sub(t, "def") or {}
@@ -476,6 +501,8 @@ def brief(away, home):
         for r in q2_play_caller(t):
             print(f"      {r}")
         print(f"  Q5  def weakness   {q5_def_weakness(t)}")
+        for r in q5_dc(t):
+            print(f"      {r}")
         print(f"  Q11 quarterback    {q11_qb(t)}")
         print(f"  Q6  field stretchers ({t} receivers, vs {opp}'s defence)")
         for r in q6_stretch(t):
@@ -712,6 +739,9 @@ def selftest():
     # DAL is unverified and NYG changed play-caller, so one brief exercises both.
     check("Q2 names a new play-caller where one exists", "NEW PLAY-CALLER" in out)
     check("Q2 says unverified rather than unchanged", "NOT VERIFIED" in out)
+    check("Q5 names a new defensive coordinator where one exists", "NEW DC" in out)
+    check("a defence with no verified DC is never reported as unchanged",
+          "DC unchanged" not in q5_dc("ZZZ")[0])
     check("an unknown team is never reported as unchanged",
           "play-caller unchanged" not in q2_play_caller("ZZZ")[0])
 

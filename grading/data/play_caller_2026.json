@@ -5,7 +5,8 @@
   "sources": [
    "FOX Sports 2026 NFL Coaching/GM Tracker",
    "Legendary Upside, Week 1 walkthrough, 2026-09-11 (independent; overlaps 9 rows)",
-   "Sky Sports / CBS / NBC on the Ravens HC change"
+   "Sky Sports / CBS / NBC on the Ravens HC change",
+   "Pro Football Mania, 2026 NFL defensive coordinators by team (names only)"
   ],
   "provenance": "MEASURED where two_sources is true (two independent sources agree, 9 of 9 overlapping rows agreed). SEEN where only the tracker covers it. UNKNOWN rows are unverified and must never be read as 'same'.",
   "limits": "Names the play-caller, NOT what he does. A new coordinator is a reason to distrust a 2025 tendency, never a prediction of a new one. Nothing here says which way pace or PROE moves.",
@@ -13,6 +14,13 @@
    "changed": 19,
    "same": 4,
    "unknown": 9
+  },
+  "defense": "dc_status mirrors the offensive split: changed / same / unknown, and unknown is never same. The per-team source's own new-vs-returning buckets were NOT copied -- it mis-filed Cincinnati's Al Golden and Houston's Matt Burke as new hires. Names taken, verdicts re-derived.",
+  "why_defense_matters": "teamtrends pass/rush EPA allowed -- the 'funnel' read -- is a 2025 number and belongs to the 2025 DEFENSIVE staff, exactly as pace/PROE belongs to the 2025 play-caller. A funnel is also a scheme property, so a new DC is precisely what breaks it.",
+  "counts_dc": {
+   "changed": 19,
+   "same": 12,
+   "unknown": 1
   }
  },
  "teams": {
@@ -20,193 +28,321 @@
    "status": "changed",
    "play_caller": "Nathaniel Hackett",
    "note": "HC Mike LaFleur, OC Nathaniel Hackett (was Gannon/Petzing)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "same",
+   "dc": "Nick Rallis",
+   "dc_note": "hired 2023",
+   "dc_two_sources": false
   },
   "ATL": {
    "status": "changed",
    "play_caller": "Tommy Rees",
    "note": "HC Kevin Stefanski, OC Tommy Rees (was Raheem Morris)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "same",
+   "dc": "Jeff Ulbrich",
+   "dc_note": "retained by new HC Kevin Stefanski",
+   "dc_two_sources": true
   },
   "BAL": {
    "status": "changed",
    "play_caller": "Declan Doyle",
    "note": "HC Jesse Minter, OC Declan Doyle (was Harbaugh/Monken)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Anthony Weaver (ex-MIA DC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "BUF": {
    "status": "changed",
    "play_caller": "Pete Carmichael Jr",
    "note": "HC Joe Brady promoted, OC Pete Carmichael Jr (was McDermott)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Jim Leonhard (ex-DEN assistant HC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "CAR": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Ejiro Evero",
+   "dc_note": "hired 2023",
+   "dc_two_sources": false
   },
   "CHI": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Dennis Allen (ex-NO head coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "CIN": {
    "status": "same",
    "play_caller": null,
    "note": "continuity at head coach and OC (Al Golden still DC)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "same",
+   "dc": "Al Golden",
+   "dc_note": "was the 2025 Bengals DC - the source mis-filed him as new",
+   "dc_two_sources": true
   },
   "CLE": {
    "status": "changed",
    "play_caller": "Todd Monken",
    "note": "HC Todd Monken (was Stefanski)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Mike Rutenberg (ex-ATL pass game coordinator)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "DAL": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "unknown",
+   "dc": null,
+   "dc_note": "sources disagree: Christian Parker vs a retained Nick Rallis",
+   "dc_two_sources": false
   },
   "DEN": {
    "status": "changed",
    "play_caller": "Davis Webb",
    "note": "OC Davis Webb promoted (was Joe Lombardi)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Vance Joseph",
+   "dc_note": "hired 2023",
+   "dc_two_sources": false
   },
   "DET": {
    "status": "changed",
    "play_caller": "Drew Petzing",
    "note": "OC Drew Petzing (was John Morton)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Kelvin Sheppard (promoted from LB coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "GB": {
    "status": "same",
    "play_caller": null,
    "note": "offence unchanged; new DC Jonathan Gannon",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Jonathan Gannon (ex-ARI head coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "HOU": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Matt Burke",
+   "dc_note": "hired 2023 - the source mis-filed him as new",
+   "dc_two_sources": false
   },
   "IND": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Lou Anarumo (ex-CIN DC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "JAX": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Anthony Campanile (ex-GB LB coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "KC": {
    "status": "same",
    "play_caller": null,
    "note": "Andy Reid still calls the offence; Bieniemy returns as OC/RB coach",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Steve Spagnuolo",
+   "dc_note": "hired 2019",
+   "dc_two_sources": false
   },
   "LAC": {
    "status": "changed",
    "play_caller": "Mike McDaniel",
    "note": "OC Mike McDaniel (was Greg Roman)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Chris O'Leary (ex-Western Michigan DC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "LAR": {
    "status": "changed",
    "play_caller": "Nathan Scheelhaase",
    "note": "OC Nathan Scheelhaase promoted",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Chris Shula",
+   "dc_note": "hired 2024",
+   "dc_two_sources": false
   },
   "LV": {
    "status": "changed",
    "play_caller": "Andrew Janocko",
    "note": "HC Klint Kubiak, OC Andrew Janocko (was Pete Carroll)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Rob Leonard (promoted from DL coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "MIA": {
    "status": "changed",
    "play_caller": "Jeff Hafley",
    "note": "HC Jeff Hafley (was Mike McDaniel, now LAC OC)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Sean Duggan (ex-GB LB coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "MIN": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Brian Flores",
+   "dc_note": "hired 2023",
+   "dc_two_sources": false
   },
   "NE": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Zak Kuhr (promoted from ILB coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "NO": {
    "status": "unknown",
    "play_caller": null,
    "note": "not verified either way",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Brandon Staley (ex-SF assistant HC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": false
   },
   "NYG": {
    "status": "changed",
    "play_caller": "Matt Nagy",
    "note": "HC John Harbaugh, OC Matt Nagy",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Dennard Wilson (ex-TEN DC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "NYJ": {
    "status": "changed",
    "play_caller": "Frank Reich",
    "note": "OC Frank Reich (was Tanner Engstrand)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Brian Duker (ex-MIA secondary coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "PHI": {
    "status": "changed",
    "play_caller": "Sean Mannion",
    "note": "OC Sean Mannion (was Kevin Patullo)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Vic Fangio",
+   "dc_note": "hired 2024",
+   "dc_two_sources": false
   },
   "PIT": {
    "status": "changed",
    "play_caller": "Brian Angelichio",
    "note": "HC Mike McCarthy, OC Brian Angelichio (was Tomlin)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Patrick Graham (ex-LV DC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "SEA": {
    "status": "changed",
    "play_caller": "Brian Fleury",
    "note": "OC Brian Fleury (was Klint Kubiak)",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "same",
+   "dc": "Aden Durde",
+   "dc_note": "hired 2024",
+   "dc_two_sources": false
   },
   "SF": {
    "status": "same",
    "play_caller": null,
    "note": "offence unchanged; new DC Raheem Morris",
-   "two_sources": false
+   "two_sources": false,
+   "dc_status": "changed",
+   "dc": "Raheem Morris (ex-ATL head coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "TB": {
    "status": "changed",
    "play_caller": "Zac Robinson",
    "note": "OC Zac Robinson (was Josh Grizzard)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "same",
+   "dc": "Todd Bowles",
+   "dc_note": "hired 2019 (also the head coach)",
+   "dc_two_sources": false
   },
   "TEN": {
    "status": "changed",
    "play_caller": "Brian Daboll",
    "note": "HC Robert Saleh, OC Brian Daboll (was Callahan)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Gus Bradley (ex-SF assistant HC)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   },
   "WAS": {
    "status": "changed",
    "play_caller": "David Blough",
    "note": "OC David Blough (was Kliff Kingsbury)",
-   "two_sources": true
+   "two_sources": true,
+   "dc_status": "changed",
+   "dc": "Daronte Jones (ex-MIN DBs coach)",
+   "dc_note": "new for 2026",
+   "dc_two_sources": true
   }
  }
 }
