@@ -98,6 +98,7 @@ COV = load("coverage_2025.json")
 MET = load("player_metrics_2025.json")
 QB = load("qb_profile_2025.json")
 ST = load("status_2026.json")
+PC = load("play_caller_2026.json")
 
 
 # ⛔⛔ THE FEEDS DISAGREE ON TWO TEAMS, AND THE DISAGREEMENT IS NOT ONE-SIDED.
@@ -284,6 +285,29 @@ def q2_tendency(team):
             f"{num(o,'pace'):.1f}s   [{vintage}]")
 
 
+def q2_play_caller(team):
+    """Names who calls the offence in 2026, so the 2025 number above can be read
+    for what it is.
+
+    # IT NAMES THE CALLER, NEVER WHAT HE DOES. A new coordinator is a reason to
+    # DISTRUST a 2025 tendency, never a prediction of a new one. Nothing here says
+    # which way pace or PROE moves, and a rail does not get to guess.
+    #
+    # THE THIRD STATE IS THE POINT. `unknown` is not `same`. A team absent from a
+    # coaching tracker has not been shown to have kept its staff -- a zero result
+    # measures the query. Collapsing unknown into same is how this trap gets
+    # rebuilt, so the table carries three states and so does this output."""
+    row = sub_team(PC, "teams", team) or {}
+    st = row.get("status")
+    if st == "changed":
+        return [f"⛔ NEW PLAY-CALLER: {row.get('play_caller') or '?'} — the pace/PROE above",
+                f"   is the OLD staff's number.  {row.get('note') or ''}"]
+    if st == "same":
+        return [f"✅ play-caller unchanged — {row.get('note') or ''}"]
+    return ["⚠️ play-caller NOT VERIFIED for 2026. Absent from the table is NOT",
+            "   evidence of continuity — check the staff before pricing the number."]
+
+
 def q5_def_weakness(team):
     t, vintage = trends(team)
     d = sub(t, "def") or {}
@@ -445,8 +469,8 @@ def brief(away, home):
         print(f"\n### {t}")
         print(f"  Q1  line           {q1_line(t)}")
         print(f"  Q2  tendency       {q2_tendency(t)}")
-        print(f"      ⚠️ a 2025 pace/PROE is the 2025 PLAY-CALLER's, not the team's.")
-        print(f"         No layer records who calls plays. Check the staff changed.")
+        for r in q2_play_caller(t):
+            print(f"      {r}")
         print(f"  Q5  def weakness   {q5_def_weakness(t)}")
         print(f"  Q11 quarterback    {q11_qb(t)}")
         print(f"  Q6  field stretchers ({t} receivers, vs {opp}'s defence)")
@@ -530,8 +554,11 @@ def selftest():
     check("Q8 never claims the injuries are new", "THIS WEEK" not in out)
     check("Q8 states it has no onset date", "ONSET date" in out)
     check("Q8 rows carry the last-news date", "last news 20" in out)
-    check("Q2 warns the tendency is the old play-caller's",
-          "PLAY-CALLER's, not the team's" in out)
+    # DAL is unverified and NYG changed play-caller, so one brief exercises both.
+    check("Q2 names a new play-caller where one exists", "NEW PLAY-CALLER" in out)
+    check("Q2 says unverified rather than unchanged", "NOT VERIFIED" in out)
+    check("an unknown team is never reported as unchanged",
+          "play-caller unchanged" not in q2_play_caller("ZZZ")[0])
 
     # 3. A team with no data must degrade, never crash.
     try:

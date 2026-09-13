@@ -1,0 +1,212 @@
+{
+ "_meta": {
+  "built_at": "2026-09-13",
+  "what_it_is": "Who calls the offence in 2026, per team. It exists because teamtrends pace/PROE are 2025 numbers and a 2025 number belongs to the 2025 play-caller, not to the team.",
+  "sources": [
+   "FOX Sports 2026 NFL Coaching/GM Tracker",
+   "Legendary Upside, Week 1 walkthrough, 2026-09-11 (independent; overlaps 9 rows)",
+   "Sky Sports / CBS / NBC on the Ravens HC change"
+  ],
+  "provenance": "MEASURED where two_sources is true (two independent sources agree, 9 of 9 overlapping rows agreed). SEEN where only the tracker covers it. UNKNOWN rows are unverified and must never be read as 'same'.",
+  "limits": "Names the play-caller, NOT what he does. A new coordinator is a reason to distrust a 2025 tendency, never a prediction of a new one. Nothing here says which way pace or PROE moves.",
+  "counts": {
+   "changed": 19,
+   "same": 4,
+   "unknown": 9
+  }
+ },
+ "teams": {
+  "ARI": {
+   "status": "changed",
+   "play_caller": "Nathaniel Hackett",
+   "note": "HC Mike LaFleur, OC Nathaniel Hackett (was Gannon/Petzing)",
+   "two_sources": true
+  },
+  "ATL": {
+   "status": "changed",
+   "play_caller": "Tommy Rees",
+   "note": "HC Kevin Stefanski, OC Tommy Rees (was Raheem Morris)",
+   "two_sources": true
+  },
+  "BAL": {
+   "status": "changed",
+   "play_caller": "Declan Doyle",
+   "note": "HC Jesse Minter, OC Declan Doyle (was Harbaugh/Monken)",
+   "two_sources": false
+  },
+  "BUF": {
+   "status": "changed",
+   "play_caller": "Pete Carmichael Jr",
+   "note": "HC Joe Brady promoted, OC Pete Carmichael Jr (was McDermott)",
+   "two_sources": false
+  },
+  "CAR": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "CHI": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "CIN": {
+   "status": "same",
+   "play_caller": null,
+   "note": "continuity at head coach and OC (Al Golden still DC)",
+   "two_sources": true
+  },
+  "CLE": {
+   "status": "changed",
+   "play_caller": "Todd Monken",
+   "note": "HC Todd Monken (was Stefanski)",
+   "two_sources": false
+  },
+  "DAL": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "DEN": {
+   "status": "changed",
+   "play_caller": "Davis Webb",
+   "note": "OC Davis Webb promoted (was Joe Lombardi)",
+   "two_sources": false
+  },
+  "DET": {
+   "status": "changed",
+   "play_caller": "Drew Petzing",
+   "note": "OC Drew Petzing (was John Morton)",
+   "two_sources": true
+  },
+  "GB": {
+   "status": "same",
+   "play_caller": null,
+   "note": "offence unchanged; new DC Jonathan Gannon",
+   "two_sources": false
+  },
+  "HOU": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "IND": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "JAX": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "KC": {
+   "status": "same",
+   "play_caller": null,
+   "note": "Andy Reid still calls the offence; Bieniemy returns as OC/RB coach",
+   "two_sources": false
+  },
+  "LAC": {
+   "status": "changed",
+   "play_caller": "Mike McDaniel",
+   "note": "OC Mike McDaniel (was Greg Roman)",
+   "two_sources": true
+  },
+  "LAR": {
+   "status": "changed",
+   "play_caller": "Nathan Scheelhaase",
+   "note": "OC Nathan Scheelhaase promoted",
+   "two_sources": false
+  },
+  "LV": {
+   "status": "changed",
+   "play_caller": "Andrew Janocko",
+   "note": "HC Klint Kubiak, OC Andrew Janocko (was Pete Carroll)",
+   "two_sources": true
+  },
+  "MIA": {
+   "status": "changed",
+   "play_caller": "Jeff Hafley",
+   "note": "HC Jeff Hafley (was Mike McDaniel, now LAC OC)",
+   "two_sources": false
+  },
+  "MIN": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "NE": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "NO": {
+   "status": "unknown",
+   "play_caller": null,
+   "note": "not verified either way",
+   "two_sources": false
+  },
+  "NYG": {
+   "status": "changed",
+   "play_caller": "Matt Nagy",
+   "note": "HC John Harbaugh, OC Matt Nagy",
+   "two_sources": false
+  },
+  "NYJ": {
+   "status": "changed",
+   "play_caller": "Frank Reich",
+   "note": "OC Frank Reich (was Tanner Engstrand)",
+   "two_sources": true
+  },
+  "PHI": {
+   "status": "changed",
+   "play_caller": "Sean Mannion",
+   "note": "OC Sean Mannion (was Kevin Patullo)",
+   "two_sources": false
+  },
+  "PIT": {
+   "status": "changed",
+   "play_caller": "Brian Angelichio",
+   "note": "HC Mike McCarthy, OC Brian Angelichio (was Tomlin)",
+   "two_sources": false
+  },
+  "SEA": {
+   "status": "changed",
+   "play_caller": "Brian Fleury",
+   "note": "OC Brian Fleury (was Klint Kubiak)",
+   "two_sources": false
+  },
+  "SF": {
+   "status": "same",
+   "play_caller": null,
+   "note": "offence unchanged; new DC Raheem Morris",
+   "two_sources": false
+  },
+  "TB": {
+   "status": "changed",
+   "play_caller": "Zac Robinson",
+   "note": "OC Zac Robinson (was Josh Grizzard)",
+   "two_sources": true
+  },
+  "TEN": {
+   "status": "changed",
+   "play_caller": "Brian Daboll",
+   "note": "HC Robert Saleh, OC Brian Daboll (was Callahan)",
+   "two_sources": true
+  },
+  "WAS": {
+   "status": "changed",
+   "play_caller": "David Blough",
+   "note": "OC David Blough (was Kliff Kingsbury)",
+   "two_sources": true
+  }
+ }
+}
