@@ -238,6 +238,48 @@ Six requirements that survived the persona split. **These are the design floor.*
 
 ---
 
+## ⭐⭐ WHAT THIS APP IS RELATIVE TO THE FANTASY APPS (his ruling, Sep 13, 2026)
+
+**His words:** *"i dont want to be just like any of the fantasy apps on the market... my app is
+supposed to provide stuff that people cant get from their fantasy apps... more like a complementary
+app rather than something that is trying to compete with these apps that already have huge loyal
+audiences."*
+
+> ## **IT IS A COMPLEMENT, NOT A SUBSTITUTE. Nobody is being asked to leave Yahoo, Sleeper or
+> ## Underdog. They open this IN ADDITION, for something those apps do not do.**
+
+⛔ **WHAT THIS RULES OUT, and it is the scope creep this file exists to stop:** live scoring · a
+lineup setter · waiver claims · trade execution · push alerts · news feeds · anything whose honest
+description is *"the same thing Yahoo does."* **Those apps have the roster, the league, the
+transactions and the audience. Rebuilding any of it is a fight over ground already held, with
+worse data.**
+
+⭐⭐ **AND IT ANSWERS THE IN-SEASON QUESTION, which is why it is banked here rather than in a
+strategy note.** *(Sep 13: he asked whether 2025 spike/dud rates are the right thing to headline
+for a redraft user in season.)* **The complementary answer is not "show in-season stats" — Yahoo
+already shows those, live, with the actual scoring attached. It is: SHOW WHAT CHANGED ABOUT THE
+ROSTER HE BUILT, AND WHAT THAT MEANS FOR HOW HE BUILT IT.**
+
+| A fantasy app answers | This app answers |
+|---|---|
+| how many points did he score | **did his ROLE change** *(rank 1 in the Source Hierarchy, refreshed weekly)* |
+| who is on your bench | **which bench spot is load-bearing, and what breaks without it** |
+| his projection this week | **how confident that class of number is, and how old it is** |
+| a start/sit verdict | ⛔ **not this — the pick stays the user's, see the not-for list below** |
+| nothing | **"we do not know," said out loud** |
+
+⭐ **THE CONSEQUENCE FOR THE GRADE, and it cuts against the obvious read: the grade becomes MORE
+central in season, not less.** **Construction quality is the one thing the incumbent apps do not
+produce at all** — their screens are per-player points and projections. **It is the defensible
+half, so an in-season build extends the grade into the season rather than replacing it with a
+stat feed.**
+
+⚠️ **PROVENANCE: this is HIS ruling, so it is not mine to overrule.** The competitor half is
+SEEN — two screen recordings of the Yahoo and Underdog iOS apps, read frame by frame Sep 13 2026.
+**No scan has measured what users of those apps actually want, so nothing here claims that.**
+
+---
+
 ## Who this app is NOT for
 
 Saying this plainly prevents scope creep.
