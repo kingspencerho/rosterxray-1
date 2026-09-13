@@ -343,7 +343,34 @@ def q8_role_change(team, n=6):
 
 
 def q11_qb(team):
+    # WHO STARTS IS A DEPTH-CHART FACT, NOT A VOLUME FACT.
+    # Sorting the 2025 profile by pass attempts picks last year's busiest passer,
+    # which is not the same question. MEASURED Sep 13 2026: Minnesota's brief
+    # printed JJ MCCARTHY - now the QB3 - because Kyler Murray, the live QB1, was
+    # benched in 2025 and has no row in qb_profile at all. The brief showed a
+    # third-stringer's numbers as the starter's, with nothing saying so.
+    starter = None
+    best = 99
+    for k, v in (sub(ST, "players") or {}).items():
+        if not is_team(v.get("team"), team):
+            continue
+        if (v.get("depth_chart_position") or v.get("pos")) != "QB":
+            continue
+        o = v.get("depth_chart_order")
+        if o is not None and o < best:
+            best, starter = o, k
     rows = [(k, v) for k, v in (sub(QB, "players") or {}).items() if on_roster(k, v.get("team"), team)]
+    if starter:
+        # The live starter first when he has a profile; otherwise say he has none
+        # rather than silently promoting whoever does.
+        hit = [r for r in rows if _nm(r[0]) == _nm(starter)]
+        if hit:
+            rows = hit
+        else:
+            others = ", ".join(k.title() for k, _ in rows[:2])
+            return (f"{starter.title()} is the Week 1 starter - NO 2025 profile on file "
+                    f"(benched, rookie, or below the 6-game / 100-attempt gate)"
+                    + (f". 2025 data exists for: {others}" if others else ""))
     rows.sort(key=lambda r: -num(r[1],"pass_att_pg"))
     if not rows:
         return "no QB profile on file"
