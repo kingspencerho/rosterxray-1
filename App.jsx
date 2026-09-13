@@ -2255,7 +2255,7 @@ const COACHING_ADJ = {
   // CBS graded the hire A+). Entirely new defensive staff, so HIGH CHURN
   // despite the strong tier. Hendrickson signed 4yr/$112M. Five defenders
   // opened camp on PUP. Softened -2.5 -> -2.0 on churn + PUP load, not talent.
-  BAL: { all: -2.0, note: "HIGH CHURN — Minter is HC (from LAC), Weaver is the new DC. Hendrickson added 4yr/$112M; theScore has them 6th. As of Sep 13 2026 the room is largely intact for the opener: Hendrickson is the OLB1 and Humphrey the CB2 on the Week 1 depth chart, and Buchanan passed his physical in late August. The churn here is COACHING and scheme, not availability" },
+  BAL: { all: -2.0, note: "HIGH CHURN — Minter is HC (from LAC), Weaver is the new DC. Hendrickson added 4yr/$112M; theScore has them 6th. As of Sep 13 2026 the front is NOT intact: Madubuike is Out with a neck issue and Buchanan is Out with a knee (ACL), with two more defensive backs on IR. Hendrickson is the OLB1 and Humphrey the CB2 on the Week 1 depth chart, so the edge and the top corner are there — the interior and the depth are not" },
   // Tomlin gone after 19 years; McCarthy HC, Graham DC from LV. Top-10 read
   // holds, but this is a new HC + new DC + a DC who has run both 3-4 and 4-3,
   // with Porter Jr, Ramsey and Kent all on PUP. Softened on confidence.

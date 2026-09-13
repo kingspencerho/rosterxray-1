@@ -39,7 +39,7 @@ verdict).
                                   is BLANK on 3,285 of them (54%) - over half the
                                   file is practice-report-only.
   Sleeper /v1/players/nfl         HTTP 200, 14.6MB, 12,225 players, ~1s.
-                                  812 skill-position players with a team.
+                                  812 skill-position players with a team; defenders added Sep 13 2026.
 
 The deciding fact is COVERAGE, not stability. nflverse is the safer dependency
 and carries only the official injury report - no trades, no suspensions, no
@@ -85,7 +85,19 @@ SRC = sys.argv[1] if len(sys.argv) > 1 else "sleeper.json"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "grading/data/status_2026.json"
 SEASON = int(sys.argv[3]) if len(sys.argv) > 3 else 2026
 
-POSITIONS = ("WR", "TE", "RB", "QB")
+# ⛔⛔ DEFENDERS ADDED Sep 13 2026, and the reason is a gap that cost three web
+# searches the same day. Every claim in COACHING_ADJ is about DEFENDERS — who is on
+# PUP, who came off it, which starters are back — and this feed carried only skill
+# positions, so the app could not verify a single one of them from its own data.
+# Same defence-side blind spot that leaves questions 3 and 5 unanswerable in
+# matchup-brief.py. Third sighting of one root cause.
+#
+# ⚠️ THE SIDE IS TAGGED ON EVERY ROW rather than inferred from the position, so a
+# consumer filters explicitly instead of carrying its own list of what counts as
+# defence — a second such list would be the duplicate-definition class.
+OFF_POSITIONS = ("WR", "TE", "RB", "QB")
+DEF_POSITIONS = ("DE", "DT", "LB", "CB", "S", "DB", "NT", "OLB", "ILB", "FS", "SS")
+POSITIONS = OFF_POSITIONS + DEF_POSITIONS
 
 # A status meaning "he is not playing", as opposed to a weekly maybe. Only these
 # raise a contradiction flag in report-stale-news.mjs. A Questionable tag every
@@ -95,7 +107,7 @@ HARD_STATUS = ("IR", "PUP", "Out", "Sus", "NFI", "DNR")
 
 # The exact field set every player row carries. The guard asserts this, so a
 # Sleeper shape change adds or drops a key loudly instead of silently.
-ROW_FIELDS = ("pos", "team", "status", "injury_status", "injury_body_part",
+ROW_FIELDS = ("pos", "side", "team", "status", "injury_status", "injury_body_part",
               "depth_chart_order", "depth_chart_position", "news_updated")
 
 
@@ -146,6 +158,7 @@ def main():
             continue
         players[key] = {
             "pos": p.get("position"),
+            "side": "off" if p.get("position") in OFF_POSITIONS else "def",
             "team": p.get("team"),
             "status": p.get("status") or None,
             "injury_status": p.get("injury_status") or None,
@@ -178,12 +191,15 @@ def main():
             "so freshest-wins would demote the analysis to decoration on day one."
         ),
         "reaches_ai_prompt": False,
-        "renders": False,
-        "renders_reason": (
-            "Approved Sep 1 2026: build it, ship it reading, do not render until the "
-            "feed has been watched for a week. The committed file stays at zero rows "
-            "until that watch is done, so there is nothing to render by construction."
-        ),
+        # ⛔⛔ THESE FOUR WERE HAND-EDITED INTO THE JSON ON SEP 8 AND NEVER PUT HERE,
+        # so every rebuild reverted renders to False and dropped the other three.
+        # Guard 26 asserts all four, so the weekly refresh would have failed on it
+        # every week. A generated file is not a place to keep anything by hand.
+        "renders": True,
+        "renders_reason": "Wired Sep 8 2026 after the watch period. TWO REVIEWED CONSUMERS AND NO OTHERS: buildBreakoutBoard reads it for depthOpening (a teammate at the same depth-chart slot, ahead of him, carrying a hard status) and buildPlayerCard renders an availability row. Guard 26 holds the allowlist and still asserts analyzeRoster and analyzeRedraft never read it, which is the assertion that protects the grades.",
+        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard"],
+        "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
+        "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",
         "join_key": (
             "normalize(full_name), a mirror of App.jsx:2469. NOT gsis_id, which Sleeper "
             "carries on only 18% of skill players and which no layer in grading/data/ uses."
@@ -195,6 +211,12 @@ def main():
         # prior is not a finding, and an absent one is not a zero.
         "stability": None,
         "counts": {p: sum(1 for v in players.values() if v["pos"] == p) for p in POSITIONS},
+        "counts_by_side": {
+            side: sum(1 for v in players.values() if v["side"] == side)
+            for side in ("off", "def")
+        },
+        "off_positions": list(OFF_POSITIONS),
+        "def_positions": list(DEF_POSITIONS),
         "with_depth_chart": with_depth,
         "hard_status_count": len(hard),
         "dropped_no_name": dropped_no_name,
