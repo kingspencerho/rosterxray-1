@@ -320,7 +320,26 @@ def q7_usage(team, n=4):
 
 def q8_role_change(team, n=6):
     """Rank 1 in the Source Hierarchy: the thing that invalidates every baseline
-    above. Live, and the only 2026 layer with real coverage as of Sep 13."""
+    above. Live, and the only 2026 layer with real coverage as of Sep 13.
+
+    # THE FEED CARRIES A CURRENT STATUS AND NO ONSET DATE. THIS FIELD USED TO SAY
+    # "role change THIS WEEK", WHICH IS A CLAIM ITS OWN DATA CANNOT SUPPORT.
+    #
+    # WORKED CASE, Sep 13 2026, and it cost a real recommendation. BAL's Nnamdi
+    # Madubuike prints `LDE DC1 Out (Neck)`. Read under the old header that is a
+    # Week 1 subtraction and a live edge against a top-5 offensive line. It is
+    # not: he was hurt in WEEK 2 OF 2025, missed that whole season, had neck
+    # surgery in April 2026 and has been ramping up through camp. Every Baltimore
+    # line has priced it for twelve months.
+    #
+    # `news_updated` DOES NOT RESCUE IT and that is the part worth remembering.
+    # His reads 2026-09-11 - because he spoke to reporters that day. It dates the
+    # last NEWS ITEM, never the injury. So it is printed as "last news", which is
+    # what it is, and the header no longer claims a recency nothing measures.
+    #
+    # The rule this broke is the repo's own: a title is a label, not its contents.
+    # A caveat filed somewhere else loses to a field label every time, so the
+    # warning prints HERE, on every team, in the output itself."""
     rows = []
     for name, v in (sub(ST, "players") or {}).items():
         if not is_team(v.get("team"), team):
@@ -335,11 +354,16 @@ def q8_role_change(team, n=6):
         return ["no injury designations on file for this team"]
     # ⛔ `.get(k, default)` does NOT cover a key that EXISTS holding None, and both
     # depth fields are frequently null in the Sleeper feed. Found by --selftest.
-    return [f"{k.title():<22} {(v.get('depth_chart_position') or '?'):<4} "
-            f"DC{v.get('depth_chart_order') if v.get('depth_chart_order') is not None else '?'}  "
-            f"{v.get('injury_status') or '?'}"
-            f"{'  (' + v['injury_body_part'] + ')' if v.get('injury_body_part') else ''}"
-            for k, v, _ in hits[:n]]
+    out = []
+    for k, v, _ in hits[:n]:
+        dc = v.get("depth_chart_order")
+        st = v.get("injury_status") or "?"
+        if v.get("injury_body_part"):
+            st += f" ({v['injury_body_part']})"
+        out.append(f"{k.title():<22} {(v.get('depth_chart_position') or '?'):<4} "
+                   f"DC{dc if dc is not None else '?':<4} {st:<24} "
+                   f"last news {v.get('news_updated') or '?'}")
+    return out
 
 
 def q11_qb(team):
@@ -416,7 +440,9 @@ def brief(away, home):
         print(f"  Q7  usage — the anchor tier (WOPR 0.752, tgt sh 0.729, snap 0.709)")
         for r in q7_usage(t):
             print(f"        {r}")
-        print(f"  Q8  role change THIS WEEK  [rank 1 — invalidates every baseline above]")
+        print(f"  Q8  availability  [rank 1 — invalidates every baseline above]")
+        print(f"      ⚠️ CURRENT status. The feed has no ONSET date, so a Friday injury")
+        print(f"         and a year-old one print identically. Check before pricing one.")
         for r in q8_role_change(t):
             print(f"        {r}")
 
@@ -480,6 +506,12 @@ def selftest():
     check("the raw-FPA caveat prints", "not schedule-adjusted" in out)
     check("it says it does not pick a side", "does not pick a side" in out)
     check("role change is marked rank 1", "invalidates every baseline" in out)
+    # MUST-FAIL CASES for the Sep 13 fix. Restoring the old header, or dropping
+    # either the caveat or the date column, fails here instead of silently
+    # shipping a recency claim the feed cannot support.
+    check("Q8 never claims the injuries are new", "THIS WEEK" not in out)
+    check("Q8 states it has no onset date", "ONSET date" in out)
+    check("Q8 rows carry the last-news date", "last news 20" in out)
 
     # 3. A team with no data must degrade, never crash.
     try:
