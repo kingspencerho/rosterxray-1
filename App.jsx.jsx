@@ -2286,11 +2286,17 @@ const WIN_TOTALS = {
 // DAL 41/0 · TEN 30/0 · WAS 0 · NYJ 0.
 // ✅ THE INSTRUMENT, not the verdict: python scripts/coaching-adj-impact.py
 //
-// ⚠️ KNOWN AND NOT FIXED HERE: GB's note says the value reflects the W15-17
-// window and that GB is "materially softer W1-4". Both true, and the flat value
-// cannot express it — redraft and the W1-14 advance layer read all weeks. A week
-// dimension is the fix and it is a feature with its own calibration, not an
-// audit edit.
+// ✅✅ RULED Sep 13 2026, HIS CALL — NO WEEK DIMENSION. CLOSED, not deferred.
+// His words: "let the live fpa take over, no week dimension." ⛔ Do not build a
+// week-aware fpaPointsFor. A week dimension would touch every call site to make
+// a preseason GUESS more precise about weeks that measured data is about to
+// cover anyway, and the thing it would model — GB softer early, tougher late —
+// is exactly what three weeks of real results states directly.
+// ⚠️ WHAT THAT ACCEPTS, so nobody rediscovers it as a bug: GB's note says the
+// value reflects the W15-17 window and that GB is "materially softer W1-4".
+// Both true, and the flat value cannot express it, so until the gates clear GB
+// is graded tougher than it is early — and in 2025 mode that stays true all
+// season. A known, bounded overstatement on ONE team, visible in its own note.
 const COACHING_ADJ = {
   // WAS "Minter DC promotion" corrected: Minter is the HEAD COACH, hired from
   // the Chargers DC job, not promoted internally. DC is Anthony Weaver (ex-MIA,

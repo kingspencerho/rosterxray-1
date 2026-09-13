@@ -8889,9 +8889,22 @@ W1-4"**. Both true, and a flat value cannot express it — **redraft and the W1-
 read all weeks**, so GB is graded as tougher than it is for the quarter of the season Parsons is
 mandated out. It moves **more letter grades than any other entry (15)**.
 
-⛔ **A magnitude change is the wrong fix: it would trade a W15-17 error for a W1-14 one.** The fix
-is a **week dimension on COACHING_ADJ**, which is a feature with its own calibration, not an audit
-edit. `fpaPointsFor` takes no week today, so it touches every call site.
+⛔ **A magnitude change is the wrong fix: it would trade a W15-17 error for a W1-14 one.**
+
+> ## ✅✅ **RULED Sep 13, 2026, HIS CALL — NO WEEK DIMENSION. LET LIVE FPA TAKE OVER.**
+> **His words: *"let the live fpa take over, no week dimension."*** ⛔ **So this is CLOSED, not
+> deferred — do not reopen it, and do not build a week-aware `fpaPointsFor`.**
+>
+> **Why it is the right call and not just the cheap one:** a week dimension would be a feature
+> with its own calibration, touching every `fpaPointsFor` call site, **to make a preseason GUESS
+> more precise about weeks that measured data is about to cover anyway.** Precision on an
+> unsourced number is the worst place to spend effort — and the thing it would model (GB softer
+> early, tougher late) is exactly what three weeks of real results states directly.
+>
+> ⚠️ **WHAT HE IS ACCEPTING, stated plainly so nobody rediscovers it as a bug:** until the gates
+> clear, **GB is graded tougher than it is for the weeks Parsons is mandated out**, and in 2025
+> mode that stays true all season. **It is a known, bounded overstatement on one team**, visible
+> in GB's own note, and it moves 15 letter grades on the fixtures.
 
 ### What pass 2 rejected, and why it is recorded
 
