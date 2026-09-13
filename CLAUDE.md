@@ -9008,3 +9008,93 @@ grades byte-identical.
 The artifact's other two cards — the metric-coverage ribbon and the roster list with lens tabs
 and slot pucks — and any restyle of the nutshell, Strengths and Weaknesses. He asked for the grade
 card; the rest is its own pass and its own calibration.
+
+
+---
+
+## ⛔ OPEN HYPOTHESIS — "Coordinator Turnover + Secondary Absence" (registered Sep 13, 2026)
+
+> ## ⛔⛔ **PROVENANCE: REASONED. n = 0. UNTESTED.**
+> **It may be a hypothesis, a next step or a question. It may NOT support a recommendation.**
+> **No stars on this entry, deliberately — emphasis marks evidence strength, and there is none yet.**
+
+### The claim, stated so it can be checked
+
+> **A team favoured by 3 or more points that (a) has replaced BOTH its offensive
+> play-caller and its defensive coordinator in the same off-season, and (b) is
+> missing two or more DC1/DC2 defensive backs, wins outright LESS often than its
+> spread implies.**
+
+### Where it came from
+
+Read off the Week 1 2026 slate while picking outright winners. Detroit was laying
+7 and carried all three conditions at once:
+
+```
+new OC   Drew Petzing          (was John Morton)
+new DC   Kelvin Sheppard       (promoted)
+Out      Branch (SS), Joseph (FS)   -- both starting safeties
+also     David Montgomery left for HOU, so the backfield is reconfigured too
+```
+
+And the underdog's defence was quietly the better one on the app's own numbers —
+NO `pass EPA -0.046 / rush EPA -0.073` against DET `-0.006 / -0.015`.
+
+### The proposed mechanism, which is the part most likely to be wrong
+
+Two new coordinators means neither unit has been seen live, so the market prices
+last season's team. Missing safeties is the specific hole that a new defensive
+scheme is least able to disguise, because coverage rules are the part of a
+defence that takes longest to install. **The claim is that Week 1 mispricing is
+concentrated where continuity is lowest.**
+
+⚠️ **The obvious competing explanation, which must be ruled out before this is
+believed: the market already knows.** Coordinator hires are public all off-season
+and inactives post 90 minutes before kickoff. A signal this legible is exactly
+the kind that is already in the number. **"Nobody prices this" and "it does not
+work" produce identical-looking evidence**, and the pleasant reading is the one
+that gets picked up.
+
+### ⛔⛔ TONIGHT'S RESULT CANNOT CONFIRM OR REFUTE THIS
+
+**One game is never evidence about a population.** This repo's own rule: *"did you
+check one, or did you check all of them?"* Whatever happens in Detroit is **one
+row**, and a hypothesis with three conditions attached will match only a handful
+of teams a season.
+
+**PRE-REGISTERED so hindsight cannot rewrite it.** Recorded BEFORE kickoff:
+
+| | |
+|---|---|
+| Game | NO @ DET, Week 1 2026 |
+| Line | DET -7 |
+| Prediction | **DET wins outright but fails to cover; NO within 7** |
+| Upset call | NO outright — flagged as the slate's most likely upset |
+| Runner-up (different mechanism) | CLE +8.5 at JAX, on spread-to-total ratio, not personnel |
+
+⛔ **A Detroit blowout does not kill it and a Saints win does not prove it.**
+Record the row and move on.
+
+### How it would actually get tested
+
+Needs a back-test, not a season of watching:
+
+1. Historical coordinator changes by team and year (the `play_caller_2026.json`
+   shape, extended backwards — this is the expensive part and does not exist yet)
+2. Week-1 inactives by team and year
+3. Closing spreads and results
+4. Compare outright win rate against the spread-implied rate for the matching
+   subgroup, and against all other favourites of the same size
+
+**Minimum useful n is a few dozen team-seasons**, which means roughly a decade.
+⚠️ **And the sample must contain the cases where it did NOT work** — every
+competitor scan in the sibling repo sampled winners only, and a sample with no
+failures measures a convention, never a cause.
+
+### What it would change if it held
+
+Nothing about grading. `teamtrends` is context-only and the engines read none of
+it, so this could never move a roster grade. It would inform the matchup brief —
+a line next to Q5 saying the defensive read is least trustworthy where both
+coordinators are new. **That is a disclosure, not a prediction, which is the only
+shape this repo lets an untested idea ship in.**
