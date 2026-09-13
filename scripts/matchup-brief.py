@@ -45,6 +45,7 @@ LaPorta looks soft at TE for reasons unrelated to the defence. Stated inline.
 USAGE
     python scripts/matchup-brief.py DAL NYG
     python scripts/matchup-brief.py --slate          # every priced game, one line each
+    python scripts/matchup-brief.py --props          # posted props priced by the app
     python scripts/matchup-brief.py DAL NYG --json
 """
 import json
@@ -99,6 +100,9 @@ MET = load("player_metrics_2025.json")
 QB = load("qb_profile_2025.json")
 ST = load("status_2026.json")
 PC = load("play_caller_2026.json")
+EFF = load("player_efficiency_2025.json")
+VAC = load("vacated_2026.json")
+PROPS = load("props_2026w01.json")
 
 
 # ⛔⛔ THE FEEDS DISAGREE ON TWO TEAMS, AND THE DISAGREEMENT IS NOT ONE-SIDED.
@@ -515,6 +519,157 @@ def slate():
     print(f"\n{len(games)} priced. Run `matchup-brief.py AWAY HOME` for the twelve questions.")
 
 
+# ==========================================================================
+# --props : PRICE THE POSTED PROP LINES AGAINST THE APP'S OWN 2025 RATES
+#
+# ONLY THREE PROP TYPES ARE ELIGIBLE, and that is the whole design. Per section 2
+# of ANALYST-REFERENCE.md, receptions (targets/g r=0.774), RB carries (r=0.730)
+# and QB pass attempts (r=0.605) are the only common props whose underlying rate
+# repeats year to year. Rushing YARDS is carries (0.730) x YPC (0.022), and
+# receiving YARDS is targets (0.774) x YPT (0.308) -- both bet a sticky number
+# multiplied by a random one. They are EXCLUDED rather than ranked low, because a
+# ranked-low row still reads as a recommendation on a quiet board.
+#
+# THE ROLE GUARD IS THE ONE THAT MATTERS, AND IT WAS LEARNED THE HARD WAY.
+# The first version scored on |gap| alone and ranked Bhayshul Tuten UNDER 12.5 as
+# the best bet on the entire slate: app rate 5.53 carries a game against a 12.5
+# line. He is Jacksonville's DC1 in 2026 and was a backup in 2025 -- the line is a
+# starter's and the 5.53 is a backup's. The same bug promoted David Montgomery,
+# now Houston's DC1 after splitting a backfield with Gibbs in Detroit.
+#   Rank 1 in the Source Hierarchy is role CHANGE, and it INVALIDATES the sticky
+#   baseline. Scoring |gap| alone inverts that exactly: the more certainly the
+#   baseline was dead, the higher it ranked. A gap that is large RELATIVE to the
+#   line is the market pricing a role the 2025 rate cannot see. Not an edge.
+#
+# AND THE MIRROR IMAGE, which is easier to miss: VACATED WORK. Jahmyr Gibbs
+# carried 14.29 a game WHILE SHARING WITH David Montgomery, who is a Texan now.
+# The 17.5 line prices the vacated half. His baseline UNDERSTATES him, so the
+# UNDER that the raw gap suggests is precisely backwards. vacated_2026 records
+# who left, so this is checkable instead of something to remember.
+#
+# IT PRINTS AND RANKS. IT DOES NOT PICK. Game script, opponent and any second
+# source sit outside it, and the flags are there to be read, not summed.
+# ==========================================================================
+PROP_W = {"rec": 1.00, "car": 0.95, "att": 0.75}   # stickiness tier weight
+PROP_POS = {"rec": ("WR", "TE"), "car": ("RB",), "att": ("QB",)}
+PROP_NAME = {"rec": "receptions", "att": "pass att", "car": "rush att"}
+
+
+def pcs_status(team):
+    row = sub_team(PC, "teams", team) or {}
+    return row.get("status", "unknown"), row.get("play_caller")
+
+
+def prop_rate(kind, name):
+    """The app's own 2025 per-game rate for this prop's unit, or None."""
+    k = _nm(name)
+    if kind == "att":
+        v = (sub(QB, "players") or {}).get(k) or {}
+        a = v.get("pass_att_pg")
+        return (a, v.get("team"), None) if a is not None else (None, None, None)
+    m = (sub(MET, "players") or MET or {}).get(k) or {}
+    gp = m.get("gp")
+    if not gp:
+        return (None, None, None)
+    if kind == "rec":
+        return (m["rec"] / gp, m.get("team"), gp)
+    car = ((sub(EFF, "players") or {}).get(k) or {}).get("carries")
+    return (car / gp, m.get("team"), gp) if car else (None, None, None)
+
+
+def vacated_at(team, kind):
+    """Same-position team-mates who left. Their work goes somewhere, so a
+    survivor's 2025 rate understates the role he holds now."""
+    row = sub_team(VAC, "teams", team) or {}
+    names = [g.get("name") for g in (row.get("gone") or [])
+             if g.get("pos") in PROP_POS.get(kind, ())]
+    return names, row.get("vacated_pct") or 0
+
+
+def score_prop(row):
+    kind, team, line = row.get("type"), row.get("team"), row.get("line")
+    r, rt, gp = prop_rate(kind, row.get("player", ""))
+    if r is None or not line:
+        return None
+    gap = r - line
+    rel = abs(gap) / line
+    s = rel * PROP_W.get(kind, 0.5)
+    flags = []
+    live = (sub(ST, "players") or {}).get(_nm(row.get("player", ""))) or {}
+    dc = live.get("depth_chart_order")
+    if rel > 0.30:
+        s *= 0.25
+        flags.append("ROLE CHANGE, not an edge (2026 DC%s)" % dc)
+    left, vpct = vacated_at(team, kind)
+    if left and gap < 0:
+        # SIZE THE VACANCY, do not just detect it. The first version applied a flat
+        # 0.35 and so treated Cincinnati losing ONE tight end (7.1% of targets) the
+        # same as Tampa losing Mike Evans and two more (32%). That silently dropped
+        # a legitimate pick off the board. vacated_pct is a TARGET-share figure, so
+        # it sizes a receptions prop honestly and says nothing about carries -- a
+        # carries vacancy gets a fixed, moderate penalty instead of a fake number.
+        s *= (0.70 if kind == "car" else max(0.35, 1 - (vpct / 100.0) * 1.6))
+        flags.append("VACATED WORK (%s%% of targets) - baseline may understate: %s"
+                     % (vpct, ", ".join(left[:2])))
+    stat, caller = pcs_status(team)
+    if stat == "changed":
+        s *= 0.55
+        flags.append("NEW PLAY-CALLER %s" % caller)
+    elif stat == "unknown":
+        s *= 0.80
+        flags.append("play-caller unverified")
+    if rt and not is_team(rt, team):
+        s *= 0.70
+        flags.append("2025 w/%s" % rt)
+    if gp and gp < 10:
+        s *= 0.70
+        flags.append("only %d gp" % gp)
+    if live.get("injury_status"):
+        s *= 0.40
+        flags.append(str(live["injury_status"]).upper())
+    out = dict(row)
+    out.update({"score": s, "side": "OVER" if gap > 0 else "UNDER",
+                "price": row["over"] if gap > 0 else row["under"],
+                "rate": r, "gap": gap, "dc": dc, "flags": flags})
+    return out
+
+
+def props(top=3):
+    W = 78   # brief() keeps its own local copy; this is not a module constant
+    if not PROPS:
+        print("no prop board on file - expected grading/data/props_2026w01.json")
+        return
+    m = sub(PROPS, "_meta") or {}
+    print("=" * W)
+    print("  POSTED PROPS PRICED AGAINST THE APP   week %s \u00b7 pulled %s"
+          % (m.get("week"), m.get("pulled")))
+    print("  source: %s" % m.get("source"))
+    print("  \u26a0\ufe0f a snapshot, not a live price - re-pull before betting any row")
+    print("  eligible: receptions \u00b7 RB carries \u00b7 QB pass attempts. Rushing and")
+    print("  receiving YARDS are excluded - their efficiency half does not repeat.")
+    print("=" * W)
+    scored = [x for x in (score_prop(r) for r in (PROPS.get("props") or [])) if x]
+    by_team = {}
+    for x in scored:
+        by_team.setdefault(x["team"], []).append(x)
+    for g in (sub(GE, "games") or []):
+        a, h = g.get("away"), g.get("home")
+        rows = sorted(by_team.get(a, []) + by_team.get(h, []),
+                      key=lambda x: -x["score"])[:top]
+        print("\n### %s @ %s" % (a, h))
+        if not rows:
+            print("      no eligible prop with app data")
+        for x in rows:
+            print("  %-5s %-20s %5.1f %-10s %+5d  | app %.2f (%+.2f) | DC%s | %.3f"
+                  % (x["side"], x["player"], x["line"], PROP_NAME[x["type"]],
+                     x["price"], x["rate"], x["gap"], x["dc"], x["score"]))
+            if x["flags"]:
+                print("        \u26a0\ufe0f " + " \u00b7 ".join(x["flags"]))
+    print("\n" + "-" * W)
+    print("  It ranks inputs. It does not pick a side - game script, opponent and any")
+    print("  second source sit outside it, and the flags are to be read, not summed.")
+
+
 def selftest():
     """The two things that would fail SILENTLY, so they each carry a must-fail case.
     ⛔ A checker that quietly passes is worse than no checker."""
@@ -564,6 +719,26 @@ def selftest():
     try:
         q1_line("ZZZ"); q2_tendency("ZZZ"); q7_usage("ZZZ"); q8_role_change("ZZZ")
         check("an unknown team degrades instead of crashing", True)
+        # 4. --props MUST-FAIL CASES. Every one of these is a bug that shipped.
+        buf2 = _io.StringIO()
+        with contextlib.redirect_stdout(buf2):
+            props()
+        po = buf2.getvalue()
+        # SEVENTH INSTANCE of a guard failing on its own documentation: the header
+        # prose explains WHY yardage props are excluded, so scanning the whole
+        # output for those words fails on correct code. Scan the PICK ROWS only.
+        picks = [ln for ln in po.split(chr(10))
+                 if ln.startswith("  OVER") or ln.startswith("  UNDER")]
+        check("props emits only the three repeating types",
+              bool(picks) and all(any(t in ln for t in PROP_NAME.values()) for ln in picks))
+        check("props flags a role change instead of promoting it",
+              "ROLE CHANGE, not an edge" in po)
+        check("props flags vacated work", "VACATED WORK" in po)
+        check("props states it does not pick a side", "does not pick a side" in po)
+        _t = score_prop({"player": "bhayshul tuten", "team": "JAX", "type": "car",
+                         "line": 12.5, "over": -121, "under": -107})
+        check("the Tuten row scores as a role change, never as a top bet",
+              bool(_t) and any("ROLE CHANGE" in f for f in _t["flags"]))
     except Exception as e:  # noqa: BLE001
         check("an unknown team degrades instead of crashing", False, repr(e))
 
@@ -575,6 +750,8 @@ if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if "--selftest" in sys.argv:
         sys.exit(selftest())
+    elif "--props" in sys.argv:
+        props()
     elif "--slate" in sys.argv:
         slate()
     elif len(args) == 2:

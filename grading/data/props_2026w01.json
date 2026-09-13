@@ -1,0 +1,710 @@
+{
+ "_meta": {
+  "week": 1,
+  "season": 2026,
+  "pulled": "2026-09-13",
+  "source": "Sports Betting Dime, Week 1 player prop lines",
+  "what_it_is": "One row per posted prop line. The APP prices these; it does not set them.",
+  "⛔ STALE THE MOMENT IT IS WRITTEN": "Lines move and players get ruled out. This snapshot already contained props for Brock Bowers and Tua Tagovailoa, both of whom are OUT. Re-pull before trusting any row, and never treat a row here as a live price.",
+  "only_three_types": "rec / att / car only. Per the stickiness table, receptions (targets/g 0.774), RB carries (0.730) and QB pass attempts (0.605) are the only common props whose underlying rate repeats. Rushing YARDS = carries x YPC (0.022) and receiving YARDS = targets x YPT (0.308), so both bet a sticky number times a random one. They are excluded rather than ranked low.",
+  "count": 87
+ },
+ "props": [
+  {
+   "player": "Ja'Marr Chase",
+   "team": "CIN",
+   "type": "rec",
+   "line": 7.5,
+   "over": 112,
+   "under": -145
+  },
+  {
+   "player": "CeeDee Lamb",
+   "team": "DAL",
+   "type": "rec",
+   "line": 6.5,
+   "over": 115,
+   "under": -151
+  },
+  {
+   "player": "Chris Olave",
+   "team": "NO",
+   "type": "rec",
+   "line": 6.5,
+   "over": 102,
+   "under": -133
+  },
+  {
+   "player": "Justin Jefferson",
+   "team": "MIN",
+   "type": "rec",
+   "line": 5.5,
+   "over": -148,
+   "under": 114
+  },
+  {
+   "player": "Nico Collins",
+   "team": "HOU",
+   "type": "rec",
+   "line": 5.5,
+   "over": 100,
+   "under": -130
+  },
+  {
+   "player": "George Pickens",
+   "team": "DAL",
+   "type": "rec",
+   "line": 4.5,
+   "over": -156,
+   "under": 121
+  },
+  {
+   "player": "DeVonta Smith",
+   "team": "PHI",
+   "type": "rec",
+   "line": 5.5,
+   "over": 110,
+   "under": -142
+  },
+  {
+   "player": "Zay Flowers",
+   "team": "BAL",
+   "type": "rec",
+   "line": 4.5,
+   "over": -157,
+   "under": 120
+  },
+  {
+   "player": "Drake London",
+   "team": "ATL",
+   "type": "rec",
+   "line": 5.5,
+   "over": -119,
+   "under": -110
+  },
+  {
+   "player": "Garrett Wilson",
+   "team": "NYJ",
+   "type": "rec",
+   "line": 5.5,
+   "over": -114,
+   "under": -113
+  },
+  {
+   "player": "Tee Higgins",
+   "team": "CIN",
+   "type": "rec",
+   "line": 4.5,
+   "over": -143,
+   "under": 110
+  },
+  {
+   "player": "Malik Nabers",
+   "team": "NYG",
+   "type": "rec",
+   "line": 5.5,
+   "over": 118,
+   "under": -157
+  },
+  {
+   "player": "Rashee Rice",
+   "team": "KC",
+   "type": "rec",
+   "line": 5.5,
+   "over": -128,
+   "under": -101
+  },
+  {
+   "player": "Jameson Williams",
+   "team": "DET",
+   "type": "rec",
+   "line": 3.5,
+   "over": -144,
+   "under": 111
+  },
+  {
+   "player": "Trey McBride",
+   "team": "ARI",
+   "type": "rec",
+   "line": 6.5,
+   "over": 113,
+   "under": -149
+  },
+  {
+   "player": "Tetairoa McMillan",
+   "team": "CAR",
+   "type": "rec",
+   "line": 4.5,
+   "over": -113,
+   "under": -114
+  },
+  {
+   "player": "Christian Watson",
+   "team": "GB",
+   "type": "rec",
+   "line": 3.5,
+   "over": -169,
+   "under": 128
+  },
+  {
+   "player": "Luther Burden",
+   "team": "CHI",
+   "type": "rec",
+   "line": 4.5,
+   "over": -132,
+   "under": 100
+  },
+  {
+   "player": "Emeka Egbuka",
+   "team": "TB",
+   "type": "rec",
+   "line": 4.5,
+   "over": 122,
+   "under": -160
+  },
+  {
+   "player": "Jaylen Waddle",
+   "team": "DEN",
+   "type": "rec",
+   "line": 4.5,
+   "over": -120,
+   "under": -107
+  },
+  {
+   "player": "Ladd McConkey",
+   "team": "LAC",
+   "type": "rec",
+   "line": 4.5,
+   "over": -105,
+   "under": -124
+  },
+  {
+   "player": "Terry McLaurin",
+   "team": "WSH",
+   "type": "rec",
+   "line": 3.5,
+   "over": -168,
+   "under": 126
+  },
+  {
+   "player": "Marvin Harrison Jr",
+   "team": "ARI",
+   "type": "rec",
+   "line": 4.5,
+   "over": 113,
+   "under": -145
+  },
+  {
+   "player": "DJ Moore",
+   "team": "BUF",
+   "type": "rec",
+   "line": 3.5,
+   "over": -109,
+   "under": -120
+  },
+  {
+   "player": "Alec Pierce",
+   "team": "IND",
+   "type": "rec",
+   "line": 3.5,
+   "over": -113,
+   "under": -115
+  },
+  {
+   "player": "DK Metcalf",
+   "team": "PIT",
+   "type": "rec",
+   "line": 3.5,
+   "over": -132,
+   "under": 101
+  },
+  {
+   "player": "Rome Odunze",
+   "team": "CHI",
+   "type": "rec",
+   "line": 3.5,
+   "over": -104,
+   "under": -126
+  },
+  {
+   "player": "Tucker Kraft",
+   "team": "GB",
+   "type": "rec",
+   "line": 4.5,
+   "over": 127,
+   "under": -166
+  },
+  {
+   "player": "Josh Downs",
+   "team": "IND",
+   "type": "rec",
+   "line": 4.5,
+   "over": 118,
+   "under": -154
+  },
+  {
+   "player": "Kyle Pitts",
+   "team": "ATL",
+   "type": "rec",
+   "line": 4.5,
+   "over": 112,
+   "under": -145
+  },
+  {
+   "player": "Mark Andrews",
+   "team": "BAL",
+   "type": "rec",
+   "line": 3.5,
+   "over": 119,
+   "under": -155
+  },
+  {
+   "player": "Parker Washington",
+   "team": "JAX",
+   "type": "rec",
+   "line": 4.5,
+   "over": 119,
+   "under": -155
+  },
+  {
+   "player": "Caleb Williams",
+   "team": "CHI",
+   "type": "att",
+   "line": 32.5,
+   "over": -106,
+   "under": -122
+  },
+  {
+   "player": "Bryce Young",
+   "team": "CAR",
+   "type": "att",
+   "line": 30.5,
+   "over": -119,
+   "under": -109
+  },
+  {
+   "player": "Daniel Jones",
+   "team": "IND",
+   "type": "att",
+   "line": 32.5,
+   "over": -118,
+   "under": -110
+  },
+  {
+   "player": "Lamar Jackson",
+   "team": "BAL",
+   "type": "att",
+   "line": 26.5,
+   "over": -121,
+   "under": -108
+  },
+  {
+   "player": "Aaron Rodgers",
+   "team": "PIT",
+   "type": "att",
+   "line": 31.5,
+   "over": -111,
+   "under": -116
+  },
+  {
+   "player": "Trevor Lawrence",
+   "team": "JAX",
+   "type": "att",
+   "line": 32.5,
+   "over": -105,
+   "under": -125
+  },
+  {
+   "player": "Baker Mayfield",
+   "team": "TB",
+   "type": "att",
+   "line": 31.5,
+   "over": -108,
+   "under": -121
+  },
+  {
+   "player": "Joe Burrow",
+   "team": "CIN",
+   "type": "att",
+   "line": 34.5,
+   "over": -112,
+   "under": -116
+  },
+  {
+   "player": "Geno Smith",
+   "team": "NYJ",
+   "type": "att",
+   "line": 30.5,
+   "over": -119,
+   "under": -109
+  },
+  {
+   "player": "Cameron Ward",
+   "team": "TEN",
+   "type": "att",
+   "line": 31.5,
+   "over": -118,
+   "under": -111
+  },
+  {
+   "player": "Jared Goff",
+   "team": "DET",
+   "type": "att",
+   "line": 33.5,
+   "over": -110,
+   "under": -118
+  },
+  {
+   "player": "Josh Allen",
+   "team": "BUF",
+   "type": "att",
+   "line": 29.5,
+   "over": -116,
+   "under": -111
+  },
+  {
+   "player": "CJ Stroud",
+   "team": "HOU",
+   "type": "att",
+   "line": 31.5,
+   "over": -107,
+   "under": -122
+  },
+  {
+   "player": "Jacoby Brissett",
+   "team": "ARI",
+   "type": "att",
+   "line": 34.5,
+   "over": -103,
+   "under": -126
+  },
+  {
+   "player": "Justin Herbert",
+   "team": "LAC",
+   "type": "att",
+   "line": 29.5,
+   "over": -114,
+   "under": -113
+  },
+  {
+   "player": "Kyler Murray",
+   "team": "MIN",
+   "type": "att",
+   "line": 30.5,
+   "over": -128,
+   "under": 100
+  },
+  {
+   "player": "Jordan Love",
+   "team": "GB",
+   "type": "att",
+   "line": 32.5,
+   "over": -109,
+   "under": -119
+  },
+  {
+   "player": "Kirk Cousins",
+   "team": "LV",
+   "type": "att",
+   "line": 29.5,
+   "over": -121,
+   "under": -108
+  },
+  {
+   "player": "Jayden Daniels",
+   "team": "WSH",
+   "type": "att",
+   "line": 29.5,
+   "over": -116,
+   "under": -112
+  },
+  {
+   "player": "Jalen Hurts",
+   "team": "PHI",
+   "type": "att",
+   "line": 28.5,
+   "over": -113,
+   "under": -115
+  },
+  {
+   "player": "Dak Prescott",
+   "team": "DAL",
+   "type": "att",
+   "line": 33.5,
+   "over": -102,
+   "under": -127
+  },
+  {
+   "player": "Jaxson Dart",
+   "team": "NYG",
+   "type": "att",
+   "line": 29.5,
+   "over": -107,
+   "under": -122
+  },
+  {
+   "player": "Patrick Mahomes",
+   "team": "KC",
+   "type": "att",
+   "line": 31.5,
+   "over": -122,
+   "under": -107
+  },
+  {
+   "player": "Bo Nix",
+   "team": "DEN",
+   "type": "att",
+   "line": 34.5,
+   "over": -109,
+   "under": -119
+  },
+  {
+   "player": "Tyler Shough",
+   "team": "NO",
+   "type": "att",
+   "line": 32.5,
+   "over": -115,
+   "under": -113
+  },
+  {
+   "player": "Deshaun Watson",
+   "team": "CLE",
+   "type": "att",
+   "line": 30.5,
+   "over": -111,
+   "under": -120
+  },
+  {
+   "player": "Malik Willis",
+   "team": "MIA",
+   "type": "att",
+   "line": 27.5,
+   "over": -119,
+   "under": -109
+  },
+  {
+   "player": "Jahmyr Gibbs",
+   "team": "DET",
+   "type": "car",
+   "line": 17.5,
+   "over": -125,
+   "under": -105
+  },
+  {
+   "player": "Derrick Henry",
+   "team": "BAL",
+   "type": "car",
+   "line": 17.5,
+   "over": -122,
+   "under": -107
+  },
+  {
+   "player": "Jonathan Taylor",
+   "team": "IND",
+   "type": "car",
+   "line": 18.5,
+   "over": -112,
+   "under": -116
+  },
+  {
+   "player": "Saquon Barkley",
+   "team": "PHI",
+   "type": "car",
+   "line": 18.5,
+   "over": -117,
+   "under": -110
+  },
+  {
+   "player": "Bijan Robinson",
+   "team": "ATL",
+   "type": "car",
+   "line": 18.5,
+   "over": -102,
+   "under": -127
+  },
+  {
+   "player": "James Cook",
+   "team": "BUF",
+   "type": "car",
+   "line": 16.5,
+   "over": -130,
+   "under": -101
+  },
+  {
+   "player": "Javonte Williams",
+   "team": "DAL",
+   "type": "car",
+   "line": 17.5,
+   "over": -111,
+   "under": -117
+  },
+  {
+   "player": "D'Andre Swift",
+   "team": "CHI",
+   "type": "car",
+   "line": 15.5,
+   "over": -126,
+   "under": -101
+  },
+  {
+   "player": "Omarion Hampton",
+   "team": "LAC",
+   "type": "car",
+   "line": 14.5,
+   "over": -140,
+   "under": 108
+  },
+  {
+   "player": "Devon Achane",
+   "team": "MIA",
+   "type": "car",
+   "line": 14.5,
+   "over": -106,
+   "under": -123
+  },
+  {
+   "player": "Breece Hall",
+   "team": "NYJ",
+   "type": "car",
+   "line": 16.5,
+   "over": -106,
+   "under": -124
+  },
+  {
+   "player": "Kenneth Walker III",
+   "team": "KC",
+   "type": "car",
+   "line": 16.5,
+   "over": -103,
+   "under": -127
+  },
+  {
+   "player": "Quinshon Judkins",
+   "team": "CLE",
+   "type": "car",
+   "line": 15.5,
+   "over": -112,
+   "under": -113
+  },
+  {
+   "player": "Chase Brown",
+   "team": "CIN",
+   "type": "car",
+   "line": 14.5,
+   "over": -127,
+   "under": -103
+  },
+  {
+   "player": "Bucky Irving",
+   "team": "TB",
+   "type": "car",
+   "line": 14.5,
+   "over": 100,
+   "under": -130
+  },
+  {
+   "player": "Travis Etienne Jr",
+   "team": "NO",
+   "type": "car",
+   "line": 15.5,
+   "over": -105,
+   "under": -123
+  },
+  {
+   "player": "David Montgomery",
+   "team": "HOU",
+   "type": "car",
+   "line": 13.5,
+   "over": -110,
+   "under": -117
+  },
+  {
+   "player": "Tony Pollard",
+   "team": "TEN",
+   "type": "car",
+   "line": 14.5,
+   "over": -108,
+   "under": -120
+  },
+  {
+   "player": "MarShawn Lloyd",
+   "team": "GB",
+   "type": "car",
+   "line": 13.5,
+   "over": -115,
+   "under": -114
+  },
+  {
+   "player": "Cameron Skattebo",
+   "team": "NYG",
+   "type": "car",
+   "line": 12.5,
+   "over": -101,
+   "under": -129
+  },
+  {
+   "player": "Bhayshul Tuten",
+   "team": "JAX",
+   "type": "car",
+   "line": 12.5,
+   "over": -121,
+   "under": -107
+  },
+  {
+   "player": "Rico Dowdle",
+   "team": "PIT",
+   "type": "car",
+   "line": 12.5,
+   "over": -121,
+   "under": -107
+  },
+  {
+   "player": "JK Dobbins",
+   "team": "DEN",
+   "type": "car",
+   "line": 12.5,
+   "over": -101,
+   "under": -129
+  },
+  {
+   "player": "Jordan Mason",
+   "team": "MIN",
+   "type": "car",
+   "line": 10.5,
+   "over": -142,
+   "under": 110
+  },
+  {
+   "player": "Jaylen Warren",
+   "team": "PIT",
+   "type": "car",
+   "line": 9.5,
+   "over": -102,
+   "under": -127
+  },
+  {
+   "player": "Jo'Quavious Marks",
+   "team": "HOU",
+   "type": "car",
+   "line": 7.5,
+   "over": -122,
+   "under": -106
+  },
+  {
+   "player": "Aaron Jones",
+   "team": "MIN",
+   "type": "car",
+   "line": 8.5,
+   "over": -130,
+   "under": 100
+  },
+  {
+   "player": "Rachaad White",
+   "team": "WSH",
+   "type": "car",
+   "line": 6.5,
+   "over": -102,
+   "under": -127
+  }
+ ]
+}
