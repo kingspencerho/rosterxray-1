@@ -53,7 +53,7 @@
 # REPORT — the single largest information event of the week — not the last word.
 #
 # USAGE
-#   bash scripts/refresh-inseason.sh [season]                # all seven steps
+#   bash scripts/refresh-inseason.sh [season]                # all eight steps
 #   bash scripts/refresh-inseason.sh [season] --live-only    # steps 6-7 only
 #
 # Then re-run the guards and commit:
@@ -95,7 +95,7 @@ if [ "$LIVE_ONLY" = "1" ]; then
   echo "change between Monday night and the weekend). Refreshing 6-7 only."
   echo
 else
-  echo "1/7  snap trajectory (role change)"
+  echo "1/8  snap trajectory (role change)"
   # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
   if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
     got_any=1
@@ -109,13 +109,13 @@ else
   # ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
   # twin all read the same weekly stats file, so the second and third layers cost
   # a parse each and no extra network.
-  echo "2/7  QB volume profile"
+  echo "2/8  QB volume profile"
   if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
     got_any=1
     python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
       "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
     echo
-    echo "3/7  game logs (reusing the same download)"
+    echo "3/8  game logs (reusing the same download)"
     python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
       "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
     echo
@@ -125,16 +125,30 @@ else
     # LAST season for the whole of this one. This is the same measurements on the
     # current season, context only. Both vintages render; neither replaces the
     # other.
-    echo "4/7  current-season volume (reusing the same download)"
+    echo "4/8  current-season volume (reusing the same download)"
     python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
       "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
+
+    # ⛔⛔ STEP 5 IS THE ONLY SCORED ONE IN THIS SCRIPT. Every other layer here is
+    # context; this one feeds the matchup pills and therefore the grade.
+    # Derived ANALYST-REFERENCE.md §2b: FPA through week N predicts the rest of
+    # that season far better than the prior season predicts anything — WR inverts
+    # outright, r=-0.073 across seasons against 0.531 after three weeks within one.
+    # ⚠️ It goes live on its own when weeks_covered clears each position’s gate.
+    # Nothing here or in App.jsx has to be changed when that happens.
+    echo "5/8  live FPA by position (reusing the same download)"
+    python3 "$ROOT/scripts/build-fpa-current.py" "$TMP/week.csv" \
+      "$ROOT/grading/data/fpa_$SEASON.json" "$SEASON" || fail=1
   else
     echo "  skipped — placeholder left untouched"; fail=1
     echo
-    echo "3/7  game logs (reusing the same download)"
+    echo "3/8  game logs (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
     echo
-    echo "4/7  current-season volume (reusing the same download)"
+    echo "5/8  live FPA by position (reusing the same download)"
+    echo "  skipped — the weekly stats file is unavailable"
+    echo
+    echo "4/8  current-season volume (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
   fi
   echo
@@ -144,7 +158,7 @@ else
   # three of which CLAUDE.md Section 4 has specified since July with no data
   # behind them. It sits INSIDE the full-pass branch because it is an nflverse
   # season release and does not change between Monday night and the weekend.
-  echo "5/7  team trends: pass rate, pace, defensive funnel"
+  echo "5/8  team trends: pass rate, pace, defensive funnel"
   if fetch "$BASE/pbp/play_by_play_$SEASON.csv.gz" "$TMP/pbp.csv.gz"; then
     got_any=1
     python3 "$ROOT/scripts/build-teamtrends.py" --pbp "$TMP/pbp.csv.gz" \
@@ -164,7 +178,7 @@ fi
 #
 # The 14.6MB raw payload is written to $TMP and dies with the trap. Only the
 # ~200KB extract reaches grading/data/. NEVER commit the raw dump.
-echo "6/7  availability + depth chart (Sleeper, live - works pre-season)"
+echo "6/8  availability + depth chart (Sleeper, live - works pre-season)"
 if fetch "https://api.sleeper.app/v1/players/nfl" "$TMP/sleeper.json"; then
   python3 "$ROOT/scripts/build-status.py" "$TMP/sleeper.json" \
     "$ROOT/grading/data/status_$SEASON.json" "$SEASON" && got_any=1 || fail=1
@@ -189,7 +203,7 @@ echo
 # sandbox curl returns 200 for this endpoint on every URL form while python
 # urllib returns 403 through the egress proxy. build-gameenv.py is a PURE PARSE
 # for that reason - see its header.
-echo "7/7  game environment + weekly projections (live - expires, see _meta)"
+echo "7/8  game environment + weekly projections (live - expires, see _meta)"
 ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 if fetch "$ESPN/scoreboard" "$TMP/cur.json"; then
   WEEK=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print((d.get('week') or {}).get('number') or 0)" "$TMP/cur.json" 2>/dev/null || echo 0)

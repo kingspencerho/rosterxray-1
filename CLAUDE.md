@@ -8682,3 +8682,120 @@ with `num()` / `txt()` rather than per call site; 32 numeric reads route through
 ⚠️ **The other thing it pins is the VINTAGE.** `teamtrends_2026` is still thin, so every line falls
 back to 2025 **and must say so** — a 2026 label over 2025 numbers is the stale-data trap wearing a
 date. Guard: `python scripts/matchup-brief.py --selftest`.
+
+---
+
+## The Matchup Pills Read the Season Being Played (Sep 13, 2026)
+
+`scripts/build-fpa-current.py` -> `grading/data/fpa_2026.json`. **THE FIRST SCORED
+IN-SEASON LAYER** — every other one built since August is context. **90 grades
+BYTE-IDENTICAL** against a pristine worktree, because the committed file is the
+inert placeholder. Guard 40: `scripts/test-fpa-current.mjs`.
+
+### His question, and the answer inverts the obvious reading
+
+*"now that the season has started... shouldn't we just replace the 2026 proj mode
+with in-season features instead?"* **Yes.** `OFFSEASON_ADJ_2026` is preseason
+reasoning dated Aug 3 whose entire job was to bridge *2025 is stale* and *2026
+does not exist yet.* That gap closes on its own.
+
+Measured (ANALYST-REFERENCE.md §2b) — does FPA through week N predict the REST of
+that same season:
+
+```
+pos   last year    W1-3    W1-6
+QB       0.049     0.369   0.329
+RB       0.245    -0.123   0.148
+WR      -0.073     0.531   0.418     <- the worst cross-season input in the app,
+TE       0.192     0.281   0.426        one of the best within a season
+```
+
+⛔ **STATE THE BAR: at n=31 defences an `r` needs ~`0.355` to clear noise, so BOTH
+RB figures are inside it.** An earlier draft of this read *"last year wins for
+RB,"* which is wrong and implies last year works.
+
+### ⭐⭐⭐ THE RULING THAT DECIDED RB IS HIS, AND IT CORRECTS MY TEST
+
+I recommended leaving RB on 2025 because current data does not FORECAST better.
+His answer: *"i still want to know whats happening currently during my season."*
+
+> **THE PILL DESCRIBES. IT DOES NOT FORECAST.** A correlation asks whether the
+> RANKING PERSISTS; it never asks whether a number describes the team that exists
+> NOW. A defence that lost three starters in August is a different defence, and
+> last season's number describes a team that is gone.
+
+**Right instrument, wrong question** — the same class as the leverage panel
+printing "ownership" for a projection.
+
+### The four rules, each closing a specific failure
+
+1. ⛔ **THE SWITCH IS LEAGUE-WIDE PER POSITION, never per defence.** Mixing live
+   and estimated defences inside one position ranks them against two
+   distributions — the population error the card's five percentile tables exist
+   to avoid.
+2. ⛔ **WHEN LIVE, NO ADJUSTMENT APPLIES.** COACHING_ADJ and OFFSEASON_ADJ_2026
+   guess what a defence would BECOME; real results already contain it.
+3. ⛔ **THE RANK POOL MATCHES THE VINTAGE THE VALUE CAME FROM.**
+4. ⚠️ **GATES ARE READ FROM `_meta.gates`** — `QB/WR/TE 3 weeks, RB 4`. RB's is
+   **sample parity, not predictiveness**: 1.79 draftable backs per game against a
+   receiver's 2.29.
+
+### ⭐ ONE HELPER PAIR, because both matchup functions had the same block
+
+`getMatchupTier` and `getMatchupScoreForOpponent` each carried identical
+lookup + adjust + rank logic. **The assertion caught it before anything was
+written** — the rank-pool line matched twice. `fpaPointsFor` and `fpaRankPool`
+now serve both; patching each separately would have been the
+duplicate-definition class for the eleventh time.
+
+### VALIDATED AGAINST THE TABLE IT REPLACES
+
+Run over the full 2025 season and correlated with the hand-typed Rotowire table:
+
+```
+pos    r vs Rotowire    mine    roto    top-8 softest
+QB         0.999        16.8    17.0     8 of 8
+RB         0.994        19.8    20.1     8 of 8
+WR         0.998        25.1    25.3     8 of 8
+TE         0.998        10.6    10.6     8 of 8
+```
+
+**It is a genuine drop-in, not a different metric wearing the same name.**
+
+⚠️ **AND IT FOUND THE LA/LAR SPLIT AGAIN** — nflverse says `LA`, the FPA table
+says `LAR`, so the first run resolved **31 of 32**. Normalised in the BUILDER, at
+the source, so no consumer has to remember. Sep 11 lost every Rams card to this
+exact split in a different file.
+
+### His ruling on disclosure: no flag on any pill
+
+I proposed stepping the RB pill back with *"run matchups barely repeat — the
+weakest read here."* He rejected it: *"why give them a reason to doubt when it was
+never an issue in the first place?"*
+
+⭐⭐ **He is right, and the sharper reason is that the line was a VERDICT rather
+than PROVENANCE.** Every existing disclosure here says what a number IS and where
+it came from; none passes judgement on whether it is any good. **A verdict invites
+"says who?" and needs a paragraph of statistics to defend.**
+
+✅ **So: no dimming, no caveat, no per-pill flag.** The existing results footer
+carries it — `fpaVintageLabel()` replaces the hardcoded `FPA: 2025 Rotowire`. The
+mechanism lives in ANALYST-REFERENCE §2b and the `<Explainer>` already sitting
+above `<MatchupLegend />`. The toggle is now **`📈 2026 Season`**, not an estimate.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL (placeholder inert) · 39 guards · 1,751 assertions
+dual-file identical · LF preserved · vite build clean
+9 sabotages against a verified-clean baseline, ALL exit non-zero
+the switch PROVEN to fire: a live-shaped file moves ref3 B+ 5.42 -> A 7.83
+refresh-inseason.sh RUN FOR REAL, not just bash -n: step 5/8 built the file
+```
+
+⚠️ **TWO SABOTAGES MISSED ON THE FIRST PASS AND BOTH ASSERTIONS WERE TOO LOOSE.**
+*"The estimate still carries its adjustments"* only checked that the value moved
+off raw — **OFFSEASON alone satisfied it, so deleting COACHING_ADJ passed.** And
+the no-retyped-gate check forbade a literal and **missed `weeks_covered >= 3`**,
+the same duplication wearing a comparison. Both now assert the exact value and the
+positive property.

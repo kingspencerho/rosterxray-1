@@ -101,6 +101,7 @@ import REDZONE from './grading/data/redzone_2025.json';
 // scripts/build-availability.py. CONTEXT ONLY.
 import AVAILABILITY from './grading/data/availability_2026.json';
 import STATUS_LAYER from './grading/data/status_2026.json';
+import FPA_CUR from './grading/data/fpa_2026.json';
 import GAMEENV from './grading/data/gameenv_2026.json';
 import TRENDS_PRIOR from './grading/data/teamtrends_2025.json';
 import TRENDS_CUR from './grading/data/teamtrends_2026.json';
@@ -2687,6 +2688,68 @@ const lookupTeam = (table, t) => {
   return null;
 };
 
+// ⭐⭐ THE SEASON BEING PLAYED, WHEN THERE IS ENOUGH OF IT.
+// Derived Sep 13 2026, ANALYST-REFERENCE.md §2b: FPA through week N predicts the
+// REST of that season far better than the prior season predicts anything. WR
+// inverts outright — the worst cross-season input in this app at r=-0.073, and
+// one of the best within a season at 0.531 after three weeks.
+//
+// ⛔ THE SWITCH IS LEAGUE-WIDE PER POSITION, never per defence. Mixing live and
+// estimated defences inside one position would rank them against two different
+// distributions — the population error the card’s five separate percentile
+// tables exist to avoid. A position goes live when the SEASON clears its gate.
+//
+// ⛔ AND WHEN LIVE, NO ADJUSTMENT APPLIES. COACHING_ADJ and OFFSEASON_ADJ_2026
+// are hand-written guesses at what a defence would BECOME; real results already
+// contain whatever it became, so adding them would double-count.
+//
+// ⚠️ Gates are READ from _meta.gates. A literal 3 or 4 typed here would be the
+// duplicate-definition class this repo has paid for ten times — which is also
+// why these two helpers exist at all rather than the same block being pasted
+// into getMatchupTier and getMatchupScoreForOpponent.
+const FPA_CUR_LIVE = (pos) => Boolean(FPA_CUR?._meta?.live?.[pos]);
+const FPA_CUR_WEEKS = FPA_CUR?._meta?.weeks_covered || 0;
+
+// Returns the points figure a matchup tier is computed from, and WHICH VINTAGE
+// it came from, because the caller must rank it inside the same population.
+const fpaPointsFor = (pos, team, useProjected) => {
+  if (useProjected && FPA_CUR_LIVE(pos)) {
+    const row = lookupTeam(FPA_CUR.defences, team);
+    const cell = row && row[pos];
+    if (cell && typeof cell.pts === "number") return { pts: cell.pts, live: true };
+  }
+  let pts = FPA[pos]?.[team];
+  if (pts == null) return { pts: null, live: false };
+  // Sign convention (both tables): positive = the defence got WORSE. FPA is
+  // points allowed, so adjustments ADD. `pts -= adj` was a Jul 16 2026 bug.
+  const adj = COACHING_ADJ[team];
+  if (adj) pts += adj.all;
+  if (useProjected) {
+    const offAdj = OFFSEASON_ADJ_2026[team];
+    if (offAdj) {
+      const delta = offAdj[pos.toLowerCase()];
+      if (delta != null) pts += delta;
+    }
+  }
+  return { pts, live: false };
+};
+
+// ⛔ RANK AGAINST THE VINTAGE THE VALUE CAME FROM. Ranking a live 2026 number
+// inside the 2025 distribution places it against a league that no longer exists.
+const fpaRankPool = (pos, live) => (live
+  ? Object.values(FPA_CUR.defences).map((d) => d[pos] && d[pos].pts).filter((v) => typeof v === "number")
+  : Object.values(FPA[pos])).sort((a, b) => b - a);
+
+// What the pills are computed from, for the results footer. ONE vintage line and
+// no per-pill flag — his ruling Sep 13: a disclosure states what a number IS,
+// never a verdict on whether it is any good.
+const fpaVintageLabel = (useProjected) => {
+  if (!useProjected) return "2025 Rotowire";
+  const live = ["QB", "RB", "WR", "TE"].filter(FPA_CUR_LIVE);
+  if (!live.length) return "2025 Rotowire + 2026 offseason estimate";
+  if (live.length === 4) return `2026 through W${FPA_CUR_WEEKS}`;
+  return `2026 through W${FPA_CUR_WEEKS} for ${live.join("/")}, 2025 elsewhere`;
+};
 const getVacated = (team) => lookupTeam(VACATED.teams, team);
 
 // ⭐ OFFENSIVE LINE — CONTEXT ONLY, and the gate lives in the data rather
@@ -5025,29 +5088,14 @@ const parseRosterLegacy = (text, format = "standard") => {
 
 const getMatchupTier = (opponentTeam, pos, useProjected = false) => {
   const opp = opponentTeam.replace("@", "");
-  let pts = FPA[pos]?.[opp];
+  const { pts, live } = fpaPointsFor(pos, opp, useProjected);
   if (pts == null) return { tier: "—", score: 0, opp };
-  // Adjustment sign convention (both tables): positive = defense got WORSE
-  // (allows more, softer matchup), negative = improved (tougher). FPA is
-  // points allowed, so adjustments ADD. `pts -= adj` here was a sign-inversion
-  // bug (fixed Jul 16 2026) that made improved defenses look softer and
-  // gutted defenses look tougher — contradicting the tables' own notes.
-  const adj = COACHING_ADJ[opp];
-  if (adj) pts += adj.all;
-  // apply 2026 offseason layer (only in projected mode)
-  if (useProjected) {
-    const offAdj = OFFSEASON_ADJ_2026[opp];
-    if (offAdj) {
-      const delta = offAdj[pos.toLowerCase()];
-      if (delta != null) pts += delta;
-    }
-  }
 
   // Rank-based tiering using position-specific distribution.
   // If adjustments push pts below the league minimum, findIndex returns -1
   // (rank 0), which previously fell through to "Smash" — the exact opposite
   // of a tougher-than-everyone defense. Clamp to worst rank instead.
-  const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
+  const allPts = fpaRankPool(pos, live);
   const rankIdx = allPts.findIndex(v => v <= pts);
   const rank = rankIdx === -1 ? allPts.length + 1 : rankIdx + 1;
 
@@ -7341,19 +7389,9 @@ const buildLeagueFromConfig = (cfg) => {
 const getMatchupScoreForOpponent = (opp, pos, useProjected = false) => {
   const oppClean = opp.replace("@", "");
   if (oppClean === "BYE") return null;
-  let pts = FPA[pos]?.[oppClean];
+  const { pts, live } = fpaPointsFor(pos, oppClean, useProjected);
   if (pts == null) return { score: 3, tier: "Unknown" };
-  // Same sign convention + Jul 16 2026 inversion fix as getMatchupTier.
-  const adj = COACHING_ADJ[oppClean];
-  if (adj) pts += adj.all;
-  if (useProjected) {
-    const offAdj = OFFSEASON_ADJ_2026[oppClean];
-    if (offAdj) {
-      const delta = offAdj[pos.toLowerCase()];
-      if (delta != null) pts += delta;
-    }
-  }
-  const allPts = Object.values(FPA[pos]).sort((a, b) => b - a);
+  const allPts = fpaRankPool(pos, live);
   const rankIdx = allPts.findIndex(v => v <= pts);
   // Below-minimum pts = tougher than every defense — worst rank, not rank 0/Smash.
   const rank = rankIdx === -1 ? allPts.length + 1 : rankIdx + 1;
@@ -13389,7 +13427,7 @@ Analyze this best ball roster. Return JSON only.`;
                 whiteSpace: "nowrap",
               }}
             >
-              🔮 2026 Est.
+              📈 2026 Season
             </button>
           </div>
           {/* Coverage panel — shown in BOTH modes.
@@ -18056,13 +18094,13 @@ Analyze this best ball roster. Return JSON only.`;
             const nAdj = (dataMode === "projected" ? ADJ_COVERAGE.projAdjusted : ADJ_COVERAGE.actualAdjusted).length;
             const adjStr = `EPA adj: ${nAdj}/${ADJ_COVERAGE.total} teams · ${ADJ_UPDATED}`;
             if (fromRoster > 0 && fromRoster >= v.length / 2) {
-              return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: 2025 Rotowire · ${adjStr}`;
+              return `ADP: from your roster (${fromRoster}/${v.length} players, live at draft time) · FPA: ${fpaVintageLabel(dataMode === "projected")} · ${adjStr}`;
             }
             // Name the table that actually produced these numbers. This line
             // said "Underdog half-PPR" unconditionally, so a redraft grade
             // printed a best-ball market and a best-ball date.
             const vin = adpVintageFor(analyzed);
-            return `ADP: ${vin.market} ${vin.label} snapshot · paste a roster that includes ADP for live numbers · FPA: 2025 Rotowire · ${adjStr}`;
+            return `ADP: ${vin.market} ${vin.label} snapshot · paste a roster that includes ADP for live numbers · FPA: ${fpaVintageLabel(dataMode === "projected")} · ${adjStr}`;
           })()}
         </div>
 

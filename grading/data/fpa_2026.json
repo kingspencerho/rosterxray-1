@@ -1,0 +1,32 @@
+{
+ "_meta": {
+  "season": 2026,
+  "weeks_covered": 0,
+  "max_week": 0,
+  "defences": 0,
+  "gates": {
+   "QB": 3,
+   "WR": 3,
+   "TE": 3,
+   "RB": 4
+  },
+  "live": {
+   "QB": false,
+   "RB": false,
+   "WR": false,
+   "TE": false
+  },
+  "scoring": "half-PPR, 4pt passing TD",
+  "population": "all players, not the draftable subset",
+  "source": "nflverse-data stats_player weekly release",
+  "scored": true,
+  "reaches_ai_prompt": false,
+  "derivation": "ANALYST-REFERENCE.md section 2b",
+  "caveats": [
+   "Raw points allowed, NOT schedule-adjusted. A defence that drew Kelce, Bowers and LaPorta looks soft at TE for reasons that are not the defence.",
+   "A position goes live league-wide or not at all; mixing live and estimated defences would rank them against two distributions.",
+   "When live, no COACHING_ADJ or OFFSEASON_ADJ_2026 applies \u2014 real results already contain whatever the defence became."
+  ]
+ },
+ "defences": {}
+}
