@@ -9221,3 +9221,52 @@ The **Matchups colour pass** — his read: *"way too much white font... everythi
 together."* It is a LOOK decision, so it ships as two rendered variants he picks from, not a
 description. The scan's rules apply: value bright / label dim, position puck for identity, flags in
 their meaning colour, everything else steps down a shade.
+
+---
+
+## ⛔⛔ Production Crashed on Every Redraft Grade, and 39 Guards Said Green (Sep 13, 2026)
+
+**For roughly forty minutes, every redraft grade on rosterxray.com rendered "Something went wrong."**
+Cause: the reorder commit `f6308e4`. The refresh-lag banner moved from Lineup Confidence into the
+Matchups block reads `nfl.stale`, `nfl.dataWeeks`, `nfl.lag`, `nfl.week`. The block it came from
+declared `const nfl = seasonNow()` locally; the move kept the JSX and dropped the declaration.
+`ReferenceError: nfl is not defined`, caught by the error boundary. Hotfix `90fa1c6`.
+
+### Why nothing caught it — every layer, in order
+
+| Layer | Why it passed |
+|---|---|
+| `vite build` | esbuild does not check free identifiers |
+| 39 guards | all string-based or engine-based; **none renders the results tree** |
+| 90-grade calibration | the engine was fine; the render was not |
+| the DOM audit | ran while the banner sat in **Trends, a panel that never mounts pre-season**, so the reference was never evaluated; it was moved into Matchups afterwards and merged without a second render |
+| two failed screenshots after the move | **were the crash** — and were read as "the pane is hidden" |
+
+⛔ **The reusable lesson is the last row.** A screenshot that fails to capture and a DOM query that
+returns "no panel" are not neutral events; they are exactly what a crashed tree looks like from the
+outside. **Read the console before explaining away a blank render.**
+
+### Guard 40 — `scripts/test-no-undef.mjs`
+
+A free identifier is a **class**, not an incident: any move, rename or block deletion can make one,
+and nothing in the suite could see it. eslint's `no-undef` sees it in a second, before a browser is
+involved. **eslint is now a devDependency** (`^10`), the guard lints `App.jsx.jsx` — the file the dev
+server and the deploy serve — with ES builtins from `ecmaVersion: latest` and an allow-list of the
+browser globals the app uses. **Clean run: 18,645 lines, zero findings, no globals missing.**
+
+Proven both ways against a file copy: **dropping the `nfl` declaration fails with five hits and the
+line numbers; a planted `somethingNobodyDeclared` fails on its line.** Wired into `npm test`, so the
+weekly refresh workflow runs it too.
+
+⚠️ **The globals list is an allow-list, not a suppression list.** An app identifier added there to
+turn a red run green defeats the guard exactly as loosening an assertion would.
+
+### Also in the hotfix commit: the Matchups panel, in the treatment he chose
+
+Three colourings were rendered for him; he picked option 3 and cut the implied total. Now: the line
+reads **FAVOURITE −SPREAD · Total X**, with weight from **brightness** and never from yellow — on
+this page yellow means a warning, and the injury line **`<opp> out`** is the only thing in the panel
+that earns it. Slot pucks for identity, the projection as value-over-unit, the tendency line a step
+dimmer. **Measured at 375 with the console read:** panel mounts, 7 pucks, no "implied" in the panel,
+yellow on the six "X out" labels and nothing else, 0 sub-32px targets, no overflow. 90 grades
+byte-identical.
