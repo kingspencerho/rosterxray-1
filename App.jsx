@@ -9831,14 +9831,13 @@ const SECTION_INDEX = {
   ],
   redraft: [
     { id: "rxr-lineup",       label: "Lineup" },
-    { id: "rxr-depth",        label: "Depth" },
-    { id: "rxr-byeconflicts", label: "Byes" },
-    { id: "rxr-playoffs",     label: "Playoffs" },
-    { id: "rxr-weekly",       label: "Weekly" },
-    { id: "rxr-trends",       label: "Trends" },
     { id: "rxr-gameenv",      label: "Matchups" },
+    { id: "rxr-trends",       label: "Trends" },
     { id: "rxr-freeagents",   label: "Waivers" },
     { id: "rxr-breakout",     label: "Breakout" },
+    { id: "rxr-weekly",       label: "Weekly" },
+    { id: "rxr-playoffs",     label: "Playoffs" },
+    { id: "rxr-byeconflicts", label: "Byes" },
     { id: "rxr-bench",        label: "Bench" },
   ],
 };
@@ -10927,7 +10926,6 @@ export default function RosterScorer() {
   // Selected week in the Lineup Confidence strip. null = follow the calendar
   // (current week in season, W1 otherwise) so a fresh grade always opens on
   // the week that matters without the user touching anything.
-  const [lcWeek, setLcWeek] = useState(null);
   const [exportingCard, setExportingCard] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState(null);
   // The generated card is a full-height PNG, so once it appears it sits between
@@ -16772,39 +16770,200 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             </div>
 
-            {/* Positional Depth */}
-            <div style={{ marginBottom: "20px" }}>
-              <h2 id="rxr-depth" style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 12px",
-                color: "var(--text-primary)",
-              }}>
-                POSITIONAL DEPTH
-              </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
-                {Object.entries(analyzed.depthAnalysis).map(([pos, d]) => {
-                  const isWeak = d.depth < 1;
-                  const isStrong = d.depth >= 3;
-                  const color = isWeak ? "#f87171" : isStrong ? "#4ade80" : "#b4b4c0";
-                  return (
-                    <div key={pos} style={{
-                      background: "var(--bg-surface)",
-                      border: `1px solid ${color}40`,
-                      borderLeft: `3px solid ${color}`,
-                      borderRadius: "4px",
-                      padding: "10px 12px",
+            {/* ⭐ GAME ENVIRONMENT — one block per GAME, not one line per
+                player. Twelve starters can sit in eight games, so attaching the
+                total and spread to each player repeats the same two facts up to
+                three times. CONTEXT ONLY; guard 38 asserts it never reaches a
+                scoring engine or the AI prompt. */}
+            {(() => {
+              const env = buildGameEnvBoard(analyzed.allStarters);
+              // Out of season, or before the weekly refresh has run, there is
+              // no slate. The panel does not exist rather than rendering an
+              // empty table that looks broken.
+              if (!env || env.games.length === 0) return null;
+              const bw = env.flags.blowout || {}, sh = env.flags.shootout || {};
+              return (
+                <div id="rxr-gameenv" style={{ marginBottom: "20px" }}>
+                  <SectionH2
+                    title={`WEEK ${env.week} · GAME ENVIRONMENT`}
+                    open={gameEnvOpen}
+                    onToggle={() => setGameEnvOpen(o => !o)}
+                    hint={`${env.games.length} game${env.games.length === 1 ? "" : "s"}`} />
+                  {/* THE REFRESH-LAG BANNER lived in Lineup Confidence until that
+                      section was removed (Sep 13 2026). It renders HERE because the Matchups panel
+                      mounts every week in season; the Trends panel does not
+                      mount until volume_2026 has weeks, so a banner there could
+                      be invisible on exactly the week it matters. Guard
+                      `test-current-week.mjs` asserts it names both numbers. */}
+                  {nfl.stale && (
+                    <div style={{
+                      fontSize: "11px", lineHeight: 1.5, marginBottom: "10px",
+                      padding: "8px 10px", borderRadius: "4px",
+                      background: "var(--bg-elevated)", border: "1px solid var(--caution)",
+                      color: "var(--caution)",
                     }}>
-                      <div style={{ fontSize: "14px", color: "var(--text-primary)", fontWeight: 600 }}>{pos}: {d.count}</div>
-                      <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px" }}>
-                        Need: {d.needed} starter(s){d.depth >= 0 ? `, ${d.depth} bench` : ", THIN"}
-                      </div>
+                      ⚠ In-season role data covers weeks 1-{nfl.dataWeeks}, {nfl.lag} week{nfl.lag === 1 ? "" : "s"} behind week {nfl.week}.
+                      The lines and projections here are current; the role trends and game logs are not. Run the weekly refresh.
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  )}
+                  {gameEnvOpen && (
+                    <div style={{ padding: "10px 0 2px" }}>
+                      {env.games.map((row, i) => {
+                        const g = row.game;
+                        const flags = [];
+                        if (g.shootout) flags.push(["shootout", "var(--accent-lime)"]);
+                        if (g.blowout) flags.push(["blowout risk", "var(--caution)"]);
+                        if (g.indoor) flags.push(["dome", "var(--text-muted)"]);
+                        return (
+                          <div key={i} style={{ marginBottom: "14px", paddingBottom: "12px", borderBottom: i === env.games.length - 1 ? "none" : "1px solid var(--border-default)" }}>
+                            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
+                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                                {row.side} vs {row.opp}
+                              </span>
+                              {g.total != null ? (
+                                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                                  implied <strong style={{ color: "var(--text-primary)" }}>{row.implied ?? "-"}</strong>
+                                  {" · "}{g.total} total
+                                  {g.spread != null && row.fav != null
+                                    ? ` · ${row.fav ? "-" : "+"}${g.spread}`
+                                    : ""}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: "11px", color: "var(--text-dim)" }}>no line posted</span>
+                              )}
+                              {flags.map(([t, c], k) => (
+                                <span key={k} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase", color: c }}>{t}</span>
+                              ))}
+                            </div>
+                            {(row.offTrend || row.oppDef) && (() => {
+                              const bits = [];
+                              const o = row.offTrend;
+                              // \u2b50 THE CHANGE IS THE FINDING. Where both vintages have a
+                              // value the prior one rides along, so a reader sees a team
+                              // that moved rather than a number whose meaning moved.
+                              const shift = (cur, key) => (o && o.prior && o.prior[key] != null
+                                ? ` from ${o.prior[key] > 0 ? "+" : ""}${o.prior[key]}` : "");
+                              if (o) {
+                                if (o.proe_label && o.proe_label !== "average")
+                                  bits.push(`${o.proe_label} (${o.proe_rel > 0 ? "+" : ""}${o.proe_rel} PROE${shift(o.proe_rel, "proe_rel")})`);
+                                if (o.pace_label && o.pace_label !== "average")
+                                  bits.push(`${o.pace_label} (${o.pace}s between snaps)`);
+                              }
+                              const d = row.oppDef;
+                              const funnel = d && d.funnel_label && d.funnel_label !== "average" ? d.funnel_label : null;
+                              if (!bits.length && !funnel) return null;
+                              // \u26a0\ufe0f THE VINTAGE MUST COME FROM THE HALF THAT ACTUALLY
+                              // RENDERED. Offence and defence clear their gates independently,
+                              // so taking it from whichever object exists can name a season
+                              // that did not produce the number beside it.
+                              const vs = [...new Set([bits.length ? o.vintage : null, funnel ? d.vintage : null].filter(Boolean))];
+                              const v = vs.join(" / ");
+                              return (
+                                <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "0 0 5px" }}>
+                                  {bits.length > 0 && (
+                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.side} offence</strong>: {bits.join(" \u00b7 ")}</span>
+                                  )}
+                                  {bits.length > 0 && funnel ? " \u00b7 " : ""}
+                                  {funnel && (
+                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.opp} defence</strong>: {funnel}</span>
+                                  )}
+                                  {v ? <span style={{ color: "var(--text-dim)" }}>{" \u00b7 "}{v}</span> : null}
+                                </div>
+                              );
+                            })()}
+                            {row.players.map((p, j) => (
+                              <div key={j} style={{ display: "flex", alignItems: "baseline", gap: "8px", padding: "3px 0", fontSize: "12px" }}>
+                                <span style={{ color: posColor(p.pos).text, fontWeight: 600, minWidth: "26px" }}>{p.pos}</span>
+                                <span style={{ color: "var(--text-secondary)", flex: 1 }}>{p.name}</span>
+                                <span style={{ color: p.proj == null ? "var(--text-dim)" : "var(--text-primary)", fontWeight: 600 }}>
+                                  {p.proj == null ? "no proj" : `${p.proj} proj`}
+                                </span>
+                              </div>
+                            ))}
+                            {/* THE BENCH-SWAP LINE - the one piece of the old Lineup
+                                Confidence section worth keeping, moved here Sep 13 2026
+                                on his call to remove that section. It is the only place
+                                the app compares a BENCH player to a starter for THIS
+                                week, which is a Sunday question. The engine's per-week
+                                concerns are untouched; only the render moved. */}
+                            {row.players.map((p, j) => {
+                              const wk = (analyzed.lineupConfidencePreview || []).find(w => w.week === env.week);
+                              const c = wk && wk.concerns.find(x => x.name === p.name && x.suggestion);
+                              if (!c) return null;
+                              const sg = c.suggestion;
+                              return (
+                                <div key={`s${j}`} className="rx-bench-swap" style={{ fontSize: "11px", color: "var(--text-muted)", padding: "2px 0 0 34px" }}>
+                                  <span style={{ color: "var(--text-dim)" }}>bench:</span>{" "}
+                                  <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{sg.name}</span>
+                                  {" "}<span style={{ color: posColor(sg.pos).text, fontWeight: 700 }}>{sg.pos}</span>
+                                  {" "}has a {sg.matchup.tier} matchup this week
+                                  {c.disclaimers && c.disclaimers.length > 0 && <span style={{ color: "var(--text-dim)" }}> · {c.disclaimers[0]}</span>}
+                                </div>
+                              );
+                            })}
+                            {/* ⭐ THE DISAGREEMENT IS THE PRODUCT. The bare
+                                projection is available on any site; the gap
+                                between it and his measured usage is not. */}
+                            {row.players.filter(p => p.divergence).map((p, j) => (
+                              <div key={`d${j}`} style={{ fontSize: "11px", color: "var(--ui-accent)", padding: "2px 0 0 34px" }}>
+                                {p.name}: {p.divergence.text}
+                              </div>
+                            ))}
+                            {row.defOut.length > 0 && (
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", paddingTop: "4px" }}>
+                                {row.opp} defence out: {row.defOut.map(d => `${d.name} (${d.pos})`).join(", ")}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      <Explainer label="what these numbers are">
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          <strong style={{ color: "var(--text-secondary)" }}>Implied</strong> is how many points the
+                          betting market expects this team to score: the game total split by the spread.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Shootout</strong> is a game inside{" "}
+                          {sh.max_abs_spread} points with a total of {sh.min_total} or more, which lifts both sides.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Blowout risk</strong> is a spread of{" "}
+                          {bw.min_abs_spread}+ with a total under {bw.max_total}.
+                          <br /><br />
+                          The projection is a reference line from {env.projSource}, not a recommendation, and it does
+                          not show its work. Where it disagrees with usage this app has actually measured, that gap is
+                          printed above — it is the part worth acting on.
+                          <br /><br />
+                          <strong style={{ color: "var(--text-secondary)" }}>Pass rate over expected (PROE)</strong> is
+                          how much more a team throws than the situation calls for — down, distance, clock and score.
+                          A plus number is a team that throws by choice, not because it is losing.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Pace</strong> is elapsed clock between
+                          snaps in a close game before the fourth quarter. It includes the previous play, so it runs
+                          a few seconds higher than published pace tables — read the ranking, not the number.
+                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Funnel</strong> is the opponent
+                          defence: tough against the run and soft against the pass pushes offences to throw, and the
+                          reverse pushes them to run.
+                          <br /><br />
+                          Both are measured against the <strong style={{ color: "var(--text-secondary)" }}>league
+                          average of that season, not against zero</strong>, because every defence gives up more per
+                          pass than per run and the whole league drifts off the pass-rate model year to year. A team
+                          only appears here when it is more than one standard deviation from the league on one of the
+                          three; <strong style={{ color: "var(--text-secondary)" }}>silence means ordinary</strong>,
+                          not missing.
+                          <br /><br />
+                          These settle slowly, so the season each line came from is printed on it. A team needs{" "}
+                          {TRENDS_GATES.proe_plays} plays before its pass rate is readable, {TRENDS_GATES.pace_plays}{" "}
+                          close-game snaps for pace and {TRENDS_GATES.funnel_plays_per_side} on each side for the
+                          funnel — roughly week 5 for the first two and week 10 for the third. Until then the
+                          line shows last season and says so.
+                          <br /><br />
+                          <strong style={{ color: "var(--text-secondary)" }}>Lines move all week.</strong> Pulled{" "}
+                          {env.fetched ? String(env.fetched).replace("T", " ").replace("Z", " UTC") : "unknown"}.
+                          Defensive injuries are the opponent's only; your own players are covered elsewhere.
+                          None of this touches your grade.
+                        </div>
+                      </Explainer>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* 2025 role context for the starters — trajectory, teammate
                 absence, season SOS. Collapsed reference; costs one line at
@@ -16887,340 +17046,286 @@ Analyze this best ball roster. Return JSON only.`;
               );
             })()}
 
-            {/* ⭐ GAME ENVIRONMENT — one block per GAME, not one line per
-                player. Twelve starters can sit in eight games, so attaching the
-                total and spread to each player repeats the same two facts up to
-                three times. CONTEXT ONLY; guard 38 asserts it never reaches a
-                scoring engine or the AI prompt. */}
-            {(() => {
-              const env = buildGameEnvBoard(analyzed.allStarters);
-              // Out of season, or before the weekly refresh has run, there is
-              // no slate. The panel does not exist rather than rendering an
-              // empty table that looks broken.
-              if (!env || env.games.length === 0) return null;
-              const bw = env.flags.blowout || {}, sh = env.flags.shootout || {};
-              return (
-                <div id="rxr-gameenv" style={{ marginBottom: "20px" }}>
-                  <SectionH2
-                    title={`WEEK ${env.week} · GAME ENVIRONMENT`}
-                    open={gameEnvOpen}
-                    onToggle={() => setGameEnvOpen(o => !o)}
-                    hint={`${env.games.length} game${env.games.length === 1 ? "" : "s"}`} />
-                  {gameEnvOpen && (
-                    <div style={{ padding: "10px 0 2px" }}>
-                      {env.games.map((row, i) => {
-                        const g = row.game;
-                        const flags = [];
-                        if (g.shootout) flags.push(["shootout", "var(--accent-lime)"]);
-                        if (g.blowout) flags.push(["blowout risk", "var(--caution)"]);
-                        if (g.indoor) flags.push(["dome", "var(--text-muted)"]);
-                        return (
-                          <div key={i} style={{ marginBottom: "14px", paddingBottom: "12px", borderBottom: i === env.games.length - 1 ? "none" : "1px solid var(--border-default)" }}>
-                            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
-                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                                {row.side} vs {row.opp}
-                              </span>
-                              {g.total != null ? (
-                                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                                  implied <strong style={{ color: "var(--text-primary)" }}>{row.implied ?? "-"}</strong>
-                                  {" · "}{g.total} total
-                                  {g.spread != null && row.fav != null
-                                    ? ` · ${row.fav ? "-" : "+"}${g.spread}`
-                                    : ""}
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: "11px", color: "var(--text-dim)" }}>no line posted</span>
-                              )}
-                              {flags.map(([t, c], k) => (
-                                <span key={k} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase", color: c }}>{t}</span>
-                              ))}
-                            </div>
-                            {(row.offTrend || row.oppDef) && (() => {
-                              const bits = [];
-                              const o = row.offTrend;
-                              // \u2b50 THE CHANGE IS THE FINDING. Where both vintages have a
-                              // value the prior one rides along, so a reader sees a team
-                              // that moved rather than a number whose meaning moved.
-                              const shift = (cur, key) => (o && o.prior && o.prior[key] != null
-                                ? ` from ${o.prior[key] > 0 ? "+" : ""}${o.prior[key]}` : "");
-                              if (o) {
-                                if (o.proe_label && o.proe_label !== "average")
-                                  bits.push(`${o.proe_label} (${o.proe_rel > 0 ? "+" : ""}${o.proe_rel} PROE${shift(o.proe_rel, "proe_rel")})`);
-                                if (o.pace_label && o.pace_label !== "average")
-                                  bits.push(`${o.pace_label} (${o.pace}s between snaps)`);
-                              }
-                              const d = row.oppDef;
-                              const funnel = d && d.funnel_label && d.funnel_label !== "average" ? d.funnel_label : null;
-                              if (!bits.length && !funnel) return null;
-                              // \u26a0\ufe0f THE VINTAGE MUST COME FROM THE HALF THAT ACTUALLY
-                              // RENDERED. Offence and defence clear their gates independently,
-                              // so taking it from whichever object exists can name a season
-                              // that did not produce the number beside it.
-                              const vs = [...new Set([bits.length ? o.vintage : null, funnel ? d.vintage : null].filter(Boolean))];
-                              const v = vs.join(" / ");
-                              return (
-                                <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "0 0 5px" }}>
-                                  {bits.length > 0 && (
-                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.side} offence</strong>: {bits.join(" \u00b7 ")}</span>
-                                  )}
-                                  {bits.length > 0 && funnel ? " \u00b7 " : ""}
-                                  {funnel && (
-                                    <span><strong style={{ color: "var(--text-secondary)" }}>{row.opp} defence</strong>: {funnel}</span>
-                                  )}
-                                  {v ? <span style={{ color: "var(--text-dim)" }}>{" \u00b7 "}{v}</span> : null}
-                                </div>
-                              );
-                            })()}
-                            {row.players.map((p, j) => (
-                              <div key={j} style={{ display: "flex", alignItems: "baseline", gap: "8px", padding: "3px 0", fontSize: "12px" }}>
-                                <span style={{ color: posColor(p.pos).text, fontWeight: 600, minWidth: "26px" }}>{p.pos}</span>
-                                <span style={{ color: "var(--text-secondary)", flex: 1 }}>{p.name}</span>
-                                <span style={{ color: p.proj == null ? "var(--text-dim)" : "var(--text-primary)", fontWeight: 600 }}>
-                                  {p.proj == null ? "no proj" : `${p.proj} proj`}
-                                </span>
-                              </div>
-                            ))}
-                            {/* ⭐ THE DISAGREEMENT IS THE PRODUCT. The bare
-                                projection is available on any site; the gap
-                                between it and his measured usage is not. */}
-                            {row.players.filter(p => p.divergence).map((p, j) => (
-                              <div key={`d${j}`} style={{ fontSize: "11px", color: "var(--ui-accent)", padding: "2px 0 0 34px" }}>
-                                {p.name}: {p.divergence.text}
-                              </div>
-                            ))}
-                            {row.defOut.length > 0 && (
-                              <div style={{ fontSize: "11px", color: "var(--text-muted)", paddingTop: "4px" }}>
-                                {row.opp} defence out: {row.defOut.map(d => `${d.name} (${d.pos})`).join(", ")}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                      <Explainer label="what these numbers are">
-                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
-                          <strong style={{ color: "var(--text-secondary)" }}>Implied</strong> is how many points the
-                          betting market expects this team to score: the game total split by the spread.
-                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Shootout</strong> is a game inside{" "}
-                          {sh.max_abs_spread} points with a total of {sh.min_total} or more, which lifts both sides.
-                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Blowout risk</strong> is a spread of{" "}
-                          {bw.min_abs_spread}+ with a total under {bw.max_total}.
-                          <br /><br />
-                          The projection is a reference line from {env.projSource}, not a recommendation, and it does
-                          not show its work. Where it disagrees with usage this app has actually measured, that gap is
-                          printed above — it is the part worth acting on.
-                          <br /><br />
-                          <strong style={{ color: "var(--text-secondary)" }}>Pass rate over expected (PROE)</strong> is
-                          how much more a team throws than the situation calls for — down, distance, clock and score.
-                          A plus number is a team that throws by choice, not because it is losing.
-                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Pace</strong> is elapsed clock between
-                          snaps in a close game before the fourth quarter. It includes the previous play, so it runs
-                          a few seconds higher than published pace tables — read the ranking, not the number.
-                          {" "}<strong style={{ color: "var(--text-secondary)" }}>Funnel</strong> is the opponent
-                          defence: tough against the run and soft against the pass pushes offences to throw, and the
-                          reverse pushes them to run.
-                          <br /><br />
-                          Both are measured against the <strong style={{ color: "var(--text-secondary)" }}>league
-                          average of that season, not against zero</strong>, because every defence gives up more per
-                          pass than per run and the whole league drifts off the pass-rate model year to year. A team
-                          only appears here when it is more than one standard deviation from the league on one of the
-                          three; <strong style={{ color: "var(--text-secondary)" }}>silence means ordinary</strong>,
-                          not missing.
-                          <br /><br />
-                          These settle slowly, so the season each line came from is printed on it. A team needs{" "}
-                          {TRENDS_GATES.proe_plays} plays before its pass rate is readable, {TRENDS_GATES.pace_plays}{" "}
-                          close-game snaps for pace and {TRENDS_GATES.funnel_plays_per_side} on each side for the
-                          funnel — roughly week 5 for the first two and week 10 for the third. Until then the
-                          line shows last season and says so.
-                          <br /><br />
-                          <strong style={{ color: "var(--text-secondary)" }}>Lines move all week.</strong> Pulled{" "}
-                          {env.fetched ? String(env.fetched).replace("T", " ").replace("Z", " UTC") : "unknown"}.
-                          Defensive injuries are the opponent's only; your own players are covered elsewhere.
-                          None of this touches your grade.
-                        </div>
-                      </Explainer>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            {(() => {
-              const ctx = buildRoleContext(analyzed.allStarters);
-              const n = ctx.moved.length + ctx.absences.length;
+            {/* === FREE-AGENT POOL === */}
+            {freeAgents && freeAgents.candidates.length > 0 && (() => {
+              const shown = freeAgents.candidates
+                .filter(c => faPos === "ALL" || c.pos === faPos)
+                .filter(c => !c.likelyRostered)
+                .slice(0, 12);
+              const deep = freeAgents.candidates.filter(c => !c.likelyRostered).length;
               return (
                 <div style={{ marginBottom: "20px" }}>
-                  <SectionH2 title="2025 CONTEXT · ROLE & SCHEDULE" open={roleCtxOpen} onToggle={() => setRoleCtxOpen(o => !o)} hint={n > 0 ? `${n} flag${n > 1 ? "s" : ""} · SOS` : "SOS"} />
-                  {roleCtxOpen && (
-                    <div style={{ fontSize: "12px", lineHeight: 1.55 }}>
-                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "10px 0 4px" }}>Role trajectory</div>
-                      {ctx.moved.length === 0 && <div style={{ color: "var(--text-muted)" }}>No starter's role moved across 2025 — season averages are fair reads.</div>}
-                      {ctx.moved.map((t, i) => (
-                        <div key={i} style={{ padding: "2px 0" }}>
-                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{t.name}</span>
-                          <span style={{ color: "var(--text-secondary)" }}> {Math.round(t.early * 100)}% W1-9 → {Math.round(t.late * 100)}% W10-18</span>
-                          <span style={{ color: t.trend === "rising" ? "var(--pos)" : "var(--neg)", fontWeight: 600 }}> {t.trend}</span>
-                          <span style={{ color: "var(--text-dim)" }}> — the season average {t.trend === "rising" ? "understates" : "overstates"} the current role</span>
-                        </div>
-                      ))}
-                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Who else was on the field</div>
-                      {ctx.absences.length === 0 && <div style={{ color: "var(--text-muted)" }}>No significant teammate absence behind any starter's 2025 line — the numbers read at face value.</div>}
-                      {ctx.absences.map((a, i) => (
-                        <div key={i} style={{ padding: "2px 0" }}>
-                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{a.starter}</span>
-                          <span style={{ color: "var(--text-secondary)" }}> — {a.name} ({a.role}) missed {a.missed} of his {a.total}:</span>
-                          <span style={{ color: "var(--text-primary)" }}> {a.withPts.toFixed(1)}</span>
-                          <span style={{ color: "var(--text-dim)" }}> ppg with · </span>
-                          <span style={{ color: "var(--text-primary)" }}>{a.withoutPts.toFixed(1)}</span>
-                          <span style={{ color: "var(--text-dim)" }}> without</span>
-                        </div>
-                      ))}
-                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Season schedule (SOS) · 1 = easiest of 32</div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "3px 14px" }}>
-                        {ctx.sos.map((r, i) => (
-                          <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
-                            <span style={{ color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name.split(" ").slice(-1)[0]} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>{r.team}</span></span>
-                            <span style={{ fontVariantNumeric: "tabular-nums", color: r.rank <= 10 ? "var(--pos)" : r.rank >= 23 ? "var(--neg)" : "var(--text-muted)", fontWeight: 600 }}>{r.rank}<span style={{ color: "var(--text-dim)", fontWeight: 400 }}>{r.delta > 0 ? ` +${r.delta}` : r.delta < 0 ? ` ${r.delta}` : ""}</span></span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", lineHeight: 1.5 }}>
-                        Context only — none of this moves the grade. SOS is the least stable input in the app (WR matchup data is negative year over year); the delta is how many spots the slate eased since 2025. An absence explains where volume came from; it does not prove the volume was hollow.
+                  <SectionH2
+                    id="rxr-freeagents"
+                    title="WAIVER TARGETS"
+                    open={faOpen}
+                    onToggle={() => setFaOpen(o => !o)}
+                    hint={`${deep} ranked`}
+                  />
+                  {faOpen && (<>
+                    {/* ⚠️ THE LIMIT, STATED FIRST. The app knows your roster and
+                        the player universe. It does not know the other eleven
+                        rosters, so this cannot be "your best available add" and
+                        must not be worded as one. */}
+                    <div style={{
+                      // ⚠️ A CAVEAT IS NOT THE CONTENT. This block was the largest
+                      // bright mass on the page and it says what the app CANNOT do —
+                      // the one thing on screen a returning reader never needs again.
+                      // It keeps its bold lead sentence and drops a step behind the
+                      // players, which is where the eye should land.
+                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-muted)",
+                      background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
+                      borderRadius: "4px", padding: "9px 11px", marginBottom: "12px",
+                    }}>
+                      <strong style={{ color: "var(--text-primary)" }}>This app cannot see your league's waiver wire.</strong>{" "}
+                      It knows your roster and it knows every player; it does not know the other{" "}
+                      {(freeAgents.depth / 13).toFixed(0) - 1} rosters. So this ranks players who are
+                      not on <em>your</em> roster and who a {freeAgents.depth}-deep league plausibly leaves
+                      unrostered. Check the names against your actual wire, and paste anyone already
+                      taken below to drop them.
+                      <div style={{ marginTop: "7px", color: "var(--text-dim)" }}>
+                        Ranked on role change, volume, targets per route, availability and separation —
+                        in Source Hierarchy order. <strong style={{ color: "var(--text-secondary)" }}>Schedule is not
+                        in the score.</strong> Matchup data is the least stable input measured here, so it
+                        sorts a shortlist and never builds one.
                       </div>
                     </div>
-                  )}
+
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
+                      {["ALL", "RB", "WR", "TE", "QB"].map(pp => (
+                        <button
+                          key={pp}
+                          data-compact
+                          onClick={() => setFaPos(pp)}
+                          style={{
+                            fontSize: "11px", padding: "6px 11px", minHeight: "32px",
+                            borderRadius: "3px", cursor: "pointer", fontWeight: 700,
+                            letterSpacing: "0.04em",
+                            // The SELECTED chip wears that position's own colour,
+                            // the same one its rows carry below. ALL has no position,
+                            // so it stays neutral rather than borrowing one.
+                            background: faPos === pp ? (POS_ACCENT[pp]?.bg || "var(--bg-elevated)") : "transparent",
+                            border: `1px solid ${faPos === pp ? (POS_ACCENT[pp] ? `${POS_ACCENT[pp].border}66` : "var(--border-default)") : "transparent"}`,
+                            color: faPos === pp
+                              ? (POS_ACCENT[pp]?.text || "var(--text-primary)")
+                              : "var(--text-dim)",
+                          }}>
+                          {pp}
+                        </button>
+                      ))}
+                    </div>
+
+                    {shown.length === 0 ? (
+                      <div style={{ fontSize: "12px", color: "var(--text-muted)", padding: "10px 0" }}>
+                        No {faPos === "ALL" ? "" : `${faPos} `}candidate clears the two-signal minimum.
+                        A ranking built on one number is an anecdote, so nothing is shown rather than
+                        something weak.
+                      </div>
+                    ) : shown.map((c, i) => (
+                      <div
+                        key={c.name}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openCard({ name: c.name, pos: c.pos, team: c.team })}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard({ name: c.name, pos: c.pos, team: c.team }); } }}
+                        aria-label={`Open player card for ${c.name}`}
+                        style={{
+                          padding: "10px 0", cursor: "pointer",
+                          borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
+                        }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", color: posColor(c.pos).text }}>
+                            {c.pos}
+                          </span>
+                          <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", textTransform: "capitalize" }}>
+                            {c.name}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.team}</span>
+                          <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>
+                            ADP {typeof c.adp === "number" ? c.adp.toFixed(0) : "—"}
+                          </span>
+                        </div>
+                        {/* THE EVIDENCE, NOT JUST THE RANK. A ranked list a reader
+                            cannot audit is a black box, and checkable numbers are
+                            the entire argument of this app. */}
+                        {/* Figures in HIS position colour, prose dimmed by Source
+                            Hierarchy rank. See FaReason for why those are two
+                            separate channels and why neither invents a hue. */}
+                        <ul style={{ margin: "6px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
+                          {c.reasons.slice(0, 3).map(r => (
+                            <FaReason key={r.key} label={r.label}
+                              numColor={posColor(c.pos).text} rank={FA_RANK[r.key] || 3} />
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+
+                    <div style={{ marginTop: "12px" }}>
+                      <div style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--ui-accent)", fontWeight: 700, marginBottom: "5px" }}>
+                        ALREADY TAKEN IN YOUR LEAGUE
+                      </div>
+                      <textarea
+                        value={faTaken}
+                        onChange={(e) => setFaTaken(e.target.value)}
+                        placeholder={"One name per line, or comma separated.\nAnything you paste here drops out of the list above."}
+                        style={{
+                          width: "100%", minHeight: "62px", fontSize: "12px", padding: "8px",
+                          background: "var(--bg-raised)", color: "var(--text-primary)",
+                          border: "1px solid var(--border-default)", borderRadius: "3px",
+                          fontFamily: "inherit", resize: "vertical",
+                        }}
+                      />
+                    </div>
+                  </>)}
                 </div>
               );
             })()}
 
-            {/* Bye Week Notes */}
-            {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
+            {/* Breakout Watch */}
+            {breakout && (
               <div style={{ marginBottom: "20px" }}>
-                <h2 id="rxr-byeconflicts" style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "24px",
-                  letterSpacing: "0.05em",
-                  margin: "0 0 4px",
-                  color: "var(--text-primary)",
-                }}>
-                  BYE WEEK CONFLICTS
-                </h2>
-                <Explainer>
-                  When multiple starters <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>share the same bye</span>, you're forced to start backups in their place. Critical = your entire position is on bye that week. Warning = partial hole.
-                </Explainer>
-                {analyzed.criticalByeConflicts.map((c, i) => (
-                  <div key={i} style={{
-                    background: c.severity === "critical" ? "#2e1414" : c.severity === "warning" ? "#2a2618" : "#141414",
-                    border: `1px solid ${c.severity === "critical" ? "#dc2626" : c.severity === "warning" ? "#eab308" : "var(--border-default)"}`,
-                    borderLeft: `3px solid ${c.severity === "critical" ? "#dc2626" : c.severity === "warning" ? "#eab308" : "var(--text-dim)"}`,
-                    borderRadius: "3px",
-                    padding: "8px 12px",
-                    marginBottom: "6px",
-                    fontSize: "12px",
-                  }}>
-                    <span style={{ color: c.severity === "critical" ? "var(--neg)" : c.severity === "warning" ? "var(--caution)" : "var(--text-muted)", fontWeight: c.severity === "info" ? 400 : 600, letterSpacing: "0.05em" }}>
-                      {c.severity === "critical" ? "⚠ CRITICAL · " : c.severity === "warning" ? "⚠ " : "ℹ "}{c.msg}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+                <SectionH2
+                  id="rxr-breakout"
+                  title="BREAKOUT WATCH"
+                  open={breakoutOpen}
+                  onToggle={() => setBreakoutOpen(o => !o)}
+                  hint={breakout.live
+                    ? `${breakout.flagged.length} flagged · ${breakout.watched.length} watched`
+                    : "pre-season"}
+                />
+                {breakoutOpen && (<>
+                  <Explainer>
+                    Tracks late-round darts and rookies against <strong>their own</strong> earlier
+                    usage, never a league percentile — an 18% share is nothing league-wide and
+                    everything if he was at 4% three weeks ago. A role move and a big game are
+                    scored separately: <strong>WATCH</strong> means the role grew and the points
+                    have not caught up, which is the signal that arrives first.
+                  </Explainer>
 
-            {/* Playoff Schedule */}
-            <div style={{ marginBottom: "20px" }}>
-              <h2 id="rxr-playoffs" style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "24px",
-                letterSpacing: "0.05em",
-                margin: "0 0 4px",
-                color: "var(--text-primary)",
-              }}>
-                PLAYOFF SCHEDULE · STARTERS
-              </h2>
-              <Explainer>
-                The playoff weeks that <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "var(--pos)", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "var(--neg)", fontWeight: 600 }}>red flag</span>.
-              </Explainer>
-              <MatchupLegend />
-              <div style={{
-                background: "var(--bg-surface)",
-                border: "1px solid #2a1a3a",
-                borderRadius: "4px",
-                padding: "12px 16px",
-              }}>
-                {analyzed.playoffMatchups.map((p, i) => {
-                  const scoreOf10 = Math.round((p.totalScore / 15) * 10);
-                  const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--tier-even)";
-                  const pc = posColor(p.pos);
-                  return (
-                    <div key={i} style={{
-                      padding: "8px 0",
-                      borderBottom: i < analyzed.playoffMatchups.length - 1 ? "1px solid var(--bg-raised)" : "none",
-                    }}>
-                      {/* Row 1: name + pos chip + score */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
-                          <span style={{ color: "var(--text-primary)", fontSize: "12px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {p.name}
-                          </span>
-                          <span style={{
-                            fontSize: "9px",
-                            background: pc.bg,
-                            border: `1px solid ${pc.border}44`,
-                            color: pc.text,
-                            padding: "1px 5px",
-                            borderRadius: "2px",
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                          }}>
-                            {p.pos}·{p.team}
-                          </span>
+                  {!breakout.live && (
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
+                      The season has not started, so there is no current-year usage to compare
+                      against. Add names now and this fills in from Week 4, once there are enough
+                      games to measure a step.
+                    </div>
+                  )}
+
+                  {/* Add to watchlist */}
+                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                    <input
+                      value={watchInput}
+                      onChange={e => setWatchInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key !== "Enter") return;
+                        // ⚠️ "yahoo" is the REDRAFT table, and it must match the table the board
+                        // iterates (ADP_YAHOO) or a name resolves here and then
+                        // never appears in the list. findPlayer returns matchedKey.
+                        const hit = findPlayer(watchInput, "yahoo");
+                        if (hit?.matchedKey) { toggleWatch(hit.matchedKey); setWatchInput(""); }
+                      }}
+                      placeholder="add a player to watch, then press Enter"
+                      style={{
+                        flex: "1 1 220px", minHeight: "32px", padding: "6px 8px", fontSize: "12px",
+                        background: "var(--bg-raised)", color: "var(--text-primary)",
+                        border: "1px solid var(--border-default)", borderRadius: "3px",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                    <button
+                      data-compact
+                      onClick={() => setBreakoutRookiesOnly(r => !r)}
+                      style={{
+                        minHeight: "32px", padding: "6px 10px", fontSize: "11px", fontWeight: 600,
+                        letterSpacing: "0.04em", cursor: "pointer", borderRadius: "3px",
+                        background: "transparent", color: "var(--ui-accent)",
+                        border: "1px solid var(--border-default)", fontFamily: "inherit",
+                      }}
+                    >{breakout.rookiesOnly ? "ROOKIES ONLY" : "ALL PLAYERS"}</button>
+                  </div>
+
+                  {[["YOUR WATCHLIST", breakout.watched, true],
+                    [breakout.rookiesOnly ? "ROOKIES FLAGGING THIS WEEK" : "FLAGGING THIS WEEK", breakout.flagged, false]
+                  ].map(([heading, rows, isWatch]) => (
+                    <div key={heading} style={{ marginBottom: "14px" }}>
+                      <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em",
+                                    color: "var(--ui-accent)", marginBottom: "6px" }}>{heading}</div>
+                      {rows.length === 0 ? (
+                        /* ⚠️ An empty group SAYS SO. Silence reads as "nothing is
+                           happening", which is the silent-drop failure this repo
+                           forbids — the reader cannot tell it apart from a bug. */
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          {isWatch
+                            ? "Nothing on your watchlist yet. Add a name above to track him all season."
+                            : breakout.flaggedEmptyWhy}
                         </div>
-                        <span style={{
-                          color: scoreColor,
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          fontFamily: "var(--font-display)",
-                          letterSpacing: "0.03em",
-                          flexShrink: 0,
-                          marginLeft: "8px",
+                      ) : rows.map(r => (
+                        <div key={r.key} style={{
+                          display: "flex", alignItems: "flex-start", gap: "8px",
+                          padding: "8px 0", borderTop: "1px solid var(--border-default)",
                         }}>
-                          {scoreOf10}<span style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 500 }}>/10</span>
-                        </span>
-                      </div>
-                      {/* Row 2: matchup chips */}
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
-                        {p.playoffMatches.map((m, j) => {
-                          const s = tierStyle(m.color);
-                          const env = getGameEnvironmentLabel(m.opp, m.week);
-                          return (
-                            <div key={j} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                              <span style={{
-                                fontSize: "10px",
-                                color: s.text,
-                                fontWeight: 500,
-                                whiteSpace: "nowrap",
-                              }}>
-                                W{m.week} {m.opp}·<span style={{ fontWeight: 700 }}>{m.tier}</span>
-                              </span>
-                              {env && (
+                          <button
+                            data-compact
+                            onClick={() => toggleWatch(r.key)}
+                            aria-label={r.watched ? `Stop watching ${r.name}` : `Watch ${r.name}`}
+                            style={{
+                              minWidth: "32px", minHeight: "32px", cursor: "pointer",
+                              background: "transparent", border: "none", fontSize: "14px",
+                              color: r.watched ? "var(--text-primary)" : "var(--text-muted)",
+                            }}
+                          >{r.watched ? "★" : "☆"}</button>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>{r.name}</span>
+                              <span style={{ fontSize: "10px", color: posColor(r.pos).text }}>{r.pos} {r.team}</span>
+                              {/* ⚠️ NOT gated on `blocked`. OPENING is precisely the state that fires
+                                  while the usage side is unmeasurable, so gating the badge
+                                  on blocked hid the label on the only rows it was new for. */}
+                              {r.state !== "quiet" && (
                                 <span style={{
-                                  fontSize: "8px",
-                                  color: "#7d8fa5",
-                                  fontWeight: 500,
-                                  letterSpacing: "0.03em",
-                                }}>
-                                  O/U {env.total}
-                                </span>
+                                  fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em",
+                                  color: "var(--text-primary)", background: "var(--bg-elevated)",
+                                  border: "1px solid var(--border-default)", borderRadius: "3px",
+                                  padding: "1px 5px",
+                                }}>{BREAKOUT_STATES[r.state].label}</span>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
+                            {/* The reason the engine gives, never a hand-typed copy. */}
+                            <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "2px" }}>
+                              {r.blocked && !r.reasons.length
+                                ? r.blocked
+                                : (<>
+                                    <span>{BREAKOUT_STATES[r.state].why}</span>
+                                    {/* ⚠️ THE MARK IS NOT DECORATION. `supports` is
+                                        computed per reason and the first render threw it
+                                        away, so a NOISE row's non-supporting opportunity
+                                        line looked exactly like real evidence. Same rule
+                                        the waiver pool learned: a reason must be evidence
+                                        FOR, not every number measured. */}
+                                    {r.reasons.map(x => (
+                                      <span key={x.key} style={{ display: "block",
+                                        color: x.supports ? "var(--text-secondary)" : "var(--text-muted)" }}>
+                                        {x.supports ? "+" : "·"} {x.text}
+                                      </span>
+                                    ))}
+                                    {/* A row can carry a live opening AND an
+                                        unmeasurable usage side. Both are shown:
+                                        suppressing the second would imply the
+                                        role move had been checked. */}
+                                    {r.blocked && (
+                                      <span style={{ display: "block", color: "var(--text-dim)" }}>
+                                        · {r.blocked}
+                                      </span>
+                                    )}
+                                  </>)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
+                  ))}
+                </>)}
               </div>
-            </div>
-
+            )}
 
             {/* Weekly Difficulty Calendar — Phase 3 replacement for SOS.
                 Header matches the best-ball Season Schedule panel: same purple,
@@ -17538,611 +17643,183 @@ Analyze this best ball roster. Return JSON only.`;
             </>)}
               </div>
 
-            {/* Lineup Confidence */}
-            {/* === LINEUP CONFIDENCE — week chip strip + one panel ===
-                Replaces two sections that overlapped: a date-driven "Weekly
-                Spotlight" showing the current week, and a Lineup Confidence
-                list that stacked ALL 17 weeks vertically. The stack was 2254px,
-                28.6% of the whole page, holding ~4.5k characters — sparse, and
-                it made every week look equally urgent. The strip colours each
-                week by severity so the problem weeks are visible at a glance,
-                and the panel shows one week at a time. */}
-            {analyzed.lineupConfidencePreview && analyzed.lineupConfidencePreview.length > 0 && (() => {
-              const byWeek = {};
-              analyzed.lineupConfidencePreview.forEach(wk => { byWeek[wk.week] = wk; });
-              const weeks = Array.from({ length: 17 }, (_, i) => i + 1);
-              const nfl = seasonNow();
-              // Default to the week the user is actually living in. Out of
-              // season there is no "this week", so open on W1.
-              const fallback = nfl.inSeason ? nfl.week : 1;
-              const active = lcWeek == null ? Math.min(fallback, 17) : lcWeek;
-              const wk = byWeek[active];
-              const sitCount = wk ? wk.concerns.length : 0;
-              const lockCount = wk ? wk.locks.length : 0;
-              const totalSits = analyzed.lineupConfidencePreview.reduce((n, w) => n + w.concerns.length, 0);
-              const worst = analyzed.lineupConfidencePreview
-                .filter(w => w.concerns.length > 0)
-                .sort((a, b) => b.concerns.length - a.concerns.length)[0];
-
-              return (
-                <div style={{ marginBottom: "20px" }}>
-                  <h2 style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "24px",
-                    letterSpacing: "0.05em",
-                    margin: "0 0 4px",
-                    color: "var(--text-primary)",
-                  }}>
-                    LINEUP CONFIDENCE
-                  </h2>
-                  <Explainer>
-                    Who to lock in and who to consider sitting, week by week. Tap a week to see it.
-                    {nfl.inSeason && <> Opens on <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>W{nfl.week}</span>, the week you are in.</>}
-                    {worst && <> Your tightest week is <span style={{ color: "var(--neg)", fontWeight: 700 }}>W{worst.week}</span> with {worst.concerns.length} tough matchup{worst.concerns.length === 1 ? "" : "s"}.</>}
-                  </Explainer>
-
-                  {/* ⚠️ THE DATE AND THE DATA CAN DISAGREE, AND ONLY ONE OF THEM
-                      IS ON A CLOCK. The week comes from the calendar; the role
-                      numbers come from a weekly refresh someone has to run. A
-                      lag of 1 is the healthy steady state — after week N is
-                      played the data covers N and you are deciding N+1 — so
-                      only a larger gap says anything, and it says it here
-                      rather than letting a stale figure read as current. */}
-                  {nfl.stale && (
-                    <div style={{
-                      fontSize: "11px", lineHeight: 1.5, marginBottom: "10px",
-                      padding: "8px 10px", borderRadius: "4px",
-                      background: "var(--bg-elevated)", border: "1px solid var(--caution)",
-                      color: "var(--caution)",
-                    }}>
-                      ⚠ In-season role data covers weeks 1-{nfl.dataWeeks}, {nfl.lag} week{nfl.lag === 1 ? "" : "s"} behind week {nfl.week}.
-                      Matchups below are current; snap trends and game logs are not. Run the weekly refresh.
-                    </div>
-                  )}
-
-                  {/* Week strip — red = has a sit call, green = only locks, dim = nothing to decide */}
-                  <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "6px", marginBottom: "10px" }}>
-                    <div style={{ display: "flex", gap: "4px", alignItems: "stretch", minWidth: "min-content" }}>
-                      {weeks.map(w => {
-                        const d = byWeek[w];
-                        const sits = d ? d.concerns.length : 0;
-                        const locks = d ? d.locks.length : 0;
-                        const isActive = w === active;
-                        const isPlayoff = w >= 15;
-                        const isNow = nfl.inSeason && w === nfl.week;
-                        const tone = sits > 0
-                          ? { bg: "#2e1414", border: "#ef4444", text: "var(--neg)" }
-                          : locks > 0
-                            ? { bg: "#0d3320", border: "#22c55e", text: "var(--pos)" }
-                            : { bg: "var(--bg-surface)", border: "#2a2a32", text: "var(--text-dim)" };
-                        return (
-                          <React.Fragment key={w}>
-                            {w === 15 && <div style={{ width: "1px", background: "#4a2a6a", margin: "0 5px", alignSelf: "stretch", flexShrink: 0 }} />}
-                            <button
-                              onClick={() => setLcWeek(w)}
-                              aria-label={`Week ${w}${sits > 0 ? `, ${sits} tough matchup${sits === 1 ? "" : "s"}` : ""}`}
-                              aria-pressed={isActive}
-                              // Centre the opening week in the strip. In Week 12 the
-                              // panel would say WEEK 12 while the strip still showed
-                              // W1-W8, which reads as a broken control. Sets
-                              // scrollLeft directly rather than scrollIntoView, which
-                              // would also yank the page vertically. Runs once.
-                              ref={isActive ? (el) => {
-                                if (!el || el.dataset.centred) return;
-                                el.dataset.centred = "1";
-                                const scroller = el.parentElement && el.parentElement.parentElement;
-                                if (!scroller) return;
-                                const r = el.getBoundingClientRect();
-                                const s = scroller.getBoundingClientRect();
-                                scroller.scrollLeft += (r.left - s.left) - (s.width - r.width) / 2;
-                              } : undefined}
-                              style={{
-                                position: "relative",
-                                flexShrink: 0,
-                                minWidth: "44px",
-                                minHeight: "44px",
-                                justifyContent: "center",
-                                padding: "7px 6px 6px",
-                                background: isActive ? tone.bg : "transparent",
-                                border: `1px solid ${isActive ? tone.border : "#2a2a32"}`,
-                                borderRadius: "3px",
-                                cursor: "pointer",
-                                fontFamily: "var(--font-mono)",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: "3px",
-                              }}
-                            >
-                              <span style={{
-                                fontSize: "10px",
-                                fontWeight: isActive || isPlayoff ? 700 : 500,
-                                letterSpacing: "0.04em",
-                                color: isActive ? tone.text : isPlayoff ? "var(--accent-purple-light)" : "var(--text-dim)",
-                              }}>
-                                W{w}
-                              </span>
-                              {/* severity dot — the whole point of the strip: find the bad weeks without reading */}
-                              <span style={{
-                                width: sits > 0 ? "5px" : "4px",
-                                height: sits > 0 ? "5px" : "4px",
-                                borderRadius: "50%",
-                                background: sits > 0 ? "var(--neg)" : locks > 0 ? "var(--pos)" : "#2a2a32",
-                                display: "block",
-                              }} />
-                              {isNow && (
-                                <span style={{
-                                  position: "absolute",
-                                  top: "-1px",
-                                  right: "-1px",
-                                  width: "5px",
-                                  height: "5px",
-                                  borderRadius: "50%",
-                                  background: "var(--ui-accent)",
-                                }} />
-                              )}
-                            </button>
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "14px", fontSize: "10px", marginBottom: "10px", flexWrap: "wrap", color: "var(--text-dim)" }}>
-                    <span><span style={{ color: "var(--neg)", fontWeight: 700 }}>●</span> tough call</span>
-                    <span><span style={{ color: "var(--pos)", fontWeight: 700 }}>●</span> easy week</span>
-                    {nfl.inSeason && <span><span style={{ color: "var(--ui-accent)", fontWeight: 700 }}>●</span> this week</span>}
-                    <span style={{ color: "var(--accent-purple-light)" }}>W15-17 = playoffs</span>
-                    <span>{totalSits} tough matchup{totalSits === 1 ? "" : "s"} all season</span>
-                  </div>
-
-                  {/* Selected week panel */}
-                  <div style={{
-                    background: "var(--bg-surface)",
-                    border: "1px solid var(--bg-elevated)",
-                    borderLeft: `3px solid ${sitCount > 0 ? "var(--neg)" : lockCount > 0 ? "var(--pos-solid)" : "#2a2a32"}`,
-                    borderRadius: "3px",
-                    padding: "12px 14px",
-                    minHeight: "72px",
-                  }}>
-                    <div style={{
-                      fontSize: "11px",
-                      fontFamily: "var(--font-display)",
-                      letterSpacing: "0.1em",
-                      color: active >= 15 ? "var(--accent-purple-light)" : "var(--text-dim)",
-                      marginBottom: "8px",
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: "8px",
-                    }}>
-                      <span>WEEK {active}{active >= 15 ? " · PLAYOFFS" : ""}</span>
-                      {nfl.inSeason && active === nfl.week && <span style={{ fontSize: "9px", color: "var(--ui-accent)", letterSpacing: "0.08em" }}>THIS WEEK</span>}
-                    </div>
-
-                    {active >= 15 && aiLineupNotes[`W${active}`] && (
-                      <div style={{ fontSize: "10px", color: "#c084fcaa", lineHeight: 1.5, marginBottom: "8px", paddingBottom: "6px", borderBottom: "1px solid var(--border-strong)", fontStyle: "italic" }}>
-                        {aiLineupNotes[`W${active}`]}
-                      </div>
-                    )}
-
-                    {!wk && (
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                        No start/sit calls this week — every starter is in a matchup you would not bench them for.
-                      </div>
-                    )}
-
-                    {wk && wk.locks.length > 0 && (
-                      <div style={{ marginBottom: wk.concerns.length > 0 ? "8px" : 0 }}>
-                        {wk.locks.map((l, j) => {
-                          const pc = posColor(l.pos);
-                          return (
-                            <div key={j} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px", fontSize: "12px" }}>
-                              <span style={{ color: "var(--pos)", fontSize: "10px", width: "14px", flexShrink: 0 }}>▲</span>
-                              <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{l.name}</span>
-                              <span style={{
-                                fontSize: "9px",
-                                background: pc.bg,
-                                border: `1px solid ${pc.border}44`,
-                                color: pc.text,
-                                padding: "1px 4px",
-                                borderRadius: "2px",
-                                flexShrink: 0,
-                              }}>
-                                {l.pos}
-                              </span>
-                              <span style={{ color: "var(--pos)", fontSize: "10px" }}>
-                                vs {l.matchup.opp.replace("@","")} · {l.matchup.tier}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {wk && wk.concerns.length > 0 && (
-                      <div>
-                        {wk.concerns.map((c, j) => {
-                          const pc = posColor(c.pos);
-                          return (
-                            <div key={j} style={{ marginBottom: j < wk.concerns.length - 1 ? "8px" : 0 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: c.suggestion ? "4px" : "3px", fontSize: "12px" }}>
-                                <span style={{ color: "var(--neg)", fontSize: "10px", width: "14px", flexShrink: 0 }}>▼</span>
-                                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{c.name}</span>
-                                <span style={{
-                                  fontSize: "9px",
-                                  background: pc.bg,
-                                  border: `1px solid ${pc.border}44`,
-                                  color: pc.text,
-                                  padding: "1px 4px",
-                                  borderRadius: "2px",
-                                  flexShrink: 0,
-                                }}>
-                                  {c.slot === "FLEX" || c.slot === "SFLEX" ? c.slot : c.pos}
-                                </span>
-                                <span style={{ color: "var(--neg)", fontSize: "10px" }}>
-                                  vs {c.matchup.opp.replace("@","")} · {c.matchup.tier}
-                                </span>
-                              </div>
-                              {c.suggestion && (() => {
-                                const spc = posColor(c.suggestion.pos);
-                                return (
-                                  <div style={{ paddingLeft: "20px" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", marginBottom: "2px" }}>
-                                      <span style={{ color: "var(--info-blue)", fontSize: "9px", flexShrink: 0 }}>💡</span>
-                                      <span style={{ color: "#aaa" }}>
-                                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{c.suggestion.name.split(" ").pop()}</span>
-                                        {" "}
-                                        <span style={{
-                                          fontSize: "8px",
-                                          background: spc.bg,
-                                          border: `1px solid ${spc.border}44`,
-                                          color: spc.text,
-                                          padding: "1px 4px",
-                                          borderRadius: "2px",
-                                        }}>{c.suggestion.pos}·{c.suggestion.team}</span>
-                                        {" "}
-                                        <span style={{ color: "var(--info-blue)", fontSize: "10px" }}>
-                                          {c.suggestion.matchup.tier} matchup this week
-                                        </span>
-                                      </span>
-                                    </div>
-                                    {c.disclaimers && c.disclaimers.map((d, di) => (
-                                      <div key={di} style={{ fontSize: "9px", color: "var(--text-muted)", paddingLeft: "12px", marginBottom: "1px", lineHeight: 1.4 }}>
-                                        ⚠ {d}
-                                      </div>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Handcuffs */}
+            {/* Playoff Schedule */}
             <div style={{ marginBottom: "20px" }}>
-              <h2 style={{
+              <h2 id="rxr-playoffs" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "24px",
                 letterSpacing: "0.05em",
                 margin: "0 0 4px",
                 color: "var(--text-primary)",
               }}>
-                HANDCUFFS · INSURANCE
+                PLAYOFF SCHEDULE · STARTERS
               </h2>
               <Explainer>
-                A handcuff is the <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>backup RB</span> on the same team as your starter. If your RB1 gets hurt, the handcuff <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>inherits the workload</span> — rostering them means you don't lose the value twice.
+                The playoff weeks that <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>make or break</span> your season. Each /10 score reflects how favorable a starter's W15–W17 matchups are — 7+ is <span style={{ color: "var(--pos)", fontWeight: 600 }}>good</span>, 4 or below is a <span style={{ color: "var(--neg)", fontWeight: 600 }}>red flag</span>.
               </Explainer>
-              {analyzed.handcuffStatus.map((h, i) => (
-                <div key={i} style={{
-                  background: "var(--bg-surface)",
-                  border: `1px solid ${h.hasHandcuff ? "#22c55e40" : "#f8717140"}`,
-                  borderLeft: `3px solid ${h.hasHandcuff ? "var(--pos-solid)" : "var(--neg)"}`,
-                  borderRadius: "3px",
-                  padding: "8px 12px",
-                  marginBottom: "6px",
-                  fontSize: "12px",
-                }}>
-                  <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{h.rb.name}</span>
-                  <span style={{ color: "var(--text-dim)", marginLeft: "6px" }}>({h.rb.team})</span>
-                  {h.hasHandcuff ? (
-                    <span style={{ marginLeft: "10px", color: "var(--pos)" }}>
-                      ✓ Handcuffed: {h.handcuff.name} <span style={{ color: "var(--text-dim)" }}>(ADP {h.handcuff.adp})</span>
-                    </span>
-                  ) : (
-                    <span style={{ marginLeft: "10px", color: "var(--neg)" }}>
-                      ⚠ No handcuff rostered
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* === FREE-AGENT POOL === */}
-            {freeAgents && freeAgents.candidates.length > 0 && (() => {
-              const shown = freeAgents.candidates
-                .filter(c => faPos === "ALL" || c.pos === faPos)
-                .filter(c => !c.likelyRostered)
-                .slice(0, 12);
-              const deep = freeAgents.candidates.filter(c => !c.likelyRostered).length;
-              return (
-                <div style={{ marginBottom: "20px" }}>
-                  <SectionH2
-                    id="rxr-freeagents"
-                    title="WAIVER TARGETS"
-                    open={faOpen}
-                    onToggle={() => setFaOpen(o => !o)}
-                    hint={`${deep} ranked`}
-                  />
-                  {faOpen && (<>
-                    {/* ⚠️ THE LIMIT, STATED FIRST. The app knows your roster and
-                        the player universe. It does not know the other eleven
-                        rosters, so this cannot be "your best available add" and
-                        must not be worded as one. */}
-                    <div style={{
-                      // ⚠️ A CAVEAT IS NOT THE CONTENT. This block was the largest
-                      // bright mass on the page and it says what the app CANNOT do —
-                      // the one thing on screen a returning reader never needs again.
-                      // It keeps its bold lead sentence and drops a step behind the
-                      // players, which is where the eye should land.
-                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-muted)",
-                      background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
-                      borderRadius: "4px", padding: "9px 11px", marginBottom: "12px",
+              <MatchupLegend />
+              <div style={{
+                background: "var(--bg-surface)",
+                border: "1px solid #2a1a3a",
+                borderRadius: "4px",
+                padding: "12px 16px",
+              }}>
+                {analyzed.playoffMatchups.map((p, i) => {
+                  const scoreOf10 = Math.round((p.totalScore / 15) * 10);
+                  const scoreColor = scoreOf10 >= 7 ? "var(--pos)" : scoreOf10 <= 4 ? "var(--neg)" : "var(--tier-even)";
+                  const pc = posColor(p.pos);
+                  return (
+                    <div key={i} style={{
+                      padding: "8px 0",
+                      borderBottom: i < analyzed.playoffMatchups.length - 1 ? "1px solid var(--bg-raised)" : "none",
                     }}>
-                      <strong style={{ color: "var(--text-primary)" }}>This app cannot see your league's waiver wire.</strong>{" "}
-                      It knows your roster and it knows every player; it does not know the other{" "}
-                      {(freeAgents.depth / 13).toFixed(0) - 1} rosters. So this ranks players who are
-                      not on <em>your</em> roster and who a {freeAgents.depth}-deep league plausibly leaves
-                      unrostered. Check the names against your actual wire, and paste anyone already
-                      taken below to drop them.
-                      <div style={{ marginTop: "7px", color: "var(--text-dim)" }}>
-                        Ranked on role change, volume, targets per route, availability and separation —
-                        in Source Hierarchy order. <strong style={{ color: "var(--text-secondary)" }}>Schedule is not
-                        in the score.</strong> Matchup data is the least stable input measured here, so it
-                        sorts a shortlist and never builds one.
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
-                      {["ALL", "RB", "WR", "TE", "QB"].map(pp => (
-                        <button
-                          key={pp}
-                          data-compact
-                          onClick={() => setFaPos(pp)}
-                          style={{
-                            fontSize: "11px", padding: "6px 11px", minHeight: "32px",
-                            borderRadius: "3px", cursor: "pointer", fontWeight: 700,
-                            letterSpacing: "0.04em",
-                            // The SELECTED chip wears that position's own colour,
-                            // the same one its rows carry below. ALL has no position,
-                            // so it stays neutral rather than borrowing one.
-                            background: faPos === pp ? (POS_ACCENT[pp]?.bg || "var(--bg-elevated)") : "transparent",
-                            border: `1px solid ${faPos === pp ? (POS_ACCENT[pp] ? `${POS_ACCENT[pp].border}66` : "var(--border-default)") : "transparent"}`,
-                            color: faPos === pp
-                              ? (POS_ACCENT[pp]?.text || "var(--text-primary)")
-                              : "var(--text-dim)",
+                      {/* Row 1: name + pos chip + score */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
+                          <span style={{ color: "var(--text-primary)", fontSize: "12px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {p.name}
+                          </span>
+                          <span style={{
+                            fontSize: "9px",
+                            background: pc.bg,
+                            border: `1px solid ${pc.border}44`,
+                            color: pc.text,
+                            padding: "1px 5px",
+                            borderRadius: "2px",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
                           }}>
-                          {pp}
-                        </button>
-                      ))}
-                    </div>
-
-                    {shown.length === 0 ? (
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)", padding: "10px 0" }}>
-                        No {faPos === "ALL" ? "" : `${faPos} `}candidate clears the two-signal minimum.
-                        A ranking built on one number is an anecdote, so nothing is shown rather than
-                        something weak.
-                      </div>
-                    ) : shown.map((c, i) => (
-                      <div
-                        key={c.name}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => openCard({ name: c.name, pos: c.pos, team: c.team })}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard({ name: c.name, pos: c.pos, team: c.team }); } }}
-                        aria-label={`Open player card for ${c.name}`}
-                        style={{
-                          padding: "10px 0", cursor: "pointer",
-                          borderTop: i === 0 ? "none" : "1px solid var(--bg-raised)",
-                        }}>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", color: posColor(c.pos).text }}>
-                            {c.pos}
-                          </span>
-                          <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", textTransform: "capitalize" }}>
-                            {c.name}
-                          </span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.team}</span>
-                          <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>
-                            ADP {typeof c.adp === "number" ? c.adp.toFixed(0) : "—"}
+                            {p.pos}·{p.team}
                           </span>
                         </div>
-                        {/* THE EVIDENCE, NOT JUST THE RANK. A ranked list a reader
-                            cannot audit is a black box, and checkable numbers are
-                            the entire argument of this app. */}
-                        {/* Figures in HIS position colour, prose dimmed by Source
-                            Hierarchy rank. See FaReason for why those are two
-                            separate channels and why neither invents a hue. */}
-                        <ul style={{ margin: "6px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
-                          {c.reasons.slice(0, 3).map(r => (
-                            <FaReason key={r.key} label={r.label}
-                              numColor={posColor(c.pos).text} rank={FA_RANK[r.key] || 3} />
-                          ))}
-                        </ul>
+                        <span style={{
+                          color: scoreColor,
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          fontFamily: "var(--font-display)",
+                          letterSpacing: "0.03em",
+                          flexShrink: 0,
+                          marginLeft: "8px",
+                        }}>
+                          {scoreOf10}<span style={{ color: "var(--text-dim)", fontSize: "10px", fontWeight: 500 }}>/10</span>
+                        </span>
                       </div>
-                    ))}
-
-                    <div style={{ marginTop: "12px" }}>
-                      <div style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--ui-accent)", fontWeight: 700, marginBottom: "5px" }}>
-                        ALREADY TAKEN IN YOUR LEAGUE
+                      {/* Row 2: matchup chips */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
+                        {p.playoffMatches.map((m, j) => {
+                          const s = tierStyle(m.color);
+                          const env = getGameEnvironmentLabel(m.opp, m.week);
+                          return (
+                            <div key={j} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                              <span style={{
+                                fontSize: "10px",
+                                color: s.text,
+                                fontWeight: 500,
+                                whiteSpace: "nowrap",
+                              }}>
+                                W{m.week} {m.opp}·<span style={{ fontWeight: 700 }}>{m.tier}</span>
+                              </span>
+                              {env && (
+                                <span style={{
+                                  fontSize: "8px",
+                                  color: "#7d8fa5",
+                                  fontWeight: 500,
+                                  letterSpacing: "0.03em",
+                                }}>
+                                  O/U {env.total}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                      <textarea
-                        value={faTaken}
-                        onChange={(e) => setFaTaken(e.target.value)}
-                        placeholder={"One name per line, or comma separated.\nAnything you paste here drops out of the list above."}
-                        style={{
-                          width: "100%", minHeight: "62px", fontSize: "12px", padding: "8px",
-                          background: "var(--bg-raised)", color: "var(--text-primary)",
-                          border: "1px solid var(--border-default)", borderRadius: "3px",
-                          fontFamily: "inherit", resize: "vertical",
-                        }}
-                      />
                     </div>
-                  </>)}
+                  );
+                })}
+              </div>
+            </div>
+
+
+            {/* Bye Week Notes */}
+            {analyzed.criticalByeConflicts.filter(c => c.severity !== "info").length > 0 && (
+              <div style={{ marginBottom: "20px" }}>
+                <h2 id="rxr-byeconflicts" style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "24px",
+                  letterSpacing: "0.05em",
+                  margin: "0 0 4px",
+                  color: "var(--text-primary)",
+                }}>
+                  BYE WEEK CONFLICTS
+                </h2>
+                <Explainer>
+                  When multiple starters <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>share the same bye</span>, you're forced to start backups in their place. Critical = your entire position is on bye that week. Warning = partial hole.
+                </Explainer>
+                {analyzed.criticalByeConflicts.map((c, i) => (
+                  <div key={i} style={{
+                    background: c.severity === "critical" ? "#2e1414" : c.severity === "warning" ? "#2a2618" : "#141414",
+                    border: `1px solid ${c.severity === "critical" ? "#dc2626" : c.severity === "warning" ? "#eab308" : "var(--border-default)"}`,
+                    borderLeft: `3px solid ${c.severity === "critical" ? "#dc2626" : c.severity === "warning" ? "#eab308" : "var(--text-dim)"}`,
+                    borderRadius: "3px",
+                    padding: "8px 12px",
+                    marginBottom: "6px",
+                    fontSize: "12px",
+                  }}>
+                    <span style={{ color: c.severity === "critical" ? "var(--neg)" : c.severity === "warning" ? "var(--caution)" : "var(--text-muted)", fontWeight: c.severity === "info" ? 400 : 600, letterSpacing: "0.05em" }}>
+                      {c.severity === "critical" ? "⚠ CRITICAL · " : c.severity === "warning" ? "⚠ " : "ℹ "}{c.msg}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {(() => {
+              const ctx = buildRoleContext(analyzed.allStarters);
+              const n = ctx.moved.length + ctx.absences.length;
+              return (
+                <div style={{ marginBottom: "20px" }}>
+                  <SectionH2 title="2025 CONTEXT · ROLE & SCHEDULE" open={roleCtxOpen} onToggle={() => setRoleCtxOpen(o => !o)} hint={n > 0 ? `${n} flag${n > 1 ? "s" : ""} · SOS` : "SOS"} />
+                  {roleCtxOpen && (
+                    <div style={{ fontSize: "12px", lineHeight: 1.55 }}>
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "10px 0 4px" }}>Role trajectory</div>
+                      {ctx.moved.length === 0 && <div style={{ color: "var(--text-muted)" }}>No starter's role moved across 2025 — season averages are fair reads.</div>}
+                      {ctx.moved.map((t, i) => (
+                        <div key={i} style={{ padding: "2px 0" }}>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{t.name}</span>
+                          <span style={{ color: "var(--text-secondary)" }}> {Math.round(t.early * 100)}% W1-9 → {Math.round(t.late * 100)}% W10-18</span>
+                          <span style={{ color: t.trend === "rising" ? "var(--pos)" : "var(--neg)", fontWeight: 600 }}> {t.trend}</span>
+                          <span style={{ color: "var(--text-dim)" }}> — the season average {t.trend === "rising" ? "understates" : "overstates"} the current role</span>
+                        </div>
+                      ))}
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Who else was on the field</div>
+                      {ctx.absences.length === 0 && <div style={{ color: "var(--text-muted)" }}>No significant teammate absence behind any starter's 2025 line — the numbers read at face value.</div>}
+                      {ctx.absences.map((a, i) => (
+                        <div key={i} style={{ padding: "2px 0" }}>
+                          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{a.starter}</span>
+                          <span style={{ color: "var(--text-secondary)" }}> — {a.name} ({a.role}) missed {a.missed} of his {a.total}:</span>
+                          <span style={{ color: "var(--text-primary)" }}> {a.withPts.toFixed(1)}</span>
+                          <span style={{ color: "var(--text-dim)" }}> ppg with · </span>
+                          <span style={{ color: "var(--text-primary)" }}>{a.withoutPts.toFixed(1)}</span>
+                          <span style={{ color: "var(--text-dim)" }}> without</span>
+                        </div>
+                      ))}
+                      <div style={{ fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, margin: "12px 0 4px" }}>Season schedule (SOS) · 1 = easiest of 32</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "3px 14px" }}>
+                        {ctx.sos.map((r, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                            <span style={{ color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name.split(" ").slice(-1)[0]} <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>{r.team}</span></span>
+                            <span style={{ fontVariantNumeric: "tabular-nums", color: r.rank <= 10 ? "var(--pos)" : r.rank >= 23 ? "var(--neg)" : "var(--text-muted)", fontWeight: 600 }}>{r.rank}<span style={{ color: "var(--text-dim)", fontWeight: 400 }}>{r.delta > 0 ? ` +${r.delta}` : r.delta < 0 ? ` ${r.delta}` : ""}</span></span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: "9px", color: "var(--text-dim)", marginTop: "8px", lineHeight: 1.5 }}>
+                        Context only — none of this moves the grade. SOS is the least stable input in the app (WR matchup data is negative year over year); the delta is how many spots the slate eased since 2025. An absence explains where volume came from; it does not prove the volume was hollow.
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })()}
-
-            {/* Breakout Watch */}
-            {breakout && (
-              <div style={{ marginBottom: "20px" }}>
-                <SectionH2
-                  id="rxr-breakout"
-                  title="BREAKOUT WATCH"
-                  open={breakoutOpen}
-                  onToggle={() => setBreakoutOpen(o => !o)}
-                  hint={breakout.live
-                    ? `${breakout.flagged.length} flagged · ${breakout.watched.length} watched`
-                    : "pre-season"}
-                />
-                {breakoutOpen && (<>
-                  <Explainer>
-                    Tracks late-round darts and rookies against <strong>their own</strong> earlier
-                    usage, never a league percentile — an 18% share is nothing league-wide and
-                    everything if he was at 4% three weeks ago. A role move and a big game are
-                    scored separately: <strong>WATCH</strong> means the role grew and the points
-                    have not caught up, which is the signal that arrives first.
-                  </Explainer>
-
-                  {!breakout.live && (
-                    <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
-                      The season has not started, so there is no current-year usage to compare
-                      against. Add names now and this fills in from Week 4, once there are enough
-                      games to measure a step.
-                    </div>
-                  )}
-
-                  {/* Add to watchlist */}
-                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
-                    <input
-                      value={watchInput}
-                      onChange={e => setWatchInput(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key !== "Enter") return;
-                        // ⚠️ "yahoo" is the REDRAFT table, and it must match the table the board
-                        // iterates (ADP_YAHOO) or a name resolves here and then
-                        // never appears in the list. findPlayer returns matchedKey.
-                        const hit = findPlayer(watchInput, "yahoo");
-                        if (hit?.matchedKey) { toggleWatch(hit.matchedKey); setWatchInput(""); }
-                      }}
-                      placeholder="add a player to watch, then press Enter"
-                      style={{
-                        flex: "1 1 220px", minHeight: "32px", padding: "6px 8px", fontSize: "12px",
-                        background: "var(--bg-raised)", color: "var(--text-primary)",
-                        border: "1px solid var(--border-default)", borderRadius: "3px",
-                        fontFamily: "inherit",
-                      }}
-                    />
-                    <button
-                      data-compact
-                      onClick={() => setBreakoutRookiesOnly(r => !r)}
-                      style={{
-                        minHeight: "32px", padding: "6px 10px", fontSize: "11px", fontWeight: 600,
-                        letterSpacing: "0.04em", cursor: "pointer", borderRadius: "3px",
-                        background: "transparent", color: "var(--ui-accent)",
-                        border: "1px solid var(--border-default)", fontFamily: "inherit",
-                      }}
-                    >{breakout.rookiesOnly ? "ROOKIES ONLY" : "ALL PLAYERS"}</button>
-                  </div>
-
-                  {[["YOUR WATCHLIST", breakout.watched, true],
-                    [breakout.rookiesOnly ? "ROOKIES FLAGGING THIS WEEK" : "FLAGGING THIS WEEK", breakout.flagged, false]
-                  ].map(([heading, rows, isWatch]) => (
-                    <div key={heading} style={{ marginBottom: "14px" }}>
-                      <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em",
-                                    color: "var(--ui-accent)", marginBottom: "6px" }}>{heading}</div>
-                      {rows.length === 0 ? (
-                        /* ⚠️ An empty group SAYS SO. Silence reads as "nothing is
-                           happening", which is the silent-drop failure this repo
-                           forbids — the reader cannot tell it apart from a bug. */
-                        <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
-                          {isWatch
-                            ? "Nothing on your watchlist yet. Add a name above to track him all season."
-                            : breakout.flaggedEmptyWhy}
-                        </div>
-                      ) : rows.map(r => (
-                        <div key={r.key} style={{
-                          display: "flex", alignItems: "flex-start", gap: "8px",
-                          padding: "8px 0", borderTop: "1px solid var(--border-default)",
-                        }}>
-                          <button
-                            data-compact
-                            onClick={() => toggleWatch(r.key)}
-                            aria-label={r.watched ? `Stop watching ${r.name}` : `Watch ${r.name}`}
-                            style={{
-                              minWidth: "32px", minHeight: "32px", cursor: "pointer",
-                              background: "transparent", border: "none", fontSize: "14px",
-                              color: r.watched ? "var(--text-primary)" : "var(--text-muted)",
-                            }}
-                          >{r.watched ? "★" : "☆"}</button>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                              <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>{r.name}</span>
-                              <span style={{ fontSize: "10px", color: posColor(r.pos).text }}>{r.pos} {r.team}</span>
-                              {/* ⚠️ NOT gated on `blocked`. OPENING is precisely the state that fires
-                                  while the usage side is unmeasurable, so gating the badge
-                                  on blocked hid the label on the only rows it was new for. */}
-                              {r.state !== "quiet" && (
-                                <span style={{
-                                  fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em",
-                                  color: "var(--text-primary)", background: "var(--bg-elevated)",
-                                  border: "1px solid var(--border-default)", borderRadius: "3px",
-                                  padding: "1px 5px",
-                                }}>{BREAKOUT_STATES[r.state].label}</span>
-                              )}
-                            </div>
-                            {/* The reason the engine gives, never a hand-typed copy. */}
-                            <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginTop: "2px" }}>
-                              {r.blocked && !r.reasons.length
-                                ? r.blocked
-                                : (<>
-                                    <span>{BREAKOUT_STATES[r.state].why}</span>
-                                    {/* ⚠️ THE MARK IS NOT DECORATION. `supports` is
-                                        computed per reason and the first render threw it
-                                        away, so a NOISE row's non-supporting opportunity
-                                        line looked exactly like real evidence. Same rule
-                                        the waiver pool learned: a reason must be evidence
-                                        FOR, not every number measured. */}
-                                    {r.reasons.map(x => (
-                                      <span key={x.key} style={{ display: "block",
-                                        color: x.supports ? "var(--text-secondary)" : "var(--text-muted)" }}>
-                                        {x.supports ? "+" : "·"} {x.text}
-                                      </span>
-                                    ))}
-                                    {/* A row can carry a live opening AND an
-                                        unmeasurable usage side. Both are shown:
-                                        suppressing the second would imply the
-                                        role move had been checked. */}
-                                    {r.blocked && (
-                                      <span style={{ display: "block", color: "var(--text-dim)" }}>
-                                        · {r.blocked}
-                                      </span>
-                                    )}
-                                  </>)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </>)}
-              </div>
-            )}
 
             {/* Bench Moves */}
             {analyzed.benchMoves && analyzed.benchMoves.length > 0 && (

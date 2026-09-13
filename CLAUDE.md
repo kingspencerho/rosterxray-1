@@ -9147,3 +9147,77 @@ fails, bare `free agent` on a rostered player fails, `free-agent signing` passes
 the date. Never narrate what the entry used to say, however vividly the correction wants to be
 written. The history goes in this file and the commit message. ⛔ **And a guard that enforces it
 must read EVERY table the prompt reads — a new prose table is a new loop, on the day it is added.**
+
+---
+
+## The Redraft Page, Reordered Around His Sunday (Sep 13, 2026)
+
+**His call, from three phone screenshots of the live site:** *"we have to reorder the sections, and
+there are some sections that are redundant... positional depth — users already know how many
+players they have... remove lineup confidence and handcuff insurance too... if there are good
+features within it that you think we should keep... merge it."* **PRESENTATION ONLY — 90 grades
+BYTE-IDENTICAL** against a pristine worktree, and that is the assertion that mattered here, because
+one removed section is SCORED. 39 guards, 1,788 assertions.
+
+### Three sections removed, and why each was safe
+
+| Section | Scored? | Lines | Why removal loses nothing |
+|---|---|---|---|
+| **Positional Depth** | no | 34 | The counts are the grade card's structure line; the only flag that matters (a thin position → streaming penalty) is scored and already printed in Weaknesses. A duplicate. |
+| **Lineup Confidence** | no | 286 | The 17-week grid is FPA tiers (rank 5) week by week — Weekly already shows that. `lineupConfidencePreview` still feeds the AI prompt from the engine; only the render went. |
+| **Handcuffs · Insurance** | **yes** (+0.5 / −0.3) | 39 | Strengths/Weaknesses already prints "X/Y RB1(s) handcuffed" / "No RB1 handcuffs." The boxes repeated the sentence. **The score is untouched — the calibration is the proof.** |
+
+### One piece kept, moved into Matchups: the bench-swap line
+
+The only thing Lineup Confidence did that nothing else does: compare a BENCH player to a starter
+for THIS week — a literal Sunday question. It now renders under a player's row in the game-
+environment panel, reading the engine's own `concerns` for `env.week`. ⚠️ **On the example roster
+it renders zero lines at Week 1, and that is correct: the engine reports no Week 1 concern; the
+first week with a suggestion is Week 2 (LaPorta → Kincaid · Good).** Verified by running the engine,
+not by trusting the empty render. Guard 38 pins the line (three assertions, sabotage-tested).
+
+### The refresh-lag banner nearly vanished
+
+`⚠ In-season role data covers weeks 1-N, M weeks behind week W` lived inside Lineup Confidence.
+Removing the section removed the only render, and guard `test-current-week.mjs` caught it. First
+move was into Trends — **wrong, because Trends does not mount until `volume_2026` has weeks**, so on
+exactly the week the lag matters the banner would have had no home. It lives in Matchups, which
+mounts every week in season and is the panel the sentence is about.
+
+### New order, Sunday loop first, reference last
+
+```
+Grade card → Strengths/Weaknesses → Lineup → MATCHUPS (+ bench swap) → TRENDS → Waivers →
+Breakout → Weekly → Playoffs → Byes → 2025 Context → Bench moves → Bench
+```
+
+Sticky index: nine pills. ⚠️ **Pre-existing and left alone: the `Trends` pill points at a section
+that does not mount pre-season** — the id exists in source (guard 18 resolves it there) and not in
+the DOM until the first weekly refresh lands rows.
+
+### Guard 38 measured position in the file and called it containment — again
+
+`panelEnd` was anchored on `buildRoleContext(...)`, the 2025-context block that used to sit next to
+Matchups. Reordering made the "panel" span six sections and fail on their tokens. Re-aimed at the
+panel's own closing bracket; a real `--danger` inside the panel still fails. **Third instance of this
+class** (guards 15 and 38, Sep 12).
+
+⛔ **Repairing that one line cost three attempts, all escaping:** a Python heredoc turned `\n` into
+a real newline, `sed` in this shell did the same, and only a Write-tool file with a raw string
+landed it. **A backslash inside a JS string is not safe through bash → Python → file. Write the
+patch as a file with `r'...'`, every time.**
+
+### Measured
+
+```
+phone 375   depth / lineup confidence / handcuffs absent · 0 sub-32px targets · no overflow
+            order verified in the DOM by section id · sticky pills Lineup…Bench (9)
+engine      example roster Week 1: 0 concerns → 0 swap lines (correct); Week 2 has one
+```
+
+### Still to do from the same audit
+
+The **Matchups colour pass** — his read: *"way too much white font... everything is way too blended
+together."* It is a LOOK decision, so it ships as two rendered variants he picks from, not a
+description. The scan's rules apply: value bright / label dim, position puck for identity, flags in
+their meaning colour, everything else steps down a shade.

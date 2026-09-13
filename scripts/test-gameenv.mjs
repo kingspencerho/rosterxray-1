@@ -178,7 +178,12 @@ console.log("\n=== 9. the projection is framed as a reference, never a verdict =
 // window asserts "these strings are near each other", which is not a property
 // anybody wants, and it broke guard 31 on Sep 6 when a block simply moved.
 const panelStart = app.indexOf('id="rxr-gameenv"');
-const panelEnd = app.indexOf("buildRoleContext(analyzed.allStarters)", panelStart);
+// ⛔ BOUNDED BY THE PANEL'S OWN CLOSING BRACKET, not by whichever section happens
+// to follow it. Until Sep 13 2026 this anchored on buildRoleContext(...) - the
+// 2025-context block that used to sit next - and the moment the redraft page was
+// reordered the "panel" silently spanned six sections and failed on their
+// tokens. Position in the file is not containment (guards 15 and 38, Sep 12).
+const panelEnd = app.indexOf("\n            })()}", panelStart);
 // ⚠️ WHITESPACE IS NORMALISED because JSX wraps prose at arbitrary points. The
 // first version of this failed on "it does\n  not show its work" — the sentence
 // was correct and the assertion was reading the source layout, not the copy.
@@ -192,6 +197,13 @@ t(/does not show its work/i.test(panel),
 t(/None of this touches your grade/i.test(panel), "the page says it does not affect the grade");
 t(!/--pos-good|--danger|--accent-lime.{0,40}proj/i.test(panel.replace(/shootout", "var\(--accent-lime\)/, "")),
   "the projection number is not painted as good/bad");
+// THE BENCH-SWAP LINE (Sep 13 2026) - the one piece kept when Lineup Confidence
+// was removed. It must live in THIS panel, read the engine's own per-week
+// concerns, and key on the panel's week - not a hard-coded one.
+t(/rx-bench-swap/.test(panel), "the bench-swap line renders inside the environment panel");
+t(/lineupConfidencePreview/.test(panel) && /w\.week === env\.week/.test(panel),
+  "the bench-swap line reads the engine's concerns for the panel's own week");
+t(/sg\.matchup\.tier/.test(panel), "it prints the suggestion's tier from the engine, not a retyped one");
 
 console.log(`\n${fail ? `FAILED (${fail})` : "ALL CHECKS PASSED"}`);
 process.exit(fail ? 1 : 0);
