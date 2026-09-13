@@ -613,6 +613,49 @@ def vacated_at(team, kind):
     return names, row.get("vacated_pct") or 0
 
 
+def funnel_read(opp, kind, side):
+    """Does the defence being faced push this prop's number UP or DOWN?
+
+    # THE FUNNEL IS THE GAP between pass EPA allowed and rush EPA allowed, never
+    # how bad the defence is outright. Tampa allows +0.068 on pass plays, which is
+    # mid-pack; what makes it a pass funnel is that it allows -0.072 on the RUN.
+    # Stiff against the run invites throwing, so pass volume and receptions go UP.
+    # A run funnel does the reverse, and for a CARRIES prop the sign flips again.
+    #
+    # ⛔ AND IT IS VOID WHENEVER THE OPPOSING DC CHANGED. The split is a 2025
+    # number owned by the 2025 defensive staff, and a funnel is a scheme property,
+    # so a new coordinator does not shift it -- it removes it. MEASURED Sep 13
+    # 2026: nine of thirteen picks faced a defence with a new DC, so the read was
+    # unavailable for most of the board. Void is reported as void, never as
+    # neutral, because neutral reads as "checked and fine".
+    #
+    # ⚠️ WEIGHT IT AS RANK 5. Matchup data orders close options and never makes a
+    # good read bad. It has no measured stickiness in this app at all, so it
+    # RE-RANKS and must not veto.
+    """
+    row = sub_team(TT26, "teams", opp) or sub_team(TT25, "teams", opp) or {}
+    d = row.get("def") or {}
+    pe, re_ = d.get("pass_epa"), d.get("rush_epa")
+    if pe is None or re_ is None:
+        return None, "no defensive trends on file for %s" % opp
+    gap = pe - re_
+    st = (sub_team(PC, "teams", opp) or {}).get("dc_status", "unknown")
+    if st == "changed":
+        return None, "funnel VOID - %s changed defensive coordinator" % opp
+    lifts, drops = gap > 0.03, gap < -0.03
+    if kind == "car":
+        lifts, drops = drops, lifts
+    if (lifts and side == "OVER") or (drops and side == "UNDER"):
+        v = "SUPPORTS"
+    elif (lifts and side == "UNDER") or (drops and side == "OVER"):
+        v = "FIGHTS"
+    else:
+        v = "neutral"
+    if st == "unknown":
+        v += " (DC unverified)"
+    return v, "vs %s funnel %+.3f (pass %+.3f / rush %+.3f)" % (opp, gap, pe, re_)
+
+
 def score_prop(row):
     kind, team, line = row.get("type"), row.get("team"), row.get("line")
     r, rt, gp = prop_rate(kind, row.get("player", ""))
@@ -654,10 +697,24 @@ def score_prop(row):
     if live.get("injury_status"):
         s *= 0.40
         flags.append(str(live["injury_status"]).upper())
+    opp = None
+    for g in (sub(GE, "games") or []):
+        if is_team(g.get("away"), team):
+            opp = g.get("home")
+        elif is_team(g.get("home"), team):
+            opp = g.get("away")
+        if opp:
+            break
+    fv, fnote = funnel_read(opp, kind, "OVER" if gap > 0 else "UNDER") if opp else (None, "no game found")
+    if fv == "FIGHTS":
+        s *= 0.80          # rank 5: it re-ranks, it does not veto
+    elif fv == "SUPPORTS":
+        s *= 1.15
     out = dict(row)
     out.update({"score": s, "side": "OVER" if gap > 0 else "UNDER",
                 "price": row["over"] if gap > 0 else row["under"],
-                "rate": r, "gap": gap, "dc": dc, "flags": flags})
+                "rate": r, "gap": gap, "dc": dc, "flags": flags,
+                "funnel": fv, "funnel_note": fnote, "opp": opp})
     return out
 
 
@@ -690,6 +747,10 @@ def props(top=3):
             print("  %-5s %-20s %5.1f %-10s %+5d  | app %.2f (%+.2f) | DC%s | %.3f"
                   % (x["side"], x["player"], x["line"], PROP_NAME[x["type"]],
                      x["price"], x["rate"], x["gap"], x["dc"], x["score"]))
+            mark = {"SUPPORTS": "\u2705", "FIGHTS": "\u26d4"}.get(
+                (x["funnel"] or "").split()[0] if x["funnel"] else "", "\u2014")
+            print("        %s matchup: %s \u00b7 %s"
+                  % (mark, x["funnel"] or "unavailable", x["funnel_note"]))
             if x["flags"]:
                 print("        \u26a0\ufe0f " + " \u00b7 ".join(x["flags"]))
     print("\n" + "-" * W)
@@ -765,6 +826,12 @@ def selftest():
               "ROLE CHANGE, not an edge" in po)
         check("props flags vacated work", "VACATED WORK" in po)
         check("props states it does not pick a side", "does not pick a side" in po)
+        check("props reads each prop against the defence faced", "matchup:" in po)
+        # VOID must never be rendered as neutral -- neutral reads as "checked, fine".
+        check("a changed DC voids the funnel rather than neutralising it",
+              funnel_read("BAL", "rec", "UNDER")[0] is None)
+        check("an unchanged DC still yields a funnel verdict",
+              funnel_read("TB", "rec", "UNDER")[0] == "FIGHTS")
         _t = score_prop({"player": "bhayshul tuten", "team": "JAX", "type": "car",
                          "line": 12.5, "over": -121, "under": -107})
         check("the Tuten row scores as a role change, never as a top bet",
