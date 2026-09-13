@@ -312,6 +312,35 @@ def q2_play_caller(team):
             "   evidence of continuity — check the staff before pricing the number."]
 
 
+def q5_big_runs(team):
+    """Explosive runs allowed — a DIFFERENT question from rush EPA above.
+
+    # rush_epa is the AVERAGE value allowed per run. This is the TAIL. A defence
+    # can be good at one and poor at the other, and TB 2025 is exactly that:
+    # rush_epa -0.0724, which reads stiff against the run, while allowing 20+ yard
+    # runs on 2.78%% of carries — 22nd of 32 against a 2.30%% league rate.
+    #
+    # ⛔ WHY THE LINE EXISTS. The funnel read was used to argue that Tampa
+    # suppresses a long run. It does not; it suppresses the AVERAGE run. Anything
+    # decided by ONE big play is answered here and never by the EPA above.
+    """
+    row = sub_team(TT26, "teams", team) or sub_team(TT25, "teams", team) or {}
+    e = (row.get("def") or {}).get("expl_run") or {}
+    if not e.get("runs"):
+        return []
+    out = []
+    if e.get("rate20") is not None:
+        rk = e.get("rank20")
+        out.append("big runs: 20+ on %.2f%% of carries (%d of %d)%s"
+                   % (e["rate20"] * 100, e.get("n20", 0), e["runs"],
+                      "  —  %d of 32, league 2.30%%" % rk if rk else ""))
+    if e.get("rate15") is not None:
+        out.append("         15+ on %.2f%% (%d)" % (e["rate15"] * 100, e.get("n15", 0)))
+    if not e.get("computed_from_pbp"):
+        out.append("   ⚠️ hand-pulled, 20+/40+ only — a pbp rebuild fills 10+ and 15+")
+    return out
+
+
 def q5_dc(team):
     """Who runs this defence in 2026, so the EPA split above can be read for what
     it is.
@@ -502,6 +531,8 @@ def brief(away, home):
             print(f"      {r}")
         print(f"  Q5  def weakness   {q5_def_weakness(t)}")
         for r in q5_dc(t):
+            print(f"      {r}")
+        for r in q5_big_runs(t):
             print(f"      {r}")
         print(f"  Q11 quarterback    {q11_qb(t)}")
         print(f"  Q6  field stretchers ({t} receivers, vs {opp}'s defence)")
@@ -801,6 +832,10 @@ def selftest():
     check("Q2 names a new play-caller where one exists", "NEW PLAY-CALLER" in out)
     check("Q2 says unverified rather than unchanged", "NOT VERIFIED" in out)
     check("Q5 names a new defensive coordinator where one exists", "NEW DC" in out)
+    # rush EPA is an average and explosive rate is the tail. Reporting only the
+    # average is what let a longest-run question be answered with a funnel.
+    check("Q5 reports explosive runs allowed, not only the EPA average",
+          "big runs: 20+" in out)
     check("a defence with no verified DC is never reported as unchanged",
           "DC unchanged" not in q5_dc("ZZZ")[0])
     check("an unknown team is never reported as unchanged",

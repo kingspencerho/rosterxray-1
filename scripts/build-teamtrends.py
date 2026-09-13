@@ -106,6 +106,7 @@ def collect(rows):
     oe = {}          # posteam -> [pass_oe]
     pace = {}        # posteam -> [seconds between snaps, neutral only]
     dpass = {}       # defteam -> [epa allowed on a pass]
+    drun_yds = {}    # defteam -> [yards gained on each run allowed]
     drush = {}       # defteam -> [epa allowed on a rush]
     weeks = set()
     games = {}       # team -> set(game_id)
@@ -137,6 +138,15 @@ def collect(rows):
                 dpass.setdefault(dfn, []).append(e)
             elif pt == "run":
                 drush.setdefault(dfn, []).append(e)
+
+        # --- Explosive runs allowed. SEPARATE FROM rush_epa ON PURPOSE: epa is
+        #     the average value per run, and a defence can be good on average
+        #     while still leaking long ones. Counted here so a question about a
+        #     single big play stops being answered with an average.
+        if pt == "run" and dfn:
+            yg = fnum(r.get("yards_gained"))
+            if yg is not None:
+                drun_yds.setdefault(dfn, []).append(yg)
 
         # --- Pace. Consecutive snaps, same game, same offence, same drive.
         if pt in ("pass", "run"):
@@ -230,6 +240,24 @@ def build(oe, pace, dpass, drush, weeks, games):
             dfn["funnel"] = round(raw, 4)
             dfn["funnel_rel"] = round(rel, 4)
             dfn["funnel_label"] = label(rel, gap_sd, "pass funnel", "run funnel")
+
+        # THREE THRESHOLDS, not one. Public tables publish 20+ and 40+, but a
+        # prop is often written at 15, and 10 is the common "explosive" cut. All
+        # three are cheap once the yards are in hand, and a missing threshold is
+        # how a question gets answered with the nearest available number instead
+        # of the right one.
+        ys = drun_yds.get(t, [])
+        if ys:
+            dfn["expl_run"] = {
+                "runs": len(ys),
+                "n10": sum(1 for y in ys if y >= 10),
+                "n15": sum(1 for y in ys if y >= 15),
+                "n20": sum(1 for y in ys if y >= 20),
+                "rate10": round(sum(1 for y in ys if y >= 10) / len(ys), 4),
+                "rate15": round(sum(1 for y in ys if y >= 15) / len(ys), 4),
+                "rate20": round(sum(1 for y in ys if y >= 20) / len(ys), 4),
+                "computed_from_pbp": True,
+            }
 
         teams[t] = {"games": len(games.get(t, set())), "off": off, "def": dfn}
 

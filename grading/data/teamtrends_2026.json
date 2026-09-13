@@ -2,7 +2,7 @@
  "_meta": {
   "caveats": [
    "PROE and the funnel gap are labelled against the LEAGUE MEAN of this season, never against zero: 2025 league mean pass_oe is -1.74 and the league mean funnel gap is positive because passing is more efficient than running everywhere.",
-   "off describes the team's OWN offence. def describes the defence it fields, which is a fact about the players who FACE it \u2014 never about its own skill players.",
+   "off describes the team's OWN offence. def describes the defence it fields, which is a fact about the players who FACE it — never about its own skill players.",
    "Pace is snap-to-snap elapsed clock and includes the previous play's duration, so it runs ~5s higher than published pace tables. Use the ranking, not the number.",
    "A partial season's own SD is inflated by sampling noise, so a partial build flags FEWER teams than a complete one. That is the conservative direction and is intended."
   ],
@@ -13,7 +13,9 @@
    "proe_plays": 300
   },
   "generated": "2026-09-12",
-  "league": {},
+  "league": {
+   "expl_run_rate20_mean": null
+  },
   "neutral": {
    "margin": 7,
    "max_qtr": 3,
@@ -26,7 +28,8 @@
   "source": "nflverse play_by_play (nflfastR); pass_oe/xpass and epa as published",
   "teams_covered": 4,
   "threshold_source": "1 SD of this build's own league distribution",
-  "weeks_covered": 1
+  "weeks_covered": 1,
+  "expl_run_note": "expl_run is explosive RUNS ALLOWED, and it is deliberately separate from rush_epa. rush_epa is the average value allowed per run; expl_run counts the tail. A defence can be good on the first and poor on the second -- TB 2025 is exactly that (rush_epa -0.0724, but 20+ runs on 2.78% of carries, 22nd of 32 against a 2.30%% league rate). Any question about ONE big play is answered here, never by the average. Rows with computed_from_pbp=false were hand-pulled from the NFL.com team-defence table on 2026-09-13 and carry only the 20+/40+ thresholds that table publishes; the next pbp rebuild replaces them and fills n10/n15."
  },
  "teams": {
   "LA": {
