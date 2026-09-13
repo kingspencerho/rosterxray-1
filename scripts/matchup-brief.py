@@ -368,7 +368,8 @@ def brief(away, home):
         im = g.get("implied") or {}
         flags = [f for f, on in (("BLOWOUT", g.get("blowout")), ("SHOOTOUT", g.get("shootout"))) if on]
         print(f"  {g['favorite']} -{g['spread']}  O/U {g['total']}   "
-              f"implied {away} {im.get(away,'?')} / {home} {im.get(home,'?')}"
+              f"implied {away} {im.get(away, im.get(g.get('away'), '?'))} / "
+              f"{home} {im.get(home, im.get(g.get('home'), '?'))}"
               f"{'   [' + ' '.join(flags) + ']' if flags else ''}")
     print(f"  lines fetched {sub(GE,'_meta','fetched_at')} — a line moves, this does not")
     print("=" * W)
