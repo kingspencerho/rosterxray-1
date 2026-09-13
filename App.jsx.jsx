@@ -16776,6 +16776,13 @@ Analyze this best ball roster. Return JSON only.`;
                 three times. CONTEXT ONLY; guard 38 asserts it never reaches a
                 scoring engine or the AI prompt. */}
             {(() => {
+              // nfl is what the refresh-lag banner below reads. The block it came
+              // from (Lineup Confidence, removed Sep 13 2026) declared its own; the
+              // move kept the JSX and dropped the declaration, and NOTHING caught it -
+              // esbuild does not check free identifiers, no guard renders this tree,
+              // and the DOM audit ran while the banner sat in a panel that never
+              // mounts pre-season. Production crashed on every redraft grade.
+              const nfl = seasonNow();
               const env = buildGameEnvBoard(analyzed.allStarters);
               // Out of season, or before the weekly refresh has run, there is
               // no slate. The panel does not exist rather than rendering an
@@ -16816,24 +16823,40 @@ Analyze this best ball roster. Return JSON only.`;
                         if (g.indoor) flags.push(["dome", "var(--text-muted)"]);
                         return (
                           <div key={i} style={{ marginBottom: "14px", paddingBottom: "12px", borderBottom: i === env.games.length - 1 ? "none" : "1px solid var(--border-default)" }}>
-                            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
-                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                                {row.side} vs {row.opp}
-                              </span>
-                              {g.total != null ? (
-                                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                                  implied <strong style={{ color: "var(--text-primary)" }}>{row.implied ?? "-"}</strong>
-                                  {" · "}{g.total} total
-                                  {g.spread != null && row.fav != null
-                                    ? ` · ${row.fav ? "-" : "+"}${g.spread}`
-                                    : ""}
+                            {/* HIS FORMAT, Sep 13 2026: teams, then FAVOURITE -SPREAD · Total.
+                                The implied total is gone on his call - "so the user can
+                                focus on 1 number... the projected". Option 3 of the three he
+                                saw rendered: the favourite and spread take their weight from
+                                BRIGHTNESS, the total sits a step down, and yellow is never
+                                used here - on this page yellow means a warning, and the
+                                injury line below is the only thing that earns it. */}
+                            <div style={{ marginBottom: "6px" }}>
+                              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
+                                <span style={{ fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", color: "var(--text-primary)" }}>
+                                  {row.side} vs {row.opp}
                                 </span>
+                                {flags.map(([t, c], k) => (
+                                  <span key={k} style={{
+                                    fontSize: "8.5px", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase",
+                                    color: c, border: `1px solid ${c}`, opacity: 0.9, borderRadius: "3px", padding: "1px 6px",
+                                  }}>{t}</span>
+                                ))}
+                              </div>
+                              {g.total != null ? (
+                                <div style={{ fontSize: "11.5px", marginTop: "2px", fontVariantNumeric: "tabular-nums" }}>
+                                  {g.spread != null && row.fav != null ? (
+                                    <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>
+                                      {row.fav ? row.side : row.opp} −{g.spread}
+                                    </span>
+                                  ) : (
+                                    <span style={{ color: "var(--text-dim)" }}>pick'em</span>
+                                  )}
+                                  <span style={{ color: "var(--text-dim)" }}>{"  ·  "}Total </span>
+                                  <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{g.total}</span>
+                                </div>
                               ) : (
-                                <span style={{ fontSize: "11px", color: "var(--text-dim)" }}>no line posted</span>
+                                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "2px" }}>no line posted</div>
                               )}
-                              {flags.map(([t, c], k) => (
-                                <span key={k} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase", color: c }}>{t}</span>
-                              ))}
                             </div>
                             {(row.offTrend || row.oppDef) && (() => {
                               const bits = [];
@@ -16871,15 +16894,35 @@ Analyze this best ball roster. Return JSON only.`;
                                 </div>
                               );
                             })()}
-                            {row.players.map((p, j) => (
-                              <div key={j} style={{ display: "flex", alignItems: "baseline", gap: "8px", padding: "3px 0", fontSize: "12px" }}>
-                                <span style={{ color: posColor(p.pos).text, fontWeight: 600, minWidth: "26px" }}>{p.pos}</span>
-                                <span style={{ color: "var(--text-secondary)", flex: 1 }}>{p.name}</span>
-                                <span style={{ color: p.proj == null ? "var(--text-dim)" : "var(--text-primary)", fontWeight: 600 }}>
-                                  {p.proj == null ? "no proj" : `${p.proj} proj`}
-                                </span>
-                              </div>
-                            ))}
+                            {row.players.map((p, j) => {
+                              const pc = posColor(p.pos).text;
+                              return (
+                                <div key={j} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 0" }}>
+                                  {/* the slot puck says WHO the row is; the hue is the position's own */}
+                                  <span className="rx-env-puck" style={{
+                                    width: "30px", height: "30px", flex: "0 0 30px", borderRadius: "50%",
+                                    display: "grid", placeItems: "center", background: "var(--bg-base)",
+                                    border: `1.5px solid ${pc}`, color: pc, fontSize: "8.5px", fontWeight: 700,
+                                  }}>{p.pos}</span>
+                                  <span style={{ flex: 1, minWidth: 0 }}>
+                                    <span style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                      {p.name} <span style={{ color: "var(--text-faint)", fontWeight: 400, fontSize: "11px" }}>· {row.side}</span>
+                                    </span>
+                                  </span>
+                                  {/* value over unit: the number is what you read, "proj" is a 9px label */}
+                                  <span style={{ textAlign: "right", lineHeight: 1, minWidth: "52px" }}>
+                                    {p.proj == null ? (
+                                      <span style={{ fontSize: "11px", color: "var(--text-dim)" }}>no proj</span>
+                                    ) : (
+                                      <>
+                                        <span style={{ display: "block", fontSize: "15px", fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "var(--text-primary)" }}>{p.proj}</span>
+                                        <span style={{ fontSize: "9px", color: "var(--text-faint)", letterSpacing: ".06em", textTransform: "uppercase" }}>proj</span>
+                                      </>
+                                    )}
+                                  </span>
+                                </div>
+                              );
+                            })}
                             {/* THE BENCH-SWAP LINE - the one piece of the old Lineup
                                 Confidence section worth keeping, moved here Sep 13 2026
                                 on his call to remove that section. It is the only place
@@ -16892,7 +16935,7 @@ Analyze this best ball roster. Return JSON only.`;
                               if (!c) return null;
                               const sg = c.suggestion;
                               return (
-                                <div key={`s${j}`} className="rx-bench-swap" style={{ fontSize: "11px", color: "var(--text-muted)", padding: "2px 0 0 34px" }}>
+                                <div key={`s${j}`} className="rx-bench-swap" style={{ fontSize: "10.5px", color: "var(--text-muted)", padding: "0 0 4px 40px" }}>
                                   <span style={{ color: "var(--text-dim)" }}>bench:</span>{" "}
                                   <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{sg.name}</span>
                                   {" "}<span style={{ color: posColor(sg.pos).text, fontWeight: 700 }}>{sg.pos}</span>
@@ -16905,13 +16948,14 @@ Analyze this best ball roster. Return JSON only.`;
                                 projection is available on any site; the gap
                                 between it and his measured usage is not. */}
                             {row.players.filter(p => p.divergence).map((p, j) => (
-                              <div key={`d${j}`} style={{ fontSize: "11px", color: "var(--ui-accent)", padding: "2px 0 0 34px" }}>
+                              <div key={`d${j}`} style={{ fontSize: "10.5px", color: "var(--ui-accent)", padding: "0 0 4px 40px" }}>
                                 {p.name}: {p.divergence.text}
                               </div>
                             ))}
                             {row.defOut.length > 0 && (
-                              <div style={{ fontSize: "11px", color: "var(--text-muted)", paddingTop: "4px" }}>
-                                {row.opp} defence out: {row.defOut.map(d => `${d.name} (${d.pos})`).join(", ")}
+                              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", padding: "4px 0 0 40px" }}>
+                                <span style={{ color: "var(--caution)", fontWeight: 600 }}>{row.opp} out</span>
+                                {" "}{row.defOut.map(d => `${d.name} ${d.pos}`).join(" · ")}
                               </div>
                             )}
                           </div>
@@ -16919,8 +16963,7 @@ Analyze this best ball roster. Return JSON only.`;
                       })}
                       <Explainer label="what these numbers are">
                         <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6 }}>
-                          <strong style={{ color: "var(--text-secondary)" }}>Implied</strong> is how many points the
-                          betting market expects this team to score: the game total split by the spread.
+                          The line is the betting market's read: the favourite and the spread, then the game total.
                           {" "}<strong style={{ color: "var(--text-secondary)" }}>Shootout</strong> is a game inside{" "}
                           {sh.max_abs_spread} points with a total of {sh.min_total} or more, which lifts both sides.
                           {" "}<strong style={{ color: "var(--text-secondary)" }}>Blowout risk</strong> is a spread of{" "}
