@@ -12655,7 +12655,14 @@ Analyze this best ball roster. Return JSON only.`;
   const bbFieldPlacement = analyzed && analyzed.mode !== "redraft"
     ? fieldPlacement(analyzed.score, tournament)
     : null;
-  const renderGradeHero = ({ grade, score, fp, title, meta, metaColor }) => {
+  // posCounts and right were added Sep 13 2026 on his phone screenshot: the
+  // structure line and the roster chip sat in a clump under the hero while the
+  // space beside the ring was empty, and on a wide screen the chip was flung to
+  // the far edge of its own row. The artifact never had a separate row - the
+  // counts live in the block BESIDE the ring, which is what fills the phone -
+  // and on a wide screen that block, the ring and the chip spread across one
+  // row instead of stacking on the left.
+  const renderGradeHero = ({ grade, score, fp, title, meta, metaColor, posCounts, right }) => {
     const color = gradeColor(grade);
     const pct = Math.round(gradeRingFill(grade) * 100);
     const delta = fp && typeof score === "number" ? score - fp.median : null;
@@ -12671,7 +12678,11 @@ Analyze this best ball roster. Return JSON only.`;
           <span style={{ fontSize: "10.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-secondary)", fontWeight: 600 }}>{title}</span>
           <span style={{ fontSize: "10px", color: metaColor || "var(--text-faint)", letterSpacing: "0.02em", textAlign: "right", fontWeight: 600 }}>{meta}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", padding: "15px 15px 0" }}>
+        {/* Two zones. Zone 1 is the ring plus its text column; zone 2 is the
+            roster button. space-between spreads them on a wide row; on a phone
+            zone 2 wraps under the ring, left-aligned with it. */}
+        <div className="rx-hero-zone" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px 24px", flexWrap: "wrap", padding: "15px 15px 4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: "1 1 240px", minWidth: 0 }}>
           <div className="rx-grade-ring" role="img" aria-label={"Grade " + grade} style={{
             width: "92px", height: "92px", flex: "0 0 92px", borderRadius: "50%",
             display: "grid", placeItems: "center",
@@ -12681,7 +12692,12 @@ Analyze this best ball roster. Return JSON only.`;
               <span style={{ fontFamily: "var(--font-display)", fontSize: "34px", fontWeight: 900, letterSpacing: "0.02em", lineHeight: 1, color }}>{grade}</span>
             </div>
           </div>
-          <div style={{ flex: "1 1 180px", minWidth: "160px" }}>
+          {/* The text column is itself a wrapping row: the score block and the
+              structure block sit side by side when there is room and stack when
+              there is not - so on a phone the counts land beside the ring, in the
+              space that was empty. */}
+          <div className="rx-hero-text" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 36px", minWidth: 0, flex: "1 1 160px" }}>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: "12.5px", color: "var(--text-secondary)", display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
               <span>
                 <strong style={{ color: "var(--text-primary)", fontSize: "18px", fontVariantNumeric: "tabular-nums" }}>
@@ -12707,6 +12723,22 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
             )}
           </div>
+          {posCounts && (
+            <div style={{ display: "flex", gap: "12px", alignItems: "baseline", flexWrap: "wrap" }}>
+              {["QB", "RB", "WR", "TE"].map(pos => {
+                const c = posColor(pos);
+                return (
+                  <span key={pos} style={{ fontSize: "15px", fontWeight: 600, fontVariantNumeric: "tabular-nums", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+                    <span style={{ color: "var(--text-primary)" }}>{posCounts[pos]}</span>
+                    <span style={{ color: c.text, fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", marginLeft: "3px" }}>{pos}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+          </div>
+          </div>
+          {right}
         </div>
       </>
     );
@@ -12958,6 +12990,14 @@ Analyze this best ball roster. Return JSON only.`;
           animation: rxGradeFill 1000ms cubic-bezier(.22, .9, .3, 1) 120ms both;
         }
         @keyframes rxGradeFill { from { --rx-arc: 0%; } }
+        /* WIDE SCREENS ONLY: the score block and the structure block spread out
+           across the hero instead of hugging the ring, so a 1,100px row reads
+           ring - score - structure - chip with even gaps rather than everything
+           on the left and one chip on the right. Below 900px the blocks stack
+           beside the ring, which is the phone layout and must not change. */
+        @media (min-width: 900px) {
+          .rx-hero-text { justify-content: space-evenly; }
+        }
         /* THE UPLOAD HINT. Two animations carrying two different jobs: the ring
            says WHERE the button is, the dot says WHAT TO DO to it. One alone is
            ambiguous — a bare pulse could mean anything, a bare dot has no target. */
@@ -14761,32 +14801,19 @@ Analyze this best ball roster. Return JSON only.`;
                 grade: analyzed.grade, score: analyzed.score,
                 fp: bbFieldPlacement,
                 title: "Overall ceiling rating", meta: analyzed.tournament.name, metaColor: "var(--pos)",
-              })}
-              <div style={{ padding: "10px 15px 15px" }}>
-                <button
-                  onClick={() => setRosterStripOpen(o => !o)}
-                  aria-expanded={rosterStripOpen}
-                  aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
-                  style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    gap: "12px", rowGap: "10px", flexWrap: "wrap",
-                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
-                    padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
-                  }}
-                >
-                  <span style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-                  {["QB", "RB", "WR", "TE"].map(pos => {
-                    const c = posColor(pos);
-                    return (
-                      <span key={pos} style={{ fontSize: "15px", fontWeight: 600, fontVariantNumeric: "tabular-nums", letterSpacing: "0.04em" }}>
-                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
-                        <span style={{ color: c.text, fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", marginLeft: "3px" }}>{pos}</span>
-                      </span>
-                    );
-                  })}
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
-                    <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
+                posCounts: analyzed.posCounts,
+                right: (
+                  <button
+                    onClick={() => setRosterStripOpen(o => !o)}
+                    aria-expanded={rosterStripOpen}
+                    aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
+                    style={{
+                      display: "inline-flex", justifyContent: "flex-end", alignItems: "center", gap: "12px",
+                      fontSize: "12px", color: "var(--text-muted)", background: "transparent", border: "none",
+                      padding: 0, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
                     <span className={rosterStripOpen ? undefined : "roster-cta-pulse"} style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
                       color: rosterStripOpen ? "var(--ui-accent)" : "var(--bg-base)",
@@ -14799,8 +14826,10 @@ Analyze this best ball roster. Return JSON only.`;
                       {rosterStripOpen ? "Hide roster" : "View roster"}
                       <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                     </span>
-                  </span>
-                </button>
+                  </button>
+                ),
+              })}
+              <div style={{ padding: "0 15px 15px" }}>
                 {/* ONE LINE UNDER THE GRADE, NOT THREE — his call Sep 6 2026:
                     "its way too wordy... there is way too much info around this area."
                     The three qualifier blocks that lived here (ADP discipline, field
@@ -16265,32 +16294,19 @@ Analyze this best ball roster. Return JSON only.`;
                 grade: analyzed.grade, score: analyzed.score,
                 fp: null,
                 title: "Redraft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
-              })}
-              <div style={{ padding: "10px 15px 15px" }}>
-                <button
-                  onClick={() => setRosterStripOpen(o => !o)}
-                  aria-expanded={rosterStripOpen}
-                  aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
-                  style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    gap: "12px", rowGap: "10px", flexWrap: "wrap",
-                    fontSize: "13px", width: "100%", background: "transparent", border: "none",
-                    padding: "6px 0 2px", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
-                  }}
-                >
-                  <span style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-                  {["QB", "RB", "WR", "TE"].map(pos => {
-                    const c = posColor(pos);
-                    return (
-                      <span key={pos} style={{ fontSize: "15px", fontWeight: 600, fontVariantNumeric: "tabular-nums", letterSpacing: "0.04em" }}>
-                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
-                        <span style={{ color: c.text, fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", marginLeft: "3px" }}>{pos}</span>
-                      </span>
-                    );
-                  })}
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-muted)" }}>
-                    <span style={{ fontSize: "12px" }}>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
+                posCounts: analyzed.posCounts,
+                right: (
+                  <button
+                    onClick={() => setRosterStripOpen(o => !o)}
+                    aria-expanded={rosterStripOpen}
+                    aria-label={rosterStripOpen ? "Hide roster" : "View roster"}
+                    style={{
+                      display: "inline-flex", justifyContent: "flex-end", alignItems: "center", gap: "12px",
+                      fontSize: "12px", color: "var(--text-muted)", background: "transparent", border: "none",
+                      padding: 0, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span>{analyzed.valid.length}/{analyzed.picks.length} matched</span>
                     <span className={rosterStripOpen ? undefined : "roster-cta-pulse"} style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
                       color: rosterStripOpen ? "var(--ui-accent)" : "var(--bg-base)",
@@ -16303,8 +16319,10 @@ Analyze this best ball roster. Return JSON only.`;
                       {rosterStripOpen ? "Hide roster" : "View roster"}
                       <span style={{ display: "inline-block", transform: rosterStripOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>⌄</span>
                     </span>
-                  </span>
-                </button>
+                  </button>
+                ),
+              })}
+              <div style={{ padding: "0 15px 15px" }}>
                 {/* METRIC COVERAGE, redraft. Same helper, same shared CEILING_GATE —
                     and the gate is EXACTLY the one the redraft Floor Layer scores on,
                     so the number is already the right one for this mode. Added Sep 6

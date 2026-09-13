@@ -8984,6 +8984,25 @@ desktop 1024    hero two-column 107px tall · card 337px · 0 sub-32px targets i
 console         one error: the documented Vite /api/analyze 404
 ```
 
+### The hero is three zones on one row (same day, on his phone screenshot)
+
+His report, with two screenshots: *"the roster structure and the view roster button are too
+condensed... all this black space on the right side"* and *"widescreen there's way too much black
+in the middle."* **Both were one mistake: the first build kept the structure line and the roster
+button on their own row UNDER the hero, which the artifact never did.** The counts belong in the
+block beside the ring - that is the phone's right-hand space - and the chip is the row's third
+zone, not the far end of a separate one.
+
+```
+phone 375     ring | score + structure stacked beside it     roster row beneath, left-aligned
+wide 1440     ring 178 · score 438 · structure 703 · chip 1019   gaps 168 / 188 / 176, one row
+```
+
+⭐ **The wide case needed one media rule, not a second layout:** above 900px `.rx-hero-text`
+switches to `space-evenly`, so its two blocks spread across the space the row already has. Below
+900px nothing changes, so the phone layout is untouched. 0 sub-32px targets, no overflow, 90
+grades byte-identical.
+
 ### Not built, on purpose
 
 The artifact's other two cards — the metric-coverage ribbon and the roster list with lens tabs
