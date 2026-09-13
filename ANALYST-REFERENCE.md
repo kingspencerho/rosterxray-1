@@ -232,6 +232,96 @@ baseline**.
 
 ---
 
+### ⭐⭐ §2b · THE IN-SEASON CROSSOVER — when THIS season beats LAST season (Sep 13, 2026)
+
+**His question: the app grades matchups off 2025 FPA. Now that games are being played, should it use
+2026 instead?** Measured on the 2025 game logs — points allowed to draftable players, by defense, by
+position — asking whether FPA through week N predicts the REST of that same season.
+
+| pos | last year *(banked §2)* | W1-3 | W1-4 | W1-5 | W1-6 | W1-8 |
+|---|---|---|---|---|---|---|
+| QB | `0.049` | **0.369** | 0.332 | 0.351 | 0.329 | 0.266 |
+| RB | `0.245` | -0.123 | -0.057 | 0.115 | 0.148 | 0.101 |
+| WR | `-0.073` | **0.531** | **0.615** | **0.569** | 0.418 | **0.521** |
+| TE | `0.192` | 0.281 | 0.314 | 0.275 | **0.426** | 0.322 |
+
+⭐⭐⭐ **WR IS THE HEADLINE AND IT INVERTS COMPLETELY.** **It is the WORST cross-season input in this
+app at `-0.073` — literally negative — and one of the best WITHIN a season at `0.531` after three
+games.** ⭐ **Same metric, opposite verdict, depending which question is asked.** **A wideout gets
+targeted whether his team is ahead or behind; game script does not erase his opportunity.**
+
+⛔⛔ **STATE THIS BAR BEFORE QUOTING ANY NUMBER ABOVE: with `n = 31` defenses, an `r` must reach about
+`0.355` before it is distinguishable from noise.** **So RB fails on BOTH sides — `0.245` and `0.148`
+are each below it.** ⚠️ **An earlier draft of this finding read *"last year wins for RB,"* which is
+WRONG and implies last year works. It does not. NEITHER predicts.** **TE at three games (`0.281`) is
+also under the bar, though still better than the `0.192` it replaces.**
+
+### ⭐⭐⭐ WHY RUNNING BACKS BEHAVE THIS WAY — a real mechanism, not a data quirk
+
+**A run defence is genuinely STABLE.** It is mostly linemen and linebackers, units that turn over
+slowly — which is exactly why RB is the STICKIEST of the four across seasons. ⛔ **But "fantasy points
+allowed to a running back" does not measure the defence. It measures THE GAME.** **A team that is
+winning runs the clock out and its back sees 25 carries; a team that is losing throws and the same
+back sees 8.** ⭐ **So the underlying thing is stable and the instrument is noise.**
+⚠️ **A second problem stacks on it: a defence’s RB figure rests on ~`1.79` draftable backs per game
+against a receiver’s `2.29`** — the thinnest sample of any skill position.
+
+### ⛔⛔ THE TEST I APPLIED WAS THE WRONG ONE, AND HIS CATCH IS THE RULING
+
+**I recommended leaving the RB pill on 2025 because current-season data does not FORECAST better.**
+**His answer:** *"i still want to know whats happening currently during my season... i would rather
+show it than rely on last years data."*
+
+> ## ⭐⭐⭐ **HE IS RIGHT, AND THE REASON IS THAT THE PILL DESCRIBES — IT DOES NOT FORECAST.**
+> ## **A correlation asks whether the RANKING PERSISTS. It never asks whether the number DESCRIBES THE TEAM THAT EXISTS NOW.**
+
+**Those come apart exactly where it matters: a defence that lost three starters in August is a
+different defence, and last season’s number describes a team that no longer exists.** ⛔ **Judging a
+descriptive display by a predictive test is the same class of error as the leverage panel printing
+"ownership" for a projection — right instrument, wrong question.**
+
+### The gates that fall out, and why there is only ONE
+
+```
+QB · WR · TE    3 games      the current season becomes the better input almost at once
+RB              4 games      SAMPLE PARITY, not predictiveness — 1.79 backs/game against
+                             a receiver 2.29, so RB needs ~4 games for the same number
+                             of observations WR has at 3
+```
+
+⚠️ **PER-POSITION GATES WERE REJECTED AND HIS CATCH IS WHY.** **Separate gates put up to THREE
+VINTAGES ON SCREEN AT ONCE** — at Week 4 the WR and QB pills would read 2026 while TE read 2025 —
+**which is unexplainable in a one-line footer.** ⭐ **One gate, and TE is carried at three games
+because the question is "is it BETTER than what it replaces" (`0.281` vs `0.192`), not "is it
+significant." Those are different bars, and conflating them is what produced the error above.**
+
+### ⭐ HIS RULING ON PLACEMENT — no flag on the pill
+
+**I proposed stepping the RB pill back with a line reading *"run matchups barely repeat — the weakest
+read here."* He rejected it:** *"that doesnt invite users to question why this is the case?... why
+give them a reason to doubt when it was never an issue in the first place?"*
+⭐⭐ **He is right, and the sharper reason is that the line was a VERDICT rather than PROVENANCE.**
+**Every existing disclosure in this app says what a number IS and where it came from — `2025 data`,
+`not schedule-adjusted`, `480 simulated rosters`. None passes judgement on whether a number is any
+good.** ⛔ **A verdict invites "says who?" and needs a paragraph of statistics to defend, in the one
+place a reader has no patience for one.**
+✅ **DECIDED: the RB pill renders exactly like the others — no dimming, no caveat, no flag. The vintage
+stamp in the existing results footer (`FPA: 2025 Rotowire`, App.jsx ~18059) becomes dynamic and carries
+the whole disclosure. The mechanism above lives HERE and in the `<Explainer>` that already sits directly
+above `<MatchupLegend />` — findable by the reader who asks, invisible to the one who does not.**
+
+### ⚠️ Limits — state these before quoting the crossover table
+
+- **Points allowed to DRAFTABLE players only**, which is what `gamelogs_2025.json` covers. A proxy for
+  true FPA, not true FPA.
+- **One season**, against year-over-year figures measured across two transitions.
+- **`n = 31` defences**, hence the `0.355` bar.
+- ⚠️ **The declining tail is partly an ARTIFACT** — as N grows the "rest of season" target shrinks and
+  gets noisier. **Do NOT read `W1-4` as optimal.**
+- **Raw, not schedule-adjusted, on both sides.** Partly cancels; not entirely.
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a
