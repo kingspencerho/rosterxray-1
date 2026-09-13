@@ -1537,9 +1537,10 @@ rather than sitting beside them.
 | `node scripts/grade-cli.mjs <roster> --tournament <key>` | grade headlessly. Unknown flags and unknown tournament keys exit non-zero with a hint — `--mode redraft` was silently ignored until Sep 1 2026 and graded a redraft roster through the best-ball engine |
 | `node scripts/scout.mjs "Name" [--format …]` | the data behind `/scout` |
 | `node scripts/report-stale-news.mjs [date]` | **run before any draft.** TWO sections since Sep 1 2026: (1) players whose every note is past the 45-day re-validation rule, (2) **CONTRADICTED** — the status feed reports a hard unavailability the freshest note predates. Section 2 asks questions and never edits a note. Takes a date |
-| `bash scripts/refresh-inseason.sh [season]` | the weekly job, **5 steps since Sep 1 2026**. Three downloads. Steps 1-4 no-op safely before Week 1; **step 5 (Sleeper) is the only one that returns data pre-season**, so a partial run is normal and is reported as `Partly refreshed` |
+| `bash scripts/refresh-inseason.sh [season] [--live-only]` | the weekly job, **8 steps as of Sep 13 2026**. Steps 1-6 are nflverse season releases and no-op safely before Week 1; **steps 7 (Sleeper) and 8 (lines/projections) are live and return data pre-season**, so a partial run is normal and is reported as `Partly refreshed`. `--live-only` runs 7-8 alone for the Saturday pass. ⚠️ Two steps both printed `5/8` until Sep 13 — the live-FPA step took a number team trends already held |
+| `python scripts/coaching-adj-impact.py [--inert]` | **what each `COACHING_ADJ` delta actually DOES.** The matchup score is strictly tier-banded, so a delta crossing no rank boundary cannot move a grade for ANY roster — **WAS +0.75 and NYJ +0.25 cross none and are INERT.** Needs no roster, changes nothing. ⭐ Run it before and after touching a delta |
 | `python3 scripts/refresh-adp.py [--source underdog\|ffc] [--table data\|yahoo] [--apply]` | ADP drift report. **Reports by default, never auto-applies** |
-| `npm test` | 26 guards |
+| `npm test` | **39 guards**, chained with `&&`, so the run stops at the first failure |
 | `npm run build` | Vite production build |
 
 ### Runbooks

@@ -54,7 +54,7 @@
 #
 # USAGE
 #   bash scripts/refresh-inseason.sh [season]                # all eight steps
-#   bash scripts/refresh-inseason.sh [season] --live-only    # steps 6-7 only
+#   bash scripts/refresh-inseason.sh [season] --live-only    # steps 7-8 only
 #
 # Then re-run the guards and commit:
 #   npm test && git add grading/data && git commit
@@ -91,8 +91,8 @@ fail=0
 got_any=0
 
 if [ "$LIVE_ONLY" = "1" ]; then
-  echo "Live-only pass: steps 1-5 skipped (nflverse season releases do not"
-  echo "change between Monday night and the weekend). Refreshing 6-7 only."
+  echo "Live-only pass: steps 1-6 skipped (nflverse season releases do not"
+  echo "change between Monday night and the weekend). Refreshing 7-8 only."
   echo
 else
   echo "1/8  snap trajectory (role change)"
@@ -158,7 +158,7 @@ else
   # three of which CLAUDE.md Section 4 has specified since July with no data
   # behind them. It sits INSIDE the full-pass branch because it is an nflverse
   # season release and does not change between Monday night and the weekend.
-  echo "5/8  team trends: pass rate, pace, defensive funnel"
+  echo "6/8  team trends: pass rate, pace, defensive funnel"
   if fetch "$BASE/pbp/play_by_play_$SEASON.csv.gz" "$TMP/pbp.csv.gz"; then
     got_any=1
     python3 "$ROOT/scripts/build-teamtrends.py" --pbp "$TMP/pbp.csv.gz" \
@@ -178,7 +178,7 @@ fi
 #
 # The 14.6MB raw payload is written to $TMP and dies with the trap. Only the
 # ~200KB extract reaches grading/data/. NEVER commit the raw dump.
-echo "6/8  availability + depth chart (Sleeper, live - works pre-season)"
+echo "7/8  availability + depth chart (Sleeper, live - works pre-season)"
 if fetch "https://api.sleeper.app/v1/players/nfl" "$TMP/sleeper.json"; then
   python3 "$ROOT/scripts/build-status.py" "$TMP/sleeper.json" \
     "$ROOT/grading/data/status_$SEASON.json" "$SEASON" && got_any=1 || fail=1
@@ -203,7 +203,7 @@ echo
 # sandbox curl returns 200 for this endpoint on every URL form while python
 # urllib returns 403 through the egress proxy. build-gameenv.py is a PURE PARSE
 # for that reason - see its header.
-echo "7/8  game environment + weekly projections (live - expires, see _meta)"
+echo "8/8  game environment + weekly projections (live - expires, see _meta)"
 ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 if fetch "$ESPN/scoreboard" "$TMP/cur.json"; then
   WEEK=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print((d.get('week') or {}).get('number') or 0)" "$TMP/cur.json" 2>/dev/null || echo 0)

@@ -8799,3 +8799,107 @@ off raw — **OFFSEASON alone satisfied it, so deleting COACHING_ADJ passed.** A
 the no-retyped-gate check forbade a literal and **missed `weeks_covered >= 3`**,
 the same duplication wearing a comparison. Both now assert the exact value and the
 positive property.
+
+---
+
+## COACHING_ADJ Pass 2: No Delta Changed, and That Is the Finding (Sep 13, 2026)
+
+**90 grades BYTE-IDENTICAL** against a pristine worktree at HEAD — 15 tournaments x 5 fixtures
+plus 3 leagues x 5 — because nothing but a comment block moved. 39 guards pass, mirror identical,
+LF preserved.
+
+Pass 1 (commit `67d69c1`) dated all nine entries and corrected GB, BAL, PIT and CHI on fact with
+zero grade movement. Pass 2 asked the remaining question: now that `status_2026.json` carries
+defenders, **should any MAGNITUDE move?** The answer is no, on four grounds.
+
+### ⛔⛔ 1. THE TABLE HAS NO WEEK DIMENSION, AND THAT DECIDES IT
+
+One value is applied to all 18 weeks. **Every absence the defender feed surfaced is TEMPORARY or
+DEPTH:**
+
+```
+BAL  Madubuike  LDE  #1  Out  Neck        duration unstated, week-to-week
+BAL  Buchanan   LILB #1  Out  Knee-ACL    season-ending — a ROOKIE ILB
+GB   Parsons    ROLB #1  PUP  Knee-ACL    Reserve/PUP mandates W1-4, back ~W5-6
+PIT  Elliott    SS   #1  IR               plus Porter Jr open for W1
++ 20 more across the nine teams, all depth or IR
+```
+
+**Encoding a week-to-week neck injury into a flat season constant would still be softening that
+defence in December** — the stale-verdict trap, inside a scored input. The only season-ending loss
+to a STARTER across all nine teams is BAL's Buchanan, and **the two pillars of BAL's -2.0
+(Hendrickson, the new scheme) are intact and healthy on the Week 1 depth chart.**
+
+### ✅ 2. THE INJURIES ALREADY REACH THE READER, IN THE RIGHT PLACE
+
+The weekly game-environment panel renders **`<opp> defence out: name (pos)`** from a live feed
+(`build-gameenv.py`, `def_out`). Per week, dated, and **self-correcting when a player returns.**
+A flat season constant is the wrong home for a fact that expires.
+
+### ⏳ 3. IT GOES DORMANT ON ITS OWN, IN THE MODE HE ACTUALLY USES
+
+`fpaPointsFor` returns **before reading this table** once `FPA_CUR` is live for a position — gates
+`QB/WR/TE 3 weeks, RB 4`, currently `weeks_covered: 0`. So in **2026-Season mode every delta here
+stops being read in late September**, replaced by the measured number, which contains these
+injuries by construction. ⛔ **In 2025 mode it applies FOREVER**, which is the only reason it still
+earns an audit.
+
+### ⭐⭐ 4. MEASURED: TWO OF THE NINE CANNOT MOVE A GRADE AT ALL
+
+The matchup score is **strictly tier-banded** — `getMatchupTier` maps rank bands to 5/4/3/2/1 and
+nothing reads a continuous FPA value. **So a delta that crosses no rank boundary cannot move a
+grade for any roster, ever.** Two do not, and they look exactly as authoritative as the seven that
+do:
+
+```
+team   delta   boundaries crossed   grades moved / 90   letters
+GB     -1.50        4 of 4                 75             15
+BAL    -2.00        4 of 4                 75             11
+CLE    -0.50        1 of 4                 75              0
+PIT    -1.50        3 of 4                 60              1
+CHI    +1.50        2 of 4                 45              0
+DAL    +1.00        1 of 4                 41              0
+TEN    +0.50        1 of 4                 30              0
+WAS    +0.75        INERT                   0              0
+NYJ    +0.25        INERT                   0              0
+```
+
+⚠️ **MY OWN TIER COUNT UNDERSTATED IMPACT AND THE FIXTURE RUN CORRECTED IT.** CLE crosses ONE
+boundary and moves **75 grades**, because one tier change propagates to every RB facing CLE in
+every week of every fixture. **Boundary count says WHETHER a delta bites; only the fixture run says
+how hard.** Run both — and note the two instruments agree exactly on the inert pair, which is what
+makes that claim general rather than fixture-specific.
+
+### ✅ THE INSTRUMENT, NOT THE VERDICT — `scripts/coaching-adj-impact.py`
+
+```
+python scripts/coaching-adj-impact.py            # every entry, tier movement per position
+python scripts/coaching-adj-impact.py --inert     # only the ones doing nothing
+```
+
+Reads `App.jsx`, changes nothing, needs no roster. **Run it before and after touching any delta: a
+change that crosses no boundary is a comment, not a grade change.** It exists instead of a guard
+because the thing worth protecting is not a particular value — re-tuning a delta is a legitimate
+data decision — it is that nobody should set one without knowing whether it does anything.
+
+### ⚠️ KNOWN AND DELIBERATELY NOT FIXED: GB's note contradicts its own application
+
+GB's note says the value reflects the **W15-17 window** and that **GB is "materially softer
+W1-4"**. Both true, and a flat value cannot express it — **redraft and the W1-14 advance-rate layer
+read all weeks**, so GB is graded as tougher than it is for the quarter of the season Parsons is
+mandated out. It moves **more letter grades than any other entry (15)**.
+
+⛔ **A magnitude change is the wrong fix: it would trade a W15-17 error for a W1-14 one.** The fix
+is a **week dimension on COACHING_ADJ**, which is a feature with its own calibration, not an audit
+edit. `fpaPointsFor` takes no week today, so it touches every call site.
+
+### What pass 2 rejected, and why it is recorded
+
+**CHI needed no change** — pass 1 replaced its note wholesale (`Dennis Allen is the SITTING DC`;
+Greenard and Hargrave were Vikings) and the `+1.5` now rests on a traceable basis: 18 new defensive
+players, half the CB room gone, three of the top four 2025 turnover leaders gone, 31st in pass-rush
+win rate. **The conclusion survived the audit; the reasoning was rebuilt under it.**
+
+⛔ **"Pass 2 is the delta changes" was the plan, and the evidence did not support one.** An audit
+that changes nothing and says why is a result; changing a number to make the pass feel productive
+is how an unsourced magnitude becomes an arbitrary one.

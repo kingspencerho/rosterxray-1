@@ -2249,6 +2249,48 @@ const WIN_TOTALS = {
 // tracker (upd. Jul 20), the SI PUP/NFI/IR tracker (upd. Jul 29) and the 2026
 // draft. Seven notes here and below were factually wrong — see the individual
 // entries. Prior vintage was Jun 25 2026.
+// ⛔⛔ PASS 2 AUDIT, Sep 13 2026 — NO DELTA CHANGED, AND THE REASON IS A RULE.
+//
+// Pass 1 dated all nine entries and corrected GB, BAL, PIT and CHI on fact.
+// Pass 2 asked whether any MAGNITUDE should move, now that status_2026.json
+// carries defenders and every claim here can be checked against availability.
+// It should not, on four grounds — and the first is the one that generalises:
+//
+// 1. ⛔ THIS TABLE HAS NO WEEK DIMENSION. One value is applied to all 18 weeks.
+//    Every absence found is TEMPORARY or DEPTH: Madubuike Out with a neck,
+//    Parsons on Reserve/PUP for a mandated W1-4, Porter Jr open for W1. Encoding
+//    any of them would still be softening that defence in December — the
+//    stale-verdict trap, inside a scored input. The only season-ending loss to a
+//    STARTER across all nine teams is BAL's Buchanan, a rookie ILB, and the two
+//    pillars of BAL's -2.0 (Hendrickson, the new scheme) are intact and healthy.
+// 2. ✅ THE INJURIES ALREADY REACH THE READER, IN THE RIGHT PLACE. The weekly
+//    game-environment panel renders "<opp> defence out: name (pos)" from a live
+//    feed — per week, dated, and self-correcting when a player returns. A flat
+//    season constant is the wrong home for a fact that expires.
+// 3. ⚠️ ANY NEW NUMBER WOULD BE AS UNSOURCED AS THE ONE IT REPLACED. These nine
+//    are hand-set magnitudes on reasoned claims; re-tuning one on a week-to-week
+//    injury trades a defensible guess for an arbitrary one.
+// 4. ⏳ IT GOES DORMANT ON ITS OWN. fpaPointsFor returns BEFORE reading this
+//    table once FPA_CUR is live for a position (gates: QB/WR/TE 3 weeks, RB 4),
+//    so in 2026-Season mode every delta here stops being read in late September
+//    and the measured number — which contains these injuries by construction —
+//    replaces it. ⛔ In 2025 mode it applies FOREVER, which is why it still
+//    earns an audit at all.
+//
+// ⭐⭐ MEASURED, and it is what any future delta decision should start from:
+// the matchup score is strictly TIER-BANDED (getMatchupTier), so a delta that
+// crosses no rank boundary cannot move a grade for any roster. WAS +0.75 and
+// NYJ +0.25 cross none — they are INERT, and they look exactly as authoritative
+// as the seven that are not. Across the five fixtures, 90 grades each:
+// BAL 75 moved/11 letters · GB 75/15 · CLE 75/0 · PIT 60/1 · CHI 45/0 ·
+// DAL 41/0 · TEN 30/0 · WAS 0 · NYJ 0.
+// ✅ THE INSTRUMENT, not the verdict: python scripts/coaching-adj-impact.py
+//
+// ⚠️ KNOWN AND NOT FIXED HERE: GB's note says the value reflects the W15-17
+// window and that GB is "materially softer W1-4". Both true, and the flat value
+// cannot express it — redraft and the W1-14 advance layer read all weeks. A week
+// dimension is the fix and it is a feature with its own calibration, not an
+// audit edit.
 const COACHING_ADJ = {
   // WAS "Minter DC promotion" corrected: Minter is the HEAD COACH, hired from
   // the Chargers DC job, not promoted internally. DC is Anthony Weaver (ex-MIA,
