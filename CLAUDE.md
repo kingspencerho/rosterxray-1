@@ -8635,3 +8635,50 @@ render showed it.** Write the character, or wrap it in an expression.
 **PROE and pace for a DEFENCE** (how much do opponents throw against them, and does the defence
 speed the game up) are computable from the same file and were not built — the funnel already
 answers the question the framework asks. **Expected points surfacing** is described above.
+
+---
+
+## matchup-brief.py — the first instrument built from a USER'S loop (Sep 13, 2026)
+
+**Every other tool here was designed from the codebase outward. This one was designed from a real
+decision procedure inward.** He wrote down what goes through his head making sit/start calls on a
+Sunday morning, and those six questions plus the six the measured data says he is overlooking are
+now `USER-PERSONAS.md` P3 — and this script answers all twelve for one game.
+
+```
+python scripts/matchup-brief.py DAL NYG      python scripts/matchup-brief.py --slate
+python scripts/matchup-brief.py --selftest
+```
+
+⛔ **IT DOES NOT PICK A SIDE, RANK THE PLAYERS OR RECOMMEND A START.** The not-for list governs —
+*it names flaws and describes players; the pick stays the user's.* **It prints inputs and leaves the
+contradictions standing**, because two true facts pointing opposite ways is a better input to a
+judgement than a verdict is. *(Worked case: the Giants funnel to the run — rush EPA `+0.167` vs pass
+`+0.028` — and Dallas just lost LG Tyler Smith for 4-6 weeks.)*
+
+⭐⭐ **THE RULE THAT UNLOCKS THE SCHEME DATA, and it is worth stating because it reads like a
+contradiction:** the app WITHHOLDS coverage splits from the AI because they measured `r = 0.161`
+year over year. **That rule protects THE GRADE from inputs that do not repeat. It does not make the
+data useless here**, because a scheme read is DESCRIPTIVE — what did this defence do — and
+description is exactly what questions 3 and 4 need. ✅ **Withheld from SCORING is not unavailable to
+a READER.**
+
+⛔ **TWO GAPS PRINT AS GAPS** rather than being silently omitted, per the silent-drop rule: there is
+**no defence-side scheme profile** (`coverage_2025` is man rate FACED BY A RECEIVER — an offence-side
+measurement wearing a defensive name) and **nothing splits defence by route DEPTH**. Same root cause:
+rich offence-side player data, team-level defensive EPA, and no defence-side positional profile. FPA
+is the nearest thing and it is rank 5 of 5. ⭐ **That is the highest-value data addition for P3.**
+
+⚠️ **The raw-FPA caveat prints inline** — a defence that drew Kelce, Bowers and LaPorta looks soft at
+TE for reasons unrelated to the defence.
+
+### ⛔⛔ `.get(key, default)` DOES NOT COVER A KEY THAT EXISTS HOLDING `None`
+
+**`--selftest` earned its keep on its first run and again on its second**, catching the same bug in
+two different functions. **Four of fourteen games crashed** — Sleeper leaves depth fields null and
+`player_metrics` carries `None` for a metric a player has no sample for. ⭐ **Fixed ONCE at the source
+with `num()` / `txt()` rather than per call site; 32 numeric reads route through them.**
+
+⚠️ **The other thing it pins is the VINTAGE.** `teamtrends_2026` is still thin, so every line falls
+back to 2025 **and must say so** — a 2026 label over 2025 numbers is the stale-data trap wearing a
+date. Guard: `python scripts/matchup-brief.py --selftest`.
