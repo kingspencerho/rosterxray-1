@@ -99,19 +99,64 @@ QB = load("qb_profile_2025.json")
 ST = load("status_2026.json")
 
 
+# ⛔⛔ THE FEEDS DISAGREE ON TWO TEAMS, AND THE DISAGREEMENT IS NOT ONE-SIDED.
+# MEASURED Sep 13 2026 across the eight files this script reads:
+#
+#   WAS   teamtrends · oline · ngs · status · player_metrics · qb_profile
+#   WSH   gameenv ONLY (it comes from ESPN, which spells it WSH)
+#   LA    teamtrends · player_metrics · qb_profile
+#   LAR   oline · ngs · status · gameenv
+#
+# So there is NO single canonical code that works everywhere, and that is why
+# this is a spelling SET per lookup rather than one normalise-on-input call.
+# Normalising toward one code was the wrong fix for the same bug in App.jsx on
+# Sep 11 — it changed nothing, because the table it normalised toward was the
+# one keyed the other way.
+#
+# ⚠️ THE FAILURE WAS SILENT IN BOTH DIRECTIONS: `matchup-brief.py WSH PHI` found
+# the game and then printed "no team trends on file / no QB profile on file /
+# no injury designations on file" for a team the app has full data on, while
+# `matchup-brief.py WAS PHI` could not find the game at all. Nothing errored.
+TEAM_SPELLINGS = {
+    "WAS": ("WAS", "WSH"), "WSH": ("WSH", "WAS"),
+    "LA": ("LA", "LAR"), "LAR": ("LAR", "LA"),
+}
+
+
+def alts(team):
+    """Every spelling this team is filed under, the given one first."""
+    return TEAM_SPELLINGS.get(team, (team,))
+
+
+def sub_team(d, subkey, team):
+    """sub(d, subkey, <team>) over every spelling. First hit wins."""
+    for t in alts(team):
+        hit = sub(d, subkey, t)
+        if hit:
+            return hit
+    return None
+
+
+def is_team(row_team, team):
+    """Does this player row belong to `team`, under any spelling?"""
+    return row_team in alts(team)
+
+
 def trends(team):
     """2026 first, 2025 as the stated fallback. NEVER silently mixed — the caller
     prints which vintage it got, because a 2026 label over 2025 numbers is the
     stale-data trap wearing a date."""
-    cur = sub(TT26, "teams", team)
+    cur = sub_team(TT26, "teams", team)
     if cur and num(cur,"games") >= 4:
         return cur, "2026"
-    return sub(TT25, "teams", team), "2025"
+    return sub_team(TT25, "teams", team), "2025"
 
 
 def game_for(away, home):
+    """Matches on any spelling of either side, so `WAS PHI` and `WSH PHI` both
+    resolve the one game ESPN files under WSH."""
     for g in (sub(GE, "games") or []):
-        if g.get("away") == away and g.get("home") == home:
+        if is_team(g.get("away"), away) and is_team(g.get("home"), home):
             return g
     return None
 
@@ -119,14 +164,14 @@ def game_for(away, home):
 def roster(team, positions, min_tgt=40):
     out = []
     for name, v in (sub(NGS, "players") or {}).items():
-        if v.get("team") == team and v.get("pos") in positions and v.get("tgt", 0) >= min_tgt:
+        if is_team(v.get("team"), team) and v.get("pos") in positions and v.get("tgt", 0) >= min_tgt:
             out.append((name, v))
     return out
 
 
 # ---------------------------------------------------------------- the sections
 def q1_line(team):
-    row = sub(OL, "teams", team) or {}
+    row = sub_team(OL, "teams", team) or {}
     tier, rank = txt(row, "tier"), txt(row, "rank")
     line = f"OL {tier} (rank {rank} of 32)"
     if row.get("change"):
@@ -199,7 +244,7 @@ def q8_role_change(team, n=6):
     above. Live, and the only 2026 layer with real coverage as of Sep 13."""
     rows = []
     for name, v in (sub(ST, "players") or {}).items():
-        if v.get("team") != team:
+        if not is_team(v.get("team"), team):
             continue
         inj = v.get("injury_status")
         depth = v.get("depth_chart_order")
@@ -219,7 +264,7 @@ def q8_role_change(team, n=6):
 
 
 def q11_qb(team):
-    rows = [(k, v) for k, v in (sub(QB, "players") or {}).items() if v.get("team") == team]
+    rows = [(k, v) for k, v in (sub(QB, "players") or {}).items() if is_team(v.get("team"), team)]
     rows.sort(key=lambda r: -num(r[1],"pass_att_pg"))
     if not rows:
         return "no QB profile on file"
