@@ -49,6 +49,7 @@ USAGE
 """
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -161,10 +162,88 @@ def game_for(away, home):
     return None
 
 
+# ==========================================================================
+# WHO PLAYS WHERE IN 2026
+#
+# THE 2025 FILES CARRY THE TEAM A PLAYER *PLAYED FOR*, NOT THE ONE HE IS ON NOW.
+# Filtering them by team answers "who produced for this team last year", which is
+# not the question a matchup brief asks. MEASURED Sep 13 2026 against the live
+# feed: 24 of 120 NGS receivers (20%), 26 of 127 coverage rows, 5 of 41 QBs.
+#
+# IT FAILED IN BOTH DIRECTIONS, and the second one is the silent half:
+#   - A.J. Brown printed as Philadelphia's WR1 on 121 targets. He is a PATRIOT.
+#   - Dontayvion Wicks, Philadelphia's actual WR2, printed under GREEN BAY.
+# The first is visibly wrong to anyone who follows the league. The second is
+# invisible: a player simply never appears, and nothing says he is missing.
+#
+# THE APP ITSELF NEVER HAD THIS BUG. ADP_DATA has carried "aj brown -> NE" for
+# months, with the trade note beside it, and buildPlayerCard raises a movedFrom
+# banner for exactly this case. CLAUDE.md has documented the trap since Aug 8
+# 2026. This SCRIPT reintroduced it on day one by reading the JSON layers
+# directly and never consulting the app's own roster table.
+#   The lesson is not "check the team field". It is that a rule living only in
+#   prose gets re-broken by the next tool that does not read the prose.
+#
+# TWO AUTHORITIES, IN THE APP'S OWN ORDER OF PRECEDENCE:
+#   1. ADP_DATA in App.jsx - CURATED, ~300 draftable players, carries the trade
+#      notes, and is what the app actually grades against. The Aug 8 rule says
+#      in as many words: check the row's team against the ADP table first.
+#   2. status_2026.json - the live Sleeper feed. 1,931 players, far broader
+#      coverage, but third-party and unversioned.
+#   3. The 2025 row's own team, when neither knows him.
+#
+# THE FALLBACK IS THE 2025 TEAM, NOT A DROP. A retired or practice-squad player
+# is in neither authority, and dropping him would silently delete last year's
+# production from a brief that still wants it. This repo's rule: a filtered name
+# must never be silent.
+# ==========================================================================
+def _nm(n):
+    """The feed's spelling: lowercase, no punctuation, no generational suffix."""
+    n = n.lower().replace(".", "").replace("'", "").replace("-", " ")
+    n = re.sub(r"\s+(jr|sr|ii|iii|iv|v)$", "", n).strip()
+    return re.sub(r"\s+", " ", n)
+
+
+def _load_adp_teams():
+    """Parse ADP_DATA out of App.jsx. It is JavaScript, not JSON, so this reads
+    the one shape the table is written in and ignores anything else."""
+    out = {}
+    try:
+        with open(os.path.join(os.path.dirname(HERE), "App.jsx"), encoding="utf-8") as fh:
+            app = fh.read()
+    except OSError:
+        return out
+    for n, t in re.findall(
+            r'"([^"]+)":\s*\{\s*adp:\s*[\d.]+,\s*pos:\s*"\w+",\s*team:\s*"(\w+)"', app):
+        out.setdefault(_nm(n), t)
+    return out
+
+
+CUR_TEAM = _load_adp_teams()
+ADP_TEAM_COUNT = len(CUR_TEAM)
+for _k, _v in (sub(ST, "players") or {}).items():
+    if _v.get("team"):
+        CUR_TEAM.setdefault(_nm(_k), _v["team"])
+
+
+def on_roster(name, row_team, team):
+    """Is he on `team` in 2026? Curated table first, live feed second, the 2025
+    row only when neither has heard of him."""
+    return is_team(CUR_TEAM.get(_nm(name)) or row_team, team)
+
+
+def prev_team(name, row_team):
+    """Marker for numbers earned somewhere else. The row still prints - his
+    production is real - but it describes a different offence, a different
+    quarterback and a different play-caller."""
+    now = CUR_TEAM.get(_nm(name))
+    return f"  [2025 w/ {row_team}]" if (now and row_team and not is_team(now, row_team)) else ""
+
+
 def roster(team, positions, min_tgt=40):
     out = []
     for name, v in (sub(NGS, "players") or {}).items():
-        if is_team(v.get("team"), team) and v.get("pos") in positions and v.get("tgt", 0) >= min_tgt:
+        if on_roster(name, v.get("team"), team) and v.get("pos") in positions and v.get("tgt", 0) >= min_tgt:
             out.append((name, v))
     return out
 
@@ -205,7 +284,7 @@ def q6_stretch(team, n=3):
     rows.sort(key=lambda r: -num(r[1],"iay"))
     if not rows:
         return ["none with 40+ targets in 2025"]
-    return [f"{k.title():<22} {v['iay']:>5.1f} aDOT   {v['sep']:.1f} sep   {int(num(v,'tgt'))} tgt"
+    return [f"{k.title():<22} {v['iay']:>5.1f} aDOT   {v['sep']:.1f} sep   {int(num(v,'tgt'))} tgt{prev_team(k, v.get('team'))}"
             for k, v in rows[:n]]
 
 
@@ -214,13 +293,13 @@ def q4_counters(team, n=3):
     for that player. It says how he fared, never how often he will see it."""
     rows = []
     for name, v in (sub(COV, "players") or {}).items():
-        if v.get("team") == team and (num(v,"tgt_man") + num(v,"tgt_zone")) >= 40:
+        if on_roster(name, v.get("team"), team) and (num(v,"tgt_man") + num(v,"tgt_zone")) >= 40:
             rows.append((name, v))
     rows.sort(key=lambda r: -num(r[1],"edge"))
     if not rows:
         return ["no coverage splits on file"]
     return [f"{k.title():<22} man {num(v,'ypt_man'):>5.2f} ypt / zone {num(v,'ypt_zone'):>5.2f}   "
-            f"edge {num(v,'edge'):+.2f}   saw man {num(v,'man_rate')*100:.0f}%"
+            f"edge {num(v,'edge'):+.2f}   saw man {num(v,'man_rate')*100:.0f}%{prev_team(k, v.get('team'))}"
             for k, v in rows[:n]]
 
 
@@ -229,13 +308,13 @@ def q7_usage(team, n=4):
     for name, v in (MET or {}).items():
         if name.startswith("_") or not isinstance(v, dict):
             continue
-        if v.get("team") == team and v.get("pos") in ("RB", "WR", "TE") and num(v,"gp") >= 8:
+        if on_roster(name, v.get("team"), team) and v.get("pos") in ("RB", "WR", "TE") and num(v,"gp") >= 8:
             rows.append((name, v))
     rows.sort(key=lambda r: -num(r[1],"wopr"))
     if not rows:
         return ["no 2025 usage on file"]
     return [f"{k.title():<22} WOPR {num(v,'wopr'):>5.2f}  tgt sh {num(v,'tgt_sh')*100:>4.1f}%  "
-            f"snap {num(v,'snap_sh')*100:>4.1f}%  dud {num(v,'dud_rate')*100:>4.1f}%"
+            f"snap {num(v,'snap_sh')*100:>4.1f}%  dud {num(v,'dud_rate')*100:>4.1f}%{prev_team(k, v.get('team'))}"
             for k, v in rows[:n]]
 
 
@@ -264,12 +343,12 @@ def q8_role_change(team, n=6):
 
 
 def q11_qb(team):
-    rows = [(k, v) for k, v in (sub(QB, "players") or {}).items() if is_team(v.get("team"), team)]
+    rows = [(k, v) for k, v in (sub(QB, "players") or {}).items() if on_roster(k, v.get("team"), team)]
     rows.sort(key=lambda r: -num(r[1],"pass_att_pg"))
     if not rows:
         return "no QB profile on file"
     k, v = rows[0]
-    return (f"{k.title()}  {num(v,'pass_att_pg'):.1f} pass att/g  "
+    return (f"{k.title()}{prev_team(k, v.get('team'))}  {num(v,'pass_att_pg'):.1f} pass att/g  "
             f"{num(v,'rush_att_pg'):.2f} RUSH att/g  aDOT {num(v,'pass_adot'):.1f}   "
             f"[rush att r=0.815, 2nd stickiest input in the app]")
 
