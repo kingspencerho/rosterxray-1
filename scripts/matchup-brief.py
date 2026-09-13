@@ -259,6 +259,22 @@ def q1_line(team):
 
 
 def q2_tendency(team):
+    """# A 2025 PACE OR PROE NUMBER BELONGS TO THE 2025 PLAY-CALLER, NOT THE TEAM.
+    # This is "Player Metrics Carry the OLD Team" one level up, and it is worse,
+    # because a traded player is visibly wrong to anyone who follows the league
+    # while a stale tendency number looks completely normal.
+    #
+    # MEASURED Sep 13 2026 against one analyst's Week 1 walkthrough: EIGHT of the
+    # 24 teams playing that Sunday had a new offensive play-caller or head coach
+    # -- DET, NYJ, ATL, LV, ARI, LAC, TB and a new WSH defensive coordinator.
+    #
+    # WORKED CASE. Miami prints `pace slow 35.5s`, the slowest on the board, and
+    # it reads as a standing team trait. It is MIKE McDANIEL'S number, and he is
+    # the Chargers' offensive coordinator now. The number describes a staff that
+    # left. Building a totals read on it is building on a coach who is gone.
+    #
+    # There is no play-caller field in any layer, so this cannot be fixed with
+    # data -- only stated. The caveat prints at the site, on every team."""
     t, vintage = trends(team)
     o = sub(t, "off") or {}
     if not o:
@@ -429,6 +445,8 @@ def brief(away, home):
         print(f"\n### {t}")
         print(f"  Q1  line           {q1_line(t)}")
         print(f"  Q2  tendency       {q2_tendency(t)}")
+        print(f"      ⚠️ a 2025 pace/PROE is the 2025 PLAY-CALLER's, not the team's.")
+        print(f"         No layer records who calls plays. Check the staff changed.")
         print(f"  Q5  def weakness   {q5_def_weakness(t)}")
         print(f"  Q11 quarterback    {q11_qb(t)}")
         print(f"  Q6  field stretchers ({t} receivers, vs {opp}'s defence)")
@@ -512,6 +530,8 @@ def selftest():
     check("Q8 never claims the injuries are new", "THIS WEEK" not in out)
     check("Q8 states it has no onset date", "ONSET date" in out)
     check("Q8 rows carry the last-news date", "last news 20" in out)
+    check("Q2 warns the tendency is the old play-caller's",
+          "PLAY-CALLER's, not the team's" in out)
 
     # 3. A team with no data must degrade, never crash.
     try:
