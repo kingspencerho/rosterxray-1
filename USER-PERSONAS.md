@@ -145,6 +145,34 @@ share-card parsers, `league.playoffWeeks`, the Floor Layer and BENCH MOVES were 
 | 5 | that defense's weakness *(e.g. the deep ball)* | `teamtrends.def` gives run-vs-pass EPA and funnel — **nothing by route DEPTH** | ⚠️ partial |
 | 6 | who can stretch the field to exploit it | `ngs_receiving` — intended air yards + separation, 120 players | ✅ |
 
+### ⭐⭐⭐ WHAT HE DID NOT ASK BUT THE DATA SAYS TO — added Sep 13 on his question *"is there anything i should also be looking for thats important that im overlooking"*
+
+⛔⛔ **THE PATTERN IN HIS SIX: every one is about THE ENVIRONMENT — the line, the tendency, the
+scheme, the hole. Almost none are about whether HIS PLAYER GETS THE BALL.** ⭐ **Every anchor-tier
+input in §2 of `ANALYST-REFERENCE.md` is player USAGE, and he named one of them.** **Meanwhile three
+of his six sit on the weakest inputs in that same table: man rate faced `0.335`, coverage splits
+`0.161`, WR FPA `-0.073` (negative).**
+
+| # | What to add | Why, measured | Data |
+|---|---|---|---|
+| 7 | ⭐⭐ **USAGE — target share, snap share, WOPR, carries/g** | **the whole anchor tier, `0.709`-`0.826`.** The environment question is *is there food on the table*; this is *does he get a plate* | `player_metrics_2025` · `volume_2026` *(empty until W4)* |
+| 8 | ⭐⭐ **ROLE CHANGE this week** | **rank 1 in his own Source Hierarchy, and the table says a confirmed change "invalidates the sticky baseline"** | `status_2026` — **813 players, depth chart order, live** |
+| 9 | **DUD rate over SPIKE rate, for start/sit only** | dud `0.667` vs spike `0.475` — **markedly stickier** — and a head-to-head week is lost to a zero more often than won on a ceiling | `player_metrics_2025` |
+| 10 | **Implied team total** | scoring chances are not equal. *(Sep 13 slate: CLE implied `15.5`, LAC `28.5`.)* | `gameenv_2026.implied` |
+| 11 | **QB rushing attempts/g, when the call is a QB** | **`0.815` — the second-stickiest input in the entire app** | `qb_profile_2025` |
+| 12 | ⭐ **BREAKOUT WATCH — his own feature, and he raised it himself** | **the ONLY layer already shaped for in-season.** It scores a player **against his own trailing baseline**, which is how it reaches rookies and late-round darts that every percentile gate excludes *(gp>=8, snap>=0.35)* | `breakouts-2026.md` · guard 35 |
+
+⚠️⚠️ **DO NOT TELL HIM TO DROP QUESTIONS 3-5.** **§2 measures YEAR-OVER-YEAR stickiness and a
+start/sit call is a WITHIN-WEEK decision — different questions, and the file says so itself:
+*"stickiness is NECESSARY, not SUFFICIENT... this table says what to assume by DEFAULT."*** ⭐ **What
+the numbers settle is the WEIGHTING, not the question list: usage and role set the baseline, matchup
+breaks ties between close options.** **That IS the Source Hierarchy — *matchup never makes a good
+player bad or a bad player good.***
+
+⚠️ **AND ONE CAVEAT OWED ON HIS QUESTION 5:** **FPA is RAW points allowed, not schedule-adjusted.**
+**A defence that drew Kelce, Bowers and LaPorta looks soft at TE for reasons that have nothing to do
+with the defence.**
+
 ⛔⛔ **THE TWO GAPS SHARE ONE ROOT CAUSE, and naming it is the point: the app has rich OFFENCE-side
 player data and TEAM-level defensive EPA, and no DEFENCE-side positional or scheme profile.** **FPA is
 the closest thing and it is rank 5 of 5.** ⭐ **A defence-side profile is the single highest-value data
