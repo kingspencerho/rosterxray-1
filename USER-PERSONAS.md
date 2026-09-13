@@ -105,33 +105,72 @@ behind a switch.
 
 ---
 
-### P3 · The Season-Long Manager
+### P3 · The Season-Long Manager  ⭐ REWRITTEN Sep 13 2026 FROM HIS OWN SUNDAY LOOP
 
-> *"Do I start Chubb this week, and who on my bench is dead weight?"*
+> ## ⭐⭐⭐ **THIS ENTRY WAS A GUESS UNTIL SEP 13, AND THE GUESS WAS WRONG IN A SPECIFIC WAY.**
+> **The Sep 1 version read:** *"Do I start Chubb this week, and who on my bench is dead weight?"*,
+> **asking for start/sit and waiver cuts, caring about FLOOR, AVAILABILITY and the next four weeks.**
+> ⛔ **He described his actual Sunday morning and NONE of those words appear in it.** **He does not
+> ask for a floor. He asks WHY a matchup tilts, and whether the personnel on the field can exploit it.**
+> ⚠️ **PROVENANCE: `HIS`, `n=1`.** **He is a real user of exactly this product in exactly these formats,
+> which is the strongest evidence this file has ever had — and it is still one person.** ⛔ **Do not
+> restate it as "users want."**
 
-**Evidence he exists:** the redraft engine, the Yahoo/Sleeper share-card parsers,
-`league.playoffWeeks`, the Floor Layer, and BENCH MOVES.
+> *"whose o line is better, how often they run and pass, what defensive schemes does a certain team run,
+> what players does the opposing team have that could possibly counter that scheme, weaknesses that a
+> certain teams defense has (like giving up the deep ball for example), and if the opposing team has
+> players who stretch the field to exploit those holes."*
+> — **his words, and his framing: *"questions in my head that i have on sunday mornings when i make sit
+> and start decisions."***
+
+**Evidence he exists:** he is one, and he said so. *(Also: the redraft engine, the Yahoo/Sleeper
+share-card parsers, `league.playoffWeeks`, the Floor Layer and BENCH MOVES were all built for him.)*
 
 | | |
 |---|---|
-| **Where** | Yahoo or Sleeper, weekly, often Sunday morning |
-| **Time budget** | minutes — he is not on a clock |
-| **Asks** | start/sit, and who to cut for a waiver add |
-| **Cares about** | floor, availability, the next four weeks |
+| **Where** | Sunday morning, before lineups lock |
+| **Time budget** | minutes — he is not on a clock, and he is willing to read |
+| **Asks** | ⭐ **not "who do I start" — "WHY does this matchup tilt, and can these players exploit it"** |
+| **Cares about** | structural advantage: line play, tendency, scheme, and the personnel that counters it |
+| **Ignores** | a verdict with nothing under it. **His own words on the incumbent: *"its recs and analysis suck imo, and i dont trust it because theres nothing backing up their recommendations."*** |
 
-**What he needs to piece together:** **he is the only persona who genuinely
-needs availability and floor**, and the only one for whom a dud rate is worth
-more than a spike rate. Best ball has no lineup; he submits one every week.
+### ⭐⭐ THE SIX QUESTIONS — this is the in-season SPEC, in his order
 
-**What benefits him:** the reason a player is startable, not just that he is.
+| # | His question | Data on disk | State |
+|---|---|---|---|
+| 1 | whose O-line is better | `oline_2026` — rank, tier, **and in-season changes** | ✅ |
+| 2 | how often they run and pass | `teamtrends.off` — `proe`, `pace` | ✅ |
+| 3 | what scheme the defense runs | `coverage_2025` is man rate **FACED BY A RECEIVER**, not a defensive tendency | ⚠️ partial |
+| 4 | who on the other side counters that scheme | `coverage_2025.edge`, `ypt_man` vs `ypt_zone` per player | ✅ |
+| 5 | that defense's weakness *(e.g. the deep ball)* | `teamtrends.def` gives run-vs-pass EPA and funnel — **nothing by route DEPTH** | ⚠️ partial |
+| 6 | who can stretch the field to exploit it | `ngs_receiving` — intended air yards + separation, 120 players | ✅ |
 
-**Design consequence.** The Floor Layer scores redraft and nothing else. Redraft
-keeps its own competitive-balance thresholds and its own calibration. **Never
-carry a best-ball argument into his mode** — floor is irrelevant in one and the
-product in the other.
+⛔⛔ **THE TWO GAPS SHARE ONE ROOT CAUSE, and naming it is the point: the app has rich OFFENCE-side
+player data and TEAM-level defensive EPA, and no DEFENCE-side positional or scheme profile.** **FPA is
+the closest thing and it is rank 5 of 5.** ⭐ **A defence-side profile is the single highest-value data
+addition for this persona.**
+
+⭐⭐ **THE RULE THAT UNLOCKS MOST OF IT:** the app **withholds** coverage data from the AI because it
+measured `r = 0.161` year over year. **That rule protects THE GRADE from inputs that do not repeat.**
+⛔ **It does not mean the data is useless — it still DESCRIBES what happened, and description is exactly
+what question 3 and 4 need.** ✅ **Withheld from SCORING is not the same as unavailable to a READER.**
+
+**What he needs to piece together:** all six answers live in different files and nothing joins them.
+**He is doing the join in his head every Sunday.**
+
+**What benefits him:** the six answers for one game, on one screen, with the disagreements left in.
+*(Worked Sep 13 on `DAL @ NYG`: the Giants are a run funnel — rush EPA `+0.167` vs pass `+0.028` — and
+Dallas just lost LG Tyler Smith for 4-6 weeks. **The matchup says run at them; the injury says Dallas is
+less equipped to than last week.** ⭐ **Two true facts pointing opposite ways is a better input to his
+judgement than a verdict would be, and it is the shape the output should take.**)*
+
+**Design consequence.** ⛔ **This is NOT a start/sit recommender** — the not-for list below still governs,
+the pick stays the user's. ⭐⭐ **And it is the clearest example of the complementary ruling above: Yahoo
+tells him the projected points. Nothing on the market tells him the Giants funnel to the run but Dallas
+lost their left guard.** ✅ **The Floor Layer paragraph from the Sep 1 version still stands as ENGINE
+behaviour — floor scores redraft and nothing else — it just is not what he opens the app to read.**
 
 ---
-
 ### P4 · The Skeptic
 
 > *"Where did this number come from, and what season is it?"*
