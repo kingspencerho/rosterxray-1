@@ -81,11 +81,11 @@ const res = await build({
   bundle: true, write: false, format: "esm", platform: "node",
   jsx: "transform", loader: { ".jsx": "jsx" },
   external: ["react", "react-dom", "react/jsx-runtime", "lucide-react", "recharts", "html2canvas"],
-  footer: { js: "export { SITUATIONS, RECENT_NEWS, ADP_DATA };" },
+  footer: { js: "export { SITUATIONS, RECENT_NEWS, VERDICTS, ADP_DATA };" },
 });
 const bundlePath = path.join(tmpDir, "app.mjs");
 writeFileSync(bundlePath, res.outputFiles[0].text);
-const { SITUATIONS, RECENT_NEWS, ADP_DATA } = await import(pathToFileURL(bundlePath).href);
+const { SITUATIONS, RECENT_NEWS, VERDICTS, ADP_DATA } = await import(pathToFileURL(bundlePath).href);
 
 const UNAVAILABLE = "unsigned|effectively retired|a free agent|released by|out for the season|suspended|holding out";
 
@@ -98,6 +98,15 @@ const RULES = [
   {
     re: /\b(the|this) (old|prior|previous|earlier) (note|entry|read|version)\b|\bTHIS ENTRY EXISTS\b|\bused to (read|say)\b|\bsaid the opposite\b|\buntil \w+ \d+ 20\d\d (said|read)\b/i,
     why: "narrates a superseded version of itself — that history belongs in CLAUDE.md, not in model input",
+  },
+  {
+    // RULE 4 (Sep 13 2026): narrating a superseded version WITHOUT quoting it.
+    // Every prior rule keyed on quote marks or on "the old note". The Diggs and
+    // Stowers VERDICTS entries did neither: "SUPERSEDES the May 26 free-agent/
+    // effectively-retired read", "SUPERSEDES the May 19 buy-now read, which
+    // rested on a FALSE PREMISE". A dated prior read is still a prior read.
+    re: /\bsupersed(?:es|ed|ing)\b|\bthe old [\w-]*\s?(?:note|read|verdict|target|entry)\b|\brested on a false premise\b|\b(?:this|that) entry existed\b|\bthe (?:[A-Z][a-z]+ \d{1,2}|late-\w+|early-\w+|mid-\w+) (?:read|note|entry|picture|verdict)\b/i,
+    why: "narrates a superseded version without quoting it - the model keeps the old claim and drops the word that retired it",
   },
 ];
 
@@ -140,6 +149,15 @@ const entries = [];
 for (const [k, v] of Object.entries(RECENT_NEWS)) entries.push(["RECENT_NEWS", k, v]);
 for (const [k, v] of Object.entries(SITUATIONS)) if (v?.trendNote) entries.push(["SITUATIONS", k, v.trendNote]);
 for (const [k, v] of Object.entries(SITUATIONS)) if (v?.reason) entries.push(["SITUATIONS.reason", k, v.reason]);
+// ⛔⛔ VERDICTS WAS NEVER SWEPT, AND THAT IS HOW DIGGS CAME BACK A THIRD TIME
+// (Sep 13 2026). The Sep 2 note "reason was added to the swept set" meant
+// SITUATIONS.reason. VERDICTS is a separate table with its own `reason` field,
+// the prompt reads it at the verdictAlignments line, and the Diggs entry there
+// read "SUPERSEDES the May 26 free-agent/effectively-retired read" - unquoted,
+// so rule 1 could not see it even if this table had been in the loop. The
+// production nutshell then told a user Diggs was "unsigned and effectively
+// retired as of June 2026". Three prose tables, three loops, no exceptions.
+for (const [k, v] of Object.entries(VERDICTS)) if (v?.reason) entries.push(["VERDICTS.reason", k, v.reason]);
 
 const negatedWrongTeam = (key, text) => {
   const own = ADP_DATA[key]?.team;
@@ -155,6 +173,21 @@ const negatedWrongTeam = (key, text) => {
   return null;
 };
 
+// RULE 5 (Sep 13 2026): a rostered subject's entry may not carry an
+// availability word at all, quoted or not. "retired" and "unsigned" have no
+// benign use about a player who has a team. "free agent" does - "free-agent
+// signing Keaton Mitchell", "signed as a restricted free agent in March" are
+// affirmative and true - so it is banned only as a bare status. Subjects with
+// no team (ADP team "-" or "FA") are exempt: for them the word is the fact.
+const AVAIL_BARE = /\b(?:retired|unsigned)\b/i;
+const FREE_AGENT = /(?<!\b(?:restricted|exclusive-rights|as a|signed as a|undrafted)\s)\bfree[- ]agent\b(?!\s+(?:signing|addition|pickup|deal|contract|market|class|acquisition|tender|frenzy|period))/i;
+const availabilityOnRostered = (key, text) => {
+  const team = ADP_DATA[key]?.team;
+  if (!team || team === "-" || team === "FA") return null;
+  const s = String(text);
+  const m = s.match(AVAIL_BARE) || s.match(FREE_AGENT);
+  return m ? { frag: s.slice(Math.max(0, m.index - 40), m.index + 50).replace(/\s+/g, " "), team } : null;
+};
 const failures = [];
 for (const [src, key, text] of entries) {
   let hit = false;
@@ -163,6 +196,8 @@ for (const [src, key, text] of entries) {
     if (m) { failures.push({ src, key, why: rule.why, frag: m[0].slice(0, 90) }); hit = true; break; }
   }
   if (hit) continue;
+  const avail = availabilityOnRostered(key, text);
+  if (avail) { failures.push({ src, key, frag: avail.frag, why: `carries an availability word for a player rostered on ${avail.team} - say only what is true now` }); continue; }
   const wrong = negatedWrongTeam(key, text);
   if (wrong) failures.push({
     src, key, frag: wrong.frag,

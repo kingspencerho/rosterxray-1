@@ -9098,3 +9098,52 @@ it, so this could never move a roster grade. It would inform the matchup brief �
 a line next to Q5 saying the defensive read is least trustworthy where both
 coordinators are new. **That is a disclosure, not a prediction, which is the only
 shape this repo lets an untested idea ship in.**
+
+---
+
+## Diggs Came Back a Third Time, and the Guard Was Reading the Wrong Tables (fixed Sep 13, 2026)
+
+**His report, from a production nutshell:** *"the recent news flags Diggs as unsigned and effectively
+retired as of June 2026 … you need a contingency plan at WR before Week 1."* Every data layer had him
+right — all three ADP tables key him `WAS`, `RECENT_NEWS` opens *"Washington's WR2"*. **His words:
+*"this keeps happening even when I fix it… can we prevent this from happening permanently??"***
+
+**90 grades BYTE-IDENTICAL** (prose carries no score). 39 guards, 1,785 assertions.
+
+### ⛔⛔ THE CAUSE: guard 12 never read `VERDICTS`
+
+The sentence lived in **`VERDICTS.reason`**: *"SUPERSEDES the May 26 free-agent/effectively-retired
+read. Signed with WASHINGTON…"*. That field reaches the model — `verdictAlignments.push({ reason:
+v.reason })` — and **`test-no-quoted-negations.mjs` exported only `SITUATIONS, RECENT_NEWS,
+ADP_DATA`.** The Sep 2 note *"reason was added to the swept set"* meant `SITUATIONS.reason`, a
+different table. **Three prose tables reach the prompt; the guard swept two.** It was green while the
+exact text it exists to catch sat one table over.
+
+And even in a swept table it would have passed: rule 1 keys on **quote marks**, rule 2 on the phrase
+*"the old note"*. This entry did neither — it narrated a **dated** prior read, unquoted. **A dated
+prior read is still a prior read.** Same mechanism as Aug 16 (quoted) and Sep 2 (a negated team):
+the vivid words survive, the framing that retires them does not.
+
+### What changed, so it cannot recur
+
+1. **`VERDICTS.reason` is swept.** Three tables, three loops.
+2. **Rule 4 — narrating a prior version, unquoted:** `supersedes / superseded`, `the old <anything>
+   note/read/verdict/target`, `rested on a false premise`, `this entry existed`, and **a dated prior
+   read** (`the May 26 read`, `the late-July picture`). Case-insensitive — ⚠️ the first version was
+   not, and "SUPERSEDES" in capitals slipped past it in the enumeration.
+3. **Rule 5 — an availability word on a ROSTERED subject, quoted or not:** `retired`, `unsigned`, and
+   `free agent` as a bare status. Subjects whose ADP team is `-` or `FA` are exempt (for them the word
+   is the fact). **Benign uses stay legal** — *"free-agent signing Keaton Mitchell"*, *"signed as a
+   restricted free agent"* — and the control sabotage proves it.
+
+**Nine entries across six players were narrating a prior version** — Diggs, Stowers (three places),
+Murray (two), Rice, Holani, Love — all rewritten to say what is true now, dates kept. **Four
+sabotages against a file copy: `retired` in a `VERDICTS.reason` fails, `SUPERSEDES` in a `trendNote`
+fails, bare `free agent` on a rostered player fails, `free-agent signing` passes.**
+
+### The rule, restated for the fourth time because it keeps being broken in a new place
+
+**Prose entries are model input, not a changelog.** Say what is true now, in the present tense, with
+the date. Never narrate what the entry used to say, however vividly the correction wants to be
+written. The history goes in this file and the commit message. ⛔ **And a guard that enforces it
+must read EVERY table the prompt reads — a new prose table is a new loop, on the day it is added.**
