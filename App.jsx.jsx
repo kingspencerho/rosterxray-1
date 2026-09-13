@@ -2255,20 +2255,20 @@ const COACHING_ADJ = {
   // CBS graded the hire A+). Entirely new defensive staff, so HIGH CHURN
   // despite the strong tier. Hendrickson signed 4yr/$112M. Five defenders
   // opened camp on PUP. Softened -2.5 -> -2.0 on churn + PUP load, not talent.
-  BAL: { all: -2.0, note: "HIGH CHURN — Minter is HC (from LAC), Weaver is the new DC. Hendrickson added 4yr/$112M; theScore has them 6th. Five defenders opened camp on PUP; Humphrey moving to nickel off an injury year" },
+  BAL: { all: -2.0, note: "HIGH CHURN — Minter is HC (from LAC), Weaver is the new DC. Hendrickson added 4yr/$112M; theScore has them 6th. As of Sep 13 2026 the room is largely intact for the opener: Hendrickson is the OLB1 and Humphrey the CB2 on the Week 1 depth chart, and Buchanan passed his physical in late August. The churn here is COACHING and scheme, not availability" },
   // Tomlin gone after 19 years; McCarthy HC, Graham DC from LV. Top-10 read
   // holds, but this is a new HC + new DC + a DC who has run both 3-4 and 4-3,
   // with Porter Jr, Ramsey and Kent all on PUP. Softened on confidence.
-  PIT: { all: -1.5, note: "HIGH CHURN — McCarthy replaces Tomlin, Graham DC from LV. Top-10 read intact (11th DVOA 2025) but three projected starting DBs opened camp on PUP; 2025 FPA is low-confidence here" },
+  PIT: { all: -1.5, note: "HIGH CHURN — McCarthy replaces Tomlin, Graham DC from LV. Top-10 read intact (11th DVOA 2025). Secondary as of Sep 13 2026: Ramsey is off PUP and has said he is at full strength; Porter Jr has been activated but his Week 1 availability is genuinely open, with a back issue and a contract standoff both live. 2025 FPA stays low-confidence here on the staff change" },
   // "Pass rush remains elite" was overstated — see OFFSEASON note. Trading the
   // reigning DPOY at 23 sacks for a younger, less productive edge is a real
   // downgrade, so the regression is more than "slight."
-  CLE: { all: -0.5, note: "Schwartz resigned (passed over for HC), Rutenberg first-time DC keeping the scheme. Garrett traded to LAR for Verse + three picks — pressure now has to be manufactured rather than isolated" },
+  CLE: { all: -0.5, note: "Schwartz resigned (passed over for HC), Rutenberg first-time DC keeping the scheme. Garrett traded to LAR for Verse + three picks — pressure now has to be manufactured rather than isolated (as written Aug 3 2026; the personnel claims here have not been re-checked since)" },
   // Parsons IS the reason for this number, but he is not available early. Torn
   // ACL Dec 14, surgery Dec 30, opened camp on PUP, reporting points to a
   // Week 6 return. Value kept for the W15-17 window, where he should be back;
   // the W1-14 advance-rate layer is the part that overstates GB.
-  GB: { all: -1.5, note: "HIGH CHURN — Gannon DC replaces Hafley, back to a 3-4. Parsons on PUP (ACL, ~Week 6 return), Gary traded to DAL and Enagbare left: 1,000+ snaps to replace. Value reflects the W15-17 window; GB is materially softer W1-6" },
+  GB: { all: -1.5, note: "HIGH CHURN — Gannon DC replaces Hafley, back to a 3-4. Parsons is on RESERVE/PUP as of Sep 13 2026, which mandates the first four games: he sits W1 MIN, W2 NYJ, W3 ATL, W4 TB. Earliest possible return is W5 at CHI on Oct 11; his own stated target is W6 against Dallas. Torn ACL plus a meniscus procedure, and he is not cleared to practise until the nine-month mark from a Dec 30 2025 surgery. Gary traded away and Enagbare gone: 1,000+ edge snaps to replace. The value reflects the W15-17 window, where he should be back — GB is materially softer W1-4, and W5 is the first week he could play" },
   // Note replaced wholesale, not edited. Every name in the old one was wrong:
   // Dennis Allen is the SITTING DC running camp, and Greenard and Hargrave were
   // Vikings in 2025 who went to PHI and GB. The conclusion survived the audit;
@@ -2281,10 +2281,10 @@ const COACHING_ADJ = {
   WAS: { all: +0.75, note: "Rebuild, but direction is up — B/R top-5 most improved. New DC Daronte Jones (Flores lineage, attacking). Oweh 4yr/~$100M, Chenal, Settle, Douglas, Robertson; LB Sonny Styles at 7. Was last in total defense 2025, so still soft — just not statically bottom-5" },
   // "Bottom-8" was badly under-scaled: the No. 2 overall pick, a 3x All-Pro
   // safety and four veteran front-seven signings is not a bottom-8 trajectory.
-  NYJ: { all: +0.25, note: "Improving faster than the old bottom-8 note implied — EDGE David Bailey at No. 2, Minkah Fitzpatrick acquired + extended, Davis/Ossai/Enagbare/Onyemata added. B/R top-5 most improved. Glenn still calls the defense, so play-calling is continuous despite the new DC title" },
+  NYJ: { all: +0.25, note: "Improving faster than the old bottom-8 note implied — EDGE David Bailey at No. 2, Minkah Fitzpatrick acquired + extended, Davis/Ossai/Enagbare/Onyemata added. B/R top-5 most improved. Glenn still calls the defense, so play-calling is continuous despite the new DC title (as written Aug 3 2026, not re-checked since)" },
   // Same static-grade error as WAS. Tennessee spent more real money on defense
   // than nearly anyone and drafted two front-seven starters.
-  TEN: { all: +0.5, note: "Saleh HC calling his own defense, Gus Bradley DC. Enormous spend — Simmons 3yr/$105.8M, Franklin-Myers, Jermaine Johnson II, two CBs at $45M+; Faulk at 31 and Hill at 60. B/R top-5 most improved. Coming off 3-14 so scheme-install risk is real, but a static bottom-5 is now wrong" },
+  TEN: { all: +0.5, note: "Saleh HC calling his own defense, Gus Bradley DC (as written Aug 3 2026, not re-checked since). Enormous spend — Simmons 3yr/$105.8M, Franklin-Myers, Jermaine Johnson II, two CBs at $45M+; Faulk at 31 and Hill at 60. B/R top-5 most improved. Coming off 3-14 so scheme-install risk is real, but a static bottom-5 is now wrong" },
 };
 
 // === TEAM ENVIRONMENT PRIORS (2026 preseason) ===
