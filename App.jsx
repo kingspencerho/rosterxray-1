@@ -12619,6 +12619,99 @@ Analyze this best ball roster. Return JSON only.`;
     return "var(--neg)";
   };
 
+  // THE GRADE HERO - treatment B, his call Sep 12 2026, refined against his
+  // own Yahoo and Underdog recordings and shown to him as a rendered artifact
+  // before a line of this existed. Both results headers call it; two hand-typed
+  // copies would be the duplicate-definition class for the twelfth time.
+  //
+  // THE RING FILLS FROM THE LETTER, NOT THE SCORE. The two engines grade on
+  // different ladders (analyzeRedraft shifts its thresholds by league
+  // difficulty), so a score-based fill would need a second copy of both
+  // threshold sets and could disagree with the letter beside it. Filling by
+  // letter means the ring IS the grade: an A is full, a B+ is five sevenths, a
+  // D is one seventh. Sub-letter precision is carried by the printed score and
+  // the delta pill, which are real numbers the engine already produced.
+  //
+  // THE RING WEARS gradeColor(), THE SAME HUE AS THE LETTER INSIDE IT. The
+  // artifact's ring was purple; on this page purple means the playoff window,
+  // and guard 17 caps --accent-purple at one use for exactly that reason. A
+  // grade and its ring carry one meaning, so they share one colour.
+  const GRADE_LADDER = ["D", "C", "C+", "B", "B+", "A-", "A"];
+  const gradeRingFill = (g) => {
+    const i = GRADE_LADDER.indexOf(g);
+    return i === -1 ? 1 : (i + 1) / GRADE_LADDER.length;
+  };
+  const gradeCardStyle = {
+    background: "var(--bg-surface)", border: "1px solid var(--border-default)",
+    borderRadius: "8px", marginBottom: "20px", overflow: "hidden",
+  };
+  // fp is the field placement or null. Redraft passes null on purpose - the
+  // baseline file is keyed by tournament and a redraft score compared against a
+  // best-ball field would be a confident, precise, wrong number.
+  // ONE call site for fieldPlacement, guard 32's rule: the baseline file is
+  // keyed by tournament, so a second call anywhere is one step from comparing a
+  // redraft score against a best-ball field. Computed here, read by the hero
+  // and by the details block beneath it.
+  const bbFieldPlacement = analyzed && analyzed.mode !== "redraft"
+    ? fieldPlacement(analyzed.score, tournament)
+    : null;
+  const renderGradeHero = ({ grade, score, fp, title, meta, metaColor }) => {
+    const color = gradeColor(grade);
+    const pct = Math.round(gradeRingFill(grade) * 100);
+    const delta = fp && typeof score === "number" ? score - fp.median : null;
+    const up = delta != null && delta >= 0;
+    return (
+      <>
+        {/* One header band per card, hairline under it. This is the grouping
+            rule the whole treatment rests on: a card's edge is unmistakable. */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px",
+          padding: "11px 15px", background: "var(--bg-raised)", borderBottom: "1px solid var(--border-default)",
+        }}>
+          <span style={{ fontSize: "10.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-secondary)", fontWeight: 600 }}>{title}</span>
+          <span style={{ fontSize: "10px", color: metaColor || "var(--text-faint)", letterSpacing: "0.02em", textAlign: "right", fontWeight: 600 }}>{meta}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", padding: "15px 15px 0" }}>
+          <div className="rx-grade-ring" role="img" aria-label={"Grade " + grade} style={{
+            width: "92px", height: "92px", flex: "0 0 92px", borderRadius: "50%",
+            display: "grid", placeItems: "center",
+            "--rx-arc": pct + "%", "--rx-ring-color": color,
+          }}>
+            <div style={{ width: "73px", height: "73px", borderRadius: "50%", background: "var(--bg-surface)", display: "grid", placeItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "34px", fontWeight: 900, letterSpacing: "0.02em", lineHeight: 1, color }}>{grade}</span>
+            </div>
+          </div>
+          <div style={{ flex: "1 1 180px", minWidth: "160px" }}>
+            <div style={{ fontSize: "12.5px", color: "var(--text-secondary)", display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+              <span>
+                <strong style={{ color: "var(--text-primary)", fontSize: "18px", fontVariantNumeric: "tabular-nums" }}>
+                  {typeof score === "number" ? score.toFixed(1) : "—"}
+                </strong>{" "}score
+              </span>
+              {delta != null && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "4px", borderRadius: "20px", padding: "2px 8px",
+                  fontSize: "10.5px", fontWeight: 600, fontVariantNumeric: "tabular-nums",
+                  color: up ? "var(--pos)" : "var(--neg)",
+                  border: "1px solid " + (up ? "#1c4532" : "#4a1c1c"), background: up ? "#0d2318" : "#230d0d",
+                }}>{up ? "▲" : "▼"} {Math.abs(delta).toFixed(1)}</span>
+              )}
+            </div>
+            {/* THE FINDING STAYS AT REST, the reasoning taps (Sep 6 rule). And
+                "of a simulated field" stays on this line: guard 32 exists because
+                a percentile against a simulation must never read as a percentile
+                against the real field. */}
+            {fp && (
+              <div style={{ fontSize: "10.5px", color: "var(--text-faint)", marginTop: "4px", lineHeight: 1.5 }}>
+                an ordinary entry scores {fp.median} here · <strong style={{ color: "var(--text-muted)", fontWeight: 600 }}>{fp.where}</strong> of a simulated field
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  };
+
   // Shared style for native select dropdowns in custom builder (mobile-friendly)
   const selectStyle = {
     width: "100%",
@@ -12851,9 +12944,20 @@ Analyze this best ball roster. Return JSON only.`;
           background: var(--bg-base);
         }
 
-        .grade-pulse {
-          animation: pulse 2.5s ease-in-out infinite;
+        /* THE GRADE RING - treatment B, his call Sep 12 2026. It fills
+           clockwise once on arrival and replaces the infinite letter pulse that
+           lived here; two motions on one number is one too many.
+           A conic-gradient stop is NOT animatable on its own: the browser has no
+           idea --rx-arc is a percentage, so it jumps. @property declares the
+           type, which is what makes it interpolate. The keyframe has no "to" on
+           purpose - it animates to whatever the element's own inline --rx-arc
+           is, so one rule serves every grade. */
+        @property --rx-arc { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+        .rx-grade-ring {
+          background: conic-gradient(var(--rx-ring-color) 0 var(--rx-arc), var(--bg-raised) var(--rx-arc) 100%);
+          animation: rxGradeFill 1000ms cubic-bezier(.22, .9, .3, 1) 120ms both;
         }
+        @keyframes rxGradeFill { from { --rx-arc: 0%; } }
         /* THE UPLOAD HINT. Two animations carrying two different jobs: the ring
            says WHERE the button is, the dot says WHAT TO DO to it. One alone is
            ambiguous — a bare pulse could mean anything, a bare dot has no target. */
@@ -13103,6 +13207,8 @@ Analyze this best ball roster. Return JSON only.`;
              motion is off takes the instruction with it. */
           .rx-ring { animation: none; opacity: .5; }
           .rx-tap  { animation: none; opacity: 1; }
+          /* The grade ring keeps its FINAL state, never its empty one. */
+          .rx-grade-ring { animation: none; }
           .hero-diagnose-scan {
             animation: none;
             background-position: 200% center;
@@ -13190,12 +13296,6 @@ Analyze this best ball roster. Return JSON only.`;
           }
           .hero-pill { white-space: nowrap; text-align: center; font-size: 9px !important; padding: 4px 8px !important; }
           .hero-cta-btn { padding: 10px 24px !important; font-size: 18px !important; }
-        }
-        @media (max-width: 480px) {
-          .grade-banner-grid {
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-          }
         }
         @media (max-width: 480px) {
           .playoff-week-grid {
@@ -14654,32 +14754,15 @@ Analyze this best ball roster. Return JSON only.`;
         {/* Output */}
         {analyzed && analyzed.mode !== "redraft" && (
           <div className="fade-in" ref={resultsRef}>
-            {/* Grade banner */}
-            <div className="grade-banner-grid" style={{
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              gap: "24px",
-              alignItems: "center",
-              background: "linear-gradient(135deg, var(--bg-surface), #161616)",
-              border: "1px solid var(--border-strong)",
-              borderRadius: "6px",
-              padding: "24px",
-              marginBottom: "20px",
-            }}>
-              <div className="grade-pulse" style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "110px",
-                fontWeight: 900,
-                lineHeight: 1,
-                color: gradeColor(analyzed.grade),
-                letterSpacing: "-0.02em",
-              }}>
-                {analyzed.grade}
-              </div>
-              <div>
-                <div style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                  Overall Ceiling Rating · <span style={{ color: "var(--pos)" }}>{analyzed.tournament.name}</span>
-                </div>
+            {/* Grade banner - treatment B. Band, ring, then the roster row,
+                qualifiers, warnings and lookup inside one padded body. */}
+            <div style={gradeCardStyle}>
+              {renderGradeHero({
+                grade: analyzed.grade, score: analyzed.score,
+                fp: bbFieldPlacement,
+                title: "Overall ceiling rating", meta: analyzed.tournament.name, metaColor: "var(--pos)",
+              })}
+              <div style={{ padding: "10px 15px 15px" }}>
                 <button
                   onClick={() => setRosterStripOpen(o => !o)}
                   aria-expanded={rosterStripOpen}
@@ -14695,9 +14778,9 @@ Analyze this best ball roster. Return JSON only.`;
                   {["QB", "RB", "WR", "TE"].map(pos => {
                     const c = posColor(pos);
                     return (
-                      <span key={pos}>
-                        <span style={{ color: c.text, letterSpacing: "0.06em", fontWeight: 700 }}>{pos}</span>{" "}
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{analyzed.posCounts[pos]}</span>
+                      <span key={pos} style={{ fontSize: "15px", fontWeight: 600, fontVariantNumeric: "tabular-nums", letterSpacing: "0.04em" }}>
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                        <span style={{ color: c.text, fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", marginLeft: "3px" }}>{pos}</span>
                       </span>
                     );
                   })}
@@ -14740,7 +14823,7 @@ Analyze this best ball roster. Return JSON only.`;
                     Native <details> rather than a new useState: a hook cannot go inside
                     this IIFE, and the element is already an idiom in this file. */}
                 {(() => {
-                  const fp = fieldPlacement(analyzed.score, tournament);
+                  const fp = bbFieldPlacement;
                   const mc = metricCoverage(analyzed.valid);
                   const why = analyzed.advanceLayer?.disciplineWhy;
                   // Coverage is a qualifier, so it appears only when it has something to
@@ -14759,12 +14842,14 @@ Analyze this best ball roster. Return JSON only.`;
                         fontSize: "11px", lineHeight: 1.4, color: "var(--text-muted)",
                         display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0 8px",
                       }}>
-                        {fp && (
-                          <span><strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong> of a simulated field</span>
-                        )}
-                        {fp && partial && <span style={{ opacity: 0.45 }}>·</span>}
-                        {partial && (
+                        {/* The placement now sits in the hero above; this summary
+                            names what the tap opens instead of repeating it. */}
+                        {partial ? (
                           <span>graded on <strong style={{ color: "var(--text-primary)" }}>{mc.measured} of {mc.total}</strong> players</span>
+                        ) : why ? (
+                          <span>ADP discipline not scored</span>
+                        ) : (
+                          <span>how the field comparison works</span>
                         )}
                         <span style={{
                           marginLeft: "auto", color: "var(--ui-accent)",
@@ -14781,8 +14866,7 @@ Analyze this best ball roster. Return JSON only.`;
                         {fp && (
                           <div style={{ marginTop: why ? "6px" : 0 }}>
                             <span style={{ color: "var(--ui-accent)", fontWeight: 600, letterSpacing: "0.05em" }}>vs the field</span>
-                            {" · "}an ordinary entry scores <strong style={{ color: "var(--text-primary)" }}>{fp.median}</strong> here, so this roster sits <strong style={{ color: "var(--text-primary)" }}>{fp.where}</strong>
-                            {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents</span>
+                            {" · "}<span style={{ opacity: 0.8 }}>{fp.n} simulated rosters drafted off ADP, not real opponents — the median and placement are on the line above</span>
                           </div>
                         )}
                         {partial && (
@@ -14877,6 +14961,18 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+            {/* The rest of what the old grade banner held - the nutshell, strengths,
+                weaknesses and how-the-grade-is-calculated - keeps the old box. The
+                card above IS the grade; this is not, so the band must not span it.
+                Caught by asking the DOM what the card contained: the old grid's
+                second column ran all the way to the sticky index. */}
+            <div style={{
+              background: "linear-gradient(135deg, var(--bg-surface), #161616)",
+              border: "1px solid var(--border-strong)", borderRadius: "6px",
+              padding: "24px", marginBottom: "20px",
+            }}>
                 {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
@@ -15103,7 +15199,6 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   );})()}
                 </div>
-              </div>
             </div>
 
             {/* Best ball lost the input-screen copy in the same move, so it gets
@@ -16163,32 +16258,15 @@ Analyze this best ball roster. Return JSON only.`;
         {/* === REDRAFT OUTPUT === */}
         {analyzed && analyzed.mode === "redraft" && (
           <div className="fade-in" ref={resultsRef}>
-            {/* Grade banner */}
-            <div className="grade-banner-grid" style={{
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              gap: "24px",
-              alignItems: "center",
-              background: "linear-gradient(135deg, var(--bg-surface), #161616)",
-              border: "1px solid var(--border-strong)",
-              borderRadius: "6px",
-              padding: "24px",
-              marginBottom: "20px",
-            }}>
-              <div className="grade-pulse" style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "110px",
-                fontWeight: 900,
-                lineHeight: 1,
-                color: gradeColor(analyzed.grade),
-                letterSpacing: "-0.02em",
-              }}>
-                {analyzed.grade}
-              </div>
-              <div>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                  Redraft Grade · <span style={{ color: "var(--accent-purple-light)" }}>{analyzed.league.name}</span>
-                </div>
+            {/* Grade banner - treatment B. Band, ring, then the roster row,
+                qualifiers, warnings and lookup inside one padded body. */}
+            <div style={gradeCardStyle}>
+              {renderGradeHero({
+                grade: analyzed.grade, score: analyzed.score,
+                fp: null,
+                title: "Redraft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
+              })}
+              <div style={{ padding: "10px 15px 15px" }}>
                 <button
                   onClick={() => setRosterStripOpen(o => !o)}
                   aria-expanded={rosterStripOpen}
@@ -16204,9 +16282,9 @@ Analyze this best ball roster. Return JSON only.`;
                   {["QB", "RB", "WR", "TE"].map(pos => {
                     const c = posColor(pos);
                     return (
-                      <span key={pos}>
-                        <span style={{ color: c.text, letterSpacing: "0.06em", fontWeight: 700 }}>{pos}</span>{" "}
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{analyzed.posCounts[pos]}</span>
+                      <span key={pos} style={{ fontSize: "15px", fontWeight: 600, fontVariantNumeric: "tabular-nums", letterSpacing: "0.04em" }}>
+                        <span style={{ color: "var(--text-primary)" }}>{analyzed.posCounts[pos]}</span>
+                        <span style={{ color: c.text, fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", marginLeft: "3px" }}>{pos}</span>
                       </span>
                     );
                   })}
@@ -16348,6 +16426,18 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+            {/* The rest of what the old grade banner held - the nutshell, strengths,
+                weaknesses and how-the-grade-is-calculated - keeps the old box. The
+                card above IS the grade; this is not, so the band must not span it.
+                Caught by asking the DOM what the card contained: the old grid's
+                second column ran all the way to the sticky index. */}
+            <div style={{
+              background: "linear-gradient(135deg, var(--bg-surface), #161616)",
+              border: "1px solid var(--border-strong)", borderRadius: "6px",
+              padding: "24px", marginBottom: "20px",
+            }}>
                 {(analyzed.nutshell || aiLoading) && (
                   <div style={{
                     marginTop: "14px",
@@ -16574,7 +16664,6 @@ Analyze this best ball roster. Return JSON only.`;
                     </div>
                   );})()}
                 </div>
-              </div>
             </div>
 
             {/* ⛔ THE WHAT-IF SWAP TOOL WAS REMOVED HERE, Sep 9 2026, his call —

@@ -8916,3 +8916,76 @@ win rate. **The conclusion survived the audit; the reasoning was rebuilt under i
 ⛔ **"Pass 2 is the delta changes" was the plan, and the evidence did not support one.** An audit
 that changes nothing and says why is a result; changing a number to make the pass feel productive
 is how an unsourced magnitude becomes an arbitrary one.
+
+---
+
+## The Grade Card, Treatment B (built Sep 13, 2026)
+
+**His call, after a three-way rendered comparison and two screen recordings of the Yahoo and
+Underdog apps. PRESENTATION ONLY — 90 grades BYTE-IDENTICAL** (15 tournaments x 5 fixtures plus 3
+leagues x 5) against a pristine worktree at HEAD. 39 guards, 1,785 assertions, mirror identical,
+LF preserved. Design source: the signed-off artifact at
+`https://claude.ai/code/artifact/6fdf1c0d-1e68-4577-8932-fbb2b17f998b`.
+
+### What it is
+
+One `renderGradeHero()` helper, called by both results headers. A header band names the card
+(`OVERALL CEILING RATING · General` / `REDRAFT GRADE · Standard 12-Team`), then the ring with the
+letter inside it, the score, a delta pill against the field median, and the placement line. The
+structure line (`3 QB 5 RB 7 WR 3 TE`) sits under it beside the match counter and the roster chip,
+then the coverage disclosure, then the player lookup. **The card ends there.**
+
+### Four design calls that differ from the artifact, and why
+
+1. **THE RING FILLS FROM THE LETTER, NOT THE SCORE.** `GRADE_LADDER = D C C+ B B+ A- A`; an A is
+   full, a B+ is five sevenths. The two engines grade on different ladders — `analyzeRedraft`
+   shifts its thresholds by league difficulty — so a score-based fill would need a second copy of
+   both threshold sets (the duplicate-definition class, twelfth instance waiting to happen) **and
+   could disagree with the letter beside it.** Sub-letter precision is carried by the printed
+   score and the delta pill, both real engine numbers.
+2. **THE RING WEARS `gradeColor()`, THE SAME HUE AS THE LETTER.** The artifact's ring was purple.
+   On this page purple means the playoff window, and guard 17 caps `--accent-purple` at one use
+   for exactly that reason. A grade and its ring carry one meaning, so they share one colour.
+3. **NO "of 10".** The artifact printed `8.3 of 10`. Scores run past 10 (ref1 grades A 10.73), so
+   the label would be false. It prints `9.7 score`.
+4. **THE PLACEMENT MOVED UP TO THE HERO AND OUT OF THE DISCLOSURE.** *"an ordinary entry scores
+   5.46 here · in the top 10% of a simulated field"* is the finding and rests; the `why ⌄` beneath
+   now names what the tap opens (coverage, or the ADP-discipline reason, or the simulation caveat)
+   instead of repeating it. ⛔ **"of a simulated field" stays at rest** — guard 32 asserts it.
+
+### ⚠️⚠️ THE OLD GRID'S SECOND COLUMN HELD THE WHOLE HEADER, and only the DOM showed it
+
+The old `grade-banner-grid` put the 110px letter in column one and **everything through
+"How is this grade calculated?" in column two.** The first build wrapped that column in the card,
+so the band promised a group edge and then spanned the nutshell, Strengths and Weaknesses — a
+952px "grade card". **The source read fine; the render looked plausible; asking the DOM for the
+card's children is what caught it** (`padChildren` listed the nutshell). The card now closes after
+the roster strip and the remainder keeps the old box, untouched. 952px → 337px.
+
+### Guard 32 was hardened, not relaxed — the sixth guard to fail on its own documentation
+
+It counted `fieldPlacement(` on raw source, so a helper comment reading *"fp is fieldPlacement()
+or null"* failed it on correct code. Comments are now blanked length-preserving before both
+counts (same fix as guards 17, 25, 31, 34, 38). ✅ **Proven both ways against a file copy, never
+`git checkout`:** a comment carrying the token passes; a real second call in code still fails.
+
+⚠️ **Two of the three patch scripts that touched that guard did nothing and reported an anchor
+count of 0** — the first because bash-heredoc-into-Python mangled regex backslashes, the second
+because the guard file was one of the **103 files still CRLF on disk**, so a `\n` anchor could not
+match. That second one is the Sep 8 `test-free-agents.mjs` trap again. **A patch that asserts
+`count == 1` before writing is what made both failures loud instead of silent.**
+
+### Measured, in a real browser
+
+```
+phone 375x812   redraft: ring 86% (A-), rxGradeFill running, 0 sub-32px targets, no overflow
+                best ball: ring 100% (A), "▲ 4.2", placement at rest, 0 sub-32px, no overflow
+desktop 1024    hero two-column 107px tall · card 337px · 0 sub-32px targets in the card
+console         one error: the documented Vite /api/analyze 404
+```
+
+### Not built, on purpose
+
+The artifact's other two cards — the metric-coverage ribbon and the roster list with lens tabs
+and slot pucks — and any restyle of the nutshell, Strengths and Weaknesses. He asked for the grade
+card; the rest is its own pass and its own calibration.

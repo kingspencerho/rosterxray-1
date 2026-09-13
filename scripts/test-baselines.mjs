@@ -64,8 +64,15 @@ for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
 }
 ok("fieldPlacement is defined exactly once",
   (app.match(/const fieldPlacement = /g) || []).length === 1);
-const calls = [...app.matchAll(/fieldPlacement\(/g)].map(m => m.index)
-  .filter(i => !app.slice(Math.max(0, i - 30), i).includes("const fieldPlacement = "));
+// COUNTED ON CODE, NOT PROSE. Sep 13 2026: a helper comment reading "fp is
+// fieldPlacement() or null" tripped this on correct code - the sixth guard in
+// this repo to fail on its own documentation (17, 25, 31, 34, 38 before it).
+// Comments are blanked length-preserving so every index below still points at
+// the real file. A real second call in code still fails; negative-tested.
+const codeOnly = app.replace(/\/\*[\s\S]*?\*\//g, m => " ".repeat(m.length))
+  .replace(/^([ \t]*)\/\/.*$/gm, (m, lead) => lead + " ".repeat(m.length - lead.length));
+const calls = [...codeOnly.matchAll(/fieldPlacement\(/g)].map(m => m.index)
+  .filter(i => !codeOnly.slice(Math.max(0, i - 30), i).includes("const fieldPlacement = "));
 ok("fieldPlacement has exactly one call site", calls.length === 1, `${calls.length} found`);
 
 console.log("\nthe file describes itself honestly");
@@ -161,7 +168,7 @@ ok("the redraft copy names the layers that go blind THERE",
   app.includes("floor and lineup-confidence checks cannot see them"),
   "best ball says ceiling/floor/naked-RB; redraft has different consumers");
 ok("the field baseline stays best-ball only",
-  (app.match(/fieldPlacement\(/g) || []).length === 1,
+  (codeOnly.match(/fieldPlacement\(/g) || []).length === 1,   // codeOnly: comments blanked, see above
   "exactly one CALL site; a redraft copy would compare a redraft score against a best-ball field");
 for (const engine of ["const analyzeRoster = ", "const analyzeRedraft = "]) {
   const body = bodyOf(app, engine); if (!body) continue;
