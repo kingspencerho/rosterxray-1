@@ -9270,3 +9270,89 @@ that earns it. Slot pucks for identity, the projection as value-over-unit, the t
 dimmer. **Measured at 375 with the console read:** panel mounts, 7 pucks, no "implied" in the panel,
 yellow on the six "X out" labels and nothing else, 0 sub-32px targets, no overflow. 90 grades
 byte-identical.
+
+---
+
+## 📊 Week 1 2026 Graded the App Back (Sep 13, 2026 — the first real-world read)
+
+**MEASURED, n=274 projected players across 14 of 16 Week 1 games.** Source: nflverse
+`stats_player_week_2026.csv`, scored with this repo's own half-PPR formula (the one in
+`scripts/build-gamelogs.py`), joined to `grading/data/gameenv_2026.json` on `App.jsx`'s own
+`normalize()`. **Excluded: DAL@NYG (not yet in the nflverse release) and DEN@KC (Monday, unplayed).**
+
+### The projection number the Matchups panel headlines
+
+| | n | mean proj | mean actual | bias | MAE |
+|---|---|---|---|---|---|
+| all | 274 | 7.29 | 7.51 | **+0.22** | 4.32 |
+| QB | 28 | 17.0 | 17.0 | +0.0 | 6.9 |
+| RB | 70 | 7.7 | 8.1 | +0.5 | 4.4 |
+| WR | 114 | 6.3 | 6.4 | +0.1 | 4.3 |
+| TE | 61 | 4.4 | 4.7 | +0.3 | 3.3 |
+
+⭐ **UNBIASED IN THE AGGREGATE, USELESS PER PLAYER.** The mean is within a quarter of a point at
+every position — and the median absolute error is **3.15 points on a 7.3-point mean**. Of 116
+players projected at 8 or more, **20% scored under 5 and 24% scored 18 or more.** The number is a
+centre of mass, not a forecast, which is exactly what `_meta.caveats` already says: *"a projection
+is a model opinion, not a market price."*
+
+⭐⭐ **THE ONE THING IT DOES DO WELL, and it is the reason to keep it on the row:** of 158 players
+projected UNDER 8, exactly **one** scored 18 or more. **It is a reliable floor filter and an
+unreliable ceiling estimate.** Treat the digit as a sorting key, never as a prediction.
+
+### The line the panel prints under the teams
+
+13 priced games played. **Favourite won outright 10/13 (77%). Favourite covered 8/13 (62%).
+Total went OVER 8/13** — and the size is the story: **average actual total 53.3 against an average
+posted total of 45.1, a mean miss of +8.2 points.** CHI@CAR finished 96 on a 47.5.
+
+**The two flags, read honestly:**
+- `shootout` (|spread| ≤3 and total ≥46) fired 3 times. **2 of 3 cleared the number** — CHI@CAR 96/47.5 and GB@MIN 61/46.5; DAL@NYG landed 48 on a 48.5.
+- `blowout` (|spread| ≥7 and total ≤44) fired once, on CLE@JAX, which finished 34-10. **Correct, but 5 priced games were decided by 14+ and the flag saw one of them.** ⚠️ **High precision, low recall — say "this line expects a blowout", never "these are the blowouts".**
+
+### What the prose tables got right and wrong
+
+✅ **Diggs.** The entry fixed this morning by guard 12 said he is a rostered Washington starter.
+**Week 1: 9 targets, 4-55-1TD, 13.5 half-PPR.** The "retired" sentence would have been live on the
+site through the exact week it was disproved on television.
+
+✅ **Travis Hunter**, updated Sep 11: *"projected to play full-time cornerback… a WR2 projection
+presumes offensive usage nobody has confirmed."* **Week 1: listed at CB, 1 target, 1-8.**
+
+✅ **Jadarian Price over George Holani** (Price RB1, Holani RB2): **10-52 against 8-29.** Direction
+right, gap narrower than the entry implies.
+
+✅ **Goedert is still Philadelphia's TE1** (the load-bearing clause of the Stowers entry): **21.7
+points, two touchdowns.** Stowers did not record a snap.
+
+⛔⛔ **KYLER MURRAY — THE ENTRY IS WRONG IN TWO PLACES AND ONE OF THEM WAS ALREADY WRONG AT DEPLOY
+TIME.** It reads *"McCarthy is the BACKUP"* and *"THE JOB IS SETTLED."* **Minnesota named Carson
+Wentz QB2 and dropped J.J. McCarthy to QB3 on Sep 9 — four days before the deploy** — and Murray
+left Week 1 after 11 plays with a concussion (0.6 points; Wentz threw three touchdowns in relief).
+
+⭐⭐⭐ **THIS IS A SECOND STALENESS CLASS AND GUARD 12 CANNOT SEE IT.** Guard 12 catches an
+AVAILABILITY word on a rostered player (*retired*, *unsigned*, *free agent*) and narration about a
+prior version. **A depth-chart claim that reality overturned contains none of those.** The
+detectable half is the phrasing: **"THE JOB IS SETTLED" and "NO leash" are permanent claims in a
+file whose subject changes weekly.** The cheap guard is a date check, not a word check — an entry
+asserting a settled depth chart whose `updated` date is older than the current NFL week is a
+re-read prompt.
+
+### What did NOT break
+
+⭐ **Team assignments are clean.** All 274 matched players were checked against their real Week 1
+club: **zero mismatches**, the only hits being the `WAS`/`WSH` alias. Whatever else drifts in this
+repo, the 2026 roster layer is current.
+
+### Reproduce
+
+```
+curl -sSL -o wk.csv https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2026.csv
+```
+Score with the `SCORE` dict at the top of `scripts/build-gamelogs.py`; join on `normalize()` from
+`App.jsx`, stripping a trailing Jr/Sr/II-V (Sleeper drops suffixes, nflverse keeps them — that
+alone cost 24 joins on the first pass and the misses were disproportionately stars).
+
+⚠️ **PROVENANCE: one week, one season, winners and losers both present, but n=13 priced games.**
+It is enough to describe how the app behaved in Week 1. **It is not enough to retune anything** —
+a 62% cover rate and a 77% favourite rate are what a single week of any season looks like.
