@@ -416,6 +416,42 @@ def q7_usage(team, n=4):
             for k, v in rows[:n]]
 
 
+def q7b_unmeasured(team):
+    """2026 starters with NO 2025 row. Every read above is BLIND to these players.
+
+    # ⛔⛔ THIS COST A REAL CALL, Sep 13 2026. Arizona's two 2025 running backs were
+    # both on IR, so a usage read built on player_metrics_2025 returned an empty
+    # backfield and the conclusion written was "Arizona cannot run". Arizona then
+    # won outright as the week's biggest underdog, controlling the game on the
+    # ground 37:31 to 22:29, behind ROOKIE Jeremiyah Love -- who was listed DC1 in
+    # status_2026 the whole time and has no 2025 row anywhere.
+    #
+    # THE DEFECT IS STRUCTURAL, NOT A ONE-OFF. Every 2025 layer -- player_metrics,
+    # ngs_receiving, coverage, qb_profile, player_efficiency -- can only describe
+    # players who produced in 2025. Rookies are invisible to all of them, and so
+    # is anyone who missed the season. The live depth chart knows them; nothing
+    # else does.
+    #
+    # ⭐ THE FIX IS A DISCLOSURE, NOT A PROJECTION. Nothing here estimates what an
+    # unmeasured player will do -- that would be inventing data, which is worse
+    # than missing it. It prints WHO the numbers cannot see, so an empty position
+    # group reads as "blind here" rather than as "nobody plays here".
+    """
+    rows = []
+    for name, v in (sub(ST, "players") or {}).items():
+        if not is_team(v.get("team"), team):
+            continue
+        pos, dc = v.get("pos"), v.get("depth_chart_order")
+        if pos not in ("QB", "RB", "WR", "TE") or dc is None or dc > 2:
+            continue
+        src = (sub(QB, "players") or {}) if pos == "QB" else (sub(MET, "players") or MET or {})
+        if _nm(name) not in src:
+            rows.append((dc, "%-22s %-3s DC%s%s" % (
+                name.title(), pos, dc,
+                "  " + v["injury_status"] if v.get("injury_status") else "")))
+    return [r for _, r in sorted(rows)]
+
+
 def q8_role_change(team, n=6):
     """Rank 1 in the Source Hierarchy: the thing that invalidates every baseline
     above. Live, and the only 2026 layer with real coverage as of Sep 13.
@@ -544,6 +580,11 @@ def brief(away, home):
         print(f"  Q7  usage — the anchor tier (WOPR 0.752, tgt sh 0.729, snap 0.709)")
         for r in q7_usage(t):
             print(f"        {r}")
+        _blind = q7b_unmeasured(t)
+        if _blind:
+            print(f"  Q7b NO 2025 DATA — every read above is BLIND to these starters")
+            for r in _blind:
+                print(f"        {r}")
         print(f"  Q8  availability  [rank 1 — invalidates every baseline above]")
         print(f"      ⚠️ CURRENT status. The feed has no ONSET date, so a Friday injury")
         print(f"         and a year-old one print identically. Check before pricing one.")
@@ -826,6 +867,14 @@ def selftest():
     # either the caveat or the date column, fails here instead of silently
     # shipping a recency claim the feed cannot support.
     check("Q8 never claims the injuries are new", "THIS WEEK" not in out)
+    # ⛔ MUST-FAIL: a 2026 starter with no 2025 row has to be NAMED, not silently
+    # dropped. Arizona is the worked case -- rookie RB Jeremiyah Love was DC1 in
+    # the live feed and absent from every 2025 layer, so the backfield read came
+    # back empty and was reported as "cannot run". He won the game on the ground.
+    _ari = q7b_unmeasured("ARI")
+    check("an unmeasured 2026 starter is named rather than dropped",
+          any("Love" in r for r in _ari), _ari)
+    check("a fully-measured team prints nothing", q7b_unmeasured("ZZZ") == [])
     check("Q8 states it has no onset date", "ONSET date" in out)
     check("Q8 rows carry the last-news date", "last news 20" in out)
     # DAL is unverified and NYG changed play-caller, so one brief exercises both.
