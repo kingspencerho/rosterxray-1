@@ -9356,3 +9356,72 @@ alone cost 24 joins on the first pass and the misses were disproportionately sta
 ⚠️ **PROVENANCE: one week, one season, winners and losers both present, but n=13 priced games.**
 It is enough to describe how the app behaved in Week 1. **It is not enough to retune anything** —
 a 62% cover rate and a 77% favourite rate are what a single week of any season looks like.
+
+---
+
+## Guard 41: A Depth Chart Is a Weekly Fact (Sep 13, 2026)
+
+**The defect it was built from.** On Week 1 Sunday the Kyler Murray entry read, in production:
+*"McCarthy is the BACKUP. NO leash or re-evaluation language was attached... THE JOB IS SETTLED."*
+**Minnesota had named Carson Wentz QB2 and dropped J.J. McCarthy to QB3 on Sep 9 2026 - four days
+before that deploy** - and Murray then left Week 1 with a concussion after eleven snaps. Two wrong
+claims in one entry, one of them already wrong when it shipped.
+
+⛔ **GUARD 12 CANNOT SEE THIS, AND THAT IS WHY IT IS A SECOND FILE.** Guard 12 catches an
+availability word on a rostered player and narration about a superseded version. **Every word in
+the Murray entry was affirmative, present tense, and true when written. The defect is not the
+wording, it is the clock.**
+
+### The two rules
+
+| | fires | what it catches | the cure |
+|---|---|---|---|
+| **1 permanence** | year-round | *the job is settled* · *no leash* · *the competition is over* | rewrite - a weekly file may not foreclose next week |
+| **2 stale role claim** | **in season only** | a stated current position (*is the starter*, *is the WR2*, *named the starter*) dated more than **7 days** ago | **one clause**: say when you will look again |
+
+⭐⭐ **RULE 2's CURE IS THE DESIGN.** A guard whose only remedy is a rewrite gets disabled the first
+busy week. This one steps back for `re-check` / `re-validate` / `unconfirmed` / `week-to-week` -
+**an entry that says when it expires is not making a permanent claim, whatever its date.** The
+repo already wrote that way in places (*"Re-check after preseason Week 3"*); the guard makes the
+idiom mandatory for role claims instead of optional.
+
+⭐ **RULE 2 IS OFF IN THE OFFSEASON ON PURPOSE.** Out of season the card's own 30/45-day ageing is
+the right instrument and this would only duplicate it. In season, a camp-dated depth chart is a
+different kind of wrong: **games have been played on top of it.**
+
+### It was calibrated before it shipped, and the calibration changed the design
+
+Measured over all **294 prose entries** on Sep 13 2026:
+
+| candidate | would have failed |
+|---|---|
+| rule 1 (permanence) | **2** - both the Murray defect, zero false positives |
+| a BROAD role regex, stale, no cure | **36** ⛔ a wall, rejected |
+| rule 2 as written | **7** |
+
+⛔ **36 RED ENTRIES TEACHES A SESSION TO DELETE THE GUARD. 7 TEACHES IT TO FIX SEVEN ENTRIES.**
+That is the whole argument for `ROLE_CLAIM` being high precision and low recall, and it is stated
+in the file so nobody "improves" it back into a wall.
+
+⚠️ **THE DETERMINER IS LOAD-BEARING, and the first draft proved it.** Allowing a bare role noun
+after the copula failed a CORRECT Brissett sentence - **"$15M guaranteed IS STARTER MONEY"** is a
+contract fact, not a depth-chart claim. Requiring *the* / *his team's* costs the loose phrasings
+(*is RB1*) and buys back the false positive. **That case is now a must-pass line in `--selftest`.**
+
+### What it found on its first real run, beyond Murray
+
+**Braelon Allen** - *"Allen holds the job outright"*, 44 days old. **Week 1 answered it the other
+way: Hall 22-102-1 against Allen's 10-40.** **Adam Randall** - *"Hill holds the job today"*,
+confirmed (Hill 6 carries, Randall no touches) but undated for the season. **Malachi Fields** -
+*"Nabers is tracking to play Week 1"*, resolved (Nabers played, 6-69). **All three reads survived
+contact; all three were written as if August were still true.**
+
+### What was NOT changed, and it is his call
+
+**The Murray verdict is still `TARGET` at `HIGH` confidence, and the situation/risk flags are
+untouched.** Prose carries no score - 90 baselines byte-identical, and `VERDICTS.date` only sets a
+`stale` badge for the prompt, never a number. **But a HIGH-confidence TARGET on a quarterback in
+the concussion protocol is a credibility call, not a mechanical one**, so it is left standing and
+named here rather than quietly downgraded.
+
+**41 guards, suite green, `vite build` clean.**

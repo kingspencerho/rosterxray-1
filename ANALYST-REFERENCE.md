@@ -1540,7 +1540,8 @@ rather than sitting beside them.
 | `bash scripts/refresh-inseason.sh [season] [--live-only]` | the weekly job, **8 steps as of Sep 13 2026**. Steps 1-6 are nflverse season releases and no-op safely before Week 1; **steps 7 (Sleeper) and 8 (lines/projections) are live and return data pre-season**, so a partial run is normal and is reported as `Partly refreshed`. `--live-only` runs 7-8 alone for the Saturday pass. ⚠️ Two steps both printed `5/8` until Sep 13 — the live-FPA step took a number team trends already held |
 | `python scripts/coaching-adj-impact.py [--inert]` | **what each `COACHING_ADJ` delta actually DOES.** The matchup score is strictly tier-banded, so a delta crossing no rank boundary cannot move a grade for ANY roster — **WAS +0.75 and NYJ +0.25 cross none and are INERT.** Needs no roster, changes nothing. ⭐ Run it before and after touching a delta |
 | `python3 scripts/refresh-adp.py [--source underdog\|ffc] [--table data\|yahoo] [--apply]` | ADP drift report. **Reports by default, never auto-applies** |
-| `npm test` | **39 guards**, chained with `&&`, so the run stops at the first failure |
+| `npm test` | **41 guards**, chained with `&&`, so the run stops at the first failure |
+| `node scripts/test-stale-depth-claims.mjs [--selftest]` | **guard 41 (Sep 13 2026) - a depth chart is a weekly fact.** Rule 1 fails any entry claiming a job is permanently settled (*the job is settled*, *no leash*), year-round. Rule 2 fails an entry stating a CURRENT depth-chart position off a date more than 7 days old, **in season only**, unless it says when it will be re-checked. ⭐ Calibrated against all 294 prose entries before shipping: a broad role regex flagged 36 and was rejected as a wall; this one flags what is actually stale. `--selftest` proves both rules fire and that correct prose does not |
 | `npm run build` | Vite production build |
 
 ### Runbooks
