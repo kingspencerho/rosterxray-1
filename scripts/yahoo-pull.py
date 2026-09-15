@@ -58,7 +58,28 @@ USE
     python3 scripts/yahoo-pull.py --teams            # list your teams, get a key
     python3 scripts/yahoo-pull.py --team <team_key>  # roster + opponent + FAs
     python3 scripts/yahoo-pull.py --team <key> --week 5
+    python3 scripts/yahoo-pull.py --team <key> --json    # raw JSON to stdout, still not saved
     python3 scripts/yahoo-pull.py --self-test        # no network, no credentials
+
+⛔⛔ NOTHING IS WRITTEN TO DISK. THE PULL IS DISPLAYED AND LET GO.
+    The API Access and Use Agreement, Exhibit A section 2.c.vii, reads:
+    "Developer shall not store, cache or index the Yahoo Fantasy Information."
+    There is no personal-use exemption, so a script that quietly saved a copy on
+    every run would be out of compliance on its FIRST run. Until Sep 15 2026 this
+    file did exactly that -- it wrote ~/.config/rosterxray/yahoo_team.json
+    unconditionally, with no way to switch it off.
+
+    --out still exists, because a deliberate act is different from a default, and
+    it now prints what the agreement says before it writes. Section 6 is the
+    reason to think twice: on termination you must delete every copy within ten
+    business days, "including any analyses, test results or other data created in
+    connection with or while using" it -- so a derived summary is covered too.
+
+    ⭐ WHAT YOU CAN KEEP INSTEAD: your own decisions. A record of what you
+    started and why is a record of YOUR behaviour, not information retrieved from
+    Yahoo's database, and the facts in it can come from nflverse, which carries no
+    such restriction. Same shape as the betting ledger: log the REASON, not the
+    market data.
 
 ⚠️ THE LIVE API PATH IS UNVERIFIED IN THIS REPO. It was written against Yahoo's
     published contract and cannot be exercised here -- there are no credentials
@@ -356,6 +377,32 @@ def pull_team(token: str, team_key: str, week, fa_limit: int) -> dict:
     }
 
 
+def render(data: dict, summary: str) -> None:
+    """Print the pull so a human can read it. WRITES NOTHING - that is the point.
+
+    A wall of raw JSON is not a Sunday-morning instrument. The two questions this
+    view answers are the two the app cannot answer today: who is on my roster with
+    what injury tag, and who is actually available in MY league.
+    """
+    print(summary)
+    roster = data.get("roster") or []
+    if roster:
+        print("\nROSTER (%d)" % len(roster))
+        for p in roster:
+            print("  %-4s %-3s %-26s %-4s %s" % (
+                p.get("slot") or "-", p.get("pos") or "-",
+                p.get("name") or "?", p.get("team") or "-", p.get("status") or ""))
+    fas = data.get("free_agents") or []
+    if fas:
+        print("\nFREE AGENTS (%d, by rank)" % len(fas))
+        for p in fas:
+            own = p.get("pct_owned")
+            own = ("%s%%" % own).rjust(5) if own not in (None, "") else "    -"
+            print("  %s  %-3s %-26s %-4s %s" % (
+                own, p.get("pos") or "-", p.get("name") or "?",
+                p.get("team") or "-", p.get("status") or ""))
+
+
 # --- self test -------------------------------------------------------------
 def self_test() -> int:
     fails = []
@@ -435,6 +482,29 @@ def self_test() -> int:
         refused = True
     ok("saving a token INSIDE the repo is refused", refused)
     ok("no token file was created in the repo", not (REPO_ROOT / "yahoo_token.json").exists())
+    print("\nthe no-cache default — the pull is shown, not saved")
+    import io as _io, contextlib as _ctx
+    _sample = {
+        "_meta": {"week": 2}, "league": {"name": "Test League", "num_teams": 12},
+        "opponent": {"name": "Them"},
+        "roster": [{"name": "Justin Jefferson", "pos": "WR", "team": "MIN",
+                    "slot": "WR", "status": None, "pct_owned": 99}],
+        "free_agents": [{"name": "Caleb Douglas", "pos": "WR", "team": "MIA",
+                         "status": "Q", "pct_owned": 12}],
+    }
+    _buf = _io.StringIO()
+    with _ctx.redirect_stdout(_buf):
+        render(_sample, "summary line")
+    _shown = _buf.getvalue()
+    # Assert the SHAPE, not the column widths: a cosmetic width change must not
+    # fail this, but dropping the slot or the team column must.
+    _rline = next((l for l in _shown.splitlines() if "Justin Jefferson" in l), "")
+    ok("the roster line leads with the lineup slot and carries the team",
+       _rline.strip().startswith("WR") and "MIN" in _rline, _rline)
+    ok("it prints free agents with ownership and injury tag",
+       "Caleb Douglas" in _shown and "12%" in _shown and "Q" in _shown)
+    ok("it prints the summary line", "summary line" in _shown)
+
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
 
@@ -450,7 +520,11 @@ def main() -> int:
     ap.add_argument("--redirect", default=None,
                     help=f"redirect URI registered on the Yahoo app (default {DEFAULT_REDIRECT})")
     ap.add_argument("--env", default=str(DEFAULT_DIR / "yahoo.env"), help="credentials file")
-    ap.add_argument("--out", default=None, help="write JSON here (default ~/.config/rosterxray/)")
+    ap.add_argument("--json", action="store_true",
+                    help="raw JSON to stdout instead of the readable view (still not saved)")
+    ap.add_argument("--out", default=None,
+                    help="ALSO save a copy here. Off by default: the agreement forbids "
+                         "storing Yahoo Fantasy Information")
     ap.add_argument("--self-test", action="store_true", help="no network, no credentials")
     a = ap.parse_args()
 
@@ -478,19 +552,31 @@ def main() -> int:
         return 0
 
     data = pull_team(token, a.team, a.week, a.fa_limit)
-    out = Path(a.out).expanduser() if a.out else DEFAULT_DIR / "yahoo_team.json"
-    # An --out inside the repo is allowed but must be deliberate: a roster is
-    # personal-track content, which CLAUDE.md rule 4 keeps out of a public repo.
-    if a.out and inside_repo(out):
-        print(f"WARNING: writing a personal roster inside the PUBLIC repo at {out}.\n"
-              f"         Make sure it is gitignored before you commit.", file=sys.stderr)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=2))
     m, lg = data["_meta"], data["league"]
-    print(f"{lg.get('name')} · week {m['week']} · {len(data['roster'])} rostered · "
-          f"{len(data['free_agents'])} free agents"
-          + (f" · vs {data['opponent']['name']}" if data.get("opponent") else " · no matchup found"))
-    print(f"-> {out}")
+    summary = (f"{lg.get('name')} · week {m['week']} · {lg.get('num_teams') or '?'} teams · "
+               f"{len(data['roster'])} rostered · {len(data['free_agents'])} free agents"
+               + (f" · vs {data['opponent']['name']}" if data.get("opponent") else " · no matchup found"))
+
+    # DISPLAY, DO NOT STORE. Both branches print and neither touches the disk.
+    if a.json:
+        print(json.dumps(data, indent=2))
+    else:
+        render(data, summary)
+
+    # --out is the deliberate exception, and it says so out loud before it writes.
+    if a.out:
+        out = Path(a.out).expanduser()
+        # An --out inside the repo is allowed but must be deliberate: a roster is
+        # personal-track content, which CLAUDE.md rule 4 keeps out of a public repo.
+        if inside_repo(out):
+            print(f"WARNING: writing a personal roster inside the PUBLIC repo at {out}.\n"
+                  f"         Make sure it is gitignored before you commit.", file=sys.stderr)
+        print("NOTE: the API agreement restricts storing Yahoo Fantasy Information\n"
+              "      (Exhibit A 2.c.vii). Delete this file when you are done with it.",
+              file=sys.stderr)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(data, indent=2))
+        print(f"-> {out}", file=sys.stderr)
     return 0
 
 

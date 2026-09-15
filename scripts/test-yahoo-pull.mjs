@@ -88,5 +88,27 @@ console.log("\n4. the script's own self-test passes (Yahoo's JSON shape, token e
   ok("no assertion is short-circuited with `or True`", !/or True\)/.test(src));
 }
 
+console.log("\n5. nothing is written to disk unless --out is passed");
+{
+  // WHY (Sep 15 2026): the API Access and Use Agreement, Exhibit A 2.c.vii, reads
+  // "Developer shall not store, cache or index the Yahoo Fantasy Information."
+  // There is no personal-use exemption. Until this date the script wrote
+  // ~/.config/rosterxray/yahoo_team.json on EVERY run with no way to switch it
+  // off, so a first run would have been out of compliance before it finished.
+  // The default is now display-only; --out is the deliberate exception.
+  ok("--out still defaults to None", /add_argument\("--out",\s*default=None/.test(src));
+  ok("a display-only renderer exists", /def render\(/.test(src));
+  // The pull's write must sit UNDER `if a.out:`. Structural, because the failure
+  // this catches is a future edit hoisting it back out to the top level.
+  const pullWrite = src.match(/if a\.out:[\s\S]{0,900}?out\.write_text\(/);
+  ok("the pulled roster is written only inside `if a.out:`", !!pullWrite);
+  ok("no write to the old unconditional default path",
+     !/out = Path\(a\.out\)\.expanduser\(\) if a\.out else DEFAULT_DIR/.test(src));
+  ok("--out says out loud that storing is restricted",
+     /agreement restricts storing Yahoo Fantasy Information/.test(src));
+  ok("the no-cache rule is documented at the top of the file",
+     /NOTHING IS WRITTEN TO DISK/.test(src));
+}
+
 console.log(`\n${fail === 0 ? "PASS  yahoo-pull is credential-safe" : "FAIL  " + fail + " assertion(s)"}`);
 process.exit(fail ? 1 : 0);
