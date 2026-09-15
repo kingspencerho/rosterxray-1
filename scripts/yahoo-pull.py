@@ -81,7 +81,24 @@ USE
     such restriction. Same shape as the betting ledger: log the REASON, not the
     market data.
 
-⚠️ THE LIVE API PATH IS UNVERIFIED IN THIS REPO. It was written against Yahoo's
+✅ THE OAUTH PATH IS VERIFIED AGAINST THE LIVE API — Sep 15 2026, first real run.
+    --auth completed end to end: authorize URL accepted, code exchanged, token
+    written to ~/.config/rosterxray/yahoo_token.json. So the client id, the client
+    secret and the redirect URI are all correct, and the token store works.
+
+⭐⭐ WHAT A PRE-PROVISIONING FAILURE LOOKS LIKE, so nobody misdiagnoses it later.
+    With a valid token but no Fantasy Sports permission attached to the app, every
+    fantasy endpoint returns:
+
+        HTTP 401  oauth_problem="additional_authorization_required"
+
+    ⛔ THAT IS NOT A BROKEN CONFIG. It is Yahoo saying the credentials are fine and
+    the APP is not entitled to this API yet. A generic "invalid credentials" read of
+    it would send you back to re-check the .env, which is the wrong end of the
+    problem. The fix is provisioning, which is Yahoo's side: countersignature of the
+    API Access and Use Agreement, then the Fantasy permission attached to the app.
+
+⚠️ THE FANTASY DATA PATH REMAINS UNVERIFIED. It was written against Yahoo's
     published contract and cannot be exercised here -- there are no credentials
     in this environment and there never should be. --self-test covers every part
     that does not need the network: the path safety rules, the token file
