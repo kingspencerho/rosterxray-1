@@ -292,8 +292,25 @@ def main():
     oe, pace, dpass, drush, drun_yds, weeks, games = collect(rows)
     teams, max_week, league = build(oe, pace, dpass, drush, drun_yds, weeks, games)
 
+    # ⚠️ GENERATED, NOT HAND-TYPED. This text lived only inside
+    # teamtrends_2025.json until Sep 16 2026 - added by hand at e828b5f while
+    # this builder was crashing on the drun_yds NameError - so the moment 2026
+    # was rebuilt the two vintages carried different _meta keys and the guard
+    # went red. A note that explains a generated field belongs in the generator.
+    EXPL_RUN_NOTE = (
+        "expl_run is explosive RUNS ALLOWED, and it is deliberately separate from "
+        "rush_epa. rush_epa is the average value allowed per run; expl_run counts the "
+        "tail. A defence can be good on the first and poor on the second, so any "
+        "question about ONE big play is answered here and never by the average. "
+        "Three thresholds are published because a prop is often written at 15 and 10 "
+        "is the common explosive cut; a missing threshold is how a question gets "
+        "answered with the nearest available number instead of the right one. "
+        "Every row here carries computed_from_pbp=true."
+    )
+
     out = {
         "_meta": {
+            "expl_run_note": EXPL_RUN_NOTE,
             "season": a.season,
             "weeks_covered": max_week,
             "season_complete": max_week >= 18,

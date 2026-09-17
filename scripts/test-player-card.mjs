@@ -33,7 +33,7 @@ mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { newsDateFor, buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand, WORK_COLOR };\n";
+  "\nexport { newsDateFor, buildPlayerCard, CARD_PERCENTILES, cardPercentile, ADP_DATA, PLAYER_METRICS, CARD_GLOSSARY, CARD_METRICS, CARD_DESCRIPTIVE, buildPlayerNews, parseNewsDate, RECENT_NEWS, SITUATIONS, GAME_LOGS, GAME_LOGS_CUR, gameBand, WORK_COLOR, getMetrics };\n";
 const outfile = path.join(tmpDir, "c.mjs");
 await build({
   stdin: { contents: src, loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
@@ -307,8 +307,46 @@ ok("cards carry game logs", withLog.length > 50, `${withLog.length} of ${draftab
 ok("...and each game is banded", withLog.every(c => c.gameLog.games.every(g => g.band)));
 ok("...and stats are paired with their column names",
    withLog.every(c => c.gameLog.games.every(g => g.stats.every(st => st.label && st.value != null))));
-ok("the 2026 placeholder is empty, so nothing renders as current",
-   (e.GAME_LOGS_CUR._meta?.weeks_covered || 0) === 0);
+// ⛔ THIS ASSERTION USED TO READ `weeks_covered === 0` — it encoded "we are still
+// preseason" as a fact about the app, and went red the first time the in-season
+// refresh ran for real (Sep 16 2026). A guard that fails when the data arrives is
+// testing the calendar, not the code. It now asserts the BEHAVIOUR in whichever
+// state the data is in, so it is correct in both and stays correct all season.
+{
+  const curWeeks = e.GAME_LOGS_CUR._meta?.weeks_covered || 0;
+  const withCur = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team, NOW)).filter(c => c.gameLogCur);
+  if (curWeeks === 0) {
+    ok("the current season is empty, so nothing renders as current", withCur.length === 0);
+  } else {
+    ok(`the current season is live (${curWeeks}w), so cards carry it`, withCur.length > 0, `${withCur.length} cards`);
+    ok("...and every current-season game is inside the weeks covered",
+       withCur.every(c => c.gameLogCur.games.every(g => g.week >= 1 && g.week <= curWeeks)));
+  }
+}
+
+// ⭐ THE LIVE-SEASON BRANCH CREATED A THIRD KIND OF PLAYER and it rendered silently:
+// a rookie with 2026 games and no 2025 season. `card.reason` is suppressed the
+// moment a current log exists, and the omitted list keyed on 2025 metrics alone,
+// so five sections vanished with nothing explaining them. Jeremiyah Love, Carnell
+// Tate, Jadarian Price and Makai Lemon all did it the day Week 1 landed.
+{
+  const rookiesLive = draftable
+    .map(([n, v]) => [n, e.buildPlayerCard(n, v.pos, v.team, NOW)])
+    .filter(([n, c]) => c.gameLogCur && !e.getMetrics(n));
+  if (rookiesLive.length) {
+    ok(`a player with current games and no prior season names his sections (${rookiesLive.length} found)`,
+       rookiesLive.every(([, c]) => (c.omitted || []).length > 0),
+       rookiesLive.filter(([, c]) => !(c.omitted || []).length).map(([n]) => n).join(", "));
+    // ⛔ AND THE WHY MUST NOT BE A GATE HE NEVER FACED. "needs 8+ games" says he
+    // played and fell short; he has no season at all. Same false-explanation rule
+    // the QB case already enforces one assertion down.
+    ok("...and the reason given is an absent season, never a population gate",
+       rookiesLive.every(([, c]) => (c.omitted || [])
+         .filter(x => /Opportunity|Route workload|Week outcomes/.test(x.label))
+         .every(x => x.kind === "no-season" && !/needs \d/.test(x.why))),
+       JSON.stringify((rookiesLive[0][1].omitted || []).slice(0, 3)));
+  }
+}
 ok("the chart gives every week a slot, including ones he did not play",
    /did not play/.test(app) && /Math\.max\(log\.maxWeek, 1\)/.test(app));
 // The full-log disclosure is an AFFORDANCE, not deprioritised reference:

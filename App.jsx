@@ -4277,26 +4277,49 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   // Reading the flag instead of the condition listed seven gates under a card
   // that already says "no 2025 NFL data", which is the same sentence twice.
   const hasAnySeason = !!getMetrics(name);
-  if (hasAnySeason) {
+  // ⛔⛔ A ROOKIE WITH 2026 GAMES IS A THIRD STATE THIS BLOCK DID NOT HAVE, and it
+  // arrived the first time the in-season refresh ran for real (Sep 16 2026).
+  //
+  // The `reason` line below is suppressed as soon as `card.gameLogCur` exists —
+  // correctly, because a card carrying a 2026 game log is not a blank card. But
+  // this block keyed on 2025 metrics alone, so a rookie fell between the two:
+  // no reason line to explain him AND no omitted list either, and five sections
+  // vanished in silence. Jeremiyah Love, Carnell Tate, Jadarian Price and Makai
+  // Lemon all rendered that way the moment gamelogs_2026 had Week 1 in it.
+  //
+  // ⚠️ AND THE WHY MATTERS AS MUCH AS THE WHETHER. "needs 8+ games" is a POPULATION
+  // GATE — it says he played and did not clear a bar. A rookie did not fail that
+  // bar, he has no 2025 season at all. Printing the gate text at him is the same
+  // false explanation this block already refuses to give a QB about Opportunity.
+  const noSeasonButLive = !hasAnySeason && !!card.gameLogCur;
+  if (hasAnySeason || noSeasonButLive) {
     const rzGate = REDZONE._meta?.gates?.min_player_rz_opp;
     const omit = [];
-    const gated = (cond, group, label, why) => { if (cond) omit.push({ group, label, why }); };
+    // `kind` travels with the entry so the RENDERER can pick its closing
+    // sentence: "population gates, not missing data" is true of a gate and false
+    // of an absent season, and the note asserts one of them out loud.
+    const kind = noSeasonButLive ? "no-season" : "gate";
+    const gated = (cond, group, label, why) => { if (cond) omit.push({ group, label, why, kind }); };
+    // Applies ONLY to reasons that cite a 2025 population gate. A reason that is
+    // "this does not apply to him" — NGS covering WR and TE only, a passing split
+    // on a QB — stays true for a rookie and is left alone.
+    const g25 = (gateText) => noSeasonButLive ? "no 2025 season on file" : gateText;
     // ⚠️ A SECTION THAT DOES NOT APPLY IS NOT A GATE HE FAILED. CARD_METRICS.QB
     // is empty BY DESIGN — a quarterback's volume lives in Volume profile — so
     // telling a QB reader that Burrow "needs 8+ games" for Opportunity is a
     // false explanation, which is worse than no explanation.
     const isQB = pos === "QB";
-    gated(!isQB && !card.metrics.length, "job", "Opportunity", `needs ${CARD_POP_GATE}`);
+    gated(!isQB && !card.metrics.length, "job", "Opportunity", g25(`needs ${CARD_POP_GATE}`));
     gated(!card.deployment.length, "job", "Deployment",
-      pos === "WR" || pos === "TE" ? `needs ${NGS_POP_GATE}`
+      pos === "WR" || pos === "TE" ? g25(`needs ${NGS_POP_GATE}`)
         : isQB ? "receiving tracking does not apply to him"
         : "Next Gen Stats receiving tracking covers WR and TE only");
-    gated(!isQB && !card.routes.length, "job", "Route workload", `needs ${ROUTES_POP_GATE}`);
-    gated(!card.redzone.length, "job", "Red zone", rzGate ? `needs ${rzGate}+ red-zone opportunities` : "no qualifying red-zone volume");
-    gated(!isQB && !card.descriptive.length, "production", "Week outcomes", `needs ${CARD_POP_GATE}`);
+    gated(!isQB && !card.routes.length, "job", "Route workload", g25(`needs ${ROUTES_POP_GATE}`));
+    gated(!card.redzone.length, "job", "Red zone", g25(rzGate ? `needs ${rzGate}+ red-zone opportunities` : "no qualifying red-zone volume"));
+    gated(!isQB && !card.descriptive.length, "production", "Week outcomes", g25(`needs ${CARD_POP_GATE}`));
     gated(!card.coverage, "reference", "Man vs zone",
-      pos === "QB" ? "a passing split does not apply to him" : `needs ${COV_POP_GATE}`);
-    gated(!card.efficiency.length, "reference", "Efficiency", "no qualifying 2025 per-touch volume");
+      pos === "QB" ? "a passing split does not apply to him" : g25(`needs ${COV_POP_GATE}`));
+    gated(!card.efficiency.length, "reference", "Efficiency", g25("no qualifying 2025 per-touch volume"));
     card.omitted = omit;
   } else {
     card.omitted = [];
@@ -9398,7 +9421,9 @@ const OmittedNote = ({ items, group }) => {
           {i > 0 && " · "}
           <span style={{ color: "var(--text-muted)" }}>{x.label}</span> ({x.why})
         </span>
-      ))}. Population gates, not missing data.
+      ))}. {mine.every(x => x.kind === "no-season")
+          ? "He has no 2025 season on file — these are 2025 sections."
+          : "Population gates, not missing data."}
     </div>
   );
 };

@@ -2,25 +2,25 @@
  "_meta": {
   "caveats": [
    "PROE and the funnel gap are labelled against the LEAGUE MEAN of this season, never against zero: 2025 league mean pass_oe is -1.74 and the league mean funnel gap is positive because passing is more efficient than running everywhere.",
-   "off describes the team's OWN offence. def describes the defence it fields, which is a fact about the players who FACE it — never about its own skill players.",
+   "off describes the team's OWN offence. def describes the defence it fields, which is a fact about the players who FACE it \u2014 never about its own skill players.",
    "Pace is snap-to-snap elapsed clock and includes the previous play's duration, so it runs ~5s higher than published pace tables. Use the ranking, not the number.",
    "A partial season's own SD is inflated by sampling noise, so a partial build flags FEWER teams than a complete one. That is the conservative direction and is intended."
   ],
+  "expl_run_note": "expl_run is explosive RUNS ALLOWED, and it is deliberately separate from rush_epa. rush_epa is the average value allowed per run; expl_run counts the tail. A defence can be good on the first and poor on the second, so any question about ONE big play is answered here and never by the average. Three thresholds are published because a prop is often written at 15 and 10 is the common explosive cut; a missing threshold is how a question gets answered with the nearest available number instead of the right one. Every row here carries computed_from_pbp=true.",
   "gate_rule": "mean absolute sampling error <= half the league spread, measured by resampling each team's own 2025 plays",
   "gates": {
    "funnel_plays_per_side": 350,
    "pace_plays": 200,
    "proe_plays": 300
   },
-  "generated": "2026-09-12",
+  "generated": "2026-09-17",
   "league": {
    "funnel_mean": 0.0248,
    "funnel_sd": 0.1019,
    "pace_mean": 32.762,
    "pace_sd": 1.082,
    "proe_mean": -1.739,
-   "proe_sd": 3.327,
-   "expl_run_rate20_mean": 0.023
+   "proe_sd": 3.327
   },
   "neutral": {
    "margin": 7,
@@ -34,28 +34,28 @@
   "source": "nflverse play_by_play (nflfastR); pass_oe/xpass and epa as published",
   "teams_covered": 32,
   "threshold_source": "1 SD of this build's own league distribution",
-  "weeks_covered": 18,
-  "expl_run_note": "expl_run is explosive RUNS ALLOWED, and it is deliberately separate from rush_epa. rush_epa is the average value allowed per run; expl_run counts the tail. A defence can be good on the first and poor on the second -- TB 2025 is exactly that (rush_epa -0.0724, but 20+ runs on 2.78% of carries, 22nd of 32 against a 2.30%% league rate). Any question about ONE big play is answered here, never by the average. Rows with computed_from_pbp=false were hand-pulled from the NFL.com team-defence table on 2026-09-13 and carry only the 20+/40+ thresholds that table publishes; the next pbp rebuild replaces them and fills n10/n15."
+  "weeks_covered": 18
  },
  "teams": {
   "ARI": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 62,
+     "n15": 28,
+     "n20": 15,
+     "rate10": 0.136,
+     "rate15": 0.0614,
+     "rate20": 0.0329,
+     "runs": 456
+    },
     "funnel": 0.1419,
     "funnel_label": "pass funnel",
     "funnel_rel": 0.1171,
     "pass_epa": 0.1499,
     "pass_plays": 597,
     "rush_epa": 0.008,
-    "rush_plays": 456,
-    "expl_run": {
-     "runs": 489,
-     "n20": 15,
-     "n40": 3,
-     "rate20": 0.0307,
-     "rank20": 27,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 456
    },
    "games": 17,
    "off": {
@@ -71,22 +71,23 @@
   },
   "ATL": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 51,
+     "n15": 23,
+     "n20": 15,
+     "rate10": 0.1116,
+     "rate15": 0.0503,
+     "rate20": 0.0328,
+     "runs": 457
+    },
     "funnel": -0.0569,
     "funnel_label": "average",
     "funnel_rel": -0.0817,
     "pass_epa": -0.0286,
     "pass_plays": 590,
     "rush_epa": 0.0283,
-    "rush_plays": 457,
-    "expl_run": {
-     "runs": 466,
-     "n20": 15,
-     "n40": 2,
-     "rate20": 0.0322,
-     "rank20": 29,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 457
    },
    "games": 17,
    "off": {
@@ -102,22 +103,23 @@
   },
   "BAL": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 47,
+     "n15": 22,
+     "n20": 12,
+     "rate10": 0.1122,
+     "rate15": 0.0525,
+     "rate20": 0.0286,
+     "runs": 419
+    },
     "funnel": 0.1262,
     "funnel_label": "average",
     "funnel_rel": 0.1014,
     "pass_epa": 0.0742,
     "pass_plays": 658,
     "rush_epa": -0.052,
-    "rush_plays": 419,
-    "expl_run": {
-     "runs": 434,
-     "n20": 12,
-     "n40": 1,
-     "rate20": 0.0276,
-     "rank20": 21,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 419
    },
    "games": 17,
    "off": {
@@ -133,22 +135,23 @@
   },
   "BUF": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 65,
+     "n15": 28,
+     "n20": 13,
+     "rate10": 0.1461,
+     "rate15": 0.0629,
+     "rate20": 0.0292,
+     "runs": 445
+    },
     "funnel": -0.2078,
     "funnel_label": "run funnel",
     "funnel_rel": -0.2326,
     "pass_epa": -0.1136,
     "pass_plays": 505,
     "rush_epa": 0.0942,
-    "rush_plays": 445,
-    "expl_run": {
-     "runs": 450,
-     "n20": 13,
-     "n40": 7,
-     "rate20": 0.0289,
-     "rank20": 25,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 445
    },
    "games": 17,
    "off": {
@@ -164,22 +167,23 @@
   },
   "CAR": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 47,
+     "n15": 24,
+     "n20": 13,
+     "rate10": 0.1015,
+     "rate15": 0.0518,
+     "rate20": 0.0281,
+     "runs": 463
+    },
     "funnel": 0.0827,
     "funnel_label": "average",
     "funnel_rel": 0.0579,
     "pass_epa": 0.1057,
     "pass_plays": 535,
     "rush_epa": 0.023,
-    "rush_plays": 463,
-    "expl_run": {
-     "runs": 479,
-     "n20": 13,
-     "n40": 2,
-     "rate20": 0.0271,
-     "rank20": 20,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 463
    },
    "games": 17,
    "off": {
@@ -195,22 +199,23 @@
   },
   "CHI": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 59,
+     "n15": 27,
+     "n20": 13,
+     "rate10": 0.1305,
+     "rate15": 0.0597,
+     "rate20": 0.0288,
+     "runs": 452
+    },
     "funnel": 0.0298,
     "funnel_label": "average",
     "funnel_rel": 0.005,
     "pass_epa": 0.0313,
     "pass_plays": 570,
     "rush_epa": 0.0015,
-    "rush_plays": 452,
-    "expl_run": {
-     "runs": 457,
-     "n20": 13,
-     "n40": 4,
-     "rate20": 0.0284,
-     "rank20": 24,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 452
    },
    "games": 17,
    "off": {
@@ -226,22 +231,23 @@
   },
   "CIN": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 62,
+     "n15": 31,
+     "n20": 19,
+     "rate10": 0.1336,
+     "rate15": 0.0668,
+     "rate20": 0.0409,
+     "runs": 464
+    },
     "funnel": 0.0778,
     "funnel_label": "average",
     "funnel_rel": 0.053,
     "pass_epa": 0.1647,
     "pass_plays": 571,
     "rush_epa": 0.0869,
-    "rush_plays": 464,
-    "expl_run": {
-     "runs": 479,
-     "n20": 19,
-     "n40": 3,
-     "rate20": 0.0397,
-     "rank20": 31,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 464
    },
    "games": 17,
    "off": {
@@ -257,22 +263,23 @@
   },
   "CLE": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 46,
+     "n15": 22,
+     "n20": 14,
+     "rate10": 0.1013,
+     "rate15": 0.0485,
+     "rate20": 0.0308,
+     "runs": 454
+    },
     "funnel": -0.0781,
     "funnel_label": "run funnel",
     "funnel_rel": -0.1029,
     "pass_epa": -0.1315,
     "pass_plays": 540,
     "rush_epa": -0.0534,
-    "rush_plays": 454,
-    "expl_run": {
-     "runs": 475,
-     "n20": 14,
-     "n40": 4,
-     "rate20": 0.0295,
-     "rank20": 26,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 454
    },
    "games": 17,
    "off": {
@@ -288,22 +295,23 @@
   },
   "DAL": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 64,
+     "n15": 35,
+     "n20": 14,
+     "rate10": 0.1475,
+     "rate15": 0.0806,
+     "rate20": 0.0323,
+     "runs": 434
+    },
     "funnel": 0.1259,
     "funnel_label": "average",
     "funnel_rel": 0.1011,
     "pass_epa": 0.2206,
     "pass_plays": 593,
     "rush_epa": 0.0947,
-    "rush_plays": 434,
-    "expl_run": {
-     "runs": 452,
-     "n20": 14,
-     "n40": 2,
-     "rate20": 0.031,
-     "rank20": 28,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 434
    },
    "games": 17,
    "off": {
@@ -319,22 +327,23 @@
   },
   "DEN": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 30,
+     "n15": 11,
+     "n20": 6,
+     "rate10": 0.0756,
+     "rate15": 0.0277,
+     "rate20": 0.0151,
+     "runs": 397
+    },
     "funnel": -0.0723,
     "funnel_label": "average",
     "funnel_rel": -0.0971,
     "pass_epa": -0.1151,
     "pass_plays": 658,
     "rush_epa": -0.0428,
-    "rush_plays": 397,
-    "expl_run": {
-     "runs": 400,
-     "n20": 6,
-     "n40": 2,
-     "rate20": 0.015,
-     "rank20": 5,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 397
    },
    "games": 17,
    "off": {
@@ -350,22 +359,23 @@
   },
   "DET": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 54,
+     "n15": 15,
+     "n20": 10,
+     "rate10": 0.1253,
+     "rate15": 0.0348,
+     "rate20": 0.0232,
+     "runs": 431
+    },
     "funnel": 0.0083,
     "funnel_label": "average",
     "funnel_rel": -0.0165,
     "pass_epa": -0.0065,
     "pass_plays": 609,
     "rush_epa": -0.0148,
-    "rush_plays": 431,
-    "expl_run": {
-     "runs": 446,
-     "n20": 10,
-     "n40": 3,
-     "rate20": 0.0224,
-     "rank20": 18,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 431
    },
    "games": 17,
    "off": {
@@ -381,22 +391,23 @@
   },
   "GB": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 40,
+     "n15": 14,
+     "n20": 8,
+     "rate10": 0.0846,
+     "rate15": 0.0296,
+     "rate20": 0.0169,
+     "runs": 473
+    },
     "funnel": 0.097,
     "funnel_label": "average",
     "funnel_rel": 0.0722,
     "pass_epa": 0.0776,
     "pass_plays": 584,
     "rush_epa": -0.0194,
-    "rush_plays": 473,
-    "expl_run": {
-     "runs": 476,
-     "n20": 8,
-     "n40": 0,
-     "rate20": 0.0168,
-     "rank20": 9,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 473
    },
    "games": 17,
    "off": {
@@ -412,22 +423,23 @@
   },
   "HOU": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 35,
+     "n15": 14,
+     "n20": 8,
+     "rate10": 0.0888,
+     "rate15": 0.0355,
+     "rate20": 0.0203,
+     "runs": 394
+    },
     "funnel": -0.1362,
     "funnel_label": "run funnel",
     "funnel_rel": -0.161,
     "pass_epa": -0.1861,
     "pass_plays": 588,
     "rush_epa": -0.0499,
-    "rush_plays": 394,
-    "expl_run": {
-     "runs": 400,
-     "n20": 8,
-     "n40": 2,
-     "rate20": 0.02,
-     "rank20": 15,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 394
    },
    "games": 17,
    "off": {
@@ -443,22 +455,23 @@
   },
   "IND": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 43,
+     "n15": 15,
+     "n20": 7,
+     "rate10": 0.0984,
+     "rate15": 0.0343,
+     "rate20": 0.016,
+     "runs": 437
+    },
     "funnel": 0.0896,
     "funnel_label": "average",
     "funnel_rel": 0.0648,
     "pass_epa": 0.0398,
     "pass_plays": 664,
     "rush_epa": -0.0497,
-    "rush_plays": 437,
-    "expl_run": {
-     "runs": 448,
-     "n20": 7,
-     "n40": 1,
-     "rate20": 0.0156,
-     "rank20": 6,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 437
    },
    "games": 17,
    "off": {
@@ -474,22 +487,23 @@
   },
   "JAX": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 34,
+     "n15": 10,
+     "n20": 5,
+     "rate10": 0.0947,
+     "rate15": 0.0279,
+     "rate20": 0.0139,
+     "runs": 359
+    },
     "funnel": -0.1005,
     "funnel_label": "run funnel",
     "funnel_rel": -0.1252,
     "pass_epa": -0.1404,
     "pass_plays": 671,
     "rush_epa": -0.0399,
-    "rush_plays": 359,
-    "expl_run": {
-     "runs": 369,
-     "n20": 5,
-     "n40": 0,
-     "rate20": 0.0136,
-     "rank20": 4,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 359
    },
    "games": 17,
    "off": {
@@ -505,22 +519,23 @@
   },
   "KC": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 41,
+     "n15": 14,
+     "n20": 5,
+     "rate10": 0.0947,
+     "rate15": 0.0323,
+     "rate20": 0.0115,
+     "runs": 433
+    },
     "funnel": 0.0424,
     "funnel_label": "average",
     "funnel_rel": 0.0176,
     "pass_epa": -0.0004,
     "pass_plays": 545,
     "rush_epa": -0.0428,
-    "rush_plays": 433,
-    "expl_run": {
-     "runs": 448,
-     "n20": 5,
-     "n40": 2,
-     "rate20": 0.0112,
-     "rank20": 1,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 433
    },
    "games": 17,
    "off": {
@@ -536,22 +551,23 @@
   },
   "LA": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 39,
+     "n15": 14,
+     "n20": 7,
+     "rate10": 0.0903,
+     "rate15": 0.0324,
+     "rate20": 0.0162,
+     "runs": 432
+    },
     "funnel": -0.0339,
     "funnel_label": "average",
     "funnel_rel": -0.0587,
     "pass_epa": -0.0746,
     "pass_plays": 636,
     "rush_epa": -0.0407,
-    "rush_plays": 432,
-    "expl_run": {
-     "runs": 436,
-     "n20": 7,
-     "n40": 2,
-     "rate20": 0.0161,
-     "rank20": 7,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 432
    },
    "games": 17,
    "off": {
@@ -567,22 +583,23 @@
   },
   "LAC": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 52,
+     "n15": 21,
+     "n20": 7,
+     "rate10": 0.1281,
+     "rate15": 0.0517,
+     "rate20": 0.0172,
+     "runs": 406
+    },
     "funnel": -0.0202,
     "funnel_label": "average",
     "funnel_rel": -0.0449,
     "pass_epa": -0.0915,
     "pass_plays": 549,
     "rush_epa": -0.0714,
-    "rush_plays": 406,
-    "expl_run": {
-     "runs": 416,
-     "n20": 7,
-     "n40": 3,
-     "rate20": 0.0168,
-     "rank20": 10,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 406
    },
    "games": 17,
    "off": {
@@ -598,22 +615,23 @@
   },
   "LV": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 50,
+     "n15": 17,
+     "n20": 9,
+     "rate10": 0.1016,
+     "rate15": 0.0346,
+     "rate20": 0.0183,
+     "runs": 492
+    },
     "funnel": 0.1128,
     "funnel_label": "average",
     "funnel_rel": 0.088,
     "pass_epa": 0.0769,
     "pass_plays": 562,
     "rush_epa": -0.0359,
-    "rush_plays": 492,
-    "expl_run": {
-     "runs": 511,
-     "n20": 9,
-     "n40": 2,
-     "rate20": 0.0176,
-     "rank20": 11,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 492
    },
    "games": 17,
    "off": {
@@ -629,22 +647,23 @@
   },
   "MIA": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 60,
+     "n15": 31,
+     "n20": 16,
+     "rate10": 0.1302,
+     "rate15": 0.0672,
+     "rate20": 0.0347,
+     "runs": 461
+    },
     "funnel": 0.0823,
     "funnel_label": "average",
     "funnel_rel": 0.0576,
     "pass_epa": 0.1256,
     "pass_plays": 555,
     "rush_epa": 0.0432,
-    "rush_plays": 461,
-    "expl_run": {
-     "runs": 469,
-     "n20": 16,
-     "n40": 6,
-     "rate20": 0.0341,
-     "rank20": 30,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 461
    },
    "games": 17,
    "off": {
@@ -660,22 +679,23 @@
   },
   "MIN": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 55,
+     "n15": 21,
+     "n20": 6,
+     "rate10": 0.1056,
+     "rate15": 0.0403,
+     "rate20": 0.0115,
+     "runs": 521
+    },
     "funnel": -0.0949,
     "funnel_label": "run funnel",
     "funnel_rel": -0.1197,
     "pass_epa": -0.1481,
     "pass_plays": 496,
     "rush_epa": -0.0532,
-    "rush_plays": 521,
-    "expl_run": {
-     "runs": 529,
-     "n20": 6,
-     "n40": 0,
-     "rate20": 0.0113,
-     "rank20": 2,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 521
    },
    "games": 17,
    "off": {
@@ -691,22 +711,23 @@
   },
   "NE": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 42,
+     "n15": 17,
+     "n20": 9,
+     "rate10": 0.104,
+     "rate15": 0.0421,
+     "rate20": 0.0223,
+     "runs": 404
+    },
     "funnel": -0.0237,
     "funnel_label": "average",
     "funnel_rel": -0.0485,
     "pass_epa": -0.057,
     "pass_plays": 562,
     "rush_epa": -0.0333,
-    "rush_plays": 404,
-    "expl_run": {
-     "runs": 411,
-     "n20": 9,
-     "n40": 1,
-     "rate20": 0.0219,
-     "rank20": 17,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 404
    },
    "games": 17,
    "off": {
@@ -722,22 +743,23 @@
   },
   "NO": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 52,
+     "n15": 20,
+     "n20": 11,
+     "rate10": 0.1044,
+     "rate15": 0.0402,
+     "rate20": 0.0221,
+     "runs": 498
+    },
     "funnel": 0.0268,
     "funnel_label": "average",
     "funnel_rel": 0.0021,
     "pass_epa": -0.0461,
     "pass_plays": 531,
     "rush_epa": -0.0729,
-    "rush_plays": 498,
-    "expl_run": {
-     "runs": 517,
-     "n20": 11,
-     "n40": 1,
-     "rate20": 0.0213,
-     "rank20": 16,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 498
    },
    "games": 17,
    "off": {
@@ -753,22 +775,23 @@
   },
   "NYG": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 75,
+     "n15": 36,
+     "n20": 19,
+     "rate10": 0.1693,
+     "rate15": 0.0813,
+     "rate20": 0.0429,
+     "runs": 443
+    },
     "funnel": -0.1387,
     "funnel_label": "run funnel",
     "funnel_rel": -0.1635,
     "pass_epa": 0.0279,
     "pass_plays": 589,
     "rush_epa": 0.1666,
-    "rush_plays": 443,
-    "expl_run": {
-     "runs": 465,
-     "n20": 19,
-     "n40": 6,
-     "rate20": 0.0409,
-     "rank20": 32,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 443
    },
    "games": 17,
    "off": {
@@ -784,22 +807,23 @@
   },
   "NYJ": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 65,
+     "n15": 26,
+     "n20": 15,
+     "rate10": 0.1272,
+     "rate15": 0.0509,
+     "rate20": 0.0294,
+     "runs": 511
+    },
     "funnel": 0.2188,
     "funnel_label": "pass funnel",
     "funnel_rel": 0.194,
     "pass_epa": 0.2534,
     "pass_plays": 542,
     "rush_epa": 0.0346,
-    "rush_plays": 511,
-    "expl_run": {
-     "runs": 539,
-     "n20": 15,
-     "n40": 3,
-     "rate20": 0.0278,
-     "rank20": 23,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 511
    },
    "games": 17,
    "off": {
@@ -815,22 +839,23 @@
   },
   "PHI": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 55,
+     "n15": 19,
+     "n20": 8,
+     "rate10": 0.1136,
+     "rate15": 0.0393,
+     "rate20": 0.0165,
+     "runs": 484
+    },
     "funnel": -0.1,
     "funnel_label": "run funnel",
     "funnel_rel": -0.1248,
     "pass_epa": -0.1244,
     "pass_plays": 582,
     "rush_epa": -0.0244,
-    "rush_plays": 484,
-    "expl_run": {
-     "runs": 494,
-     "n20": 8,
-     "n40": 1,
-     "rate20": 0.0162,
-     "rank20": 8,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 484
    },
    "games": 17,
    "off": {
@@ -846,22 +871,23 @@
   },
   "PIT": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 47,
+     "n15": 26,
+     "n20": 8,
+     "rate10": 0.1061,
+     "rate15": 0.0587,
+     "rate20": 0.0181,
+     "runs": 443
+    },
     "funnel": 0.0264,
     "funnel_label": "average",
     "funnel_rel": 0.0017,
     "pass_epa": 0.0283,
     "pass_plays": 661,
     "rush_epa": 0.0019,
-    "rush_plays": 443,
-    "expl_run": {
-     "runs": 451,
-     "n20": 8,
-     "n40": 2,
-     "rate20": 0.0177,
-     "rank20": 13,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 443
    },
    "games": 17,
    "off": {
@@ -877,22 +903,23 @@
   },
   "SEA": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 28,
+     "n15": 8,
+     "n20": 5,
+     "rate10": 0.0681,
+     "rate15": 0.0195,
+     "rate20": 0.0122,
+     "runs": 411
+    },
     "funnel": 0.048,
     "funnel_label": "average",
     "funnel_rel": 0.0232,
     "pass_epa": -0.0973,
     "pass_plays": 650,
     "rush_epa": -0.1453,
-    "rush_plays": 411,
-    "expl_run": {
-     "runs": 418,
-     "n20": 5,
-     "n40": 1,
-     "rate20": 0.012,
-     "rank20": 3,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 411
    },
    "games": 17,
    "off": {
@@ -908,22 +935,23 @@
   },
   "SF": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 37,
+     "n15": 19,
+     "n20": 10,
+     "rate10": 0.0889,
+     "rate15": 0.0457,
+     "rate20": 0.024,
+     "runs": 416
+    },
     "funnel": 0.1022,
     "funnel_label": "average",
     "funnel_rel": 0.0774,
     "pass_epa": 0.1122,
     "pass_plays": 603,
     "rush_epa": 0.01,
-    "rush_plays": 416,
-    "expl_run": {
-     "runs": 424,
-     "n20": 10,
-     "n40": 1,
-     "rate20": 0.0236,
-     "rank20": 19,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 416
    },
    "games": 17,
    "off": {
@@ -939,22 +967,23 @@
   },
   "TB": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 39,
+     "n15": 19,
+     "n20": 11,
+     "rate10": 0.101,
+     "rate15": 0.0492,
+     "rate20": 0.0285,
+     "runs": 386
+    },
     "funnel": 0.1404,
     "funnel_label": "pass funnel",
     "funnel_rel": 0.1157,
     "pass_epa": 0.068,
     "pass_plays": 604,
     "rush_epa": -0.0724,
-    "rush_plays": 386,
-    "expl_run": {
-     "runs": 396,
-     "n20": 11,
-     "n40": 3,
-     "rate20": 0.0278,
-     "rank20": 22,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 386
    },
    "games": 17,
    "off": {
@@ -970,22 +999,23 @@
   },
   "TEN": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 49,
+     "n15": 21,
+     "n20": 8,
+     "rate10": 0.1129,
+     "rate15": 0.0484,
+     "rate20": 0.0184,
+     "runs": 434
+    },
     "funnel": 0.1507,
     "funnel_label": "pass funnel",
     "funnel_rel": 0.126,
     "pass_epa": 0.1673,
     "pass_plays": 558,
     "rush_epa": 0.0166,
-    "rush_plays": 434,
-    "expl_run": {
-     "runs": 453,
-     "n20": 8,
-     "n40": 5,
-     "rate20": 0.0177,
-     "rank20": 12,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 434
    },
    "games": 17,
    "off": {
@@ -1001,22 +1031,23 @@
   },
   "WAS": {
    "def": {
+    "expl_run": {
+     "computed_from_pbp": true,
+     "n10": 65,
+     "n15": 27,
+     "n20": 10,
+     "rate10": 0.1327,
+     "rate15": 0.0551,
+     "rate20": 0.0204,
+     "runs": 490
+    },
     "funnel": 0.126,
     "funnel_label": "average",
     "funnel_rel": 0.1012,
     "pass_epa": 0.2009,
     "pass_plays": 583,
     "rush_epa": 0.0749,
-    "rush_plays": 490,
-    "expl_run": {
-     "runs": 504,
-     "n20": 10,
-     "n40": 3,
-     "rate20": 0.0198,
-     "rank20": 14,
-     "source": "NFL.com team defence rushing table",
-     "computed_from_pbp": false
-    }
+    "rush_plays": 490
    },
    "games": 17,
    "off": {

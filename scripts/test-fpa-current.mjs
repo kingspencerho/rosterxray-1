@@ -62,11 +62,34 @@ ok("live flags agree with weeks_covered and the gates",
 ok("the derivation is cited", /2b/.test(m.derivation || ""));
 ok("the raw-FPA confound is stated", (m.caveats || []).some((c) => /schedule-adjusted/i.test(c)));
 
-// ---------------------------------------------------------------- placeholder
-ok("the committed file is the inert placeholder",
-  m.weeks_covered === 0 && Object.keys(fpa.defences || {}).length === 0,
-  "a real refresh lands via refresh-inseason.sh, reviewed in a PR");
-ok("...so no position is live", Object.values(m.live).every((v) => v === false));
+// ------------------------------------------------- placeholder OR live, both legal
+// ⛔ THE CALENDAR IS NOT A PROPERTY OF THE CODE. This block used to assert
+// `weeks_covered === 0` - "the committed file is the inert placeholder" - and it
+// went red the first time refresh-inseason.sh ran for real (Sep 16 2026). The
+// second line, "so no position is live", would have gone red again in Week 3 on
+// its own, for the same reason and with nobody expecting it.
+//
+// ⭐ THE SAFETY PROPERTY WAS NEVER "the file is empty". It is that a position's
+// live flag follows its GATE - which is already asserted generically above - so
+// a layer with one week of data still falls back to the estimate. That is true
+// in every week of the season, and it is what this now checks.
+{
+  const weeks = m.weeks_covered;
+  const defs = Object.keys(fpa.defences || {}).length;
+  if (weeks === 0) {
+    ok("the committed file is the inert placeholder", defs === 0,
+      "a real refresh lands via refresh-inseason.sh, reviewed in a PR");
+  } else {
+    ok(`the committed file carries ${weeks} week(s) of real data`, defs > 0, `${defs} defences`);
+    ok("...and every defence carries all four positions",
+      Object.values(fpa.defences).every((d) => ["QB", "RB", "WR", "TE"].every((p) => p in d)));
+  }
+  // The one that matters in both states, and the reason the gates exist: a
+  // position goes live ONLY when its own gate is met, never because data arrived.
+  ok("no position is live before its gate is met",
+    ["QB", "RB", "WR", "TE"].every((p) => m.live[p] === (weeks >= m.gates[p])),
+    JSON.stringify({ weeks, gates: m.gates, live: m.live }));
+}
 
 // ---------------------------------------------------------------- one helper pair
 const count = (re) => (codeOnly.match(re) || []).length;
