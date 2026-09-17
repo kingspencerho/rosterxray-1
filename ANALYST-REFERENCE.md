@@ -9,6 +9,14 @@ it records how things were built and what broke, in date order.
 screen. Read this one to understand the analysis, that one before changing code,
 and the personas before changing what the app shows, hides, orders or names.
 
+> ## 📖 **WANT THE PLAIN-ENGLISH VERSION? READ [METRICS-PLAIN-ENGLISH.md](METRICS-PLAIN-ENGLISH.md).**
+> **Every metric grouped by the QUESTION it answers, in Source Hierarchy order, with a real
+> player attached to each one** — the meaning, the argument, the worked example and the trap,
+> with the File/Field/Surfaces machinery stripped out.
+> ⛔ **It is GENERATED from this file** (`python scripts/build-plain-english.py`), so it cannot
+> drift and it cannot disagree. **This file stays the single source of truth; §5 wins on any
+> conflict.** Rebuild it whenever §2, §3 or an entry in §5 changes.
+
 **New here?** Start at [§13, the plain-English guide](#13--plain-english-guide--every-metric-grouped-by-the-question-it-answers).
 It groups every metric by the question it answers and links into the detail.
 [§14](#14--seasonal-coverage--what-the-app-is-for-and-when) is what the app
