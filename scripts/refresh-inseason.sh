@@ -95,7 +95,7 @@ if [ "$LIVE_ONLY" = "1" ]; then
   echo "change between Monday night and the weekend). Refreshing 7-8 only."
   echo
 else
-  echo "1/8  snap trajectory (role change)"
+  echo "1/9  snap trajectory (role change)"
   # NOTE the release tags: snap_counts, but stats_player (NOT player_stats).
   if fetch "$BASE/snap_counts/snap_counts_$SEASON.csv.gz" "$TMP/snaps.csv.gz"; then
     got_any=1
@@ -109,13 +109,13 @@ else
   # ONE DOWNLOAD, THREE BUILDERS. The QB profile, the game logs and the volume
   # twin all read the same weekly stats file, so the second and third layers cost
   # a parse each and no extra network.
-  echo "2/8  QB volume profile"
+  echo "2/9  QB volume profile"
   if fetch "$BASE/stats_player/stats_player_week_$SEASON.csv" "$TMP/week.csv"; then
     got_any=1
     python3 "$ROOT/scripts/build-qb-profile.py" "$TMP/week.csv" \
       "$ROOT/grading/data/qb_profile_$SEASON.json" "$SEASON" || fail=1
     echo
-    echo "3/8  game logs (reusing the same download)"
+    echo "3/9  game logs (reusing the same download)"
     python3 "$ROOT/scripts/build-gamelogs.py" "$TMP/week.csv" \
       "$ROOT/grading/data/gamelogs_$SEASON.json" "$SEASON" || fail=1
     echo
@@ -140,7 +140,7 @@ else
     # and rebuild BOTH sides together when you do.
     volume_prior="$ROOT/grading/data/volume_$((SEASON - 1)).json"
     [ -f "$volume_prior" ] || volume_prior=""
-    echo "4/8  current-season volume (reusing the same download)"
+    echo "4/9  current-season volume (reusing the same download)"
     python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
       "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" "$volume_prior" || fail=1
 
@@ -151,19 +151,19 @@ else
     # outright, r=-0.073 across seasons against 0.531 after three weeks within one.
     # ⚠️ It goes live on its own when weeks_covered clears each position’s gate.
     # Nothing here or in App.jsx has to be changed when that happens.
-    echo "5/8  live FPA by position (reusing the same download)"
+    echo "5/9  live FPA by position (reusing the same download)"
     python3 "$ROOT/scripts/build-fpa-current.py" "$TMP/week.csv" \
       "$ROOT/grading/data/fpa_$SEASON.json" "$SEASON" || fail=1
   else
     echo "  skipped — placeholder left untouched"; fail=1
     echo
-    echo "3/8  game logs (reusing the same download)"
+    echo "3/9  game logs (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
     echo
-    echo "5/8  live FPA by position (reusing the same download)"
+    echo "5/9  live FPA by position (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
     echo
-    echo "4/8  current-season volume (reusing the same download)"
+    echo "4/9  current-season volume (reusing the same download)"
     echo "  skipped — the weekly stats file is unavailable"
   fi
   echo
@@ -173,7 +173,7 @@ else
   # three of which CLAUDE.md Section 4 has specified since July with no data
   # behind them. It sits INSIDE the full-pass branch because it is an nflverse
   # season release and does not change between Monday night and the weekend.
-  echo "6/8  team trends: pass rate, pace, defensive funnel"
+  echo "6/9  team trends: pass rate, pace, defensive funnel"
   if fetch "$BASE/pbp/play_by_play_$SEASON.csv.gz" "$TMP/pbp.csv.gz"; then
     got_any=1
     python3 "$ROOT/scripts/build-teamtrends.py" --pbp "$TMP/pbp.csv.gz" \
@@ -182,6 +182,24 @@ else
     echo "  skipped - placeholder left untouched"; fail=1
   fi
   echo
+  # ⚠️ ITS OWN DOWNLOAD, and it is NOT an nflverse release. Expected points
+  # lives in ffverse/ffopportunity - there is no ff_opportunity tag in
+  # nflverse-data, which CLAUDE.md asserted for a month before it was checked.
+  # It publishes plain CSV beside the parquet, so this is stdlib only.
+  #
+  # ⛔ IT SITS IN THE FULL PASS, NOT THE LIVE ONE. Expected points is computed
+  # from plays that have been played; it does not move between Monday night and
+  # Saturday the way a betting line or a practice report does.
+  echo "7/9  expected fantasy points (own download, ffverse)"
+  if curl -sSL --fail --max-time 180 -o "$TMP/ep.csv" \
+       "https://github.com/ffverse/ffopportunity/releases/download/latest-data/ep_weekly_$SEASON.csv"; then
+    python3 "$ROOT/scripts/build-expected-points.py" "$TMP/ep.csv" \
+      "$ROOT/grading/data/expected_$SEASON.json" "$SEASON" || fail=1
+    got_any=1
+  else
+    echo "     not published yet for $SEASON - leaving the committed file alone"
+  fi
+
 fi
 
 # STEP 6 IS THE ODD ONE OUT AND THE COMMENT IS THE POINT.
@@ -193,7 +211,7 @@ fi
 #
 # The 14.6MB raw payload is written to $TMP and dies with the trap. Only the
 # ~200KB extract reaches grading/data/. NEVER commit the raw dump.
-echo "7/8  availability + depth chart (Sleeper, live - works pre-season)"
+echo "8/9  availability + depth chart (Sleeper, live - works pre-season)"
 if fetch "https://api.sleeper.app/v1/players/nfl" "$TMP/sleeper.json"; then
   python3 "$ROOT/scripts/build-status.py" "$TMP/sleeper.json" \
     "$ROOT/grading/data/status_$SEASON.json" "$SEASON" && got_any=1 || fail=1
@@ -218,7 +236,7 @@ echo
 # sandbox curl returns 200 for this endpoint on every URL form while python
 # urllib returns 403 through the egress proxy. build-gameenv.py is a PURE PARSE
 # for that reason - see its header.
-echo "8/8  game environment + weekly projections (live - expires, see _meta)"
+echo "9/9  game environment + weekly projections (live - expires, see _meta)"
 ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 if fetch "$ESPN/scoreboard" "$TMP/cur.json"; then
   WEEK=$(python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print((d.get('week') or {}).get('number') or 0)" "$TMP/cur.json" 2>/dev/null || echo 0)
