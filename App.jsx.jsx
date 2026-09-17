@@ -76,6 +76,11 @@ import VOLUME_CUR from './grading/data/volume_2026.json';
 // it invents a role change for every mid-season mover. See vs_prior() in
 // scripts/build-volume-current.py.
 import VOLUME_PRIOR from './grading/data/volume_2025.json';
+// Expected fantasy points: what his chances SHOULD have been worth. Built by
+// scripts/build-expected-points.py from ffverse/ffopportunity, recomputed into
+// THIS app's half-PPR scoring. CONTEXT ONLY - never touches a grade.
+import EXPECTED_CUR from './grading/data/expected_2026.json';
+import EXPECTED_PRIOR from './grading/data/expected_2025.json';
 import ROUTES from './grading/data/routes_2025.json';
 import COVERAGE from './grading/data/coverage_2025.json';
 // Age, experience and draft slot, with the published aging band per position.
@@ -2857,6 +2862,47 @@ const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
 const CUR_VOLUME_LIVE = (VOLUME_CUR._meta?.weeks_covered || 0) > 0;
 const getVolumeCur = (name) => (CUR_VOLUME_LIVE ? lookupPlayer(VOLUME_CUR.players, name) : null);
 
+// === EXPECTED FANTASY POINTS (CONTEXT ONLY) ===
+// Every other opportunity layer here reports a SHARE. A share says how much of
+// a pie he owns and nothing about how big the pie is or where on the field it
+// sits. This converts the whole opportunity set into ONE NUMBER ON THE SAME
+// SCALE AS THE OUTPUT, so a receiving role and a goal-line role can be compared
+// without hand-waving.
+//
+// ⭐⭐⭐ ITS EDGE IS REAL, MEASURED, AND EXPIRES. Pooled over 2023-25, expected
+// points predicts the rest of the season better than actual points ONLY while
+// the sample is tiny - +0.066 after one game, +0.026 after two, and gone from
+// week three (+0.016, then +0.002 by week eight). It is a SMALL-SAMPLE NOISE
+// FILTER, not a better metric: after one game actual points are dominated by
+// whether a touchdown happened and expected points are not.
+//
+// ⛔ SO THE CARD SAYS WHEN TO STOP READING IT. A layer that quietly keeps
+// claiming an edge it no longer has is the stale-verdict trap in a new costume.
+const EXPECTED_EDGE_WEEKS = 2;   // from the measurement above, not chosen
+const EXP_CUR_LIVE = (EXPECTED_CUR._meta?.weeks_covered || 0) > 0;
+const getExpected = (name) =>
+  (EXP_CUR_LIVE ? lookupPlayer(EXPECTED_CUR.players, name) : null);
+const getExpectedPrior = (name) => lookupPlayer(EXPECTED_PRIOR.players, name);
+
+const expectedPoints = (name) => {
+  const cur = getExpected(name);
+  const prior = getExpectedPrior(name);
+  if (!cur && !prior) return null;
+  const wk = EXPECTED_CUR._meta?.weeks_covered || 0;
+  const row = (v, meta) => v && {
+    season: meta.season, gp: v.gp, exp: v.exp_pg, act: v.act_pg,
+    diff: v.diff_pg, rank: v.exp_rank, actRank: v.act_rank,
+    complete: !!meta.season_complete,
+  };
+  return {
+    cur: row(cur, EXPECTED_CUR._meta),
+    prior: row(prior, EXPECTED_PRIOR._meta),
+    weeks: wk,
+    // ⚠️ Stated from the CURRENT week, so it retires itself on schedule.
+    edgeLive: EXP_CUR_LIVE && wk > 0 && wk <= EXPECTED_EDGE_WEEKS,
+  };
+};
+
 // === THIS SEASON AGAINST HIS OWN PRIOR SEASON (CONTEXT ONLY) ===
 // The card has rendered both vintages side by side since Sep 1 and has never
 // said whether the gap between them is large. A reader seeing `11.6 -> 12.4`
@@ -4059,6 +4105,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     if (CUR_VOLUME_LIVE) {
       const tt = getTargetTrend(name);
       const ct = pos === "RB" ? getCarryTrend(name) : null;
+      card.expected = expectedPoints(name);
       card.shift = usageShift(name, pos);
       card.targetTrend = {
         vintage: vintageLabel(VOLUME_CUR._meta),
@@ -9446,6 +9493,7 @@ const CARD_ACCENTS = {
   // WHAT COULD CHANGE IT — availability, depth chart, calendar
   status: CARD_GROUP_ACCENT.outlook,
   // HIS JOB — what the offense gives him
+  expected: CARD_GROUP_ACCENT.job,
   shift: CARD_GROUP_ACCENT.job,
   targetTrend: CARD_GROUP_ACCENT.job,
   trajectory: CARD_GROUP_ACCENT.job,
@@ -9590,6 +9638,37 @@ const ShiftRow = ({ row }) => {
             {row.moved === "up" ? "\u2191" : row.moved === "down" ? "\u2193" : ""}{d}
           </span>
         )}
+      </span>
+    </div>
+  );
+};
+
+// One season of "what his chances should have been worth" against what he got.
+//
+// \u26d4 THE GAP IS NOT A SKILL RATING. It repeats at r = 0.21 year over year,
+// which is the point - if out-scoring your opportunity were a talent it would
+// repeat, and it mostly does not. It is the part of his season his usage does
+// NOT explain. Rendered without a good/bad hue for that reason: weight marks
+// the size, an arrow marks the direction, same two-channel rule as ShiftRow.
+const ExpectedRow = ({ r }) => {
+  if (!r) return null;
+  const big = Math.abs(r.diff) >= 2;
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                  gap: "10px", padding: "5px 0", fontSize: "12px", flexWrap: "wrap" }}>
+      <span style={{ color: "var(--text-dim)" }}>
+        {r.season}{r.complete ? "" : ` \u00b7 ${r.gp}g`}
+        {r.rank != null && <span style={{ color: "var(--text-faint)", marginLeft: "6px", fontSize: "10px" }}>
+          {" "}#{r.rank} on chances</span>}
+      </span>
+      <span style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+                     color: "var(--text-primary)" }}>
+        {r.exp.toFixed(1)} <span style={{ color: "var(--text-faint)" }}>expected</span>
+        {" \u00b7 "}{r.act.toFixed(1)} <span style={{ color: "var(--text-faint)" }}>actual</span>
+        <span style={{ marginLeft: "8px", fontWeight: big ? 700 : 400,
+                       color: big ? "var(--text-primary)" : "var(--text-faint)" }}>
+          {r.diff >= 0 ? "\u2191+" : "\u2193\u2212"}{Math.abs(r.diff).toFixed(1)}
+        </span>
       </span>
     </div>
   );
@@ -10656,6 +10735,31 @@ const PlayerCardModal = ({ card, onClose }) => {
                 he on the field", this is "how much of the ball is his". Found
                 by rendering the card, not by reading the source. Guard 29
                 asserts the two titles stay distinct. */}
+            {card.expected && (card.expected.cur || card.expected.prior) && (
+              <CardSection
+                title="Expected points"
+                accent={CARD_ACCENTS.expected}
+                collapsible
+                hint={card.expected.cur
+                  ? `${card.expected.cur.exp.toFixed(1)} exp`
+                  : `${card.expected.prior.season}`}
+                note={`What his chances were WORTH, in points per game, beside what he actually scored. Every other line on this card is a share \u2014 a share says how much of a pie is his and nothing about how big the pie is or where on the field it sits. This puts opportunity on the same scale as the output.${
+                  card.expected.edgeLive
+                    ? ` \u2b50 Through ${card.expected.weeks} game${card.expected.weeks === 1 ? "" : "s"} this is the number to trust over raw points: measured across 2023-25, expected beats actual at predicting the rest of the season by +0.066 after one game and +0.026 after two.`
+                    : card.expected.weeks > EXPECTED_EDGE_WEEKS
+                      ? ` \u26a0 Past week ${EXPECTED_EDGE_WEEKS} this stops beating raw points \u2014 the measured edge is +0.016 by week three and +0.002 by week eight. Read it now as a description of his usage, not as the better forecast.`
+                      : ""
+                } \u26d4 The gap between the two is NOT a skill rating: it repeats at only r=0.21 year over year, so it is mostly the part his usage does not explain. Half-PPR, recomputed from opportunity components.`}>
+                <ExpectedRow r={card.expected.cur} />
+                <ExpectedRow r={card.expected.prior} />
+                {!card.expected.cur && (
+                  <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "8px" }}>
+                    {"\u26a0"} No current-season row yet \u2014 the prior season is shown alone rather than
+                    relabelled.
+                  </div>
+                )}
+              </CardSection>
+            )}
             {card.shift && (
               <CardSection
                 title="Usage vs last season"
