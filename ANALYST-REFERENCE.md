@@ -976,6 +976,78 @@ python scripts/measure-blitz-consequences.py
 
 ---
 
+### ⭐⭐ §2h · POSITION PERCENTILES REACH THE SCRIPTS (Sep 17, 2026)
+
+`scripts/matchup-brief.py` + `scripts/test-percentile-parity.mjs` (guard 43).
+⛔ **NO App.jsx CHANGE — `git status` shows no diff on either app file, which is stronger than a
+calibration run.** Nothing new was invented here.
+
+**WHAT PROMPTED IT, and it is a real error, not a hypothetical.** A FLEX comparison in this repo set
+an RB's dud rate beside a WR's and invited them to be read as equals. **RB median dud rate is 11.8%;
+WR median is 35.3%.** Same number, opposite meaning — a 23.5% dud rate is a *good* wide receiver and
+a *bad* running back. The raw table said the reverse of the truth and the recommendation was wrong.
+
+### ⭐⭐⭐ THE FEATURE ALREADY EXISTED, AND THAT IS THE FINDING
+
+**App.jsx has had `CARD_PERCENTILES` and `cardPercentile` all along.** The card already prints
+`29%ile` beside every metric, its glossary already explains *"50 is the median starter… a
+60th-percentile TE and a 60th-percentile WR are equally ordinary for their job"*, it already carries
+a 12-player floor, an `invert` flag for dud rate, a named population, and a comment warning against
+ranking a partial season against a full-season pool.
+
+⛔ **What it did NOT have was any way for a SCRIPT to see it.** The pools are built at module load
+inside the browser bundle and never written to `grading/data`. So `matchup-brief.py` — the instrument
+built from his own Sunday decision procedure — printed raw numbers with no baseline.
+
+⭐ **The gap was never "the app cannot rank by position." It was "the ranking does not leave the
+browser."** Checking that first turned a feature build into a 40-line mirror plus a guard.
+
+### ⛔⛔ TWO BUGS THE PARITY GUARD CAUGHT ON ITS FIRST RUN
+
+Both would have shipped silently, and **neither is findable by reading the two sources side by side.**
+
+**1 · THE POPULATION SILENTLY DIVERGED.** The Python reused `CUR_TEAM`, whose keys run through
+`_nm()` — lowercase, no punctuation, no generational suffix. **App.jsx gates on a RAW lookup,
+`!ADP_DATA[name]`.** The normalised set admitted **4 extra RBs, 5 extra WRs and 2 extra TEs**, which
+moved every percentile by about a point. Small enough to ship, wrong everywhere.
+
+**2 · ⭐⭐⭐ PYTHON AND JAVASCRIPT ROUND HALVES IN OPPOSITE DIRECTIONS.** Python's `round()` is
+banker's rounding, half to **even**. JavaScript's `Math.round` sends half **up**. On the 40-player TE
+snap-share pool that is an exact-half case three times over — `13/40 = 32.5`, `25/40 = 62.5`,
+`5/40 = 12.5` — so three tight ends read one point lower in the brief than on their own card, forever.
+Fixed with `math.floor(x + 0.5)`.
+
+> ## ⭐⭐⭐ **THE REUSABLE RULE: A PARITY GUARD MUST RUN BOTH IMPLEMENTATIONS, NEVER COMPARE THEIR TEXT.**
+> **Both sources said `round(below / n * 100)`.** A string-matching guard would have called them
+> identical for as long as the file existed. The guard extracts `cardPercentile` out of App.jsx with
+> `new Function`, executes it against every draftable player, and compares to the Python's own output —
+> **1,448 rows, and it failed on all three of these before it passed.** It carries a must-fail case:
+> one perturbed value must be caught.
+
+⚠️ **THE DISCREPANCY IN 1 IS NOT RESOLVED, ONLY MADE VISIBLE.** The Python now matches App.jsx
+exactly, which is what parity means. **But the normalised match is arguably the better one** — those
+eleven players differ only in name spelling between two files, and App.jsx's raw lookup drops them
+from the pool. ⛔ **That is a question about App.jsx, and it is not this pass's to answer.**
+
+### What it prints
+
+```
+Malik Washington       WOPR  0.27 (19)  tgt sh 14.0% (30)  snap 57.0% (30)  dud 52.9% (32)
+Devon Achane           WOPR  0.30 (95)  tgt sh 19.3% (95)  snap 75.4% (90)  dud  0.0% (100)
+```
+
+**The parenthesised number is his rank against draftable players at his own position with 8+ games.**
+A thin pool prints `(--)` rather than a flattering number.
+
+### Reproduce
+
+```
+python scripts/matchup-brief.py MIA SF
+node scripts/test-percentile-parity.mjs
+```
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a

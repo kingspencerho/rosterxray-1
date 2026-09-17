@@ -48,10 +48,17 @@ USAGE
     python scripts/matchup-brief.py --props          # posted props priced by the app
     python scripts/matchup-brief.py DAL NYG --json
 """
+import math
 import json
 import os
 import re
 import sys
+
+# Windows consoles default to cp1252 and every emoji in this brief is a
+# hard crash there - it took out a real run twice in one session. errors=
+# 'replace' so a missing glyph degrades to '?' instead of killing the report.
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(os.path.dirname(HERE), "grading", "data")
@@ -227,6 +234,95 @@ def _load_adp_teams():
 
 CUR_TEAM = _load_adp_teams()
 ADP_TEAM_COUNT = len(CUR_TEAM)
+
+# ⛔ THE PERCENTILE GATE USES RAW NAMES, AND CUR_TEAM CANNOT BE REUSED FOR IT.
+# CUR_TEAM is keyed by _nm(), which strips punctuation and generational
+# suffixes. App.jsx gates its pool on a RAW lookup - `!ADP_DATA[name]` - so the
+# normalised set matches players the app excludes: 4 more RBs, 5 more WRs, 2
+# more TEs. That shifted every percentile by about a point, which is small
+# enough to have shipped unnoticed and is exactly the sort of quiet divergence
+# the parity guard exists to refuse.
+ADP_RAW = set()
+try:
+    with open(os.path.join(os.path.dirname(HERE), "App.jsx"), encoding="utf-8") as _fh:
+        ADP_RAW = set(re.findall(
+            r'"([^"]+)":\s*\{\s*adp:\s*[\d.]+,\s*pos:\s*"\w+",\s*team:\s*"\w+"', _fh.read()))
+except OSError:
+    pass
+
+
+# ============================ POSITION PERCENTILES ============================
+# ⛔⛔ THIS IS A MIRROR, NOT A NEW IDEA. App.jsx has had CARD_PERCENTILES
+# since long before this; the card already prints "29%ile" beside every metric
+# and its glossary already explains that 50 is the median starter. What it did
+# NOT have is any way for a SCRIPT to see it, because the pools are built at
+# module load inside the browser bundle and never written to grading/data.
+#
+# That gap has a cost and it is not hypothetical. On Sep 17 2026 a FLEX
+# comparison in this repo put an RB's dud rate next to a WR's and read them
+# side by side. A 23.5% dud rate is a GOOD wide receiver and a BAD running back
+# - RB median is 11.8%, WR median is 35.3% - so the raw numbers said the
+# opposite of the truth and the recommendation was wrong.
+#
+# ⛔ THE GATE IS COPIED FROM App.jsx AND MUST STAY COPIED. Over there:
+#     if (m.pos !== pos || (m.gp || 0) < 8 || !ADP_DATA[name]) continue;
+#     if (!arr || arr.length < 12 || value == null) return null;
+# Same position, 8+ games, must be in the draftable ADP table, and never rank
+# against fewer than 12 players. A duplicated definition is this repo's most
+# repeated bug, so scripts/test-percentile-parity.mjs runs BOTH implementations
+# against the same inputs and fails if they ever disagree.
+PCT_KEYS = ("wopr", "tgt_sh", "snap_sh", "dud_rate")
+# Low is good, so the rank is flipped - App.jsx does this with `invert: true`
+# and `pct = 100 - pct`.
+PCT_INVERT = ("dud_rate",)
+PCT_MIN_GP = 8
+PCT_MIN_POOL = 12
+
+
+def _pct_pools():
+    out = {}
+    for name, v in (MET or {}).items():
+        if name.startswith("_") or not isinstance(v, dict):
+            continue
+        pos = v.get("pos")
+        if pos not in ("RB", "WR", "TE"):
+            continue
+        if num(v, "gp") < PCT_MIN_GP or name not in ADP_RAW:
+            continue
+        for k in PCT_KEYS:
+            x = v.get(k)
+            if isinstance(x, (int, float)):
+                out.setdefault(pos, {}).setdefault(k, []).append(x)
+    for by_key in out.values():
+        for arr in by_key.values():
+            arr.sort()
+    return out
+
+
+PCT_POOLS = _pct_pools()
+
+
+def pctile(pos, key, value):
+    """Percentile of `value` among draftable 8+ game players at `pos`.
+
+    Returns None rather than a flattering number when the pool is thin - a rank
+    against eight players is not information. 50 is the median starter.
+    """
+    arr = (PCT_POOLS.get(pos) or {}).get(key)
+    if not arr or len(arr) < PCT_MIN_POOL or value is None:
+        return None
+    below = 0
+    for x in arr:
+        if x < value:
+            below += 1
+        else:
+            break
+    # ⛔ NOT round(). Python rounds half to EVEN and JavaScript's Math.round
+    # sends half UP, so 13/40 = 32.5% became 32 here and 33 on the card. Three
+    # tight ends disagreed by a point and nothing anywhere would have said so -
+    # a guard that compared the two SOURCES would have called them identical.
+    p = math.floor(below / len(arr) * 100 + 0.5)
+    return 100 - p if key in PCT_INVERT else p
 for _k, _v in (sub(ST, "players") or {}).items():
     if _v.get("team"):
         CUR_TEAM.setdefault(_nm(_k), _v["team"])
@@ -458,8 +554,16 @@ def q7_usage(team, n=4):
     rows.sort(key=lambda r: -num(r[1],"wopr"))
     if not rows:
         return ["no 2025 usage on file"]
-    return [f"{k.title():<22} WOPR {num(v,'wopr'):>5.2f}  tgt sh {num(v,'tgt_sh')*100:>4.1f}%  "
-            f"snap {num(v,'snap_sh')*100:>4.1f}%  dud {num(v,'dud_rate')*100:>4.1f}%{prev_team(k, v.get('team'))}"
+    def pc(v, key):
+        # A bare "(--)" is deliberate: a thin pool prints its absence rather
+        # than silently dropping to a raw number the reader then misreads.
+        p = pctile(v.get("pos"), key, v.get(key))
+        return "(--)" if p is None else "(%2d)" % p
+
+    return [f"{k.title():<22} WOPR {num(v,'wopr'):>5.2f} {pc(v,'wopr')}  "
+            f"tgt sh {num(v,'tgt_sh')*100:>4.1f}% {pc(v,'tgt_sh')}  "
+            f"snap {num(v,'snap_sh')*100:>4.1f}% {pc(v,'snap_sh')}  "
+            f"dud {num(v,'dud_rate')*100:>4.1f}% {pc(v,'dud_rate')}{prev_team(k, v.get('team'))}"
             for k, v in rows[:n]]
 
 
@@ -1049,6 +1153,25 @@ if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if "--selftest" in sys.argv:
         sys.exit(selftest())
+    elif "--pctdump" in sys.argv:
+        # Machine-readable percentile output, for the cross-language parity
+        # guard only. It exists because this file DUPLICATES a rule that lives
+        # in App.jsx, and an unproven duplicate is how the same bug has landed
+        # a dozen times in this repo.
+        import json as _json
+        _out = []
+        for _n, _v in sorted((MET or {}).items()):
+            if _n.startswith("_") or not isinstance(_v, dict):
+                continue
+            if _v.get("pos") not in ("RB", "WR", "TE"):
+                continue
+            for _k in PCT_KEYS:
+                _p = pctile(_v.get("pos"), _k, _v.get(_k))
+                if _p is not None:
+                    _out.append([_n, _v["pos"], _k, _v.get(_k), _p])
+        print(_json.dumps({"pools": {p: {k: len(v) for k, v in d.items()}
+                                     for p, d in PCT_POOLS.items()},
+                           "rows": _out}))
     elif "--props" in sys.argv:
         props()
     elif "--slate" in sys.argv:
