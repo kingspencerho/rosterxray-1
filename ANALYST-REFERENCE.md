@@ -138,6 +138,7 @@ Legend — **Tier:** A carries the analysis · B is queued · C is impossible.
 | [Usable rate](#usable-rate--r--065--rank-4) | 0.65 | 4 | A | live | **yes — Advance, Floor** |
 | [QB pass attempts / game](#qb-pass-attempts--game--r--061--rank-2) | 0.61 | 2 | A | live | no |
 | [Spike rate](#spike-rate--r--048--rank-4) | 0.48 | 4 | A | live | **yes — Ceiling** |
+| [Expected fantasy points](#expected-fantasy-points--r----rank-2) | — | 2 | A | live | no |
 | [Snap trajectory](#snap-trajectory--r----rank-1) | — | 1 | A | live | no |
 | [Vacated targets](#vacated-targets--r----rank-1) | — | 1 | A | live | no |
 | [Red-zone opportunity share](#red-zone-opportunity-share--r----rank-1) | — | 1 | A | live | no |
@@ -971,6 +972,73 @@ reason unrelated to ceiling. That bug looked like a working feature.
 **Never quote this about one player.** Justin Jefferson carries a 0.000 blend at
 roughly ADP 10 — a true description of 2025, not a projection. The layer is safe
 because it **averages**; one misleading player moves the score by under 0.02.
+
+---
+
+### Expected fantasy points · r = — · rank 2
+
+| | |
+|---|---|
+| **File** | `expected_2025.json` · `expected_2026.json` |
+| **Field** | `exp_pg` · `act_pg` · `diff_pg` · `exp_rank` |
+| **Surfaces** | player card → Expected points |
+| **Status** | live |
+
+**Plain English.** Given the chances he actually got — the targets, how far
+downfield they were thrown, the carries, where they started — how many points
+should that have been worth? Then set it beside what he really scored.
+
+**Why it matters.** Every other opportunity input here reports a SHARE. A share
+says how much of a pie he owns and nothing about how big the pie is or where on
+the field it sits. **This converts the whole opportunity set into one number on
+the SAME SCALE AS THE OUTPUT**, which is what lets a receiving role and a
+goal-line role be compared without hand-waving.
+
+⭐⭐⭐ **AND ITS VALUE IS BOUNDED, MEASURED, AND SMALLER THAN ANYONE SELLS IT.**
+The claim everywhere is that expected points "is more predictive than actual
+points." **Tested on 2023-25 pooled, it is only true while the sample is tiny:**
+
+```
+through   EXPECTED   actual     edge        n
+W1-1        0.697     0.630   +0.066      886   <- a real edge
+W1-2        0.760     0.734   +0.026      752   <- a real edge
+W1-3        0.767     0.751   +0.016      657      gone
+W1-4        0.796     0.781   +0.015      808      gone
+W1-8        0.802     0.800   +0.002      964      gone
+```
+**It is a SMALL-SAMPLE NOISE FILTER, not a better metric.** After one game,
+actual points are dominated by whether a touchdown happened and expected points
+are not — so expected wins. **By Week 3 the two are the same number wearing
+different clothes.**
+
+⛔ **The cross-season test returns NOTHING, and that is consistent rather than
+contradictory.** Predicting next season's points per game, `n=243/232`, 8+ games
+both sides: expected `0.804` against actual `0.798` overall, and actual
+marginally AHEAD at QB and RB. **Over a full season the two converge, so a
+season-long expected figure carries no extra information.** Do not build a
+projection on it.
+
+⚠️ **This is the RB-pill error in a new costume, and it is worth naming.** The
+first test run here was the cross-season one, it came back null, and that nearly
+killed the layer. **The pill DESCRIBES; it does not forecast** — his Sep 13
+ruling — and expected points is used in Week 2 to judge a Week 1 box score, not
+to project next August. **Right instrument, wrong question.**
+
+**Worked example.** Week 1 2026: Kenneth Walker scored `32.6` on `23.7`
+expected, `+8.9`. Jahmyr Gibbs scored `33.1` on `30.6`, `+2.5`. **Same headline
+week; one of them was bought with opportunity and the other was not.**
+
+**Gotchas.** ⛔⛔ **THE SOURCE FILE IS FULL PPR AND ITS TOTALS ARE UNUSED.**
+Verified by reconstructing `total_fantasy_points_exp` from the component columns
+across four players — full PPR to `0.02`. This app is half-PPR with 4-point
+passing TDs, so the builder recomputes both sides from components with this
+repo's own `SCORE` dict. Copying their total would print a PPR number on a
+half-PPR card. ⚠️ **`diff_pg` REPEATS AT ONLY `0.21` year over year** — which
+is the point: if the gap between actual and expected were skill it would repeat,
+and it mostly does not. **Never read it as a talent rating.** ⚠️ **It is a
+MODEL, and not Hayden Winks' model** — his published Gibbs figure (`28.4`) does
+not reproduce here under any single scoring, so never present it as reproducing
+his.
 
 ---
 
@@ -1957,6 +2025,7 @@ repeatable family in the app and the one to build a projection on.
 
 | Metric | In plain English |
 |---|---|
+| [Expected fantasy points](#expected-fantasy-points--r----rank-2) | What his chances SHOULD have been worth, in points. Beats actual points only in weeks 1-2 |
 | [Targets / game](#targets--game--r--077--rank-2) | Raw volume. Nothing else survives this being low |
 | [Air yards share](#air-yards-share--r--078--rank-2) | Of all the yardage his QB throws toward, how much is aimed at him |
 | [Target share](#target-share--r--073--rank-2) | How central he is, independent of how often his team throws |
