@@ -168,7 +168,7 @@ def collect(rows):
                         pace.setdefault(off, []).append(d)
             prev = r
 
-    return oe, pace, dpass, drush, weeks, games
+    return oe, pace, dpass, drush, drun_yds, weeks, games
 
 
 def mean(xs):
@@ -186,7 +186,7 @@ def label(rel, sd, hi, lo):
     return "average"
 
 
-def build(oe, pace, dpass, drush, weeks, games):
+def build(oe, pace, dpass, drush, drun_yds, weeks, games):
     # League distributions, computed only over teams with a real sample so a
     # one-game team cannot widen the spread the thresholds come from.
     proe_raw = {t: mean(v) for t, v in oe.items() if len(v) >= LEAGUE_MIN["proe"]}
@@ -289,8 +289,8 @@ def main():
             sys.exit("build-teamtrends: --pbp is required unless --empty")
         rows = read_pbp(a.pbp)
 
-    oe, pace, dpass, drush, weeks, games = collect(rows)
-    teams, max_week, league = build(oe, pace, dpass, drush, weeks, games)
+    oe, pace, dpass, drush, drun_yds, weeks, games = collect(rows)
+    teams, max_week, league = build(oe, pace, dpass, drush, drun_yds, weeks, games)
 
     out = {
         "_meta": {
