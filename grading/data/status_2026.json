@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "built_at": "2026-09-17T05:15:31Z",
+  "built_at": "2026-09-17T07:50:25Z",
   "conflict_rule": "The feed NEVER overwrites, outranks or out-dates a hand-written note. It raises a flag a human clears. A hand-written note keeps its own date until it is edited by hand. Both render; neither replaces the other.",
   "consumers": [
    "buildBreakoutBoard/depthOpening",
@@ -9,7 +9,7 @@
   "context_only": true,
   "counts": {
    "CB": 172,
-   "DB": 337,
+   "DB": 339,
    "DE": 151,
    "DT": 163,
    "FS": 2,
@@ -25,7 +25,7 @@
    "WR": 314
   },
   "counts_by_side": {
-   "def": 1127,
+   "def": 1129,
    "off": 814
   },
   "def_positions": [
@@ -3775,7 +3775,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-17",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -3940,7 +3940,7 @@
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-17",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -4798,7 +4798,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": "Knee",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-17",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -9443,7 +9443,7 @@
    "news_updated": "2026-09-16",
    "pos": "WR",
    "side": "off",
-   "status": "Active",
+   "status": "Inactive",
    "team": "BAL"
   },
   "jakobi meyers": {
@@ -11272,6 +11272,17 @@
    "status": "Active",
    "team": "JAX"
   },
+  "johnathan edwards": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-15",
+   "pos": "DB",
+   "side": "def",
+   "status": "Active",
+   "team": "IND"
+  },
   "johnny mundt": {
    "depth_chart_order": 2,
    "depth_chart_position": "TE",
@@ -11838,7 +11849,7 @@
    "depth_chart_position": "RCB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-11",
+   "news_updated": "2026-09-17",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -14318,6 +14329,17 @@
    "side": "def",
    "status": "Active",
    "team": "PHI"
+  },
+  "maceo beard": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": null,
+   "pos": "DB",
+   "side": "def",
+   "status": "Active",
+   "team": "MIN"
   },
   "mack hollins": {
    "depth_chart_order": 2,
@@ -19175,7 +19197,7 @@
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-17",
    "pos": "WR",
    "side": "off",
    "status": "Active",
