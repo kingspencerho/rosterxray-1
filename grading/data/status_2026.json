@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "built_at": "2026-09-17T03:33:45Z",
+  "built_at": "2026-09-17T05:15:31Z",
   "conflict_rule": "The feed NEVER overwrites, outranks or out-dates a hand-written note. It raises a flag a human clears. A hand-written note keeps its own date until it is edited by hand. Both render; neither replaces the other.",
   "consumers": [
    "buildBreakoutBoard/depthOpening",
@@ -8043,7 +8043,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": "Achilles",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-17",
    "pos": "TE",
    "side": "off",
    "status": "Active",

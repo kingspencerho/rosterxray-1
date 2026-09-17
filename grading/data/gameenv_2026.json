@@ -2,7 +2,7 @@
  "_meta": {
   "season": 2026,
   "week": 2,
-  "fetched_at": "2026-09-17T03:33:49Z",
+  "fetched_at": "2026-09-17T05:15:35Z",
   "scoring": "half_ppr",
   "games_covered": 16,
   "games_priced": 16,
@@ -276,12 +276,12 @@
    "id": "401872943",
    "away": "SEA",
    "home": "ARI",
-   "total": 40.5,
+   "total": 41.5,
    "favorite": "SEA",
    "spread": 3.5,
    "implied": {
-    "SEA": 22.0,
-    "ARI": 18.5
+    "SEA": 22.5,
+    "ARI": 19.0
    },
    "indoor": true,
    "kick": "2026-09-20T20:25Z",
