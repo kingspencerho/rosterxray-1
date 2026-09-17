@@ -2639,6 +2639,86 @@ own calibration run and its own cap.**
 
 ---
 
+### ⭐⭐ §11c · SAMPLE HYGIENE, AND THE SHOW'S TWO MISSING METRICS (Sep 17, 2026)
+
+`scripts/matchup-brief.py` + `scripts/measure-partial-games.py`. **His instruction, two parts: add
+Winks' sample-hygiene move, and make routes / snap share / usage / red zone / pass rate available to
+a sit-start read whether or not they are app features.** ⛔ **NO App.jsx CHANGE.**
+
+### ⭐⭐⭐ THE BRIEF WAS MISSING THE SHOW'S MOST-CITED METRIC
+
+§11b counted citations across 141 minutes: **routes 65, snap share 45, carry share 27, red zone 25,
+ADP zero.** The usage block printed WOPR, target share, snap share and dud rate — **neither routes
+nor red zone.** It was missing the show's number one and number three.
+
+Both now print, with percentiles, on their own line:
+
+```
+Jerry Jeudy     WOPR 0.53 (67)  tgt sh 20.2% (61)  snap 84.5% (79)  dud 58.8% (27)
+                routes 92% (90)  TPRR 0.180 (56)  rz tgt sh 16% (49)   [own population]
+```
+
+⛔ **`[own population]` IS NOT DECORATION.** `routes_2025` gates on route participation and
+`redzone_2025` emits a share only when the player AND his team clear an opportunity gate, so **each
+file's membership IS its population and it is not the draftable-8-games population the first line
+uses.** App.jsx says the same thing about its NGS table in as many words. **A player absent from one
+of these is unranked, never a zero.**
+
+### ⭐⭐ THE HYGIENE THRESHOLD IS MEASURED, WHICH IS THE ONLY REASON IT IS DEFENSIBLE
+
+A season rate silently averages a three-snap injury exit with fifteen full games. The move is to name
+the contaminated game and give the rate without it. **The threshold decides everything, so it was
+measured rather than chosen** — `measure-partial-games.py`, whole 2025 corpus, 170 players, 2,470
+games:
+
+```
+frac   %games flagged   %players with >=1
+0.15        1.34              15.9
+0.20        2.67              30.0      <- chosen
+0.30        5.18              46.5
+0.50       13.60              83.5
+```
+
+⛔ **The curve climbs gently to 0.30 and then accelerates. At 0.50 it calls 13.6% of all games
+contaminated, which is not finding injuries — it is finding ordinary variance, and it would let any
+week that spoiled a story be discarded.**
+
+⭐ **A game is scored against THE PLAYER'S OWN MEDIAN, never a league bar.** Six targets is a quiet
+Sunday for one receiver and a career day for another.
+
+✅ **VALIDATED BY READING WHAT IT CATCHES, not just by the curve:** CeeDee Lamb on 1 target against a
+10 median, Amon-Ra St. Brown 1 against 10, AJ Brown 1 against 9, Kimani Vidal with zero opportunities
+against 13. **None of those is a quiet day.**
+
+⚠️ **IT CATCHES TWO CAUSES AND CANNOT TELL THEM APART: a mid-game exit and a Week 18 rest** (James
+Cook, 2 opportunities against a 20 median). Both contaminate a rate, so both are worth printing —
+**which is why the line says "partial" and not "injured."**
+
+⛔ **IT RECOMPUTES ONLY WHAT IT HONESTLY CAN.** Targets per game, yes — the game log carries per-game
+targets. **A target SHARE needs that team's per-game totals, which no file here carries, so a share is
+flagged as contaminated and never re-derived.** Inventing it would be worse than leaving it.
+
+### ⛔ THREE DISPLAY BUGS, AND ONE WAS PRE-EXISTING
+
+Adding a percentile beside each number exposed them — **the rank and the value were contradicting
+each other and nothing had ever put them side by side.**
+
+1. ⛔⛔ **A NULL SNAP SHARE PRINTED AS `0.0%`.** `num()` coerces `None` to zero, so Chris Godwin and
+   Harold Fannin — both of whom played all season — read as never having taken a snap. **The new
+   percentile column said `(--)` right beside it, so the row asserted he never played AND that he
+   could not be ranked.** Now prints `--`.
+2. `route_sh` printed raw (`routes 0.917`) instead of as a percentage.
+3. Red-zone shares printed **wrong by a factor of a hundred** (`rz tgt sh 0.2%` for 20%).
+
+### Reproduce
+
+```
+python scripts/measure-partial-games.py
+python scripts/matchup-brief.py CLE TB
+python scripts/matchup-brief.py --selftest
+```
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**

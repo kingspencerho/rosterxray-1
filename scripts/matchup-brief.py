@@ -111,6 +111,9 @@ PC = load("play_caller_2026.json")
 EFF = load("player_efficiency_2025.json")
 VAC = load("vacated_2026.json")
 PROPS = load("props_2026w01.json")
+ROUTES = load("routes_2025.json")
+RZ = load("redzone_2025.json")
+GL = load("gamelogs_2025.json")
 
 
 # ⛔⛔ THE FEEDS DISAGREE ON TWO TEAMS, AND THE DISAGREEMENT IS NOT ONE-SIDED.
@@ -300,6 +303,122 @@ def _pct_pools():
 
 
 PCT_POOLS = _pct_pools()
+
+
+# ⛔⛔ ROUTES AND RED ZONE GET THEIR OWN POOLS AND MUST NEVER SHARE THE ONE
+# ABOVE. App.jsx says this in as many words about its NGS table: "NGS carries
+# its OWN population (40+ targets in 2025) and its own gate, which is not the
+# gate CARD_PERCENTILES uses. Ranking one against the other would print a
+# percentile whose stated population is wrong." routes_2025 gates on route
+# participation and redzone_2025 emits a share only when the PLAYER and his
+# TEAM both clear an opportunity gate, so each file's own membership IS its
+# population. A player absent from one is not a zero, he is unranked.
+def _layer_pools(layer, keys):
+    out = {}
+    for _n, v in (sub(layer, "players") or {}).items():
+        if not isinstance(v, dict):
+            continue
+        pos = v.get("pos")
+        if pos not in ("RB", "WR", "TE"):
+            continue
+        for k in keys:
+            x = v.get(k)
+            if isinstance(x, (int, float)):
+                out.setdefault(pos, {}).setdefault(k, []).append(x)
+    for d in out.values():
+        for arr in d.values():
+            arr.sort()
+    return out
+
+
+ROUTE_KEYS = ("route_sh", "tprr")
+RZ_KEYS = ("rz_tgt_sh", "rz_car_sh", "i10_car_sh")
+ROUTE_POOLS = _layer_pools(ROUTES, ROUTE_KEYS)
+RZ_POOLS = _layer_pools(RZ, RZ_KEYS)
+
+
+def layer_pct(pools, pos, key, value):
+    arr = (pools.get(pos) or {}).get(key)
+    if not arr or len(arr) < PCT_MIN_POOL or value is None:
+        return None
+    below = 0
+    for x in arr:
+        if x < value:
+            below += 1
+        else:
+            break
+    return math.floor(below / len(arr) * 100 + 0.5)
+
+
+# ======================= SAMPLE HYGIENE (the Winks move) ======================
+# ⭐⭐ WHAT IT IS. A season rate silently averages a three-snap injury exit
+# with fifteen full games. The move worth stealing, from ANALYST-REFERENCE.md
+# §11b: name the contaminated game and say why, then give the rate without it.
+#
+# ⛔ THE THRESHOLD IS MEASURED, NOT CHOSEN. scripts/measure-partial-games.py
+# prints the flag rate over the whole 2025 corpus at seven thresholds. The curve
+# climbs gently to 0.30 and then accelerates; at 0.50 it flags 13.6% of all
+# games and 83.5% of players, which is finding ordinary variance rather than
+# injuries - and a reader could then discard any week that spoiled a story.
+# 0.20 flags 66 of 2,470 games (2.67%), and a spot read of what it catches is
+# unambiguous: CeeDee Lamb on 1 target against a 10 median, Amon-Ra St. Brown 1
+# against 10, Kimani Vidal with zero opportunities against 13.
+#
+# ⭐ IT IS SCORED AGAINST THE PLAYER'S OWN MEDIAN, never a league bar. Six
+# targets is a quiet Sunday for one receiver and a career day for another.
+#
+# ⚠️ IT CATCHES TWO CAUSES AND CANNOT TELL THEM APART: a mid-game exit and a
+# Week 18 rest. Both contaminate a rate, so both are worth printing, but the
+# line says "partial" rather than "injured" because the data does not know.
+PARTIAL_FRAC = 0.20
+PARTIAL_MIN_MEDIAN = 3.0
+PARTIAL_MIN_GAMES = 6
+
+
+def _gl_opp(pos, cols, g):
+    d = dict(zip(cols, g))
+    if pos == "RB":
+        return (d.get("car") or 0) + (d.get("tgt") or 0)
+    return d.get("tgt") or 0
+
+
+def partial_games(name):
+    """Games whose opportunity collapsed against the player's own median.
+
+    Returns (flags, clean_tgt_pg, all_tgt_pg) or None when the log is too thin
+    to say anything. ⛔ It RECOMPUTES ONLY PER-GAME RATES. A target SHARE needs
+    that team's per-game totals, which no file here carries, so a share is
+    flagged as contaminated and never re-derived - inventing it would be worse
+    than leaving it.
+    """
+    row = (GL or {}).get(name)
+    if not isinstance(row, dict) or not row.get("g"):
+        return None
+    pos = row.get("pos")
+    if pos not in ("RB", "WR", "TE"):
+        return None
+    cols = sub(GL, "_meta", "cols", pos) or []
+    if not cols:
+        return None
+    games = row["g"]
+    if len(games) < PARTIAL_MIN_GAMES:
+        return None
+    opp = [_gl_opp(pos, cols, g) for g in games]
+    med = sorted(opp)[len(opp) // 2] if len(opp) % 2 else (
+        sorted(opp)[len(opp) // 2 - 1] + sorted(opp)[len(opp) // 2]) / 2
+    if med < PARTIAL_MIN_MEDIAN:
+        return None
+    flags, kept = [], []
+    for g, x in zip(games, opp):
+        d = dict(zip(cols, g))
+        if x <= med * PARTIAL_FRAC:
+            flags.append((d.get("week"), x))
+        else:
+            kept.append(d.get("tgt") or 0)
+    if not flags or not kept:
+        return None
+    all_tgt = [dict(zip(cols, g)).get("tgt") or 0 for g in games]
+    return flags, sum(kept) / len(kept), sum(all_tgt) / len(all_tgt), med
 
 
 def pctile(pos, key, value):
@@ -554,17 +673,68 @@ def q7_usage(team, n=4):
     rows.sort(key=lambda r: -num(r[1],"wopr"))
     if not rows:
         return ["no 2025 usage on file"]
+    def _snap(v):
+        # ⛔ A NULL SNAP SHARE IS NOT ZERO. num() coerces None to 0, so this
+        # printed "snap 0.0%" for Chris Godwin and Harold Fannin - both of whom
+        # played all season. The percentile column said "(--)" beside it, so the
+        # row asserted he never took a snap AND that he could not be ranked.
+        # Absence is a stated gap here, never a number.
+        x = v.get("snap_sh")
+        return "%4.1f%%" % (x * 100) if isinstance(x, (int, float)) else "  --  "
+
     def pc(v, key):
         # A bare "(--)" is deliberate: a thin pool prints its absence rather
         # than silently dropping to a raw number the reader then misreads.
         p = pctile(v.get("pos"), key, v.get(key))
         return "(--)" if p is None else "(%2d)" % p
 
-    return [f"{k.title():<22} WOPR {num(v,'wopr'):>5.2f} {pc(v,'wopr')}  "
-            f"tgt sh {num(v,'tgt_sh')*100:>4.1f}% {pc(v,'tgt_sh')}  "
-            f"snap {num(v,'snap_sh')*100:>4.1f}% {pc(v,'snap_sh')}  "
-            f"dud {num(v,'dud_rate')*100:>4.1f}% {pc(v,'dud_rate')}{prev_team(k, v.get('team'))}"
-            for k, v in rows[:n]]
+    # ============ ROUTE / RED ZONE / HYGIENE ============
+    # ⭐⭐⭐ ROUTES IS FIRST AND IT IS NOT CLOSE. Counted over 141 minutes of
+    # the Yahoo show (ANALYST-REFERENCE.md §11b): routes 65 mentions, snap
+    # share 45, carry share 27, red zone 25 - and ADP ZERO. In season the price
+    # you paid is irrelevant and route participation is the spine. This block
+    # was printing neither routes nor red zone, which is to say it was missing
+    # the show's most-cited metric and its third.
+    def extra(name, v):
+        pos, out = v.get("pos"), []
+        r = (sub(ROUTES, "players") or {}).get(name) or {}
+        z = (sub(RZ, "players") or {}).get(name) or {}
+
+        def add(pools, key, val, label, as_pct):
+            # ⛔ route_sh and every red-zone share are FRACTIONS on disk. The
+            # first cut printed "routes 0.917" and "rz tgt sh 0.2%" - one raw,
+            # one wrong by a factor of a hundred. Scale here, once.
+            if not isinstance(val, (int, float)):
+                return
+            p = layer_pct(pools, pos, key, val)
+            shown = ("%.0f%%" % (val * 100)) if as_pct else ("%.3f" % val)
+            out.append("%s %s %s" % (label, shown, "(--)" if p is None else "(%2d)" % p))
+
+        add(ROUTE_POOLS, "route_sh", r.get("route_sh"), "routes", True)
+        add(ROUTE_POOLS, "tprr", r.get("tprr"), "TPRR", False)
+        add(RZ_POOLS, "rz_tgt_sh", z.get("rz_tgt_sh"), "rz tgt sh", True)
+        add(RZ_POOLS, "rz_car_sh", z.get("rz_car_sh"), "rz car sh", True)
+        add(RZ_POOLS, "i10_car_sh", z.get("i10_car_sh"), "i10 car sh", True)
+        return out
+
+    lines = []
+    for k, v in rows[:n]:
+        lines.append(f"{k.title():<22} WOPR {num(v,'wopr'):>5.2f} {pc(v,'wopr')}  "
+                     f"tgt sh {num(v,'tgt_sh')*100:>4.1f}% {pc(v,'tgt_sh')}  "
+                     f"snap {_snap(v)} {pc(v,'snap_sh')}  "
+                     f"dud {num(v,'dud_rate')*100:>4.1f}% {pc(v,'dud_rate')}{prev_team(k, v.get('team'))}")
+        ex = extra(k, v)
+        if ex:
+            lines.append("%-22s %s   [own population]" % ("", "  ".join(ex)))
+        h = partial_games(k)
+        if h:
+            flags, clean, allv, med = h
+            wk = ", ".join("wk %s: %s opp" % (w, o) for w, o in flags)
+            lines.append("%-22s ⚠ %d partial game(s) inside the 2025 rates - %s, against a %.0f median."
+                         % ("", len(flags), wk, med))
+            lines.append("%-22s   targets/game %.1f without them, %.1f as shown. Shares above are NOT re-derived."
+                         % ("", clean, allv))
+    return lines
 
 
 def q7b_unmeasured(team):
@@ -1144,6 +1314,46 @@ def selftest():
               bool(_t) and any("ROLE CHANGE" in f for f in _t["flags"]))
     except Exception as e:  # noqa: BLE001
         check("an unknown team degrades instead of crashing", False, repr(e))
+
+    # ---- SAMPLE HYGIENE, and the threshold is the whole design ------------
+    # 0.20 IS MEASURED, NOT PICKED. scripts/measure-partial-games.py prints the
+    # flag rate at seven thresholds over the 2025 corpus; 0.20 flags 66 of 2,470
+    # games. If someone loosens it to "catch more", the corpus rate is the
+    # argument against them: 0.50 flags 13.6% of ALL games, which would let any
+    # inconvenient week be discarded as contaminated.
+    check("the partial-game threshold is still the measured 0.20",
+          PARTIAL_FRAC == 0.20)
+    check("...and the measurement that justifies it still exists",
+          os.path.exists(os.path.join(HERE, "measure-partial-games.py")))
+
+    _lamb = partial_games("ceedee lamb")
+    check("a real collapsed game is caught (lamb, 1 target on a 10 median)",
+          bool(_lamb) and any(w == 18 for w, _ in _lamb[0]))
+    check("...and the clean rate differs from the printed one",
+          bool(_lamb) and abs(_lamb[1] - _lamb[2]) > 0.01)
+
+    # MUST-FAIL CASE. A detector that finds a partial game in flat data would
+    # flag the whole league, and nothing downstream would ever notice.
+    _save = GL.get("__selftest__")
+    GL["__selftest__"] = {"pos": "WR", "g": [[w, 1, 9.0, 0, 8, 5, 60, 70] for w in range(1, 13)]}
+    check("a perfectly flat season flags NOTHING", partial_games("__selftest__") is None)
+    GL["__selftest__"] = {"pos": "WR",
+                          "g": [[w, 1, 9.0, 0, 8, 5, 60, 70] for w in range(1, 12)]
+                               + [[12, 1, 0.3, 0, 1, 0, 0, 0]]}
+    _sab = partial_games("__selftest__")
+    check("...and one collapsed game IS flagged", bool(_sab) and _sab[0] == [(12, 1)])
+    if _save is None:
+        GL.pop("__selftest__", None)
+    else:
+        GL["__selftest__"] = _save
+
+    # ---- the two display bugs the percentile column exposed ---------------
+    _q7 = chr(10).join(q7_usage("CLE", n=6) + q7_usage("TB", n=6))
+    check("a NULL snap share prints as a gap, never as 0.0%", "snap   --  " in _q7)
+    check("route share prints as a percentage, not a raw fraction",
+          "routes 0." not in _q7)
+    check("routes and red zone declare their OWN population",
+          "[own population]" in _q7)
 
     print("\n" + ("PASS  matchup-brief" if ok else "FAIL  matchup-brief"))
     return 0 if ok else 1
