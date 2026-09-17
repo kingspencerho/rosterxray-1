@@ -2862,6 +2862,46 @@ const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
 const CUR_VOLUME_LIVE = (VOLUME_CUR._meta?.weeks_covered || 0) > 0;
 const getVolumeCur = (name) => (CUR_VOLUME_LIVE ? lookupPlayer(VOLUME_CUR.players, name) : null);
 
+// === THE FULL-PPR PREMIUM (CONTEXT ONLY) ===
+// Exactly half a point per reception per game. Not a model, not a projection -
+// it is the arithmetic gap between a half-PPR league and a full-PPR one.
+//
+// \u2b50 FIRST BUILT ON THE DRAFT-REPORT BRANCH IN AUGUST and stranded there,
+// scoped to draft day. Its own note called it "the single largest edge
+// available in a full-PPR draft, and it is invisible if you read the ADP table
+// straight." The same edge is live every week on a waiver wire.
+//
+// \u26d4\u26d4 IT IS READ AGAINST HIS POSITION, NEVER ABSOLUTELY, and that is the
+// whole design. 1.5 points is the 90th percentile for a running back and about
+// the median for a receiver - so an absolute number would quietly tell you
+// every receiver is valuable in PPR, which is true of the position and says
+// nothing about the player. The medians are derived in the builder.
+//
+// \u26a0\ufe0f THE ROW IS SILENT UNLESS HE CLEARS HIS POSITION'S 75th PERCENTILE.
+// Silence means ordinary, the same contract trajectoryContext and teamtrends
+// already use. QBs are structurally zero and never render.
+const PPR_META = VOLUME_PRIOR._meta?.ppr_premium?.by_pos || {};
+const pprPremium = (name, pos) => {
+  if (pos === "QB") return null;
+  const cur = getVolumeCur(name);
+  const prior = getVolumePrior(name);
+  const src = (cur && cur.ppr_prem != null) ? cur : prior;
+  if (!src || src.ppr_prem == null) return null;
+  const band = PPR_META[pos];
+  if (!band) return null;
+  return {
+    prem: src.ppr_prem,
+    median: band.median,
+    p75: band.p75,
+    max: band.max,
+    season: src === cur ? (VOLUME_CUR._meta?.season) : (VOLUME_PRIOR._meta?.season),
+    gp: src.gp,
+    // \u26a0\ufe0f Above his position's p75. Below that he is an ordinary player for
+    // the format and the row would be noise on every card.
+    notable: src.ppr_prem >= band.p75 && band.p75 > 0,
+  };
+};
+
 // === EXPECTED FANTASY POINTS (CONTEXT ONLY) ===
 // Every other opportunity layer here reports a SHARE. A share says how much of
 // a pie he owns and nothing about how big the pie is or where on the field it
@@ -2920,6 +2960,7 @@ const expectedPoints = (name) => {
 // always a change in what a staff DID and never in what happened afterwards.
 // That split is the whole reason one week of this is worth reading at all:
 // usage repeats (r 0.73-0.83), outcomes do not (0.02-0.31).
+const getVolumePrior = (name) => lookupPlayer(VOLUME_PRIOR.players, name);
 const SHIFT_META = VOLUME_CUR._meta?.vs_prior || null;
 const SHIFT_LIVE = !!(SHIFT_META && CUR_VOLUME_LIVE);
 const SHIFT_STABILITY = VOLUME_CUR._meta?.stability || {};
@@ -4105,6 +4146,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     if (CUR_VOLUME_LIVE) {
       const tt = getTargetTrend(name);
       const ct = pos === "RB" ? getCarryTrend(name) : null;
+      card.ppr = pprPremium(name, pos);
       card.expected = expectedPoints(name);
       card.shift = usageShift(name, pos);
       card.targetTrend = {
@@ -10752,6 +10794,23 @@ const PlayerCardModal = ({ card, onClose }) => {
                 } \u26d4 The gap between the two is NOT a skill rating: it repeats at only r=0.21 year over year, so it is mostly the part his usage does not explain. Half-PPR, recomputed from opportunity components.`}>
                 <ExpectedRow r={card.expected.cur} />
                 <ExpectedRow r={card.expected.prior} />
+                {card.ppr && card.ppr.notable && (
+                  <div style={{ display: "flex", justifyContent: "space-between",
+                                alignItems: "baseline", gap: "10px", padding: "5px 0",
+                                marginTop: "8px", borderTop: "1px solid var(--border-default)",
+                                fontSize: "12px", flexWrap: "wrap" }}>
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                      In a FULL-PPR league
+                      <span style={{ color: "var(--text-faint)", marginLeft: "6px", fontSize: "10px" }}>
+                        {" "}vs {card.pos} median {card.ppr.median.toFixed(2)}
+                      </span>
+                    </span>
+                    <span style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+                                   color: "var(--text-primary)", fontWeight: 700 }}>
+                      +{card.ppr.prem.toFixed(1)} <span style={{ fontWeight: 400, color: "var(--text-faint)" }}>pts / game</span>
+                    </span>
+                  </div>
+                )}
                 {!card.expected.cur && (
                   <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "8px" }}>
                     {"\u26a0"} No current-season row yet \u2014 the prior season is shown alone rather than
@@ -10854,7 +10913,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
 
             {card.descriptive.length > 0 && (
-              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three.">
+              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three. Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. ⚠ In a FULL-PPR league the same player clears them more often, and unevenly by position — measured on 2025, spike rate rises about 26% at RB, 61% at WR and 76% at TE, and not at all at QB. Read these as half-PPR rates, not as a verdict on his ceiling in your format.">
                 {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
               </CardSection>
             )}

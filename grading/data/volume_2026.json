@@ -16,6 +16,12 @@
    "file": "player_metrics_2025.json",
    "rule": "BOTH vintages render, always. The prior season is never overwritten and the current one never silently replaces it."
   },
+  "ppr_premium": {
+   "by_pos": {},
+   "formula": "0.5 x receptions per game - the gap between half-PPR and full PPR, exactly. Not a model.",
+   "qb": "structurally zero. Quarterbacks do not catch passes, so the format is neutral for them and the row is withheld.",
+   "read_against": "his POSITION's median, never absolutely. 1.5 is p90 for a back and about median for a receiver."
+  },
   "season": 2026,
   "season_complete": false,
   "source": "nflverse stats_player (weekly, REG only)",

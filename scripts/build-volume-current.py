@@ -337,6 +337,23 @@ def main():
             "pos": a["pos"], "team": a["team"], "gp": a["gp"],
             "tgt": int(a["tgt"]), "tgt_pg": round(a["tgt"] / a["gp"], 2),
             "rec": int(a["rec"]),
+            # THE FULL-PPR PREMIUM: what he gains per game if the league pays a
+            # full point per reception instead of a half. It is not a model -
+            # it is exactly 0.5 x receptions per game, and that is the whole
+            # calculation.
+            #
+            # ⭐ FIRST BUILT ON THE DRAFT-REPORT BRANCH IN AUGUST and stranded
+            # there, scoped to draft season. Its own note called it "the single
+            # largest edge available in a full-PPR draft, invisible if you read
+            # the ADP table straight". The same edge is live every week on the
+            # waiver wire, which is why it belongs here.
+            #
+            # ⚠️ IT MUST BE READ AGAINST HIS POSITION, NEVER ABSOLUTELY. 1.5 is
+            # the 90th percentile for a back and about the median for a
+            # receiver. Same reason the Ceiling Shape Layer normalises by
+            # position - scoring the raw number rewards a roster for carrying
+            # receivers, which says nothing about anybody.
+            "ppr_prem": round(0.5 * a["rec"] / a["gp"], 2),
             "car": int(a["car"]), "car_pg": round(a["car"] / a["gp"], 2),
             # Where the ball is AIMED when it is thrown at him. r = 0.826
             # year over year, the stickiest player input measured anywhere in
@@ -455,6 +472,21 @@ def main():
             },
         }
 
+    # Position medians for the premium, derived here so no consumer has to
+    # re-derive them and no second copy can disagree.
+    ppr_meta = {}
+    for pos in POSITIONS:
+        xs = sorted(v["ppr_prem"] for v in players.values() if v["pos"] == pos)
+        if not xs:
+            continue
+        h = len(xs) // 2
+        med = xs[h] if len(xs) % 2 else (xs[h - 1] + xs[h]) / 2
+        ppr_meta[pos] = {
+            "median": round(med, 2),
+            "p75": round(xs[min(len(xs) - 1, int(0.75 * len(xs)))], 2),
+            "max": xs[-1], "n": len(xs),
+        }
+
     meta = {
         "season": SEASON,
         "source": "nflverse stats_player (weekly, REG only)",
@@ -473,6 +505,15 @@ def main():
         "hierarchy_rank": {"all": "2 — opportunity volume"},
         "trend": trend_meta,
         "vs_prior": shift_meta,
+        "ppr_premium": {
+            "by_pos": ppr_meta,
+            "formula": "0.5 x receptions per game - the gap between half-PPR "
+                       "and full PPR, exactly. Not a model.",
+            "read_against": "his POSITION's median, never absolutely. 1.5 is "
+                            "p90 for a back and about median for a receiver.",
+            "qb": "structurally zero. Quarterbacks do not catch passes, so the "
+                  "format is neutral for them and the row is withheld.",
+        },
         "trend_rules": {
             "rank": "1 — role/opportunity CHANGE, which outranks the season "
                     "aggregate sitting beside it",
