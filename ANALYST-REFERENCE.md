@@ -820,7 +820,14 @@ under every scheme block, and the brief's selftest asserts the sentence is there
 ⚠️ **That is not a reason to skip it.** The brief's stated job is to print inputs and leave
 contradictions standing; P3's questions 3 and 4 are *what does this defence do*, which is
 descriptive by construction. **Blitz and pressure rate are the more promising half** — they connect
-to sacks, time to throw and checkdowns, chains that have not been measured here yet.
+to sacks, time to throw and checkdowns.
+
+⛔⛔ **CORRECTED Sep 17 2026 — THAT WAS AN ARGUMENT, AND §2g MEASURED IT AND KILLED IT.**
+A blitz-heavy defence is **not measurably different within a season** on any outcome tested:
+sack rate `0.090`, hit rate `0.195`, EPA per dropback `-0.157` — all under the `0.355` bar and
+most flipping sign between seasons. **The chain dies at the same middle link the man/zone chain
+died at.** ⭐ **The layer is unchanged, because it was built descriptive and brief-only for
+exactly this reason.**
 
 ### ⛔ THREE PRE-EXISTING BUGS IN matchup-brief.py, ALL HIDDEN BEHIND EACH OTHER
 
@@ -859,6 +866,113 @@ python scripts/matchup-brief.py --selftest
 
 ⚠️ **ANNUAL cadence, and there is no 2026 twin** until nflverse publishes participation for it. The
 scheme read therefore describes LAST season, and the brief says so where it prints.
+
+---
+
+### ⛔⛔ §2g · THE BLITZ CHAIN IS DEAD AT LINK 2 (Sep 17, 2026)
+
+`scripts/measure-blitz-consequences.py`. **NOTHING SHIPPED, and nothing needs removing** — the
+scheme layer stays exactly as §2f built it, descriptive and brief-only.
+
+**§2f closed by arguing that blitz rate was the promising half:** it repeats at `r = 0.622`, and
+unlike the man/zone chain it acts on things that are themselves measurable — sacks, time to throw,
+how deep the ball goes. ⭐ **That was an ARGUMENT and §2f labelled it one. This measures it, and it
+is wrong.**
+
+### THE THREE LINKS, and the cheapest one is the one that kills it
+
+```
+LINK 1   does blitz rate repeat?               r = 0.622   YES (§2f)
+LINK 2   does it DO anything within a season?               NO   <- dead here
+LINK 3   does knowing it in advance help?                   moot
+```
+
+### ⛔ LINK 2 — a blitz-heavy defence is not measurably different
+
+`r(blitz rate, outcome allowed)`, same season, n = 32:
+
+```
+outcome           2023     2024     2025     mean
+sack_rate       -0.185   +0.192   +0.262    0.090
+qb_hit_rate     -0.114   +0.468   +0.230    0.195
+adot_allowed    -0.110   +0.300   +0.037    0.076
+comp_pct        +0.141   -0.233   -0.034   -0.042
+epa_per_db      -0.032   -0.281   -0.158   -0.157
+time_to_throw   -0.307   -0.182   -0.399   -0.296
+```
+
+**Not one clears the `0.355` bar, and four of six flip sign between seasons.** ⛔ **A defence that
+blitzes more does not take more sacks, hit the quarterback more, or give up different yardage in
+any way that survives a second season.**
+
+⭐ **ONE REAL EFFECT SURVIVES AND IT IS UNUSABLE.** `time_to_throw` is negative in all three
+seasons and it is the right sign — blitzing forces the ball out faster, which is the mechanism
+working exactly as advertised. **It is still under the bar, and time to throw is not a fantasy
+input.** The mechanism is real and too small to act on.
+
+### LINK 3 — and the honest reading of the one row that looks like a win
+
+```
+outcome        2023>24  2024>25  blitz->now  own prior    delta   verdict
+sack_rate        0.237    0.471       0.354      0.112   +0.242   knife-edge, see below
+qb_hit_rate      0.295    0.426       0.360      0.409   -0.049   own prior is better
+time_to_throw   -0.312   -0.128      -0.220      0.339   -0.119   own prior is better
+adot_allowed     0.151    0.078       0.115      0.296   -0.182   own prior is better
+```
+
+⚠️⚠️ **`sack_rate` DESERVES THE SCRUTINY IT NEARLY ESCAPED.** At `0.354` against a baseline of
+`0.112` it is the biggest apparent gain in the table — **and my first run labelled it "blitz
+ADDS".** Three things say it is not a finding:
+
+1. **It is `0.001` under the noise bar.** A verdict that swings on a thousandth is not a verdict.
+2. **The two transitions are `0.237` and `0.471`.** One is well under the bar and one is over —
+   **the pooled number is one transition carrying the other**, which is the failure §2c and §2e
+   were both killed by.
+3. ⛔ **THERE IS NO MECHANISM UNDER IT.** Link 2 says blitzing does not produce sacks within a
+   season (`0.090`, sign-flipping). **A cross-season link with no within-season cause is an
+   artefact**, not a discovery.
+
+⭐ **A genuine secondary finding, and it is the more useful one: SACK RATE ALLOWED BARELY REPEATS
+AT ALL — its own prior is `r = 0.112`.** A defence's sack rate is not a stable property of that
+defence. That is worth knowing independently of blitzing, and it is why the baseline here is so
+low that a noisy predictor could clear it.
+
+### ⚠️ TWO FLAWS IN MY OWN INSTRUMENT, CAUGHT BEFORE THE VERDICT
+
+Both would have produced a false positive, and both are the repo's own recorded lessons:
+
+1. **LINK 3 PRINTED ONLY A POOLED MEAN.** I printed per-season rows for link 2 and a single mean
+   for link 3 — in a repo where the last three measurements were decided by a per-season sign flip.
+   Now per-transition.
+2. ⛔ **THE VERDICT COULD DECLARE A WINNER BETWEEN TWO NOISE VALUES.** `int_rate` read *"blitz
+   ADDS"* at `r = -0.088` against a baseline of `0.008`. **Both mean nothing; the delta rule
+   compared them anyway.** The verdict now requires the predictor itself to clear the bar first.
+
+### ⭐⭐ THE REUSABLE RULE: WHEN A PROPOSAL IS A CHAIN, TEST THE MIDDLE LINK FIRST
+
+A chain is only as strong as its weakest link, and **the middle link is usually the cheapest to
+test and the likeliest to be zero.** Here link 1 was already measured and encouraging, and link 3
+is the expensive question everyone wants answered — but link 2, *does this thing do anything at
+all*, settles it in one correlation.
+
+⛔ **The man/zone chain failed the same way**: sticky tendency (0.462) times a coin-flip receiver
+edge (0.161). **Two chains, two dead middles.** Before building on "X is sticky, and X affects Y",
+measure whether X affects Y.
+
+### What this changes
+
+**Nothing in the app, and nothing in `defense_scheme_2025.json`.** The layer was built as
+descriptive and brief-only precisely because §2f could not vouch for the chain. ⭐ **That caution
+is now vindicated rather than regretted** — had the scheme profile been wired into the AI prompt or
+a start/sit hint on the strength of "blitz rate is sticky", this measurement would be a retraction
+instead of a footnote.
+
+### Reproduce
+
+```
+python scripts/measure-blitz-consequences.py --selftest
+python scripts/measure-blitz-consequences.py
+```
 
 ---
 
