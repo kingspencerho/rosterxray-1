@@ -1697,6 +1697,77 @@ because the builder divides a full-season target count by one team's totals.
 regenerate the frozen file to fix it**; that moves every grade and invalidates
 every calibration on file. It rides along with the next legitimate rebuild.
 
+### ⭐⭐ §11b · The Winks teardown — five instruments, ranked by what they would buy (Sep 17, 2026)
+
+**Source:** Hayden Winks, *RB Blueprint for Week 2*, Yahoo Fantasy, Sep 16 2026. Read in full —
+5,219 words and all 22 graphics, at full resolution. **His data source is `nflfastR`, the same
+release this repo builds on**, so nothing below needs a paid feed.
+
+⛔ **PROVENANCE: `SEEN`, n = 1 analyst.** This is how one respected operator does it, looked at
+directly. **It is not evidence that any of it WORKS** — no failure sample exists, he publishes only
+his own method, and nothing here has been measured for stability against this repo's own `r` bar.
+**Every item below is a candidate to MEASURE, never a finding to adopt.**
+
+| # | What he has | What we have | Gap |
+|---|---|---|---|
+| **A** | **Expected fantasy points (xFP)** per player per game | nothing | ⭐⭐⭐ the spine of his whole read |
+| **B** | **Schedule-adjusted FPA** — defence +/- vs each opponent's OWN baseline | raw FPA, confounded, and §2 says so | ⭐⭐⭐ our stated caveat, solved |
+| **C** | **Usage plotted against game state** — every touch by minute and win probability | nothing | ⭐⭐ separates real role from garbage time |
+| **D** | **Rolling windows that cross the season boundary** (last 10 games; 2025 W20–2026 W1) | season-bucketed files behind play-count gates | ⭐⭐ ours are EMPTY in September |
+| **E** | **Defence-side scheme rates** (MAN%, 2HI%, BLITZ%) | offence-side only | ⭐ already flagged by `matchup-brief.py` |
+
+**A — EXPECTED FANTASY POINTS.** He reports every player as *actual on expected*: "James Cook 8.4
+half-PPR points on 11.4 expected." **It converts opportunity into one number on the same scale as
+the output**, which is what lets him compare a receiving role against a goal-line role without
+hand-waving. ⭐ **The data already sits in an nflverse release this repo consumes** —
+`ffopportunity`, read by `build-efficiency.py` via `nfl.load_ff_opportunity`. ⚠️ It needs
+`nflreadpy` + `polars`, which every in-season builder deliberately avoids, so this is an ANNUAL
+layer or a dependency decision, not a weekly one.
+
+⭐⭐ **His two-number shorthand is free and worth stealing on its own: "RB12 on RB11 usage."**
+Finish rank ON usage rank, in one phrase. The gap between them IS the luck.
+
+**B — SCHEDULE-ADJUSTED FPA.** His own words: *"Each defense's +/- allowed versus their opponents'
+baselines. Ex: +42 rush yards means opponents facing that defense averaged 42 more rush yards than
+their typical average."* ⛔⛔ **§2 of this file has carried the raw-FPA caveat since Aug 25 and
+never closed it** — *"a defense that drew Kelce, Bowers and LaPorta looks soft at TE for reasons
+unrelated to the defense."* **This is that fix, and it is computable from data already on disk.**
+⚠️ **FPA IS SCORED here** (the matchup pills, the playoff geometry), so changing it moves every
+grade and needs its own calibration. It is a data decision, not a cleanup.
+
+**C — USAGE AGAINST GAME STATE.** His RB Rotation chart plots every touch on minutes-into-game
+against in-game win probability, marking passing downs, inside-the-5 and fumbles. ⭐⭐ **It answers
+the question one week of usage cannot otherwise answer: was this role, or was this the scoreboard?**
+`win_prob` and `game_seconds_remaining` are already columns in the pbp release this repo downloads
+weekly. **The chart is one rendering of it; the useful half is a per-player split of touches by
+win-probability band.**
+
+**D — ROLLING WINDOWS.** His neutral pass rate is *"over each team's previous 10 games"* and his
+team usage bar is stamped *"2025 W20 – 2026 W1"*. ⛔ **Both cross the season boundary. Ours do
+not, and that is why `teamtrends_2026` is empty until roughly Week 5** — PROE needs 300 plays, the
+funnel 350 per side, and a season-bucketed file cannot borrow from December. **A rolling window is
+always populated and always current.** ⚠️ It also blends two coaching staffs across an offseason,
+which is exactly the confound the per-season split exists to avoid. **Neither is obviously right;
+this is a measurement to run, not a change to make.**
+
+**E — DEFENCE-SIDE SCHEME.** His matchup table carries MAN%, two-high% and BLITZ% per defence.
+⚠⚠ **DO NOT read this repo's `r = 0.161` as a refutation.** That figure measures a RECEIVER'S
+yards-per-target EDGE against man versus zone, year over year. **A defence's man RATE is a team
+tendency and a different measurement entirely**, and this repo has never measured its stability.
+`coverage_2025.json` is man rate FACED BY a receiver — an offence-side number wearing a defensive
+name — which `scripts/matchup-brief.py` already names as its top data gap.
+
+### What he does that is NOT worth copying, and why
+
+⛔ **The per-player film notes** — named offensive linemen, route types charted by hand ("both of
+his screen targets, his lone play-action leak target"), tape reads on vision and burst. **That is
+manual charting by a full-time analyst and cannot be automated.** It is also where most of his
+words go, and it is the half this app deliberately does not compete on.
+⚠️ **Betting-market yardage projections** as the headline number. He leads every player with one.
+**We already carry spreads and implied totals** in `gameenv_<season>.json`; a per-player yardage
+prop is a different feed, priced per market per game, and §2b's own reasoning applies — it is a
+forecast, not a memory, so it is worth having and it is not free.
+
 **Shipped Sep 1 2026 and pruned from this queue:** targets per route run and
 coverage-scheme splits. Both now live in §5. **The lesson worth keeping is the
 measurement order** — TPRR came out at r=0.674 and shipped as a real input,
