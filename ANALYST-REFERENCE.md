@@ -194,6 +194,10 @@ repeatable).
 | TD per touch | 0.198 | weak |
 | Catch rate (RB) | 0.103 | noise |
 | **RB yards per carry** | **0.022** | **coin flip** |
+| **Defence blitz rate** | **0.646** | **reliable** |
+| **Defence two-high rate** | **0.559** | **soft** |
+| **Defence box count** | 0.532 | soft — but see the entry: it discriminates nothing |
+| **Defence man rate** | **0.462** | **soft** |
 | Man rate faced | 0.335 | weak |
 | Yards per target vs zone | 0.294 | weak |
 | Yards per target vs man | 0.235 | weak |
@@ -202,6 +206,48 @@ repeatable).
 | Matchup data (FPA) — TE | 0.192 | |
 | Matchup data (FPA) — QB | 0.049 | |
 | **Matchup data (FPA) — WR** | **−0.073** | **negative** |
+
+### ⭐⭐ THE FOUR DEFENCE-SIDE ROWS ARE NEW (Sep 17, 2026) AND THEY ARE NOT THE COIN FLIP
+
+⛔⛔ **DO NOT CONFUSE THEM WITH `Coverage-scheme splits (man/zone edge) 0.161`.** That row
+measures A RECEIVER'S yards-per-target EDGE against man versus zone. **These four measure what a
+DEFENCE DOES** — how often it plays man, how often it sits two-high, how often it sends five.
+**Different question, different answer: `0.462` against `0.161`, roughly three times as
+repeatable.** The `0.161` finding is correct and it never said anything about this.
+
+**Measured the same way as everything else in this table** — same team, both transitions, from the
+nflverse `pbp_participation` release (`defense_man_zone_type`, `defense_coverage_type`,
+`number_of_pass_rushers`, `defenders_in_box`). 32 defences qualify in every season at a 100-play
+gate. The defence is derived from the game id and `possession_team`; participation carries no team
+column, so that derivation IS the join.
+
+⭐ **Blitz rate at `0.646` sits in the reliable band with TPRR (`0.674`), dud rate (`0.667`) and
+separation (`0.663`).** It is a legitimate input by this file's own bar.
+
+⛔⛔ **BOX COUNT IS THE CAUTIONARY ONE AND IT IS WHY SPREAD MUST BE CHECKED BESIDE `r`.** It
+repeats at `0.532`, and the entire league sits between **5.99 and 6.49 defenders, sd `0.11`**.
+**It is sticky and it discriminates nothing.** A jersey number would score 1.00 — the rule this
+file already states, caught in the wild.
+
+**The three that do have spread, 2025:**
+```
+man rate    19.0% (MIN) to 44.4% (DEN)   mean 31.8%  sd 7.5%
+two-high    31.8%        to 59.1% (MIN)  mean 42.9%  sd 6.5%
+blitz       17.6%        to 46.2% (MIN)  mean 27.4%  sd 5.7%
+```
+⭐ **MIN is the outlier on all three at once** — least man, most two-high, most blitz. That is one
+identifiable scheme, and it is the defence Winks describes in prose as keeping backs in to block.
+**Two independent methods naming the same team is the closest thing to corroboration here.**
+
+⚠⚠ **AVAILABILITY IS THE BLOCKER, NOT THE MEASUREMENT.** `pbp_participation_2026.parquet`
+**returns 404** — probed Sep 17 2026. The 2023, 2024 and 2025 files exist. **So this can only ever
+be a PRESEASON/ANNUAL layer until nflverse publishes the current year**, and a coordinator change
+invalidates a team's row the moment it happens. ⚠️ Re-probe before building; a
+data-availability claim ages exactly like a player verdict, which is R19.
+
+⚠️ **AND STABILITY IS NOT USEFULNESS.** These say a defence's tendency repeats. **Nothing here
+measures whether knowing it improves a fantasy decision** — that is a second study, against
+player outcomes, and it has not been run.
 
 ### The whole thing in one sentence
 
