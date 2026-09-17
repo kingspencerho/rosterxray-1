@@ -513,6 +513,133 @@ scoring functions — the duplicate-definition class, pointed at a measurement i
 
 ---
 
+### ⭐⭐ §2d · THE ROLLING WINDOW — measured, and the three metrics give three different answers (Sep 17, 2026)
+
+`scripts/measure-rolling-window.py`. **NOTHING SHIPPED YET — no App.jsx, no `grading/data`, no
+builder changed.** Team trends are context only, so none of this can move a grade; what it can do
+is stop the panel printing a worse number than it has to.
+
+**The question.** `build-teamtrends.py` computes PROE, neutral-script pace and the defensive funnel
+PER SEASON, and its gates need roughly 300 / 200 / 350 plays — about week 5, week 5 and week 10. So
+for the first month the app has no current-season figure and **falls back to last season entirely.**
+A rolling window of the last K games is never empty: in week 2 it is two games of this season and
+four from the end of last.
+
+### ✅ THE COLLECTOR REPRODUCES THE SHIPPED BUILDER — 96 of 96 values
+
+32 teams x 3 metrics against the committed `teamtrends_2025.json`, zero mismatches, asserted by
+`--selftest`. ⭐ **Same discipline §2c used and the reason its verdict was trusted: a harness that
+cannot reproduce the thing it is judging is measuring its own reimplementation.** The neutral-script
+definition, the pace bounds and `fnum()` are IMPORTED from the builder rather than retyped.
+
+### The test
+
+```
+PRIOR     the metric over all of season S-1
+TODATE    the metric over weeks 1..N of season S          <- what the app uses past the gate
+ROLL(K)   the last K team-games ending at week N, crossing into S-1 as needed
+TARGET    the metric over weeks N+1..18 of season S
+```
+
+⛔ **The target is the REST OF THE CURRENT SEASON** — not next season, and not the full season,
+because including weeks 1..N would let TODATE predict itself.
+
+### ⭐⭐ PROE — a rolling 6-game window beats the prior-season fallback in ALL THREE SEASONS, but only early
+
+```
+roll6 minus prior          2023     2024     2025    seasons won
+week 2                   +0.033   +0.041   +0.120       3 of 3
+week 3                   +0.047   +0.067   +0.247       3 of 3
+week 4                   +0.112   -0.034   +0.315       2 of 3
+week 6                   +0.188   -0.055   +0.409       2 of 3
+week 8                   +0.098   -0.099   +0.400       2 of 3
+```
+
+⭐ **Weeks 2 and 3 are the only cells where ANY predictor beats `prior` in all three seasons, and
+`roll6` is the only predictor that does it.** That is exactly the window where the app currently has
+nothing and shows last season. `todate` manages only 2 of 3 at every cut, and `roll10` is 1 of 3 at
+week 2 — **a six-game window is doing the work, not "rolling" in general.**
+
+⚠️ **Read the size honestly: two of the three margins at week 2 are `+0.03` and `+0.04`, well inside
+what a difference of two `r` values can produce by chance at `n = 32`.** **The replicated DIRECTION
+is the finding; the pooled `+0.065` is carried mostly by 2025**, where `prior` collapses to `0.231`
+because the 2024-to-2025 PROE relationship was unusually weak.
+
+⛔ **From week 4 on there is no stable winner** — 2024 flips to `prior` while 2023 and 2025 stay with
+the current season. Every predictor clears the `0.349` bar at most cuts, so PROE is genuinely
+predictable; the question is only which window, and past week 3 the answer depends on the season.
+
+### ⛔⛔ PACE — THE CURRENT SEASON LOSES TO LAST SEASON IN 15 OF 15 CELLS
+
+```
+todate minus prior         2023     2024     2025    seasons won
+week 2                   -0.054   -0.208   -0.220       0 of 3
+week 3                   -0.076   -0.211   -0.231       0 of 3
+week 4                   -0.116   -0.232   -0.339       0 of 3
+week 6                   -0.027   -0.129   -0.219       0 of 3
+week 8                   -0.074   -0.156   -0.247       0 of 3
+```
+
+**Every season, every cut, without exception.** `prior` runs `0.34-0.57`; `todate` runs `0.17-0.41`.
+Rolling windows land between them and beat `prior` only at weeks 2-3, and only in 2 of 3 seasons.
+
+⚠️ **THE OBVIOUS OBJECTION IS THIN SAMPLES, AND IT DOES NOT EXPLAIN IT.** At week 2 a team has very
+few neutral snaps, so `todate` losing there proves little. **But the app does not use `todate` at
+week 2 — it uses it from the gate at ~week 5.** At weeks 6 and 8, where the sample is at or past
+that gate, `prior` still wins 3 of 3 and 3 of 3.
+
+> ## ⛔ SO THE SHIPPED BEHAVIOUR SWITCHES TO A WORSE NUMBER, ON THIS TEST.
+> **Neutral-script pace is a slow-moving team property. Last season measures it on a full year;
+> half a season measures it on less, in a sample bent by whatever game scripts happened.**
+
+### ⛔⛔ FUNNEL — NOTHING PREDICTS IT, AND THE SIGN FLIPS BY SEASON
+
+```
+pooled          week 2   week 3   week 4   week 6   week 8
+prior           -0.064   -0.052   -0.043   +0.001   +0.007
+todate          -0.058   -0.137   -0.022   +0.050   +0.086
+roll10          -0.186   -0.263   -0.150   -0.105   -0.024
+```
+
+**Not one cell clears the `0.349` bar and most are negative.** Per season it is worse than the
+pooled means suggest: `todate` at week 6 is **`+0.422` in 2023 and `-0.304` in 2024**.
+
+⭐ **This is §2c's finding on a different layer.** A defence's pass-minus-rush EPA gap through week N
+carries essentially no information about its gap over the rest of that same season. ⚠️ **The panel
+prints `pass funnel` / `run funnel` labels off exactly this number**, and a reader will act on a
+label as though it forecasts.
+
+### ⛔ WHAT WAS NOT DONE, AND WHY IT IS HIS CALL
+
+**No behaviour changed.** Two of these findings argue for changing what vintage the panel prints,
+and that runs straight into his standing ruling on the matchup pill:
+
+> ⭐⭐⭐ **THE PILL DESCRIBES. IT DOES NOT FORECAST.** *"i still want to know whats happening
+> currently during my season."*
+
+**That ruling beat a predictive argument once already, and it was the right call.** It may well
+cover pace too — a reader asking *"is this offence playing fast this year"* is asking a descriptive
+question, and answering it with last season's number is the stale-data trap wearing a correlation.
+
+⚠️ **The honest distinction, and it is not decisive either way:** the FPA pill is labelled as a
+description of a defence, while the pace and PROE lines are read to anticipate an upcoming game,
+which is forecasting. **That is an argument, not a measurement, so it does not get to overrule him.**
+
+### Reproduce
+
+```
+curl -sSL -o pbp_2025.csv.gz https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2025.csv.gz
+python scripts/measure-rolling-window.py --selftest      # 96/96 against the shipped builder
+python scripts/measure-rolling-window.py                 # needs 2022-2025 for three prior-season pairs
+```
+
+⚠️ **THE OFFSEASON SITS INSIDE EVERY ROLLING WINDOW.** A team that changed coordinators is two
+teams and `roll(K)` averages them. **Historical coordinator data does not exist in this repo**, so
+this cannot be split by continuity — which means **a rolling win is a win DESPITE that confound**,
+and a rolling loss does not prove the window is wrong.
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a
