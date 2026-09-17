@@ -3140,6 +3140,26 @@ const trendVintage = (meta) => {
 // clears its gate, and the season is printed on every line either way. Where
 // both vintages have a value the prior one rides along, because the change is
 // the finding.
+// ⛔⛔ PACE IS READ FROM THE MOST RECENTLY COMPLETED SEASON, ALL YEAR, AND
+// NOT FROM THE LIVE ONE. Measured Sep 17 2026 across 2023-25 (ANALYST-REFERENCE
+// §2d): a complete season predicts the REST OF THIS SEASON better than this
+// season to date in 15 of 15 season-by-cut cells — every season, every week
+// tested, no exception. The thin-sample objection does not cover it, because
+// the switch happens at the gate around week 5 and prior still wins 3 of 3 at
+// weeks 6 and 8.
+//
+// ⭐ THE MECHANISM IS SAMPLE SIZE, NOT RECENCY. The predictors rank in order of
+// how many games they hold — a 17-game rolling window matches the prior season
+// (~0.45), a 10-game window trails it, and this season to date is worst
+// (0.17-0.41). Neutral-script pace is a slow-moving team property, so more
+// games beats more recent games.
+//
+// ⚠️ It is NOT "last season" — it is the completed one. Once the current season
+// finishes, `season_complete` flips and pace comes from it, which is the same
+// rule rather than an exception to it.
+const COMPLETE_TRENDS = TRENDS_CUR._meta?.season_complete ? TRENDS_CUR : TRENDS_PRIOR;
+const PACE_KEYS = ["pace", "pace_label", "pace_rel", "pace_plays"];
+
 const pickTrend = (half, ready) => {
   const cur = lookupTeam(TRENDS_CUR.teams || {}, half.team);
   const prior = lookupTeam(TRENDS_PRIOR.teams || {}, half.team);
@@ -3147,12 +3167,22 @@ const pickTrend = (half, ready) => {
   const priorV = prior && ready(prior[half.side]) ? prior : null;
   const live = curV || priorV;
   if (!live) return null;
-  return {
+  const out = {
     ...live[half.side],
     games: live.games,
     vintage: trendVintage(live === curV ? TRENDS_CUR._meta : TRENDS_PRIOR._meta),
     prior: curV && priorV ? priorV[half.side] : null,
   };
+  // ⚠️ Pace overrides the half's vintage and therefore carries its OWN label.
+  // A number printed under a season that did not produce it is exactly what
+  // the render comment below already warns about.
+  if (half.side === "off") {
+    const done = lookupTeam(COMPLETE_TRENDS.teams || {}, half.team);
+    const dp = done && done.off;
+    for (const k of PACE_KEYS) out[k] = dp ? dp[k] : null;
+    out.paceVintage = dp && dp.pace != null ? trendVintage(COMPLETE_TRENDS._meta) : null;
+  }
+  return out;
 };
 const offReady = (o) => o && o.proe != null;
 const defReady = (d) => d && d.funnel != null;
@@ -17186,11 +17216,16 @@ Analyze this best ball roster. Return JSON only.`;
                               // that moved rather than a number whose meaning moved.
                               const shift = (cur, key) => (o && o.prior && o.prior[key] != null
                                 ? ` from ${o.prior[key] > 0 ? "+" : ""}${o.prior[key]}` : "");
+                              let proeShown = false, paceShown = false;
                               if (o) {
-                                if (o.proe_label && o.proe_label !== "average")
+                                if (o.proe_label && o.proe_label !== "average") {
                                   bits.push(`${o.proe_label} (${o.proe_rel > 0 ? "+" : ""}${o.proe_rel} PROE${shift(o.proe_rel, "proe_rel")})`);
-                                if (o.pace_label && o.pace_label !== "average")
+                                  proeShown = true;
+                                }
+                                if (o.pace_label && o.pace_label !== "average") {
                                   bits.push(`${o.pace_label} (${o.pace}s between snaps)`);
+                                  paceShown = true;
+                                }
                               }
                               const d = row.oppDef;
                               const funnel = d && d.funnel_label && d.funnel_label !== "average" ? d.funnel_label : null;
@@ -17199,7 +17234,15 @@ Analyze this best ball roster. Return JSON only.`;
                               // RENDERED. Offence and defence clear their gates independently,
                               // so taking it from whichever object exists can name a season
                               // that did not produce the number beside it.
-                              const vs = [...new Set([bits.length ? o.vintage : null, funnel ? d.vintage : null].filter(Boolean))];
+                              // ⛔ PACE NOW COMES FROM A DIFFERENT SEASON THAN PASS RATE, so
+                              // naming one vintage for the whole offence half would print a
+                              // season that did not produce half the numbers beside it. Each
+                              // bit contributes its own.
+                              const vs = [...new Set([
+                                proeShown ? o.vintage : null,
+                                paceShown ? o.paceVintage : null,
+                                funnel ? d.vintage : null,
+                              ].filter(Boolean))];
                               const v = vs.join(" / ");
                               return (
                                 <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "0 0 5px" }}>
@@ -17311,10 +17354,16 @@ Analyze this best ball roster. Return JSON only.`;
                           not missing.
                           <br /><br />
                           These settle slowly, so the season each line came from is printed on it. A team needs{" "}
-                          {TRENDS_GATES.proe_plays} plays before its pass rate is readable, {TRENDS_GATES.pace_plays}{" "}
-                          close-game snaps for pace and {TRENDS_GATES.funnel_plays_per_side} on each side for the
-                          funnel — roughly week 5 for the first two and week 10 for the third. Until then the
-                          line shows last season and says so.
+                          {TRENDS_GATES.proe_plays} plays before its pass rate is readable and{" "}
+                          {TRENDS_GATES.funnel_plays_per_side} on each side for the funnel — roughly week 5 and
+                          week 10. Until then those lines show last season and say so.
+                          <br /><br />
+                          <strong style={{ color: "var(--text-secondary)" }}>Pace works differently: it always
+                          comes from the most recently completed season</strong>, even once this one is well
+                          under way. Measured across 2023-25, a full season predicts the rest of this season
+                          better than this season so far does — in every season and at every week tested,
+                          including past the point where the other two switch over. Pace is a slow-moving team
+                          property, and more games beats more recent games.
                           <br /><br />
                           <strong style={{ color: "var(--text-secondary)" }}>Lines move all week.</strong> Pulled{" "}
                           {env.fetched ? String(env.fetched).replace("T", " ").replace("Z", " UTC") : "unknown"}.

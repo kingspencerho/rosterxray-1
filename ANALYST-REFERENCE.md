@@ -609,6 +609,43 @@ carries essentially no information about its gap over the rest of that same seas
 prints `pass funnel` / `run funnel` labels off exactly this number**, and a reader will act on a
 label as though it forecasts.
 
+### ✅✅ HIS RULING, Sep 17 2026 — OPTION B SHIPPED: PACE ONLY
+
+**He was given three options and chose B: change pace, leave pass rate and the funnel alone.**
+
+⭐ **The implementation is not "use last season" — it is USE THE COMPLETED SEASON.** `COMPLETE_TRENDS`
+is derived from `_meta.season_complete`, so the moment the current season finishes, pace comes from
+it. **That is the same rule rather than an exception to it**, and it is what keeps the change from
+quietly becoming a permanent pin to an ageing year.
+
+⚠️ **PACE HAD BEEN RIDING ALONG WITH PASS RATE, WHICH IS WHY THIS WAS INVISIBLE.** `pickTrend` chose
+ONE vintage for the whole offence half, gated on `offReady` — *does this team have a PROE value*. So
+the moment a team cleared the 300-play PROE gate around week 5, **pace switched to the live season
+too, on whatever sample it happened to have.** Nothing named pace in that decision.
+
+⛔ **SO PACE NOW CARRIES ITS OWN VINTAGE LABEL.** Pass rate can read 2026 while pace reads 2025 on
+the same line, and the render names both. The existing comment there already warned that taking one
+vintage for a whole half "can name a season that did not produce the number beside it" — **this
+change is the case that warning was written for.**
+
+✅ **Verified: 90 grades BYTE-IDENTICAL** against a pristine worktree (15 tournaments x 5 fixtures
+plus 3 leagues x 5) — team trends are context only and the calibration is the proof, not the claim.
+**42 guards green, mirror identical, LF preserved, `vite build` clean.**
+
+⚠️ **IT IS INERT TODAY AND THAT IS EXPECTED.** At week 1 nothing clears a gate, so both halves
+already fell back to 2025 and the rendered panel is unchanged — verified in a browser: every
+tendency line reads `2025 season`, 0 sub-32px targets, no console error. **The change bites at
+about week 5.** Guard 39 therefore proves it BEHAVIOURALLY, extracting `pickTrend` with
+`new Function` and running it against a live-shaped current season the committed data cannot
+produce — the technique guards 29 and 41 adopted after a string-match sabotage slipped through.
+
+**6 sabotages, all caught:** pace falling back to the live season, `COMPLETE_TRENDS` pinned to the
+prior season, pace borrowing the offence half's vintage, the pace vintage dropped, an absent team
+silently inheriting live pace, and the reader not being told.
+
+⛔ **NOT SHIPPED, on his call: the pass-rate rolling window and the funnel wording.** Both findings
+stand as recorded above; neither was acted on.
+
 ### ⛔ WHAT WAS NOT DONE, AND WHY IT IS HIS CALL
 
 **No behaviour changed.** Two of these findings argue for changing what vintage the panel prints,

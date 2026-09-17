@@ -163,12 +163,84 @@ const panelEnd = appCode.indexOf("buildRoleContext(analyzed.allStarters)", panel
 const panel = appCode.slice(panelStart, panelEnd > 0 ? panelEnd : panelStart + 20000);
 t(panelStart >= 0 && panelEnd > panelStart, "the panel block is locatable");
 t(/\{v \? <span/.test(panel) || /\{v\s*\?/.test(panel), "the rendered line carries a vintage");
-const vs = panel.match(/const vs = \[[^\]]+\]/);
-t(!!vs && /bits\.length \?/.test(vs[0]) && /funnel \?/.test(vs[0]),
-  "the vintage is taken from the half that actually rendered, not from whichever object exists");
+const vs = panel.match(/const vs = \[[\s\S]*?\]/);
+// ⚠️ RE-AIMED Sep 17 2026, NOT RELAXED. This used to match `bits.length ?`,
+// which is an implementation shape rather than the property it names. Pace now
+// reads from the completed season while pass rate reads from the live one, so
+// naming one vintage for the whole offence half became precisely the error this
+// assertion exists to prevent. The property is: EVERY RENDERED BIT NAMES THE
+// SEASON THAT PRODUCED IT.
+t(!!vs && /proeShown \?/.test(vs[0]) && /funnel \?/.test(vs[0]),
+  "pass rate and the funnel each name their own season");
+t(!!vs && /paceShown \? o\.paceVintage/.test(vs[0]),
+  "pace names its OWN season, never the offence half's");
+t(!!vs && !/bits\.length \?/.test(vs[0]),
+  "no bit borrows another's vintage - pace and pass rate can differ now");
 const pick = body("pickTrend") || "";
 t(/TRENDS_CUR_LIVE/.test(pick) && /prior:/.test(pick),
   "the current season is preferred once live, and the prior value rides along");
+
+console.log("\n7b. PACE COMES FROM THE COMPLETED SEASON (section 2d)");
+// ⛔ A REGEX OVER SOURCE ASSERTS THAT TEXT EXISTS, NEVER THAT CODE BEHAVES.
+// pickTrend is extracted and RUN against a live-shaped current season, which is
+// the only way to exercise the case the committed data cannot reach: the app is
+// at week 1, so nothing clears a gate and the switch this protects never fires.
+const vintStart = appCode.indexOf("const TRENDS_CUR_LIVE");
+const vintEnd = appCode.indexOf("const getTeamOff", vintStart);
+const vintSrc = vintStart > -1 && vintEnd > vintStart ? appCode.slice(vintStart, vintEnd) : "";
+t(!!vintSrc, "the trend-accessor block is locatable");
+t(/COMPLETE_TRENDS/.test(vintSrc) && /season_complete/.test(vintSrc),
+  "the completed season is derived from season_complete, not hand-picked");
+t((appCode.match(/const COMPLETE_TRENDS =/g) || []).length === 1,
+  "COMPLETE_TRENDS is declared exactly once");
+
+const makePick = (CUR, PRIOR) => new Function(
+  "TRENDS_CUR", "TRENDS_PRIOR", "lookupTeam",
+  `${vintSrc} return pickTrend;`
+)(CUR, PRIOR, (tbl, team) => (tbl ? tbl[team] || null : null));
+
+const offRow = (proe, pace) => ({
+  off: { proe, proe_label: "pass-heavy", proe_rel: proe, proe_plays: 900,
+         pace, pace_label: "fast", pace_rel: -1.5, pace_plays: 400 },
+});
+const LIVE_CUR = {
+  _meta: { season: 2026, weeks_covered: 6, season_complete: false },
+  teams: { KC: offRow(5.5, 25.0) },
+};
+const DONE_PRIOR = {
+  _meta: { season: 2025, weeks_covered: 18, season_complete: true },
+  teams: { KC: offRow(1.5, 31.0) },
+};
+const ready = (o) => o && o.proe != null;
+
+const midSeason = makePick(LIVE_CUR, DONE_PRIOR)({ team: "KC", side: "off" }, ready);
+t(midSeason && midSeason.proe === 5.5,
+  "mid-season, pass rate comes from the LIVE season once it clears its gate");
+t(midSeason && midSeason.pace === 31.0,
+  "...and pace comes from the COMPLETED season anyway - the whole point of 2d");
+t(midSeason && midSeason.vintage === "2026 through W6"
+  && midSeason.paceVintage === "2025 season",
+  "...and the two carry different season labels");
+
+// Once the current season finishes it BECOMES the completed one. This is the
+// same rule, not an exception - pace is never pinned to "last year".
+const FIN_CUR = {
+  _meta: { season: 2026, weeks_covered: 18, season_complete: true },
+  teams: { KC: offRow(5.5, 25.0) },
+};
+const done = makePick(FIN_CUR, DONE_PRIOR)({ team: "KC", side: "off" }, ready);
+t(done && done.pace === 25.0 && done.paceVintage === "2026 season",
+  "once the current season is complete, pace comes from IT");
+
+// A team the completed season does not carry must not silently inherit the
+// live season's pace under the completed season's label.
+const THIN_PRIOR = { _meta: DONE_PRIOR._meta, teams: {} };
+const orphan = makePick(LIVE_CUR, THIN_PRIOR)({ team: "KC", side: "off" }, ready);
+t(orphan && orphan.pace == null && orphan.paceVintage == null,
+  "a team absent from the completed season shows no pace rather than the wrong one");
+
+t(/most recently completed season/i.test(appCode),
+  "the page tells the reader pace uses the completed season");
 t(/season_complete \? /.test(body("trendVintage") || ""),
   "a finished season is labelled final and a live one names its week");
 

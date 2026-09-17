@@ -8583,6 +8583,35 @@ funnels**, roughly 20 average on each. **A team appears on the panel only when i
 one SD from the league on one of the three — silence means ordinary, not missing**, and the
 Explainer says so. Same deliberate-silence pattern as `trajectoryContext`.
 
+### ⛔⛔ PACE READS THE COMPLETED SEASON, ALL YEAR (added Sep 17, 2026 — his call)
+
+**PROE and the funnel switch to the current season once they clear their gates. PACE DOES NOT.**
+It is read from whichever season is `season_complete`, which in-season means last year and after
+week 18 means this one.
+
+**Measured across 2023-25 (`ANALYST-REFERENCE.md` §2d, `scripts/measure-rolling-window.py`): a
+complete season predicts the REST OF THIS SEASON better than this season to date in 15 of 15
+season-by-cut cells.** Every season, every week tested, no exception — prior runs `0.34-0.57`
+against to-date's `0.17-0.41`.
+
+⚠️ **The thin-sample objection does not cover it.** The app never used to-date at week 2; it
+switched at the gate around week 5, and at weeks 6 and 8 the completed season still wins 3 of 3.
+
+⭐ **THE MECHANISM IS SAMPLE SIZE, NOT RECENCY** — the predictors rank by how many games they hold
+(17-game rolling ≈ prior > 10-game > 6-game > to-date). Neutral-script pace is a slow-moving team
+property, so more games beats more recent games.
+
+⛔ **PACE HAD BEEN RIDING ALONG WITH PASS RATE.** `pickTrend` picked one vintage for the whole
+offence half, gated on whether PROE had a value, so pace followed PROE across at ~week 5 with
+nothing naming it. **It now carries its OWN vintage label**, and pass rate and pace can print
+different seasons on one line.
+
+⚠️ **A rolling window was measured for pass rate too and NOT shipped** — a 6-game window beats the
+prior-season fallback in all three seasons at weeks 2-3, but two of the three margins are inside
+chance at n=32 and there is no stable winner past week 4. **The funnel predicts nothing at all**
+(no cell clears the 0.349 bar; the same measurement is +0.422 in 2023 and -0.304 in 2024), which is
+worth knowing before reading its `pass funnel` / `run funnel` label as a forecast.
+
 ### Scope
 
 - **REDRAFT ONLY**, rendered inside the existing Week N game-environment panel rather than as a
