@@ -9561,3 +9561,244 @@ refresh-inseason.sh RUN FOR REAL end to end, not just parsed
 is a subset of its own prior, so every player has a pair. **It is tested by extracting `usageShift`
 with `new Function` and running it against a synthetic** — the technique guard 29 adopted after a
 string-match sabotage slipped through. In the real season a rookie triggers it on day one.
+
+---
+
+## Expected Fantasy Points, and the Full-PPR Premium (added Sep 16-17, 2026)
+
+`scripts/build-expected-points.py` -> `grading/data/expected_2025.json` (582 players,
+season complete) and `expected_2026.json` (312 players, live). Plus a `ppr_prem` field and
+a `_meta.ppr_premium` block in `volume_<season>.json`. **CONTEXT ONLY — 90 grades
+BYTE-IDENTICAL** (15 tournaments x 5 fixtures plus 3 leagues x 5), diffed against a
+pristine worktree at HEAD. Guard 42: `scripts/test-expected-points.mjs`.
+
+Both came out of reading a Yahoo analyst's RB blueprint and the show it belongs to, then
+measuring the five instruments he uses against what this app already had. Expected points
+was the one real gap. The PPR premium was already built and stranded.
+
+### EVERY OTHER OPPORTUNITY LAYER HERE REPORTS A SHARE. THIS ONE REPORTS POINTS.
+
+That is the whole argument for a nineteenth data file. A share says how much of a pie a
+player owns and says **nothing about how big the pie is or where on the field it sits**.
+Expected points converts the entire opportunity set — targets and where they were thrown,
+carries and where they started — into **one number on the same scale as the output**, which
+is what lets a receiving role and a goal-line role be compared without hand-waving.
+
+```
+Week 1 2026   James Cook   8.4 half-PPR points scored   on 11.4 expected
+```
+
+**A respectable box score that was actually a below-par week. No share in this repo can say
+that.** It is rank 2 in the Source Hierarchy — opportunity volume, expressed in points.
+
+### THE SOURCE, AND THE TWO CLAIMS IN THIS FILE THAT WERE WRONG
+
+Both recorded in the Sep 12 team-trends entry, both false, both found by checking instead of
+citing:
+
+| This file said | Actually |
+|---|---|
+| "Expected points comes from a separate nflverse release" | It is **ffverse/ffopportunity**. There is no `ff_opportunity` tag in nflverse-data at all |
+| "needs nflreadpy + polars, dependencies every in-season builder avoids" | The release publishes **plain CSV beside the parquet**, so this builder is **stdlib only**, exactly like every other one here |
+
+That second one is what made the layer cheap rather than expensive, and it had been sitting
+in this file as the reason not to build it. **Same shape as the Sep 1 participation
+correction: a "this is impossible" note ages exactly like a player verdict and nothing gives
+it a freshness rule.** Re-checking a feed costs one command.
+
+### THE SOURCE FILE IS FULL PPR AND ITS TOTALS ARE DELIBERATELY UNUSED
+
+`total_fantasy_points_exp` was reconstructed from the component columns across four players
+and **matches full PPR to 0.02**. This app is half-PPR with 4-point passing TDs. Copying that
+total would print a PPR number on a half-PPR card — the same class as reading a share whose
+denominator you did not check.
+
+So both sides are recomputed from components through **one function**:
+
+```python
+def score(r, suffix):
+    """`suffix` is "_exp" for expected and "" for realised, so BOTH SIDES GO
+    THROUGH THE SAME ARITHMETIC."""
+```
+
+**If expected and actual went through different code the difference would be measuring two
+scoring systems rather than one player.** Guard 42 asserts the single function, asserts the
+builder never reads the source total, and asserts the `SCORE` dict equals
+`build-gamelogs.py`'s key by key — a second hand-typed copy is the duplicate-definition class
+this repo has now paid for twelve times.
+
+### THE EDGE IS REAL, MEASURED, AND EXPIRES — SO THE CARD SAYS WHEN TO STOP READING IT
+
+Pooled over 2023-25, does expected points through week N predict the REST of that season
+better than actual points through week N?
+
+```
+after 1 game   +0.066      after 3 games   +0.016
+after 2 games  +0.026      after 8 games   +0.002
+```
+
+**It is a SMALL-SAMPLE NOISE FILTER, not a better metric.** After one game actual points are
+dominated by whether a touchdown happened and expected points are not; by week three that
+advantage is inside the noise.
+
+`EXPECTED_EDGE_WEEKS = 2`, **derived from that table rather than chosen**. Past week 2 the
+card's own note flips and says so in words — *"this stops beating raw points... read it now
+as a description of his usage, not as the better forecast."*
+
+⛔ **A layer that quietly keeps claiming an edge it no longer has is the stale-verdict trap in
+a new costume.** Guard 42 asserts **both** branches of that note exist, because a version that
+merely goes silent when the edge expires would pass a check that only looked for the good
+branch.
+
+### ⛔⛔ THE WRONG PREDICTIVE TEST WAS RUN FIRST AND NEARLY KILLED THE LAYER
+
+The first measurement asked whether **2025** expected points predicts **2026** better than
+2025 actual points. It does not, materially. On that result the layer was about to be
+dropped.
+
+**That is the wrong question, and the Sep 13 ruling on the matchup pills exists to prevent
+exactly it.** A cross-season correlation asks whether a RANKING PERSISTS. Expected points is
+not trying to persist across seasons — it is trying to describe **the sample in front of you**
+when that sample is four games old and full of touchdown noise. The right test is
+within-season, and within-season it wins for two weeks and then stops.
+
+⭐ **Right instrument, wrong question — third instance in this file**, after the leverage panel
+printing "ownership" for a projection and the RB pill being judged on forecasting when its job
+is description.
+
+### ⚠️ IT IS NOT HAYDEN WINKS' MODEL AND MUST NEVER BE PRESENTED AS HIS
+
+His charts credit nflfastR, and his published Gibbs figure (28.4) **does not reproduce from
+this file** in half-PPR (30.56) or under any other single scoring. **Expected points is a
+MODEL, not a measurement, and two models disagree.** `_meta.rules.not_winks` records it and the
+guard asserts the rule survives.
+
+### The full-PPR premium: already built, stranded on a dead branch since August
+
+`0.5 x receptions per game` — **the arithmetic gap between half-PPR and full PPR, exactly. Not
+a model.** It was written for `claude/draft-report-pipeline-aug26`, scoped to draft day, and its
+own note there called it *"the single largest edge available in a full-PPR draft, and it is
+invisible if you read the ADP table straight."* **The same edge is live every week on a waiver
+wire**, which is why it moved into the app rather than staying a draft-report column.
+
+⛔⛔ **IT IS READ AGAINST HIS POSITION, NEVER ABSOLUTELY, AND THAT IS THE WHOLE DESIGN.**
+
+```
+       median   p75    max     n
+QB      0.00   0.00   0.25    75     structurally zero - QBs do not catch passes
+RB      0.44   1.03   3.00   140
+TE      0.68   1.38   3.71   126
+WR      0.79   1.50   4.03   229
+```
+
+**1.5 points a game is roughly p90 for a back and about the MEDIAN for a receiver.** An absolute
+bar would quietly tell every reader that every receiver is valuable in PPR — which is true of
+the POSITION and says nothing about the PLAYER. The bands are derived in the builder and read
+from `_meta`; the app types no threshold of its own, and the guard extracts `pprPremium` with
+`new Function` and **runs it** to prove 1.2 clears the RB bar and misses the WR bar.
+
+The row is **silent below his position's p75**. Silence means ordinary, the same contract
+`trajectoryContext` and the team-trends panel already use. QBs never render it at all.
+
+### ⛔ RE-SCORING THE DATA LAYER FOR PPR WAS REJECTED ON MEASUREMENT
+
+The obvious ask — *"should the app support full PPR"* — was answered by measuring what a
+full-PPR re-score would actually change to the ORDERING the grade depends on:
+
+```
+rank correlation, half-PPR vs full-PPR   r = 0.995 to 0.9996
+average movement                          about 2 ranks
+```
+
+**Against that: thawing `player_metrics_2025.json`, breaking guard 15's frozen/weekly split,
+and invalidating every calibration figure recorded in this file.** A two-rank average reshuffle
+does not buy that. ✅ **So the format difference ships as DISCLOSURE, not as a second scoring
+engine** — which is also the only version that can be right for a reader whose league is
+neither.
+
+The Week outcomes note now carries it, measured on 2025:
+
+> *Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. In a FULL-PPR league the same player
+> clears them more often, and unevenly by position — spike rate rises about 26% at RB, 61% at WR
+> and 76% at TE, and not at all at QB.*
+
+⭐ **The unevenness is the finding.** A reader in a full-PPR league is not looking at numbers
+that are uniformly a bit low; he is looking at numbers that understate his tight ends three
+times as much as his backs.
+
+### Direction is never a good/bad hue
+
+`ExpectedRow` may not paint the gap with `--pos`, `--neg`, `--caution`, `--warn` or any `--tier`
+token, and the guard fails on any of them. **Out-scoring your own opportunity is not good and
+under-scoring it is not bad — it is UNEXPLAINED**, and every efficiency input measured in
+ANALYST-REFERENCE section 2 sits between r=0.02 and r=0.31. Painting it green would teach a
+reader to trust a coin flip, which is the same defect the player card's two-channel design was
+built to avoid.
+
+### Containment
+
+Both layers are context only. `analyzeRoster` and `analyzeRedraft` reference none of
+`EXPECTED_CUR`, `EXPECTED_PRIOR`, `expectedPoints`, `pprPremium`, `PPR_META`, `ExpectedRow` or
+`EXPECTED_EDGE_WEEKS` — asserted structurally, and each helper has **exactly one call site,
+inside `buildPlayerCard`**. `_meta.scored` and `_meta.reaches_ai_prompt` are both false on both
+files.
+
+### The weekly job is nine steps
+
+Step 7 pulls `ep_weekly_<season>.csv` from ffverse. ⚠️ **It is its OWN download** — the only
+step besides Sleeper that cannot reuse one — and it sits in the **full-pass branch, not the
+live one**: expected points is computed from plays already played and does not move between
+Monday night and Saturday the way a betting line or a practice report does. So `--live-only`
+skips it.
+
+```
+bash scripts/refresh-inseason.sh 2026               # all nine steps
+bash scripts/refresh-inseason.sh 2026 --live-only   # steps 8-9 only
+```
+
+### Four traps on the way in, three of them already recorded in this file
+
+1. ⛔ **A UNICODE ESCAPE IN JSX TEXT POSITION IS LITERAL TEXT.** The composite marker rendered as
+   six characters on the page. **Third instance** — Sep 12 on an Explainer's em dashes, Sep 16 on
+   the usage-shift marker, now this. The build was clean and every guard passed. Write the
+   character, or wrap it in an expression.
+2. ⛔ **A BASH HEREDOC MANGLED REGEX BACKSLASHES THREE TIMES IN ONE SESSION**, and a fourth
+   heredoc failed outright while appending THIS section. Same lesson as Sep 13: **write any patch
+   carrying escapes or long prose as a file, never through bash.**
+3. ⛔ **THE BUILDER WROTE CRLF** until `newline=""` was added. ⚠️ **Other builders in `scripts/`
+   still do** — `status_2026.json` is CRLF in the working tree right now and git normalises it on
+   commit. Its own pass, not fixed here.
+4. ⚠️ **AN UNQUOTED PATH WORD-SPLIT** in the refresh script, because the repo path contains a
+   space. `bash -n` passed it. **Caught by running it.**
+
+### ⚠️ TWO GUARD ASSERTIONS WERE AIMED WRONG AND FAILED ON CORRECT CODE
+
+1. **SEVENTH INSTANCE OF A GUARD FAILING ON ITS OWN DOCUMENTATION.** *"The builder never reads
+   `total_fantasy_points_exp`"* matched the module **DOCSTRING** explaining why it must not, and a
+   comment stripper that only handles `#` leaves a docstring standing. The docstring is now blanked
+   alongside the comments, length-preserving, and **a real read in code is in the sabotage set** to
+   prove the strip did not defang the check.
+2. **A MAGIC 400-BYTE WINDOW**, when the real gap between the two anchors is 441. A fixed byte
+   window asserts *"these strings are near each other"*, which is not a property anybody wants and
+   breaks the moment a sentence is added — the exact criticism guard 31 earned on Sep 6. Re-aimed
+   at the note's own block, bounded by its own markers.
+
+⛔ **Neither was relaxed.** Re-aiming a brittle locator is not the same as dropping the check it
+performs.
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL vs a pristine worktree at HEAD
+42 guards, 1,821 assertions, wired into npm test - a guard that is not in the chain
+  is a file, not a guard
+dual-file identical - LF preserved - vite build clean
+10 sabotages against a verified-clean baseline, ALL exit non-zero: an engine leak, the
+  builder reading the source PPR total, the scoring drifting from build-gamelogs.py, the
+  expiry branch dropped, a good/bad hue on the gap, an absolute premium bar, QB losing
+  its silence, the half-PPR provenance dropped, the premium formula changed, a drifted
+  mirror
+refresh-inseason.sh RUN FOR REAL end to end, not just parsed: step 7 wrote 312 players
+rendered in a browser: the section mounts, the edge note carries the live branch, and
+  the premium row is silent on an ordinary player and fires above p75
+```
