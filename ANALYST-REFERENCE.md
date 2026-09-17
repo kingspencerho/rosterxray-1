@@ -677,6 +677,88 @@ and a rolling loss does not prove the window is wrong.
 
 ---
 
+### ⛔ §2e · NEUTRAL-SCRIPT USAGE — measured and rejected, and it completes a pattern (Sep 17, 2026)
+
+`scripts/measure-neutral-usage.py`. **NOTHING SHIPPED.** No App.jsx, no `grading/data`, no builder.
+
+**The idea, and it is a good one.** Every usage number in this app — target share, carry share,
+targets per game — is measured over ALL situations. A back's carries are inflated when his team is
+ahead and a receiver's targets are inflated when it is behind, so those numbers blend the ROLE a
+coach gave him with the SCOREBOARD he happened to play in front of. §2b already names that mechanism
+as the reason RB matchup data does not repeat: *"it does not measure the defence, it measures THE
+GAME."*
+
+⭐ **And the app already believes it for PACE** — `build-teamtrends.py` measures pace on neutral
+snaps only. So this asks whether the same filter belongs on player usage. **The constants are
+IMPORTED from that builder**, so there is one definition of neutral in the repo rather than two.
+
+### ⭐ THIS TEST HAS POWER, UNLIKE §2c AND §2d
+
+Those compare 31-32 defences or teams, where an `r` must reach `~0.355` to clear noise. **This
+compares 60-174 PLAYERS**, so the bar is nearer `0.10-0.14` and a consistent `0.03` is worth
+reading.
+
+### TARGET SHARE — raw wins in 12 of 12 cells
+
+```
+neutral minus raw          2023     2024     2025      n
+week 3, by score         -0.073   -0.163   -0.073   88-116
+week 4, by score         -0.046   -0.058   -0.085   122-139
+week 6, by score         -0.015   -0.068   -0.018   158-164
+week 8, by score         -0.003   -0.004   -0.039   167-174
+```
+
+**Every season, every cut, both definitions of neutral** (the score rule and a 20-80% win-probability
+band). ⛔ **And the penalty is LARGEST EARLY — `-0.103` pooled at week 3 — which is precisely where
+the filter was supposed to help most.**
+
+### CARRY SHARE — no difference at all
+
+Deltas run `-0.038` to `+0.052` and pool to between `-0.011` and `+0.021`. **Inside chance at every
+cut.** The one nominal win (week 3, win-probability band, `+0.021`) is a third of the noise bar.
+
+### ⭐⭐ WHY IT FAILS — two mechanisms, and the second is the interesting one
+
+1. **IT THROWS AWAY HALF THE DATA.** The score rule keeps 44% of pass plays and 51% of runs, so an
+   already-thin three-week sample is halved. **The confound removed is smaller than the noise added**
+   — which is exactly §2c's finding in a different costume.
+2. ⭐ **GARBAGE TIME IS PART OF THE JOB, AND IT RECURS.** A receiver who eats targets while his team
+   trails will do it again, because **game script is itself stable at team level — bad teams keep
+   losing.** So the "contamination" is correlated with itself across weeks, and removing it deletes
+   real predictive signal rather than noise. ⛔ **A confound that repeats is not a confound for a
+   forecasting question; it is information.**
+
+> ## ⭐⭐⭐ THE PATTERN ACROSS ALL THREE MEASUREMENTS, AND IT IS THE REUSABLE PART
+>
+> ```
+> §2c  schedule-adjusted FPA      SUBTRACTS data (a baseline estimated from a subset)   lost
+> §2e  neutral-script usage       SUBTRACTS data (discards ~half the plays)             lost
+> §2d  completed-season pace      ADDS data (17 games instead of 5)                     won 15/15
+> ```
+>
+> **CORRECTIONS THAT SUBTRACT DATA LOSE. CORRECTIONS THAT ADD DATA WIN.** At the sample sizes this
+> app actually has in-season — three to eight games, 32 teams — **the noise a correction introduces
+> is reliably larger than the confound it removes.** The only one of the three that shipped is the
+> one that made the sample BIGGER.
+>
+> ⚠️ **This is a prior, not a law.** It says where to look first and what to expect, and it does not
+> excuse skipping the measurement — §2d's own PROE half beat the prior season by subtracting nothing
+> and adding little. **But a proposal that begins "filter out the contaminated cases" should now
+> carry the burden of proof rather than the benefit of the doubt.**
+
+### Reproduce
+
+```
+python scripts/measure-neutral-usage.py --selftest    # proves both filters keep a usable slice
+python scripts/measure-neutral-usage.py               # needs pbp for 2023-2025
+```
+
+⚠️ **THE TARGET IS RAW USAGE ON PURPOSE.** A manager's points come from every situation, garbage
+time included. **A neutral-script number that describes the role more truthfully but predicts the
+box score worse is not an improvement here** — and that is exactly what it turned out to be.
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a
