@@ -1803,6 +1803,75 @@ tendency and a different measurement entirely**, and this repo has never measure
 `coverage_2025.json` is man rate FACED BY a receiver — an offence-side number wearing a defensive
 name — which `scripts/matchup-brief.py` already names as its top data gap.
 
+### ⭐⭐ THE SHOW, MEASURED — and it uses a DIFFERENT toolkit from the article
+
+**"32 Teams. 32 Fantasy Football Facts to BULLY Week 2"**, Yahoo Fantasy / Josh & Hayden,
+Sep 16 2026. **141 minutes, 31,492 words of transcript, all 96 storyboard grids read.** Same
+analyst, six times the words, and **the instruments do not match the article's.**
+
+**Their stated method, first sentence of the show:** *"this is stats versus film — we go and
+watch all 16 games from the weekend... and compare that to the stats, the spreadsheets, the
+analytics, the underlying metrics."* ⭐ **Two independent passes over the same week, and the
+product is where they DISAGREE.** Structurally the same device as this file's own
+volume-versus-TPRR divergence, run across mediums instead of across metrics.
+**Running order: ~10 headline teams (injuries and depth-chart changes), then alphabetical 32.**
+
+**What they actually cite, counted over the full transcript:**
+```
+routes                65     red zone / goal line   25     target share      9
+snap share/count      45     injury / depth chart   25     blitz, pressure   8
+carry share           27     neutral pass rate      15     man/zone          6
+usage (generic)       25     tape / film            15     air yards         5
+                             expected points        13     EPA               3
+                                                           ADP               0
+```
+⭐⭐⭐ **ROUTES IS FIRST BY A FACTOR OF 1.4 OVER SNAPS, AND ADP IS ZERO.** In season, the price
+you paid is irrelevant and route participation is the spine. **This repo shipped TPRR on Sep 1 and
+calls it the only per-opportunity rate in the app** — the show independently treats its
+denominator as the most important number on the board.
+⭐ **And they never quote a rate without its denominator**: *"91% of the routes on a team with 67
+dropbacks"*, *"ran 29 routes on 40 dropbacks."* Same discipline this file already imposes on
+red-zone share.
+
+⛔⛔ **THE MARKET FINDING, AND IT INVERTS THE ARTICLE.** Counted across 141 minutes:
+```
+point spread quoted as a line     0        over/under or game total     0
+implied team total                6        Vegas / betting / market     3
+```
+**The ARTICLE leads all 45 players with a market-derived yardage projection and an implied team
+total.** ⭐ **The SHOW — where they actually argue toward a conclusion — barely mentions
+either.** Same analyst, same week. **Read that as the market being a FRAMING device for a written
+ranking, and usage being the reasoning engine.** ⚠️ Auto-captions, so a mangled number is
+possible; zero point-spread mentions in 141 minutes is not a transcription artefact.
+
+**The reasoning chain, caught whole at 07:32–07:54 and worth reading as the template:**
+> Rashee Rice *"was targeted on 6.9% of his routes in that game — the lowest of his career, if you
+> throw out the one game he ran three routes before tearing his ACL... you've got to go back to his
+> rookie season to get games consistently under 20% targets per route run. The Broncos just decided
+> to play man coverage and took these guys away. And in week two they get a Colts defense that
+> played over 60% man coverage on second to fourth down."*
+
+⭐⭐ **Four moves in twenty seconds: a per-opportunity rate → against HIS OWN career baseline →
+with a contaminated game explicitly excluded → explained by a defence's scheme → projected onto
+next week's defence's scheme.** **Three of those four are things this repo either has or just
+measured.** The sample-hygiene move — naming the game he is throwing out and why — is the one
+worth stealing outright.
+
+**On screen (96 storyboard grids, sampled across the full runtime):** a player box-score card per
+subject, a running fantasy-points ticker, **and Winks' own charts screen-shared live — the Week 1
+RB Rotation scatter, the Game Script 2×2, TE and RB Fantasy Usage By Team, and the dark
+schedule-adjusted matchups table.** ⭐ **The article's five instruments ARE the show's
+instruments.** One toolkit, two mediums.
+
+⚠️ **WHAT COULD NOT BE READ, stated rather than implied: the video itself is 403-blocked.**
+yt-dlp's section download fails against ffmpeg 8.x, a direct stream pull returns 403, and a full
+video-only download returns 403. **Storyboards at 320×180 per frame were the working route** —
+enough to identify WHICH chart is on screen, **never enough to read a value off it.** Every number
+above comes from the transcript or from the article's own full-resolution graphics.
+⚠️ **And the storyboard parts are JPEG here, not the WEBP `scraping-routing.md` records.** The
+header is lowercase `Content-type`, which is why a case-sensitive grep reports zero image parts.
+**Detect the magic bytes; do not assume the format.**
+
 ### What he does that is NOT worth copying, and why
 
 ⛔ **The per-player film notes** — named offensive linemen, route types charted by hand ("both of
