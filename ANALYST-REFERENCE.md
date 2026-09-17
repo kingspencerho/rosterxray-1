@@ -759,6 +759,109 @@ box score worse is not an improvement here** — and that is exactly what it tur
 
 ---
 
+### ⭐⭐ §2f · DEFENCE-SIDE SCHEME RATES — built, and the chain caveat is the point (Sep 17, 2026)
+
+`scripts/measure-defense-scheme.py` -> `scripts/build-defense-scheme.py` ->
+`grading/data/defense_scheme_2025.json`. **Consumer is `scripts/matchup-brief.py` ONLY.** No
+App.jsx change, no `grading/data` file that any engine reads — **`git status` shows no App.jsx diff
+at all, which is stronger than a calibration run.**
+
+**The gap.** `matchup-brief.py` printed two gaps AS gaps, and CLAUDE.md called the first *"the
+highest-value data addition for P3"*: **there is no defence-side scheme profile** —
+`coverage_2025.json` is man rate **faced by a receiver**, an offence-side measurement wearing a
+defensive name. This closes it. **Route depth is still open.**
+
+### ⚠️ MY FIRST PROBE WAS WRONG AND WOULD HAVE PRODUCED A FALSE "STILL BLOCKED"
+
+I probed `pbp_participation_2026.csv.gz`, got 404, and nearly recorded the item as still blocked.
+**2025 returns 404 on that URL too — and 2025 is a season this app already ships two layers from.**
+CLAUDE.md states it plainly: *"participation ships parquet-only; there is no csv.gz asset."*
+
+✅ **Re-probed with the right asset AND a control: parquet returns 200 for 2023, 2024 and 2025 and
+404 for 2026.** So the block is real, and now it is verified rather than inherited. ⭐ **A control
+is what separates "the thing is missing" from "I asked the wrong question"** — the same discipline
+§2c used to earn its verdict.
+
+### WHAT REPEATS — 6 of 14, measured across 2023>2024 and 2024>2025, n=32, bar 0.355
+
+```
+blitz_rate      0.622   REPEATS        cov_cover_0   0.304   noise
+cov_cover_1     0.598   REPEATS        cov_cover_3   0.292   noise
+pressure_rate   0.510   REPEATS        box_mean      0.207   noise
+man_rate        0.462   REPEATS        cov_cover_6   0.119   noise
+cov_2_man       0.417   REPEATS        cov_cover_4   0.109   noise
+cov_cover_2     0.389   REPEATS        cov_combo     0.033   noise
+                                       cov_cover_9   0.002   noise
+                                       cov_blown    -0.131   noise
+```
+
+⭐⭐ **`man_rate` lands on `0.462` — the exact figure banked Sep 1 2026 by a different session
+through `nflreadpy`.** This build reads the parquet with **pyarrow** instead, because `nflreadpy`
+and `polars` are not installed on this machine (which is why `build-routes.py` and
+`build-coverage.py` cannot be re-run here). **Two toolchains, one number.** The classified-play
+count reproduces too: **22,055**, asserted in the builder's selftest.
+
+⛔ **The eight that fail are recorded in `_meta.not_emitted` WITH THEIR r, not silently dropped** —
+same contract `ngs_receiving` uses, because otherwise a future session re-adds one on intuition.
+
+### ⛔⛔ STICKY IS NOT USEFUL, AND HERE THE CHAIN IS THE WHOLE CAVEAT
+
+```
+  "this defence plays man 41% of the time"     r = 0.462   sticky
+x "your receiver gains Y against man"          r = 0.161   COIN FLIP
+= a start/sit recommendation                               NOISE
+```
+
+**The product is dominated by the noisy term.** §2 already withholds that receiver edge from the AI
+prompt for exactly this reason. ⭐ **So this file DESCRIBES A DEFENCE and cannot support "start him
+against this coverage"** — the builder says so in `_meta.rules.descriptive`, the brief prints it
+under every scheme block, and the brief's selftest asserts the sentence is there.
+
+⚠️ **That is not a reason to skip it.** The brief's stated job is to print inputs and leave
+contradictions standing; P3's questions 3 and 4 are *what does this defence do*, which is
+descriptive by construction. **Blitz and pressure rate are the more promising half** — they connect
+to sacks, time to throw and checkdowns, chains that have not been measured here yet.
+
+### ⛔ THREE PRE-EXISTING BUGS IN matchup-brief.py, ALL HIDDEN BEHIND EACH OTHER
+
+Wiring Q3 in surfaced them, and the order matters — each one hid the next.
+
+1. **THE SELFTEST WAS PINNED TO `brief("DAL", "NYG")`.** `gameenv_2026.json` is a WEEKLY snapshot,
+   so when the board rotated to week 2 that call printed *"no game"* and returned — **every
+   assertion after it stopped running.** The selftest exited 1 while reporting nothing about what
+   it was meant to check. ⭐ **Verified pre-existing by running the unmodified file in place: 6
+   checks, exit 1, identical.** The fixture is now derived from whatever the board holds. **Same
+   class as the Sep 6 pinned clock — a fixed fixture is a maintenance deadline dressed as a test.**
+2. ⛔⛔ **`funnel_read` WAS DEAD FOR ALL 32 TEAMS.** It fell back to 2025 only when the 2026 **row**
+   was missing — but `teamtrends_2026` carries every team from week 1 with **null values** below
+   each gate, so the row is truthy, `or` short-circuits, and it reported *"no defensive trends on
+   file"* league-wide **while the 2025 numbers sat one file over.** ⭐ **Exactly the same shape as
+   the App.jsx pace bug fixed the same day: a truthiness test on the CONTAINER instead of on the
+   VALUE.**
+3. ⛔⛔⛔ **AND ONE ASSERTION WAS PASSING FOR THE WRONG REASON.** *"A changed DC voids the funnel"*
+   expects `None` — and was getting `None` from the dead fallback rather than from the DC rule. **A
+   false pass is worse than a failure, because nothing looks at it again.** It now asserts the data
+   resolves FIRST, so a `None` can only mean the rule fired.
+
+⚠️ **Two more assertions pinned DAL and NYG for play-caller status, with a comment saying so.** Both
+derive their team from the file now. **37 checks, 0 failures — the brief's selftest passes for the
+first time since the board rotated.**
+
+### Reproduce
+
+```
+curl -sSL -o part_2025.parquet https://github.com/nflverse/nflverse-data/releases/download/pbp_participation/pbp_participation_2025.parquet
+python scripts/measure-defense-scheme.py --selftest    # reproduces the banked 22,055
+python scripts/measure-defense-scheme.py               # stickiness, 3 seasons
+python scripts/build-defense-scheme.py part_2025.parquet grading/data/defense_scheme_2025.json 2025
+python scripts/matchup-brief.py --selftest
+```
+
+⚠️ **ANNUAL cadence, and there is no 2026 twin** until nflverse publishes participation for it. The
+scheme read therefore describes LAST season, and the brief says so where it prints.
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a

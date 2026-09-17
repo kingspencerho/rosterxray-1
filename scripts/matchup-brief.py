@@ -96,6 +96,7 @@ TT26 = load("teamtrends_2026.json")
 OL = load("oline_2026.json")
 NGS = load("ngs_receiving_2025.json")
 COV = load("coverage_2025.json")
+DSCH = load("defense_scheme_2025.json")
 MET = load("player_metrics_2025.json")
 QB = load("qb_profile_2025.json")
 ST = load("status_2026.json")
@@ -386,6 +387,52 @@ def q6_stretch(team, n=3):
             for k, v in rows[:n]]
 
 
+def q3_scheme(opp):
+    """What the OPPOSING DEFENCE actually does, from its own side.
+
+    ⛔ FPA DIRECTION RULE. This describes the defence being FACED, so it is read
+    for the players opposing it and never for its own.
+
+    ⛔⛔ ONLY RATES THAT REPEAT ARE IN THE FILE (r >= 0.355 across two
+    transitions, n=32), and the r prints beside each so nobody has to remember
+    which ones earned their place.
+    """
+    if not DSCH:
+        return ["no defence-side scheme profile file — run build-defense-scheme.py"]
+    d = sub(DSCH, "teams", opp)
+    if not d:
+        return ["no defence-side scheme profile for %s" % opp]
+    meta = DSCH.get("_meta", {}) or {}
+    st = meta.get("stickiness", {}) or {}
+    league = meta.get("league", {}) or {}
+    order = (("man_rate", "man"), ("blitz_rate", "blitz"),
+             ("pressure_rate", "pressure"), ("cov_cover_1", "cover-1"),
+             ("cov_cover_2", "cover-2"), ("cov_2_man", "2-man"))
+    out = []
+    for key, name in order:
+        v = d.get(key)
+        if v is None:
+            continue
+        lab = d.get(key + "_label")
+        # ⚠️ The headline two always print; the coverage splits print only when
+        # this defence is more than a standard deviation off the league, because
+        # "average cover-2" on every brief is noise. Silence means ordinary.
+        if key not in ("man_rate", "blitz_rate") and lab in (None, "average"):
+            continue
+        mu = (league.get(key) or {}).get("mean")
+        ctx = " · league %.1f%%" % (100.0 * mu) if mu is not None else ""
+        tag = "" if lab in (None, "average") else "  %s" % lab.upper()
+        out.append("%-9s %5.1f%%%s   [r %.2f]%s"
+                   % (name, 100.0 * v, ctx, st.get(key, float("nan")), tag))
+    n = (d.get("plays") or {}).get("man_zone")
+    if n:
+        out.append("%d classified snaps, %s season" % (n, meta.get("season")))
+    out.append("\u26d4 DESCRIPTIVE. A defence's man rate repeats at 0.46; what a RECEIVER")
+    out.append("   does against man repeats at 0.16 — a coin flip. Sticky tendency x noisy")
+    out.append("   edge = noise, so this says what they DID, not who to start.")
+    return out
+
+
 def q4_counters(team, n=3):
     """Who on this offence punished man coverage. ⚠️ `edge` is ypt_man - ypt_zone
     for that player. It says how he fared, never how often he will see it."""
@@ -574,6 +621,9 @@ def brief(away, home):
         print(f"  Q6  field stretchers ({t} receivers, vs {opp}'s defence)")
         for r in q6_stretch(t):
             print(f"        {r}")
+        print(f"  Q3  what scheme {opp}'s defence runs")
+        for r in q3_scheme(opp):
+            print(f"        {r}")
         print(f"  Q4  man-coverage counters")
         for r in q4_counters(t):
             print(f"        {r}")
@@ -593,12 +643,13 @@ def brief(away, home):
 
     print("\n" + "-" * W)
     print("  NOT MEASURED — stated rather than silently omitted")
-    print("  Q3  what scheme this defence runs.  coverage_2025 is man rate FACED BY A")
-    print("      RECEIVER, not a defensive tendency. No defence-side scheme profile exists.")
     print("  Q5b deep ball allowed specifically. teamtrends splits run vs pass and nothing")
-    print("      by route DEPTH.")
-    print("  Both: the app has offence-side player data and team-level defensive EPA, and")
-    print("  no defence-side positional profile. FPA is the nearest thing and it is rank 5.")
+    print("      by route DEPTH. The app has offence-side player data and team-level")
+    print("      defensive EPA, and no defence-side POSITIONAL profile — FPA is the")
+    print("      nearest thing and it is rank 5.")
+    print("  ⚠️ Q3 is no longer here: defense_scheme_2025 closed it Sep 17 2026. It is a")
+    print("      2025 layer — participation parquet is 404 for 2026, so there is no")
+    print("      current-season twin and the scheme read describes LAST season.")
     print("  ⚠️ FPA is RAW points allowed, not schedule-adjusted — a defence that drew")
     print("      Kelce, Bowers and LaPorta looks soft at TE for reasons that are not the defence.")
     print("  Q12 Breakout Watch is a separate board: grading/data/breakouts-2026.md")
@@ -685,6 +736,23 @@ def vacated_at(team, kind):
     return names, row.get("vacated_pct") or 0
 
 
+def _def_trends(team):
+    """The freshest defensive split that actually HAS numbers.
+
+    ⛔ FALL BACK ON A MISSING VALUE, NOT A MISSING ROW. teamtrends_2026 carries
+    all 32 teams from week 1, with nulls until each gate is met - so
+    `sub_team(TT26,...) or sub_team(TT25,...)` short-circuits on a row full of
+    nulls and the 2025 numbers are never reached. That read "no defensive
+    trends on file" for every team in the league while the data sat one file
+    over.
+    """
+    for src in (TT26, TT25):
+        d = (sub_team(src, "teams", team) or {}).get("def") or {}
+        if d.get("pass_epa") is not None and d.get("rush_epa") is not None:
+            return d
+    return {}
+
+
 def funnel_read(opp, kind, side):
     """Does the defence being faced push this prop's number UP or DOWN?
 
@@ -705,8 +773,7 @@ def funnel_read(opp, kind, side):
     # good read bad. It has no measured stickiness in this app at all, so it
     # RE-RANKS and must not veto.
     """
-    row = sub_team(TT26, "teams", opp) or sub_team(TT25, "teams", opp) or {}
-    d = row.get("def") or {}
+    d = _def_trends(opp)
     pe, re_ = d.get("pass_epa"), d.get("rush_epa")
     if pe is None or re_ is None:
         return None, "no defensive trends on file for %s" % opp
@@ -846,19 +913,38 @@ def selftest():
     t26 = sub(TT26, "teams") or {}
     thin = [k for k, v in t26.items() if num(v,"games") < 4]
     check("teamtrends_2026 is still thin, so the fallback is live", bool(thin))
-    for team in ("DAL", "NYG"):
+    # ⛔ THE FIXTURE IS DERIVED, NOT PINNED. gameenv_2026 is a WEEKLY snapshot;
+    # hardcoding a matchup means the selftest silently stops testing the moment
+    # the slate rotates - which is exactly what happened when this file still
+    # said brief("DAL", "NYG") and the board moved to week 2. Same class as a
+    # fixed clock in a guard: a maintenance deadline dressed as a test.
+    _games = sub(GE, "games") or []
+    _first = _games[0] if isinstance(_games, list) and _games else {}
+    _ST_AWAY = _first.get("away") or "DAL"
+    _ST_HOME = _first.get("home") or "NYG"
+    check("the selftest found a real game on the current board",
+          bool(_first), "gameenv_2026 has no games — nothing downstream can run")
+    for team in (_ST_AWAY, _ST_HOME):
         check(f"{team} tendency states its vintage", "[20" in q2_tendency(team))
         check(f"{team} def weakness states its vintage", "[20" in q5_def_weakness(team))
-    _, v = trends(next(iter(thin), "DAL"))
+    _, v = trends(next(iter(thin), _ST_AWAY))
     check("a thin 2026 team falls back to 2025", v == "2025", f"got {v}")
 
     # 2. THE GAPS MUST PRINT. The silent-drop rule: a missing number states why.
     import io as _io, contextlib
     buf = _io.StringIO()
     with contextlib.redirect_stdout(buf):
-        brief("DAL", "NYG")
+        brief(_ST_AWAY, _ST_HOME)
     out = buf.getvalue()
-    check("Q3 prints as NOT MEASURED", "defence-side scheme profile exists" in out)
+    # ⚠️ INVERTED Sep 17 2026. Q3 used to print as a stated gap and now prints a
+    # measured profile, so the assertion flips with it rather than being deleted.
+    check("Q3 prints a defence-side scheme read",
+          ("what scheme %s's defence runs" % _ST_HOME) in out)
+    check("...with the stickiness beside each rate", "[r 0." in out)
+    check("...and says it is descriptive, not a start/sit input",
+          "not who to start" in out)
+    check("Q3 is no longer listed as unmeasured",
+          "No defence-side scheme profile exists" not in out)
     check("Q5b prints as NOT MEASURED", "by route DEPTH" in out)
     check("the raw-FPA caveat prints", "not schedule-adjusted" in out)
     check("it says it does not pick a side", "does not pick a side" in out)
@@ -877,9 +963,26 @@ def selftest():
     check("a fully-measured team prints nothing", q7b_unmeasured("ZZZ") == [])
     check("Q8 states it has no onset date", "ONSET date" in out)
     check("Q8 rows carry the last-news date", "last news 20" in out)
-    # DAL is unverified and NYG changed play-caller, so one brief exercises both.
-    check("Q2 names a new play-caller where one exists", "NEW PLAY-CALLER" in out)
-    check("Q2 says unverified rather than unchanged", "NOT VERIFIED" in out)
+    # ⛔ DERIVED, NOT PINNED. This used to read "DAL is unverified and NYG
+    # changed play-caller, so one brief exercises both" - true when it was
+    # written, and false the moment the selftest's fixture stopped being DAL
+    # @ NYG. Ask the data which teams carry each status.
+    _pc = sub(PC, "teams") or {}
+    _unk = next((k for k, v in sorted(_pc.items())
+                 if isinstance(v, dict) and v.get("status") == "unknown"), None)
+    _chg = next((k for k, v in sorted(_pc.items())
+                 if isinstance(v, dict) and v.get("status") == "changed"), None)
+    check("the play-caller file carries both a changed and an unverified team",
+          bool(_unk) and bool(_chg))
+    if _chg:
+        # q2_play_caller returns a LIST of lines, so this needs a substring
+        # test per line - `in` on a list is an exact-element match and silently
+        # fails on text that is plainly there.
+        check("Q2 names a new play-caller where one exists",
+              any("NEW PLAY-CALLER" in r for r in q2_play_caller(_chg)), _chg)
+    if _unk:
+        check("Q2 says unverified rather than unchanged",
+              any("NOT VERIFIED" in r for r in q2_play_caller(_unk)), _unk)
     check("Q5 names a new defensive coordinator where one exists", "NEW DC" in out)
     # rush EPA is an average and explosive rate is the tail. Reporting only the
     # average is what let a longest-run question be answered with a funnel.
@@ -912,10 +1015,25 @@ def selftest():
         check("props states it does not pick a side", "does not pick a side" in po)
         check("props reads each prop against the defence faced", "matchup:" in po)
         # VOID must never be rendered as neutral -- neutral reads as "checked, fine".
-        check("a changed DC voids the funnel rather than neutralising it",
-              funnel_read("BAL", "rec", "UNDER")[0] is None)
-        check("an unchanged DC still yields a funnel verdict",
-              funnel_read("TB", "rec", "UNDER")[0] == "FIGHTS")
+        # ⚠️ THESE TWO PINNED BAL AND TB AND THE FIRST WAS PASSING FOR THE
+        # WRONG REASON - it got None from a dead fallback rather than from the
+        # DC rule. Derive one team of each kind, and assert the DATA IS THERE
+        # first so a None can only mean the DC rule fired.
+        _pcs = sub(PC, "teams") or {}
+        _dc_chg = next((k for k, v in sorted(_pcs.items())
+                        if isinstance(v, dict) and v.get("dc_status") == "changed"
+                        and _def_trends(k)), None)
+        _dc_same = next((k for k, v in sorted(_pcs.items())
+                         if isinstance(v, dict) and v.get("dc_status") == "same"
+                         and _def_trends(k)), None)
+        check("defensive trends resolve at all (the 2025 fallback is live)",
+              bool(_dc_chg) or bool(_dc_same))
+        if _dc_chg:
+            check("a changed DC voids the funnel rather than neutralising it",
+                  funnel_read(_dc_chg, "rec", "UNDER")[0] is None, _dc_chg)
+        if _dc_same:
+            check("an unchanged DC still yields a funnel verdict",
+                  funnel_read(_dc_same, "rec", "UNDER")[0] is not None, _dc_same)
         _t = score_prop({"player": "bhayshul tuten", "team": "JAX", "type": "car",
                          "line": 12.5, "over": -121, "under": -107})
         check("the Tuten row scores as a role change, never as a top bet",
