@@ -65,12 +65,15 @@ Regenerate (or just run scripts/refresh-inseason.sh, which calls this):
     https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2026.csv.gz
   python3 scripts/build-volume-current.py stats.csv.gz grading/data/volume_2026.json 2026
 """
-import csv, gzip, json, re, sys
+import csv, gzip, io, json, re, sys
 from collections import defaultdict
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "stats.csv.gz"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "grading/data/volume_2026.json"
 SEASON = int(sys.argv[3]) if len(sys.argv) > 3 else 2026
+# Optional 4th arg: a volume file for the PRIOR season, which turns on the
+# vs-prior comparison. Absent, the build is exactly what it was.
+PRIOR = sys.argv[4] if len(sys.argv) > 4 else None
 
 POSITIONS = ("WR", "TE", "RB", "QB")
 TEAM_ALIAS = {"LA": "LAR"}   # see build-sos.py — nflverse ships the Rams as LA
@@ -86,6 +89,24 @@ MIN_GP = 2
 # (~W4-5) instead of 6 (~W6-7). The game count travels with every number so
 # a thin split is visible rather than implied.
 MIN_WINDOW_GP = 2
+# --- vs prior season -----------------------------------------------------
+# ⛔⛔ THE PRIOR MUST BE COMPUTED BY THIS SAME BUILDER, never read out of
+# player_metrics_2025.json. That file divides a traded player's FULL-SEASON
+# targets by ONE team's totals - a known bug, recorded in CLAUDE.md, that
+# reads Brandin Cooks at a 29.3% target share against a true 8.9%. Diffing
+# against it would manufacture a fake role change for every mid-season mover,
+# which is exactly the population this comparison exists to find.
+#
+# ⭐ A DELTA BETWEEN TWO NUMBERS COMPUTED DIFFERENTLY MEASURES THE DIFFERENCE
+# IN METHOD, NOT THE PLAYER. Same code, both seasons, or no comparison.
+#
+# aDOT on two targets is one throw. The count travels with it either way -
+# the red-zone rule, applied to a different small denominator.
+ADOT_MIN_TGT = 8
+# Same bar the trend threshold uses: below this the distribution is not a
+# distribution and no bar is derived.
+PRIOR_MIN_N = 30
+
 # Recency window, in GAMES PLAYED — never "the last 3 weeks". An injured
 # player's exit role must be measured on games he actually played, the same
 # rule build-snap-trajectory.py applies to its last4.
@@ -160,6 +181,99 @@ def trajectory(wk_rows, season_complete, ci=1, si=2):
     }
 
 
+def stdev(xs):
+    if len(xs) < 2:
+        return None
+    mu = sum(xs) / len(xs)
+    return (sum((x - mu) ** 2 for x in xs) / (len(xs) - 1)) ** 0.5
+
+
+def median(xs):
+    if not xs:
+        return None
+    ys = sorted(xs)
+    h = len(ys) // 2
+    return ys[h] if len(ys) % 2 else (ys[h - 1] + ys[h]) / 2
+
+
+# Only OPPORTUNITY metrics are comparable here, and that is the whole point:
+# this file contains no yards, no touchdowns and no efficiency, so a shift
+# reported by it is always a change in what a coaching staff DID and never in
+# what happened afterwards. Each carries its own bar because the units differ
+# - a share moves in hundredths and targets per game in whole looks.
+SHIFT_METRICS = ("tgt_pg", "tgt_sh", "ay_sh", "adot", "car_pg", "wopr")
+# wopr restates tgt_sh and ay_sh. It is emitted because it is the number a
+# reader recognises, and flagged so nothing counts it as a third signal.
+SHIFT_COMPOSITE = ("wopr",)
+
+
+def vs_prior(players, prior_players):
+    """Attach a per-metric shift, and derive each metric's bar from the
+    observed distribution of shifts rather than from a typed-in number.
+
+    ⭐ THE BAR IS SELF-CALIBRATING ACROSS THE SEASON, and that is the property
+    that makes this usable in Week 2. Early on, the current figure is a two
+    game sample, so the spread of deltas is dominated by sampling noise and
+    the bar is WIDE - almost nothing clears it, which is correct, because
+    almost nothing is yet knowable. As games accumulate the noise falls, the
+    bar narrows on its own, and real role changes start to clear it.
+    """
+    deltas = {m: [] for m in SHIFT_METRICS}
+    pairs = {}
+    for key, p in players.items():
+        q = prior_players.get(key)
+        if not q:
+            continue
+        d = {}
+        for m in SHIFT_METRICS:
+            a, b = p.get(m), q.get(m)
+            if a is None or b is None:
+                continue
+            d[m] = a - b
+            deltas[m].append(a - b)
+        if d:
+            pairs[key] = (d, q)
+
+    bars = {}
+    for m in SHIFT_METRICS:
+        xs = deltas[m]
+        sd = stdev(xs)
+        bars[m] = {
+            "bar": round(sd, 4) if (sd is not None and len(xs) >= PRIOR_MIN_N) else None,
+            "n": len(xs),
+            "median": round(median(xs), 4) if xs else None,
+            "stdev": round(sd, 4) if sd is not None else None,
+            "composite": m in SHIFT_COMPOSITE,
+            "source": ("1 SD of the observed shifts" if len(xs) >= PRIOR_MIN_N
+                       else "not derived - only %d pairs, need %d" % (len(xs), PRIOR_MIN_N)),
+        }
+
+    for key, (d, q) in pairs.items():
+        p = players[key]
+        out = {}
+        for m, delta in d.items():
+            bar = bars[m]["bar"]
+            out[m] = {
+                "cur": p.get(m), "prior": q.get(m), "delta": round(delta, 4),
+                # ⚠ null means NOT YET MEASURABLE, never "did not move". A
+                # consumer that renders those the same way turns an unknown
+                # into a finding - the distinction trendWhy already draws.
+                "moved": (None if bar is None
+                          else ("up" if delta >= bar else
+                                "down" if delta <= -bar else "flat")),
+            }
+        p["vs_prior"] = out
+        p["prior_gp"] = q.get("gp")
+        p["prior_team"] = q.get("team")
+        # ⚠️ A PRIOR EARNED ON ANOTHER TEAM DESCRIBES ANOTHER JOB. Michael
+        # Pittman's 21.3% target share was Indianapolis; he plays for
+        # Pittsburgh. The shift is still computed - it is real information -
+        # but nothing may render it without saying whose offence it came from.
+        p["changed_team"] = bool(q.get("team") and p.get("team")
+                                 and q["team"] != p["team"])
+    return bars
+
+
 def main():
     op = gzip.open if SRC.endswith(".gz") else open
     try:
@@ -224,6 +338,13 @@ def main():
             "tgt": int(a["tgt"]), "tgt_pg": round(a["tgt"] / a["gp"], 2),
             "rec": int(a["rec"]),
             "car": int(a["car"]), "car_pg": round(a["car"] / a["gp"], 2),
+            # Where the ball is AIMED when it is thrown at him. r = 0.826
+            # year over year, the stickiest player input measured anywhere in
+            # this project - and sticky BECAUSE deployment is a role property
+            # rather than a performance one. So a moved aDOT is a moved ROLE,
+            # which is rank 1, the only rank that invalidates a baseline.
+            "adot": (round(a["ay"] / a["tgt"], 2)
+                     if a["tgt"] >= ADOT_MIN_TGT else None),
             "tgt_sh": round(tgt_sh, 3) if tgt_sh is not None else None,
             "ay_sh": round(ay_sh, 3) if ay_sh is not None else None,
             "wopr": round(wopr, 3) if wopr is not None else None,
@@ -291,6 +412,49 @@ def main():
             "counts": label(key, thr),
         }
 
+    # ---- vs the prior season ------------------------------------------
+    # Absent a prior file this is a no-op and the build is byte-for-byte what
+    # it was, which is what keeps the pre-season placeholder shape stable.
+    shift_meta = None
+    if PRIOR:
+        try:
+            prior_doc = json.load(open(PRIOR))
+        except (OSError, ValueError) as e:
+            sys.exit(f"--prior given but unreadable: {PRIOR} ({e})")
+        if prior_doc.get("_meta", {}).get("season") == SEASON:
+            sys.exit(f"--prior is the SAME season ({SEASON}); that is a "
+                     f"comparison of a file with itself")
+        shift_meta = vs_prior(players, prior_doc.get("players", {}))
+        shift_meta = {
+            "prior_season": prior_doc.get("_meta", {}).get("season"),
+            "prior_weeks": prior_doc.get("_meta", {}).get("weeks_covered"),
+            "metrics": shift_meta,
+            "rules": {
+                "method": "BOTH seasons are computed by THIS builder. Never "
+                          "diff against player_metrics_2025.json - its shares "
+                          "use a season-level team denominator, so every "
+                          "mid-season mover reads as a fake role change.",
+                "bar": "1 SD of the observed shift distribution, derived per "
+                       "metric from this run. It is WIDE early, because a two "
+                       "game sample is noisy, and narrows on its own as games "
+                       "accumulate. Nothing here is hand-typed.",
+                "moved_null": "means NOT YET MEASURABLE, never 'did not move'. "
+                              "Rendering the two the same way turns an unknown "
+                              "into a finding.",
+                "no_pair": "a player absent from this block has no prior-season "
+                           "row - a rookie, or someone under the game gate. "
+                           "That is an absent baseline, NOT a gate he failed.",
+                "changed_team": "the prior was earned on another offence. The "
+                                "shift is real and nothing may render it "
+                                "without naming the team it came from.",
+                "decisions_only": "this file carries no yards, no touchdowns "
+                                  "and no efficiency, so every shift it can "
+                                  "report is a change in what a coaching staff "
+                                  "DID. What happened afterwards is not here "
+                                  "by construction.",
+            },
+        }
+
     meta = {
         "season": SEASON,
         "source": "nflverse stats_player (weekly, REG only)",
@@ -303,11 +467,12 @@ def main():
         "context_only": True,
         "denominator": "team targets/air yards summed over GAMES PLAYED, never the full season",
         "stability": {
-            "tgt_pg": 0.774, "ay_sh": 0.780, "tgt_sh": 0.729,
+            "adot": 0.826, "tgt_pg": 0.774, "ay_sh": 0.780, "tgt_sh": 0.729,
             "wopr": 0.752, "car_pg": 0.730,
         },
         "hierarchy_rank": {"all": "2 — opportunity volume"},
         "trend": trend_meta,
+        "vs_prior": shift_meta,
         "trend_rules": {
             "rank": "1 — role/opportunity CHANGE, which outranks the season "
                     "aggregate sitting beside it",
@@ -328,8 +493,21 @@ def main():
         },
         "counts": {p: sum(1 for v in players.values() if v["pos"] == p) for p in POSITIONS},
     }
-    json.dump({"_meta": meta, "players": players}, open(OUT, "w"), indent=1, sort_keys=True)
+    # newline= is passed below because Python otherwise rewrites every
+    # line ending on Windows. The repo pins LF via .gitattributes and
+    # several guards match on a literal newline, so a CRLF working tree
+    # fails the suite on completely correct code.
+    # pins LF via .gitattributes and several guards match on a literal newline,
+    # so a CRLF working tree fails the suite on completely correct code.
+    json.dump({"_meta": meta, "players": players},
+              io.open(OUT, "w", encoding="utf-8", newline=""),
+              indent=1, sort_keys=True)
     print(f"wrote {OUT}: {len(players)} players through W{weeks_covered}  counts={meta['counts']}")
+    if shift_meta:
+        pairs = sum(1 for v in players.values() if v.get("vs_prior"))
+        print(f"  vs {shift_meta['prior_season']}: {pairs} players paired")
+        for k, m in shift_meta["metrics"].items():
+            print(f"    {k}: bar={m['bar']} n={m['n']} ({m['source']})")
     for k, m in trend_meta.items():
         print(f"  {k}: threshold={m['threshold']} n={m['delta_n']} "
               f"median={m['delta_median']} {m['counts']}")

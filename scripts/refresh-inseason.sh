@@ -125,9 +125,24 @@ else
     # LAST season for the whole of this one. This is the same measurements on the
     # current season, context only. Both vintages render; neither replaces the
     # other.
+    # The PRIOR season is passed in so each player's current figures can be
+    # set against his own, and so the bar that decides whether a gap is large
+    # can be derived from the observed spread rather than typed in.
+    #
+    # ⛔ IT IS A VOLUME FILE BUILT BY THIS SAME SCRIPT, NEVER
+    # player_metrics_2025.json. That file divides a traded player's full-season
+    # targets by ONE team's totals, so diffing against it invents a role change
+    # for every mid-season mover - the exact population this comparison is for.
+    # A delta between two numbers computed differently measures the method.
+    #
+    # ⚠️ The prior is a CLOSED season and never changes, so it is committed and
+    # not refetched here. Rebuild it only if the builder's own maths changes,
+    # and rebuild BOTH sides together when you do.
+    volume_prior="$ROOT/grading/data/volume_$((SEASON - 1)).json"
+    [ -f "$volume_prior" ] || volume_prior=""
     echo "4/8  current-season volume (reusing the same download)"
     python3 "$ROOT/scripts/build-volume-current.py" "$TMP/week.csv" \
-      "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" || fail=1
+      "$ROOT/grading/data/volume_$SEASON.json" "$SEASON" "$volume_prior" || fail=1
 
     # ⛔⛔ STEP 5 IS THE ONLY SCORED ONE IN THIS SCRIPT. Every other layer here is
     # context; this one feeds the matchup pills and therefore the grade.

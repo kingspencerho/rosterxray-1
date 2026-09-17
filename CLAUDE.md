@@ -9431,3 +9431,133 @@ the concussion protocol is a credibility call, not a mechanical one**, so it is 
 named here rather than quietly downgraded.
 
 **41 guards, suite green, `vite build` clean.**
+
+
+---
+
+## Usage vs His Own Prior Season (added Sep 16, 2026)
+
+`grading/data/volume_2025.json` + a `vs_prior` block in `volume_2026.json`, both from
+`scripts/build-volume-current.py`. **CONTEXT ONLY — 90 grades BYTE-IDENTICAL** (15 tournaments x 5
+fixtures plus 3 leagues x 5), diffed against a pristine worktree at HEAD. Guard 41:
+`scripts/test-usage-shift.mjs`.
+
+### His ask, and it came out of a real Sunday
+
+*"is this williams production actually a real trend or just a one off game."* Asked three times in
+one message about three different players. **The card has rendered both vintages side by side since
+Sep 1 and has never said whether the gap between them is large** — a reader seeing `11.6 -> 12.4`
+has to supply the judgement, and the judgement is the hard part: on target share that gap is
+nothing, on aDOT it would be a different job.
+
+### ⭐⭐ IT FILLS THE WINDOW `targetTrend` STRUCTURALLY CANNOT REACH
+
+The Sep 5 usage-trajectory layer splits the season in half, so `MIN_WINDOW_GP = 2` means **it says
+nothing until four games**. This compares against last year and works from the second week.
+
+> **They are complementary, not duplicative — and the early weeks are exactly when a role change is
+> worth the most and is hardest to read.**
+
+### ⛔⛔ THE PRIOR IS BUILT BY THE SAME BUILDER, AND THAT IS THE WHOLE DESIGN
+
+The obvious implementation diffs against `player_metrics_2025.json`. **It would have been wrong for
+precisely the players this feature exists to find.** That file divides a traded player's FULL-SEASON
+targets by ONE team's totals — a bug already recorded above, which reads **Brandin Cooks at a 29.3%
+target share against a true 8.9%** — so every mid-season mover would have shown a fake role change.
+
+> ## ⭐ A DELTA BETWEEN TWO NUMBERS COMPUTED DIFFERENTLY MEASURES THE METHOD, NOT THE PLAYER.
+
+`build-volume-current.py` is already season-parameterised, so the prior is the same code run on the
+2025 weekly release. **That also fixes the nine-player bug for this feature by construction, without
+thawing the frozen file** (guard 15 forbids it, and it would move every grade).
+
+### ⭐ THE BAR IS DERIVED, AND IT SELF-CALIBRATES ACROSS THE SEASON
+
+Per metric, ~1 SD of the observed shift distribution, written into `_meta.vs_prior.metrics`. Nothing
+is hand-typed — the twelfth instance of the duplicate-definition class if it were.
+
+**The property that makes it usable in September:** early on the current figure is a two-game
+sample, so the spread is dominated by sampling noise and **the bar is WIDE** — almost nothing clears
+it, which is correct, because almost nothing is yet knowable. As games accumulate the noise falls,
+the bar narrows on its own, and real changes start to clear it.
+
+⚠️ **Below 30 pairs no bar is derived and `moved` is `null`.** `null` means NOT YET MEASURABLE and
+is rendered differently from `flat` — collapsing the two turns an unknown into a finding.
+
+### What it compares, and the fact that every row is a decision
+
+```
+adot    r 0.826   ay_sh  r 0.780   tgt_pg  r 0.774
+wopr    r 0.752   car_pg r 0.730   tgt_sh  r 0.729      (wopr flagged composite)
+```
+
+⭐⭐ **THIS FILE CARRIES NO YARDS, NO TOUCHDOWNS AND NO EFFICIENCY, so every shift it can report is a
+change in what a coaching staff DID.** What happened afterwards is not here by construction — which
+is the reason one week of it is worth reading at all. Usage repeats (0.73-0.83); outcomes do not
+(0.02-0.31). **`adot` is new to this builder** and is the stickiest player input measured anywhere
+in the project; it is what separates a changed ROLE from a changed result.
+
+### ⛔ DIRECTION IS NEVER A GOOD/BAD HUE
+
+Green means "good matchup" everywhere else on this page. **A rising aDOT is not good — it is a
+different job, with a higher ceiling and a lower catch rate.** Weight and brightness carry *this
+moved*; an arrow carries which way. Same two-channel rule the waiver panel uses for hierarchy rank,
+and guard 41 fails on `--pos`, `--neg`, `--caution`, `--warn`, `--tier` or `--accent-` inside
+`ShiftRow`.
+
+⚠️ **A PRIOR EARNED ON ANOTHER TEAM DESCRIBES ANOTHER JOB.** Michael Pittman's 21.3% target share
+was Indianapolis; he plays for Pittsburgh. The shift is still computed — it is real information —
+and the render names both teams. Asserted.
+
+### ⚠️ IT IS DORMANT UNTIL WEEK 2, and that is `MIN_GP = 2` behaving correctly
+
+At one week the builder emits zero players, so the section does not mount. **Lowering that gate
+would change the population for every existing consumer** (the card, both prompts, the free-agent
+pool, `projDivergence`) — real blast radius on a guarded system, to report a one-game sample that
+the bar would refuse to call moved anyway.
+
+### Four traps, three of them already recorded in this file
+
+1. ⛔ **A `\u` ESCAPE IN JSX *TEXT* POSITION IS LITERAL TEXT.** The composite marker rendered as the
+   six characters `\u2248` on the page. **Recorded Sep 12 when three em dashes did the same thing in
+   an Explainer, and hit again here** — the build was clean and all 40 guards passed. The arrows
+   either side came out right because they sit inside expressions.
+2. ⛔ **AN UNQUOTED PATH WORD-SPLIT IN `refresh-inseason.sh`.** The repo path contains a space, so
+   the builder received a truncated path and exited. **`bash -n` passed it** — the same lesson this
+   file records from the Sep 1 `\n`-in-a-line-continuation slip. **Caught by running it.**
+3. ⛔ **THE BUILDER WROTE CRLF.** `json.dump(..., open(OUT, "w"))` rewrites every line ending on
+   Windows. Fixed at the source with `newline=""`. ⚠️ **The other builders in `scripts/` still do
+   this** — `status_2026.json` is CRLF in the working tree right now. Not fixed here on purpose;
+   it is its own pass.
+4. ⚠️ **`import.meta.url`'s pathname is PERCENT-ENCODED**, so "Claude Projects" became
+   `Claude%20Projects` and every read in the new guard missed. Every other guard in `scripts/` uses
+   `process.cwd()`; match the house idiom.
+
+### ⚠️ Two guard assertions were aimed wrong and failed on CORRECT code
+
+**Sixth instance of a guard failing on its own documentation.** *"The builder never reads
+player_metrics"* matched the builder's own docstring explaining why it must not, and
+`_meta.pairs_with.file`, which names the file both vintages render beside. **Neither is a read.**
+Re-aimed at `(open|load)\(...player_metrics`. And *"defined once and called once"* counted
+`usageShift(` — which `const usageShift = (` never matches — so the count was only ever the call
+site. **An assertion that breaks on valid code teaches people to edit the assertion.**
+
+### Verified
+
+```
+90 grades BYTE-IDENTICAL vs a pristine worktree at HEAD · 41 guards · dual-file identical · LF
+10 sabotages against a verified-clean baseline, ALL exit non-zero - including an engine leak,
+  the builder reading player_metrics, a good/bad hue on direction, a null `moved` rendered as
+  flat, a retyped r, a hand-typed bar, a rookie told he failed a gate, the changed-team
+  disclosure dropped, an unreviewed second call site, and a drifted mirror
+rendered at 375x812 against a simulated live season (2025 W1-6 relabelled): section mounts in
+  the HIS JOB group, 44px at rest and 489px open, rows wrap rather than overflow, 0 sub-32px
+  targets, computed colours read back from the browser - moved rgb(250,250,250)/600 against
+  flat dim/400, no good-bad hue anywhere
+refresh-inseason.sh RUN FOR REAL end to end, not just parsed
+```
+
+⚠️ **THE NO-PRIOR BRANCH IS NOT EXERCISED BY ANY FIXTURE**, because the simulation's current season
+is a subset of its own prior, so every player has a pair. **It is tested by extracting `usageShift`
+with `new Function` and running it against a synthetic** — the technique guard 29 adopted after a
+string-match sabotage slipped through. In the real season a rookie triggers it on day one.

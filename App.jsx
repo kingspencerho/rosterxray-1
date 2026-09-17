@@ -70,6 +70,12 @@ import QB_PROFILE_CUR from './grading/data/qb_profile_2026.json';
 // scripts/build-ngs-receiving.py. CONTEXT ONLY — never touches the score.
 import NGS_RECEIVING from './grading/data/ngs_receiving_2025.json';
 import VOLUME_CUR from './grading/data/volume_2026.json';
+// The PRIOR season, computed by the SAME builder as the current one. It is a
+// separate file rather than a read of player_metrics_2025.json on purpose:
+// that file's shares use a season-level team denominator, so diffing against
+// it invents a role change for every mid-season mover. See vs_prior() in
+// scripts/build-volume-current.py.
+import VOLUME_PRIOR from './grading/data/volume_2025.json';
 import ROUTES from './grading/data/routes_2025.json';
 import COVERAGE from './grading/data/coverage_2025.json';
 // Age, experience and draft slot, with the published aging band per position.
@@ -2851,6 +2857,67 @@ const CUR_QB_LIVE = (QB_PROFILE_CUR._meta?.weeks_covered || 0) > 0;
 const CUR_VOLUME_LIVE = (VOLUME_CUR._meta?.weeks_covered || 0) > 0;
 const getVolumeCur = (name) => (CUR_VOLUME_LIVE ? lookupPlayer(VOLUME_CUR.players, name) : null);
 
+// === THIS SEASON AGAINST HIS OWN PRIOR SEASON (CONTEXT ONLY) ===
+// The card has rendered both vintages side by side since Sep 1 and has never
+// said whether the gap between them is large. A reader seeing `11.6 -> 12.4`
+// has to supply the judgement themselves, and the judgement is the hard part:
+// on target share that gap is nothing, on aDOT it would be a different job.
+//
+// ⭐ IT FILLS THE WINDOW `targetTrend` CANNOT REACH. That layer splits the
+// season in half and so needs four games before it says anything; this one
+// compares against last year and works from the second week. They are
+// complementary, and the early weeks are exactly when a role change is worth
+// the most and is hardest to read.
+//
+// ⛔ EVERY METRIC HERE IS A COACHING DECISION, BY CONSTRUCTION. The file
+// carries no yards, no touchdowns and no efficiency, so a shift it reports is
+// always a change in what a staff DID and never in what happened afterwards.
+// That split is the whole reason one week of this is worth reading at all:
+// usage repeats (r 0.73-0.83), outcomes do not (0.02-0.31).
+const SHIFT_META = VOLUME_CUR._meta?.vs_prior || null;
+const SHIFT_LIVE = !!(SHIFT_META && CUR_VOLUME_LIVE);
+const SHIFT_STABILITY = VOLUME_CUR._meta?.stability || {};
+// ⚠️ Ordered by how well each number REPEATS, not by familiarity. The
+// `r` is read from the file's own stability block rather than retyped here;
+// a second copy of a measured value is the duplicate-definition class this
+// repo has paid for eleven times.
+const SHIFT_ROWS = [
+  { key: "adot", label: "Air yards per target", unit: " yds" },
+  { key: "ay_sh", label: "Air yards share", pct: true },
+  { key: "tgt_pg", label: "Targets / game" },
+  { key: "wopr", label: "WOPR", echo: true },
+  { key: "car_pg", label: "Carries / game", rb: true },
+  { key: "tgt_sh", label: "Target share", pct: true },
+];
+
+const usageShift = (name, pos) => {
+  if (!SHIFT_LIVE) return null;
+  const v = getVolumeCur(name);
+  if (!v) return null;                       // under the current-season gate
+  const vp = v.vs_prior;
+  // ⛔ AN ABSENT PRIOR IS NOT A GATE HE FAILED. A rookie has no baseline to
+  // move away from, and telling him he "needs 2+ games" would be the false
+  // explanation the Sep 1 card audit exists to prevent.
+  if (!vp) {
+    return {
+      rows: [], gp: v.gp, priorSeason: SHIFT_META.prior_season,
+      why: `no ${SHIFT_META.prior_season} row on file — nothing to compare this season against yet`,
+    };
+  }
+  const rows = SHIFT_ROWS
+    .filter((r) => (!r.rb || pos === "RB") && vp[r.key])
+    .map((r) => ({ ...r, ...vp[r.key], r: SHIFT_STABILITY[r.key] ?? null,
+                   bar: SHIFT_META.metrics?.[r.key]?.bar ?? null }));
+  return {
+    rows, gp: v.gp, priorGp: v.prior_gp, priorSeason: SHIFT_META.prior_season,
+    // ⚠️ A PRIOR EARNED ON ANOTHER TEAM DESCRIBES ANOTHER JOB. Never
+    // render the comparison without naming the offence it came from.
+    changedTeam: !!v.changed_team, priorTeam: v.prior_team, team: v.team,
+    moved: rows.filter((x) => x.moved === "up" || x.moved === "down").length,
+    measurable: rows.some((x) => x.moved !== null),
+  };
+};
+
 // === TARGET / CARRY TRAJECTORY (CONTEXT ONLY) ===
 // The season-to-date share sitting beside this is rank 2, opportunity volume.
 // This is rank 1, role CHANGE, and averaging the weeks collapses the higher-
@@ -3992,6 +4059,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     if (CUR_VOLUME_LIVE) {
       const tt = getTargetTrend(name);
       const ct = pos === "RB" ? getCarryTrend(name) : null;
+      card.shift = usageShift(name, pos);
       card.targetTrend = {
         vintage: vintageLabel(VOLUME_CUR._meta),
         splitMode: TREND_META.trend?.split_mode || null,
@@ -9378,6 +9446,7 @@ const CARD_ACCENTS = {
   // WHAT COULD CHANGE IT — availability, depth chart, calendar
   status: CARD_GROUP_ACCENT.outlook,
   // HIS JOB — what the offense gives him
+  shift: CARD_GROUP_ACCENT.job,
   targetTrend: CARD_GROUP_ACCENT.job,
   trajectory: CARD_GROUP_ACCENT.job,
   volume: CARD_GROUP_ACCENT.job,
@@ -9489,6 +9558,43 @@ const SectionH2 = ({ title, open, onToggle, hint, children, id }) => (
 // `nested` is for a section inside a section (the game-by-game table): it
 // keeps the tighter spacing and no rule, so sub-sections stay visually
 // subordinate instead of impersonating top-level ones.
+// One row of "this season against his own last season".
+//
+// \u26d4 DIRECTION IS NEVER A GOOD/BAD HUE, and that is not a style choice.
+// Green means "good matchup" everywhere else on this page, and a rising aDOT
+// is not good - it is a different job, with a higher ceiling and a lower
+// catch rate. Painting it green would issue a verdict this section exists to
+// withhold. Weight and brightness carry "this moved"; the arrow carries which
+// way. Same two-channel rule the waiver panel uses for hierarchy rank.
+const ShiftRow = ({ row }) => {
+  const moved = row.moved === "up" || row.moved === "down";
+  const f = (v) => v == null ? "\u2014" : (row.pct ? pct1(v) : `${v.toFixed(1)}${row.unit || ""}`);
+  const d = row.delta == null ? null
+    : (row.pct ? `${row.delta >= 0 ? "+" : "\u2212"}${Math.abs(row.delta * 100).toFixed(1)} pts`
+               : `${row.delta >= 0 ? "+" : "\u2212"}${Math.abs(row.delta).toFixed(1)}`);
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                  gap: "10px", padding: "5px 0", fontSize: "12px", flexWrap: "wrap" }}>
+      <span style={{ color: moved ? "var(--text-primary)" : "var(--text-dim)",
+                     fontWeight: moved ? 600 : 400 }}>
+        {row.label}
+        {row.echo && <span style={{ color: "var(--text-faint)", marginLeft: "5px" }}>{"\u2248"}</span>}
+        {row.r != null && <span style={{ color: "var(--text-faint)", marginLeft: "6px", fontSize: "10px" }}>{" "}r {row.r.toFixed(2)}</span>}
+      </span>
+      <span style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+                     color: moved ? "var(--text-primary)" : "var(--text-muted)" }}>
+        {f(row.prior)} <span style={{ color: "var(--text-faint)" }}>{"\u2192"}</span> {f(row.cur)}
+        {d && (
+          <span style={{ marginLeft: "8px", fontWeight: moved ? 700 : 400,
+                         color: moved ? "var(--text-primary)" : "var(--text-faint)" }}>
+            {row.moved === "up" ? "\u2191" : row.moved === "down" ? "\u2193" : ""}{d}
+          </span>
+        )}
+      </span>
+    </div>
+  );
+};
+
 const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = false, nested = false, hint = null, children }) => {
   const [open, setOpen] = React.useState(false);
   const shown = !collapsible || open;
@@ -10550,6 +10656,32 @@ const PlayerCardModal = ({ card, onClose }) => {
                 he on the field", this is "how much of the ball is his". Found
                 by rendering the card, not by reading the source. Guard 29
                 asserts the two titles stay distinct. */}
+            {card.shift && (
+              <CardSection
+                title="Usage vs last season"
+                accent={CARD_ACCENTS.shift}
+                collapsible
+                hint={!card.shift.rows.length ? "no prior"
+                  : !card.shift.measurable ? "not yet measurable"
+                  : card.shift.moved ? `${card.shift.moved} moved` : "holding"}
+                note={!card.shift.rows.length
+                  ? `${card.shift.why}. An absent baseline, not a gate he failed.`
+                  : `His ${card.shift.priorSeason} figures against this season's, both computed the same way \u2014 ${card.shift.priorGp} games then ${card.shift.gp}. Every number here is a coaching DECISION rather than a result: this layer carries no yards, no touchdowns and no efficiency, which is why one week of it is worth reading at all. A row is marked as moved only when the gap clears that metric's own bar, and the bar is one standard deviation of every player's shift this season \u2014 derived from the data, never typed in, so it is wide early and narrows as games accumulate.${card.shift.changedTeam ? ` \u26a0 He changed teams: the ${card.shift.priorSeason} column is ${card.shift.priorTeam}, not ${card.shift.team}, so it describes a different offence.` : ""}`}>
+                {!card.shift.rows.length ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>{card.shift.why}</div>
+                ) : (
+                  <>
+                    {card.shift.rows.map((r) => <ShiftRow key={r.key} row={r} />)}
+                    {!card.shift.measurable && (
+                      <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "8px" }}>
+                        {"\u26a0"} No bar is derived yet this season, so nothing here is called moved.
+                        That is NOT the same as flat \u2014 it means not yet measurable.
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardSection>
+            )}
             {card.targetTrend && (
               <CardSection
                 title="Usage trajectory"

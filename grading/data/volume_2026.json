@@ -20,6 +20,7 @@
   "season_complete": false,
   "source": "nflverse stats_player (weekly, REG only)",
   "stability": {
+   "adot": 0.826,
    "ay_sh": 0.78,
    "car_pg": 0.73,
    "tgt_pg": 0.774,
@@ -67,6 +68,68 @@
    "insufficient": "means not enough games to split, NOT a flat role. Never render it as stable.",
    "rank": "1 \u2014 role/opportunity CHANGE, which outranks the season aggregate sitting beside it",
    "windows": "calendar (W1-9 vs W10-18) only on a complete season, otherwise halves of the weeks covered. The two are different measurements and never comparable."
+  },
+  "vs_prior": {
+   "metrics": {
+    "adot": {
+     "bar": null,
+     "composite": false,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    },
+    "ay_sh": {
+     "bar": null,
+     "composite": false,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    },
+    "car_pg": {
+     "bar": null,
+     "composite": false,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    },
+    "tgt_pg": {
+     "bar": null,
+     "composite": false,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    },
+    "tgt_sh": {
+     "bar": null,
+     "composite": false,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    },
+    "wopr": {
+     "bar": null,
+     "composite": true,
+     "median": null,
+     "n": 0,
+     "source": "not derived - only 0 pairs, need 30",
+     "stdev": null
+    }
+   },
+   "prior_season": 2025,
+   "prior_weeks": 18,
+   "rules": {
+    "bar": "1 SD of the observed shift distribution, derived per metric from this run. It is WIDE early, because a two game sample is noisy, and narrows on its own as games accumulate. Nothing here is hand-typed.",
+    "changed_team": "the prior was earned on another offence. The shift is real and nothing may render it without naming the team it came from.",
+    "decisions_only": "this file carries no yards, no touchdowns and no efficiency, so every shift it can report is a change in what a coaching staff DID. What happened afterwards is not here by construction.",
+    "method": "BOTH seasons are computed by THIS builder. Never diff against player_metrics_2025.json - its shares use a season-level team denominator, so every mid-season mover reads as a fake role change.",
+    "moved_null": "means NOT YET MEASURABLE, never 'did not move'. Rendering the two the same way turns an unknown into a finding.",
+    "no_pair": "a player absent from this block has no prior-season row - a rookie, or someone under the game gate. That is an absent baseline, NOT a gate he failed."
+   }
   },
   "weeks_covered": 1
  },
