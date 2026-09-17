@@ -377,6 +377,142 @@ above `<MatchupLegend />` — findable by the reader who asks, invisible to the 
 
 ---
 
+### ⛔⛔ §2c · SCHEDULE-ADJUSTED FPA WAS BUILT, MEASURED AND REJECTED (Sep 17, 2026)
+
+**He approved a full recalibration of the matchup layer**, on the strength of the caveat this file
+and CLAUDE.md have both carried since Aug 25:
+
+> *"These are RAW points allowed, NOT schedule-adjusted. A defence that drew Kelce, Bowers and
+> LaPorta looks soft at TE for reasons unrelated to the defence."*
+
+**The caveat is true. Correcting it does not work, and the measurement says so clearly enough that
+no code was changed.** ⛔ **90 grades byte-identical, because nothing shipped.**
+
+### THE TEST, and it is the same one §2b runs
+
+For each season, position and cut-week N, over the same draftable population §2b used:
+
+```
+RAW(D)    mean points allowed per game by defence D, weeks 1..N
+ADJ(D)    the same, minus each opponent offence's own strength at that position,
+          LEAVE-ONE-OUT so D's own games never feed the baseline it is corrected against
+TARGET    RAW points allowed per game by D, weeks N+1..18, same season
+```
+
+⛔ **THE TARGET IS RAW ON PURPOSE.** A manager's points are raw. The pill answers *"how many points
+will my guy score against this defence"*, not *"how good is this defence in the abstract"* — and
+scoring the target adjusted would be grading the adjustment against itself.
+
+### ✅ THE HARNESS REPRODUCES §2b's PUBLISHED TABLE EXACTLY, which is what earns it a verdict
+
+```
+pos   §2b W1-3   mine    §2b W1-4   mine    §2b W1-6   mine
+QB      0.369    0.370     0.332    0.332     0.329    0.329
+RB     -0.123   -0.123    -0.057   -0.057     0.148    0.148
+WR      0.531    0.531     0.615    0.615     0.418    0.418
+TE      0.281    0.281     0.314    0.314     0.426    0.426
+```
+
+⭐ **Every value to three decimals.** A harness that cannot reproduce the baseline has no standing to
+overturn it — the same discipline `build-fpa-current.py` used when it validated against the Rotowire
+table it replaces at `r = 0.994-0.999`.
+
+### ⛔⛔ THE VERDICT: EVERY POSITION'S ANSWER FLIPS SIGN BETWEEN ONE SEASON AND THREE
+
+Measured on 2025 alone, the adjustment looks like a major win at TE and a major loss at RB:
+
+```
+2025 only, delta (adjusted r minus raw r)
+        cut 3    cut 4    cut 5    cut 6    cut 8
+TE     +0.229   +0.227   +0.248   +0.177   +0.083     <- looks decisive
+RB     -0.125   -0.154   -0.145   -0.180   -0.135     <- looks decisive, other way
+WR     -0.083   -0.064   -0.035   -0.050   -0.037
+```
+
+**TE at cut 3 goes from `0.281` — under the `0.355` noise bar — to `0.510`, comfortably over it. On
+one season that is a shipping result, and it is exactly the position the caveat names.**
+
+Pooled over 2023-25 it evaporates:
+
+```
+pooled, three seasons        cut 3    cut 4    cut 5    cut 6    cut 8
+TE   delta                  +0.051   +0.040   +0.077   +0.029   -0.037
+RB   delta                  -0.028   +0.028   +0.029   +0.034   +0.066
+WR   delta                  -0.035   -0.035   +0.017   +0.049   +0.052
+QB   delta                  -0.061   -0.025   -0.026   +0.019   +0.030
+                     11 cells help by >0.02 · 7 hurt by >0.02 · 2 neither
+```
+
+⭐⭐⭐ **THE PER-SEASON SPREAD IS FOUR TO EIGHT TIMES THE EFFECT.** That is the whole finding:
+
+```
+TE delta, cut 3     2023 -0.211   2024 +0.134   2025 +0.229      swing 0.44
+RB delta, cut 6     2023 +0.030   2024 +0.253   2025 -0.180      swing 0.43
+QB delta, cut 3     2023 -0.208   2024 -0.052   2025 +0.075      swing 0.28
+```
+
+**A quantity whose sign depends on which season you measured it in is not an effect.** ⛔ **And note
+which season would have been picked: 2025, because that is the season §2b used and the one on disk.
+Measuring only it produces "adjust TE, it is worth +0.23" — a scored change to every matchup pill in
+the app, resting entirely on one year.** ⭐ **This is the sample-of-one rule landing on a
+CALIBRATION rather than on a claim about a corpus.**
+
+### ⭐ WHY IT FAILS, and it is NOT that the confound is imaginary
+
+The confound is real — a defence genuinely does draw an easier or harder set of pass-catchers. **The
+correction fails because it is estimated from the same tiny sample it is correcting.** At cut 3 an
+opponent's baseline rests on two games, leave-one-out, so the app would be subtracting one noisy
+number from another and calling the result cleaner. **At `n = 32` defences and three to eight games,
+the noise the adjustment ADDS is the same size as the confound it REMOVES.**
+
+⚠️ **A better estimator was not built, and here is why that does not change the verdict:** a
+two-way iterative fit or a ridge shrink would reduce the added noise, not the 0.43-swing
+season-to-season instability, because that instability is in the DATA rather than in the estimator.
+Nothing recoverable from three to eight games bridges it.
+
+### ⛔⛔ THE SECOND FINDING, AND IT IS LARGER THAN THE FIRST: §2b's HEADLINE IS ONE SEASON AND DOES NOT REPLICATE
+
+§2b's Limits block already says *"one season"*. **Nobody had measured what that costs.** On the same
+draftable population, raw FPA through week 3 predicting the rest of that season:
+
+```
+WR    2023 +0.121    2024 -0.230    2025 +0.531     pooled  0.141
+TE    2023 -0.140    2024 +0.118    2025 +0.281     pooled  0.087
+RB    2023 +0.157    2024 -0.020    2025 -0.123     pooled  0.005
+QB    2023 +0.245    2024 +0.221    2025 +0.370     pooled  0.279
+```
+
+⛔ **`WR 0.531` is the three-star headline of §2b — *"one of the best within a season"* — and 2024
+is `-0.230`.** **Pooled it is `0.141`, well under the `0.355` bar this file states beside it.** ⭐
+**QB is the only position whose sign is stable across all three seasons, and it never clears the bar
+either.**
+
+> ## ⚠️ WHAT THIS DOES **NOT** DO: IT DOES NOT PULL THE LIVE FPA LAYER.
+> **His ruling already decided that on other grounds, and the ruling is untouched:** *"i still want
+> to know whats happening currently during my season."* ⭐ **THE PILL DESCRIBES, IT DOES NOT
+> FORECAST** — a defence that lost three starters in August is a different defence, and last
+> season's number describes a team that is gone. **That argument never depended on the correlation,
+> which is precisely why it survives the correlation not replicating.**
+>
+> ⛔ **What must change is how the NUMBER is quoted.** Per the provenance rule, MEASURED carries its
+> `n`: **`WR 0.531` is `MEASURED, one season`, not a property of the metric.** Do not cite the §2b
+> table as evidence that live FPA forecasts better. Cite his ruling, which is what the layer
+> actually stands on.
+
+### Reproduce
+
+```
+curl -sSL -o wk2023.csv https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2023.csv
+python scripts/measure-schedule-adjustment.py --draftable          # three seasons
+python scripts/measure-schedule-adjustment.py 2025 --draftable     # reproduces the §2b table
+```
+
+⚠️ **It imports `points()` and `normalize()` from `build-fpa-current.py` rather than retyping them.**
+A calibration that scores differently from the builder it is judging measures the gap between two
+scoring functions — the duplicate-definition class, pointed at a measurement instead of at code.
+
+---
+
 ## §3 · The Source Hierarchy — how inputs get weighed
 
 Every entry in [§5](#5--tier-a--the-inputs-that-carry-the-analysis) carries a
