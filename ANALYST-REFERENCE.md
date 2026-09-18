@@ -2719,6 +2719,85 @@ python scripts/matchup-brief.py --selftest
 ```
 
 ---
+### ⛔⛔ §11d · THE CROSS-FILE NAME JOIN, AND WHAT ONE-SIDED NORMALISATION COST (Sep 17, 2026)
+
+`scripts/matchup-brief.py` + `scripts/measure-name-joins.py`. ⛔ **NO App.jsx CHANGE.**
+
+**THE SYMPTOM.** The brief printed **Kenny Gainwell** under *"Q7b NO 2025 DATA — every read above is
+BLIND to these starters"* while his 2025 row sat one file over as **`kenneth gainwell`**. ⛔ **A
+96th-percentile targets-per-route-run and a 94th-percentile red-zone target share — 16 carries
+inside the 10, 9 inside the 5 — were suppressed from a live lineup decision, and the disclosure
+block asserted the opposite of the truth.** Chris Godwin and Harold Fannin were listed the same way.
+
+**THE CAUSE.** Every layer in `grading/data` keys players by NAME and **only `redzone_2025` carries
+a stable id**, so a lookup across files is a string match with nothing verifying it.
+
+⭐⭐ **AND THE PARTICULAR BUG IS WORTH NAMING: `q7b_unmeasured` NORMALISED ONE SIDE.** It ran `_nm()`
+on the depth-chart name and then looked the result up in a dict whose **own keys are raw**. ⛔
+**Normalising one side of a comparison is worse than normalising neither — it looks careful and it
+fails silently.**
+
+### THE RESIDUE WAS MEASURED, SO THE ALIAS LIST STAYS SHORT
+
+`measure-name-joins.py`, `player_metrics_2025` against each layer:
+
+```
+                          raw hit   after _nm()   rescued
+routes_2025                   299          299         0
+redzone_2025                  255          268        13
+gamelogs_2025                 219          231        12
+
+status_2026 starters called unmeasured:  464 raw  ->  445 after _nm()
+FALSE "no data" claims fixed by normalisation alone:  19
+```
+
+⭐ **Normalisation alone is worth 19 false disclosures** — Godwin, Fannin, Deebo Samuel, Brian Thomas
+Jr, Kenneth Walker III, Luther Burden III and a dozen more. **Nicknames need an alias, and an alias
+is dangerous in a way a miss is not: a WRONG one merges two players' seasons into one row.**
+
+### ⭐⭐⭐ SO EVERY ALIAS IS PROVEN, AND THE FIRST TEST THAT PROVED THEM WAS BROKEN
+
+**Three aliases ship: `kenneth/kenny gainwell`, `joshua/josh palmer`, `zonovan/bam knight`.**
+
+⛔ **The first verification said Kyle Allen and Josh Allen were the same person.** It collected rows
+only for names that EXIST, and `kyle allen` is in no 2025 file — so it compared Josh Allen against
+himself and found perfect agreement. **A test that passes for the wrong reason is worse than no
+test**, and it is the same guard-that-cannot-fail class §2h ran into.
+
+**THE BAR THAT SURVIVED, all three required:**
+1. **both spellings appear somewhere**
+2. ⭐ **never in the SAME file** — Kyle Allen and Josh Allen are both in `status_2026`, and that is
+   precisely what proves they are two people
+3. **position agrees, and team agrees AMONG FILES OF THE SAME SEASON**
+
+⚠️ **Condition 3's season clause is not a detail.** It first rejected Gainwell for "disagreeing" PIT
+against TB. **That is a TRANSFER, not a contradiction** — 2025 layers say PIT, `status_2026` says TB,
+and both are correct.
+
+### ⛔ TWO MORE BUGS FOUND BY READING THE OUTPUT, NOT THE CODE
+
+1. ⛔⛔ **THE FIRST FIX MADE THE LIST LONGER.** `find_row` read `sub(layer, "players")`, but
+   `player_metrics` and `gamelogs` are **FLAT** — names at the top level beside `_meta`. So every
+   flat-file lookup returned `None`, Q7b gained **Bucky Irving, Cade Otton and Emeka Egbuka** while
+   their full rows printed three lines above, **and the hygiene detector died silently at the same
+   time.** ⭐ **It looked like a longer list, never like an error.**
+2. **A must-fail case stopped being able to fail.** The hygiene fixture was keyed `__selftest__`, and
+   the new resolver filters a leading underscore as metadata — so *"a flat season flags NOTHING"*
+   was passing because the row was invisible, not because the season was flat.
+
+### Reproduce
+
+```
+python scripts/measure-name-joins.py
+python scripts/matchup-brief.py CLE TB
+python scripts/matchup-brief.py --selftest
+```
+
+⚠️ **`npm test` is RED on an unrelated pre-existing failure** — guard 12 flags two Tua Tagovailoa
+prose entries whose depth-chart claim is dated 8 days back with Week 2 games played on top of it.
+**Verified pre-existing by stashing every change here and re-running: identical failure at HEAD.**
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**

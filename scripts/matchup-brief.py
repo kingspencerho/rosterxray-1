@@ -333,6 +333,72 @@ def _layer_pools(layer, keys):
 
 ROUTE_KEYS = ("route_sh", "tprr")
 RZ_KEYS = ("rz_tgt_sh", "rz_car_sh", "i10_car_sh")
+# ===================== CROSS-FILE PLAYER NAME RESOLUTION =====================
+# Every layer in grading/data keys players by NAME and only redzone_2025 carries
+# a stable id, so a lookup across files is a string match with nothing checking
+# it. That failed loudly on Sep 17 2026: the brief printed Kenny Gainwell under
+# "NO 2025 DATA - every read above is BLIND to these starters" while his 2025
+# row sat one file over as "kenneth gainwell". A 96th-percentile TPRR and a
+# 94th-percentile red-zone target share were suppressed from a live lineup call,
+# and the disclosure block asserted the opposite of the truth.
+#
+# TWO CLASSES, MEASURED BY scripts/measure-name-joins.py:
+#   SUFFIX/PUNCTUATION  "chris godwin jr" vs "chris godwin". _nm() already
+#                       solves it and the brief simply was not using it.
+#                       Worth 19 false "no data" claims on its own.
+#   NICKNAME            "kenneth gainwell" vs "kenny gainwell". No rule reaches
+#                       it, so it needs an alias - and an alias is dangerous in
+#                       a way a miss is not, because a WRONG one merges two
+#                       players' seasons into one row.
+#
+# SO EVERY ALIAS BELOW IS PROVEN, NOT REMEMBERED. Run --prove-aliases. The bar:
+#   1. both spellings appear somewhere
+#   2. never in the SAME file  (Kyle Allen and Josh Allen are both in
+#      status_2026, which is what proves they are two people)
+#   3. position agrees, and team agrees AMONG FILES OF THE SAME SEASON - a
+#      2025-vs-2026 team difference is a TRANSFER, not a contradiction. That
+#      one cost a false rejection of Gainwell, who went PIT -> TB.
+ALIASES = {
+    "kenneth gainwell": "kenny gainwell",   # PIT RB in all three 2025 layers
+    "joshua palmer": "josh palmer",         # BUF WR
+    "zonovan knight": "bam knight",         # ARI RB
+}
+ALIASES.update({v: k for k, v in ALIASES.items()})
+
+
+def find_row(name, layer):
+    """The player's row in `layer`, however that file happens to spell him.
+
+    Raw hit first so an exact match always wins, then normalised, then a proven
+    alias. Returns None when he is genuinely absent - which is a real answer and
+    the reason Q7b exists.
+    """
+    # TWO FILE SHAPES AND THIS MUST SURVIVE BOTH. routes/redzone/status nest
+    # their rows under "players"; player_metrics and gamelogs are FLAT, with
+    # player names at the top level beside _meta. The first cut of this only
+    # handled the nested shape, so every flat-file lookup returned None - which
+    # made Q7b claim Bucky Irving, Cade Otton and Emeka Egbuka were unmeasured
+    # while their full rows printed three lines above, and silently killed the
+    # hygiene detector at the same time. It looked like a longer list, not an
+    # error.
+    rows = sub(layer, "players")
+    if not rows:
+        rows = {k: v for k, v in (layer or {}).items()
+                if not k.startswith("_") and isinstance(v, dict)}
+    if name in rows:
+        return rows[name]
+    key = _nm(name)
+    for k in (key, ALIASES.get(key), ALIASES.get(name)):
+        if not k:
+            continue
+        if k in rows:
+            return rows[k]
+        for rk, rv in rows.items():
+            if _nm(rk) == k:
+                return rv
+    return None
+
+
 ROUTE_POOLS = _layer_pools(ROUTES, ROUTE_KEYS)
 RZ_POOLS = _layer_pools(RZ, RZ_KEYS)
 
@@ -391,7 +457,7 @@ def partial_games(name):
     flagged as contaminated and never re-derived - inventing it would be worse
     than leaving it.
     """
-    row = (GL or {}).get(name)
+    row = find_row(name, GL)
     if not isinstance(row, dict) or not row.get("g"):
         return None
     pos = row.get("pos")
@@ -697,8 +763,8 @@ def q7_usage(team, n=4):
     # the show's most-cited metric and its third.
     def extra(name, v):
         pos, out = v.get("pos"), []
-        r = (sub(ROUTES, "players") or {}).get(name) or {}
-        z = (sub(RZ, "players") or {}).get(name) or {}
+        r = find_row(name, ROUTES) or {}
+        z = find_row(name, RZ) or {}
 
         def add(pools, key, val, label, as_pct):
             # ⛔ route_sh and every red-zone share are FRACTIONS on disk. The
@@ -765,8 +831,14 @@ def q7b_unmeasured(team):
         pos, dc = v.get("pos"), v.get("depth_chart_order")
         if pos not in ("QB", "RB", "WR", "TE") or dc is None or dc > 2:
             continue
-        src = (sub(QB, "players") or {}) if pos == "QB" else (sub(MET, "players") or MET or {})
-        if _nm(name) not in src:
+        # ONE-SIDED NORMALISATION WAS THE BUG, and it made this block lie.
+        # It ran _nm() on the status name and then looked it up in a dict whose
+        # OWN keys are raw, so "chris godwin" never matched "chris godwin jr"
+        # and three measured starters were listed as players the numbers cannot
+        # see. Normalising one side of a comparison is worse than normalising
+        # neither: it looks careful and it silently fails.
+        src_layer = QB if pos == "QB" else MET
+        if find_row(name, src_layer) is None:
             rows.append((dc, "%-22s %-3s DC%s%s" % (
                 name.title(), pos, dc,
                 "  " + v["injury_status"] if v.get("injury_status") else "")))
@@ -1315,6 +1387,40 @@ def selftest():
     except Exception as e:  # noqa: BLE001
         check("an unknown team degrades instead of crashing", False, repr(e))
 
+    # ---- CROSS-FILE NAME RESOLUTION --------------------------------------
+    # The layers key players by name and only redzone carries an id, so every
+    # lookup across files is a string match. These are the three ways it broke.
+    check("a nickname resolves across files (kenneth -> kenny gainwell)",
+          find_row("kenneth gainwell", ROUTES) is not None)
+    check("...and it carries the red-zone row that was being dropped",
+          (find_row("kenneth gainwell", RZ) or {}).get("rz_tgt_sh") is not None)
+    check("a generational suffix resolves both ways (godwin, fannin)",
+          find_row("chris godwin jr", RZ) is not None
+          and find_row("harold fannin", MET) is not None)
+
+    # BOTH FILE SHAPES. routes/redzone/status nest under "players"; metrics and
+    # gamelogs are flat. Handling only the nested shape made Q7b call Bucky
+    # Irving unmeasured while his row printed above it.
+    check("the resolver reads NESTED files", find_row("cade otton", ROUTES) is not None)
+    check("...and FLAT files", find_row("cade otton", MET) is not None)
+
+    # ⛔⛔ THE MUST-FAIL CASE, and it is the one that matters. A missing row
+    # costs a blank. A WRONG alias merges two players' seasons into one row and
+    # nothing downstream can tell. Kyle Allen and Josh Allen are both in
+    # status_2026, which is exactly what proves they are two people.
+    _ka = find_row("kyle allen", MET)
+    check("a surname collision NEVER resolves (kyle allen is not josh allen)",
+          _ka is None or _ka is not find_row("josh allen", MET))
+    check("...and every alias is bidirectional", all(
+        ALIASES.get(ALIASES[k]) == k for k in ALIASES))
+
+    # Q7b's whole job is disclosure. A false entry there is worse than silence,
+    # because it tells him to distrust a number that is sitting right above it.
+    _un = " ".join(q7b_unmeasured("TB") + q7b_unmeasured("CLE"))
+    for _who in ("Gainwell", "Godwin", "Fannin", "Irving", "Otton", "Egbuka"):
+        check("Q7b no longer calls %s unmeasured" % _who, _who not in _un)
+    check("...but a genuine rookie IS still disclosed", "Concepcion" in _un)
+
     # ---- SAMPLE HYGIENE, and the threshold is the whole design ------------
     # 0.20 IS MEASURED, NOT PICKED. scripts/measure-partial-games.py prints the
     # flag rate at seven thresholds over the 2025 corpus; 0.20 flags 66 of 2,470
@@ -1334,18 +1440,18 @@ def selftest():
 
     # MUST-FAIL CASE. A detector that finds a partial game in flat data would
     # flag the whole league, and nothing downstream would ever notice.
-    _save = GL.get("__selftest__")
-    GL["__selftest__"] = {"pos": "WR", "g": [[w, 1, 9.0, 0, 8, 5, 60, 70] for w in range(1, 13)]}
-    check("a perfectly flat season flags NOTHING", partial_games("__selftest__") is None)
-    GL["__selftest__"] = {"pos": "WR",
+    _save = GL.get("zz selftest fixture")
+    GL["zz selftest fixture"] = {"pos": "WR", "g": [[w, 1, 9.0, 0, 8, 5, 60, 70] for w in range(1, 13)]}
+    check("a perfectly flat season flags NOTHING", partial_games("zz selftest fixture") is None)
+    GL["zz selftest fixture"] = {"pos": "WR",
                           "g": [[w, 1, 9.0, 0, 8, 5, 60, 70] for w in range(1, 12)]
                                + [[12, 1, 0.3, 0, 1, 0, 0, 0]]}
-    _sab = partial_games("__selftest__")
+    _sab = partial_games("zz selftest fixture")
     check("...and one collapsed game IS flagged", bool(_sab) and _sab[0] == [(12, 1)])
     if _save is None:
-        GL.pop("__selftest__", None)
+        GL.pop("zz selftest fixture", None)
     else:
-        GL["__selftest__"] = _save
+        GL["zz selftest fixture"] = _save
 
     # ---- the two display bugs the percentile column exposed ---------------
     _q7 = chr(10).join(q7_usage("CLE", n=6) + q7_usage("TB", n=6))
