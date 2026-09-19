@@ -19,6 +19,30 @@ substitute training knowledge of a player's stats.
 Use `--format yahoo` when the question is redraft, `--format superflex` for
 superflex. The ADP and the market label change with it.
 
+## Two players, one table — use this for any start/sit
+
+```
+node scripts/scout.mjs "Player A" --vs "Player B" --format yahoo
+```
+
+**This is the shape he picked (CLAUDE.md, Sep 17): the table, then the call.**
+It prints THIS season above the 2025 rows, because rank 1 and 2 decide. ⛔ **Do
+not paste the full single-player dump for a start/sit question** — it is ~60
+lines per player and buries the comparison.
+
+## His roster, when the question involves it
+
+```
+node scripts/scout.mjs "Player" --roster "../fantasy-roster-quitters.md"
+```
+
+⛔ **THE ROSTER LIVES IN THE PRIVATE REPO AND IS PASSED BY PATH.** This repo is
+PUBLIC; his rosters and leagues never enter it. Guard 45 asserts no roster file
+is ever checked in here.
+⭐ **What it buys: handcuffs are DETECTED, not remembered.** Same NFL team, same
+position, and he already holds the man in front — that is what makes a backup
+worth a roster spot, and it is the reasoning that otherwise gets done by hand.
+
 ---
 
 ## THE FIVE RANKS — read in this order, always

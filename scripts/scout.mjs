@@ -15,7 +15,17 @@ const args = process.argv.slice(2);
 const fmtIdx = args.indexOf("--format");
 const format = fmtIdx >= 0 ? args[fmtIdx + 1] : "standard";
 const skip = fmtIdx >= 0 ? new Set([fmtIdx, fmtIdx + 1]) : new Set();
-const query = args.filter((a, i) => !skip.has(i) && !a.startsWith("--")).join(" ").trim();
+const vsIdx = args.indexOf("--vs");
+const rosterIdx = args.indexOf("--roster");
+if (vsIdx >= 0) { skip.add(vsIdx); }
+if (rosterIdx >= 0) { skip.add(rosterIdx); skip.add(rosterIdx + 1); }
+// --vs splits the remaining words at the flag: everything before is player one,
+// everything after is player two.
+const words = args.map((a, i) => (skip.has(i) || a.startsWith("--")) ? null : a);
+const vsSplit = vsIdx >= 0;
+const query = (vsSplit ? words.slice(0, vsIdx) : words).filter(Boolean).join(" ").trim();
+const query2 = vsSplit ? words.slice(vsIdx).filter(Boolean).join(" ").trim() : "";
+const rosterPath = rosterIdx >= 0 ? args[rosterIdx + 1] : null;
 if (!query) { console.error('usage: node scripts/scout.mjs "Player Name" [--format standard|superflex|yahoo]'); process.exit(2); }
 
 const repoRoot = process.cwd();
@@ -28,6 +38,79 @@ await build({ stdin: { contents: readFileSync(path.join(repoRoot, "App.jsx.jsx")
   bundle: true, platform: "node", format: "esm", outfile, logLevel: "silent",
   alias: { "@vercel/analytics/react": path.join(tmp, "stub.js"), "@vercel/analytics": path.join(tmp, "stub.js") } });
 const e = await import(pathToFileURL(outfile).href + `?t=${Date.now()}`);
+
+// ============================ SNAP SHARE, THIS SEASON ======================
+// Read straight off disk rather than through the app bundle: App.jsx does not
+// import this layer yet, and a scout read should not wait on that.
+let SNAP_CUR = null;
+try { SNAP_CUR = JSON.parse(readFileSync(path.join(repoRoot, "grading/data/snap_current_2026.json"), "utf8")); } catch {}
+const nmKey = (n) => (n || "").toLowerCase().replace(new RegExp("[.']","g"), "").replace(new RegExp("-","g"), " ").replace(new RegExp("\\s+(jr|sr|ii|iii|iv|v)$"), "").replace(new RegExp("\\s+","g"), " ").trim();
+const snapCur = (n) => SNAP_CUR?.players?.[nmKey(n)] || null;
+
+// ================================ YOUR ROSTER ==============================
+// ⛔ THE ROSTER IS PASSED BY PATH AND NEVER LIVES IN THIS REPO. rosterxray-audit
+// is PUBLIC; his rosters and leagues are private-repo-only by standing rule.
+// One line of names, or JSON. Absent is the normal case and costs nothing.
+let ROSTER = [];
+if (rosterPath) {
+  try {
+    const t = readFileSync(rosterPath, "utf8");
+    ROSTER = t.trim().startsWith("[") ? JSON.parse(t)
+      : t.split(String.fromCharCode(10)).map((x) => x.replace(String.fromCharCode(13), "").replace(/#.*$/, "").trim()).filter(Boolean);
+  } catch { console.log(`  (roster file not readable: ${rosterPath})`); }
+}
+const onRoster = (n) => ROSTER.some((r) => nmKey(r) === nmKey(n));
+
+// STATUS is how a handcuff is DETECTED rather than remembered: same NFL team,
+// same position, and you already hold the man in front of him.
+const statusRows = e.STATUS_LAYER?.players ?? e.STATUS_LAYER ?? {};
+const rosterMatesOn = (team, pos, selfName) => ROSTER.filter((r) => {
+  const st = statusRows[nmKey(r)];
+  return st && st.team === team && st.pos === pos && nmKey(r) !== nmKey(selfName);
+}).map((r) => ({ name: r, dc: statusRows[nmKey(r)]?.depth_chart_order }));
+
+// ================================ COMPARISON MODE ==========================
+if (vsSplit) {
+  if (!query || !query2) { console.error('usage: node scripts/scout.mjs "A" --vs "B"'); process.exit(2); }
+  const cols = [query, query2].map((q) => {
+    const h = e.findPlayer(q, format);
+    if (!h) return { name: q, missing: true };
+    const c = e.buildPlayerCard(h.name, h.pos, h.team, Date.now(), format);
+    // ⛔ MATCH ON LABEL, NOT key. card.redzone rows carry a key field and
+    // card.metrics rows do NOT - they are built from CARD_METRICS with label,
+    // r, tier, value and pct only. Assuming the key existed printed a dash for
+    // target share, WOPR and dud rate on a player who has all three.
+    const pick = (arr, rx) => (arr || []).find((x) => rx.test(x.label || ""));
+    const sc = snapCur(h.name);
+    const st = statusRows[nmKey(h.name)] || {};
+    return { name: h.name, pos: h.pos, team: h.team, card: c, st, sc,
+      tgtSh: pick(c.metrics, /^Target share/), wopr: pick(c.metrics, /^WOPR/),
+      snap: pick(c.metrics, /^Snap share/), dud: pick(c.descriptive, /^Duds/),
+      tprr: (c.routes || []).find((x) => /route run/i.test(x.label)),
+      rsh: (c.routes || []).find((x) => /Route share/i.test(x.label)) };
+  });
+  const cell = (x) => x ? `${String(x.value).padEnd(7)}${x.pct != null ? "(" + String(x.pct).padStart(2) + ")" : "    "}` : "  -        ";
+  const W = 26;
+  console.log(`
+================ ${cols[0].name}  vs  ${cols[1].name} ================
+`);
+  const row = (label, f) => console.log(`  ${label.padEnd(22)} ${cols.map((c) => String(c.missing ? "NO MATCH" : f(c)).padEnd(W)).join("")}`);
+  row("", (c) => `${c.pos} ${c.team}${onRoster(c.name) ? "  [YOURS]" : ""}`);
+  row("depth chart", (c) => c.st.depth_chart_order != null ? `DC${c.st.depth_chart_order} ${c.st.depth_chart_position || ""}` : "-");
+  row("injury", (c) => c.st.injury_status || "none");
+  row("SNAP % this season", (c) => c.sc ? `${Math.round(c.sc.snap_pct * 100)}%  (${c.sc.gp} gp)` : "no 2026 snaps");
+  console.log("  ---- 2025, and only where the season above cannot answer ----");
+  row("route share", (c) => cell(c.rsh));
+  row("tgts per route run", (c) => cell(c.tprr));
+  row("target share", (c) => cell(c.tgtSh));
+  row("WOPR", (c) => cell(c.wopr));
+  row("dud rate", (c) => cell(c.dud));
+  console.log(`
+  (n) is his percentile AT HIS OWN POSITION among ${cols[0].card?.popGate ?? "draftable players"}.`);
+  console.log(`  ⛔ RANK 1 AND 2 DECIDE. Snap share and depth chart are THIS season and`);
+  console.log(`     outrank every 2025 row beneath them. Matchup is rank 5 and is not here.`);
+  process.exit(0);
+}
 
 const hit = e.findPlayer(query, format);
 if (!hit) { console.log(`NO MATCH for "${query}" in the ${format} table.`); process.exit(1); }
@@ -151,6 +234,19 @@ L(`
     L(`  2026 weeks played: ${cur.g.length}`);
     for (const r of cur.g) L(`    ` + cc.map((c, n) => `${c} ${r[n]}`).join("  "));
   } else L(`  no 2026 game log yet.`);
+  const sc = snapCur(hit.name);
+  if (sc) {
+    L(`  SNAP SHARE this season  ${Math.round(sc.snap_pct * 100)}%  over ${sc.gp} game(s)  (latest ${Math.round(sc.last_pct * 100)}%)`);
+    L(`    by week: ` + sc.weeks.map((w) => `W${w.week} ${Math.round(w.pct * 100)}% (${w.snaps})`).join("  "));
+    if (SNAP_CUR._meta?.weeks_partial?.length)
+      L(`    ⚠ week(s) ${SNAP_CUR._meta.weeks_partial.join(", ")} are PARTIAL - not every team has played.`);
+    L(`    ⛔ This is SNAP share, not ROUTE share. Close (r=0.957) and not equal.`);
+  } else L(`  no 2026 snap row.`);
+  if (ROSTER.length) {
+    L(`  YOUR ROSTER: ${onRoster(hit.name) ? "you hold him." : "not on your roster."}`);
+    const mates = rosterMatesOn(hit.team, hit.pos, hit.name);
+    if (mates.length) L(`    same team + position you also hold: ` + mates.map((m) => `${m.name}${m.dc != null ? " (DC" + m.dc + ")" : ""}`).join(", "));
+  }
   if (card.trajectoryCur) { const t = card.trajectoryCur;
     L(`  snap trend THIS season: early ${pct(t.early)} -> late ${pct(t.late)}  trend ${t.trend}`); }
 }

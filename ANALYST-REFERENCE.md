@@ -2841,6 +2841,81 @@ node scripts/test-team-alias.mjs
 ```
 
 ---
+### ⭐⭐ §11f · CURRENT-SEASON SNAP SHARE, A COMPARISON MODE, AND HIS ROSTER (Sep 19, 2026)
+
+`scripts/build-snap-current.py` + `grading/data/snap_current_2026.json` + scout `--vs` / `--roster`
++ guard 45. ⛔ **NO App.jsx CHANGE.**
+
+**WHAT PROMPTED IT.** A flex decision turned on whether a receiver was a full-time player, and the
+app could not answer. `routes_2025` is last season; `snap_trajectory_2026` is **correctly empty**
+because a trajectory needs 3 games in each window and it was week 2. **The number came from an
+outside article.**
+
+### ⭐⭐⭐ THE BLOCKER WAS NOT WHAT IT LOOKED LIKE
+
+The obvious build was a 2026 ROUTES layer. ⛔ **It is genuinely blocked upstream:**
+`pbp_participation_2026.parquet` returns **404** while 2023, 2024 and 2025 all return 200 — probed
+with controls, so the gap is real rather than a wrong URL.
+
+⭐ **But `routes_2025`'s own metadata says route share measures against snap share at `r = 0.957`
+and "must never be presented as a separate signal."** So the question *is he full-time* does not
+need routes at all. ✅ **`snap_counts_2026.csv.gz` returns 200.** The layer was one download away.
+
+**MEASURED, and it reproduces the finding that decided the call:**
+
+```
+                    week-1 snap %     (the article's route %)
+Malik Washington         98%               route leader
+Makai Lemon              64%                   85%
+Chris Rodriguez          40%                    -
+Antonio Williams         37%                   29%
+Keaton Mitchell          31%                   31%
+```
+
+⛔⛔ **AND THEY ARE NOT THE SAME NUMBER — the label matters.** 37 against 29, and 64 against 85.
+**Close enough to answer *is he full-time*; never close enough to quote as a route number.** The
+builder's `_meta.is_not` says so and guard 45 asserts it, because a drifting label is how a snap
+figure ends up cited as a route figure.
+
+### What shipped
+
+| | |
+|---|---|
+| **A · snap share** | 423 players, per week, **rank 2 and CURRENT so it outranks the 2025 rows** |
+| **B · `--vs`** | two players, one table, this season above last — the shape he picked Sep 17 |
+| **C · `--roster`** | passed **by PATH**, so his roster stays in the private repo |
+
+⭐⭐ **C's real value is that a handcuff is DETECTED rather than remembered.** Same NFL team, same
+position, and he already holds the man in front: *"same team + position you also hold: Omarion
+Hampton (DC1)."* That is the reasoning that was being done by hand.
+
+### ⛔ A PARTIAL WEEK IS PART OF THE OUTPUT, NOT A FOOTNOTE
+
+Week 2 held **93 rows against week 1's 1,492** — one Thursday game. A mean that blends it gives two
+teams a denominator nobody else has. `weeks_complete` and `weeks_partial` are separate fields and
+the tool prints the warning.
+
+### ⚠️ THREE BUGS, AND TWO ARE THE SAME RECORDED TRAP
+
+1. ⛔ **The escape trap, third variant.** A regex written as `\r?\n` reached the file as real control
+   characters and broke the parse. **The banked fix was *anchor on escape-free text*; that covers
+   ANCHORS and not CONTENT.** Extended: build backslashes at runtime (`String.fromCharCode`,
+   `new RegExp`) when writing code through a heredoc.
+2. ⛔ **`card.metrics` rows have no `key` field.** `card.redzone` rows do, so a lookup by key
+   printed a dash for target share, WOPR and dud rate on a player who has all three. Matches on
+   label now.
+3. ⚠️ **The skill file is CRLF in a repo that pins LF.** `.gitattributes` normalises it on commit, so
+   nothing is broken — but an anchor spanning a line break must use the file's own ending.
+
+### Reproduce
+
+```
+python scripts/build-snap-current.py <snap_counts_2026.csv.gz> grading/data/snap_current_2026.json 2026
+node scripts/scout.mjs "Malik Washington" --vs "Antonio Williams" --format yahoo
+node scripts/test-snap-current.mjs
+```
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
