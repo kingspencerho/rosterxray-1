@@ -23,7 +23,7 @@ const tmp = path.join(os.tmpdir(), "rxr-scout"); mkdirSync(tmp, { recursive: tru
 writeFileSync(path.join(tmp, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 const outfile = path.join(tmp, "s.mjs");
 await build({ stdin: { contents: readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { buildPlayerCard, findPlayer, teammateAbsence, getMetrics, getGameLog, GAME_LOGS, PLAYER_METRICS, ADP_DATA, SITUATIONS, RECENT_NEWS, VERDICTS, CEILING_RANKINGS };\n",
+  "\nexport { buildPlayerCard, findPlayer, teammateAbsence, getMetrics, getGameLog, GAME_LOGS, PLAYER_METRICS, ADP_DATA, SITUATIONS, RECENT_NEWS, VERDICTS, CEILING_RANKINGS, STATUS_LAYER, GAME_LOGS_CUR };\n",
   loader: "jsx", resolveDir: repoRoot, sourcefile: "App.jsx.jsx" },
   bundle: true, platform: "node", format: "esm", outfile, logLevel: "silent",
   alias: { "@vercel/analytics/react": path.join(tmp, "stub.js"), "@vercel/analytics": path.join(tmp, "stub.js") } });
@@ -63,6 +63,21 @@ if (card.qb) {
   L(`  Passing aDOT         r 0.486  ${q.adot?.toFixed(1) ?? "—"}`);
   L(`  (games ${q.gp})   DO NOT project a QB from last year's POINTS — r=0.383.`);
 }
+
+L(`
+[1b] ROUTE WORKLOAD + SCORING EQUITY  (rank 2 - still opportunity)`);
+// ROUTES WAS MISSING AND IT IS THE MOST-CITED METRIC IN THIS LANE. Counted
+// across 141 minutes of the Yahoo show (ANALYST-REFERENCE.md 11b): routes 65
+// mentions, snap share 45, carry share 27, red zone 25, and ADP ZERO. The card
+// has carried card.routes and card.redzone all along; this script simply never
+// printed them, so every scout read was blind to the spine of the position.
+if (card.routes?.length) {
+  for (const x of card.routes) L(`  ${String(x.label).padEnd(20)} r ${String(x.r ?? "-").padEnd(6)} ${String(x.value).padEnd(8)} ${x.pct != null ? x.pct + "%ile" : "-"}`);
+  if (card.routesMeta) L(`  (${card.routesMeta.tgt} targets on ${card.routesMeta.routes} pass snaps, ${card.routesMeta.gp} games)`);
+} else L(`  no route data on file - he is under the route gate, which is itself a finding.`);
+if (card.redzone?.length) {
+  for (const x of card.redzone) L(`  ${String(x.label).padEnd(20)} ${String(x.value)}`);
+} else L(`  no red-zone share - player or team under the opportunity gate.`);
 
 L(`\n[2] CONVERSION  (did the volume produce)`);
 if (log?.g?.length) {
@@ -117,6 +132,29 @@ if (log?.g?.length) {
 }
 }
 
+L(`
+[5b] THIS SEASON  (rank 1 - outranks every 2025 number above)`);
+// The old limits block said "There is no 2026 data in this app." True when it
+// was written, false now, and the SKILL told every session to say it out loud.
+// status_2026 carries the depth chart and injuries; gamelogs_2026 carries real
+// weeks. A framework whose stated limit is wrong is worse than one with no
+// limits at all, because it argues against looking.
+{
+  const st = (e.STATUS_LAYER?.players ?? e.STATUS_LAYER ?? {})[key] || null;
+  if (st) {
+    L(`  depth chart  ${st.depth_chart_order != null ? "DC" + st.depth_chart_order : "-"} ${st.depth_chart_position ?? ""}   status ${st.status ?? "-"}`);
+    L(`  injury       ${st.injury_status ?? "none"}${st.injury_body_part ? " (" + st.injury_body_part + ")" : ""}   news ${st.news_updated ?? "-"}`);
+  } else L(`  not on the 2026 depth-chart feed.`);
+  const cur = e.GAME_LOGS_CUR?.[key];
+  if (cur?.g?.length) {
+    const cc = e.GAME_LOGS_CUR._meta?.cols?.[cur.pos] || [];
+    L(`  2026 weeks played: ${cur.g.length}`);
+    for (const r of cur.g) L(`    ` + cc.map((c, n) => `${c} ${r[n]}`).join("  "));
+  } else L(`  no 2026 game log yet.`);
+  if (card.trajectoryCur) { const t = card.trajectoryCur;
+    L(`  snap trend THIS season: early ${pct(t.early)} -> late ${pct(t.late)}  trend ${t.trend}`); }
+}
+
 L(`\n[6] PROSE  (rank 1 — role CHANGE outranks every number above)`);
 const sit = e.SITUATIONS[key], news = e.RECENT_NEWS[key], vd = e.VERDICTS[key];
 if (sit) L(`  SITUATION verdict=${sit.verdict} trend=${sit.trend}\n    ${(sit.trendNote || sit.reason || "").slice(0, 1200)}`);
@@ -126,6 +164,9 @@ if (!sit && !news && !vd) L(`  none — no dated prose coverage for this player.
 if (card.news?.length) for (const n of card.news) L(`  [card news] ${n.freshness ?? ""} ${n.ageDays != null ? n.ageDays + "d" : ""}`);
 
 L(`\n[7] LIMITS — state these before concluding`);
-L(`  Every number above is 2025. There is no 2026 data in this app.`);
+L(`  Sections 1-4 are 2025. Section 5b is the season being played, and when they`);
+L(`  disagree 5b WINS: role change is rank 1, and a season average describes the OLD job.`);
+L(`  2026 coverage is thin this early BY DESIGN. What exists is printed above; an`);
+L(`  empty 5b is a stated gap, never a licence to lean harder on 2025.`);
 L(`  Efficiency (yds/target, ypc, EPA) explains the past; r runs 0.02-0.31. Never project from it.`);
 L(`  Percentiles are among ${card.popGate}. A raw rate without its population means nothing.`);
