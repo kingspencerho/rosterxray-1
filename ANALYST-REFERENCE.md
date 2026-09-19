@@ -2798,6 +2798,49 @@ prose entries whose depth-chart claim is dated 8 days back with Week 2 games pla
 **Verified pre-existing by stashing every change here and re-running: identical failure at HEAD.**
 
 ---
+### ⛔ §11e · THE TEAM-CODE ALIAS WAS NEVER MISSING — THE CHECK WAS (Sep 19, 2026)
+
+`scripts/test-team-alias.mjs` (guard 44). ⛔ **NO App.jsx CHANGE, and no alias added.**
+
+**THE SYMPTOM.** During a live lineup question, a query for Washington's game returned *no game*.
+`status_2026` files them as **`WAS`**; `gameenv_2026` files them as **`WSH`**. Same split on the
+Rams: **`LA`** and **`LAR`**.
+
+⭐⭐ **THE DIAGNOSIS IS THE POINT, AND IT IS NOT WHAT IT LOOKED LIKE.** Both files already handle
+it — `TEAM_SPELLINGS` exists in App.jsx AND in `matchup-brief.py`, and App.jsx's own comment records
+this biting twice already: *"the Sep 11 LA/LAR bug was exactly this… every Rams card silently lost a
+section. WSH joins it for the same reason."*
+
+⛔ **So the alias was fine. What did not exist was anything that would tell you when it stopped
+being enough.** An ad-hoc query that does not route through the helper returns nothing, in silence,
+and reads exactly like a team with no game.
+
+### WHAT THE GUARD CHECKS, and only the third one is new
+
+1. **THE TWO MAPS AGREE.** The alias is typed twice, in two languages. ⭐ **Compared as SETS, not
+   order** — App.jsx lists the canonical spelling first, the Python lists the asked-for one first,
+   and both are correct for a try-every-spelling lookup.
+2. **THE MAP IS SYMMETRIC.** If `WAS` maps to both but `WSH` maps only to itself, half the lookups
+   still fail and the map still looks complete. **That is the must-fail case.**
+3. ⭐⭐ **EVERY TEAM CODE PRESENT IN `grading/data` RESOLVES.** **Nothing checked this before.** A
+   third spelling arriving in a new feed would have behaved exactly like the first two did — silently
+   — until it emptied somebody's lineup read on a Sunday.
+
+✅ **AND IT CONFIRMS THE ALIAS IS LOAD-BEARING RATHER THAN DECORATIVE:** all four spellings appear
+in real files today — `LAR` in `coverage_2025`, `LA` in `career_arc_2026`, `WAS` in
+`career_arc_2026`, `WSH` in `gameenv_2026`.
+
+⚠️ **WHAT IT DOES NOT DO: add the alias to new code.** A future script that hand-rolls a team lookup
+will still fail. **The guard proves the MAP is sound; it cannot force a caller to use it.** The
+callers that matter (`sub_team`, `lookupTeam`, `is_team`) already do.
+
+### Reproduce
+
+```
+node scripts/test-team-alias.mjs
+```
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
