@@ -3284,6 +3284,68 @@ PIT room and requires the check to reject it.
 **MEASURED**, `n=2` rooms end to end (PIT RB, IND WR) inside a 2,196-assertion
 suite, exit 0.
 
+### ⭐⭐⭐ §11m · COVERAGE SHAPE, MEASURED — AND IT INVERTED THE FOLK MODEL AGAIN (Sep 20, 2026)
+
+**His instruction:** *"add coverage shape into our future analysis as well, i want to
+know what defenses run and what offense pieces exploit them."*
+
+#### The conflict that had to be resolved first
+
+`build-coverage.py` already kills coverage as a predictor, PER PLAYER: the man/zone
+edge repeats at **r = 0.161**, a coin flip, on about 70 targets. It is withheld from
+the app AI on purpose.
+
+⭐⭐ **His ask survives that, because it is a DIFFERENT question.** Not *how does
+this receiver do against man* (n about 70, noise) but *which ARCHETYPE does a
+coverage shape feed*, pooled over the season (n about 16,700). **Same upgrade §11j
+made for blitz.** His own Sep 17 ruling already permits it: a metric the app will
+not use can still be shown in conversation.
+
+#### MEASURED, 2025, league-wide, n = 16,687 labelled targeted pass plays
+
+```
+MAN vs ZONE          WR      TE      RB        behindLOS  short0-9  mid10-19  deep20+
+  zone             55.3%   24.5%   20.1%          19.7%     49.1%     20.3%    10.9%
+  MAN              64.8%   23.1%   12.1%          12.3%     49.5%     24.6%    13.6%
+  change            +9.4    -1.4    -8.0           -7.4      +0.4      +4.3     +2.7
+
+COVER-2 vs REST      WR      TE      RB        behindLOS  short0-9  mid10-19  deep20+
+  other cov        59.7%   23.9%   16.4%          16.3%     48.3%     22.9%    12.5%
+  COVER-2          54.3%   24.8%   20.9%          20.4%     51.7%     18.1%     9.7%
+  change            -5.4    +0.9    +4.4           +4.1      +3.4      -4.8     -2.7
+```
+
+⭐⭐ **MAN COVERAGE REPRODUCES §11j EXACTLY, FROM A DIFFERENT FEED.** Receivers
+`+9.4`, backs `-8.0`, and the throw goes DEEPER not shorter. **Two independent
+measurements now say the same thing: whatever keeps a back out of the route tree
+hands his targets to the receivers.**
+
+⛔⛔ **AND COVER-2 INVERTED WHAT I TOLD HIM ONE TURN EARLIER.** I wrote that
+cover-2 *"squeezes the middle, which is exactly where a slot receiver operates"* and
+used it as a point AGAINST starting Makai Lemon. **The count says cover-2 pushes
+targets SHORTER: behind the line `+4.1`, short `+3.4`, and what actually gets
+squeezed is the MIDDLE DEPTH, `mid 10-19` at `-4.8`, plus deep at `-2.7`.**
+**Lemon ran 4 targets for 0 air yards and -5 yards — he works at and behind the
+line, which is the band cover-2 FEEDS.** ✅ **The Boston call still stood on rank 1
+and rank 2 alone; the coverage sentence was struck, not the conclusion.**
+
+⭐ **The reusable form: a cover-2 defence surrenders the flat and the checkdown and
+takes away the dig and the post. A man defence surrenders downfield receiver work
+and takes away the back.**
+
+#### ⚠⚠ THE CONFOUND, NAMED BECAUSE IT IS NOT RULED OUT
+
+**These are DESCRIPTIONS, not causes.** Coverage is not called at random:
+**cover-2 is a protect-the-lead call**, so the offence facing it is often trailing
+and throwing underneath, and **man is called on third down and near the goal line.**
+⛔ **So some of every row above may be DOWN, DISTANCE AND GAME SCRIPT rather than
+coverage.** Nothing here is shown to repeat year to year either.
+✅ **Usable to ORDER two close options. Never to make a good player bad.**
+
+**Reproduce:** `python scripts/measure-coverage-consequences.py --season 2025`
+(`--selftest` has four assertions incl. a must-fail proving unlabelled coverage
+rows are dropped rather than silently bucketed).
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
