@@ -3169,6 +3169,66 @@ absorb it. **That explains all three columns at once, which the checkdown story 
 ⚠️ **AND THE DEPTH BARELY MOVES**, which is the other half of the folk model failing: WR `11.0 → 10.9`,
 TE `6.3 → 6.0`, RB `0.1 → -0.3`. **A blitz does not meaningfully shorten the throw.**
 
+### ⭐⭐⭐ §11k · ONE CROSSWALK, ONE RESOLVER, ONE GUARD — THE FIX FOR THE SILENT NAME JOIN (Sep 19, 2026)
+
+**Plain version first.** Every layer in `grading/data/` is keyed by a player's
+NAME, and the feeds spell names differently. nflverse says `Kenny Gainwell`;
+the snap feed said `Kenneth Gainwell`. A lookup on the wrong spelling returned
+nothing.
+
+⛔⛔ **THE BUG WAS NEVER THAT NAMES WERE USED. IT WAS THAT A MISS WAS SILENT.**
+A back with an 84th-percentile 2025 season printed `no 2025 row`, which reads
+exactly like *this player has no data*. **An absence that looks like a fact is
+the worst failure this tool can have, because nothing about it invites a second
+look.** It surfaced only because he asked to elaborate on one player.
+
+#### The three pieces
+
+| Piece | File | What it does |
+|---|---|---|
+| **The crosswalk** | `scripts/build-player-ids.py` → `grading/data/player_ids.json` | name → `gsis_id` off the nflverse players release. **6,997 players, 8,012 names, 48,074 alt ids** (pfr/pff/espn/esb/nfl/otc/smart). Scope `last_season >= 2018` |
+| **The resolver** | `pickRowFor()` in `scripts/scout.mjs` | raw key → canonical name → id → a reverse index of the LAYER's own keys |
+| **The guard** | `scripts/test-player-ids.mjs` (guard 47) | a resolution RATE per layer, with a floor that fails on regression |
+
+#### The disambiguation ladder — it refuses rather than guesses
+
+Two real players normalise to `antonio williams`, and one is on his roster.
+⛔ **A wrong player is worse than a missing one**, so an ambiguous name
+resolves to NOTHING on its own and is rescued one rung up:
+
+```
+by_name             antonio williams          -> (refused)
+by_name_pos         antonio williams|WR       -> 00-0041040
+by_name_pos_team    antonio williams|WR|BUF   -> 00-0041040
+```
+
+✅ **91 names collide, 83 rescued by position.** Both properties are asserted:
+the safety one (ambiguity refuses) and the usefulness one (position rescues).
+
+#### ⭐⭐ Why the GUARD was the piece worth building, not the migration
+
+**A migration fixes the layers somebody migrates.** The guard fails on a layer
+nobody has touched — including one built next month by someone who never read
+this section. Floor 80%; the 19 real layers run **91-100%**.
+
+⭐ **Its sabotage is the point:** a layer keyed the way the feeds key it
+(`J.Smith`, `M.Evans`) must come back BELOW the floor. **If that sabotage
+passes, the floor is decorative and the silent-absence bug is back.**
+
+#### Two traps hit building it
+
+1. ⛔ **Temporal dead zone.** The crosswalk loader was declared below its first
+   use. `const` is not hoisted, so the section threw `ReferenceError` and the
+   symptom was an EMPTY section — **the same shape as the bug being fixed.**
+2. ⚠️ **Deleting the hand-written aliases caused a regression.** The crosswalk
+   knew CANONICAL names; the layers are keyed by FEED spellings. Fixed twice
+   over: `variants()` harvests `first_name` / `common_first_name` /
+   `football_name` from the release, and the resolver keeps a reverse index of
+   each layer's own keys by id.
+
+**MEASURED**, `n=19` layers, every one above the floor. Join-rate measurement
+it replaced: `scripts/measure-name-joins.py`.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
