@@ -118,6 +118,7 @@ if (vsSplit) {
       tgtSh: pick(c.metrics, /^Target share/), wopr: pick(c.metrics, /^WOPR/),
       snap: pick(c.metrics, /^Snap share/), dud: pick(c.descriptive, /^Duds/),
       exp: expRow(EXP_CUR, h.name) || expRow(EXP_PRIOR, h.name),
+      fr: frRow(h.name),
       expIsCur: !!expRow(EXP_CUR, h.name),
       tprr: (c.routes || []).find((x) => /route run/i.test(x.label)),
       rsh: (c.routes || []).find((x) => /Route share/i.test(x.label)) };
@@ -133,6 +134,11 @@ if (vsSplit) {
   row("injury", (c) => c.st.injury_status || "none");
   row("SNAP % this season", (c) => c.sc ? `${Math.round(c.sc.snap_pct * 100)}%  (${c.sc.gp} gp)` : "no 2026 snaps");
   row("EXPECTED pts / game", (c) => c.exp ? `${c.exp.exp_pg}  rk ${c.exp.exp_rank}/${c.exp.n}${c.expIsCur ? "" : " [2025]"}` : "-");
+  // The r printed here is POSITION-SPECIFIC on purpose. The pooled 0.908
+  // measures position, not player, and must never reach a lineup page.
+  row("FIRST READ % of tgt", (c) => (c.fr && c.fr.tgt >= 3)
+    ? `${Math.round((c.fr.fr_rate || 0) * 100)}%  (${c.fr.fr_tgt}/${c.fr.tgt})  r=${FR_R[c.pos] ?? "?"}`
+    : (c.fr ? `only ${c.fr.tgt} tgt` : "-"));
   console.log("  ---- 2025, and only where the season above cannot answer ----");
   row("route share", (c) => cell(c.rsh));
   row("tgts per route run", (c) => cell(c.tprr));

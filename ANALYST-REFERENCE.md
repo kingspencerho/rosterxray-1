@@ -3087,6 +3087,60 @@ node scripts/test-first-read.mjs
 ```
 
 ---
+### ⭐⭐ §11i · A MISSING DENOMINATOR CAN BE DERIVED FROM A PUBLISHED RATE (Sep 19, 2026)
+
+**His challenge:** *"wait you cant get this route participation data online?"* ⭐ **He was right to
+push.** A session had checked ONE source, found it missing, and written the metric off.
+
+### ⛔ FIVE FREE SOURCES CHECKED, AND ROUTES IS GENUINELY NOT IN ANY OF THEM
+
+| source | routes? |
+|---|---|
+| `pbp_participation` 2026 | ⛔ **404** — and 2023/24/25 all return 200, so the gap is real, not a bad URL |
+| `ftn_charting` | ⛔ play-level; carries no on-field player list |
+| `nextgen_stats` | ⛔ no 2026 receiving asset published |
+| `pfr_advstats` | ⛔ drops, broken tackles, passer rating |
+| `stats_player_week` | ⛔ 150 columns, none of them routes |
+
+**Route share needs *who was on the field for each pass play*.** ⛔ **The providers who have it now
+sell it, and scraping a subscription data product is out** — the same ruling
+`bbmdb-portfolio-analysis.md` already makes: *"never scrape bbmdb's computed numbers in — that is
+their product."*
+
+### ⭐⭐⭐ BUT THE NUMBER WAS REACHABLE ANYWAY, AND THE RECIPE GENERALISES
+
+**An analyst published a RATE whose denominator was the missing number.** Concepcion at *2.15 yards
+per route run*, and his receiving yards are in the box score:
+
+```
+43 receiving yards ÷ 2.15 yards per route = 20 routes
+20 routes ÷ 30 CLE dropbacks               = 67% route share
+```
+
+> ## **THE RECIPE: when a denominator is paywalled, look for a published RATE that uses it. A rate
+> ## plus one free number gives the denominator back by division.**
+
+**YPRR gives routes. Targets per route gives routes. Points per snap gives snaps.** ⭐ **The
+paywalled quantity is often sitting inside a number somebody quoted for free.**
+
+⚠️ **PRECISION IS BOUNDED BY THE ROUNDING.** `2.15` could be `2.145` to `2.155`, so 20 routes is
+**±1**. ⛔ **Fine for *is he full-time*; never quote it as exact, and never stack another derivation
+on top of it.**
+
+### WHAT IT SETTLED, AND IT WENT AGAINST THE PERSON WHO FOUND IT
+
+```
+                  routes      tgt/route     air yds
+  Lemon        28  (85%)        14.3%          0
+  Concepcion   20  (67%)        25.0%         63
+```
+
+⭐ **His instinct was right — Lemon does run far more routes.** ⛔ **And it lost anyway: Concepcion
+is targeted on a quarter of his routes against one in seven, on eight FEWER routes, at real depth.**
+**Being on the field is rank 2; being thrown to is the half of rank 2 that scores.** *(And targets
+per route run is `r = 0.674` and NOT a restatement of snap share, which route share is at 0.957.)*
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
