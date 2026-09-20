@@ -55,22 +55,75 @@ const nmKey = (n) => (n || "").toLowerCase().replace(new RegExp("[.']","g"), "")
 //
 // ⭐ THE REAL FIX IS UPSTREAM: build every layer id-first, as first_read is.
 // This is the caller-side guard for the layers that are not there yet.
-const NAME_ALIASES = {
-  "kenneth gainwell": "kenny gainwell", "kenny gainwell": "kenneth gainwell",
-  "joshua palmer": "josh palmer", "josh palmer": "joshua palmer",
-  "zonovan knight": "bam knight", "bam knight": "zonovan knight",
+// ⛔⛔ FIFTH INSTANCE OF THE NAME JOIN. A hand-written alias list fixed the three
+// cases somebody happened to notice; it could not fix the sixth. The crosswalk
+// replaces it - one file mapping every feed's id and every canonical name to a
+// gsis id, built by scripts/build-player-ids.py.
+//
+// ⭐ IT REFUSES RATHER THAN GUESSES. Two players normalise to "antonio williams"
+// and one is on his roster, so the bare name resolves to NOTHING and the caller
+// falls down a ladder - name, then name+position, then name+position+team. A
+// wrong player is worse than a missing one, because nothing about a wrong
+// number looks wrong.
+// ⛔ DECLARED ABOVE ITS FIRST USE. const is not hoisted, so defining this
+// loader further down the file threw a temporal-dead-zone ReferenceError
+// the moment anything above it called rdJson - and the symptom was an
+// EMPTY section, which reads exactly like a player with no data.
+const rdJson = (f) => { try { return JSON.parse(readFileSync(path.join(repoRoot, f), "utf8")); } catch { return null; } };
+const PLAYER_IDS = rdJson("grading/data/player_ids.json");
+const idFor = (name, pos, team) => {
+  if (!PLAYER_IDS) return null;
+  const k = nmKey(name);
+  return PLAYER_IDS.by_name_pos_team?.[`${k}|${pos}|${team}`]
+    ?? PLAYER_IDS.by_name_pos?.[`${k}|${pos}`]
+    ?? PLAYER_IDS.by_name?.[k]
+    ?? null;
 };
-// Exact, then a proven alias, then a normalised scan. The scan is last because
-// it is the slowest and the least certain, not because it is the least useful.
-const pickRow = (rows, name) => {
+const canonName = (name, pos, team) => {
+  const id = idFor(name, pos, team);
+  return id ? nmKey(PLAYER_IDS.names?.[id] || name) : nmKey(name);
+};
+// Exact key, then the canonical name the crosswalk gives, then the id if the
+// layer carries one, then a normalised scan. Each rung is cheaper and more
+// certain than the one after it.
+const pickRowFor = (rows, name, pos, team) => {
   if (!rows) return null;
   const k = nmKey(name);
   if (rows[k]) return rows[k];
-  const alt = NAME_ALIASES[k];
-  if (alt && rows[alt]) return rows[alt];
+  const canon = canonName(name, pos, team);
+  if (canon !== k && rows[canon]) return rows[canon];
+  const id = idFor(name, pos, team);
+  if (id) {
+    // ⭐⭐ THE RUNG THAT ACTUALLY CLOSES IT, and the first build missed it.
+    // Resolving the QUERY to an id is only half the join - the LAYER is keyed
+    // on whatever its feed wrote, so "kenneth gainwell" sits in expected_2025
+    // while the canonical name is "kenny gainwell" and neither reaches the
+    // other. Resolve the layer's OWN keys through the same crosswalk and match
+    // on the id. Built once per layer and cached, because it is O(keys).
+    const idx = idIndexFor(rows);
+    if (idx.has(id)) return idx.get(id);
+  }
   for (const [rk, rv] of Object.entries(rows)) if (nmKey(rk) === k) return rv;
   return null;
 };
+// One reverse index per layer object, keyed by object identity so a layer is
+// never walked twice in a run.
+const ID_INDEX = new WeakMap();
+const idIndexFor = (rows) => {
+  let m = ID_INDEX.get(rows);
+  if (m) return m;
+  m = new Map();
+  for (const [rk, rv] of Object.entries(rows)) {
+    const rid = (rv && rv.id) || PLAYER_IDS?.by_name?.[nmKey(rk)];
+    if (rid && !m.has(rid)) m.set(rid, rv);
+  }
+  ID_INDEX.set(rows, m);
+  return m;
+};
+// The single-player path knows its own position and team; the helpers below
+// keep the old two-argument shape and fill them in from the resolved card.
+let PICK_POS = null, PICK_TEAM = null;
+const pickRow = (rows, name) => pickRowFor(rows, name, PICK_POS, PICK_TEAM);
 const snapCur = (n) => pickRow(SNAP_CUR?.players, n);
 
 // ======================= EXPECTED POINTS (rank 2, in points) ===============
@@ -80,7 +133,6 @@ const snapCur = (n) => pickRow(SNAP_CUR?.players, n);
 // never the outcome), diff is "NOT a skill rating and NOT a forecast", and it
 // may never be presented as Hayden Winks' model, whose published figures do not
 // reproduce here under any single scoring.
-const rdJson = (f) => { try { return JSON.parse(readFileSync(path.join(repoRoot, f), "utf8")); } catch { return null; } };
 const EXP_CUR = rdJson("grading/data/expected_2026.json");
 const EXP_PRIOR = rdJson("grading/data/expected_2025.json");
 // ============================== FIRST READ =================================
@@ -161,6 +213,7 @@ if (vsSplit) {
     // r, tier, value and pct only. Assuming the key existed printed a dash for
     // target share, WOPR and dud rate on a player who has all three.
     const pick = (arr, rx) => (arr || []).find((x) => rx.test(x.label || ""));
+    PICK_POS = h.pos; PICK_TEAM = h.team;
     const sc = snapCur(h.name);
     const st = statusRows[nmKey(h.name)] || {};
     return { name: h.name, pos: h.pos, team: h.team, card: c, st, sc,
@@ -255,6 +308,7 @@ if (vsSplit) {
 }
 
 const hit = e.findPlayer(query, format);
+if (hit) { PICK_POS = hit.pos; PICK_TEAM = hit.team; }
 if (!hit) { console.log(`NO MATCH for "${query}" in the ${format} table.`); process.exit(1); }
 const key = hit.matchedKey;
 const card = e.buildPlayerCard(hit.name, hit.pos, hit.team, Date.now(), format);

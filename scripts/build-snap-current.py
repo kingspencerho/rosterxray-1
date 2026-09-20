@@ -19,7 +19,15 @@ of routes, another 64% of snaps against 85% of routes. Close enough to answer
 trend. That is snap_trajectory's job and it needs 6 games. This reports what
 happened, per week, and lets the reader see the sample.
 
-    python scripts/build-snap-current.py <snap_counts.csv.gz> <out.json> <season>
+⭐⭐ IT GOES THROUGH THE ID, NOT THE FEED'S SPELLING. The first version keyed on
+the name in snap_counts, which writes "Kenneth Gainwell" where other layers
+write "Kenny Gainwell". Scout looked up one spelling, got nothing, and printed
+"no 2026 snap row" for a player on his roster - an absence that reads exactly
+like a fact. snap_counts carries pfr_player_id, and player_ids.json maps every
+feed's id to a gsis id and a canonical display name, so the feed's spelling
+never reaches the output.
+
+    python scripts/build-snap-current.py <snap_counts.csv.gz> <player_ids.json> <out.json> <season>
 """
 import csv
 import gzip
@@ -37,9 +45,32 @@ def nm(n):
 
 
 def main():
-    if len(sys.argv) < 4:
-        sys.exit(__doc__.strip().splitlines()[-1].strip())
-    src, out, season = sys.argv[1], sys.argv[2], int(sys.argv[3])
+    if len(sys.argv) < 5:
+        sys.exit("usage: build-snap-current.py <snap_counts.csv.gz> <player_ids.json> "
+                 "<out.json> <season>")
+    src, ids_p, out, season = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
+    IDS = json.load(open(ids_p, encoding="utf-8"))
+    unresolved = set()
+
+    def canon(row):
+        """Canonical (key, gsis id) for one snap row, id first.
+
+        ⛔ The fallback is the FEED name, and it is recorded rather than hidden -
+        a row that had to fall back is a row that may not join, and the count
+        is published so the next person sees it without going looking.
+        """
+        pid = (row.get("pfr_player_id") or "").strip()
+        gid = IDS["by_alt"].get("pfr:" + pid) if pid else None
+        if gid:
+            return nm(IDS["names"].get(gid, row.get("player"))), gid
+        key = nm(row.get("player"))
+        pos = (row.get("position") or "").upper()
+        gid = (IDS["by_name"].get(key)
+               or IDS["by_name_pos"].get(key + "|" + pos))
+        if gid:
+            return nm(IDS["names"].get(gid, row.get("player"))), gid
+        unresolved.add(key)
+        return key, None
 
     op = gzip.open if src.endswith(".gz") else open
     with op(src, "rt", encoding="utf-8", errors="replace") as fh:
@@ -61,7 +92,7 @@ def main():
 
     players = {}
     for r in rows:
-        key = nm(r.get("player"))
+        key, gid = canon(r)
         if not key:
             continue
         try:
@@ -72,8 +103,10 @@ def main():
         p = players.setdefault(key, {
             "pos": (r.get("position") or "").upper(),
             "team": r.get("team"),
+            "id": gid,
             "weeks": [],
         })
+        p["id"] = p.get("id") or gid
         p["team"] = r.get("team") or p["team"]
         p["weeks"].append({"week": int(r["week"]), "pct": round(pct, 3), "snaps": snaps})
 
@@ -95,6 +128,9 @@ def main():
             "weeks_complete": [int(w) for w in complete],
             "weeks_partial": [int(w) for w in partial],
             "players": len(players),
+            "unresolved_names": len(unresolved),
+            "keyed_by": "canonical display name from player_ids.json, resolved via "
+                        "pfr_player_id. The feed's own spelling never reaches the output.",
             "source": "nflverse snap_counts",
             "hierarchy_rank": "2 - opportunity. Current season, so it OUTRANKS the 2025 layers.",
             "is_not": "NOT route share. Route share counts pass plays only; this counts "
@@ -112,8 +148,8 @@ def main():
     }
     with open(out, "w", encoding="utf-8", newline="") as fh:
         json.dump(doc, fh, indent=0, sort_keys=True)
-    print("wrote %s - %d players, weeks %s (complete %s, partial %s)"
-          % (out, len(players), weeks, complete, partial))
+    print("wrote %s - %d players, weeks %s (complete %s, partial %s), %d unresolved"
+          % (out, len(players), weeks, complete, partial, len(unresolved)))
 
 
 if __name__ == "__main__":
