@@ -3464,6 +3464,60 @@ recommendation. ✅ **His four rosters now record their scoring in the file head
 ⚠️ **A repricing that estimates completions or first downs is REASONED.** The direction
 survives; the digits do not.
 
+### ⭐⭐⭐ §11q · THE REPRICER — STOP ESTIMATING CUSTOM SCORING, COUNT IT (Sep 20, 2026)
+
+§11p had to reprice his league BY HAND and tag the result REASONED, because
+`gamelogs_*` carries `att` and not completions, and no first-down or sack data at
+all. **`scripts/reprice.py` reads play-by-play directly, so every term is COUNTED.**
+
+⛔ **It keys on GSIS id, never on the pbp name field.** Those are abbreviated
+(`T.Shough`), and §11h records a whole measurement that came back empty for exactly
+that reason.
+
+#### What it found, and the shape of the answer is the point
+
+**Week 1 under league 967682 scoring** *(completions 0.1, pass TD 5, INT -2,
+**sacks -1.5**, 1st downs 0.1, +2 at 300 yds and +3 at 400)*:
+
+```
+  TYLER SHOUGH  30.20            CARSON WENTZ  17.72
+    35 completions      +3.50      12 completions      +1.20
+    410 pass yds       +16.40      133 pass yds        +5.32
+      yardage bonus     +5.00      3 pass TD          +15.00
+    3 pass TD          +15.00      3 sacks             -4.50
+    19 pass 1st dn      +1.90      7 pass 1st dn       +0.70
+    2 forty-yd comp     +3.00
+    2 INT               -4.00
+    5 SACKS             -7.50
+    2 fumbles, 1 lost   -4.00
+```
+
+⭐⭐ **SHOUGH WON BY 12.5 WHILE ABSORBING 15.5 POINTS OF PENALTIES** — in the one
+league of his that charges for sacks, interceptions AND fumbles. That is the
+strongest form a result can take.
+
+⭐⭐⭐ **AND THE DECISIVE READ IS WHERE THE POINTS CAME FROM, NOT THE TOTAL.**
+**15 of Wentz's 17.72 were three passing touchdowns on NINETEEN attempts** — the
+least repeatable line in football. **Shough's came from volume**: completions,
+first downs and yardage bonuses, which this scoring pays for and which repeat.
+
+⛔ **AND THE SACK PENALTY DOES NOT FAVOUR WENTZ, WHICH IS THE OPPOSITE OF THE
+INTUITION.** Sack RATE: Shough `5/61 = 8.2%`, **Wentz `3/22 = 13.6%`.** Per dropback
+Wentz was sacked more often. **A raw sack COUNT compared across two very different
+attempt volumes is the same error as comparing a raw dud rate across positions.**
+
+#### ⚠⚠ The ambiguity it refuses to hide
+
+Yahoo prints *"2 points at 300 yards; 3 points at 400 yards"* and stacks milestone
+bonuses. **Top-tier-only would read 28.20 instead of 30.20.** `--bonus-top` prints
+the other reading and the output flags any line where they differ. ⛔ **A silent
+choice between two readings is the failure this file exists to stop.**
+
+**Guard 51** runs the selftest and **pins both transcribed league tables**, because a
+scoring table copied off a settings page by eye is exactly what rots. It asserts the
+contrast that decides players: **first downs pay 0.1 in one league and 0.5 in the
+other, and only one charges for a sack.**
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
