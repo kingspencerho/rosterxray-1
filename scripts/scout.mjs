@@ -47,6 +47,26 @@ try { SNAP_CUR = JSON.parse(readFileSync(path.join(repoRoot, "grading/data/snap_
 const nmKey = (n) => (n || "").toLowerCase().replace(new RegExp("[.']","g"), "").replace(new RegExp("-","g"), " ").replace(new RegExp("\\s+(jr|sr|ii|iii|iv|v)$"), "").replace(new RegExp("\\s+","g"), " ").trim();
 const snapCur = (n) => SNAP_CUR?.players?.[nmKey(n)] || null;
 
+// ======================= EXPECTED POINTS (rank 2, in points) ===============
+// Opportunity expressed as points: how many the offence GAVE him, whether or
+// not he converted. Its own rules block is not decoration and this obeys three
+// lines of it - ranks are within position and on EXPECTED (the opportunity,
+// never the outcome), diff is "NOT a skill rating and NOT a forecast", and it
+// may never be presented as Hayden Winks' model, whose published figures do not
+// reproduce here under any single scoring.
+const rdJson = (f) => { try { return JSON.parse(readFileSync(path.join(repoRoot, f), "utf8")); } catch { return null; } };
+const EXP_CUR = rdJson("grading/data/expected_2026.json");
+const EXP_PRIOR = rdJson("grading/data/expected_2025.json");
+// The percentile is DERIVED from the rank and position count the file already
+// publishes rather than recomputed. Two ways of producing one number is how
+// they drift apart.
+const expRow = (doc, name) => {
+  const r = doc?.players?.[nmKey(name)];
+  if (!r) return null;
+  const n = doc?._meta?.counts?.[r.pos];
+  return { ...r, n, pct: (n && r.exp_rank) ? Math.round(((n - r.exp_rank) / n) * 100) : null };
+};
+
 // ================================ YOUR ROSTER ==============================
 // ⛔ THE ROSTER IS PASSED BY PATH AND NEVER LIVES IN THIS REPO. rosterxray-audit
 // is PUBLIC; his rosters and leagues are private-repo-only by standing rule.
@@ -86,6 +106,8 @@ if (vsSplit) {
     return { name: h.name, pos: h.pos, team: h.team, card: c, st, sc,
       tgtSh: pick(c.metrics, /^Target share/), wopr: pick(c.metrics, /^WOPR/),
       snap: pick(c.metrics, /^Snap share/), dud: pick(c.descriptive, /^Duds/),
+      exp: expRow(EXP_CUR, h.name) || expRow(EXP_PRIOR, h.name),
+      expIsCur: !!expRow(EXP_CUR, h.name),
       tprr: (c.routes || []).find((x) => /route run/i.test(x.label)),
       rsh: (c.routes || []).find((x) => /Route share/i.test(x.label)) };
   });
@@ -99,6 +121,7 @@ if (vsSplit) {
   row("depth chart", (c) => c.st.depth_chart_order != null ? `DC${c.st.depth_chart_order} ${c.st.depth_chart_position || ""}` : "-");
   row("injury", (c) => c.st.injury_status || "none");
   row("SNAP % this season", (c) => c.sc ? `${Math.round(c.sc.snap_pct * 100)}%  (${c.sc.gp} gp)` : "no 2026 snaps");
+  row("EXPECTED pts / game", (c) => c.exp ? `${c.exp.exp_pg}  rk ${c.exp.exp_rank}/${c.exp.n}${c.expIsCur ? "" : " [2025]"}` : "-");
   console.log("  ---- 2025, and only where the season above cannot answer ----");
   row("route share", (c) => cell(c.rsh));
   row("tgts per route run", (c) => cell(c.tprr));
@@ -161,6 +184,32 @@ if (card.routes?.length) {
 if (card.redzone?.length) {
   for (const x of card.redzone) L(`  ${String(x.label).padEnd(20)} ${String(x.value)}`);
 } else L(`  no red-zone share - player or team under the opportunity gate.`);
+
+L(`
+[1c] EXPECTED POINTS  (rank 2 - opportunity, expressed in points)`);
+{
+  const cur = expRow(EXP_CUR, hit.name), pri = expRow(EXP_PRIOR, hit.name);
+  const show = (r, tag) => {
+    if (!r) { L(`  ${tag}  no row.`); return; }
+    L(`  ${tag}  expected ${r.exp_pg}/gm   rank ${r.exp_rank} of ${r.n} at ${r.pos}` +
+      (r.pct != null ? `  (${r.pct}%ile)` : "") + `   ${r.gp} gp`);
+    L(`              actual ${r.act_pg}/gm, ${r.diff_pg > 0 ? "+" : ""}${r.diff_pg}/gm against his opportunity`);
+  };
+  show(cur, "THIS SEASON");
+  show(pri, "2025       ");
+  L(`  ⭐ THE RANK IS ON EXPECTED, NOT ACTUAL. It ranks the opportunity the offence`);
+  L(`     handed him, which is the half that repeats.`);
+  L(`  ⛔ The +/- is NOT a forecast and NOT a skill rating. Every efficiency input`);
+  L(`     measured in this app sits between r=0.02 and r=0.31.`);
+  if (EXP_CUR?._meta?.weeks_covered != null) {
+    const w = EXP_CUR._meta.weeks_covered;
+    L(`  ⚠ ITS EDGE EXPIRES, AND THAT IS MEASURED: expected beats actual as a`);
+    L(`     predictor by +0.066 after 1 game, +0.026 after 2, +0.016 by 3, +0.002`);
+    L(`     by week 8. You are at week ${w}.` + (w >= 4 ? "  THE EDGE IS MOSTLY GONE." : "  This is the window."));
+  }
+  L(`  ⛔ THIS REPO'S model, recomputed half-PPR from components. NOT Hayden`);
+  L(`     Winks' model and never to be presented as his.`);
+}
 
 L(`\n[2] CONVERSION  (did the volume produce)`);
 if (log?.g?.length) {

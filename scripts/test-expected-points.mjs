@@ -208,6 +208,31 @@ ok("...and carries the measured per-position shift",
 ok("...and does not pass judgement", !/should not start|avoid him/i.test(
    (app.match(/Bands are HALF-PPR[^"]*/) || [""])[0]));
 
+// ---- 9b. SCOUT CONSUMPTION, added Sep 19 2026 ---------------------------
+// scout.mjs now PRINTS this layer, which is new exposure: a number a reader
+// acts on is different from a number sitting in a file. The layer's own rules
+// block imposes three things and none of them are optional once it is on a
+// page a lineup gets set from.
+const sc = txt("scripts/scout.mjs");
+ok("scout ranks on EXPECTED, not actual, and says so",
+   /RANK IS ON EXPECTED, NOT ACTUAL/.test(sc));
+ok("...and states the +/- is NOT a forecast",
+   /NOT a forecast/.test(sc) && /NOT a skill rating/.test(sc));
+ok("...and refuses the attribution the layer forbids",
+   /NOT Hayden/.test(sc) && /never to be presented as his/i.test(sc));
+ok("scout carries the measured expiry, not a vague caveat",
+   /0\.066/.test(sc) && /0\.002/.test(sc) && /week 8/.test(sc));
+// ⛔ CONTAINMENT IS THE ONE THAT COSTS MOST. Printing it in a scouting tool must
+// not become feeding it to a grader - the whole layer is context_only, and a
+// leak moves grades by a fraction and invalidates every calibration figure.
+for (const f of ["grading/data/expected_2026.json", "grading/data/expected_2025.json"]) {
+  const m = rd(f)._meta;
+  ok(`${f} is still context-only`, m.context_only === true && m.scored === false);
+  ok(`...and still out of the AI prompt`, m.reaches_ai_prompt === false);
+}
+ok("the percentile is DERIVED from the published rank, never recomputed",
+   /DERIVED from the rank/.test(sc) && !/expPool|recomputePct/.test(sc));
+
 // ---- 10. the mirror ------------------------------------------------------
 ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 

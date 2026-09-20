@@ -2980,6 +2980,27 @@ reader cannot tell, because neither column names its population.** ⭐ **That is
 session made on a FLEX call two days earlier, and the reason our percentiles are required to print
 their gate.**
 
+### ✅ ADOPTED Sep 19 2026 — EXPECTED POINTS IS NOW ON THE SCOUT CARD
+
+**`[1c] EXPECTED POINTS` in `scripts/scout.mjs`, and in the `--vs` table.** No new data was
+built: `expected_2026.json` already held 312 players and was only ever rendered as a hint.
+
+⭐⭐ **ITS FIRST OUTPUT WAS A REAL SIGNAL.** Malik Washington, week 1: **expected 10.59/gm, rank 22
+of 127 WRs — 83rd percentile — against a 61st-percentile opportunity in 2025.** He scored 6.8. **The
+opportunity moved up sharply and the points have not followed yet**, which is the buy-shaped pattern
+first-read rate exists to find, reached by a different road.
+
+⚠️ **One game, and the +/- is not a forecast.** Both are printed beside it.
+
+**FOUR RULES ARE ENFORCED BY GUARD 42 rather than remembered**, because printing a number where a
+lineup gets set is different exposure from storing it: the rank is on EXPECTED not actual · the
++/- is stated as neither forecast nor skill rating · it is never attributed to Hayden Winks · and
+**the layer stays `context_only` and out of the AI prompt** — a leak into either engine moves grades
+by a fraction and invalidates every calibration figure in the repo.
+
+⭐ **The percentile is DERIVED from the rank and position count the file already publishes, never
+recomputed.** Two ways of producing one number is how they drift apart.
+
 ---
 ## §12 · Changelog
 
