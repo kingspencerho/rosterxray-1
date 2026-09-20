@@ -311,6 +311,35 @@ if (vsSplit) {
     } else console.log(`     no scheme profile on file.`);
     console.log(`     ⛔ DESCRIPTIVE ONLY. What a RECEIVER does against a coverage repeats`);
     console.log(`        at r=0.161 - a coin flip. This says what they DID, not who to start.`);
+    // ARCHETYPE-level coverage effects. MEASURED, not folk: section 11j found
+    // the blitz folk model was BACKWARDS, so this class of claim gets counted.
+    // Numbers are a constant of 2025 and guard 49 asserts they still match the
+    // banked table. Reproduce: scripts/measure-coverage-consequences.py
+    const COV_FX = [
+      ["vs MAN    ", [9.4, -1.4, -8.0], [-7.4, 4.3, 2.7], "man_rate"],
+      ["vs COVER-2", [-5.4, 0.9, 4.4], [4.1, -4.8, -2.7], "cov_cover_2"],
+    ];
+    console.log("     WHAT THOSE SHAPES DID TO THE TARGET MIX  (2025 league-wide, n=16,687)");
+    console.log("                      WR     TE     RB  |  behindLOS  mid10-19   deep20+");
+    for (const [lbl, pos, dep] of COV_FX)
+      console.log("        " + lbl +
+        pos.map((x) => String(x > 0 ? "+" + x.toFixed(1) : x.toFixed(1)).padStart(7)).join("") +
+        "  |" + dep.map((x) => String(x > 0 ? "+" + x.toFixed(1) : x.toFixed(1)).padStart(10)).join(""));
+    if (sch) {
+      // name the row that is actually live for THIS defence, so the table is a
+      // reading of the rates above rather than decoration.
+      const live = COV_FX
+        .map(([lbl, , , key]) => [lbl.trim(), sch[key + "_rel"]])
+        .filter(([, rel]) => typeof rel === "number" && Math.abs(rel) >= 0.03)
+        .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
+      if (live)
+        console.log("        ^ this defence is " + (live[1] > 0 ? "HEAVY" : "LIGHT") + " " +
+          live[0] + " (" + (live[1] > 0 ? "+" : "") + (live[1] * 100).toFixed(1) +
+          "), so that row is the live one" + (live[1] < 0 ? ", INVERTED" : "") + ".");
+    }
+    console.log("     ARCHETYPE-level, a DIFFERENT question from the per-player r=0.161 above.");
+    console.log("     Confounded with game script: cover-2 is a protect-the-lead call, man is");
+    console.log("     a third-down call. Orders close options; never makes a good player bad.");
     const st = e.STATUS_LAYER?.players ?? e.STATUS_LAYER ?? {};
     const hurt = Object.entries(st).filter(([, v]) => v && sameTeam(v.team, opp)
       && v.side === "def" && v.injury_status);
