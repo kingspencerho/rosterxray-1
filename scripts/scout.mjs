@@ -224,11 +224,33 @@ const roomOn = (team, pos, selfName) => Object.entries(statusRows)
   .filter((m) => m.snap != null || (m.dc != null && m.dc <= 4))
   .sort((a, b) => (b.snap ?? -1) - (a.snap ?? -1) || (a.dc ?? 99) - (b.dc ?? 99));
 
+// ADP IS A DRAFT ARTIFACT, AND findPlayer RESOLVES AGAINST IT.
+// A player who went undrafted, or was signed in-season, has no ADP row, so
+// findPlayer cannot see him AT ALL. It printed "NO MATCH" for a STARTING
+// QUARTERBACK who holds a status row, a crosswalk id, a 2025 metrics row and a
+// 2026 expected row. That absence reads exactly like "this player has no data".
+// The fallback resolves him from the depth-chart feed instead and marks the
+// column noAdp, so the ADP-derived sections can say why they are empty rather
+// than the whole card vanishing.
+const resolvePlayer = (q, fmt) => {
+  const h = e.findPlayer(q, fmt);
+  if (h) return h;
+  const k = nmKey(q);
+  let st = statusRows[k];
+  if (!st) {
+    const id = idFor(q, null, null);
+    if (id) for (const [rk, rv] of Object.entries(statusRows))
+      if ((PLAYER_IDS?.by_name?.[rk]) === id) { st = rv; break; }
+  }
+  if (!st) return null;
+  return { name: k, pos: st.pos, team: st.team, noAdp: true };
+};
+
 // ================================ COMPARISON MODE ==========================
 if (vsSplit) {
   if (!query || !query2) { console.error('usage: node scripts/scout.mjs "A" --vs "B"'); process.exit(2); }
   const cols = [query, query2].map((q) => {
-    const h = e.findPlayer(q, format);
+    const h = resolvePlayer(q, format);
     if (!h) return { name: q, missing: true };
     const c = e.buildPlayerCard(h.name, h.pos, h.team, Date.now(), format);
     // ⛔ MATCH ON LABEL, NOT key. card.redzone rows carry a key field and
@@ -359,9 +381,15 @@ if (vsSplit) {
   process.exit(0);
 }
 
-const hit = e.findPlayer(query, format);
+const hit = resolvePlayer(query, format);
 if (hit) { PICK_POS = hit.pos; PICK_TEAM = hit.team; }
-if (!hit) { console.log(`NO MATCH for "${query}" in the ${format} table.`); process.exit(1); }
+if (!hit) { console.log(`NO MATCH for "${query}" in the ${format} table, the crosswalk, or the 2026 depth chart.`); process.exit(1); }
+if (hit.noAdp) console.log(`
+  NOT IN THE ${format.toUpperCase()} ADP TABLE - undrafted or signed in-season.
+`
+  + `  Resolved from the 2026 depth chart instead. Sections built off ADP or
+`
+  + `  2025 draft population will be thin; the CURRENT-SEASON rows are real.`);
 const key = hit.matchedKey;
 const card = e.buildPlayerCard(hit.name, hit.pos, hit.team, Date.now(), format);
 const m = e.getMetrics(hit.name);
@@ -419,6 +447,24 @@ L(`
     L(`  ${tag}  expected ${r.exp_pg}/gm   rank ${r.exp_rank} of ${r.n} at ${r.pos}` +
       (r.pct != null ? `  (${r.pct}%ile)` : "") + `   ${r.gp} gp`);
     L(`              actual ${r.act_pg}/gm, ${r.diff_pg > 0 ? "+" : ""}${r.diff_pg}/gm against his opportunity`);
+    // gp COUNTS A PARTIAL APPEARANCE AS A WHOLE GAME, so a per-game rate is
+    // divided by a denominator the player never played. Nothing said so, and a
+    // relief appearance was quoted against a full start as if they compared.
+    // ⛔ The flag is QB-ONLY on purpose: a quarterback either starts or he did
+    // not, so a low share means he left or entered. For a back or receiver a
+    // low share is usually his ROLE, and THE ROOM is where that gets read.
+    if (tag.trim() === "THIS SEASON" && r.gp != null && r.gp <= 2) {
+      const sc = snapCur(hit.name);
+      if (sc && sc.weeks && sc.weeks.length) {
+        L(`     snaps in those game(s): ` +
+          sc.weeks.map((w) => `W${w.week} ${Math.round(w.pct * 100)}%`).join("  "));
+        const part = hit.pos === "QB" ? sc.weeks.filter((w) => w.pct < 0.9) : [];
+        if (part.length)
+          L(`     ⛔ PARTIAL START(S) counted as whole games - this /gm rate is DILUTED.`);
+        else if (hit.pos !== "QB")
+          L(`     ⚠ a low share here is usually ROLE, not a part-game. Read THE ROOM.`);
+      }
+    }
   };
   show(cur, "THIS SEASON");
   show(pri, "2025       ");

@@ -3390,6 +3390,36 @@ market is the better input and a one-game expected is not entitled to overrule i
 
 **MEASURED**, n=1 diluted case found; the ADP gate is confirmed by reading `findPlayer`.
 
+### ⭐⭐ §11o · BOTH 11n FAILURES ARE FIXED, AND THE SCOPE OF THE FIX IS THE DESIGN (Sep 20, 2026)
+
+**`resolvePlayer()` in `scout.mjs`** tries `findPlayer` first, then falls back to the
+2026 depth chart resolved through the crosswalk, and marks the hit `noAdp`. The card
+then prints a banner saying WHY the ADP-derived rows are thin instead of the whole
+player vanishing. ✅ **Wentz now renders — and surfaces `2025 expected 17.47/gm, rank
+17 of 81, 79th percentile over 5 gp`, which is a far better read on him as a starter
+than the diluted current-season number I had been quoting.**
+⛔ **The fallback must NOT make everything resolve.** A typo that becomes a confident
+card about the wrong person is worse than the bug. Guard 50 asserts a nonsense name
+still exits non-zero.
+
+**The dilution flag** prints the per-week snap share under any `THIS SEASON` expected
+row at `gp <= 2`, and calls it a **PARTIAL START** only when a QB is under 90%.
+
+> ## ⭐⭐ **THE QB-ONLY SCOPE IS THE WHOLE DESIGN, NOT A SHORTCUT.**
+> **A quarterback either started or he did not, so a low share means he entered or
+> left.** ⛔ **For a back or receiver a low share is usually his ROLE.** Flagging
+> Jaylen Warren's 37% as a "partial game" would be flatly false and would manufacture
+> the exact confident-wrong output the flag exists to prevent. **He gets pointed at
+> THE ROOM instead.** Guard 50 asserts both directions.
+
+⚠️ **AND A CORRECTION TO 11n, WHICH OVERSTATED ITS OWN CASE.** 11n called the 10.12
+an artifact. **Wentz played 83% of the snaps, not a quarter of the game** — dilution of
+roughly a sixth, not three quarters. **The larger driver was real: Minnesota ran 65
+offensive snaps to New Orleans' 90, because the Vikings were LEADING.** ⭐ **A
+correction is not exempt from being checked.**
+
+**Guard 50, 12 assertions**, both must-fail directions proven.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
