@@ -3002,6 +3002,91 @@ by a fraction and invalidates every calibration figure in the repo.
 recomputed.** Two ways of producing one number is how they drift apart.
 
 ---
+### ⭐⭐⭐ §11h · FIRST-READ TARGETS — BUILT, MEASURED, AND THE HEADLINE NUMBER WAS A CONFOUND (Sep 19, 2026)
+
+`scripts/build-first-read.py` + `scripts/measure-first-read.py` +
+`grading/data/first_read_2026.json` + guard 46. ⛔ **NO App.jsx CHANGE.**
+
+**§11g listed this as the highest-value gap and recorded *"no source in hand."* ⛔ That was wrong.**
+
+### THE SOURCE EXISTED, AND THE FIRST PROBE MISSED IT
+
+`ftn_charting` carries **`read_thrown`** — which read in the progression the quarterback threw to —
+and **2026 is published.** ⚠️ **The first probe 404'd on a GUESSED filename** (`.csv.gz`; the assets
+are `.csv`). **The banked rule — never declare a route dead on one attempt — is the only reason it
+was checked twice.** Joined to play-by-play on `(game_id, play_id)`: **1,146 of 1,146 plays matched.**
+
+**Decoding it:** first read `1`, second read `2`, checkdown `CHK`, scramble drill `SD`, designed
+`DES`. In 2025 those total **20,123**, against the 19,830 dropbacks `routes_2025` independently
+records — two files agreeing without being asked to.
+
+### ⛔ THE NAME BUG, AND IT IS THE THIRD INSTANCE THIS WEEK
+
+The first build keyed on `receiver_player_name`, which play-by-play stores **abbreviated** —
+`M.Evans`. Stripping the period produced `mevans`, so the layer **could not join to a single other
+file** and every player asked for came back ABSENT.
+
+⭐⭐ **THE FIX IS THE ONE THE WHOLE WEEK HAS BEEN POINTING AT: key on the GSIS id.**
+`receiver_player_id` is stable, the nflverse `players` release maps it to a display name, and the
+name becomes a LABEL derived from the id rather than the join itself. **253 players, 0 unresolved
+ids.** *(§11d and §11e were both name-join failures. This is the first layer built id-first.)*
+
+### ⭐⭐⭐ WHAT IT MEASURES — AND THE NUMBER THAT NEARLY SHIPPED AS A FINDING
+
+```
+DOES IT REPEAT?          2022>23   2023>24   2024>25    MEAN
+  fr_share                 0.850     0.782     0.773    0.802
+  fr_rate                  0.911     0.912     0.900    0.908   <- the trap
+```
+
+⛔⛔ **`0.908` WOULD HAVE BEEN THE STICKIEST INPUT MEASURED ANYWHERE IN THIS APP**, above intended
+air yards at `0.826`. **It is measuring POSITION.** Within position:
+
+```
+  WITHIN     n    fr_rate r      median fr_rate
+  WR       263       0.567            0.73
+  TE       103       0.400            0.59
+  RB        85       0.244            0.19
+```
+
+**Backs check down, receivers are the design, tight ends sit between — so pooling them builds three
+clusters and the correlation reads "positions stay positions."** ⭐ **The repo's own rule caught it:
+name the search that would falsify the conclusion and run that one too. One run.**
+
+### AND THE SECOND QUESTION KILLED HALF THE METRIC
+
+```
+  overlap with target share:   fr_rate 0.38      fr_share 0.89
+```
+
+⛔ **`fr_share` is a restatement** — the same ruling `route_sh` got against `snap_sh` at `0.957`.
+✅ **`fr_rate` shares only ~14% of its variance with target share, so it is genuinely NEW.**
+
+> ## ✅ THE RULING: USE `fr_rate` AT WR (`0.567`, reliable). CAUTIOUSLY AT TE (`0.400`, soft).
+> ## ⛔ NOT AT RB (`0.244`). NEVER QUOTE THE POOLED `0.908`.
+
+### What it says about his own roster, week 1
+
+```
+  Amon-Ra St. Brown   37.5% of DET first reads   22.2% of his targets were design
+  George Pickens      29.4%                      83.3%
+  KC Concepcion       28.6%                      80.0%
+  Malik Washington    14.3%                      25.0%
+```
+
+⚠️ **The flex call was made partly on *"8 targets, team high."* Only 2 of those 8 were first reads.**
+**One game, and `n=8`** — but it is the exact distinction the metric exists to draw, pointing the
+other way from the raw count.
+
+### Reproduce
+
+```
+python scripts/build-first-read.py <ftn.csv> <pbp.csv.gz> <players.csv.gz> <out.json> <season>
+python scripts/measure-first-read.py --dir <folder> --players <players.csv.gz>
+node scripts/test-first-read.mjs
+```
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**

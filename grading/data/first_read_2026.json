@@ -1,0 +1,2314 @@
+{
+"_meta": {
+"caveats": [
+"A checkdown is charted CHK and a scramble drill SD; neither counts as a first read, which is the point.",
+"fr_share is diluted on a team that throws more, so compare within a team or use the percentile, never the raw number across offences."
+],
+"first_read_value": "1",
+"hierarchy_rank": "2 - opportunity, and specifically the DESIGN half of it",
+"is_not": "NOT first-read targets per route. That denominator needs pbp_participation, which is 404 for 2026. fr_share is share of the TEAM'S first-read throws; fr_rate is share of HIS OWN targets.",
+"join_rate": 1.0,
+"pass_plays_matched": 1146,
+"pass_plays_unmatched": 0,
+"players": 253,
+"reaches_ai_prompt": false,
+"scored": false,
+"season": 2026,
+"source": "nflverse ftn_charting read_thrown x play_by_play receiver",
+"stability": {
+"fr_rate_WITHIN_position": {
+"RB": 0.244,
+"TE": 0.4,
+"WR": 0.567
+},
+"fr_rate_pooled": 0.908,
+"fr_share_pooled": 0.802,
+"measured_by": "scripts/measure-first-read.py, 2022-2025, 30+ targets in both seasons",
+"overlap_with_target_share": {
+"fr_rate": 0.38,
+"fr_share": 0.89
+},
+"ruling": "USE fr_rate FOR WR (0.567) AND CAUTIOUSLY AT TE (0.400). DO NOT USE IT FOR RB (0.244). NEVER quote the pooled 0.908 - it measures POSITION. fr_share overlaps target share at 0.89 and is a restatement."
+},
+"unresolved_ids": 0
+},
+"players": {
+"aaron jones": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0033293",
+"team": "MIN",
+"tgt": 1
+},
+"adam trautman": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036422",
+"team": "DEN",
+"tgt": 3
+},
+"adonai mitchell": {
+"fr_rate": 0.6667,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0039890",
+"team": "NYJ",
+"tgt": 3
+},
+"aj barner": {
+"fr_rate": 0.5,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039793",
+"team": "SEA",
+"tgt": 2
+},
+"aj brown": {
+"fr_rate": 1.0,
+"fr_share": 0.25,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0035676",
+"team": "NE",
+"tgt": 4
+},
+"alec pierce": {
+"fr_rate": 0.8333,
+"fr_share": 0.3125,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0037664",
+"team": "IND",
+"tgt": 6
+},
+"ameer abdullah": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0032104",
+"team": "JAX",
+"tgt": 1
+},
+"amon ra st brown": {
+"fr_rate": 0.2222,
+"fr_share": 0.375,
+"fr_tgt": 6,
+"gp": 2,
+"id": "00-0036963",
+"team": "DET",
+"tgt": 27
+},
+"andrei iosivas": {
+"fr_rate": 1.0,
+"fr_share": 0.1364,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0038619",
+"team": "CIN",
+"tgt": 3
+},
+"andrew ogletree": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037292",
+"team": "IND",
+"tgt": 1
+},
+"antonio williams": {
+"fr_rate": 0.25,
+"fr_share": 0.0667,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041040",
+"team": "WAS",
+"tgt": 4
+},
+"arian smith": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040582",
+"team": "NYJ",
+"tgt": 1
+},
+"ashton dulin": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0035021",
+"team": "IND",
+"tgt": 1
+},
+"ashton jeanty": {
+"fr_rate": 0.1667,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040122",
+"team": "LV",
+"tgt": 6
+},
+"bhayshul tuten": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040719",
+"team": "JAX",
+"tgt": 1
+},
+"bijan robinson": {
+"fr_rate": 0.2,
+"fr_share": 0.1667,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0038542",
+"team": "ATL",
+"tgt": 10
+},
+"blake whiteheart": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038710",
+"team": "CLE",
+"tgt": 1
+},
+"bo melton": {
+"fr_rate": 1.0,
+"fr_share": 0.0303,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037091",
+"team": "GB",
+"tgt": 1
+},
+"brady russell": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038488",
+"team": "SEA",
+"tgt": 2
+},
+"braelon allen": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039794",
+"team": "NYJ",
+"tgt": 1
+},
+"breece hall": {
+"fr_rate": 1.0,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0038120",
+"team": "NYJ",
+"tgt": 2
+},
+"brenton strange": {
+"fr_rate": 0.6667,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0038935",
+"team": "JAX",
+"tgt": 3
+},
+"brevyn spann ford": {
+"fr_rate": 0.5,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039530",
+"team": "DAL",
+"tgt": 2
+},
+"brian thomas": {
+"fr_rate": 1.0,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0039893",
+"team": "JAX",
+"tgt": 3
+},
+"brock wright": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036754",
+"team": "DET",
+"tgt": 1
+},
+"bryce lance": {
+"fr_rate": 0.4,
+"fr_share": 0.069,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0041067",
+"team": "NO",
+"tgt": 5
+},
+"bucky irving": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039361",
+"team": "TB",
+"tgt": 7
+},
+"cade otton": {
+"fr_rate": 0.6,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0038129",
+"team": "TB",
+"tgt": 5
+},
+"cade stover": {
+"fr_rate": 1.0,
+"fr_share": 0.0385,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039359",
+"team": "HOU",
+"tgt": 1
+},
+"caleb douglas": {
+"fr_rate": 0.8571,
+"fr_share": 0.4286,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0041523",
+"team": "MIA",
+"tgt": 7
+},
+"carnell tate": {
+"fr_rate": 1.0,
+"fr_share": 0.4286,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0041438",
+"team": "TEN",
+"tgt": 6
+},
+"ceedee lamb": {
+"fr_rate": 0.625,
+"fr_share": 0.2941,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0036358",
+"team": "DAL",
+"tgt": 8
+},
+"chase brown": {
+"fr_rate": 0.3333,
+"fr_share": 0.0909,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0038597",
+"team": "CIN",
+"tgt": 6
+},
+"chig okonkwo": {
+"fr_rate": 0.3333,
+"fr_share": 0.0667,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037809",
+"team": "WAS",
+"tgt": 3
+},
+"chimere dike": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040705",
+"team": "TEN",
+"tgt": 1
+},
+"chris bell": {
+"fr_rate": 0.5,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041525",
+"team": "MIA",
+"tgt": 2
+},
+"chris brooks": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038685",
+"team": "GB",
+"tgt": 1
+},
+"chris godwin": {
+"fr_rate": 0.5,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0033921",
+"team": "TB",
+"tgt": 4
+},
+"chris moore": {
+"fr_rate": 1.0,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0032398",
+"team": "BAL",
+"tgt": 2
+},
+"chris olave": {
+"fr_rate": 0.6154,
+"fr_share": 0.2759,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0037239",
+"team": "NO",
+"tgt": 13
+},
+"christian mccaffrey": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0033280",
+"team": "SF",
+"tgt": 8
+},
+"christian watson": {
+"fr_rate": 1.0,
+"fr_share": 0.2424,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0038124",
+"team": "GB",
+"tgt": 8
+},
+"chuba hubbard": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036555",
+"team": "CAR",
+"tgt": 3
+},
+"cj donaldson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0041326",
+"team": "NO",
+"tgt": 2
+},
+"cody white": {
+"fr_rate": 1.0,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035891",
+"team": "LV",
+"tgt": 1
+},
+"colby parkinson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036244",
+"team": "LA",
+"tgt": 2
+},
+"cole kmet": {
+"fr_rate": 1.0,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0036290",
+"team": "CHI",
+"tgt": 3
+},
+"colston loveland": {
+"fr_rate": 1.0,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040126",
+"team": "CHI",
+"tgt": 2
+},
+"cooper kupp": {
+"fr_rate": 1.0,
+"fr_share": 0.1765,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0033908",
+"team": "SEA",
+"tgt": 3
+},
+"courtland sutton": {
+"fr_rate": 1.0,
+"fr_share": 0.3333,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0034348",
+"team": "DEN",
+"tgt": 5
+},
+"cyrus allen": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040890",
+"team": "KC",
+"tgt": 1
+},
+"dallas goedert": {
+"fr_rate": 0.8,
+"fr_share": 0.3636,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0034351",
+"team": "PHI",
+"tgt": 5
+},
+"dalton kincaid": {
+"fr_rate": 0.2857,
+"fr_share": 0.2105,
+"fr_tgt": 4,
+"gp": 2,
+"id": "00-0038933",
+"team": "BUF",
+"tgt": 14
+},
+"dalton schultz": {
+"fr_rate": 0.75,
+"fr_share": 0.2308,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0034383",
+"team": "HOU",
+"tgt": 8
+},
+"dandre swift": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036275",
+"team": "CHI",
+"tgt": 1
+},
+"daniel bellinger": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038115",
+"team": "TEN",
+"tgt": 1
+},
+"darnell mooney": {
+"fr_rate": 1.0,
+"fr_share": 0.0952,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036309",
+"team": "NYG",
+"tgt": 2
+},
+"darnell washington": {
+"fr_rate": 0.5,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038558",
+"team": "PIT",
+"tgt": 2
+},
+"darren waller": {
+"fr_rate": 0.5,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0031610",
+"team": "CAR",
+"tgt": 2
+},
+"davante adams": {
+"fr_rate": 0.8333,
+"fr_share": 0.3846,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0031381",
+"team": "LA",
+"tgt": 6
+},
+"david montgomery": {
+"fr_rate": 0.3333,
+"fr_share": 0.0385,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035685",
+"team": "HOU",
+"tgt": 3
+},
+"david njoku": {
+"fr_rate": 0.2,
+"fr_share": 0.05,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0033885",
+"team": "LAC",
+"tgt": 5
+},
+"davis allen": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039074",
+"team": "LA",
+"tgt": 1
+},
+"dawson knox": {
+"fr_rate": 0.3333,
+"fr_share": 0.0526,
+"fr_tgt": 1,
+"gp": 2,
+"id": "00-0035689",
+"team": "BUF",
+"tgt": 3
+},
+"deebo samuel": {
+"fr_rate": 0.2857,
+"fr_share": 0.2,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0035719",
+"team": "SF",
+"tgt": 7
+},
+"deejay dallas": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036425",
+"team": "MIN",
+"tgt": 1
+},
+"demarcus robinson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0032775",
+"team": "SF",
+"tgt": 3
+},
+"demario douglas": {
+"fr_rate": 0.5714,
+"fr_share": 0.25,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0038621",
+"team": "NE",
+"tgt": 7
+},
+"denzel boston": {
+"fr_rate": 1.0,
+"fr_share": 0.2857,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0041037",
+"team": "CLE",
+"tgt": 4
+},
+"derius davis": {
+"fr_rate": 1.0,
+"fr_share": 0.05,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038573",
+"team": "LAC",
+"tgt": 1
+},
+"derrick henry": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0032764",
+"team": "BAL",
+"tgt": 1
+},
+"devaughn vele": {
+"fr_rate": 0.8889,
+"fr_share": 0.2759,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0039424",
+"team": "NO",
+"tgt": 9
+},
+"devin singletary": {
+"fr_rate": 0.25,
+"fr_share": 0.0476,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035250",
+"team": "NYG",
+"tgt": 4
+},
+"devon achane": {
+"fr_rate": 0.2,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039040",
+"team": "MIA",
+"tgt": 5
+},
+"devonta smith": {
+"fr_rate": 0.5,
+"fr_share": 0.2727,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0036912",
+"team": "PHI",
+"tgt": 6
+},
+"dj moore": {
+"fr_rate": 0.875,
+"fr_share": 0.3684,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0034827",
+"team": "BUF",
+"tgt": 8
+},
+"dk metcalf": {
+"fr_rate": 0.9,
+"fr_share": 0.375,
+"fr_tgt": 9,
+"gp": 1,
+"id": "00-0035640",
+"team": "PIT",
+"tgt": 10
+},
+"dohnte meyers": {
+"fr_rate": 1.0,
+"fr_share": 0.0455,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040785",
+"team": "CIN",
+"tgt": 1
+},
+"dontayvion wicks": {
+"fr_rate": 0.5,
+"fr_share": 0.1818,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0038393",
+"team": "PHI",
+"tgt": 4
+},
+"drake london": {
+"fr_rate": 1.0,
+"fr_share": 0.3333,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0037238",
+"team": "ATL",
+"tgt": 4
+},
+"drew sample": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0035631",
+"team": "CIN",
+"tgt": 3
+},
+"durham smythe": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0034798",
+"team": "BAL",
+"tgt": 1
+},
+"dyami brown": {
+"fr_rate": 1.0,
+"fr_share": 0.1333,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036626",
+"team": "WAS",
+"tgt": 2
+},
+"eli raridon": {
+"fr_rate": 1.0,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041395",
+"team": "NE",
+"tgt": 1
+},
+"elic ayomanor": {
+"fr_rate": 1.0,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0040170",
+"team": "TEN",
+"tgt": 3
+},
+"emeka egbuka": {
+"fr_rate": 1.0,
+"fr_share": 0.4286,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0040129",
+"team": "TB",
+"tgt": 6
+},
+"emmett johnson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0041013",
+"team": "KC",
+"tgt": 2
+},
+"evan engram": {
+"fr_rate": 0.8,
+"fr_share": 0.2667,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0033881",
+"team": "DEN",
+"tgt": 5
+},
+"foster moreau": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0034981",
+"team": "HOU",
+"tgt": 2
+},
+"garrett wilson": {
+"fr_rate": 0.7143,
+"fr_share": 0.3571,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0037740",
+"team": "NYJ",
+"tgt": 7
+},
+"george holani": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039299",
+"team": "SEA",
+"tgt": 1
+},
+"george kittle": {
+"fr_rate": 0.4,
+"fr_share": 0.2,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0033288",
+"team": "SF",
+"tgt": 5
+},
+"george pickens": {
+"fr_rate": 0.8333,
+"fr_share": 0.2941,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0037247",
+"team": "DAL",
+"tgt": 6
+},
+"greg dulcich": {
+"fr_rate": 0.5,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037252",
+"team": "MIA",
+"tgt": 2
+},
+"gunnar helm": {
+"fr_rate": 0.2,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040584",
+"team": "TEN",
+"tgt": 5
+},
+"harold fannin": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040663",
+"team": "CLE",
+"tgt": 3
+},
+"hunter henry": {
+"fr_rate": 0.3333,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0033090",
+"team": "NE",
+"tgt": 3
+},
+"isaac teslaa": {
+"fr_rate": 0.1667,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 2,
+"id": "00-0040669",
+"team": "DET",
+"tgt": 6
+},
+"isaiah likely": {
+"fr_rate": 0.875,
+"fr_share": 0.3333,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0037838",
+"team": "NYG",
+"tgt": 8
+},
+"isaiah williams": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039451",
+"team": "NYJ",
+"tgt": 1
+},
+"jack bech": {
+"fr_rate": 1.0,
+"fr_share": 0.2353,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0040729",
+"team": "LV",
+"tgt": 4
+},
+"jacory croskey merritt": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040242",
+"team": "WAS",
+"tgt": 1
+},
+"jadarian price": {
+"fr_rate": 0.5,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041512",
+"team": "SEA",
+"tgt": 2
+},
+"jahan dotson": {
+"fr_rate": 0.6667,
+"fr_share": 0.1667,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0037741",
+"team": "ATL",
+"tgt": 3
+},
+"jahdae walker": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040277",
+"team": "CHI",
+"tgt": 1
+},
+"jahmyr gibbs": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 2,
+"id": "00-0039139",
+"team": "DET",
+"tgt": 13
+},
+"jake brendel": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0032701",
+"team": "SF",
+"tgt": 1
+},
+"jake briningstool": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040081",
+"team": "KC",
+"tgt": 1
+},
+"jake ferguson": {
+"fr_rate": 0.5,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038041",
+"team": "DAL",
+"tgt": 2
+},
+"jakobi lane": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040870",
+"team": "BAL",
+"tgt": 3
+},
+"jakobi meyers": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0034960",
+"team": "JAX",
+"tgt": 2
+},
+"jalen coker": {
+"fr_rate": 0.8889,
+"fr_share": 0.3333,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0039491",
+"team": "CAR",
+"tgt": 9
+},
+"jalen nailor": {
+"fr_rate": 1.0,
+"fr_share": 0.2941,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0037291",
+"team": "LV",
+"tgt": 5
+},
+"jamarr chase": {
+"fr_rate": 0.75,
+"fr_share": 0.1364,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0036900",
+"team": "CIN",
+"tgt": 4
+},
+"james cook": {
+"fr_rate": 0.1429,
+"fr_share": 0.0526,
+"fr_tgt": 1,
+"gp": 2,
+"id": "00-0037248",
+"team": "BUF",
+"tgt": 7
+},
+"jameson williams": {
+"fr_rate": 0.5385,
+"fr_share": 0.4375,
+"fr_tgt": 7,
+"gp": 2,
+"id": "00-0037240",
+"team": "DET",
+"tgt": 13
+},
+"jared wayne": {
+"fr_rate": 1.0,
+"fr_share": 0.0385,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038728",
+"team": "HOU",
+"tgt": 1
+},
+"jauan jennings": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036259",
+"team": "MIN",
+"tgt": 1
+},
+"javonte williams": {
+"fr_rate": 0.2,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036997",
+"team": "DAL",
+"tgt": 5
+},
+"jaxon smith njigba": {
+"fr_rate": 0.9091,
+"fr_share": 0.5882,
+"fr_tgt": 10,
+"gp": 1,
+"id": "00-0038543",
+"team": "SEA",
+"tgt": 11
+},
+"jayden reed": {
+"fr_rate": 1.0,
+"fr_share": 0.2121,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0039146",
+"team": "GB",
+"tgt": 7
+},
+"jaylen waddle": {
+"fr_rate": 0.6667,
+"fr_share": 0.1333,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036613",
+"team": "DEN",
+"tgt": 3
+},
+"jaylen warren": {
+"fr_rate": 0.1667,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037228",
+"team": "PIT",
+"tgt": 6
+},
+"jaylin lane": {
+"fr_rate": 1.0,
+"fr_share": 0.0667,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040164",
+"team": "WAS",
+"tgt": 1
+},
+"jaylin noel": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040138",
+"team": "HOU",
+"tgt": 2
+},
+"jeremiyah love": {
+"fr_rate": 0.75,
+"fr_share": 0.1034,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0041027",
+"team": "ARI",
+"tgt": 4
+},
+"jeremy ruckert": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037805",
+"team": "NYJ",
+"tgt": 1
+},
+"jerry jeudy": {
+"fr_rate": 1.0,
+"fr_share": 0.2857,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0036407",
+"team": "CLE",
+"tgt": 4
+},
+"jimmy horn": {
+"fr_rate": 1.0,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040218",
+"team": "CAR",
+"tgt": 1
+},
+"john bates": {
+"fr_rate": 0.5,
+"fr_share": 0.1333,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036628",
+"team": "WAS",
+"tgt": 4
+},
+"jonathan mingo": {
+"fr_rate": 1.0,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039062",
+"team": "DAL",
+"tgt": 1
+},
+"jonathan taylor": {
+"fr_rate": 0.25,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036223",
+"team": "IND",
+"tgt": 4
+},
+"jonathon brooks": {
+"fr_rate": 0.5,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039344",
+"team": "CAR",
+"tgt": 2
+},
+"jonnu smith": {
+"fr_rate": 0.6667,
+"fr_share": 0.0606,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0033858",
+"team": "GB",
+"tgt": 3
+},
+"jordan addison": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038994",
+"team": "MIN",
+"tgt": 2
+},
+"jordan whittington": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039751",
+"team": "LA",
+"tgt": 1
+},
+"josh cameron": {
+"fr_rate": 1.0,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0041100",
+"team": "JAX",
+"tgt": 2
+},
+"josh downs": {
+"fr_rate": 1.0,
+"fr_share": 0.25,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0038997",
+"team": "IND",
+"tgt": 4
+},
+"josh oliver": {
+"fr_rate": 0.25,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035249",
+"team": "MIN",
+"tgt": 4
+},
+"josh palmer": {
+"fr_rate": 0.2,
+"fr_share": 0.0526,
+"fr_tgt": 1,
+"gp": 2,
+"id": "00-0036988",
+"team": "BUF",
+"tgt": 5
+},
+"justice hill": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0034975",
+"team": "BAL",
+"tgt": 1
+},
+"justin jefferson": {
+"fr_rate": 0.7,
+"fr_share": 0.5385,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0036322",
+"team": "MIN",
+"tgt": 10
+},
+"juwan johnson": {
+"fr_rate": 0.5714,
+"fr_share": 0.1379,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0036040",
+"team": "NO",
+"tgt": 7
+},
+"kaelon black": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0041052",
+"team": "SF",
+"tgt": 1
+},
+"kalif raymond": {
+"fr_rate": 0.4444,
+"fr_share": 0.2857,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0032464",
+"team": "CHI",
+"tgt": 9
+},
+"kavontae turpin": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037801",
+"team": "DAL",
+"tgt": 1
+},
+"kayshon boutte": {
+"fr_rate": 0.5,
+"fr_share": 0.0385,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038608",
+"team": "HOU",
+"tgt": 2
+},
+"kc concepcion": {
+"fr_rate": 0.8,
+"fr_share": 0.2857,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0041547",
+"team": "CLE",
+"tgt": 5
+},
+"keenan allen": {
+"fr_rate": 0.6667,
+"fr_share": 0.25,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0030279",
+"team": "IND",
+"tgt": 6
+},
+"kendrick bourne": {
+"fr_rate": 0.875,
+"fr_share": 0.2414,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0033307",
+"team": "ARI",
+"tgt": 8
+},
+"kenneth walker": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0038134",
+"team": "KC",
+"tgt": 6
+},
+"kenny gainwell": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036919",
+"team": "TB",
+"tgt": 1
+},
+"kenyon sadiq": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041032",
+"team": "NYJ",
+"tgt": 3
+},
+"keon coleman": {
+"fr_rate": 0.25,
+"fr_share": 0.1053,
+"fr_tgt": 2,
+"gp": 2,
+"id": "00-0039901",
+"team": "BUF",
+"tgt": 8
+},
+"kevin coleman": {
+"fr_rate": 1.0,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0041529",
+"team": "MIA",
+"tgt": 2
+},
+"khalil shakir": {
+"fr_rate": 0.25,
+"fr_share": 0.1579,
+"fr_tgt": 3,
+"gp": 2,
+"id": "00-0037261",
+"team": "BUF",
+"tgt": 12
+},
+"konata mumpfield": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040590",
+"team": "LA",
+"tgt": 1
+},
+"kyle monangai": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040236",
+"team": "CHI",
+"tgt": 2
+},
+"kyle pitts": {
+"fr_rate": 1.0,
+"fr_share": 0.0833,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036970",
+"team": "ATL",
+"tgt": 1
+},
+"kyren williams": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037840",
+"team": "LA",
+"tgt": 3
+},
+"ladd mcconkey": {
+"fr_rate": 0.8571,
+"fr_share": 0.3,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0039915",
+"team": "LAC",
+"tgt": 7
+},
+"lajohntay wester": {
+"fr_rate": 0.5,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040075",
+"team": "BAL",
+"tgt": 2
+},
+"lan larison": {
+"fr_rate": 0.5,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040568",
+"team": "NE",
+"tgt": 2
+},
+"laquon treadwell": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0032951",
+"team": "IND",
+"tgt": 1
+},
+"luke farrell": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036887",
+"team": "SF",
+"tgt": 2
+},
+"luke schoonmaker": {
+"fr_rate": 1.0,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038547",
+"team": "DAL",
+"tgt": 1
+},
+"luther burden": {
+"fr_rate": 0.6,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0040735",
+"team": "CHI",
+"tgt": 5
+},
+"mack hollins": {
+"fr_rate": 0.8,
+"fr_share": 0.25,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0033555",
+"team": "NE",
+"tgt": 5
+},
+"makai lemon": {
+"fr_rate": 0.5,
+"fr_share": 0.1818,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040867",
+"team": "PHI",
+"tgt": 4
+},
+"malachi fields": {
+"fr_rate": 0.5,
+"fr_share": 0.0952,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0041042",
+"team": "NYG",
+"tgt": 4
+},
+"malik benson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040894",
+"team": "LV",
+"tgt": 2
+},
+"malik nabers": {
+"fr_rate": 0.8889,
+"fr_share": 0.381,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0039337",
+"team": "NYG",
+"tgt": 9
+},
+"malik washington": {
+"fr_rate": 0.25,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0039880",
+"team": "MIA",
+"tgt": 8
+},
+"mark andrews": {
+"fr_rate": 0.8333,
+"fr_share": 0.3571,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0034753",
+"team": "BAL",
+"tgt": 6
+},
+"marlin klein": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0041472",
+"team": "HOU",
+"tgt": 1
+},
+"marshawn lloyd": {
+"fr_rate": 1.0,
+"fr_share": 0.0303,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039811",
+"team": "GB",
+"tgt": 1
+},
+"marvin harrison": {
+"fr_rate": 0.6667,
+"fr_share": 0.069,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0039849",
+"team": "ARI",
+"tgt": 3
+},
+"mason taylor": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040736",
+"team": "NYJ",
+"tgt": 3
+},
+"matthew golden": {
+"fr_rate": 0.75,
+"fr_share": 0.2727,
+"fr_tgt": 9,
+"gp": 1,
+"id": "00-0040667",
+"team": "GB",
+"tgt": 12
+},
+"matthew hibner": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040879",
+"team": "BAL",
+"tgt": 1
+},
+"michael mayer": {
+"fr_rate": 0.4286,
+"fr_share": 0.1765,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0039066",
+"team": "LV",
+"tgt": 7
+},
+"michael pittman": {
+"fr_rate": 0.6667,
+"fr_share": 0.0833,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036252",
+"team": "PIT",
+"tgt": 3
+},
+"michael wilson": {
+"fr_rate": 1.0,
+"fr_share": 0.2414,
+"fr_tgt": 7,
+"gp": 1,
+"id": "00-0038559",
+"team": "ARI",
+"tgt": 7
+},
+"mike evans": {
+"fr_rate": 0.8571,
+"fr_share": 0.6,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0031408",
+"team": "SF",
+"tgt": 7
+},
+"mike gesicki": {
+"fr_rate": 0.7143,
+"fr_share": 0.2273,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0034829",
+"team": "CIN",
+"tgt": 7
+},
+"mitchell evans": {
+"fr_rate": 1.0,
+"fr_share": 0.0833,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040187",
+"team": "CAR",
+"tgt": 2
+},
+"nate boerkircher": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041503",
+"team": "JAX",
+"tgt": 1
+},
+"nico collins": {
+"fr_rate": 0.8,
+"fr_share": 0.3077,
+"fr_tgt": 8,
+"gp": 1,
+"id": "00-0036554",
+"team": "HOU",
+"tgt": 10
+},
+"noah fant": {
+"fr_rate": 0.625,
+"fr_share": 0.1724,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0035644",
+"team": "NO",
+"tgt": 8
+},
+"noah gray": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036637",
+"team": "KC",
+"tgt": 1
+},
+"olamide zaccheaus": {
+"fr_rate": 1.0,
+"fr_share": 0.0833,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035208",
+"team": "ATL",
+"tgt": 1
+},
+"omar cooper": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041511",
+"team": "NYJ",
+"tgt": 1
+},
+"oronde gadsden": {
+"fr_rate": 1.0,
+"fr_share": 0.1,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040189",
+"team": "LAC",
+"tgt": 2
+},
+"parker washington": {
+"fr_rate": 0.8333,
+"fr_share": 0.3571,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0038606",
+"team": "JAX",
+"tgt": 6
+},
+"pat bryant": {
+"fr_rate": 0.6667,
+"fr_share": 0.2667,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0040134",
+"team": "DEN",
+"tgt": 6
+},
+"pat freiermuth": {
+"fr_rate": 0.6,
+"fr_share": 0.125,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0036894",
+"team": "PIT",
+"tgt": 5
+},
+"patrick ricard": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0033376",
+"team": "NYG",
+"tgt": 1
+},
+"puka nacua": {
+"fr_rate": 0.6667,
+"fr_share": 0.4615,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0039075",
+"team": "LA",
+"tgt": 9
+},
+"quentin johnston": {
+"fr_rate": 0.8333,
+"fr_share": 0.25,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0038544",
+"team": "LAC",
+"tgt": 6
+},
+"quinshon judkins": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040784",
+"team": "CLE",
+"tgt": 2
+},
+"quintin morris": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036590",
+"team": "JAX",
+"tgt": 1
+},
+"rachaad white": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037256",
+"team": "WAS",
+"tgt": 2
+},
+"raheim sanders": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0040466",
+"team": "CLE",
+"tgt": 3
+},
+"rashee rice": {
+"fr_rate": 0.5,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039067",
+"team": "KC",
+"tgt": 2
+},
+"rashid shaheed": {
+"fr_rate": 0.6667,
+"fr_share": 0.1176,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0037545",
+"team": "SEA",
+"tgt": 3
+},
+"rashod bateman": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036550",
+"team": "BAL",
+"tgt": 1
+},
+"rhamondre stevenson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0036875",
+"team": "NE",
+"tgt": 6
+},
+"rico dowdle": {
+"fr_rate": 0.4,
+"fr_share": 0.0833,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0036139",
+"team": "PIT",
+"tgt": 5
+},
+"rj harvey": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040730",
+"team": "DEN",
+"tgt": 4
+},
+"roman wilson": {
+"fr_rate": 0.8333,
+"fr_share": 0.2083,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0039739",
+"team": "PIT",
+"tgt": 6
+},
+"rome odunze": {
+"fr_rate": 0.3333,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039919",
+"team": "CHI",
+"tgt": 3
+},
+"romeo doubs": {
+"fr_rate": 0.3333,
+"fr_share": 0.0625,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0037816",
+"team": "NE",
+"tgt": 3
+},
+"ronnie rivers": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037557",
+"team": "LA",
+"tgt": 1
+},
+"ryan flournoy": {
+"fr_rate": 0.25,
+"fr_share": 0.0588,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039410",
+"team": "DAL",
+"tgt": 4
+},
+"sam laporta": {
+"fr_rate": 0.1333,
+"fr_share": 0.125,
+"fr_tgt": 2,
+"gp": 2,
+"id": "00-0039065",
+"team": "DET",
+"tgt": 15
+},
+"samaje perine": {
+"fr_rate": 0.3333,
+"fr_share": 0.0455,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0033526",
+"team": "CIN",
+"tgt": 3
+},
+"saquon barkley": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0034844",
+"team": "PHI",
+"tgt": 2
+},
+"seth mcgowan": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0041125",
+"team": "IND",
+"tgt": 1
+},
+"sione vaki": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 2,
+"id": "00-0039364",
+"team": "DET",
+"tgt": 2
+},
+"skyy moore": {
+"fr_rate": 1.0,
+"fr_share": 0.0303,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038090",
+"team": "GB",
+"tgt": 1
+},
+"stefon diggs": {
+"fr_rate": 0.5556,
+"fr_share": 0.3333,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0031588",
+"team": "WAS",
+"tgt": 9
+},
+"tanner hudson": {
+"fr_rate": 1.0,
+"fr_share": 0.0455,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0034613",
+"team": "CIN",
+"tgt": 1
+},
+"ted hurst": {
+"fr_rate": 1.0,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0041048",
+"team": "TB",
+"tgt": 3
+},
+"tee higgins": {
+"fr_rate": 1.0,
+"fr_share": 0.2727,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0036410",
+"team": "CIN",
+"tgt": 6
+},
+"terrance ferguson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040737",
+"team": "LA",
+"tgt": 1
+},
+"terry mclaurin": {
+"fr_rate": 0.75,
+"fr_share": 0.2,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0035659",
+"team": "WAS",
+"tgt": 4
+},
+"tetairoa mcmillan": {
+"fr_rate": 0.75,
+"fr_share": 0.25,
+"fr_tgt": 6,
+"gp": 1,
+"id": "00-0040124",
+"team": "CAR",
+"tgt": 8
+},
+"tez johnson": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040237",
+"team": "TB",
+"tgt": 1
+},
+"theo johnson": {
+"fr_rate": 1.0,
+"fr_share": 0.0476,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039847",
+"team": "NYG",
+"tgt": 1
+},
+"tj hockenson": {
+"fr_rate": 0.8,
+"fr_share": 0.3077,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0035229",
+"team": "MIN",
+"tgt": 5
+},
+"tommy tremble": {
+"fr_rate": 0.8,
+"fr_share": 0.1667,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0037005",
+"team": "CAR",
+"tgt": 5
+},
+"tony pollard": {
+"fr_rate": 0.5,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0035261",
+"team": "TEN",
+"tgt": 2
+},
+"travis etienne": {
+"fr_rate": 0.1111,
+"fr_share": 0.0345,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0036973",
+"team": "NO",
+"tgt": 9
+},
+"travis hunter": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040718",
+"team": "JAX",
+"tgt": 1
+},
+"travis kelce": {
+"fr_rate": 0.8,
+"fr_share": 0.3077,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0030506",
+"team": "KC",
+"tgt": 5
+},
+"tre harris": {
+"fr_rate": 0.8333,
+"fr_share": 0.25,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0040727",
+"team": "LAC",
+"tgt": 6
+},
+"tre tucker": {
+"fr_rate": 0.75,
+"fr_share": 0.1765,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0038563",
+"team": "LV",
+"tgt": 4
+},
+"trey mcbride": {
+"fr_rate": 0.7692,
+"fr_share": 0.3448,
+"fr_tgt": 10,
+"gp": 1,
+"id": "00-0037744",
+"team": "ARI",
+"tgt": 13
+},
+"troy franklin": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039868",
+"team": "DEN",
+"tgt": 1
+},
+"tucker kraft": {
+"fr_rate": 0.6667,
+"fr_share": 0.1212,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0038996",
+"team": "GB",
+"tgt": 6
+},
+"tyjae spears": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039032",
+"team": "TEN",
+"tgt": 4
+},
+"tyler allgeier": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0037263",
+"team": "ARI",
+"tgt": 2
+},
+"tyler higbee": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0033110",
+"team": "LA",
+"tgt": 2
+},
+"tyler warren": {
+"fr_rate": 0.4,
+"fr_share": 0.125,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0040128",
+"team": "IND",
+"tgt": 5
+},
+"tyquan thornton": {
+"fr_rate": 1.0,
+"fr_share": 0.0769,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0038104",
+"team": "KC",
+"tgt": 1
+},
+"wandale robinson": {
+"fr_rate": 0.5,
+"fr_share": 0.2143,
+"fr_tgt": 3,
+"gp": 1,
+"id": "00-0038117",
+"team": "TEN",
+"tgt": 6
+},
+"will kacmarek": {
+"fr_rate": 1.0,
+"fr_share": 0.0714,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0041524",
+"team": "MIA",
+"tgt": 1
+},
+"will shipley": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0039746",
+"team": "PHI",
+"tgt": 1
+},
+"woody marks": {
+"fr_rate": 0.0,
+"fr_share": 0.0,
+"fr_tgt": 0,
+"gp": 1,
+"id": "00-0040583",
+"team": "HOU",
+"tgt": 1
+},
+"xavier hutchinson": {
+"fr_rate": 0.6667,
+"fr_share": 0.1538,
+"fr_tgt": 4,
+"gp": 1,
+"id": "00-0038618",
+"team": "HOU",
+"tgt": 6
+},
+"xavier legette": {
+"fr_rate": 0.5,
+"fr_share": 0.0417,
+"fr_tgt": 1,
+"gp": 1,
+"id": "00-0039342",
+"team": "CAR",
+"tgt": 2
+},
+"xavier worthy": {
+"fr_rate": 0.8333,
+"fr_share": 0.3846,
+"fr_tgt": 5,
+"gp": 1,
+"id": "00-0039894",
+"team": "KC",
+"tgt": 6
+},
+"zay flowers": {
+"fr_rate": 0.3333,
+"fr_share": 0.1429,
+"fr_tgt": 2,
+"gp": 1,
+"id": "00-0039064",
+"team": "BAL",
+"tgt": 6
+}
+}
+}

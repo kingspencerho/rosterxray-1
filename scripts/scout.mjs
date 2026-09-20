@@ -57,6 +57,17 @@ const snapCur = (n) => SNAP_CUR?.players?.[nmKey(n)] || null;
 const rdJson = (f) => { try { return JSON.parse(readFileSync(path.join(repoRoot, f), "utf8")); } catch { return null; } };
 const EXP_CUR = rdJson("grading/data/expected_2026.json");
 const EXP_PRIOR = rdJson("grading/data/expected_2025.json");
+// ============================== FIRST READ =================================
+// Was the play DESIGNED for him, or was he the outlet after the first option
+// was covered? Target share cannot tell those apart. FTN charts the read the
+// quarterback threw to; joining it to play-by-play gives the receiver.
+// ⛔ THE STABILITY IS POSITION-SPECIFIC AND THE POOLED FIGURE IS A TRAP. It
+// reads 0.908 pooled, which would be the stickiest input in this app - and it
+// is measuring POSITION. Backs check down at a 0.19 median, receivers are the
+// design at 0.73. Within position it is WR 0.567, TE 0.400, RB 0.244.
+const FIRST_READ = rdJson("grading/data/first_read_2026.json");
+const FR_R = { WR: 0.567, TE: 0.400, RB: 0.244 };
+const frRow = (name) => FIRST_READ?.players?.[nmKey(name)] || null;
 // The percentile is DERIVED from the rank and position count the file already
 // publishes rather than recomputed. Two ways of producing one number is how
 // they drift apart.
@@ -197,7 +208,18 @@ L(`
   };
   show(cur, "THIS SEASON");
   show(pri, "2025       ");
-  L(`  ⭐ THE RANK IS ON EXPECTED, NOT ACTUAL. It ranks the opportunity the offence`);
+  {
+    const fr = frRow(hit.name), r = FR_R[hit.pos];
+    if (fr && fr.tgt >= 3) {
+      L(`  first read  ${Math.round((fr.fr_rate || 0) * 100)}% of his own targets were the DESIGN` +
+        `  (${fr.fr_tgt} of ${fr.tgt})   r=${r ?? "unmeasured"} at ${hit.pos}`);
+      if (hit.pos === "RB") L(`     ⛔ r=0.244 at RB. Weak. Read it as history, never as a reason to start him.`);
+      else if (hit.pos === "TE") L(`     ⚠ r=0.400 at TE. Soft - a tilt between close options, not a decider.`);
+      L(`     ⛔ NEVER quote the pooled 0.908: backs check down, receivers are the design,`);
+      L(`        so pooling the positions measures POSITION and not the player.`);
+    } else if (fr) L(`  first read  too few targets (${fr.tgt}) to express as a rate.`);
+  }
+L(`  ⭐ THE RANK IS ON EXPECTED, NOT ACTUAL. It ranks the opportunity the offence`);
   L(`     handed him, which is the half that repeats.`);
   L(`  ⛔ The +/- is NOT a forecast and NOT a skill rating. Every efficiency input`);
   L(`     measured in this app sits between r=0.02 and r=0.31.`);
