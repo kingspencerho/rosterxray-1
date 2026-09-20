@@ -2916,6 +2916,71 @@ node scripts/test-snap-current.mjs
 ```
 
 ---
+### ⭐⭐ §11g · IS THE OUTSIDE METHOD BETTER FOR START/SIT, AND WHAT SHOULD WE TAKE (Sep 19, 2026)
+
+**His question, and it is narrower than it first looks:** *"when I ask who should I start or who should
+I pick up… I want to know if his method is effective in analyzing this and whether we should
+incorporate how he analyzes players."* ⛔ **Not *is his product better* — he already knows the app does
+a different job. The question is whether his INPUTS would change a start/sit call.**
+
+**Source:** Pat Kerrane's per-player percentile tables (Legendary Upside, Week 2 2026). **PROVENANCE:
+`SEEN`, n = 1 analyst, one week.** ⛔ **This is apprenticeship, not evidence that his method works.**
+
+### ⭐⭐⭐ THE FINDING: HIS VERDICTS ALREADY COLLAPSE TO OUR TOP TWO RANKS
+
+His tables carry ~20 rows per player. **His actual verdicts do not use them.** Traced across every
+player call in one article:
+
+| His call | What drove it | Rank |
+|---|---|---|
+| Antonio Williams, won't start him | 29% route participation | **2** |
+| Malik Washington, dart throw | route leader, but aDOT moved 5.4 → 15.8 | **1-2** |
+| KC Concepcion, dart throw | part-time slot, Jeudy ahead of him | **1** |
+| Omarion Hampton, concerning | 58% snaps, 57% carry share, 0 targets | **2** |
+
+⭐ **Role and volume decide; the exotic columns are supporting evidence, never the driver.** So
+adopting his whole table would change **very few** start/sit calls. **What would change calls is the
+handful of columns that are LEADING indicators of role rather than descriptions of last Sunday.**
+
+### THE ADOPTION TABLE
+
+| His metric | Verdict | Why |
+|---|---|---|
+| **Expected Points / Game** | ✅ **ADOPT — and it is FREE** | rank-2 OPPORTUNITY, not efficiency. **`expected_2026.json` already holds 312 players with `exp_pg`, `act_pg`, `diff_pg`.** Built, current, and walled off as `context_only` |
+| **First-read target rate** | ✅ **ADOPT if a source exists** | separates *the play was designed for him* from *he got it when the first read was covered*. **Target share cannot tell those apart.** Intent precedes outcome, so it leads role |
+| Double coverage %, YPT > expected | ⚠️ **ADOPT AS EXPLANATION ONLY** | the coverage edge is `r = 0.161`, a coin flip. ⛔ **Never a start/sit input.** ✅ **But it answers *should I panic about last week*, which the app currently cannot** |
+| RYOE, Elusive Rating, Breakaway Yds | ⛔ **DO NOT ADOPT for start/sit** | RB efficiency, `r` 0.02-0.31. Describes the past |
+| Slot rate, screen yard %, 1st down/route | ⚠️ **texture, not a decider** | useful for reading a role, unmeasured for stability here |
+
+### ⚠️ THE TIMING NOTE THAT MAKES EXPECTED POINTS URGENT RATHER THAN NICE
+
+Guard 42 measured that expected points beats actual points as a predictor **only early**: `+0.066`
+after one game, `+0.026` after two, `+0.016` by three, `+0.002` by week eight. ⭐⭐ **So its value is
+highest RIGHT NOW and decays to nothing by midseason.** Adopting it in week 2 is the whole window;
+adopting it in November is pointless.
+
+### ⛔ A CORRECTION MADE IN THE SAME SESSION
+
+A session claimed the app has **no** first-read metric. **It does — in the hand-written PROSE**
+(*"an 80th-percentile first-read target rate"*, Juwan Johnson's note). **There is no data file, no
+column and no percentile.** ⭐ **The distinction matters: a number somebody looked up once is not a
+metric the tool computes**, and describing the second as the first overstates what the app can do.
+
+### ⚠️ WHAT HIS TABLES DO NOT CARRY, AND IT IS THE ONE THING WE HAVE
+
+**No stability figure anywhere.** Every row is a percentile; none says whether the number survives to
+next week. On one back's sheet, Breakaway Yards and Elusive Rating sit two rows apart with equal
+visual weight — and one of them is close to a coin flip year over year. ⛔ **Our `r` column is the
+only thing in either system that separates a repeatable edge from a story about last Sunday.**
+
+⚠️ **AND A POPULATION WARNING, from his own sheet.** One row reads `RB Rank 2 / Percentile 2`;
+another `RB Rank 18 / Percentile 2`. **Rank 2 of ~30 is not the 2nd percentile.** The likely
+explanation is two different populations — rank among qualified, percentile among all — **and the
+reader cannot tell, because neither column names its population.** ⭐ **That is exactly the error a
+session made on a FLEX call two days earlier, and the reason our percentiles are required to print
+their gate.**
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
