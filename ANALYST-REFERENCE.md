@@ -3346,6 +3346,50 @@ coverage.** Nothing here is shown to repeat year to year either.
 (`--selftest` has four assertions incl. a must-fail proving unlabelled coverage
 rows are dropped rather than silently bucketed).
 
+### ⭐⭐⭐ §11n · A PER-GAME EXPECTED OVER A PARTIAL APPEARANCE IS DILUTED, AND NOTHING SAYS SO (Sep 20, 2026)
+
+**His catch:** *"how are we assessing wentz... if hes not in the app doesnt that mean
+hes not accurately assessed? if you dont have information on him please go online."*
+
+⛔⛔ **TWO FAILURES IN ONE ANSWER, AND BOTH WERE MINE.**
+
+**1 · `findPlayer` IS ADP-GATED.** It resolves against `ADP_DATA` / `ADP_SUPERFLEX` /
+`ADP_YAHOO`. **Carson Wentz was an undrafted backup in August, so he has no ADP row and
+the comparison column printed `NO MATCH`** — while he holds a `status_2026` row, a
+crosswalk id, a `player_metrics_2025` row AND an `expected_2026` row. **Fourth instance
+this session of an absence that reads like a fact.** ✅ Fix belongs in `scout.mjs`, not
+`App.jsx`: fall back to the crosswalk + status population when `findPlayer` returns null.
+
+**2 · AND THE NUMBER I FELL BACK ON WAS WORSE THAN NO NUMBER.** `expected_2026` gave
+Wentz `exp_pg 10.12, rank 29/37, gp 1`. **He entered that game in the FIRST QUARTER**
+after Kyler Murray was concussed — 12-of-19, 133 yards, 3 TD, 17.2 actual in roughly
+three quarters of relief. ⛔ **`gp` counts a partial appearance as a whole game, so the
+per-game rate is divided by a denominator the player never played.** Nothing in the
+output flags it. **I quoted `10.12` against Shough's `28.29` and told him the decision
+"isn't close." The gap was an artifact.**
+
+⭐ **THE RULE: before quoting any `exp_pg` at `gp <= 2`, check whether the games were
+STARTS.** `matchup-brief.py` already has `partial_games()` at a measured 0.20 threshold
+— **the concept exists in this repo and is simply not wired into the expected block.**
+
+#### ⭐⭐ AND THE SECOND HALF, WHICH IS THE BANKED RULE I ONLY HALF-RAN
+
+CLAUDE.md says: *if the files do not have the answer, say so, THEN ACTUALLY SEARCH.*
+**I said so and stopped.** He had to ask. ⛔ **A stated gap is not a discharged gap.**
+**One search settled all three open questions in under a minute:** Wentz starts with
+Murray in protocol; his last line was relief, not a start; and **his Chicago claim was
+RIGHT — the Bears allowed 37 in a 59-37 game.**
+
+#### ⚠⚠ THE TENSION WORTH KEEPING: EXPECTED LOOKS BACKWARD, THE MARKET LOOKS FORWARD
+
+**`expected_2026` prices the opportunity an offence handed a player LAST week. The
+implied team total prices THIS week.** For Shough they disagree hard — `28.29` expected
+against a **19-point implied team total**, the lowest on his board. ⭐ **Per
+`betting/BETTING-ANALYSIS.md` the closing line is unbiased, so on a forward question the
+market is the better input and a one-game expected is not entitled to overrule it.**
+
+**MEASURED**, n=1 diluted case found; the ADP gate is confirmed by reading `findPlayer`.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
