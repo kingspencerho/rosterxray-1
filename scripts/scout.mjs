@@ -201,6 +201,29 @@ const rosterMatesOn = (team, pos, selfName) => ROSTER.filter((r) => {
   return st && st.team === team && st.pos === pos && nmKey(r) !== nmKey(selfName);
 }).map((r) => ({ name: r, dc: statusRows[nmKey(r)]?.depth_chart_order }));
 
+// THE ROOM - everyone else at his position on his team, with the share they
+// ACTUALLY played.
+// rosterMatesOn above only sees players HE OWNS. That is the wrong question
+// when the threat is a teammate he does not own: a listed DC1 printed 37%
+// snaps, it was handed over as a "watch item", and the back taking the other
+// 58% was one unrun query away. A snap share with no room around it invites
+// exactly that mistake, so the room now prints whether or not it is asked for.
+const roomOn = (team, pos, selfName) => Object.entries(statusRows)
+  .filter(([k, st]) => st && st.team === team && st.pos === pos && k !== nmKey(selfName))
+  .map(([k, st]) => {
+    const sc = snapCur(k);
+    return {
+      name: k,
+      dc: st.depth_chart_order,
+      snap: sc ? sc.snap_pct : null,
+      inj: st.injury_status || (st.status && st.status !== "Active" ? st.status : ""),
+    };
+  })
+  // a share, or a plausible depth-chart spot. Without this a WR room prints
+  // nine camp bodies and the three names that matter stop standing out.
+  .filter((m) => m.snap != null || (m.dc != null && m.dc <= 4))
+  .sort((a, b) => (b.snap ?? -1) - (a.snap ?? -1) || (a.dc ?? 99) - (b.dc ?? 99));
+
 // ================================ COMPARISON MODE ==========================
 if (vsSplit) {
   if (!query || !query2) { console.error('usage: node scripts/scout.mjs "A" --vs "B"'); process.exit(2); }
@@ -475,6 +498,21 @@ L(`
       L(`    ⚠ week(s) ${SNAP_CUR._meta.weeks_partial.join(", ")} are PARTIAL - not every team has played.`);
     L(`    ⛔ This is SNAP share, not ROUTE share. Close (r=0.957) and not equal.`);
   } else L(`  no 2026 snap row.`);
+  {
+    const room = roomOn(hit.team, hit.pos, hit.name);
+    if (room.length) {
+      L(`  THE ROOM at ${hit.pos} on ${hit.team}  (his share is above)`);
+      for (const m of room.slice(0, 5)) {
+        const dc = m.dc != null ? "DC" + m.dc : "DC?";
+        const share = m.snap != null
+          ? String(Math.round(m.snap * 100)).padStart(3) + "% snaps"
+          : "  no snap row";
+        L(`    ${dc.padEnd(4)} ${m.name.padEnd(22)} ${share}${m.inj ? "   " + m.inj : ""}`);
+      }
+      if (room.length > 5) L(`    (+${room.length - 5} more)`);
+      L(`    A DEPTH-CHART LABEL IS NOT A ROLE. Compare the SHARES, not the DC numbers.`);
+    }
+  }
   if (ROSTER.length) {
     L(`  YOUR ROSTER: ${onRoster(hit.name) ? "you hold him." : "not on your roster."}`);
     const mates = rosterMatesOn(hit.team, hit.pos, hit.name);

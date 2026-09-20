@@ -188,6 +188,25 @@ describes the job he used to have.
 
 ⚠️ **An empty [5b] is a stated gap, never a licence to lean harder on 2025.**
 
+#### ⭐⭐ READ THE ROOM BEFORE YOU READ HIS SHARE
+
+`[5b]` prints **THE ROOM** — every other player at his position on his team and
+the share each of them actually played. **Read it before you interpret his own
+snap share, because a share only means something against the shares beside it.**
+
+⛔ **A DEPTH-CHART LABEL IS NOT A ROLE.** Pittsburgh lists Jaylen Warren DC1 and
+Rico Dowdle DC2. In week 1 Warren played **37%** and Dowdle played **58%**.
+
+⛔⛔ **WHAT IT COST, and it is why this section exists:** a session read
+Warren's 37% beside a DC1 label, called it *"a committee number, watch the
+backfield"*, and handed that over as the answer. **Dowdle was one unrun query
+away.** A hedge that names the right worry without answering it reads as
+careful and is one step short — the room removes the step.
+
+✅ **And the room reframed the finding rather than just filling it in:** Warren
+took **16 touches on 25 snaps** to Dowdle's **13 on 39**, so the low share was a
+passing-down role, not a demotion. Guard 48 asserts the room prints.
+
 ### [6] Prose outranks every number above
 Role CHANGE is rank 1 in the Source Hierarchy precisely because it invalidates
 the sticky baseline. **Print the age of any verdict you lean on** — past 45 days

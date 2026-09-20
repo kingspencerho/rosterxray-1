@@ -3229,6 +3229,61 @@ passes, the floor is decorative and the silent-absence bug is back.**
 **MEASURED**, `n=19` layers, every one above the floor. Join-rate measurement
 it replaced: `scripts/measure-name-joins.py`.
 
+### ⭐⭐⭐ §11l · A SNAP SHARE MEANS NOTHING WITHOUT THE ROOM AROUND IT (Sep 19, 2026)
+
+**Plain version first: a player's snap share is only readable against the shares
+of the other players at his position on his team.** 37% is a demotion or a
+specialist role depending entirely on who has the other 63%, and the card never
+said.
+
+⛔⛔ **WHAT IT COST.** Pittsburgh lists **Jaylen Warren DC1** and **Rico Dowdle
+DC2**. Week 1: **Warren 37% of snaps, Dowdle 58%.** A comparison was run for
+his lineup, the 37% was spotted, and it shipped as *"a committee number, watch
+the Pittsburgh backfield"* — a hedge, not an answer. **One query would have
+named Dowdle.** He asked why the rosters weren't up to date; the roster feed was
+current to four days prior and correct. **The tool even printed
+`*** MOVED: 2025 numbers are CAR, he is now PIT ***`.** The gap was the question,
+not the data.
+
+⭐⭐ **AND THE ANSWER INVERTED THE WORRY RATHER THAN CONFIRMING IT.** Warren took
+**16 touches on 25 snaps**; Dowdle **13 on 39**. Warren outscored him 7.8 to 3.1.
+The low share was the **passing-down role in a split defined by down** — Dowdle
+early downs, Warren third down — so it was never evidence of a demotion.
+⚠️ **A hedge can be wrong in the optimistic direction too.**
+
+#### Why `rosterMatesOn` did not catch it
+
+The existing helper answers *"do I own two players in the same backfield"* — a
+handcuff check across **his own roster**. ⛔ **Dowdle is not on his roster**, so
+nothing fired. **The threat to a player you start is usually a player you do not
+own**, which is the opposite population.
+
+#### What it prints
+
+```
+  SNAP SHARE this season  37%  over 1 game(s)  (latest 37%)
+  THE ROOM at RB on PIT  (his share is above)
+    DC2  rico dowdle             58% snaps
+    DC4  eli heidenreich          4% snaps
+    A DEPTH-CHART LABEL IS NOT A ROLE. Compare the SHARES, not the DC numbers.
+```
+
+Capped at five and filtered to a real share or `DC <= 4`, because an unfiltered
+WR room prints nine camp bodies and the three names that matter stop standing out.
+
+#### ⭐ The guard protects against SILENCE, not wrongness
+
+**Guard 48 (`test-scout-room.mjs`), 12 assertions.** If `roomOn` ever returns
+nothing — a renamed status field, a changed team code, a filter that
+over-filters — **the section simply does not print and the output looks exactly
+as finished as it does today.** So the guard asserts the room **IS there**, not
+only that it is right when present. It also asserts every name resolves to the
+same team and position in `status_2026`, and its sabotage plants a LAC back in a
+PIT room and requires the check to reject it.
+
+**MEASURED**, `n=2` rooms end to end (PIT RB, IND WR) inside a 2,196-assertion
+suite, exit 0.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
