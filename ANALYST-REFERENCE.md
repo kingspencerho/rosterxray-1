@@ -3420,6 +3420,50 @@ correction is not exempt from being checked.**
 
 **Guard 50, 12 assertions**, both must-fail directions proven.
 
+### ⭐⭐⭐ §11p · CUSTOM SCORING INVALIDATES THE EXPECTED MODEL, AND IT REVERSED A CALL (Sep 20, 2026)
+
+**He sent his league settings and asked whether they change the assessment. They did.**
+
+⛔⛔ **THE APP'S `expected_*` IS HALF-PPR. A league with custom scoring is being priced
+under rules it does not use, and NOTHING IN THE OUTPUT SAYS SO.** Every figure quoted for
+his 2QB league had the wrong scoring underneath it.
+
+#### The two settings that did the damage, both invisible to the model
+
+| setting | league | Yahoo default | who it pays |
+|---|---|---|---|
+| **Completions** | **0.1** | 0 | **volume passers** — 27 attempts is ~1.7 pts before a yard |
+| **Rushing 1st downs** | **0.5** | 0 | **rushing QBs and short-yardage backs** |
+| Receiving 1st downs | 0.5 | 0 | possession receivers, high catch rate |
+| Receptions | 1 | 0.5 | full PPR |
+| 40+ yd play / TD | 1 / 2 | 0 | explosive players, deep threats |
+
+⚠⚠ **AND THE APP CANNOT COMPUTE TWO OF THE THREE BIGGEST ONES.** `gamelogs_*` carries
+**`att`, not completions**, and carries **no first-down data at all**. So a repricing is
+REASONED, never MEASURED. **Say which.**
+
+#### ⭐⭐ THE CALL IT REVERSED, AND THE REASONING ERROR UNDERNEATH IT
+
+**I had recommended benching Malik Willis for Carson Wentz**, on the grounds that Minnesota
+was implied for 22 and Miami for 15.5.
+
+⛔⛔ **THAT LOGIC RUNS BACKWARDS FOR A QUARTERBACK.** A 13.5-point underdog THROWS MORE.
+**A low implied team total is a volume signal for its passer, not a warning about him** —
+trailing badly is the classic high-attempt quarterback environment, and at 0.1 a completion
+the garbage time pays. **I used a TEAM-SCORING proxy for a PLAYER-VOLUME question.**
+
+✅ **Repriced off the real week-1 lines: Willis ~21.7, Wentz ~18.5.** Willis ran 6 times for
+39 and a score; Wentz has no rushing floor, and his big week was **3 passing TDs on 19
+attempts** — the least repeatable line in football, and a shape this scoring does not reward.
+
+#### The rule
+
+⭐ **BEFORE ANY LINEUP ANSWER, ASK WHAT THE LEAGUE ACTUALLY SCORES.** Scoring is not a
+detail that shifts a number — **it changes which ARCHETYPE wins**, and here it flipped a
+recommendation. ✅ **His four rosters now record their scoring in the file header.**
+⚠️ **A repricing that estimates completions or first downs is REASONED.** The direction
+survives; the digits do not.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
