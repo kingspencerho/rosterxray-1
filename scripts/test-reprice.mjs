@@ -56,6 +56,22 @@ ok("battleroyale charges NOTHING for a sack",
    cfg("battleroyale", "sack") === 0, String(cfg("battleroyale", "sack")));
 ok("both leagues are full PPR", cfg("jfl3", "rec") === 1 && cfg("battleroyale", "rec") === 1);
 
+// ---- all FOUR leagues, because the contrast is what decides players -----
+// These four tables are the entire reason a repricer exists. A player who
+// wins in one loses in another, and the differences are not cosmetic:
+ok("footballbaybee is the only HALF-ppr league of his",
+   cfg("footballbaybee", "rec") === 0.5, String(cfg("footballbaybee", "rec")));
+ok("jfl2 pays SIX per passing TD", cfg("jfl2", "pass_td") === 6, String(cfg("jfl2", "pass_td")));
+ok("...and jfl2 softens fumbles to -1", cfg("jfl2", "fumble_lost") === -1,
+   String(cfg("jfl2", "fumble_lost")));
+ok("neither new league charges for a sack",
+   cfg("jfl2", "sack") === 0 && cfg("footballbaybee", "sack") === 0);
+// ⭐ FOUR DIFFERENT PASSING-TD VALUES ACROSS FOUR LEAGUES. A single hard-coded
+// 4 or 6 anywhere in an analysis is wrong for at least two of his teams.
+const tds = ["jfl2", "jfl3", "battleroyale", "footballbaybee"].map((l) => cfg(l, "pass_td"));
+ok("his four leagues carry three different passing-TD values",
+   new Set(tds).size >= 3, tds.join(", "));
+
 // ---- 3. must-fail ------------------------------------------------------
 ok("a drifted sack value WOULD be caught", cfg("jfl3", "sack") !== -1.0);
 ok("the two leagues are NOT accidentally identical",

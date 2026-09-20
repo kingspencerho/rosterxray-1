@@ -53,6 +53,32 @@ LEAGUES = {
         "rec_40": 1.5, "rec_td_40": 1,
         "pass_1d": 0.1, "rec_1d": 0.1, "rush_1d": 0.1,
     },
+    # league 468496. HALF PPR - the only one of his that is - plus a small
+    # bonus on 40+ yard TDs only. Otherwise Yahoo standard.
+    "footballbaybee": {
+        "label": "Football Baybee (468496)",
+        "completion": 0, "pass_yd": 1 / 25, "pass_td": 4, "int": -1,
+        "sack": 0, "pass_yd_bonus": [],
+        "rush_yd": 1 / 10, "rush_td": 6, "rush_yd_bonus": [],
+        "rec": 0.5, "rec_yd": 1 / 10, "rec_td": 6, "rec_yd_bonus": [],
+        "fumble": 0, "fumble_lost": -2, "pick6": 0,
+        "comp_40": 0, "pass_td_40": 1, "run_40": 0, "rush_td_40": 1,
+        "rec_40": 0, "rec_td_40": 1,
+        "pass_1d": 0, "rec_1d": 0, "rush_1d": 0,
+    },
+    # league 972885. Full PPR, SIX-point passing TDs, and a soft fumble rule.
+    # No completions, no first downs, no yardage or 40+ yard-play bonuses.
+    "jfl2": {
+        "label": "JFL #2 (972885)",
+        "completion": 0, "pass_yd": 1 / 25, "pass_td": 6, "int": -1,
+        "sack": 0, "pass_yd_bonus": [],
+        "rush_yd": 1 / 10, "rush_td": 6, "rush_yd_bonus": [],
+        "rec": 1, "rec_yd": 1 / 10, "rec_td": 6, "rec_yd_bonus": [],
+        "fumble": 0, "fumble_lost": -1, "pick6": 0,
+        "comp_40": 0, "pass_td_40": 0, "run_40": 0, "rush_td_40": 0,
+        "rec_40": 0, "rec_td_40": 0,
+        "pass_1d": 0, "rec_1d": 0, "rush_1d": 0,
+    },
     # league 15263. First downs pay FIVE TIMES what they do above, and there
     # is no sack penalty at all - which is why the same two players rank
     # differently in the two leagues.
@@ -249,7 +275,9 @@ def pull(names, week, season=2026):
                     if r.get("rush_touchdown"):
                         s["rush_td_40"] += 1
             if r.get("receiver_player_id") == pid:
-                gy = r.get("yards_gained") or 0
+                gy = r.get("receiving_yards")
+                if gy is None:
+                    gy = r.get("yards_gained") or 0
                 if r.get("complete_pass"):
                     s["rec"] += 1
                     s["rec_yd"] += gy
