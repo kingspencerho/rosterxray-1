@@ -3141,6 +3141,55 @@ is targeted on a quarter of his routes against one in seven, on eight FEWER rout
 per route run is `r = 0.674` and NOT a restatement of snap share, which route share is at 0.957.)*
 
 ---
+### ⭐⭐ §11j · A BLITZ DOES NOT FEED THE TIGHT END. IT STARVES THE RUNNING BACK (Sep 19, 2026)
+
+**His question:** *"would this benefit Fannin their TE more than the receivers?"* ⭐ **It is a
+measurable question, so it was measured rather than reasoned about.**
+
+**MEASURED: 2025, n = 17,437 targeted pass plays**, FTN charting joined to play-by-play on
+`(game_id, play_id)`, positions resolved through the GSIS id. **Blitz = 5+ pass rushers**, the
+standard definition, **12.7% of plays** — which lands on the league blitz rate the scheme file
+already carries.
+
+```
+  share of targets      WR      TE      RB
+  no blitz            56.9%   23.5%   19.6%
+  BLITZ               62.7%   25.3%   12.0%
+  change               +5.8    +1.8    -7.6
+```
+
+⛔⛔ **THE FOLK MODEL IS WRONG. It says: blitz forces a quick throw, the quick throw is a checkdown,
+so the tight end and the back eat.** ✅ **What actually happens: the RECEIVERS eat, by three times
+as much as the tight end, and it comes almost entirely out of the RUNNING BACK.**
+
+⭐⭐⭐ **THE MECHANISM THAT FITS THE NUMBERS: a blitzing defence keeps the back IN TO BLOCK.** He
+cannot run a route he is not running, so his share collapses and the routes still on the field
+absorb it. **That explains all three columns at once, which the checkdown story does not.**
+
+⚠️ **AND THE DEPTH BARELY MOVES**, which is the other half of the folk model failing: WR `11.0 → 10.9`,
+TE `6.3 → 6.0`, RB `0.1 → -0.3`. **A blitz does not meaningfully shorten the throw.**
+
+### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
+
+The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
+and the definition was nearly widened to "fix" it. ✅ **Nothing was wrong.** `n_blitzers >= 1` is
+**13.8% of ALL plays**, and roughly half of all plays are passes — so 13.8% of everything IS ~29% of
+passes. ⭐ **Two correct numbers with different denominators look exactly like one broken number.**
+**Checking before adjusting is what kept the finding intact.**
+
+### What it is worth, and what it is not
+
+✅ **It answers a recurring question in one line: a blitz-heavy opponent is a small positive for a
+tight end and a real positive for a receiver, and a genuine negative for a pass-catching back.**
+
+⛔⛔ **IT STILL CANNOT DECIDE A LINEUP.** This is a LEAGUE AVERAGE across a full season. What a
+specific receiver does against a specific coverage repeats at `r = 0.161`, a coin flip, and nothing
+here changes that. ⭐ **It describes a tendency at the position level; it is not a player-level
+edge, and the two must never be swapped.**
+
+⚠️ **One season, and the blitz label is one charting provider's judgement.**
+
+---
 ## §12 · Changelog
 
 > **Capped at 12 entries. Drop the oldest — full history is in git.**
