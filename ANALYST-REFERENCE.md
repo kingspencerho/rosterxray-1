@@ -3518,6 +3518,58 @@ scoring table copied off a settings page by eye is exactly what rots. It asserts
 contrast that decides players: **first downs pay 0.1 in one league and 0.5 in the
 other, and only one charges for a sack.**
 
+### ⭐⭐⭐ §11r · A MEAN CANNOT ANSWER A START/SIT CALL. THE SHAPE CAN. (Sep 20, 2026)
+
+**His question, and it is the sharpest one he has asked:** *“knowing the chances of
+shough having an average game or a really bad game would actually help me decide… if he
+has a good chance of posting a decent floor game i dont mind keeping him in.”*
+
+⭐ **He asked for a DISTRIBUTION, not a projection.** `scripts/qb-floor.py` reprices every
+game a QB has played under a named league and reports the spread and how much of the
+downside is penalty-driven. **It imports `reprice.py`'s scoring rather than restating it**
+— two scoring tables drift, and this repo has paid for that class a dozen times.
+
+#### ⛔⛔ ALL THREE PLANKS OF HIS OWN HYPOTHESIS WERE CONTRADICTED
+
+**He reasoned: Baltimore is good, so Shough gives back points; Wentz has the better line,
+so start Wentz.** Measured over 2025 plus 2026 week 1, in his league's scoring:
+
+```
+                    games   median   20+     15+     under 8   penalty given back
+Tyler Shough          11     19.3    45%     64%       18%     median 6.5, 55% of games >6
+Carson Wentz           6     15.1     0%     67%       17%     median 8.0, 50% of games >6
+
+BAL defence    1.78 sacks/gm  0.67 INT/gm   costs a QB 4.0 pts/gm in this scoring
+CHI defence    2.06 sacks/gm  1.33 INT/gm   costs a QB 5.8 pts/gm
+```
+
+**1 · BALTIMORE IS THE SOFTER DEFENCE.** Chicago takes back **5.8 points a game** to
+Baltimore's **4.0** — more sacks and TWICE the interceptions. **Wentz faces the more
+punishing defence, not Shough.**
+
+**2 · WENTZ IS THE MORE PENALTY-PRONE QB.** Median given back **8.0 against 6.5**. The
+better offensive line (12th vs 16th, same PFF tier) does not show up in his results.
+
+**3 · THE FLOORS ARE INDISTINGUISHABLE** — 64% vs 67% at 15+, 18% vs 17% under 8 —
+**and only one of them has a ceiling.** ⭐⭐ **Wentz has NEVER reached 20 points in this
+scoring in six games, including one where he threw FIFTY-THREE times.** Shough has cleared
+20 in five of eleven.
+
+⭐⭐⭐ **SO THE TRADE IS NOT FLOOR-FOR-CEILING. IT IS THE SAME FLOOR, A WORSE
+OPPONENT, A WORSE PENALTY PROFILE, AND NO CEILING.**
+
+#### ⭐ The attempts check is what killed the obvious objection
+
+Wentz's zero-for-six at 20+ would be meaningless if those were relief appearances. **They
+are not: 23, 53, 37, 44, 32, 23 attempts.** Four are full starts. ⛔ **Check whether a
+sample is what it claims BEFORE reading a rate off it** — §11n is the same lesson on a
+diluted per-game denominator.
+
+⚠️ **PROVENANCE: `n = 11` and `n = 6`, both small; the defensive rates are `n = 18` games
+each and are solid.** A distribution describes games already played. Shough's eleven are
+mostly his rookie season and his best game is the most recent one, which cuts in his favour
+and is not in the rate.
+
 ### ⛔ A FALSE ALARM WORTH RECORDING, BECAUSE THE FIX WAS A DENOMINATOR
 
 The first run looked wrong: blitzes were **29% of targeted passes** against a league rate near 13%,
