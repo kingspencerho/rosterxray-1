@@ -30,6 +30,53 @@ It prints THIS season above the 2025 rows, because rank 1 and 2 decide. ⛔ **Do
 not paste the full single-player dump for a start/sit question** — it is ~60
 lines per player and buries the comparison.
 
+## HOW TO READ A COMPARISON — his shape, banked Sep 19 2026
+
+**He named this one as the analysis he wants: *"especially on the same team, this
+is how I want it to be analyzed."*** The script prints the inputs. **These eight
+moves are the half it cannot do, and they run in this order.**
+
+**1 · SAY WHETHER HE EVEN OWNS HIM, AND WHAT THE MOVE COSTS.** The table tags
+`[YOURS]`. ⛔ **A comparison against a player he would have to ADD is a different
+question** — it costs a roster spot and usually a second drop. Say so in the
+first line or the whole answer is answering something he did not ask.
+
+**2 · NAME THE SHAPE BEFORE THE NUMBERS.** *"These two are near-opposites"* or
+*"same role, different volume."* ⭐ **He reads the table faster once he knows what
+he is looking for.** A table with no thesis is a data dump.
+
+**3 · SAME TEAM MEANS THE ENVIRONMENT CANNOT BREAK THE TIE.** Quarterback, game
+script and team total are identical, so ⛔ **every argument about the offence
+applies to both equally and is worth nothing here.** It reduces to ROLE and
+MATCHUP. The script detects this and prints it.
+
+**4 · READ aDOT AGAINST TARGETS, NEVER ALONE.** ⭐⭐ **Two players with four
+targets each are not comparable until you know the depth.** 28.5 yards and 12.6
+yards are different assets, different floors and different failure modes. **A
+deep profile needs protection AND accuracy; a short one needs neither.**
+
+**5 · GIVE THE OPPONENT'S SCHEME BOTH WAYS, then discount it.** A blitz forces
+the ball out fast, which hurts a deep threat — **and it empties the coverage
+behind, which is exactly how a deep threat eats.** ⛔ **Say both, then say it
+decides nothing: the receiver-versus-coverage edge repeats at `r = 0.161`.**
+
+**6 · MATCH THE INJURY TO THE ALIGNMENT.** ⭐⭐ **A hurt corner only matters to
+the man lining up across from him.** A left receiver draws the right corner; a
+slot receiver draws the nickel. ⚠️ **And hold it loosely — a depth-chart label is
+not a snap-by-snap assignment, and Questionable is not Out.**
+
+**7 · ONE REASON FOR THE VERDICT, and name the confidence.** Not a recap of the
+table. **The single line that decided it**, plus LOW when it is low.
+
+**8 · GIVE THE OTHER CASE ITS OWN SENTENCE.** *"If you need a ceiling rather than
+a floor, the other one is the better swing."* ⭐ **Floor and ceiling are different
+questions and he may be asking the one you did not answer.**
+
+⚠️ **AND CLOSE ON WHETHER EITHER IS ACTUALLY STARTABLE.** *"You are choosing
+between the 86th and 39th-ranked receiver in expected points"* is more useful
+than a confident verdict, **because it tells him how much the decision is worth
+agonising over.**
+
 ## His roster, when the question involves it
 
 ```

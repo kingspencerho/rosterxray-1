@@ -66,6 +66,29 @@ const EXP_PRIOR = rdJson("grading/data/expected_2025.json");
 // is measuring POSITION. Backs check down at a 0.19 median, receivers are the
 // design at 0.73. Within position it is WR 0.567, TE 0.400, RB 0.244.
 const FIRST_READ = rdJson("grading/data/first_read_2026.json");
+const GAMEENV = rdJson("grading/data/gameenv_2026.json");
+const DEF_SCHEME = rdJson("grading/data/defense_scheme_2025.json");
+const LOGS_CUR = rdJson("grading/data/gamelogs_2026.json");
+// ⛔ TEAM CODES DISAGREE ACROSS FILES. status says WAS and gameenv says WSH,
+// same for LA and LAR. Guard 44 proves the map is sound; this is the caller
+// that has to use it, because a lookup that skips it silently finds no game.
+const TEAM_ALT = { WAS: ["WAS", "WSH"], WSH: ["WAS", "WSH"], LA: ["LA", "LAR"], LAR: ["LA", "LAR"] };
+const sameTeam = (a, b) => a === b || (TEAM_ALT[a] || [a]).includes(b);
+const gameFor = (team) => (GAMEENV?.games || []).find(
+  (g) => sameTeam(g.away, team) || sameTeam(g.home, team)) || null;
+const oppOf = (team) => { const g = gameFor(team); if (!g) return null;
+  return sameTeam(g.away, team) ? g.home : g.away; };
+// aDOT this season, straight off the box score: air yards divided by targets.
+const adotCur = (name) => {
+  const r = LOGS_CUR?.[nmKey(name)];
+  if (!r?.g?.length) return null;
+  const c = LOGS_CUR._meta?.cols?.[r.pos] || [];
+  const ai = c.indexOf("air_yds"), ti = c.indexOf("tgt");
+  if (ai < 0 || ti < 0) return null;
+  let air = 0, tgt = 0;
+  for (const g of r.g) { air += g[ai] || 0; tgt += g[ti] || 0; }
+  return tgt ? { adot: air / tgt, air, tgt } : null;
+};
 const FR_R = { WR: 0.567, TE: 0.400, RB: 0.244 };
 const frRow = (name) => FIRST_READ?.players?.[nmKey(name)] || null;
 // The percentile is DERIVED from the rank and position count the file already
@@ -119,6 +142,7 @@ if (vsSplit) {
       snap: pick(c.metrics, /^Snap share/), dud: pick(c.descriptive, /^Duds/),
       exp: expRow(EXP_CUR, h.name) || expRow(EXP_PRIOR, h.name),
       fr: frRow(h.name),
+      ad: adotCur(h.name),
       expIsCur: !!expRow(EXP_CUR, h.name),
       tprr: (c.routes || []).find((x) => /route run/i.test(x.label)),
       rsh: (c.routes || []).find((x) => /Route share/i.test(x.label)) };
@@ -145,6 +169,58 @@ if (vsSplit) {
   row("target share", (c) => cell(c.tgtSh));
   row("WOPR", (c) => cell(c.wopr));
   row("dud rate", (c) => cell(c.dud));
+  // ⭐ AIR YARDS PER TARGET IS THE LINE THAT SEPARATES TWO PLAYERS WITH THE
+  // SAME TARGET COUNT. A 28-yard average depth and a 3-yard one are different
+  // assets, and the target column cannot tell them apart.
+  row("aDOT this season", (c) => c.ad ? `${c.ad.adot.toFixed(1)}  (${c.ad.air} air/${c.ad.tgt} tgt)` : "-");
+
+  // ---- SAME TEAM: say what that removes from the comparison ---------------
+  if (!cols[0].missing && !cols[1].missing && sameTeam(cols[0].team, cols[1].team)) {
+    console.log(`
+  ---- SAME TEAM. Quarterback, game script and team total are CONSTANT,`);
+    console.log(`       so this reduces to ROLE and MATCHUP. Every environment argument`);
+    console.log(`       applies to both equally and cannot break the tie.`);
+  }
+
+  // ---- the opponent: how they play, and who is hurt -----------------------
+  for (const c of cols) {
+    if (c.missing) continue;
+    const opp = oppOf(c.team);
+    if (!opp) continue;
+    if (cols.indexOf(c) === 1 && sameTeam(cols[0].team, c.team)) break;  // same game, print once
+    const sch = DEF_SCHEME?.teams?.[opp] || DEF_SCHEME?.[opp];
+    console.log(`
+  OPPONENT ${opp} - how they play:`);
+    if (sch) {
+      // ⭐ HEADLINE RATES ONLY, EACH WITH HOW FAR IT SITS FROM LEAGUE. The file
+      // also carries every coverage split and a _rel twin for each; printing
+      // them all buries the two lines that actually change how a game is
+      // played, which are the blitz and the pressure.
+      const SHOW = [["blitz_rate", "blitz"], ["pressure_rate", "pressure"],
+                    ["man_rate", "man coverage"], ["cov_cover_2", "cover-2"]];
+      for (const [k, label] of SHOW) {
+        const v = sch[k], rel = sch[k + "_rel"];
+        if (typeof v !== "number") continue;
+        const tag = typeof rel === "number" && Math.abs(rel) >= 0.03
+          ? (rel > 0 ? "  HEAVY" : "  LIGHT") : "";
+        console.log(`     ${label.padEnd(13)} ${(v * 100).toFixed(1)}%` +
+          (typeof rel === "number" ? `  (${rel > 0 ? "+" : ""}${(rel * 100).toFixed(1)} vs league)` : "") + tag);
+      }
+    } else console.log(`     no scheme profile on file.`);
+    console.log(`     ⛔ DESCRIPTIVE ONLY. What a RECEIVER does against a coverage repeats`);
+    console.log(`        at r=0.161 - a coin flip. This says what they DID, not who to start.`);
+    const st = e.STATUS_LAYER?.players ?? e.STATUS_LAYER ?? {};
+    const hurt = Object.entries(st).filter(([, v]) => v && sameTeam(v.team, opp)
+      && v.side === "def" && v.injury_status);
+    console.log(`  ${opp} secondary and front, who is hurt:`);
+    if (!hurt.length) console.log(`     nobody listed.`);
+    for (const [n, v] of hurt.slice(0, 6))
+      console.log(`     ${n.padEnd(22)} ${(v.depth_chart_position || "?").padEnd(5)} DC${v.depth_chart_order ?? "?"}  ${v.injury_status}${v.injury_body_part ? " (" + v.injury_body_part + ")" : ""}`);
+    console.log(`     ⭐ MATCH THE ABSENCE TO THE ALIGNMENT. A left receiver draws the`);
+    console.log(`        right corner; a slot receiver draws the nickel. A hurt corner only`);
+    console.log(`        matters to the man lining up across from him.`);
+  }
+
   console.log(`
   (n) is his percentile AT HIS OWN POSITION among ${cols[0].card?.popGate ?? "draftable players"}.`);
   console.log(`  ⛔ RANK 1 AND 2 DECIDE. Snap share and depth chart are THIS season and`);
