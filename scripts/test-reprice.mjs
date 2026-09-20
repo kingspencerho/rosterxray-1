@@ -72,6 +72,23 @@ const tds = ["jfl2", "jfl3", "battleroyale", "footballbaybee"].map((l) => cfg(l,
 ok("his four leagues carry three different passing-TD values",
    new Set(tds).size >= 3, tds.join(", "));
 
+// ---- 4. qb-floor.py rides on the same scoring, so pin it here ----------
+// It IMPORTS reprice.py rather than restating the tables. If that import ever
+// becomes a copy, two scoring definitions drift and the distribution stops
+// describing the league the repricer prices.
+let qf = "", qfCode = 0;
+try {
+  qf = execFileSync("python", ["scripts/qb-floor.py", "--selftest"],
+    { encoding: "utf8", maxBuffer: 10e6 });
+} catch (e) { qf = (e.stdout || "") + (e.stderr || ""); qfCode = e.status ?? 1; }
+ok("qb-floor.py selftest passes", qfCode === 0 && /all passed/.test(qf),
+   `exit ${qfCode}`);
+const qfSrc = readFileSync("scripts/qb-floor.py", "utf8");
+ok("...and it IMPORTS the scoring rather than restating it",
+   /from reprice import/.test(qfSrc));
+ok("...and declares no league table of its own",
+   !/LEAGUES\s*=\s*\{/.test(qfSrc));
+
 // ---- 3. must-fail ------------------------------------------------------
 ok("a drifted sack value WOULD be caught", cfg("jfl3", "sack") !== -1.0);
 ok("the two leagues are NOT accidentally identical",
