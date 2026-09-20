@@ -45,7 +45,33 @@ const e = await import(pathToFileURL(outfile).href + `?t=${Date.now()}`);
 let SNAP_CUR = null;
 try { SNAP_CUR = JSON.parse(readFileSync(path.join(repoRoot, "grading/data/snap_current_2026.json"), "utf8")); } catch {}
 const nmKey = (n) => (n || "").toLowerCase().replace(new RegExp("[.']","g"), "").replace(new RegExp("-","g"), " ").replace(new RegExp("\\s+(jr|sr|ii|iii|iv|v)$"), "").replace(new RegExp("\\s+","g"), " ").trim();
-const snapCur = (n) => SNAP_CUR?.players?.[nmKey(n)] || null;
+// ⛔⛔ FOURTH INSTANCE OF THE NAME JOIN, AND THIS TIME ACROSS LAYERS BUILT IN
+// ONE SESSION. The same back is "kenny gainwell" in expected_2026 and
+// first_read_2026 and "kenneth gainwell" in expected_2025 and
+// snap_current_2026, because some builders read a feed's spelling and some
+// resolve through a player id. A single-spelling lookup silently returned
+// nothing for a player sitting on his roster - which reads exactly like a
+// player with no data, and is the worst failure this tool has.
+//
+// ⭐ THE REAL FIX IS UPSTREAM: build every layer id-first, as first_read is.
+// This is the caller-side guard for the layers that are not there yet.
+const NAME_ALIASES = {
+  "kenneth gainwell": "kenny gainwell", "kenny gainwell": "kenneth gainwell",
+  "joshua palmer": "josh palmer", "josh palmer": "joshua palmer",
+  "zonovan knight": "bam knight", "bam knight": "zonovan knight",
+};
+// Exact, then a proven alias, then a normalised scan. The scan is last because
+// it is the slowest and the least certain, not because it is the least useful.
+const pickRow = (rows, name) => {
+  if (!rows) return null;
+  const k = nmKey(name);
+  if (rows[k]) return rows[k];
+  const alt = NAME_ALIASES[k];
+  if (alt && rows[alt]) return rows[alt];
+  for (const [rk, rv] of Object.entries(rows)) if (nmKey(rk) === k) return rv;
+  return null;
+};
+const snapCur = (n) => pickRow(SNAP_CUR?.players, n);
 
 // ======================= EXPECTED POINTS (rank 2, in points) ===============
 // Opportunity expressed as points: how many the offence GAVE him, whether or
@@ -80,7 +106,7 @@ const oppOf = (team) => { const g = gameFor(team); if (!g) return null;
   return sameTeam(g.away, team) ? g.home : g.away; };
 // aDOT this season, straight off the box score: air yards divided by targets.
 const adotCur = (name) => {
-  const r = LOGS_CUR?.[nmKey(name)];
+  const r = pickRow(LOGS_CUR, name);
   if (!r?.g?.length) return null;
   const c = LOGS_CUR._meta?.cols?.[r.pos] || [];
   const ai = c.indexOf("air_yds"), ti = c.indexOf("tgt");
@@ -90,12 +116,12 @@ const adotCur = (name) => {
   return tgt ? { adot: air / tgt, air, tgt } : null;
 };
 const FR_R = { WR: 0.567, TE: 0.400, RB: 0.244 };
-const frRow = (name) => FIRST_READ?.players?.[nmKey(name)] || null;
+const frRow = (name) => pickRow(FIRST_READ?.players, name);
 // The percentile is DERIVED from the rank and position count the file already
 // publishes rather than recomputed. Two ways of producing one number is how
 // they drift apart.
 const expRow = (doc, name) => {
-  const r = doc?.players?.[nmKey(name)];
+  const r = pickRow(doc?.players, name);
   if (!r) return null;
   const n = doc?._meta?.counts?.[r.pos];
   return { ...r, n, pct: (n && r.exp_rank) ? Math.round(((n - r.exp_rank) / n) * 100) : null };
