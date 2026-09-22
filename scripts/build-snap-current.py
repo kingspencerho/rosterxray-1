@@ -90,6 +90,21 @@ def main():
     complete = [w for w in weeks if len(by_week[w]) >= 30]
     partial = [w for w in weeks if len(by_week[w]) < 30]
 
+    # ⛔⛔ "COMPLETE" IS >= 30 TEAMS, SO A WEEK MISSING EXACTLY TWO IS CALLED
+    # COMPLETE. That is deliberate - two teams are on bye most weeks - and it
+    # makes a REAL BYE and an UNPUBLISHED GAME render identically, which is the
+    # silent-absence class. Sep 22 2026: snap_counts had not yet published LA
+    # and NYG for week 2, the file said "complete", and I read the gap as a bye
+    # and banked it as fact. The game logs had all 32 teams the whole time.
+    #
+    # This file CANNOT tell a bye from a missing release - nothing in
+    # snap_counts says who was scheduled. So it does not guess. It names the
+    # teams it did not see, and the consumer checks them against a source that
+    # knows the schedule before concluding anything.
+    seen_all = set().union(*by_week.values()) if by_week else set()
+    missing = {int(w): sorted(seen_all - by_week[w]) for w in weeks
+               if seen_all - by_week[w]}
+
     players = {}
     for r in rows:
         key, gid = canon(r)
@@ -127,6 +142,7 @@ def main():
             "weeks_covered": len(weeks),
             "weeks_complete": [int(w) for w in complete],
             "weeks_partial": [int(w) for w in partial],
+            "weeks_missing_teams": missing,
             "players": len(players),
             "unresolved_names": len(unresolved),
             "keyed_by": "canonical display name from player_ids.json, resolved via "
@@ -139,6 +155,10 @@ def main():
             "caveats": [
                 "A partial week is one or two teams, not the league. Players in it have a "
                 "denominator nobody else has; weeks_partial names which.",
+                "weeks_missing_teams names teams with NO row in a week. It does NOT say "
+                "why. A bye and an unpublished game look identical here - check the "
+                "schedule before calling a gap a bye. A week can be 'complete' (30+ "
+                "teams) and still be missing two.",
                 "snap_pct is the mean over games PLAYED, so an inactive week does not drag "
                 "it down. gp is printed beside it.",
                 "This says nothing about trend. A trend needs snap_trajectory and 6 games.",

@@ -4284,8 +4284,32 @@ at any step.**
 ⚠️ **THAT FILE IS WHAT THE ROOM BLOCK READS**, and THE ROOM is **check 1** of
 the seven — *who else is in the room*. So the check built to stop the Jaylen
 Warren failure was itself running on stale data.
-✅ Rebuilt: 454 players, weeks 1 and 2 both complete, 30 teams (LA and NYG were
-on bye). **Wire the builder into the refresh script.**
+✅ Rebuilt: 454 players, 30 teams in week 2. **Wired into step 1 of the refresh
+script**, reusing the snap_counts download step 1 already makes.
+
+##### ⛔⛔ 2b · AND THE REBUILD PRODUCED A FOURTH BUG, WHICH I BANKED AS FACT
+
+The 30 teams were **LA and NYG short, and I wrote here that they were ON BYE.**
+**They were not. Nobody was on bye.** The game logs carried all 32 teams for
+week 2 the whole time — **snap_counts simply had not published those two games
+yet.** Caught because Wan'Dale Robinson scored 1.9 for a team I had just called
+idle, and the contradiction was checkable in one query.
+
+⭐⭐⭐ **THE MECHANISM IS THE ONE THIS SECTION IS ABOUT, POINTED AT ME RATHER
+THAN AT THE CODE.** `build-snap-current.py` calls a week **complete at 30-plus
+teams** — deliberately, because two teams really are on bye most weeks. **So a
+real bye and an unpublished release render identically, and the file says
+`complete` for both.** I read a gap, reached for the pleasant explanation, and
+did not check it against a source that knows the schedule.
+
+⛔ **A GAP IS NOT A REASON FOR A GAP.** The file cannot tell the two apart —
+nothing in `snap_counts` says who was scheduled — so it must not guess, and
+neither should a reader.
+
+✅ **FIXED, and the fix is disclosure rather than cleverness:** `_meta` now
+carries **`weeks_missing_teams`**, naming every team with no row in a week, with
+a caveat saying it does not say WHY and that a week can be `complete` and still
+be missing two. **`{"2": ["LA", "NYG"]}` is now printed instead of inferred.**
 
 #### 3 · TWO REAL PLAYERS SHARE A NAME, AND THE REPRICER PICKED THE WRONG ONE
 

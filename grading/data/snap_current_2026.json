@@ -2,6 +2,7 @@
 "_meta": {
 "caveats": [
 "A partial week is one or two teams, not the league. Players in it have a denominator nobody else has; weeks_partial names which.",
+"weeks_missing_teams names teams with NO row in a week. It does NOT say why. A bye and an unpublished game look identical here - check the schedule before calling a gap a bye. A week can be 'complete' (30+ teams) and still be missing two.",
 "snap_pct is the mean over games PLAYED, so an inactive week does not drag it down. gp is printed beside it.",
 "This says nothing about trend. A trend needs snap_trajectory and 6 games."
 ],
@@ -17,6 +18,12 @@
 2
 ],
 "weeks_covered": 2,
+"weeks_missing_teams": {
+"2": [
+"LA",
+"NYG"
+]
+},
 "weeks_partial": []
 },
 "players": {
