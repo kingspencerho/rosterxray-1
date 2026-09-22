@@ -32,7 +32,77 @@ USAGE
 import argparse
 import json
 import os
+import re
 import sys
+
+# ⛔ FIFTH INSTANCE OF THE NAME JOIN. build-player-ids.py strips a generational
+# suffix when it BUILDS the crosswalk, so its keys are "michael pittman", never
+# "michael pittman jr". A lookup that does not strip the same thing therefore
+# misses every player carrying one - Pittman, Burden III, Rodriguez Jr., Penix
+# Jr. were all on his rosters and all unresolvable. scout.mjs's nmKey has
+# stripped suffixes since the fourth instance; these two python scripts never
+# caught up. The normalizer here must MATCH THE BUILDER'S, not approximate it.
+_SUFFIX = re.compile(r"\s+(jr|sr|ii|iii|iv|v)$")
+
+
+def norm(n):
+    n = (n or "").lower().replace(".", "").replace("'", "").replace("-", " ")
+    return re.sub(r"\s+", " ", _SUFFIX.sub("", n)).strip()
+
+
+# Positions this file can actually price. A crosswalk entry outside this set
+# is never the player a fantasy question is about.
+SKILL = ("QB", "RB", "WR", "TE", "FB")
+
+
+def resolve_ids(names, xw, positions=SKILL):
+    """Name -> GSIS id, and it REFUSES rather than guesses.
+
+    THE BUG THIS REPLACES, and it did not error - it lied. Two real players
+    can share a name. The crosswalk drops such a name from by_name and keeps
+    both in by_name_pos as "justin jefferson|WR" and "justin jefferson|LB".
+    The old loop took the FIRST key in dict order and broke, which handed back
+    the LINEBACKER. A linebacker has no offensive play-by-play rows, so his
+    line priced to a clean 0.0 PTS and printed beside the real players with no
+    warning at all - for a WR1 who had just played 100% of snaps.
+
+    A wrong-player zero is worse than a crash: a crash gets fixed, a zero gets
+    believed and benched. So ambiguity inside the priceable positions is a
+    hard stop that names both candidates.
+    """
+    out = {}
+    for n in names:
+        # "Antonio Williams|WR" - the escape hatch the ambiguity error points at.
+        # Two real skill players can share a name and nothing in a roster file
+        # says which, so the caller gets a way to say it rather than a dead end.
+        if "|" in n:
+            base, pos = n.rsplit("|", 1)
+            i = xw["by_name_pos"].get("%s|%s" % (norm(base), pos.strip().upper()))
+            if not i:
+                sys.exit("no crosswalk entry for %r at position %r." % (base, pos))
+            out[n] = i
+            continue
+        k = norm(n)
+        i = xw["by_name"].get(k)
+        if not i:
+            cands = {kk.split("|")[1]: vv for kk, vv in xw["by_name_pos"].items()
+                     if kk.split("|")[0] == k}
+            skill = {pos: vid for pos, vid in cands.items() if pos in positions}
+            if len(skill) == 1:
+                i = next(iter(skill.values()))
+            elif len(skill) > 1:
+                sys.exit("%r is ambiguous across %s - the crosswalk holds %s. "
+                         "Re-run naming one, e.g. %s|%s." %
+                         (n, "/".join(sorted(skill)), sorted(skill.values()),
+                          n, sorted(skill)[0]))
+            elif cands:
+                sys.exit("%r resolves only to %s in the crosswalk, which this "
+                         "tool cannot price." % (n, "/".join(sorted(cands))))
+        if not i:
+            sys.exit("cannot resolve %r through the crosswalk." % n)
+        out[n] = i
+    return out
+
 
 # ---------------------------------------------------------------- leagues ---
 # Transcribed from the settings pages he sent. A value absent here is zero.
@@ -225,24 +295,7 @@ def pull(names, week, season=2026):
 
     xw = json.load(open(os.path.join("grading", "data", "player_ids.json")))
 
-    def norm(n):
-        n = n.lower().strip()
-        for c in ".,'":
-            n = n.replace(c, "")
-        return " ".join(n.replace("-", " ").split())
-
-    ids = {}
-    for n in names:
-        k = norm(n)
-        i = xw["by_name"].get(k)
-        if not i:
-            for kk, vv in xw["by_name_pos"].items():
-                if kk.split("|")[0] == k:
-                    i = vv
-                    break
-        if not i:
-            sys.exit("cannot resolve %r through the crosswalk." % n)
-        ids[n] = i
+    ids = resolve_ids(names, xw)
 
     p = nfl.load_pbp([season])
     if week:

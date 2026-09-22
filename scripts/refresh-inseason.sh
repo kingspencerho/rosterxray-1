@@ -101,6 +101,18 @@ else
     got_any=1
     python3 "$ROOT/scripts/build-snap-trajectory.py" "$TMP/snaps.csv.gz" \
       "$ROOT/grading/data/snap_trajectory_$SEASON.json" "$SEASON" || fail=1
+    # SAME DOWNLOAD, SECOND BUILDER - and it was missing entirely until Sep 22
+    # 2026. snap_current is what scout.mjs's ROOM block reads, and THE ROOM is
+    # check 1 of the seven ("who else is in the room"). Nothing refreshed it, so
+    # it sat at whatever week someone last built by hand: it claimed
+    # weeks_covered 2 while holding ONE game, because it was built on a Saturday.
+    # A check running on stale data is worse than no check - it reads as
+    # verified.
+    # ⚠️ Unlike the trajectory above, this one is useful from Week 1: it needs no
+    # split-half, so it reports while role CHANGE is still empty.
+    python3 "$ROOT/scripts/build-snap-current.py" "$TMP/snaps.csv.gz" \
+      "$ROOT/grading/data/player_ids.json" \
+      "$ROOT/grading/data/snap_current_$SEASON.json" "$SEASON" || fail=1
   else
     echo "  skipped — placeholder left untouched"; fail=1
   fi
@@ -244,9 +256,24 @@ else
   WEEK=0
 fi
 if [ "${WEEK:-0}" -ge 1 ] && [ "${WEEK:-0}" -le 18 ]; then
-  echo "  current week: $WEEK"
   mkdir -p "$TMP/sum"
   fetch "$ESPN/scoreboard?seasontype=2&week=$WEEK&dates=$SEASON" "$TMP/sb.json" || true
+  # ESPN's "current week" stays on the week that just ENDED until it rolls over
+  # mid-week. A finished game carries NO odds, so a Tuesday refresh was writing
+  # 16 unpriced games over 16 priced ones and silently deleting the only
+  # forward-looking input the app has. If every game in this week is final,
+  # the useful week is the NEXT one. Guard 34 fails on a 0-priced file, which
+  # is how this was caught; this stops it happening in the first place.
+  if [ -s "$TMP/sb.json" ] && python3 -c "
+import json,sys
+ev=json.load(open(sys.argv[1])).get('events',[])
+st=[e.get('competitions',[{}])[0].get('status',{}).get('type',{}).get('state') for e in ev]
+sys.exit(0 if ev and all(x=='post' for x in st) else 1)" "$TMP/sb.json"; then
+    echo "  week $WEEK is already final - advancing to $((WEEK + 1))"
+    WEEK=$((WEEK + 1))
+    fetch "$ESPN/scoreboard?seasontype=2&week=$WEEK&dates=$SEASON" "$TMP/sb.json" || true
+  fi
+  echo "  current week: $WEEK"
   fetch "https://api.sleeper.app/projections/nfl/$SEASON/$WEEK?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&order_by=ppr"     "$TMP/proj.json" || true
   if [ -s "$TMP/sb.json" ]; then
     for id in $(python3 -c "import json;print(' '.join(str(e.get('id')) for e in json.load(open('$TMP/sb.json')).get('events',[]) if e.get('id')))" 2>/dev/null); do

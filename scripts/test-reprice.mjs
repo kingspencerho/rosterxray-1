@@ -89,6 +89,58 @@ ok("...and it IMPORTS the scoring rather than restating it",
 ok("...and declares no league table of its own",
    !/LEAGUES\s*=\s*\{/.test(qfSrc));
 
+// ---- 5. the name normalizer must AGREE WITH THE CROSSWALK BUILDER'S ----
+// FIFTH INSTANCE OF THE NAME JOIN, and the first one inside the scoring path.
+// build-player-ids.py strips a generational suffix when it WRITES by_name, so
+// every key is "michael pittman". reprice.py's own norm() did not strip it, so
+// four players sitting on his rosters at once - Pittman Jr., Burden III,
+// Rodriguez Jr., Penix Jr. - could not be priced at all. scout.mjs's nmKey has
+// stripped suffixes since the fourth instance; the two python scripts never
+// caught up, and nothing compared them.
+//
+// ⛔ THIS DELIBERATELY DOES NOT STRING-MATCH THE SOURCE. A guard that asserts a
+// regex LOOKS right is the guard-that-cannot-fail class banked twice in this
+// repo - and the first draft of this very block had a broken source regex that
+// would have passed itself. Both implementations are RUN and their outputs
+// compared, which is the only thing that can hold two languages together.
+const NAME_PROBE = `
+import sys, json, importlib.util
+sys.path.insert(0, 'scripts')
+from reprice import norm
+spec = importlib.util.spec_from_file_location('bpi', 'scripts/build-player-ids.py')
+bpi = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bpi)
+names = ['Michael Pittman Jr.', 'Luther Burden III', 'Chris Rodriguez Jr.',
+         'Michael Penix Jr.', "De'Von Achane", 'Amon-Ra St. Brown', 'Jr Smith']
+xw = json.load(open('grading/data/player_ids.json'))['by_name']
+print(json.dumps({
+    'agree': sum(1 for n in names if norm(n) == bpi.nm(n)),
+    'total': len(names),
+    'out': [norm(n) for n in names],
+    'resolved': sum(1 for n in names[:4] if xw.get(norm(n))),
+}))
+`;
+let probe = null, probeErr = "";
+try {
+  probe = JSON.parse(execFileSync("python", ["-c", NAME_PROBE], { encoding: "utf8" }));
+} catch (e) { probeErr = ((e.stdout || "") + (e.stderr || "")).trim(); }
+
+ok("the name probe ran at all", probe !== null, probeErr);
+if (probe) {
+  ok("reprice.norm() and the crosswalk builder's nm() agree on every name",
+     probe.agree === probe.total, `${probe.agree}/${probe.total}: ${probe.out.join(", ")}`);
+  ok("...Jr. is stripped", probe.out[0] === "michael pittman", probe.out[0]);
+  ok("...III is stripped", probe.out[1] === "luther burden", probe.out[1]);
+  ok("...and apostrophes still go", probe.out[4] === "devon achane", probe.out[4]);
+  // ⭐ must-fail: the suffix regex is anchored, so a name that merely BEGINS
+  // with one survives. An unanchored version would quietly rename players.
+  ok("a leading 'Jr' is NOT eaten - the regex is anchored", probe.out[6] === "jr smith",
+     probe.out[6]);
+  // the end-to-end assertion. The regex is only HOW it broke; this is WHAT broke.
+  ok("all four suffixed players on his rosters resolve in the crosswalk",
+     probe.resolved === 4, `${probe.resolved}/4`);
+}
+
 // ---- 3. must-fail ------------------------------------------------------
 ok("a drifted sack value WOULD be caught", cfg("jfl3", "sack") !== -1.0);
 ok("the two leagues are NOT accidentally identical",

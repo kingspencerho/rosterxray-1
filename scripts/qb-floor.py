@@ -29,31 +29,16 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from reprice import LEAGUES, EMPTY, score  # noqa: E402  single scoring definition
-
-
-def norm(n):
-    n = (n or "").lower().strip()
-    for c in ".,'":
-        n = n.replace(c, "")
-    return " ".join(n.replace("-", " ").split())
+from reprice import LEAGUES, EMPTY, score, norm, resolve_ids  # noqa: E402  one scoring AND
+# one name normalizer. A second copy of either drifts; the suffix bug that
+# made 'Michael Pittman Jr.' unresolvable lived in exactly such a copy.
 
 
 def resolve(names):
+    """QB-only on purpose - this file prices nothing else, so a name that is
+    only a defender here is an error rather than a candidate."""
     xw = json.load(open(os.path.join("grading", "data", "player_ids.json")))
-    out = {}
-    for n in names:
-        k = norm(n)
-        i = xw["by_name"].get(k)
-        if not i:
-            for kk, vv in xw["by_name_pos"].items():
-                if kk.split("|")[0] == k:
-                    i = vv
-                    break
-        if not i:
-            sys.exit("cannot resolve %r through the crosswalk." % n)
-        out[n] = i
-    return out
+    return resolve_ids(names, xw, positions=("QB",))
 
 
 def per_game(rows, pid):

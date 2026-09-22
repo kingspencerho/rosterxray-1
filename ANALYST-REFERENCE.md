@@ -4243,3 +4243,119 @@ price is worth taking.
 Kittle looks like the best buy partly because he produced in 11 games, and that
 ~80% availability is exactly why he fell to 83. **n = 1 draft board.** Re-measure
 against a second TEP draft before treating any threshold here as settled.
+
+
+---
+
+### ⭐⭐⭐ §11s · THE WEEK 2 REFRESH FOUND THREE BUGS, AND THE WORST ONE PRINTED A CLEAN ZERO (Sep 22, 2026)
+
+**Plain version first: pulling Week 2 was meant to be a data chore. It uncovered
+three separate ways this toolchain reports something false without erroring.**
+All three are the same disease in different clothes — **an answer that looks
+finished and is not** — which is the root cause already banked eleven times.
+
+#### 1 · THE TUESDAY TRAP: a refresh DELETED the only forward-looking input
+
+`refresh-inseason.sh` step 9 asked ESPN for the current week and got **2**.
+Week 2 was already over. **A finished game carries no betting odds**, so the
+pass wrote **16 unpriced games over 16 priced ones** and the implied totals and
+spreads — CHECK 4 of the seven checks, the only layer in the app that looks
+FORWARD — were gone.
+
+⭐ **ESPN's "current week" is the week that just ENDED until it rolls over
+mid-week.** Nothing in the script knew that, and the refresh is designed to run
+on exactly the day the bug fires.
+
+✅ **FIXED.** The step now tests whether every game in the week is `post` and
+advances to the next week if so. Verified end to end: `week 2 is already final -
+advancing to 3`, 16 of 16 priced.
+⭐ **Guard 34 caught it** by failing on a zero-priced file, which is the guard
+earning its keep. **But it only fires at `npm test`, AFTER the good file is
+already overwritten** — so a guard that catches a destructive write is a second
+line, never the first.
+
+#### 2 · THE ROOM WAS READING A FILE NOTHING REFRESHED
+
+`snap_current_2026.json` said `weeks_covered: 2` and **only two teams had a
+Week 2 row** — it was built on the Saturday, so its Week 2 was the Thursday
+night game alone. ⛔ **`build-snap-current.py` is not in `refresh-inseason.sh`
+at any step.**
+
+⚠️ **THAT FILE IS WHAT THE ROOM BLOCK READS**, and THE ROOM is **check 1** of
+the seven — *who else is in the room*. So the check built to stop the Jaylen
+Warren failure was itself running on stale data.
+✅ Rebuilt: 454 players, weeks 1 and 2 both complete, 30 teams (LA and NYG were
+on bye). **Wire the builder into the refresh script.**
+
+#### 3 · TWO REAL PLAYERS SHARE A NAME, AND THE REPRICER PICKED THE WRONG ONE
+
+⛔⛔ **THE WORST OF THE THREE, because it did not fail — it priced a starter at
+a confident `0.0 PTS`.**
+
+The crosswalk drops an ambiguous name from `by_name` and keeps both entries in
+`by_name_pos`:
+
+```
+justin jefferson|WR  ->  00-0036322     (the receiver)
+justin jefferson|LB  ->  00-0041075     (a linebacker)
+```
+
+`reprice.py` looped `by_name_pos`, took **the first key in dict order** and
+broke. `LB` sorts before `WR`. **A linebacker has no offensive play-by-play
+rows, so the line priced to a clean zero** and printed in the column beside the
+real players with no warning — for a **WR1 who had just played 100% of snaps.**
+
+⭐⭐⭐ **THE REUSABLE LESSON: a wrong-player zero is worse than a crash.** A
+crash gets fixed in a minute. **A zero gets believed, and it gets a starter
+benched.** And it renders *identically* to a real zero, which is the
+silent-absence class — **except this one also passed the absence check**, since
+the name did resolve. It resolved to a person.
+
+✅ **FIXED, and the shape of the fix is the point:**
+- candidates are filtered to the positions the tool can actually price;
+- exactly one skill match wins (Jefferson now prices at 8.7, not 0.0);
+- **two skill matches is a HARD STOP naming both**, never a silent pick;
+- the error hands over the escape hatch: `reprice.py ... "Antonio Williams|WR"`.
+
+⚠️ **A refusal is the right output here.** `Antonio Williams` is a real RB *and*
+a real WR; nothing in a roster file says which, so the tool must ask.
+
+#### 4 · AND THE SAME THREE FUNCTIONS WERE DUPLICATED, AGAIN
+
+`norm()` and the resolver existed **twice** — once in `reprice.py`, once in
+`qb-floor.py`. ⛔ **Twelfth instance of the duplicate-definition class in this
+repo.** Both copies also missed the generational suffix that
+`build-player-ids.py` strips when it BUILDS the crosswalk, so
+**`Michael Pittman Jr.`, `Luther Burden III`, `Chris Rodriguez Jr.` and
+`Michael Penix Jr.` — four players on his rosters at once — were unresolvable.**
+`scout.mjs`'s `nmKey` has stripped suffixes since the fourth instance; the two
+python scripts never caught up and **nothing compared them.**
+
+✅ `qb-floor.py` now imports `norm`, `score`, `LEAGUES` and `resolve_ids` from
+`reprice.py`. One definition each.
+
+#### 5 · THE GUARD, AND WHY IT DOES NOT STRING-MATCH
+
+Guard 51 gained six assertions that **RUN both normalizers and compare their
+output**, rather than asserting a regex looks right.
+⭐ **The first draft of that block did string-match — and its regex was wrong,
+so it would have passed itself.** That is the guard-that-cannot-fail class,
+caught live while writing the guard for it.
+✅ **Sabotage-proven:** removing the suffix strip fails 4 assertions; restoring
+it passes all 6.
+
+#### 6 · VALIDATION, BECAUSE A MEASUREMENT IS NOT TRUSTED UNTIL IT REPRODUCES
+
+The repriced Week 2 lines were checked against `gamelogs_2026` — a **different
+feed** (nflverse `stats_player`) than the repricer's play-by-play.
+✅ **13 of 14 agree to the rounding.** The one gap is **Denzel Boston, +1.0**,
+and it is **explained rather than excused**: he caught a 40-plus-yard TD, which
+Football Baybee pays a point for and a generic half-PPR feed cannot see.
+**A disagreement you can name is a validation; one you cannot is a bug.**
+
+⛔ **WHAT IS STILL ABSENT AT TWO WEEKS, and none of it is a lookup failure:**
+`snap_trajectory_2026` wrote **0 players** (a split-half needs more than one
+week a side), `volume_2026` trend reads `insufficient` for all 302, and FPA
+holds 2 weeks against 3-and-4-week gates. ⭐ **So RANK 1 of the Source
+Hierarchy — role CHANGE — has no data yet, and will not until about Week 4.**
+Say that out loud rather than letting rank 2 quietly stand in for it.
