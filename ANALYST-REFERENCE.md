@@ -3346,6 +3346,63 @@ coverage.** Nothing here is shown to repeat year to year either.
 (`--selftest` has four assertions incl. a must-fail proving unlabelled coverage
 rows are dropped rather than silently bucketed).
 
+#### ⭐⭐⭐ §11m-bis · EVERY COVERAGE SHELL, NOT JUST COVER-2 (Sep 23, 2026)
+
+**Built because a real matchup read stalled.** New Orleans plays **22.1% man and
+15.3% cover-2**, so the only two shells this file could measure covered barely a
+third of their snaps, and the honest answer to *"how does this defence treat a
+deep receiver"* was **"I cannot say."** ⭐ **Cover-3 and cover-4 were in the same
+feed the whole time and had simply never been split out.**
+
+**Shell frequency, 2025, targeted pass plays after the join:**
+`COVER_3 4,653 · COVER_2 3,845 · COVER_1 3,715 · COVER_4 1,682 · COVER_6 886 ·
+2_MAN 738 · COVER_0 672 · COVER_9 416`
+
+**Change in share of targets versus every other coverage, league-wide:**
+
+| shell | n | WR | TE | RB | behind LOS | short 0-9 | mid 10-19 | **deep 20+** |
+|---|---|---|---|---|---|---|---|---|
+| **COVER_1** | 3,692 | **+9.4** | −1.7 | **−7.7** | −6.2 | −4.0 | **+6.1** | **+4.1** |
+| **COVER_2** | 3,845 | **−5.4** | +0.9 | **+4.4** | +4.1 | +3.4 | **−4.8** | **−2.7** |
+| **COVER_6** | 879 | −4.3 | −0.7 | +5.0 | −0.4 | −2.4 | +1.1 | +1.7 |
+| **COVER_3** | 4,607 | −1.7 | +0.7 | +1.0 | +1.5 | −0.7 | +0.4 | **−1.3** |
+| **COVER_4** | 1,673 | −1.3 | −0.7 | +2.0 | +0.4 | −1.7 | +0.5 | **+0.8** |
+
+> ## ⭐⭐⭐ **THE FINDING IS A NULL RESULT, AND IT IS THE USEFUL KIND.**
+> **COVER-3 AND COVER-4 BARELY MOVE ANYTHING.** Every cell in both rows sits
+> inside ±2 points. **Cover-3 is the single most common shell in football and it
+> shifts the target distribution less than any other.**
+
+⛔ **THAT INVERTS A FOLK MODEL, which is now the fourth time this repo has
+counted one and found it backwards.** **Cover-4 is "quarters", the shell everyone
+describes as the deep-ball killer — measured, its deep share moves +0.8, which is
+nothing.** The shell that actually suppresses deep targets is **COVER-2 at −2.7**,
+and the one that feeds them is **COVER-1 at +4.1**.
+
+⭐⭐ **THE PRACTICAL CONSEQUENCE, and it is the reason this was worth building:**
+**a defence that is light on man AND light on cover-2 is a NEUTRAL matchup, not
+an unknown one.** Before this, that profile produced a shrug. Now it produces an
+answer: **whatever they are doing instead is mostly cover-3 and cover-4, and
+neither one moves the distribution.**
+
+⚠️ **COVER-1 IS ESSENTIALLY THE MAN RESULT, and that is a consistency check
+rather than a new finding** — cover-1 IS man coverage with one deep safety, and
+its row (+9.4 WR, −7.7 RB, +4.1 deep) lands on the MAN row from the block above
+almost exactly. **Two independent labels in the same feed agreeing is evidence
+the join is sound.**
+
+⛔ **EACH SHELL IS COMPARED AGAINST ITS OWN "REST", so the baselines differ
+between rows and the changes are NOT additive.** Read one row at a time.
+⛔ **`MIN_SHELL_N = 800`** keeps COVER_0 and COVER_9 out — a twelve-cell split
+over a few hundred targets is schedule noise wearing a table.
+⚠️ **DESCRIPTIVE OF 2025.** Nothing here is shown to repeat, and the per-player
+man/zone edge is still a coin flip at r = 0.161. **This is archetype-level and
+that is the only level it may be read at.**
+
+```
+python scripts/measure-coverage-consequences.py --season 2025
+```
+
 ### ⭐⭐⭐ §11n · A PER-GAME EXPECTED OVER A PARTIAL APPEARANCE IS DILUTED, AND NOTHING SAYS SO (Sep 20, 2026)
 
 **His catch:** *"how are we assessing wentz... if hes not in the app doesnt that mean

@@ -38,6 +38,12 @@ TIERS = (("behind LOS", -99, -1), ("short 0-9", 0, 9),
 POSITIONS = ("WR", "TE", "RB")
 TIER_NAMES = [t[0] for t in TIERS]
 
+# Floor for reporting a single coverage shell on its own. Below this the split
+# by position AND depth is twelve cells over a few hundred targets, which is
+# schedule noise wearing a table. Cover-0 and cover-6 are usually under it and
+# are correctly silent rather than reported thin.
+MIN_SHELL_N = 800
+
 
 def tier_of(ay):
     if ay is None:
@@ -216,6 +222,30 @@ def main():
             report(t2, "REST", "C2", "other cov", "COVER-2")
         else:
             print("  no cover-2 label present; cannot isolate it.")
+
+        # ⭐ EVERY SHELL, NOT JUST COVER-2 - added Sep 23 2026.
+        # WHY: a real matchup read kept stalling on defences that play little
+        # man AND little cover-2. New Orleans is 22.1% man and 15.3% cover-2,
+        # so the two shells this file could measure covered barely a third of
+        # their snaps and the honest answer was "I cannot say." Cover-3 and
+        # cover-4 are in the same feed and were simply never split out.
+        #
+        # ⚠️ EACH SHELL IS COMPARED AGAINST ITS OWN "REST", so the baselines
+        # differ between blocks and the changes are NOT additive across shells.
+        # Same design the cover-2 block already uses; read one row at a time.
+        for shell, n_shell in cvseen.most_common():
+            if n_shell < MIN_SHELL_N or shell in c2:
+                continue
+            print("\n" + "=" * 70)
+            print("%s vs EVERYTHING ELSE   %d, league-wide" % (shell, a.season))
+            print("=" * 70)
+            ts = tally(rows, lambda r, s=shell: None if not r["cv"]
+                       else ("SHELL" if r["cv"] == s else "REST"))
+            if ts["SHELL"]["n"] >= MIN_SHELL_N:
+                report(ts, "REST", "SHELL", "other cov", shell)
+            else:
+                print("  only %s targets after the join; under the %s floor."
+                      % (format(ts["SHELL"]["n"], ","), format(MIN_SHELL_N, ",")))
     else:
         print("\n  no defense_coverage_type in this release. man/zone only.")
 
