@@ -109,7 +109,10 @@ VID_ABS="$(cd "$(dirname "$VID")" && pwd)/$(basename "$VID")"
 ( cd "$OUT" && ffmpeg -v info -i "$VID_ABS" \
     -vf "select='gt(scene,0.35)',metadata=print:file=cuts.txt" \
     -an -f null - >/dev/null 2>&1 )
-CUTS=$(grep -c "pts_time" "$OUT/cuts.txt" 2>/dev/null || echo 0)
+# `grep -c` PRINTS 0 AND EXITS 1 on no match, so `|| echo 0` appends a SECOND
+# line and the count prints as two lines. Swallow the exit status instead.
+CUTS=$(grep -c "pts_time" "$OUT/cuts.txt" 2>/dev/null) || true
+[ -z "${CUTS:-}" ] && CUTS=0
 
 echo
 echo "wrote $(ls "$OUT"/sheets/sheet_*.png 2>/dev/null | wc -l) sheet(s) to $OUT/sheets/"

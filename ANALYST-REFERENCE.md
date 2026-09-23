@@ -4452,6 +4452,32 @@ the provenance rule names for every competitor scan. ✅ **A compilation titled
 failures, and is closer to a census than a highlight. Prefer that format and say
 which one you watched.**
 
+#### ⛔⛔ COLLEGE TAPE IS A DIFFERENT OBJECT. CHECK THE UPLOAD DATE FIRST.
+
+**A search for a rookie's highlights returns his DRAFT PROFILE far more often than
+his NFL work**, and the two look identical in a thumbnail. *(Worked case Sep 23,
+2026: the top result for a first-round rookie was a "Welcome to the [team]"
+package uploaded in APRIL — entirely college footage.)*
+
+⭐ **The upload date settles it in one second: anything before September is
+college.** The metadata line the script prints is there for this.
+
+**College tape is still worth watching. It answers different questions:**
+
+| ✅ College tape CAN show | ⛔ It CANNOT show |
+|---|---|
+| Traits — contact balance, vision, feet | Whether any of it survives NFL speed |
+| **What his college ROLE was** | His NFL role |
+| Short-yardage and goal-line usage | Anything about the current depth chart |
+
+⚠️ **AND THE STAT CARD ON A DRAFT PROFILE IS OFTEN THE MOST USEFUL FRAME IN THE
+VIDEO.** *(Same case: the title card read 113 carries and SIX receptions. Six
+catches in a season is a two-down college role, stated plainly, and no amount of
+watching the runs would have told you that.)*
+
+⛔ **Never let a college reel speak to NFL opportunity.** That is the room check,
+and the room is this season's depth chart.
+
 #### ⚠️ WHAT BROADCAST FOOTAGE CANNOT SHOW
 
 Nearly all public film is the TV angle, which **crops the safeties out of frame
