@@ -4383,3 +4383,93 @@ week a side), `volume_2026` trend reads `insufficient` for all 302, and FPA
 holds 2 weeks against 3-and-4-week gates. ⭐ **So RANK 1 of the Source
 Hierarchy — role CHANGE — has no data yet, and will not until about Week 4.**
 Say that out loud rather than letting rank 2 quietly stand in for it.
+
+
+---
+
+### ⭐⭐⭐ §11t · WATCHING FILM ON A PLAYER WHO HAS NO DATA YET (Sep 23, 2026)
+
+**Plain version first: for a player with a season on file, the measured rates
+outrank the tape and the tape is only confirmation. For a ROOKIE or an in-season
+waiver add there are no rates yet — so tape stops being confirmation and becomes
+one of the few instruments available.** ⛔ **It then has to be watched for
+different things, and that is what this section is.**
+
+> ## **THE INVERSION, stated as a rule:**
+> **KNOWN player (8+ games) → the data decides and the tape confirms.** Reading
+> tape to overrule a measured rate is the error.
+> **UNKNOWN player (rookie, debut, waiver add) → no rate exists.** Tape is
+> primary, but only for TRAITS and USAGE. ⛔ **Never for a rate.**
+
+#### THE THREE TIERS
+
+**TIER 1 — what tape uniquely answers about an unknown**
+
+1. ⭐⭐⭐ **WHEN IS HE ON THE FIELD?** Down, distance, quarter, score. This is the
+   coaching staff's own opinion expressed in the only currency that matters, and
+   it is **the most predictive thing visible on tape.** Almost nobody watches for
+   it. *(Worked case: Jonah Coleman's NFL debut contains a 2nd-and-11 handoff in
+   the fourth quarter of a one-score game with 2:33 left. That one frame outweighs
+   every yardage total in the video.)*
+2. **WHAT JOB ARE THEY USING HIM IN?** Goal line, third down, two-minute, gadget.
+   Each has a completely different fantasy value, and a reel shows you which.
+3. **DID HE WIN WITH A TRAIT, OR THROUGH A HOLE?** ⭐ **The hole belongs to the
+   offensive line and does not travel with him. Getting outside a walled front
+   does.**
+
+**TIER 2 — traits that transfer**
+Contact balance, decisiveness (commits vs dances), hands, long speed. **These
+repeat. Outcomes do not** — see section 2 for the stability table.
+
+**TIER 3 — what tape CANNOT show, at any resolution**
+
+4. ⛔⛔ **WHY the snaps happened.** The biggest one, and the reel looks identical
+   either way.
+5. ⛔ **PASS PROTECTION** — the number one reason a talented rookie back sits, and
+   a missed blitz pickup never makes a highlight cut.
+6. ⛔ **Any rate at all.**
+
+#### THE TWO WORKED CASES, AND THEY FAIL IN OPPOSITE DIRECTIONS
+
+⭐⭐ **JOSH DOWNS 2025 — the case where tape FLATTERS.** 88 targets and 58
+receptions across 16 games makes an excellent-looking 11-minute compilation.
+**His spike rate was 0.000 and his nuclear rate was 0.000 — he never once cleared
+18 half-PPR points in a full season, with a 43.8% dud rate.** ⛔ **No reel can
+show a frequency.** And **341 routes against 88 targets means roughly 74% of his
+season is not in the video and never could be.**
+
+⭐⭐ **JONAH COLEMAN debut — the case where the tape is RIGHT and the ROOM is the
+missing half.** The tape genuinely supports the talent read. **But the 40% snap
+share was INHERITED: the back ahead of him played 51% the previous week and was
+out. He displaced nobody.** ⛔ **That is check 1 of the seven, and it is exactly
+what a highlight reel structurally cannot show.**
+
+#### ⛔ THE SURVIVORSHIP PROPERTY
+
+**A highlight reel is a winners-only sample BY CONSTRUCTION** — the same defect
+the provenance rule names for every competitor scan. ✅ **A compilation titled
+"every target" or "every play" is materially better because it includes the
+failures, and is closer to a census than a highlight. Prefer that format and say
+which one you watched.**
+
+#### ⚠️ WHAT BROADCAST FOOTAGE CANNOT SHOW
+
+Nearly all public film is the TV angle, which **crops the safeties out of frame
+before the snap.** Coverage shell, release against press, hand usage and eye
+discipline are **not readable from it**, and no amount of careful watching
+recovers them. **All-22 is not on YouTube.** ⭐ **Name the missing instrument
+rather than inferring — an honest "I can only see the broadcast angle" costs
+nothing; a confident wrong read costs a waiver claim.**
+
+#### THE PLUMBING
+
+```
+bash scripts/film-sheets.sh <youtube-url|local-path> [outdir]
+```
+
+Downloads, samples ~64 frames whatever the runtime, and writes **tiled 4x4 contact
+sheets** — one image instead of sixteen, which is the difference between a
+readable pass and an unaffordable one. It judges nothing. **Five traps are handled
+and documented in its header**, including two that fail SILENTLY: 720p is
+403-blocked on every client that offers it, and `metadata=print:file=` writes
+nothing when handed a path containing a drive-letter colon while still exiting 0.

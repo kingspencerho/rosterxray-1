@@ -9831,3 +9831,40 @@ refresh-inseason.sh RUN FOR REAL end to end, not just parsed: step 7 wrote 312 p
 rendered in a browser: the section mounts, the edge note carries the live branch, and
   the premium row is silent on an ordinary player and fires above p75
 ```
+
+
+---
+
+## Reading Film on a Player With No Data Yet (added Sep 23, 2026)
+
+**Nothing in the app changed — no scored input, no data layer, no render.** This is
+a CONVERSATIONAL instrument plus its rubric, added because evaluating a rookie or a
+waiver add is the one case where the app's own numbers cannot help: **the rates do
+not exist yet.**
+
+**The rubric is `ANALYST-REFERENCE.md` section 11t. Read it before reading any
+tape.** Its one-line version:
+
+> **Known player, 8+ games → the DATA decides and the tape confirms.**
+> **Rookie or waiver add → no rate exists, so tape is primary for TRAITS and
+> USAGE, and never for a rate.**
+
+⭐ **The most predictive thing visible on tape is WHEN a player is on the field** —
+down, distance, quarter and score are the coaching staff voting with snaps.
+
+⛔ **The two failure modes are opposite and both are banked with worked cases in
+11t:** tape FLATTERS a high-volume player with no spike weeks, and tape is silent
+on WHY the snaps happened — an inherited snap share and an earned one look
+identical.
+
+```
+bash scripts/film-sheets.sh <youtube-url|local-path> [outdir]
+```
+
+Tiled 4x4 contact sheets, ~64 frames at any runtime. It judges nothing.
+⚠️ **Five traps are documented in its header and two of them fail SILENTLY:**
+720p is 403-blocked on every YouTube client that advertises it (the `android`
+client returns 360p and completes), and **`metadata=print:file=` writes nothing
+when handed a path containing a drive-letter colon, while still exiting 0** —
+ffmpeg parses the colon as its own option separator. Both were found by running
+the script, not by reading it.

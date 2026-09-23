@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "built_at": "2026-09-22T10:54:13Z",
+  "built_at": "2026-09-23T02:59:33Z",
   "conflict_rule": "The feed NEVER overwrites, outranks or out-dates a hand-written note. It raises a flag a human clears. A hand-written note keeps its own date until it is edited by hand. Both render; neither replaces the other.",
   "consumers": [
    "buildBreakoutBoard/depthOpening",
@@ -8,25 +8,25 @@
   ],
   "context_only": true,
   "counts": {
-   "CB": 173,
-   "DB": 340,
-   "DE": 151,
+   "CB": 175,
+   "DB": 341,
+   "DE": 152,
    "DT": 164,
    "FS": 2,
    "ILB": 1,
-   "LB": 292,
+   "LB": 293,
    "NT": 3,
    "OLB": 1,
-   "QB": 117,
-   "RB": 187,
+   "QB": 118,
+   "RB": 188,
    "S": 1,
    "SS": 4,
-   "TE": 197,
-   "WR": 316
+   "TE": 200,
+   "WR": 320
   },
   "counts_by_side": {
-   "def": 1132,
-   "off": 817
+   "def": 1137,
+   "off": 826
   },
   "def_positions": [
    "DE",
@@ -50,7 +50,7 @@
    "NFI",
    "DNR"
   ],
-  "hard_status_count": 331,
+  "hard_status_count": 338,
   "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
   "hierarchy_rank": {
    "all": "1 - role and availability CHANGE"
@@ -78,11 +78,11 @@
   ],
   "season": 2026,
   "source": "Sleeper /v1/players/nfl (public, no auth, unversioned)",
-  "source_probed": "2026-09-22",
+  "source_probed": "2026-09-23",
   "stability": null,
   "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",
   "why_not_freshest_wins": "A same-day feed would out-date all 140 RECENT_NEWS entries permanently. 7 of 15 sampled entries are pure judgement the feed has no opinion about, so freshest-wins would demote the analysis to decoration on day one.",
-  "with_depth_chart": 1334
+  "with_depth_chart": 1336
  },
  "players": {
   "aamaris brown": {
@@ -233,7 +233,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -306,7 +306,7 @@
    "team": "SEA"
   },
   "aidan oconnell": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": "Personal",
    "injury_status": "Out",
@@ -372,11 +372,11 @@
    "team": "NE"
   },
   "aj dillon": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -419,11 +419,11 @@
    "depth_chart_order": 1,
    "depth_chart_position": "RCB",
    "injury_body_part": "Groin",
-   "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "injury_status": "IR",
+   "news_updated": "2026-09-22",
    "pos": "CB",
    "side": "def",
-   "status": "Active",
+   "status": "Inactive",
    "team": "ATL"
   },
   "akayleb evans": {
@@ -504,7 +504,7 @@
    "team": "WAS"
   },
   "alec pierce": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "LWR",
    "injury_body_part": "Heel",
    "injury_status": "Out",
@@ -552,7 +552,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -702,7 +702,7 @@
    "team": "MIN"
   },
   "ameer abdullah": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -761,7 +761,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-02",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -805,7 +805,7 @@
    "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-01-31",
+   "news_updated": "2026-09-22",
    "pos": "DE",
    "side": "def",
    "status": "Active",
@@ -992,7 +992,7 @@
    "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -1153,14 +1153,14 @@
    "team": "IND"
   },
   "arian smith": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 8,
    "depth_chart_position": "RWR",
-   "injury_body_part": null,
-   "injury_status": null,
-   "news_updated": "2026-06-13",
+   "injury_body_part": "Knee",
+   "injury_status": "IR",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
-   "status": "Active",
+   "status": "Inactive",
    "team": "NYJ"
   },
   "arik armstead": {
@@ -1230,7 +1230,7 @@
    "team": "TB"
   },
   "ashton dulin": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 6,
    "depth_chart_position": "SWR",
    "injury_body_part": "Ankle",
    "injury_status": "Out",
@@ -1285,11 +1285,11 @@
    "team": "WAS"
   },
   "audric estime": {
-   "depth_chart_order": 6,
-   "depth_chart_position": "RB",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": "Thigh",
    "injury_status": "IR",
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Inactive",
@@ -1376,11 +1376,11 @@
    "depth_chart_order": null,
    "depth_chart_position": "DB",
    "injury_body_part": "Foot",
-   "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "injury_status": "IR",
+   "news_updated": "2026-09-23",
    "pos": "CB",
    "side": "def",
-   "status": "Active",
+   "status": "Inactive",
    "team": "DET"
   },
   "ayden garnes": {
@@ -1410,7 +1410,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -1432,7 +1432,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-03",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -1472,7 +1472,7 @@
    "team": "MIN"
   },
   "barion brown": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -1509,7 +1509,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-07-12",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -1538,7 +1538,7 @@
    "team": "ARI"
   },
   "bauer sharp": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -1560,7 +1560,7 @@
    "team": "ATL"
   },
   "behren morton": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -1582,7 +1582,7 @@
    "team": "PIT"
   },
   "ben sinnott": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -1615,7 +1615,7 @@
    "team": "DET"
   },
   "ben vansumeren": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -1740,11 +1740,11 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-04-28",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
-   "team": "PIT"
+   "team": "DET"
   },
   "bj green": {
    "depth_chart_order": 2,
@@ -1795,7 +1795,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -1835,7 +1835,7 @@
    "team": "TB"
   },
   "bo melton": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": "Neck",
    "injury_status": "Questionable",
@@ -1883,7 +1883,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-11",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -1923,7 +1923,7 @@
    "team": "MIA"
   },
   "brady russell": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -1988,6 +1988,17 @@
    "status": "Active",
    "team": "CIN"
   },
+  "brandin cooks": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "WR",
+   "side": "off",
+   "status": "Active",
+   "team": "SF"
+  },
   "brandin echols": {
    "depth_chart_order": 2,
    "depth_chart_position": "NB",
@@ -2000,7 +2011,7 @@
    "team": "PIT"
   },
   "brandon aiyuk": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 8,
    "depth_chart_position": null,
    "injury_body_part": "Knee - ACL + MCL",
    "injury_status": "DNR",
@@ -2048,7 +2059,7 @@
    "depth_chart_position": "RDE",
    "injury_body_part": "Hand",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "DE",
    "side": "def",
    "status": "Active",
@@ -2143,11 +2154,11 @@
    "team": "KC"
   },
   "braxton berrios": {
-   "depth_chart_order": 5,
-   "depth_chart_position": "RWR",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -2174,6 +2185,17 @@
    "side": "off",
    "status": "Active",
    "team": "NYJ"
+  },
+  "brenden bates": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "TE",
+   "side": "off",
+   "status": "Active",
+   "team": "JAX"
   },
   "brenden schooler": {
    "depth_chart_order": 3,
@@ -2275,7 +2297,7 @@
    "team": "HOU"
   },
   "brevyn spann ford": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -2330,7 +2352,7 @@
    "team": "ATL"
   },
   "brian thomas": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 2,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -2363,7 +2385,7 @@
    "team": "PHI"
   },
   "british brooks": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -2389,7 +2411,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": "Knee - Meniscus",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -2510,7 +2532,7 @@
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -2550,7 +2572,7 @@
    "team": "CAR"
   },
   "brycen tremayne": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -2609,7 +2631,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -2642,7 +2664,7 @@
    "depth_chart_position": "RCB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-01-07",
+   "news_updated": "2026-09-23",
    "pos": "CB",
    "side": "def",
    "status": "Active",
@@ -2682,7 +2704,7 @@
    "team": "TB"
   },
   "cade stover": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -2803,11 +2825,11 @@
    "team": "TEN"
   },
   "caleb williams": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Hamstring",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -3166,7 +3188,7 @@
    "team": "GB"
   },
   "carsen ryan": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -3177,7 +3199,7 @@
    "team": "CLE"
   },
   "carson beck": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -3203,7 +3225,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -3232,7 +3254,7 @@
    "team": "IND"
   },
   "carson wentz": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -3254,11 +3276,11 @@
    "team": "LV"
   },
   "case keenum": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -3302,7 +3324,7 @@
    "depth_chart_position": "RDE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-02-05",
+   "news_updated": "2026-09-23",
    "pos": "DE",
    "side": "def",
    "status": "Active",
@@ -3445,7 +3467,7 @@
    "depth_chart_position": "NB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2025-12-28",
+   "news_updated": "2026-09-23",
    "pos": "CB",
    "side": "def",
    "status": "Active",
@@ -3467,7 +3489,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": "Forearm",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Inactive",
@@ -3628,11 +3650,11 @@
    "team": "MIA"
   },
   "chris bell": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -3676,7 +3698,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -3760,7 +3782,7 @@
    "team": "MIA"
   },
   "chris moore": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -3874,7 +3896,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-02-14",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -3914,7 +3936,7 @@
    "team": "DET"
   },
   "christian kirk": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 7,
    "depth_chart_position": "SWR",
    "injury_body_part": "Calf",
    "injury_status": "IR",
@@ -4024,7 +4046,7 @@
    "team": "TB"
   },
   "cj donaldson": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -4050,7 +4072,7 @@
    "depth_chart_position": "LCB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2025-08-28",
+   "news_updated": "2026-09-22",
    "pos": "CB",
    "side": "def",
    "status": "Active",
@@ -4148,7 +4170,7 @@
    "depth_chart_order": 1,
    "depth_chart_position": "RCB",
    "injury_body_part": "Hamstring",
-   "injury_status": "Questionable",
+   "injury_status": "Out",
    "news_updated": "2026-09-21",
    "pos": "DB",
    "side": "def",
@@ -4176,6 +4198,17 @@
    "side": "def",
    "status": "Active",
    "team": "TEN"
+  },
+  "cody hardy": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-23",
+   "pos": "TE",
+   "side": "off",
+   "status": "Active",
+   "team": "NYJ"
   },
   "cody lindenberg": {
    "depth_chart_order": 2,
@@ -4222,7 +4255,7 @@
    "team": "LV"
   },
   "colbie young": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -4237,7 +4270,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -4310,7 +4343,7 @@
    "team": "CHI"
   },
   "cole payton": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -4321,7 +4354,7 @@
    "team": "PHI"
   },
   "cole turner": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "TE",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -4365,7 +4398,7 @@
    "team": "HOU"
   },
   "colson yankoff": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -4464,7 +4497,7 @@
    "team": "KC"
   },
   "cooper rush": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -4486,7 +4519,7 @@
    "team": "TEN"
   },
   "corey kiner": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -4574,11 +4607,11 @@
    "team": "DAL"
   },
   "cyrus allen": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -4600,7 +4633,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -4688,7 +4721,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -4908,7 +4941,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -5058,7 +5091,7 @@
    "team": "LV"
   },
   "dareke young": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": "Hamstring",
    "injury_status": "Questionable",
@@ -5091,7 +5124,7 @@
    "team": "LV"
   },
   "darius cooper": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -5112,8 +5145,19 @@
    "status": "Active",
    "team": "NE"
   },
+  "darius rush": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "DB",
+   "side": "def",
+   "status": "Active",
+   "team": "PIT"
+  },
   "darius slayton": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -5139,7 +5183,7 @@
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -5227,7 +5271,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -5267,7 +5311,7 @@
    "team": "ATL"
   },
   "davante adams": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 2,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -5358,15 +5402,15 @@
    "depth_chart_order": 1,
    "depth_chart_position": "LDE",
    "injury_body_part": "Groin",
-   "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "injury_status": "IR",
+   "news_updated": "2026-09-22",
    "pos": "DT",
    "side": "def",
-   "status": "Active",
+   "status": "Inactive",
    "team": "NYJ"
   },
   "david sills": {
-   "depth_chart_order": 8,
+   "depth_chart_order": 7,
    "depth_chart_position": "RWR",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -5392,7 +5436,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -5458,7 +5502,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-18",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -5469,7 +5513,7 @@
    "depth_chart_position": "LCB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-09",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -5663,7 +5707,7 @@
    "team": "SF"
   },
   "deejay dallas": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -5685,7 +5729,7 @@
    "team": "IND"
   },
   "deion burks": {
-   "depth_chart_order": 10,
+   "depth_chart_order": 7,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -5740,7 +5784,7 @@
    "team": "SEA"
   },
   "demarcus robinson": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 6,
    "depth_chart_position": "LWR",
    "injury_body_part": "Ankle",
    "injury_status": "Out",
@@ -5755,14 +5799,14 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
    "team": "NYJ"
   },
   "demario douglas": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -5788,14 +5832,14 @@
    "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
    "team": "CIN"
   },
   "demond claiborne": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -5828,7 +5872,7 @@
    "team": "JAX"
   },
   "denzel boston": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 1,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -6107,7 +6151,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -6140,7 +6184,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -6158,11 +6202,11 @@
    "team": "DAL"
   },
   "devin singletary": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -6224,7 +6268,7 @@
    "team": "PHI"
   },
   "devontez walker": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -6279,7 +6323,7 @@
    "team": "MIN"
   },
   "dillon gabriel": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": "Back",
    "injury_status": "IR",
@@ -6323,7 +6367,7 @@
    "team": "NE"
   },
   "dj giddens": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": "Knee",
    "injury_status": "Out",
@@ -6345,7 +6389,7 @@
    "team": "WAS"
   },
   "dj herman": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -6422,7 +6466,7 @@
    "team": "DET"
   },
   "dj rogers": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "TE",
    "injury_body_part": "Knee",
    "injury_status": "IR",
@@ -6499,7 +6543,7 @@
    "team": "CHI"
   },
   "dohnte meyers": {
-   "depth_chart_order": 8,
+   "depth_chart_order": 4,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -6624,18 +6668,18 @@
    "depth_chart_position": null,
    "injury_body_part": "Undisclosed",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-03",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Inactive",
    "team": "MIN"
   },
   "dontayvion wicks": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -6811,7 +6855,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -6829,7 +6873,7 @@
    "team": "IND"
   },
   "drew sample": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -6928,7 +6972,7 @@
    "team": "NYG"
   },
   "dyami brown": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -7071,7 +7115,7 @@
    "team": "NE"
   },
   "ej jenkins": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -7097,7 +7141,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-17",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -7159,8 +7203,8 @@
    "team": "PHI"
   },
   "elias neal": {
-   "depth_chart_order": 3,
-   "depth_chart_position": "LILB",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
    "news_updated": "2026-01-25",
@@ -7185,7 +7229,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-22",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -7284,7 +7328,7 @@
    "depth_chart_position": "ROLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2025-11-16",
+   "news_updated": "2026-09-23",
    "pos": "DE",
    "side": "def",
    "status": "Active",
@@ -7302,7 +7346,7 @@
    "team": "TB"
   },
   "elijah sarratt": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 6,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -7335,7 +7379,7 @@
    "team": "SEA"
   },
   "emari demercado": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -7566,7 +7610,7 @@
    "team": "MIN"
   },
   "erick all": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -7603,7 +7647,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-10",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -7742,7 +7786,7 @@
    "team": "KC"
   },
   "fernando mendoza": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -7764,11 +7808,11 @@
    "team": "LV"
   },
   "foster moreau": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -7779,7 +7823,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -7834,7 +7878,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-11",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -7896,7 +7940,7 @@
    "team": "BAL"
   },
   "gardner minshew": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -7984,11 +8028,11 @@
    "team": "NYJ"
   },
   "gary jennings": {
-   "depth_chart_order": 7,
-   "depth_chart_position": "LWR",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -8094,11 +8138,11 @@
    "team": "DAL"
   },
   "germie bernard": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -8149,7 +8193,7 @@
    "team": "HOU"
   },
   "grant calcaterra": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 6,
    "depth_chart_position": "TE",
    "injury_body_part": "Back",
    "injury_status": "IR",
@@ -8380,15 +8424,15 @@
    "team": "CHI"
   },
   "hayden rucci": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 5,
+   "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-02",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
-   "team": "JAX"
+   "team": "LAC"
   },
   "haynes king": {
    "depth_chart_order": 3,
@@ -8439,7 +8483,7 @@
    "depth_chart_position": "RCB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-05-01",
+   "news_updated": "2026-09-23",
    "pos": "CB",
    "side": "def",
    "status": "Active",
@@ -8468,7 +8512,7 @@
    "team": "NE"
   },
   "hunter long": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -8511,8 +8555,19 @@
    "status": "Active",
    "team": "TB"
   },
+  "ihmir smith marsette": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "WR",
+   "side": "off",
+   "status": "Active",
+   "team": "CAR"
+  },
   "irv charles": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 5,
    "depth_chart_position": "LWR",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -8593,11 +8648,22 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
    "team": "NYJ"
+  },
+  "isaiah hodgins": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "WR",
+   "side": "off",
+   "status": "Active",
+   "team": "PIT"
   },
   "isaiah land": {
    "depth_chart_order": null,
@@ -8709,6 +8775,17 @@
    "status": "Active",
    "team": "NYJ"
   },
+  "isaiahh loudermilk": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-05-21",
+   "pos": "DE",
+   "side": "def",
+   "status": "Active",
+   "team": "NYJ"
+  },
   "isas waxter": {
    "depth_chart_order": null,
    "depth_chart_position": null,
@@ -8721,7 +8798,7 @@
    "team": "LAC"
   },
   "isiah pacheco": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": "Back",
    "injury_status": "IR",
@@ -8765,7 +8842,7 @@
    "team": "MIN"
   },
   "j michael sturdivant": {
-   "depth_chart_order": 9,
+   "depth_chart_order": 6,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -8809,7 +8886,7 @@
    "team": "SEA"
   },
   "jack bech": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -8875,8 +8952,8 @@
    "team": "ARI"
   },
   "jack heflin": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 3,
+   "depth_chart_position": "LDE",
    "injury_body_part": null,
    "injury_status": null,
    "news_updated": "2026-02-08",
@@ -9051,11 +9128,11 @@
    "team": "MIA"
   },
   "jacob cowing": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-12",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -9099,14 +9176,14 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
    "team": "MIA"
   },
   "jacob saylors": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -9143,7 +9220,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -9220,11 +9297,22 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-02-07",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
    "team": "KC"
+  },
+  "jaden keller": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-16",
+   "pos": "LB",
+   "side": "def",
+   "status": "Active",
+   "team": "NYJ"
   },
   "jaden robinson": {
    "depth_chart_order": null,
@@ -9359,7 +9447,7 @@
    "team": "DAL"
   },
   "jake bobo": {
-   "depth_chart_order": 8,
+   "depth_chart_order": 6,
    "depth_chart_position": null,
    "injury_body_part": "Knee",
    "injury_status": "IR",
@@ -9370,7 +9458,7 @@
    "team": "SEA"
   },
   "jake briningstool": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -9502,7 +9590,7 @@
    "team": "PHI"
   },
   "jaleel mclaughlin": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -9513,7 +9601,7 @@
    "team": "CLE"
   },
   "jalen brooks": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -9722,7 +9810,7 @@
    "team": "LV"
   },
   "jalen royals": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -9755,7 +9843,7 @@
    "team": "DAL"
   },
   "jalen tolbert": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 5,
    "depth_chart_position": "LWR",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -9876,7 +9964,7 @@
    "team": "CIN"
   },
   "jameis winston": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -10023,7 +10111,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-17",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -10133,7 +10221,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-01-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -10160,6 +10248,17 @@
    "side": "off",
    "status": "Inactive",
    "team": "TEN"
+  },
+  "jaret patterson": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-23",
+   "pos": "RB",
+   "side": "off",
+   "status": "Active",
+   "team": "MIN"
   },
   "jarquez hunter": {
    "depth_chart_order": null,
@@ -10272,7 +10371,7 @@
    "team": "NYG"
   },
   "jatavion sanders": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -10382,7 +10481,7 @@
    "team": "SEA"
   },
   "jaxson dart": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Knee",
    "injury_status": "Out",
@@ -10437,7 +10536,7 @@
    "team": "CAR"
   },
   "jayden daniels": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": "Elbow",
    "injury_status": "Out",
@@ -10448,7 +10547,7 @@
    "team": "WAS"
   },
   "jayden higgins": {
-   "depth_chart_order": 11,
+   "depth_chart_order": 10,
    "depth_chart_position": null,
    "injury_body_part": "Knee - ACL",
    "injury_status": "IR",
@@ -10481,11 +10580,11 @@
    "team": "NO"
   },
   "jayden reed": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": "Neck",
    "injury_status": "Out",
-   "news_updated": "2026-09-22",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -10602,7 +10701,7 @@
    "team": "MIA"
   },
   "jaylin lane": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -10613,11 +10712,11 @@
    "team": "WAS"
   },
   "jaylin noel": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -10910,7 +11009,7 @@
    "team": "ARI"
   },
   "jerry jeudy": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -10932,7 +11031,7 @@
    "team": "IND"
   },
   "jeshaun jones": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 6,
    "depth_chart_position": "RWR",
    "injury_body_part": "Suspension",
    "injury_status": "Sus",
@@ -10958,7 +11057,7 @@
    "depth_chart_position": "FS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-08-07",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -10969,7 +11068,7 @@
    "depth_chart_position": "FS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-08-01",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -10980,7 +11079,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -11002,7 +11101,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-22",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -11042,7 +11141,7 @@
    "team": "DET"
   },
   "jj mccarthy": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -11079,7 +11178,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": "Hamstring",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -11119,11 +11218,11 @@
    "team": "BUF"
   },
   "joe bachie": {
-   "depth_chart_order": 3,
-   "depth_chart_position": "LOLB",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-08",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -11196,7 +11295,7 @@
    "team": "DAL"
   },
   "joe royer": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "TE",
    "injury_body_part": "Personal",
    "injury_status": "PUP",
@@ -11251,7 +11350,7 @@
    "team": "PIT"
   },
   "john bates": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -11284,7 +11383,7 @@
    "team": "BAL"
   },
   "john metchie": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -11350,7 +11449,7 @@
    "team": "IND"
   },
   "johnny mundt": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -11372,7 +11471,7 @@
    "team": "DEN"
   },
   "johnny wilson": {
-   "depth_chart_order": 9,
+   "depth_chart_order": 8,
    "depth_chart_position": null,
    "injury_body_part": "Knee",
    "injury_status": "IR",
@@ -11387,7 +11486,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -11515,7 +11614,7 @@
    "team": "BAL"
   },
   "jonathon brooks": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": "Groin",
    "injury_status": "Questionable",
@@ -11526,11 +11625,11 @@
    "team": "CAR"
   },
   "jonnu smith": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -11625,7 +11724,7 @@
    "team": "DAL"
   },
   "jordan james": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -11651,7 +11750,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -11746,7 +11845,7 @@
    "team": "LAR"
   },
   "jordan watkins": {
-   "depth_chart_order": 9,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -11757,7 +11856,7 @@
    "team": "SF"
   },
   "jordan whittington": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": "Quadriceps",
    "injury_status": "Out",
@@ -11772,7 +11871,7 @@
    "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -11845,7 +11944,7 @@
    "team": "CHI"
   },
   "josh cameron": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -11867,7 +11966,7 @@
    "team": "BAL"
   },
   "josh downs": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -11900,7 +11999,7 @@
    "team": "JAX"
   },
   "josh jacobs": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": "Personal",
    "injury_status": "NA",
@@ -11970,7 +12069,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -12021,7 +12120,7 @@
    "team": "LAR"
   },
   "josh whyle": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -12080,7 +12179,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-18",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -12135,7 +12234,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-14",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -12263,7 +12362,7 @@
    "team": "SEA"
   },
   "julius chestnut": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -12373,7 +12472,7 @@
    "team": "MIN"
   },
   "justin joly": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -12454,7 +12553,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -12560,11 +12659,11 @@
    "team": "BUF"
   },
   "kaleb johnson": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -12615,11 +12714,11 @@
    "team": "MIA"
   },
   "kalif raymond": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -12630,7 +12729,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -12670,7 +12769,7 @@
    "team": "HOU"
   },
   "kameron johnson": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -12795,7 +12894,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -12835,7 +12934,7 @@
    "team": "HOU"
   },
   "keandre lambert smith": {
-   "depth_chart_order": 9,
+   "depth_chart_order": 8,
    "depth_chart_position": "LWR",
    "injury_body_part": "Hamstring",
    "injury_status": "IR",
@@ -12879,7 +12978,7 @@
    "team": "PIT"
   },
   "keenan allen": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -13186,6 +13285,17 @@
    "status": "Active",
    "team": "TB"
   },
+  "kenny moore": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "CB",
+   "side": "def",
+   "status": "Active",
+   "team": "PHI"
+  },
   "kenny pickett": {
    "depth_chart_order": 2,
    "depth_chart_position": "QB",
@@ -13235,7 +13345,7 @@
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-18",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -13319,7 +13429,7 @@
    "team": "NE"
   },
   "kevin coleman": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -13418,7 +13528,7 @@
    "team": "PHI"
   },
   "khadarel hodge": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -13561,11 +13671,11 @@
    "team": "NYJ"
   },
   "kirk cousins": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -13638,7 +13748,7 @@
    "team": "WAS"
   },
   "ko kieft": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -13671,11 +13781,11 @@
    "team": "DEN"
   },
   "konata mumpfield": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -13736,6 +13846,17 @@
    "status": "Active",
    "team": "GB"
   },
+  "krys barnes": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-08-19",
+   "pos": "LB",
+   "side": "def",
+   "status": "Active",
+   "team": "CLE"
+  },
   "kurtis rourke": {
    "depth_chart_order": 3,
    "depth_chart_position": "QB",
@@ -13770,7 +13891,7 @@
    "team": "LV"
   },
   "kyle allen": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -13807,7 +13928,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -13851,7 +13972,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -13957,7 +14078,7 @@
    "team": "LAC"
   },
   "lajohntay wester": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14023,7 +14144,7 @@
    "team": "CIN"
   },
   "laquon treadwell": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14093,7 +14214,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-03-11",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -14111,7 +14232,7 @@
    "team": "SEA"
   },
   "lequint allen": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -14187,19 +14308,8 @@
    "status": "Active",
    "team": "HOU"
   },
-  "liam anderson": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
-   "injury_body_part": null,
-   "injury_status": null,
-   "news_updated": "2026-09-02",
-   "pos": "LB",
-   "side": "def",
-   "status": "Active",
-   "team": "MIA"
-  },
   "liljordan humphrey": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14320,7 +14430,7 @@
    "team": "SF"
   },
   "luke mccaffrey": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -14408,11 +14518,11 @@
    "team": "MIN"
   },
   "mack hollins": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -14423,7 +14533,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": "Thumb",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -14441,7 +14551,7 @@
    "team": "MIA"
   },
   "makai lemon": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14562,7 +14672,7 @@
    "team": "CLE"
   },
   "malik benson": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14573,7 +14683,7 @@
    "team": "LV"
   },
   "malik davis": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "RB",
    "injury_body_part": "Hip",
    "injury_status": "IR",
@@ -14584,8 +14694,8 @@
    "team": "DAL"
   },
   "malik harrison": {
-   "depth_chart_order": 3,
-   "depth_chart_position": "RILB",
+   "depth_chart_order": null,
+   "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
    "news_updated": "2026-09-08",
@@ -14639,11 +14749,11 @@
    "team": "CLE"
   },
   "malik mcclain": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 10,
+   "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-03",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -14698,7 +14808,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -14730,11 +14840,11 @@
    "depth_chart_order": 2,
    "depth_chart_position": "LILB",
    "injury_body_part": "Ankle",
-   "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "injury_status": "IR",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
-   "status": "Active",
+   "status": "Inactive",
    "team": "NYJ"
   },
   "marcellas dial": {
@@ -14804,11 +14914,11 @@
    "team": "NE"
   },
   "marcus mariota": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -14859,7 +14969,7 @@
    "team": "SF"
   },
   "mark redman": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -14874,7 +14984,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-06-17",
+   "news_updated": "2026-09-22",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -14929,7 +15039,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-12",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -14947,7 +15057,7 @@
    "team": "LAC"
   },
   "marquise brown": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -14991,11 +15101,11 @@
    "team": "NO"
   },
   "marvin harrison": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 2,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -15050,7 +15160,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": "Thumb",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -15123,7 +15233,7 @@
    "team": "LAR"
   },
   "matthew golden": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -15145,7 +15255,7 @@
    "team": "LAR"
   },
   "max bredeson": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -15446,14 +15556,14 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
    "team": "LV"
   },
   "michael penix": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "QB",
    "injury_body_part": "Knee - ACL",
    "injury_status": "Out",
@@ -15508,7 +15618,7 @@
    "team": "DET"
   },
   "michael wilson": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -15750,7 +15860,7 @@
    "team": "NYJ"
   },
   "mitchell evans": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -15860,7 +15970,7 @@
    "team": "CHI"
   },
   "montorie foster": {
-   "depth_chart_order": 10,
+   "depth_chart_order": 9,
    "depth_chart_position": "SWR",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -15937,7 +16047,7 @@
    "team": "NE"
   },
   "myles price": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -15985,7 +16095,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -15996,7 +16106,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -16084,7 +16194,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -16113,11 +16223,11 @@
    "team": "NO"
   },
   "nathaniel watson": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
-   "injury_body_part": null,
-   "injury_status": null,
-   "news_updated": "2026-08-06",
+   "depth_chart_order": 2,
+   "depth_chart_position": "MLB",
+   "injury_body_part": "Knee",
+   "injury_status": "Out",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -16227,7 +16337,7 @@
    "depth_chart_position": "MLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -16260,7 +16370,7 @@
    "depth_chart_position": "NB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -16299,6 +16409,17 @@
    "status": "Inactive",
    "team": "SF"
   },
+  "nick mccloud": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "CB",
+   "side": "def",
+   "status": "Active",
+   "team": "CHI"
+  },
   "nick mullens": {
    "depth_chart_order": null,
    "depth_chart_position": null,
@@ -16315,7 +16436,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": "Shoulder",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -16590,15 +16711,15 @@
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
    "team": "NYG"
   },
   "ogbo okoronkwo": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 4,
+   "depth_chart_position": "RDE",
    "injury_body_part": null,
    "injury_status": null,
    "news_updated": "2026-08-06",
@@ -16608,7 +16729,7 @@
    "team": "SF"
   },
   "olamide zaccheaus": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -16623,7 +16744,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -16762,7 +16883,7 @@
    "team": "CAR"
   },
   "parker washington": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -16784,7 +16905,7 @@
    "team": "NYJ"
   },
   "pat bryant": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -16799,7 +16920,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -16964,7 +17085,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-10",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -17040,7 +17161,7 @@
    "depth_chart_order": 2,
    "depth_chart_position": "FS",
    "injury_body_part": "Foot",
-   "injury_status": "Questionable",
+   "injury_status": "Out",
    "news_updated": "2026-09-21",
    "pos": "DB",
    "side": "def",
@@ -17070,7 +17191,7 @@
    "team": "SEA"
   },
   "princeton fant": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "TE",
    "injury_body_part": "Knee - ACL + MCL",
    "injury_status": "IR",
@@ -17081,11 +17202,11 @@
    "team": "DAL"
   },
   "puka nacua": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 1,
    "depth_chart_position": "RWR",
    "injury_body_part": "Hip",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -17118,7 +17239,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -17151,7 +17272,7 @@
    "depth_chart_position": "NB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-11",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -17246,7 +17367,7 @@
    "team": "NE"
   },
   "quintin morris": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -17488,7 +17609,7 @@
    "team": "MIA"
   },
   "reggie gilliam": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -17499,7 +17620,7 @@
    "team": "NE"
   },
   "reggie virgil": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -17565,7 +17686,7 @@
    "team": "WAS"
   },
   "ricky pearsall": {
-   "depth_chart_order": 8,
+   "depth_chart_order": 9,
    "depth_chart_position": null,
    "injury_body_part": "Knee - PCL",
    "injury_status": "IR",
@@ -17590,8 +17711,8 @@
    "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": "Toe",
-   "injury_status": "Out",
-   "news_updated": "2026-09-20",
+   "injury_status": "Questionable",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -17686,7 +17807,7 @@
    "team": "MIA"
   },
   "robbie ouzts": {
-   "depth_chart_order": 8,
+   "depth_chart_order": 7,
    "depth_chart_position": "RB",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -17709,14 +17830,14 @@
   },
   "robert longerbeam": {
    "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_position": "DB",
    "injury_body_part": null,
    "injury_status": null,
    "news_updated": "2026-09-02",
    "pos": "DB",
    "side": "def",
    "status": "Active",
-   "team": "PHI"
+   "team": "ATL"
   },
   "robert spears jennings": {
    "depth_chart_order": 2,
@@ -17734,7 +17855,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-17",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -17851,7 +17972,7 @@
    "team": "LV"
   },
   "roman wilson": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -17939,7 +18060,7 @@
    "team": "CLE"
   },
   "ronnie rivers": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": "Calf",
    "injury_status": "Out",
@@ -17954,14 +18075,14 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
    "team": "BAL"
   },
   "roschon johnson": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -18038,7 +18159,7 @@
    "team": "DAL"
   },
   "ryan miller": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 6,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -18086,7 +18207,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": "Lower Body",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -18126,7 +18247,7 @@
    "team": "WAS"
   },
   "sam howell": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -18174,7 +18295,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -18185,7 +18306,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -18236,7 +18357,7 @@
    "team": "IND"
   },
   "savion williams": {
-   "depth_chart_order": 7,
+   "depth_chart_order": 8,
    "depth_chart_position": "LWR",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -18357,7 +18478,7 @@
    "team": "LV"
   },
   "seth mcgowan": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -18368,7 +18489,7 @@
    "team": "IND"
   },
   "seydou traore": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
@@ -18456,7 +18577,7 @@
    "team": "ARI"
   },
   "shedeur sanders": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -18465,6 +18586,17 @@
    "side": "off",
    "status": "Active",
    "team": "CLE"
+  },
+  "shedrick jackson": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-23",
+   "pos": "WR",
+   "side": "off",
+   "status": "Active",
+   "team": "BAL"
   },
   "shelby harris": {
    "depth_chart_order": 1,
@@ -18555,11 +18687,11 @@
    "team": "SF"
   },
   "sione vaki": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 2,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -18643,11 +18775,11 @@
    "team": "CHI"
   },
   "skyy moore": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -18680,7 +18812,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -18906,6 +19038,17 @@
    "status": "Active",
    "team": "NE"
   },
+  "tanner conner": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "TE",
+   "side": "off",
+   "status": "Active",
+   "team": "NE"
+  },
   "tanner hudson": {
    "depth_chart_order": null,
    "depth_chart_position": null,
@@ -18929,7 +19072,7 @@
    "team": "LAR"
   },
   "tanner koziol": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "TE",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -18940,7 +19083,7 @@
    "team": "JAX"
   },
   "tanner mckee": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -19050,7 +19193,7 @@
    "team": "SF"
   },
   "tay martin": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -19061,7 +19204,7 @@
    "team": "DET"
   },
   "taylen green": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "QB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -19296,7 +19439,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -19380,7 +19523,7 @@
    "team": "KC"
   },
   "thomas yassmin": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 7,
    "depth_chart_position": "TE",
    "injury_body_part": "Undisclosed",
    "injury_status": "IR",
@@ -19413,7 +19556,7 @@
    "team": "LV"
   },
   "tim patrick": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 5,
    "depth_chart_position": "LWR",
    "injury_body_part": "Groin",
    "injury_status": "IR",
@@ -19461,7 +19604,7 @@
    "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -19494,7 +19637,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -19545,7 +19688,7 @@
    "team": "PIT"
   },
   "tom kennedy": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -19556,7 +19699,7 @@
    "team": "DET"
   },
   "tommy devito": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 2,
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
@@ -19692,7 +19835,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -19769,7 +19912,7 @@
    "depth_chart_position": null,
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-02",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -19835,7 +19978,7 @@
    "depth_chart_position": "RILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-16",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -20084,7 +20227,7 @@
    "team": "LV"
   },
   "treylon burks": {
-   "depth_chart_order": 6,
+   "depth_chart_order": 7,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -20139,7 +20282,7 @@
    "team": "LAC"
   },
   "troy franklin": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -20150,11 +20293,11 @@
    "team": "DEN"
   },
   "troy reeder": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 4,
+   "depth_chart_position": "LOLB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-07-27",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -20172,11 +20315,11 @@
    "team": "TEN"
   },
   "tua tagovailoa": {
-   "depth_chart_order": 1,
+   "depth_chart_order": 3,
    "depth_chart_position": "QB",
    "injury_body_part": "Oblique",
    "injury_status": "Out",
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -20205,18 +20348,18 @@
    "team": "PHI"
   },
   "tutu atwell": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 5,
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-11",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
    "team": "LAR"
   },
   "ty chandler": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 5,
    "depth_chart_position": "RB",
    "injury_body_part": "Knee",
    "injury_status": "IR",
@@ -20319,7 +20462,7 @@
    "depth_chart_position": "SS",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-01-12",
+   "news_updated": "2026-09-23",
    "pos": "DB",
    "side": "def",
    "status": "Active",
@@ -20348,7 +20491,7 @@
    "team": "ARI"
   },
   "tyler badie": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
@@ -20392,7 +20535,7 @@
    "team": "LAR"
   },
   "tyler goodson": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": "Coach's Decision",
    "injury_status": "Out",
@@ -20407,7 +20550,7 @@
    "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-18",
+   "news_updated": "2026-09-23",
    "pos": "TE",
    "side": "off",
    "status": "Active",
@@ -20484,7 +20627,7 @@
    "depth_chart_position": "QB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -20623,11 +20766,11 @@
    "team": "GB"
   },
   "tyrone tracy": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-18",
+   "news_updated": "2026-09-22",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -20645,11 +20788,11 @@
    "team": "DAL"
   },
   "tyson bagent": {
-   "depth_chart_order": 2,
+   "depth_chart_order": 1,
    "depth_chart_position": "QB",
-   "injury_body_part": null,
-   "injury_status": null,
-   "news_updated": "2026-09-20",
+   "injury_body_part": "Concussion",
+   "injury_status": "Questionable",
+   "news_updated": "2026-09-22",
    "pos": "QB",
    "side": "off",
    "status": "Active",
@@ -20660,7 +20803,7 @@
    "depth_chart_position": "RCB",
    "injury_body_part": "Ankle",
    "injury_status": "Questionable",
-   "news_updated": "2026-09-20",
+   "news_updated": "2026-09-22",
    "pos": "CB",
    "side": "def",
    "status": "Active",
@@ -20901,7 +21044,7 @@
    "depth_chart_order": 1,
    "depth_chart_position": "LCB",
    "injury_body_part": "Neck",
-   "injury_status": "Questionable",
+   "injury_status": "Out",
    "news_updated": "2026-01-06",
    "pos": "DB",
    "side": "def",
@@ -20929,6 +21072,17 @@
    "side": "def",
    "status": "Active",
    "team": "CAR"
+  },
+  "will levis": {
+   "depth_chart_order": null,
+   "depth_chart_position": null,
+   "injury_body_part": null,
+   "injury_status": null,
+   "news_updated": "2026-09-22",
+   "pos": "QB",
+   "side": "off",
+   "status": "Active",
+   "team": "NYJ"
   },
   "will mallory": {
    "depth_chart_order": 5,
@@ -20979,7 +21133,7 @@
    "depth_chart_position": "RB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-19",
+   "news_updated": "2026-09-23",
    "pos": "RB",
    "side": "off",
    "status": "Active",
@@ -21085,11 +21239,11 @@
    "team": "BAL"
   },
   "xavier hutchinson": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 3,
    "depth_chart_position": "LWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -21100,7 +21254,7 @@
    "depth_chart_position": "RWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -21140,11 +21294,11 @@
    "team": "TEN"
   },
   "xavier smith": {
-   "depth_chart_order": 4,
+   "depth_chart_order": 6,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-12",
+   "news_updated": "2026-09-23",
    "pos": "WR",
    "side": "off",
    "status": "Active",
@@ -21228,7 +21382,7 @@
    "team": "DEN"
   },
   "zach charbonnet": {
-   "depth_chart_order": 5,
+   "depth_chart_order": 4,
    "depth_chart_position": "RB",
    "injury_body_part": "Knee - ACL",
    "injury_status": "PUP",
@@ -21250,22 +21404,22 @@
    "team": "JAX"
   },
   "zach ertz": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 2,
+   "depth_chart_position": "TE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-21",
+   "news_updated": "2026-09-22",
    "pos": "TE",
    "side": "off",
    "status": "Active",
    "team": "PHI"
   },
   "zach harrison": {
-   "depth_chart_order": null,
-   "depth_chart_position": null,
+   "depth_chart_order": 3,
+   "depth_chart_position": "LDE",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-03",
+   "news_updated": "2026-09-23",
    "pos": "DE",
    "side": "def",
    "status": "Active",
@@ -21305,7 +21459,7 @@
    "team": "NO"
   },
   "zachariah branch": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 4,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
@@ -21320,7 +21474,7 @@
    "depth_chart_position": "LILB",
    "injury_body_part": null,
    "injury_status": null,
-   "news_updated": "2026-09-15",
+   "news_updated": "2026-09-23",
    "pos": "LB",
    "side": "def",
    "status": "Active",
@@ -21426,7 +21580,7 @@
    "team": "CHI"
   },
   "zavion thomas": {
-   "depth_chart_order": 3,
+   "depth_chart_order": 5,
    "depth_chart_position": "SWR",
    "injury_body_part": null,
    "injury_status": null,
