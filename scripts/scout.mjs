@@ -312,7 +312,9 @@ if (vsSplit) {
     const opp = oppOf(c.team);
     if (!opp) continue;
     if (cols.indexOf(c) === 1 && sameTeam(cols[0].team, c.team)) break;  // same game, print once
-    const sch = DEF_SCHEME?.teams?.[opp] || DEF_SCHEME?.[opp];
+    // gameenv says WSH, defense_scheme says WAS - read every spelling, or a
+    // real profile prints as "no scheme profile on file" (Sep 24 2026, SEA @ WAS).
+    const sch = (TEAM_ALT[opp] || [opp]).map((t) => DEF_SCHEME?.teams?.[t] || DEF_SCHEME?.[t]).find(Boolean);
     console.log(`
   OPPONENT ${opp} - how they play:`);
     if (sch) {
