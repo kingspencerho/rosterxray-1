@@ -9862,6 +9862,10 @@ bash scripts/film-sheets.sh <youtube-url|local-path> [outdir]
 ```
 
 Tiled 4x4 contact sheets, ~64 frames at any runtime. It judges nothing.
+⭐ **`--find "Player Name"` (Sep 23, 2026) lists candidate videos newest first and never
+picks one** — a pre-trade reel can match a query title perfectly. **Say `film <player>`
+to run the whole loop: the `film` skill picks against the player's latest team change,
+reads the tape, joins it to the room and the market, and opens with the video link.**
 ⚠️ **Five traps are documented in its header and two of them fail SILENTLY:**
 720p is 403-blocked on every YouTube client that advertises it (the `android`
 client returns 360p and completes), and **`metadata=print:file=` writes nothing

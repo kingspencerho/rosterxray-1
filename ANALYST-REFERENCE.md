@@ -4547,10 +4547,20 @@ nothing; a confident wrong read costs a waiver claim.**
 #### THE PLUMBING
 
 ```
+bash scripts/film-sheets.sh --find "Player Name" [n]      # LIST candidates, newest first
 bash scripts/film-sheets.sh <youtube-url|local-path> [outdir]
 ```
 
-Downloads, samples ~64 frames whatever the runtime, and writes **tiled 4x4 contact
+⭐ **`--find` lists and NEVER picks** (added Sep 23, 2026). Upload date, age, length,
+channel, and a REEL column read off the title — `unfiltered` for "every target" style
+reels, `curated` for "best catches". ⛔⛔ **Why it does not pick: a Kaleb Johnson search
+returned "Preseason Week 2 Highlights vs Jets" as a perfect title match — STEELERS
+footage uploaded Aug 22, eight days before his trade to Green Bay.** Only the upload
+date read against the trade date tells them apart, and the script does not know team
+history. **The `film` skill (`.claude/skills/film/`) does the picking and opens every
+answer with the link to the video it read.**
+
+The second form downloads, samples ~64 frames whatever the runtime, and writes **tiled 4x4 contact
 sheets** — one image instead of sixteen, which is the difference between a
 readable pass and an unaffordable one. It judges nothing. **Five traps are handled
 and documented in its header**, including two that fail SILENTLY: 720p is

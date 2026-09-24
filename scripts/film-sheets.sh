@@ -53,6 +53,58 @@
 # YouTube. Say so rather than inferring.
 set -uo pipefail
 
+# ------------------------------------------------------------ --find MODE ---
+#   bash scripts/film-sheets.sh --find "Player Name" [n]
+#
+# LISTS candidate videos, newest first, with upload date, age, length and
+# channel. It NEVER picks one and never downloads anything.
+#
+# WHY IT DOES NOT PICK: on Sep 23 2026 the top results for a Week 2 search on
+# Kaleb Johnson included "Preseason Week 2 Highlights vs Jets" - STEELERS
+# footage uploaded Aug 22, before his Aug 30 trade to Green Bay. The title
+# matched the query perfectly. Only the upload date, read against the date of
+# the trade, told it apart. That comparison needs the player's team history,
+# which this script does not know, so the choice stays with the reader.
+#
+# The REEL column is read off the title and is the survivorship check from
+# ANALYST-REFERENCE 11t: "every target" / "every snap" reels include the misses,
+# "best catches" and "every catch" do not. Prefer an unfiltered reel when both
+# exist. Blank means the title does not say.
+#
+# ~4 seconds per result (each is a real metadata fetch), so n defaults to 8.
+if [ "${1:-}" = "--find" ]; then
+  Q="${2:-}"; N="${3:-8}"
+  [ -z "$Q" ] && { echo "usage: film-sheets.sh --find \"Player Name\" [n]" >&2; exit 2; }
+  command -v yt-dlp >/dev/null || { echo "yt-dlp not found" >&2; exit 3; }
+  NOW=$(date +%s)
+  echo "== YouTube: \"$Q highlights\", $N results, newest first =="
+  printf "%-10s %5s %6s  %-10s %-12s %-22s %s\n" UPLOADED AGE LENGTH REEL ID CHANNEL TITLE
+  PYTHONIOENCODING=utf-8 yt-dlp --no-warnings --skip-download --ignore-errors \
+      --print "%(upload_date)s|%(duration_string)s|%(id)s|%(channel)s|%(title)s" \
+      "ytsearch${N}:${Q} highlights" 2>/dev/null \
+    | sort -r \
+    | while IFS='|' read -r D LEN ID CH T; do
+        AGE="?"
+        if [[ "$D" =~ ^[0-9]{8}$ ]]; then
+          TS=$(date -d "$D" +%s 2>/dev/null) && AGE="$(( (NOW - TS) / 86400 ))d"
+          D="${D:0:4}-${D:4:2}-${D:6:2}"
+        fi
+        LT=$(printf '%s' "$T" | tr '[:upper:]' '[:lower:]')
+        REEL=""
+        if [[ "$LT" =~ every\ (target|snap|touch|run|carry|play|rep)|all\ (targets|snaps|plays) ]]; then
+          REEL="unfiltered"
+        elif [[ "$LT" =~ best|top\ [0-9]|every\ catch|mix|hype ]]; then
+          REEL="curated"
+        fi
+        printf "%-10s %5s %6s  %-10s %-12s %-22.22s %s\n" "$D" "$AGE" "$LEN" "$REEL" "$ID" "$CH" "$T"
+      done
+  echo
+  echo "Nothing was picked. Check each upload date against the player's current"
+  echo "team before trusting a title, then run:"
+  echo "  bash scripts/film-sheets.sh \"https://www.youtube.com/watch?v=<ID>\" <outdir>"
+  exit 0
+fi
+
 SRC="${1:-}"
 OUT="${2:-film-out}"
 [ -z "$SRC" ] && { echo "usage: film-sheets.sh <youtube-url|local-path> [outdir]" >&2; exit 2; }
