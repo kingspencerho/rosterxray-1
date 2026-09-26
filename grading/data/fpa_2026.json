@@ -1,8 +1,8 @@
 {
  "_meta": {
   "season": 2026,
-  "weeks_covered": 2,
-  "max_week": 2,
+  "weeks_covered": 3,
+  "max_week": 3,
   "defences": 32,
   "gates": {
    "QB": 3,
@@ -11,10 +11,10 @@
    "RB": 4
   },
   "live": {
-   "QB": false,
+   "QB": true,
    "RB": false,
-   "WR": false,
-   "TE": false
+   "WR": true,
+   "TE": true
   },
   "scoring": "half-PPR, 4pt passing TD",
   "population": "all players, not the draftable subset",
@@ -49,20 +49,20 @@
   },
   "ATL": {
    "QB": {
-    "pts": 18.11,
-    "g": 2
+    "pts": 18.57,
+    "g": 3
    },
    "WR": {
-    "pts": 24.0,
-    "g": 2
+    "pts": 31.3,
+    "g": 3
    },
    "RB": {
-    "pts": 12.8,
-    "g": 2
+    "pts": 10.47,
+    "g": 3
    },
    "TE": {
-    "pts": 17.7,
-    "g": 2
+    "pts": 14.2,
+    "g": 3
    }
   },
   "BAL": {
@@ -229,20 +229,20 @@
   },
   "GB": {
    "QB": {
-    "pts": 16.71,
-    "g": 2
+    "pts": 15.49,
+    "g": 3
    },
    "RB": {
-    "pts": 21.1,
-    "g": 2
+    "pts": 29.17,
+    "g": 3
    },
    "TE": {
-    "pts": 9.5,
-    "g": 2
+    "pts": 9.37,
+    "g": 3
    },
    "WR": {
-    "pts": 28.25,
-    "g": 2
+    "pts": 28.37,
+    "g": 3
    }
   },
   "HOU": {

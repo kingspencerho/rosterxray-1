@@ -9872,3 +9872,42 @@ client returns 360p and completes), and **`metadata=print:file=` writes nothing
 when handed a path containing a drive-letter colon, while still exiting 0** —
 ffmpeg parses the colon as its own option separator. Both were found by running
 the script, not by reading it.
+
+---
+
+## Week 3 Refresh and News Sweep (Sep 26, 2026)
+
+**Full in-season refresh** (`refresh-inseason.sh 2026`, all nine steps) plus **83 player notes re-sourced**
+from dated reporting, Sep 10-26 2026, researched in four parallel batches with a date and URL
+required for every fact. **75 of 90 fixture grades are BYTE-IDENTICAL** against a HEAD worktree
+carrying the same data files; the other 15 are **ref5, every best-ball format, about -1.7**, all from ONE cause
+(below). Redraft: 15 of 15 identical.
+
+### What changed in the tables
+- **RECENT_NEWS:** 83 entries written or replaced, each dated and present-tense. It adds the QBs who
+  replaced injured starters and had no row at all (Winston, Mariota, Keenum, Bagent, Wentz).
+  ⚠️ **None of those five is in any ADP table, on purpose:** no best-ball quote exists.
+- **SITUATIONS:** 49 rows. `trendNote` and `reason` come from the new note. **The verdict moved
+  ONLY where availability made it false:** Dart, Stribling and Malik Davis → fade; Kolar, Njoku, Lane and Coleman → hold;
+  the ATL QB order (Penix starts, Tua is QB2, Rush is QB3).
+- **VERDICTS:** 12 rows re-dated. Dart TARGET → fade, and Lane TARGET → hold.
+
+### ⭐ The one grade move, traced, and it is correct
+**ref5 carries Jaxson Dart. With his verdict at fade (out for the 2026 regular season), the NYG
+stack stops counting as a primary stack and gains "NYG stack underbuilt — fade QB anchor."**
+ref4 is the same 18 players, and it did not move because its NYG stack was not primary to begin with.
+A season-ending injury to a stack's quarterback SHOULD cost that stack its primary status.
+
+### ⛔ The report bug, and the guard that could not see it
+`report-stale-news.mjs` section 2 parsed `freshest.date` (a display LABEL, `"Sep 26 2026"`) as
+`label + "T00:00:00Z"`. **That is NaN, so "skip when the note post-dates the feed" never fired, and
+every hard status was flagged**, including notes written the same day: 36 of 36.
+**Guard 26 asserted the TEXT `feedTs <= noteTs) continue` and passed the whole time.** Fixed by
+exposing `ts` on `buildPlayerNews` rows (display-only). Two checks now RUN the report or read real
+rows: a sabotage restoring the bug fails with *"36 of 36 rows flagged a note that post-dates the feed."*
+**The string-match-is-not-behaviour lesson, again.**
+
+### Not done, on purpose
+- **ADP:** the FFC redraft source is dead in season (thin samples; 268 table names absent). Nothing applied.
+- **`snap_trajectory_2026` has 0 players BY DESIGN:** `MIN_WINDOW_GP = 3` needs 3 games in each window, so
+  it cannot fill until about Week 6. It is a gate, not a lookup failure.

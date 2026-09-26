@@ -219,6 +219,19 @@ ok("report prints the questions-not-corrections warning",
   /QUESTIONS, NOT CORRECTIONS/.test(report));
 ok("report skips players whose note post-dates the feed", /feedTs <= noteTs\) continue/.test(report),
   "a note written after the feed already knows the status is not contradicted by it");
+ok("report compares the note TIMESTAMP, never a parsed display label",
+  !/Date\.parse\(freshest\.date/.test(report) && /freshest\.ts/.test(report),
+  "`date` is a label like \"Sep 26 2026\"; + \"T00:00:00Z\" parses to NaN and the skip never fires");
+{
+  // BEHAVIOUR, not text: run the report and require every flagged row to have a note OLDER than its feed date.
+  const { execFileSync } = await import("child_process");
+  const out = execFileSync(process.execPath, ["scripts/report-stale-news.mjs"], { encoding: "utf8" });
+  const sec = out.split("hard status the freshest note predates")[1] || "";
+  const rows = [...sec.matchAll(/\s(\d{4}-\d{2}-\d{2})\s+([A-Z][a-z]{2} \d{1,2} \d{4}) \(/g)];
+  const bad = rows.filter(m => Date.parse(m[2]) >= Date.parse(m[1] + "T00:00:00"));
+  ok("no flagged row has a note dated on or after its feed date", bad.length === 0,
+    `${bad.length} of ${rows.length} rows flagged a note that post-dates the feed`);
+}
 
 // ---- 6. WIRED INTO THE WEEKLY JOB ------------------------------------------
 console.log("\nrefresh wiring");

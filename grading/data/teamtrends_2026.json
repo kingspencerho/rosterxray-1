@@ -13,7 +13,7 @@
    "pace_plays": 200,
    "proe_plays": 300
   },
-  "generated": "2026-09-22",
+  "generated": "2026-09-26",
   "league": {},
   "neutral": {
    "margin": 7,
@@ -27,7 +27,7 @@
   "source": "nflverse play_by_play (nflfastR); pass_oe/xpass and epa as published",
   "teams_covered": 32,
   "threshold_source": "1 SD of this build's own league distribution",
-  "weeks_covered": 2
+  "weeks_covered": 3
  },
  "teams": {
   "ARI": {
@@ -58,18 +58,18 @@
      "n10": 2,
      "n15": 1,
      "n20": 0,
-     "rate10": 0.0513,
-     "rate15": 0.0256,
+     "rate10": 0.0417,
+     "rate15": 0.0208,
      "rate20": 0.0,
-     "runs": 39
+     "runs": 48
     },
-    "pass_plays": 81,
-    "rush_plays": 39
+    "pass_plays": 135,
+    "rush_plays": 48
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 33,
-    "proe_plays": 129
+    "pace_plays": 59,
+    "proe_plays": 197
    }
   },
   "BAL": {
@@ -265,21 +265,21 @@
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 3,
-     "n15": 1,
-     "n20": 1,
-     "rate10": 0.0517,
-     "rate15": 0.0172,
-     "rate20": 0.0172,
-     "runs": 58
+     "n10": 8,
+     "n15": 4,
+     "n20": 3,
+     "rate10": 0.0825,
+     "rate15": 0.0412,
+     "rate20": 0.0309,
+     "runs": 97
     },
-    "pass_plays": 72,
-    "rush_plays": 58
+    "pass_plays": 98,
+    "rush_plays": 97
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 29,
-    "proe_plays": 127
+    "pace_plays": 41,
+    "proe_plays": 193
    }
   },
   "HOU": {

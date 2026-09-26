@@ -142,7 +142,9 @@ if (!Object.keys(players).length) {
       ? notes.reduce((a, b) => (a.ageDays <= b.ageDays ? a : b))
       : null;
     const feedTs = row.news_updated ? Date.parse(row.news_updated + "T00:00:00Z") : null;
-    const noteTs = freshest ? Date.parse(freshest.date + "T00:00:00Z") : null;
+    // `date` is a display LABEL ("Sep 26 2026"); parsing it as ISO returned NaN,
+    // so this filter never fired and every hard status was flagged (fixed Sep 26 2026).
+    const noteTs = freshest ? freshest.ts : null;
     // Only flag when the feed genuinely post-dates the note. A note written
     // AFTER the feed already knows about the status and is not contradicted.
     if (freshest && feedTs != null && noteTs != null && feedTs <= noteTs) continue;

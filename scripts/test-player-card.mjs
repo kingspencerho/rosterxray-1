@@ -211,6 +211,9 @@ const allNews = Object.keys(e.ADP_DATA).map(n => e.buildPlayerNews(n, NOW)).flat
 ok("every rendered note carries a date and an age",
    allNews.length > 0 && allNews.every(n => n.date && Number.isFinite(n.ageDays)),
    `${allNews.length} notes`);
+ok("every rendered note carries a numeric timestamp, not only a display label",
+   allNews.every(n => Number.isFinite(n.ts)),
+   "report-stale-news compares note and feed dates; parsing the LABEL as ISO gave NaN and flagged every injured player (Sep 26 2026)");
 // ⚠ RE-DERIVE THROUGH newsDateFor, NOT parseNewsDate. Prose was the only date
 // source when this was written; a SITUATIONS row can also carry a structured
 // `date`, which legitimately produces a label the prose does not contain.

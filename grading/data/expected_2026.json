@@ -2,10 +2,10 @@
  "_meta": {
   "context_only": true,
   "counts": {
-   "QB": 43,
+   "QB": 44,
    "RB": 97,
    "TE": 82,
-   "WR": 151
+   "WR": 152
   },
   "hierarchy_rank": {
    "all": "2 \u2014 opportunity volume, expressed in points"
@@ -33,7 +33,7 @@
   "season": 2026,
   "season_complete": false,
   "source": "ffverse/ffopportunity latest-data (ep_weekly)",
-  "weeks_covered": 2
+  "weeks_covered": 3
  },
  "players": {
   "aaron jones": {
@@ -51,7 +51,7 @@
   "aaron rodgers": {
    "act": 19.5,
    "act_pg": 9.76,
-   "act_rank": 31,
+   "act_rank": 32,
    "diff_pg": -6.27,
    "exp": 32.1,
    "exp_pg": 16.03,
@@ -87,7 +87,7 @@
   "adonai mitchell": {
    "act": 16.8,
    "act_pg": 8.4,
-   "act_rank": 39,
+   "act_rank": 40,
    "diff_pg": -1.58,
    "exp": 20.0,
    "exp_pg": 9.98,
@@ -115,7 +115,7 @@
    "diff_pg": -0.11,
    "exp": 4.2,
    "exp_pg": 4.21,
-   "exp_rank": 91,
+   "exp_rank": 92,
    "gp": 1,
    "pos": "WR",
    "team": "NE"
@@ -139,7 +139,7 @@
    "diff_pg": -0.78,
    "exp": 11.3,
    "exp_pg": 5.63,
-   "exp_rank": 67,
+   "exp_rank": 68,
    "gp": 2,
    "pos": "WR",
    "team": "IND"
@@ -159,7 +159,7 @@
   "ameer abdullah": {
    "act": 5.5,
    "act_pg": 2.75,
-   "act_rank": 64,
+   "act_rank": 62,
    "diff_pg": -0.16,
    "exp": 5.8,
    "exp_pg": 2.91,
@@ -183,11 +183,11 @@
   "andrei iosivas": {
    "act": 3.4,
    "act_pg": 1.7,
-   "act_rank": 114,
+   "act_rank": 116,
    "diff_pg": -2.05,
    "exp": 7.5,
    "exp_pg": 3.75,
-   "exp_rank": 97,
+   "exp_rank": 98,
    "gp": 2,
    "pos": "WR",
    "team": "CIN"
@@ -207,11 +207,11 @@
   "antonio williams": {
    "act": 18.3,
    "act_pg": 9.15,
-   "act_rank": 35,
+   "act_rank": 36,
    "diff_pg": 3.08,
    "exp": 12.1,
    "exp_pg": 6.07,
-   "exp_rank": 61,
+   "exp_rank": 62,
    "gp": 2,
    "pos": "WR",
    "team": "WAS"
@@ -219,11 +219,11 @@
   "arian smith": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 146,
+   "act_rank": 147,
    "diff_pg": -1.19,
    "exp": 1.2,
    "exp_pg": 1.19,
-   "exp_rank": 135,
+   "exp_rank": 137,
    "gp": 1,
    "pos": "WR",
    "team": "NYJ"
@@ -231,11 +231,11 @@
   "ashton dulin": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 151,
+   "act_rank": 152,
    "diff_pg": -0.63,
    "exp": 0.6,
    "exp_pg": 0.63,
-   "exp_rank": 151,
+   "exp_rank": 152,
    "gp": 1,
    "pos": "WR",
    "team": "IND"
@@ -243,7 +243,7 @@
   "ashton jeanty": {
    "act": 38.0,
    "act_pg": 19.0,
-   "act_rank": 6,
+   "act_rank": 7,
    "diff_pg": -5.37,
    "exp": 48.7,
    "exp_pg": 24.37,
@@ -253,14 +253,14 @@
    "team": "LV"
   },
   "austin hooper": {
-   "act": 3.0,
-   "act_pg": 3.0,
-   "act_rank": 41,
-   "diff_pg": -0.69,
-   "exp": 3.7,
-   "exp_pg": 3.69,
-   "exp_rank": 38,
-   "gp": 1,
+   "act": 11.1,
+   "act_pg": 5.55,
+   "act_rank": 24,
+   "diff_pg": 1.52,
+   "exp": 8.1,
+   "exp_pg": 4.03,
+   "exp_rank": 34,
+   "gp": 2,
    "pos": "TE",
    "team": "ATL"
   },
@@ -279,7 +279,7 @@
   "bam knight": {
    "act": 2.4,
    "act_pg": 2.4,
-   "act_rank": 70,
+   "act_rank": 69,
    "diff_pg": 1.36,
    "exp": 1.0,
    "exp_pg": 1.04,
@@ -291,11 +291,11 @@
   "barion brown": {
    "act": 0.3,
    "act_pg": 0.3,
-   "act_rank": 139,
+   "act_rank": 140,
    "diff_pg": -0.4,
    "exp": 0.7,
    "exp_pg": 0.7,
-   "exp_rank": 150,
+   "exp_rank": 151,
    "gp": 1,
    "pos": "WR",
    "team": "NO"
@@ -315,11 +315,11 @@
   "ben skowronek": {
    "act": 0.7,
    "act_pg": 0.7,
-   "act_rank": 137,
+   "act_rank": 136,
    "diff_pg": -0.0,
    "exp": 0.7,
    "exp_pg": 0.7,
-   "exp_rank": 149,
+   "exp_rank": 150,
    "gp": 1,
    "pos": "WR",
    "team": "PIT"
@@ -337,14 +337,14 @@
    "team": "JAX"
   },
   "bijan robinson": {
-   "act": 36.9,
-   "act_pg": 18.45,
-   "act_rank": 7,
-   "diff_pg": 3.23,
-   "exp": 30.4,
-   "exp_pg": 15.22,
-   "exp_rank": 11,
-   "gp": 2,
+   "act": 71.2,
+   "act_pg": 23.73,
+   "act_rank": 5,
+   "diff_pg": 5.3,
+   "exp": 55.3,
+   "exp_pg": 18.43,
+   "exp_rank": 5,
+   "gp": 3,
    "pos": "RB",
    "team": "ATL"
   },
@@ -363,7 +363,7 @@
   "blake whiteheart": {
    "act": 10.1,
    "act_pg": 5.05,
-   "act_rank": 30,
+   "act_rank": 29,
    "diff_pg": 3.38,
    "exp": 3.3,
    "exp_pg": 1.67,
@@ -374,20 +374,20 @@
   },
   "bo melton": {
    "act": 1.5,
-   "act_pg": 0.75,
-   "act_rank": 135,
-   "diff_pg": -0.26,
-   "exp": 2.0,
-   "exp_pg": 1.01,
-   "exp_rank": 142,
-   "gp": 2,
+   "act_pg": 0.5,
+   "act_rank": 138,
+   "diff_pg": -0.71,
+   "exp": 3.6,
+   "exp_pg": 1.21,
+   "exp_rank": 136,
+   "gp": 3,
    "pos": "WR",
    "team": "GB"
   },
   "bo nix": {
    "act": 23.6,
    "act_pg": 11.78,
-   "act_rank": 27,
+   "act_rank": 28,
    "diff_pg": -0.74,
    "exp": 25.0,
    "exp_pg": 12.52,
@@ -399,7 +399,7 @@
   "brady russell": {
    "act": 3.0,
    "act_pg": 3.0,
-   "act_rank": 60,
+   "act_rank": 58,
    "diff_pg": 0.68,
    "exp": 2.3,
    "exp_pg": 2.32,
@@ -435,11 +435,11 @@
   "brenen thompson": {
    "act": 1.8,
    "act_pg": 1.8,
-   "act_rank": 112,
+   "act_rank": 113,
    "diff_pg": -2.05,
    "exp": 3.8,
    "exp_pg": 3.85,
-   "exp_rank": 96,
+   "exp_rank": 97,
    "gp": 1,
    "pos": "WR",
    "team": "LAC"
@@ -469,14 +469,14 @@
    "team": "DAL"
   },
   "brian robinson": {
-   "act": 10.8,
-   "act_pg": 5.4,
-   "act_rank": 47,
-   "diff_pg": -0.45,
-   "exp": 11.7,
-   "exp_pg": 5.85,
-   "exp_rank": 45,
-   "gp": 2,
+   "act": 21.8,
+   "act_pg": 7.27,
+   "act_rank": 35,
+   "diff_pg": 1.59,
+   "exp": 17.0,
+   "exp_pg": 5.68,
+   "exp_rank": 47,
+   "gp": 3,
    "pos": "RB",
    "team": "ATL"
   },
@@ -487,7 +487,7 @@
    "diff_pg": -1.28,
    "exp": 13.6,
    "exp_pg": 6.78,
-   "exp_rank": 52,
+   "exp_rank": 53,
    "gp": 2,
    "pos": "WR",
    "team": "JAX"
@@ -519,7 +519,7 @@
   "bryce lance": {
    "act": 7.0,
    "act_pg": 3.5,
-   "act_rank": 91,
+   "act_rank": 92,
    "diff_pg": 0.34,
    "exp": 6.3,
    "exp_pg": 3.16,
@@ -555,7 +555,7 @@
   "cade otton": {
    "act": 10.4,
    "act_pg": 5.2,
-   "act_rank": 28,
+   "act_rank": 27,
    "diff_pg": -1.77,
    "exp": 13.9,
    "exp_pg": 6.97,
@@ -579,11 +579,11 @@
   "caleb douglas": {
    "act": 14.8,
    "act_pg": 7.4,
-   "act_rank": 44,
+   "act_rank": 45,
    "diff_pg": 1.24,
    "exp": 12.3,
    "exp_pg": 6.16,
-   "exp_rank": 60,
+   "exp_rank": 61,
    "gp": 2,
    "pos": "WR",
    "team": "MIA"
@@ -607,7 +607,7 @@
    "diff_pg": 1.5,
    "exp": 3.0,
    "exp_pg": 3.0,
-   "exp_rank": 109,
+   "exp_rank": 108,
    "gp": 1,
    "pos": "WR",
    "team": "TEN"
@@ -631,7 +631,7 @@
    "diff_pg": -2.25,
    "exp": 36.2,
    "exp_pg": 18.11,
-   "exp_rank": 14,
+   "exp_rank": 15,
    "gp": 2,
    "pos": "QB",
    "team": "TEN"
@@ -643,7 +643,7 @@
    "diff_pg": -1.67,
    "exp": 13.3,
    "exp_pg": 6.67,
-   "exp_rank": 54,
+   "exp_rank": 55,
    "gp": 2,
    "pos": "WR",
    "team": "TEN"
@@ -651,7 +651,7 @@
   "carson wentz": {
    "act": 23.5,
    "act_pg": 11.77,
-   "act_rank": 28,
+   "act_rank": 29,
    "diff_pg": 2.14,
    "exp": 19.3,
    "exp_pg": 9.63,
@@ -675,7 +675,7 @@
   "charlie kolar": {
    "act": 3.6,
    "act_pg": 3.6,
-   "act_rank": 36,
+   "act_rank": 37,
    "diff_pg": 0.33,
    "exp": 3.3,
    "exp_pg": 3.27,
@@ -703,7 +703,7 @@
    "diff_pg": -2.9,
    "exp": 31.8,
    "exp_pg": 15.9,
-   "exp_rank": 8,
+   "exp_rank": 9,
    "gp": 2,
    "pos": "RB",
    "team": "CIN"
@@ -723,11 +723,11 @@
   "chimere dike": {
    "act": 1.2,
    "act_pg": 1.2,
-   "act_rank": 129,
+   "act_rank": 132,
    "diff_pg": 0.25,
    "exp": 1.0,
    "exp_pg": 0.95,
-   "exp_rank": 145,
+   "exp_rank": 146,
    "gp": 1,
    "pos": "WR",
    "team": "TEN"
@@ -735,7 +735,7 @@
   "chris bell": {
    "act": 3.0,
    "act_pg": 1.5,
-   "act_rank": 120,
+   "act_rank": 122,
    "diff_pg": -0.38,
    "exp": 3.8,
    "exp_pg": 1.88,
@@ -746,32 +746,32 @@
   },
   "chris blair": {
    "act": 1.1,
-   "act_pg": 1.1,
-   "act_rank": 130,
-   "diff_pg": -2.64,
+   "act_pg": 0.55,
+   "act_rank": 137,
+   "diff_pg": -1.32,
    "exp": 3.7,
-   "exp_pg": 3.74,
-   "exp_rank": 99,
-   "gp": 1,
+   "exp_pg": 1.87,
+   "exp_rank": 124,
+   "gp": 2,
    "pos": "WR",
    "team": "ATL"
   },
   "chris brooks": {
-   "act": 6.0,
-   "act_pg": 3.0,
-   "act_rank": 59,
-   "diff_pg": -1.53,
-   "exp": 9.1,
-   "exp_pg": 4.53,
-   "exp_rank": 57,
-   "gp": 2,
+   "act": 6.9,
+   "act_pg": 2.3,
+   "act_rank": 71,
+   "diff_pg": -1.06,
+   "exp": 10.1,
+   "exp_pg": 3.36,
+   "exp_rank": 68,
+   "gp": 3,
    "pos": "RB",
    "team": "GB"
   },
   "chris godwin jr": {
    "act": 13.6,
    "act_pg": 6.8,
-   "act_rank": 50,
+   "act_rank": 51,
    "diff_pg": 1.55,
    "exp": 10.5,
    "exp_pg": 5.25,
@@ -783,7 +783,7 @@
   "chris moore": {
    "act": 6.9,
    "act_pg": 3.45,
-   "act_rank": 93,
+   "act_rank": 94,
    "diff_pg": -1.83,
    "exp": 10.6,
    "exp_pg": 5.28,
@@ -823,20 +823,20 @@
    "diff_pg": -1.55,
    "exp": 35.0,
    "exp_pg": 17.5,
-   "exp_rank": 7,
+   "exp_rank": 8,
    "gp": 2,
    "pos": "RB",
    "team": "SF"
   },
   "christian watson": {
-   "act": 41.8,
-   "act_pg": 20.9,
+   "act": 60.9,
+   "act_pg": 20.3,
    "act_rank": 6,
-   "diff_pg": 6.23,
-   "exp": 29.3,
-   "exp_pg": 14.67,
-   "exp_rank": 8,
-   "gp": 2,
+   "diff_pg": 4.75,
+   "exp": 46.6,
+   "exp_pg": 15.55,
+   "exp_rank": 7,
+   "gp": 3,
    "pos": "WR",
    "team": "GB"
   },
@@ -879,7 +879,7 @@
   "cody white": {
    "act": 15.4,
    "act_pg": 7.7,
-   "act_rank": 42,
+   "act_rank": 43,
    "diff_pg": 4.46,
    "exp": 6.5,
    "exp_pg": 3.24,
@@ -891,11 +891,11 @@
   "colbie young": {
    "act": 1.2,
    "act_pg": 1.2,
-   "act_rank": 127,
+   "act_rank": 130,
    "diff_pg": -0.08,
    "exp": 1.3,
    "exp_pg": 1.28,
-   "exp_rank": 133,
+   "exp_rank": 134,
    "gp": 1,
    "pos": "WR",
    "team": "CIN"
@@ -915,7 +915,7 @@
   "cole kmet": {
    "act": 10.5,
    "act_pg": 5.25,
-   "act_rank": 27,
+   "act_rank": 26,
    "diff_pg": 1.58,
    "exp": 7.3,
    "exp_pg": 3.67,
@@ -975,11 +975,11 @@
   "cooper rush": {
    "act": 11.2,
    "act_pg": 5.58,
-   "act_rank": 33,
+   "act_rank": 34,
    "diff_pg": -0.49,
    "exp": 12.1,
    "exp_pg": 6.07,
-   "exp_rank": 35,
+   "exp_rank": 36,
    "gp": 2,
    "pos": "QB",
    "team": "ATL"
@@ -999,11 +999,11 @@
   "courtland sutton": {
    "act": 6.1,
    "act_pg": 3.05,
-   "act_rank": 96,
+   "act_rank": 97,
    "diff_pg": -2.78,
    "exp": 11.7,
    "exp_pg": 5.83,
-   "exp_rank": 64,
+   "exp_rank": 65,
    "gp": 2,
    "pos": "WR",
    "team": "DEN"
@@ -1011,11 +1011,11 @@
   "cyrus allen": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 148,
+   "act_rank": 149,
    "diff_pg": -0.95,
    "exp": 0.9,
    "exp_pg": 0.95,
-   "exp_rank": 144,
+   "exp_rank": 145,
    "gp": 1,
    "pos": "WR",
    "team": "KC"
@@ -1071,11 +1071,11 @@
   "dandre swift": {
    "act": 44.3,
    "act_pg": 22.15,
-   "act_rank": 5,
+   "act_rank": 6,
    "diff_pg": 4.53,
    "exp": 35.2,
    "exp_pg": 17.62,
-   "exp_rank": 6,
+   "exp_rank": 7,
    "gp": 2,
    "pos": "RB",
    "team": "CHI"
@@ -1095,7 +1095,7 @@
   "daniel jones": {
    "act": 22.4,
    "act_pg": 11.22,
-   "act_rank": 29,
+   "act_rank": 30,
    "diff_pg": -1.67,
    "exp": 25.8,
    "exp_pg": 12.89,
@@ -1107,11 +1107,11 @@
   "dareke young": {
    "act": 3.2,
    "act_pg": 3.2,
-   "act_rank": 94,
+   "act_rank": 95,
    "diff_pg": 2.01,
    "exp": 1.2,
    "exp_pg": 1.19,
-   "exp_rank": 136,
+   "exp_rank": 138,
    "gp": 1,
    "pos": "WR",
    "team": "LV"
@@ -1119,11 +1119,11 @@
   "darius cooper": {
    "act": 9.6,
    "act_pg": 9.6,
-   "act_rank": 29,
+   "act_rank": 30,
    "diff_pg": 3.23,
    "exp": 6.4,
    "exp_pg": 6.37,
-   "exp_rank": 56,
+   "exp_rank": 57,
    "gp": 1,
    "pos": "WR",
    "team": "PHI"
@@ -1227,7 +1227,7 @@
   "deebo samuel sr": {
    "act": 20.0,
    "act_pg": 10.0,
-   "act_rank": 26,
+   "act_rank": 27,
    "diff_pg": 0.31,
    "exp": 19.4,
    "exp_pg": 9.69,
@@ -1251,11 +1251,11 @@
   "deion burks": {
    "act": 1.4,
    "act_pg": 1.4,
-   "act_rank": 123,
+   "act_rank": 125,
    "diff_pg": -0.23,
    "exp": 1.6,
    "exp_pg": 1.63,
-   "exp_rank": 126,
+   "exp_rank": 127,
    "gp": 1,
    "pos": "WR",
    "team": "IND"
@@ -1263,7 +1263,7 @@
   "demarcus robinson": {
    "act": 16.9,
    "act_pg": 8.45,
-   "act_rank": 38,
+   "act_rank": 39,
    "diff_pg": 3.12,
    "exp": 10.7,
    "exp_pg": 5.33,
@@ -1275,7 +1275,7 @@
   "demario douglas": {
    "act": 5.9,
    "act_pg": 2.95,
-   "act_rank": 98,
+   "act_rank": 99,
    "diff_pg": -1.84,
    "exp": 9.6,
    "exp_pg": 4.79,
@@ -1303,7 +1303,7 @@
    "diff_pg": 7.89,
    "exp": 15.1,
    "exp_pg": 7.56,
-   "exp_rank": 45,
+   "exp_rank": 46,
    "gp": 2,
    "pos": "WR",
    "team": "CLE"
@@ -1311,11 +1311,11 @@
   "derius davis": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 143,
+   "act_rank": 144,
    "diff_pg": -1.94,
    "exp": 3.9,
    "exp_pg": 1.94,
-   "exp_rank": 120,
+   "exp_rank": 121,
    "gp": 2,
    "pos": "WR",
    "team": "LAC"
@@ -1327,7 +1327,7 @@
    "diff_pg": 7.67,
    "exp": 35.7,
    "exp_pg": 17.83,
-   "exp_rank": 5,
+   "exp_rank": 6,
    "gp": 2,
    "pos": "RB",
    "team": "BAL"
@@ -1347,7 +1347,7 @@
   "devaughn vele": {
    "act": 25.3,
    "act_pg": 12.65,
-   "act_rank": 16,
+   "act_rank": 17,
    "diff_pg": 0.83,
    "exp": 23.6,
    "exp_pg": 11.82,
@@ -1363,7 +1363,7 @@
    "diff_pg": 0.64,
    "exp": 11.4,
    "exp_pg": 5.71,
-   "exp_rank": 47,
+   "exp_rank": 46,
    "gp": 2,
    "pos": "RB",
    "team": "NYG"
@@ -1407,11 +1407,11 @@
   "dj herman": {
    "act": 2.3,
    "act_pg": 2.3,
-   "act_rank": 71,
+   "act_rank": 70,
    "diff_pg": -1.28,
    "exp": 3.6,
    "exp_pg": 3.58,
-   "exp_rank": 67,
+   "exp_rank": 66,
    "gp": 1,
    "pos": "RB",
    "team": "MIA"
@@ -1419,11 +1419,11 @@
   "dj moore": {
    "act": 18.4,
    "act_pg": 9.2,
-   "act_rank": 33,
+   "act_rank": 34,
    "diff_pg": 2.48,
    "exp": 13.4,
    "exp_pg": 6.72,
-   "exp_rank": 53,
+   "exp_rank": 54,
    "gp": 2,
    "pos": "WR",
    "team": "BUF"
@@ -1443,11 +1443,11 @@
   "dohnte meyers": {
    "act": 3.3,
    "act_pg": 1.65,
-   "act_rank": 115,
+   "act_rank": 117,
    "diff_pg": 0.17,
    "exp": 3.0,
    "exp_pg": 1.48,
-   "exp_rank": 129,
+   "exp_rank": 130,
    "gp": 2,
    "pos": "WR",
    "team": "CIN"
@@ -1455,31 +1455,31 @@
   "dontayvion wicks": {
    "act": 24.2,
    "act_pg": 12.1,
-   "act_rank": 19,
+   "act_rank": 20,
    "diff_pg": 4.62,
    "exp": 15.0,
    "exp_pg": 7.48,
-   "exp_rank": 47,
+   "exp_rank": 48,
    "gp": 2,
    "pos": "WR",
    "team": "PHI"
   },
   "drake london": {
-   "act": 11.4,
-   "act_pg": 5.7,
-   "act_rank": 56,
-   "diff_pg": 0.14,
-   "exp": 11.1,
-   "exp_pg": 5.56,
-   "exp_rank": 70,
-   "gp": 2,
+   "act": 35.3,
+   "act_pg": 11.77,
+   "act_rank": 22,
+   "diff_pg": 3.46,
+   "exp": 24.9,
+   "exp_pg": 8.3,
+   "exp_rank": 37,
+   "gp": 3,
    "pos": "WR",
    "team": "ATL"
   },
   "drake maye": {
    "act": 21.8,
    "act_pg": 10.92,
-   "act_rank": 30,
+   "act_rank": 31,
    "diff_pg": -2.97,
    "exp": 27.8,
    "exp_pg": 13.89,
@@ -1503,7 +1503,7 @@
   "drew sample": {
    "act": 3.4,
    "act_pg": 3.4,
-   "act_rank": 39,
+   "act_rank": 40,
    "diff_pg": -0.31,
    "exp": 3.7,
    "exp_pg": 3.71,
@@ -1531,7 +1531,7 @@
    "diff_pg": -4.51,
    "exp": 13.1,
    "exp_pg": 6.56,
-   "exp_rank": 55,
+   "exp_rank": 56,
    "gp": 2,
    "pos": "WR",
    "team": "WAS"
@@ -1539,11 +1539,11 @@
   "efton chism iii": {
    "act": 0.3,
    "act_pg": 0.3,
-   "act_rank": 138,
+   "act_rank": 139,
    "diff_pg": -0.86,
    "exp": 1.2,
    "exp_pg": 1.16,
-   "exp_rank": 139,
+   "exp_rank": 141,
    "gp": 1,
    "pos": "WR",
    "team": "NE"
@@ -1551,7 +1551,7 @@
   "eli raridon": {
    "act": 10.2,
    "act_pg": 5.1,
-   "act_rank": 29,
+   "act_rank": 28,
    "diff_pg": 2.46,
    "exp": 5.3,
    "exp_pg": 2.64,
@@ -1563,11 +1563,11 @@
   "elic ayomanor": {
    "act": 15.5,
    "act_pg": 7.75,
-   "act_rank": 40,
+   "act_rank": 41,
    "diff_pg": 1.54,
    "exp": 12.4,
    "exp_pg": 6.21,
-   "exp_rank": 59,
+   "exp_rank": 60,
    "gp": 2,
    "pos": "WR",
    "team": "TEN"
@@ -1611,7 +1611,7 @@
   "emeka egbuka": {
    "act": 17.6,
    "act_pg": 8.8,
-   "act_rank": 37,
+   "act_rank": 38,
    "diff_pg": -1.06,
    "exp": 19.7,
    "exp_pg": 9.86,
@@ -1627,7 +1627,7 @@
    "diff_pg": 1.74,
    "exp": 8.8,
    "exp_pg": 4.41,
-   "exp_rank": 58,
+   "exp_rank": 57,
    "gp": 2,
    "pos": "RB",
    "team": "KC"
@@ -1663,7 +1663,7 @@
    "diff_pg": 3.36,
    "exp": 7.8,
    "exp_pg": 3.89,
-   "exp_rank": 35,
+   "exp_rank": 36,
    "gp": 2,
    "pos": "TE",
    "team": "DEN"
@@ -1671,7 +1671,7 @@
   "foster moreau": {
    "act": 6.9,
    "act_pg": 3.45,
-   "act_rank": 38,
+   "act_rank": 39,
    "diff_pg": 0.91,
    "exp": 5.1,
    "exp_pg": 2.54,
@@ -1695,7 +1695,7 @@
   "garrett wilson": {
    "act": 25.1,
    "act_pg": 12.55,
-   "act_rank": 18,
+   "act_rank": 19,
    "diff_pg": 2.53,
    "exp": 20.0,
    "exp_pg": 10.02,
@@ -1707,7 +1707,7 @@
   "geno smith": {
    "act": 24.9,
    "act_pg": 12.44,
-   "act_rank": 24,
+   "act_rank": 25,
    "diff_pg": -1.08,
    "exp": 27.0,
    "exp_pg": 13.52,
@@ -1719,7 +1719,7 @@
   "george holani": {
    "act": 4.9,
    "act_pg": 2.45,
-   "act_rank": 67,
+   "act_rank": 66,
    "diff_pg": -4.45,
    "exp": 13.8,
    "exp_pg": 6.9,
@@ -1779,11 +1779,11 @@
   "gunnar helm": {
    "act": 7.1,
    "act_pg": 3.55,
-   "act_rank": 37,
+   "act_rank": 38,
    "diff_pg": -0.4,
    "exp": 7.9,
    "exp_pg": 3.95,
-   "exp_rank": 34,
+   "exp_rank": 35,
    "gp": 2,
    "pos": "TE",
    "team": "TEN"
@@ -1839,7 +1839,7 @@
   "isaac teslaa": {
    "act": 3.6,
    "act_pg": 1.8,
-   "act_rank": 111,
+   "act_rank": 112,
    "diff_pg": -3.05,
    "exp": 9.7,
    "exp_pg": 4.85,
@@ -1851,11 +1851,11 @@
   "isaiah bond": {
    "act": 1.5,
    "act_pg": 1.5,
-   "act_rank": 122,
+   "act_rank": 124,
    "diff_pg": 0.37,
    "exp": 1.1,
    "exp_pg": 1.13,
-   "exp_rank": 140,
+   "exp_rank": 142,
    "gp": 1,
    "pos": "WR",
    "team": "CLE"
@@ -1879,19 +1879,31 @@
    "diff_pg": 0.58,
    "exp": 7.8,
    "exp_pg": 3.92,
-   "exp_rank": 95,
+   "exp_rank": 96,
    "gp": 2,
    "pos": "WR",
    "team": "NYJ"
   },
+  "j michael sturdivant": {
+   "act": 3.7,
+   "act_pg": 3.7,
+   "act_rank": 90,
+   "diff_pg": 0.74,
+   "exp": 3.0,
+   "exp_pg": 2.96,
+   "exp_rank": 109,
+   "gp": 1,
+   "pos": "WR",
+   "team": "GB"
+  },
   "jack bech": {
    "act": 13.3,
    "act_pg": 6.65,
-   "act_rank": 52,
+   "act_rank": 53,
    "diff_pg": 2.55,
    "exp": 8.2,
    "exp_pg": 4.1,
-   "exp_rank": 92,
+   "exp_rank": 93,
    "gp": 2,
    "pos": "WR",
    "team": "LV"
@@ -1899,11 +1911,11 @@
   "jack strand": {
    "act": 3.0,
    "act_pg": 2.96,
-   "act_rank": 35,
+   "act_rank": 36,
    "diff_pg": -2.19,
    "exp": 5.2,
    "exp_pg": 5.15,
-   "exp_rank": 36,
+   "exp_rank": 37,
    "gp": 1,
    "pos": "QB",
    "team": "ATL"
@@ -1911,7 +1923,7 @@
   "jacoby brissett": {
    "act": 24.0,
    "act_pg": 11.99,
-   "act_rank": 26,
+   "act_rank": 27,
    "diff_pg": -2.45,
    "exp": 28.9,
    "exp_pg": 14.44,
@@ -1935,7 +1947,7 @@
   "jadarian price": {
    "act": 13.3,
    "act_pg": 6.65,
-   "act_rank": 35,
+   "act_rank": 36,
    "diff_pg": -3.02,
    "exp": 19.3,
    "exp_pg": 9.67,
@@ -1945,25 +1957,25 @@
    "team": "SEA"
   },
   "jahan dotson": {
-   "act": 4.5,
-   "act_pg": 2.25,
-   "act_rank": 105,
-   "diff_pg": -2.17,
-   "exp": 8.8,
-   "exp_pg": 4.42,
-   "exp_rank": 87,
-   "gp": 2,
+   "act": 6.1,
+   "act_pg": 2.03,
+   "act_rank": 109,
+   "diff_pg": -2.25,
+   "exp": 12.9,
+   "exp_pg": 4.29,
+   "exp_rank": 89,
+   "gp": 3,
    "pos": "WR",
    "team": "ATL"
   },
   "jahdae walker": {
    "act": 6.6,
    "act_pg": 6.6,
-   "act_rank": 53,
+   "act_rank": 54,
    "diff_pg": 2.66,
    "exp": 3.9,
    "exp_pg": 3.94,
-   "exp_rank": 94,
+   "exp_rank": 95,
    "gp": 1,
    "pos": "WR",
    "team": "CHI"
@@ -2007,11 +2019,11 @@
   "jakobi lane": {
    "act": 1.6,
    "act_pg": 1.6,
-   "act_rank": 116,
+   "act_rank": 118,
    "diff_pg": -5.7,
    "exp": 7.3,
    "exp_pg": 7.3,
-   "exp_rank": 49,
+   "exp_rank": 50,
    "gp": 1,
    "pos": "WR",
    "team": "BAL"
@@ -2019,7 +2031,7 @@
   "jakobi meyers": {
    "act": 14.5,
    "act_pg": 7.25,
-   "act_rank": 46,
+   "act_rank": 47,
    "diff_pg": 4.48,
    "exp": 5.5,
    "exp_pg": 2.77,
@@ -2059,7 +2071,7 @@
    "diff_pg": 2.65,
    "exp": 37.6,
    "exp_pg": 18.79,
-   "exp_rank": 12,
+   "exp_rank": 13,
    "gp": 2,
    "pos": "QB",
    "team": "PHI"
@@ -2067,11 +2079,11 @@
   "jalen nailor": {
    "act": 5.6,
    "act_pg": 2.8,
-   "act_rank": 99,
+   "act_rank": 100,
    "diff_pg": -2.79,
    "exp": 11.2,
    "exp_pg": 5.59,
-   "exp_rank": 69,
+   "exp_rank": 70,
    "gp": 2,
    "pos": "WR",
    "team": "LV"
@@ -2079,7 +2091,7 @@
   "jalen royals": {
    "act": 7.6,
    "act_pg": 7.6,
-   "act_rank": 43,
+   "act_rank": 44,
    "diff_pg": 2.7,
    "exp": 4.9,
    "exp_pg": 4.9,
@@ -2091,7 +2103,7 @@
   "jamarr chase": {
    "act": 25.2,
    "act_pg": 12.6,
-   "act_rank": 17,
+   "act_rank": 18,
    "diff_pg": 2.69,
    "exp": 19.8,
    "exp_pg": 9.91,
@@ -2103,7 +2115,7 @@
   "jameis winston": {
    "act": 3.5,
    "act_pg": 3.54,
-   "act_rank": 34,
+   "act_rank": 35,
    "diff_pg": -8.57,
    "exp": 12.1,
    "exp_pg": 12.11,
@@ -2119,7 +2131,7 @@
    "diff_pg": -0.96,
    "exp": 30.7,
    "exp_pg": 15.36,
-   "exp_rank": 10,
+   "exp_rank": 11,
    "gp": 2,
    "pos": "RB",
    "team": "BUF"
@@ -2151,11 +2163,11 @@
   "jared wayne": {
    "act": 6.0,
    "act_pg": 3.0,
-   "act_rank": 97,
+   "act_rank": 98,
    "diff_pg": -4.01,
    "exp": 14.0,
    "exp_pg": 7.01,
-   "exp_rank": 50,
+   "exp_rank": 51,
    "gp": 2,
    "pos": "WR",
    "team": "HOU"
@@ -2163,11 +2175,11 @@
   "jauan jennings": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 147,
+   "act_rank": 148,
    "diff_pg": -1.16,
    "exp": 1.2,
    "exp_pg": 1.16,
-   "exp_rank": 138,
+   "exp_rank": 140,
    "gp": 1,
    "pos": "WR",
    "team": "MIN"
@@ -2179,7 +2191,7 @@
    "diff_pg": -1.55,
    "exp": 31.3,
    "exp_pg": 15.65,
-   "exp_rank": 9,
+   "exp_rank": 10,
    "gp": 2,
    "pos": "RB",
    "team": "DAL"
@@ -2223,7 +2235,7 @@
   "jayden reed": {
    "act": 4.4,
    "act_pg": 2.2,
-   "act_rank": 106,
+   "act_rank": 105,
    "diff_pg": -2.66,
    "exp": 9.7,
    "exp_pg": 4.86,
@@ -2235,7 +2247,7 @@
   "jaylen waddle": {
    "act": 18.5,
    "act_pg": 9.25,
-   "act_rank": 32,
+   "act_rank": 33,
    "diff_pg": 0.27,
    "exp": 18.0,
    "exp_pg": 8.98,
@@ -2271,11 +2283,11 @@
   "jaylin lane": {
    "act": 0.9,
    "act_pg": 0.9,
-   "act_rank": 132,
+   "act_rank": 133,
    "diff_pg": -0.05,
    "exp": 0.9,
    "exp_pg": 0.95,
-   "exp_rank": 146,
+   "exp_rank": 147,
    "gp": 1,
    "pos": "WR",
    "team": "WAS"
@@ -2287,7 +2299,7 @@
    "diff_pg": 0.99,
    "exp": 9.2,
    "exp_pg": 4.61,
-   "exp_rank": 84,
+   "exp_rank": 85,
    "gp": 2,
    "pos": "WR",
    "team": "HOU"
@@ -2319,7 +2331,7 @@
   "jerry jeudy": {
    "act": 3.6,
    "act_pg": 1.8,
-   "act_rank": 113,
+   "act_rank": 114,
    "diff_pg": -1.01,
    "exp": 5.6,
    "exp_pg": 2.81,
@@ -2331,11 +2343,11 @@
   "jimmy horn jr": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 150,
+   "act_rank": 151,
    "diff_pg": -0.88,
    "exp": 0.9,
    "exp_pg": 0.88,
-   "exp_rank": 148,
+   "exp_rank": 149,
    "gp": 1,
    "pos": "WR",
    "team": "CAR"
@@ -2403,11 +2415,11 @@
   "jonathan mingo": {
    "act": 1.5,
    "act_pg": 1.5,
-   "act_rank": 121,
+   "act_rank": 123,
    "diff_pg": 0.34,
    "exp": 1.2,
    "exp_pg": 1.16,
-   "exp_rank": 137,
+   "exp_rank": 139,
    "gp": 1,
    "pos": "WR",
    "team": "DAL"
@@ -2437,25 +2449,25 @@
    "team": "CAR"
   },
   "jonnu smith": {
-   "act": 6.0,
-   "act_pg": 6.0,
-   "act_rank": 24,
-   "diff_pg": 2.11,
-   "exp": 3.9,
-   "exp_pg": 3.89,
-   "exp_rank": 36,
-   "gp": 1,
+   "act": 8.6,
+   "act_pg": 4.3,
+   "act_rank": 36,
+   "diff_pg": 0.61,
+   "exp": 7.4,
+   "exp_pg": 3.69,
+   "exp_rank": 38,
+   "gp": 2,
    "pos": "TE",
    "team": "GB"
   },
   "jordan addison": {
    "act": 3.1,
    "act_pg": 1.55,
-   "act_rank": 118,
+   "act_rank": 120,
    "diff_pg": -2.98,
    "exp": 9.1,
    "exp_pg": 4.53,
-   "exp_rank": 86,
+   "exp_rank": 87,
    "gp": 2,
    "pos": "WR",
    "team": "MIN"
@@ -2473,14 +2485,14 @@
    "team": "SF"
   },
   "jordan love": {
-   "act": 36.3,
-   "act_pg": 18.14,
-   "act_rank": 13,
-   "diff_pg": 0.54,
-   "exp": 35.2,
-   "exp_pg": 17.6,
-   "exp_rank": 15,
-   "gp": 2,
+   "act": 55.8,
+   "act_pg": 18.59,
+   "act_rank": 12,
+   "diff_pg": -0.47,
+   "exp": 57.2,
+   "exp_pg": 19.06,
+   "exp_rank": 12,
+   "gp": 3,
    "pos": "QB",
    "team": "GB"
   },
@@ -2499,11 +2511,11 @@
   "jordan whittington": {
    "act": 1.3,
    "act_pg": 1.3,
-   "act_rank": 124,
+   "act_rank": 126,
    "diff_pg": 0.03,
    "exp": 1.3,
    "exp_pg": 1.27,
-   "exp_rank": 134,
+   "exp_rank": 135,
    "gp": 1,
    "pos": "WR",
    "team": "LAR"
@@ -2523,7 +2535,7 @@
   "josh cameron": {
    "act": 9.0,
    "act_pg": 9.0,
-   "act_rank": 36,
+   "act_rank": 37,
    "diff_pg": 3.64,
    "exp": 5.4,
    "exp_pg": 5.36,
@@ -2535,11 +2547,11 @@
   "josh downs": {
    "act": 15.4,
    "act_pg": 7.7,
-   "act_rank": 41,
+   "act_rank": 42,
    "diff_pg": 0.11,
    "exp": 15.2,
    "exp_pg": 7.59,
-   "exp_rank": 44,
+   "exp_rank": 45,
    "gp": 2,
    "pos": "WR",
    "team": "IND"
@@ -2547,7 +2559,7 @@
   "josh oliver": {
    "act": 6.1,
    "act_pg": 3.05,
-   "act_rank": 40,
+   "act_rank": 41,
    "diff_pg": 0.37,
    "exp": 5.4,
    "exp_pg": 2.68,
@@ -2559,7 +2571,7 @@
   "josh palmer": {
    "act": 20.7,
    "act_pg": 10.35,
-   "act_rank": 24,
+   "act_rank": 26,
    "diff_pg": 6.03,
    "exp": 8.6,
    "exp_pg": 4.32,
@@ -2571,7 +2583,7 @@
   "justice hill": {
    "act": 6.1,
    "act_pg": 3.05,
-   "act_rank": 58,
+   "act_rank": 57,
    "diff_pg": -0.84,
    "exp": 7.8,
    "exp_pg": 3.89,
@@ -2583,7 +2595,7 @@
   "justin herbert": {
    "act": 24.1,
    "act_pg": 12.07,
-   "act_rank": 25,
+   "act_rank": 26,
    "diff_pg": -3.61,
    "exp": 31.4,
    "exp_pg": 15.68,
@@ -2623,27 +2635,27 @@
    "diff_pg": -0.78,
    "exp": 11.6,
    "exp_pg": 5.78,
-   "exp_rank": 46,
+   "exp_rank": 45,
    "gp": 2,
    "pos": "RB",
    "team": "SF"
   },
   "kaleb johnson": {
-   "act": 3.2,
-   "act_pg": 3.2,
-   "act_rank": 57,
-   "diff_pg": -0.46,
-   "exp": 3.7,
-   "exp_pg": 3.66,
-   "exp_rank": 65,
-   "gp": 1,
+   "act": 5.3,
+   "act_pg": 2.65,
+   "act_rank": 64,
+   "diff_pg": -1.65,
+   "exp": 8.6,
+   "exp_pg": 4.3,
+   "exp_rank": 58,
+   "gp": 2,
    "pos": "RB",
    "team": "GB"
   },
   "kalif raymond": {
    "act": 18.9,
    "act_pg": 9.45,
-   "act_rank": 31,
+   "act_rank": 32,
    "diff_pg": 0.83,
    "exp": 17.2,
    "exp_pg": 8.62,
@@ -2655,11 +2667,11 @@
   "kavontae turpin": {
    "act": 1.4,
    "act_pg": 0.7,
-   "act_rank": 136,
+   "act_rank": 135,
    "diff_pg": -0.58,
    "exp": 2.6,
    "exp_pg": 1.28,
-   "exp_rank": 132,
+   "exp_rank": 133,
    "gp": 2,
    "pos": "WR",
    "team": "DAL"
@@ -2671,7 +2683,7 @@
    "diff_pg": -1.94,
    "exp": 11.7,
    "exp_pg": 5.84,
-   "exp_rank": 63,
+   "exp_rank": 64,
    "gp": 2,
    "pos": "WR",
    "team": "HOU"
@@ -2691,11 +2703,11 @@
   "kc concepcion": {
    "act": 13.0,
    "act_pg": 6.5,
-   "act_rank": 54,
+   "act_rank": 55,
    "diff_pg": -0.89,
    "exp": 14.8,
    "exp_pg": 7.39,
-   "exp_rank": 48,
+   "exp_rank": 49,
    "gp": 2,
    "pos": "WR",
    "team": "CLE"
@@ -2703,11 +2715,11 @@
   "keaton mitchell": {
    "act": 5.3,
    "act_pg": 2.65,
-   "act_rank": 66,
+   "act_rank": 65,
    "diff_pg": -0.95,
    "exp": 7.2,
    "exp_pg": 3.6,
-   "exp_rank": 66,
+   "exp_rank": 65,
    "gp": 2,
    "pos": "RB",
    "team": "LAC"
@@ -2715,11 +2727,11 @@
   "keenan allen": {
    "act": 7.2,
    "act_pg": 3.6,
-   "act_rank": 90,
+   "act_rank": 91,
    "diff_pg": -2.65,
    "exp": 12.5,
    "exp_pg": 6.25,
-   "exp_rank": 58,
+   "exp_rank": 59,
    "gp": 2,
    "pos": "WR",
    "team": "IND"
@@ -2739,11 +2751,11 @@
   "kendrick bourne": {
    "act": 13.6,
    "act_pg": 6.8,
-   "act_rank": 49,
+   "act_rank": 50,
    "diff_pg": 1.04,
    "exp": 11.5,
    "exp_pg": 5.76,
-   "exp_rank": 65,
+   "exp_rank": 66,
    "gp": 2,
    "pos": "WR",
    "team": "ARI"
@@ -2763,7 +2775,7 @@
   "kenny gainwell": {
    "act": 5.3,
    "act_pg": 2.65,
-   "act_rank": 65,
+   "act_rank": 63,
    "diff_pg": -2.03,
    "exp": 9.4,
    "exp_pg": 4.68,
@@ -2775,11 +2787,11 @@
   "kenny pickett": {
    "act": 2.0,
    "act_pg": 1.0,
-   "act_rank": 38,
+   "act_rank": 39,
    "diff_pg": 0.59,
    "exp": 0.8,
    "exp_pg": 0.41,
-   "exp_rank": 41,
+   "exp_rank": 42,
    "gp": 2,
    "pos": "QB",
    "team": "CAR"
@@ -2803,7 +2815,7 @@
    "diff_pg": 0.28,
    "exp": 9.3,
    "exp_pg": 4.67,
-   "exp_rank": 83,
+   "exp_rank": 84,
    "gp": 2,
    "pos": "WR",
    "team": "BUF"
@@ -2811,11 +2823,11 @@
   "kevin austin jr": {
    "act": 1.2,
    "act_pg": 1.2,
-   "act_rank": 128,
+   "act_rank": 131,
    "diff_pg": 0.1,
    "exp": 1.1,
    "exp_pg": 1.1,
-   "exp_rank": 141,
+   "exp_rank": 143,
    "gp": 1,
    "pos": "WR",
    "team": "NO"
@@ -2823,7 +2835,7 @@
   "kevin coleman jr": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 142,
+   "act_rank": 143,
    "diff_pg": -2.05,
    "exp": 2.0,
    "exp_pg": 2.05,
@@ -2839,7 +2851,7 @@
    "diff_pg": 0.69,
    "exp": 1.6,
    "exp_pg": 1.61,
-   "exp_rank": 127,
+   "exp_rank": 128,
    "gp": 1,
    "pos": "WR",
    "team": "SF"
@@ -2859,7 +2871,7 @@
   "kirk cousins": {
    "act": 37.0,
    "act_pg": 18.51,
-   "act_rank": 12,
+   "act_rank": 13,
    "diff_pg": 3.3,
    "exp": 30.4,
    "exp_pg": 15.21,
@@ -2871,7 +2883,7 @@
   "konata mumpfield": {
    "act": 1.7,
    "act_pg": 0.85,
-   "act_rank": 133,
+   "act_rank": 134,
    "diff_pg": -1.19,
    "exp": 4.1,
    "exp_pg": 2.04,
@@ -2905,21 +2917,21 @@
    "team": "CHI"
   },
   "kyle pitts": {
-   "act": 2.0,
+   "act": 3.0,
    "act_pg": 1.0,
    "act_rank": 68,
-   "diff_pg": -1.45,
-   "exp": 4.9,
-   "exp_pg": 2.45,
+   "diff_pg": -1.35,
+   "exp": 7.1,
+   "exp_pg": 2.35,
    "exp_rank": 54,
-   "gp": 2,
+   "gp": 3,
    "pos": "TE",
    "team": "ATL"
   },
   "kyle williams": {
    "act": 1.5,
    "act_pg": 1.5,
-   "act_rank": 119,
+   "act_rank": 121,
    "diff_pg": -0.85,
    "exp": 2.4,
    "exp_pg": 2.35,
@@ -2931,11 +2943,11 @@
   "kyler murray": {
    "act": 0.6,
    "act_pg": 0.62,
-   "act_rank": 39,
+   "act_rank": 40,
    "diff_pg": -2.31,
    "exp": 2.9,
    "exp_pg": 2.93,
-   "exp_rank": 37,
+   "exp_rank": 38,
    "gp": 1,
    "pos": "QB",
    "team": "MIN"
@@ -2955,7 +2967,7 @@
   "ladd mcconkey": {
    "act": 21.7,
    "act_pg": 10.85,
-   "act_rank": 22,
+   "act_rank": 24,
    "diff_pg": 1.83,
    "exp": 18.0,
    "exp_pg": 9.02,
@@ -2967,7 +2979,7 @@
   "lajohntay wester": {
    "act": 4.4,
    "act_pg": 2.2,
-   "act_rank": 107,
+   "act_rank": 106,
    "diff_pg": -0.31,
    "exp": 5.0,
    "exp_pg": 2.51,
@@ -2983,7 +2995,7 @@
    "diff_pg": 3.21,
    "exp": 36.3,
    "exp_pg": 18.17,
-   "exp_rank": 13,
+   "exp_rank": 14,
    "gp": 2,
    "pos": "QB",
    "team": "BAL"
@@ -3019,7 +3031,7 @@
    "diff_pg": -3.4,
    "exp": 3.4,
    "exp_pg": 3.4,
-   "exp_rank": 68,
+   "exp_rank": 67,
    "gp": 1,
    "pos": "RB",
    "team": "JAX"
@@ -3027,11 +3039,11 @@
   "liljordan humphrey": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 145,
+   "act_rank": 146,
    "diff_pg": -1.52,
    "exp": 1.5,
    "exp_pg": 1.52,
-   "exp_rank": 128,
+   "exp_rank": 129,
    "gp": 1,
    "pos": "WR",
    "team": "DEN"
@@ -3063,11 +3075,11 @@
   "luther burden iii": {
    "act": 13.7,
    "act_pg": 6.85,
-   "act_rank": 48,
+   "act_rank": 49,
    "diff_pg": -1.39,
    "exp": 16.5,
    "exp_pg": 8.24,
-   "exp_rank": 38,
+   "exp_rank": 39,
    "gp": 2,
    "pos": "WR",
    "team": "CHI"
@@ -3075,11 +3087,11 @@
   "mac jones": {
    "act": -0.2,
    "act_pg": -0.2,
-   "act_rank": 42,
+   "act_rank": 43,
    "diff_pg": 0.0,
    "exp": -0.2,
    "exp_pg": -0.2,
-   "exp_rank": 42,
+   "exp_rank": 43,
    "gp": 1,
    "pos": "QB",
    "team": "SF"
@@ -3099,7 +3111,7 @@
   "makai lemon": {
    "act": 2.4,
    "act_pg": 1.2,
-   "act_rank": 125,
+   "act_rank": 128,
    "diff_pg": -1.69,
    "exp": 5.8,
    "exp_pg": 2.89,
@@ -3115,7 +3127,7 @@
    "diff_pg": -3.81,
    "exp": 15.1,
    "exp_pg": 7.56,
-   "exp_rank": 46,
+   "exp_rank": 47,
    "gp": 2,
    "pos": "WR",
    "team": "NYG"
@@ -3123,7 +3135,7 @@
   "malik benson": {
    "act": 0.3,
    "act_pg": 0.15,
-   "act_rank": 140,
+   "act_rank": 141,
    "diff_pg": -2.65,
    "exp": 5.6,
    "exp_pg": 2.79,
@@ -3147,11 +3159,11 @@
   "malik washington": {
    "act": 13.5,
    "act_pg": 6.75,
-   "act_rank": 51,
+   "act_rank": 52,
    "diff_pg": -1.39,
    "exp": 16.3,
    "exp_pg": 8.14,
-   "exp_rank": 40,
+   "exp_rank": 41,
    "gp": 2,
    "pos": "WR",
    "team": "MIA"
@@ -3171,11 +3183,11 @@
   "marcus mariota": {
    "act": 8.7,
    "act_pg": 8.74,
-   "act_rank": 32,
+   "act_rank": 33,
    "diff_pg": 0.16,
    "exp": 8.6,
    "exp_pg": 8.58,
-   "exp_rank": 33,
+   "exp_rank": 34,
    "gp": 1,
    "pos": "QB",
    "team": "WAS"
@@ -3207,31 +3219,31 @@
   "marquise brown": {
    "act": 1.2,
    "act_pg": 1.2,
-   "act_rank": 126,
+   "act_rank": 129,
    "diff_pg": -0.17,
    "exp": 1.4,
    "exp_pg": 1.37,
-   "exp_rank": 131,
+   "exp_rank": 132,
    "gp": 1,
    "pos": "WR",
    "team": "PHI"
   },
   "marshawn lloyd": {
-   "act": 13.3,
-   "act_pg": 6.65,
-   "act_rank": 37,
-   "diff_pg": -1.16,
-   "exp": 15.6,
-   "exp_pg": 7.81,
-   "exp_rank": 39,
-   "gp": 2,
+   "act": 16.1,
+   "act_pg": 5.37,
+   "act_rank": 47,
+   "diff_pg": -1.95,
+   "exp": 21.9,
+   "exp_pg": 7.31,
+   "exp_rank": 40,
+   "gp": 3,
    "pos": "RB",
    "team": "GB"
   },
   "marvin harrison jr": {
    "act": 3.8,
    "act_pg": 1.9,
-   "act_rank": 109,
+   "act_rank": 110,
    "diff_pg": -0.61,
    "exp": 5.0,
    "exp_pg": 2.51,
@@ -3243,11 +3255,11 @@
   "mason rudolph": {
    "act": 0.3,
    "act_pg": 0.3,
-   "act_rank": 41,
+   "act_rank": 42,
    "diff_pg": -0.74,
    "exp": 1.0,
    "exp_pg": 1.04,
-   "exp_rank": 39,
+   "exp_rank": 40,
    "gp": 1,
    "pos": "QB",
    "team": "PIT"
@@ -3265,14 +3277,14 @@
    "team": "NYJ"
   },
   "matthew golden": {
-   "act": 20.3,
-   "act_pg": 10.15,
-   "act_rank": 25,
-   "diff_pg": -2.92,
-   "exp": 26.1,
-   "exp_pg": 13.07,
+   "act": 38.8,
+   "act_pg": 12.93,
+   "act_rank": 16,
+   "diff_pg": -1.05,
+   "exp": 42.0,
+   "exp_pg": 13.98,
    "exp_rank": 11,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
    "team": "GB"
   },
@@ -3312,14 +3324,26 @@
    "pos": "TE",
    "team": "LV"
   },
+  "michael penix jr": {
+   "act": 13.0,
+   "act_pg": 13.04,
+   "act_rank": 24,
+   "diff_pg": 3.45,
+   "exp": 9.6,
+   "exp_pg": 9.59,
+   "exp_rank": 33,
+   "gp": 1,
+   "pos": "QB",
+   "team": "ATL"
+  },
   "michael pittman": {
    "act": 7.3,
    "act_pg": 7.3,
-   "act_rank": 45,
+   "act_rank": 46,
    "diff_pg": 3.56,
    "exp": 3.7,
    "exp_pg": 3.74,
-   "exp_rank": 98,
+   "exp_rank": 99,
    "gp": 1,
    "pos": "WR",
    "team": "PIT"
@@ -3331,7 +3355,7 @@
    "diff_pg": -2.42,
    "exp": 15.7,
    "exp_pg": 7.87,
-   "exp_rank": 42,
+   "exp_rank": 43,
    "gp": 2,
    "pos": "WR",
    "team": "ARI"
@@ -3339,11 +3363,11 @@
   "mike evans": {
    "act": 20.8,
    "act_pg": 10.4,
-   "act_rank": 23,
+   "act_rank": 25,
    "diff_pg": 2.2,
    "exp": 16.4,
    "exp_pg": 8.2,
-   "exp_rank": 39,
+   "exp_rank": 40,
    "gp": 2,
    "pos": "WR",
    "team": "SF"
@@ -3363,7 +3387,7 @@
   "mike washington jr": {
    "act": 4.8,
    "act_pg": 2.4,
-   "act_rank": 68,
+   "act_rank": 67,
    "diff_pg": -0.92,
    "exp": 6.6,
    "exp_pg": 3.32,
@@ -3387,11 +3411,11 @@
   "myles price": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 149,
+   "act_rank": 150,
    "diff_pg": -0.89,
    "exp": 0.9,
    "exp_pg": 0.89,
-   "exp_rank": 147,
+   "exp_rank": 148,
    "gp": 1,
    "pos": "WR",
    "team": "MIN"
@@ -3447,11 +3471,11 @@
   "nick mullens": {
    "act": -0.3,
    "act_pg": -0.3,
-   "act_rank": 43,
+   "act_rank": 44,
    "diff_pg": 0.0,
    "exp": -0.3,
    "exp_pg": -0.3,
-   "exp_rank": 43,
+   "exp_rank": 44,
    "gp": 1,
    "pos": "QB",
    "team": "JAX"
@@ -3493,14 +3517,14 @@
    "team": "KC"
   },
   "olamide zaccheaus": {
-   "act": 1.8,
-   "act_pg": 0.9,
-   "act_rank": 131,
-   "diff_pg": -1.03,
-   "exp": 3.9,
-   "exp_pg": 1.93,
-   "exp_rank": 121,
-   "gp": 2,
+   "act": 3.7,
+   "act_pg": 1.23,
+   "act_rank": 127,
+   "diff_pg": -0.66,
+   "exp": 5.7,
+   "exp_pg": 1.89,
+   "exp_rank": 122,
+   "gp": 3,
    "pos": "WR",
    "team": "ATL"
   },
@@ -3519,11 +3543,11 @@
   "omar cooper jr": {
    "act": 3.5,
    "act_pg": 3.5,
-   "act_rank": 92,
+   "act_rank": 93,
    "diff_pg": 2.52,
    "exp": 1.0,
    "exp_pg": 0.98,
-   "exp_rank": 143,
+   "exp_rank": 144,
    "gp": 1,
    "pos": "WR",
    "team": "NYJ"
@@ -3583,7 +3607,7 @@
    "diff_pg": -0.07,
    "exp": 7.9,
    "exp_pg": 3.97,
-   "exp_rank": 93,
+   "exp_rank": 94,
    "gp": 2,
    "pos": "WR",
    "team": "DEN"
@@ -3627,11 +3651,11 @@
   "puka nacua": {
    "act": 9.9,
    "act_pg": 9.9,
-   "act_rank": 27,
+   "act_rank": 28,
    "diff_pg": -5.16,
    "exp": 15.1,
    "exp_pg": 15.06,
-   "exp_rank": 7,
+   "exp_rank": 8,
    "gp": 1,
    "pos": "WR",
    "team": "LAR"
@@ -3643,7 +3667,7 @@
    "diff_pg": -4.48,
    "exp": 13.6,
    "exp_pg": 6.78,
-   "exp_rank": 51,
+   "exp_rank": 52,
    "gp": 2,
    "pos": "WR",
    "team": "LAC"
@@ -3651,7 +3675,7 @@
   "quinshon judkins": {
    "act": 13.3,
    "act_pg": 6.65,
-   "act_rank": 36,
+   "act_rank": 37,
    "diff_pg": -2.5,
    "exp": 18.3,
    "exp_pg": 9.15,
@@ -3687,7 +3711,7 @@
   "raheim sanders": {
    "act": 5.7,
    "act_pg": 2.85,
-   "act_rank": 62,
+   "act_rank": 60,
    "diff_pg": 0.39,
    "exp": 4.9,
    "exp_pg": 2.46,
@@ -3699,7 +3723,7 @@
   "rashee rice": {
    "act": 19.2,
    "act_pg": 9.6,
-   "act_rank": 30,
+   "act_rank": 31,
    "diff_pg": 4.62,
    "exp": 10.0,
    "exp_pg": 4.98,
@@ -3711,11 +3735,11 @@
   "rashid shaheed": {
    "act": 6.3,
    "act_pg": 3.15,
-   "act_rank": 95,
+   "act_rank": 96,
    "diff_pg": -3.12,
    "exp": 12.5,
    "exp_pg": 6.27,
-   "exp_rank": 57,
+   "exp_rank": 58,
    "gp": 2,
    "pos": "WR",
    "team": "SEA"
@@ -3723,11 +3747,11 @@
   "rashod bateman": {
    "act": 18.3,
    "act_pg": 9.15,
-   "act_rank": 34,
+   "act_rank": 35,
    "diff_pg": 1.48,
    "exp": 15.3,
    "exp_pg": 7.67,
-   "exp_rank": 43,
+   "exp_rank": 44,
    "gp": 2,
    "pos": "WR",
    "team": "BAL"
@@ -3799,7 +3823,7 @@
    "diff_pg": -3.42,
    "exp": 16.2,
    "exp_pg": 8.12,
-   "exp_rank": 41,
+   "exp_rank": 42,
    "gp": 2,
    "pos": "WR",
    "team": "PIT"
@@ -3807,7 +3831,7 @@
   "rome odunze": {
    "act": 12.0,
    "act_pg": 6.0,
-   "act_rank": 55,
+   "act_rank": 56,
    "diff_pg": 0.56,
    "exp": 10.9,
    "exp_pg": 5.44,
@@ -3831,7 +3855,7 @@
   "ronnie rivers": {
    "act": 2.9,
    "act_pg": 2.9,
-   "act_rank": 61,
+   "act_rank": 59,
    "diff_pg": -1.9,
    "exp": 4.8,
    "exp_pg": 4.8,
@@ -3847,7 +3871,7 @@
    "diff_pg": -1.66,
    "exp": 11.3,
    "exp_pg": 5.66,
-   "exp_rank": 66,
+   "exp_rank": 67,
    "gp": 2,
    "pos": "WR",
    "team": "DAL"
@@ -3859,7 +3883,7 @@
    "diff_pg": 12.73,
    "exp": 1.5,
    "exp_pg": 1.46,
-   "exp_rank": 130,
+   "exp_rank": 131,
    "gp": 1,
    "pos": "WR",
    "team": "MIA"
@@ -3867,11 +3891,11 @@
   "sam darnold": {
    "act": 0.5,
    "act_pg": 0.52,
-   "act_rank": 40,
+   "act_rank": 41,
    "diff_pg": -0.18,
    "exp": 0.7,
    "exp_pg": 0.7,
-   "exp_rank": 40,
+   "exp_rank": 41,
    "gp": 1,
    "pos": "QB",
    "team": "SEA"
@@ -3939,7 +3963,7 @@
   "sione vaki": {
    "act": 4.8,
    "act_pg": 2.4,
-   "act_rank": 69,
+   "act_rank": 68,
    "diff_pg": 0.68,
    "exp": 3.4,
    "exp_pg": 1.72,
@@ -3949,14 +3973,14 @@
    "team": "DET"
   },
   "skyy moore": {
-   "act": 1.6,
-   "act_pg": 0.8,
-   "act_rank": 134,
-   "diff_pg": -2.25,
-   "exp": 6.1,
-   "exp_pg": 3.05,
-   "exp_rank": 107,
-   "gp": 2,
+   "act": 6.2,
+   "act_pg": 2.07,
+   "act_rank": 107,
+   "diff_pg": -2.62,
+   "exp": 14.1,
+   "exp_pg": 4.69,
+   "exp_rank": 83,
+   "gp": 3,
    "pos": "WR",
    "team": "GB"
   },
@@ -3975,11 +3999,11 @@
   "stetson bennett": {
    "act": 1.4,
    "act_pg": 1.42,
-   "act_rank": 37,
+   "act_rank": 38,
    "diff_pg": -0.38,
    "exp": 1.8,
    "exp_pg": 1.8,
-   "exp_rank": 38,
+   "exp_rank": 39,
    "gp": 1,
    "pos": "QB",
    "team": "LAR"
@@ -4023,7 +4047,7 @@
   "tee higgins": {
    "act": 19.4,
    "act_pg": 9.7,
-   "act_rank": 28,
+   "act_rank": 29,
    "diff_pg": -1.72,
    "exp": 22.8,
    "exp_pg": 11.42,
@@ -4059,7 +4083,7 @@
   "tetairoa mcmillan": {
    "act": 22.6,
    "act_pg": 11.3,
-   "act_rank": 21,
+   "act_rank": 23,
    "diff_pg": -4.68,
    "exp": 32.0,
    "exp_pg": 15.98,
@@ -4071,11 +4095,11 @@
   "tez johnson": {
    "act": 5.0,
    "act_pg": 2.5,
-   "act_rank": 100,
+   "act_rank": 101,
    "diff_pg": -3.37,
    "exp": 11.7,
    "exp_pg": 5.87,
-   "exp_rank": 62,
+   "exp_rank": 63,
    "gp": 2,
    "pos": "WR",
    "team": "TB"
@@ -4155,11 +4179,11 @@
   "travis hunter": {
    "act": 1.6,
    "act_pg": 1.6,
-   "act_rank": 117,
+   "act_rank": 119,
    "diff_pg": -0.23,
    "exp": 1.8,
    "exp_pg": 1.83,
-   "exp_rank": 124,
+   "exp_rank": 125,
    "gp": 1,
    "pos": "WR",
    "team": "JAX"
@@ -4183,7 +4207,7 @@
    "diff_pg": -0.97,
    "exp": 11.2,
    "exp_pg": 5.62,
-   "exp_rank": 68,
+   "exp_rank": 69,
    "gp": 2,
    "pos": "WR",
    "team": "LAC"
@@ -4191,11 +4215,11 @@
   "tre tucker": {
    "act": 24.1,
    "act_pg": 12.05,
-   "act_rank": 20,
+   "act_rank": 21,
    "diff_pg": 3.79,
    "exp": 16.5,
    "exp_pg": 8.26,
-   "exp_rank": 37,
+   "exp_rank": 38,
    "gp": 2,
    "pos": "WR",
    "team": "LV"
@@ -4207,7 +4231,7 @@
    "diff_pg": 5.85,
    "exp": 7.8,
    "exp_pg": 7.75,
-   "exp_rank": 40,
+   "exp_rank": 39,
    "gp": 1,
    "pos": "RB",
    "team": "NE"
@@ -4239,7 +4263,7 @@
   "treylon burks": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 141,
+   "act_rank": 142,
    "diff_pg": -3.69,
    "exp": 3.7,
    "exp_pg": 3.69,
@@ -4251,35 +4275,35 @@
   "troy franklin": {
    "act": 3.7,
    "act_pg": 1.85,
-   "act_rank": 110,
+   "act_rank": 111,
    "diff_pg": -1.18,
    "exp": 6.1,
    "exp_pg": 3.03,
-   "exp_rank": 108,
+   "exp_rank": 107,
    "gp": 2,
    "pos": "WR",
    "team": "DEN"
   },
   "tucker kraft": {
-   "act": 10.5,
-   "act_pg": 5.25,
-   "act_rank": 26,
-   "diff_pg": -1.0,
-   "exp": 12.5,
-   "exp_pg": 6.25,
+   "act": 15.1,
+   "act_pg": 5.03,
+   "act_rank": 30,
+   "diff_pg": -1.83,
+   "exp": 20.6,
+   "exp_pg": 6.86,
    "exp_rank": 18,
-   "gp": 2,
+   "gp": 3,
    "pos": "TE",
    "team": "GB"
   },
   "tutu atwell": {
    "act": 2.4,
    "act_pg": 2.4,
-   "act_rank": 101,
+   "act_rank": 102,
    "diff_pg": -1.87,
    "exp": 4.3,
    "exp_pg": 4.27,
-   "exp_rank": 89,
+   "exp_rank": 90,
    "gp": 1,
    "pos": "WR",
    "team": "LAR"
@@ -4363,7 +4387,7 @@
    "diff_pg": 1.09,
    "exp": 8.4,
    "exp_pg": 4.21,
-   "exp_rank": 90,
+   "exp_rank": 91,
    "gp": 2,
    "pos": "WR",
    "team": "KC"
@@ -4383,11 +4407,11 @@
   "tyson bagent": {
    "act": 2.2,
    "act_pg": 2.16,
-   "act_rank": 36,
+   "act_rank": 37,
    "diff_pg": -5.19,
    "exp": 7.4,
    "exp_pg": 7.35,
-   "exp_rank": 34,
+   "exp_rank": 35,
    "gp": 1,
    "pos": "QB",
    "team": "CHI"
@@ -4419,7 +4443,7 @@
   "will shipley": {
    "act": 5.6,
    "act_pg": 2.8,
-   "act_rank": 63,
+   "act_rank": 61,
    "diff_pg": -1.16,
    "exp": 7.9,
    "exp_pg": 3.96,
@@ -4459,7 +4483,7 @@
    "diff_pg": -0.89,
    "exp": 9.2,
    "exp_pg": 4.59,
-   "exp_rank": 85,
+   "exp_rank": 86,
    "gp": 2,
    "pos": "WR",
    "team": "CAR"
@@ -4467,11 +4491,11 @@
   "xavier smith": {
    "act": 0.0,
    "act_pg": 0.0,
-   "act_rank": 144,
+   "act_rank": 145,
    "diff_pg": -1.65,
    "exp": 1.7,
    "exp_pg": 1.65,
-   "exp_rank": 125,
+   "exp_rank": 126,
    "gp": 1,
    "pos": "WR",
    "team": "LAR"
@@ -4479,7 +4503,7 @@
   "xavier worthy": {
    "act": 14.3,
    "act_pg": 7.15,
-   "act_rank": 47,
+   "act_rank": 48,
    "diff_pg": -3.35,
    "exp": 21.0,
    "exp_pg": 10.5,
@@ -4489,14 +4513,14 @@
    "team": "KC"
   },
   "zachariah branch": {
-   "act": 2.4,
-   "act_pg": 2.4,
-   "act_rank": 102,
-   "diff_pg": 0.49,
-   "exp": 1.9,
-   "exp_pg": 1.92,
-   "exp_rank": 122,
-   "gp": 1,
+   "act": 3.6,
+   "act_pg": 1.8,
+   "act_rank": 115,
+   "diff_pg": -0.24,
+   "exp": 4.1,
+   "exp_pg": 2.04,
+   "exp_rank": 120,
+   "gp": 2,
    "pos": "WR",
    "team": "ATL"
   },

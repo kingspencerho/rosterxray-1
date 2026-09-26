@@ -4,8 +4,8 @@
   "counts": {
    "QB": 33,
    "RB": 76,
-   "TE": 61,
-   "WR": 132
+   "TE": 64,
+   "WR": 133
   },
   "denominator": "team targets/air yards summed over GAMES PLAYED, never the full season",
   "hierarchy_rank": {
@@ -33,13 +33,13 @@
     "TE": {
      "max": 4.25,
      "median": 1.0,
-     "n": 61,
+     "n": 64,
      "p75": 1.5
     },
     "WR": {
      "max": 4.75,
      "median": 1.0,
-     "n": 132,
+     "n": 133,
      "p75": 1.75
     }
    },
@@ -62,7 +62,7 @@
    "trend": {
     "counts": {
      "falling": 0,
-     "insufficient": 302,
+     "insufficient": 306,
      "rising": 0,
      "stable": 0
     },
@@ -103,52 +103,52 @@
   "vs_prior": {
    "metrics": {
     "adot": {
-     "bar": 3.288,
+     "bar": 3.2151,
      "composite": false,
-     "median": 0.36,
-     "n": 89,
+     "median": 0.39,
+     "n": 90,
      "source": "1 SD of the observed shifts",
-     "stdev": 3.288
+     "stdev": 3.2151
     },
     "ay_sh": {
-     "bar": 0.074,
+     "bar": 0.0725,
      "composite": false,
      "median": 0.0,
-     "n": 267,
+     "n": 269,
      "source": "1 SD of the observed shifts",
-     "stdev": 0.074
+     "stdev": 0.0725
     },
     "car_pg": {
-     "bar": 2.182,
+     "bar": 2.1836,
      "composite": false,
      "median": 0.0,
-     "n": 267,
+     "n": 269,
      "source": "1 SD of the observed shifts",
-     "stdev": 2.182
+     "stdev": 2.1836
     },
     "tgt_pg": {
-     "bar": 1.8662,
+     "bar": 1.8681,
      "composite": false,
      "median": 0.0,
-     "n": 267,
+     "n": 269,
      "source": "1 SD of the observed shifts",
-     "stdev": 1.8662
+     "stdev": 1.8681
     },
     "tgt_sh": {
-     "bar": 0.056,
+     "bar": 0.0551,
      "composite": false,
      "median": 0.0,
-     "n": 267,
+     "n": 269,
      "source": "1 SD of the observed shifts",
-     "stdev": 0.056
+     "stdev": 0.0551
     },
     "wopr": {
-     "bar": 0.1227,
+     "bar": 0.1212,
      "composite": true,
      "median": 0.0,
-     "n": 267,
+     "n": 269,
      "source": "1 SD of the observed shifts",
-     "stdev": 0.1227
+     "stdev": 0.1212
     }
    },
    "prior_season": 2025,
@@ -162,7 +162,7 @@
     "no_pair": "a player absent from this block has no prior-season row - a rookie, or someone under the game gate. That is an absent baseline, NOT a gate he failed."
    }
   },
-  "weeks_covered": 2
+  "weeks_covered": 3
  },
  "players": {
   "aaron jones": {
@@ -1198,6 +1198,80 @@
    },
    "wopr": 0.364
   },
+  "austin hooper": {
+   "adot": null,
+   "ay_sh": 0.074,
+   "car": 0,
+   "car_pg": 0.0,
+   "changed_team": true,
+   "gp": 2,
+   "pos": "TE",
+   "ppr_prem": 1.0,
+   "prior_gp": 13,
+   "prior_team": "NE",
+   "rec": 4,
+   "team": "ATL",
+   "tgt": 6,
+   "tgt_pg": 3.0,
+   "tgt_sh": 0.111,
+   "trend": {
+    "delta": null,
+    "early": 0.129,
+    "early_gp": 1,
+    "last3": 0.108,
+    "last3_gp": 2,
+    "recent": 0.087,
+    "recent_gp": 1,
+    "series": [
+     [
+      2,
+      4,
+      0.129
+     ],
+     [
+      3,
+      2,
+      0.087
+     ]
+    ],
+    "split_mode": "halves",
+    "trend": "insufficient"
+   },
+   "trend_car": null,
+   "vs_prior": {
+    "ay_sh": {
+     "cur": 0.074,
+     "delta": 0.005,
+     "moved": "flat",
+     "prior": 0.069
+    },
+    "car_pg": {
+     "cur": 0.0,
+     "delta": 0.0,
+     "moved": "flat",
+     "prior": 0.0
+    },
+    "tgt_pg": {
+     "cur": 3.0,
+     "delta": 1.0,
+     "moved": "flat",
+     "prior": 2.0
+    },
+    "tgt_sh": {
+     "cur": 0.111,
+     "delta": 0.041,
+     "moved": "flat",
+     "prior": 0.07
+    },
+    "wopr": {
+     "cur": 0.219,
+     "delta": 0.065,
+     "moved": "flat",
+     "prior": 0.154
+    }
+   },
+   "wopr": 0.219
+  },
   "baker mayfield": {
    "adot": null,
    "ay_sh": 0.0,
@@ -1408,29 +1482,29 @@
    "wopr": 0.074
   },
   "bijan robinson": {
-   "adot": -1.29,
-   "ay_sh": -0.081,
-   "car": 37,
-   "car_pg": 18.5,
+   "adot": -1.75,
+   "ay_sh": -0.073,
+   "car": 66,
+   "car_pg": 22.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "RB",
-   "ppr_prem": 2.75,
+   "ppr_prem": 2.17,
    "prior_gp": 17,
    "prior_team": "ATL",
-   "rec": 11,
+   "rec": 13,
    "team": "ATL",
-   "tgt": 14,
-   "tgt_pg": 7.0,
-   "tgt_sh": 0.28,
+   "tgt": 16,
+   "tgt_pg": 5.33,
+   "tgt_sh": 0.219,
    "trend": {
     "delta": null,
     "early": 0.5263,
     "early_gp": 1,
-    "last3": 0.3277,
-    "last3_gp": 2,
-    "recent": 0.129,
-    "recent_gp": 1,
+    "last3": 0.2474,
+    "last3_gp": 3,
+    "recent": 0.108,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -1441,6 +1515,11 @@
       2,
       4,
       0.129
+     ],
+     [
+      3,
+      2,
+      0.087
      ]
     ],
     "split_mode": "halves",
@@ -1450,10 +1529,10 @@
     "delta": null,
     "early": 0.6774,
     "early_gp": 1,
-    "last3": 0.5887,
-    "last3_gp": 2,
-    "recent": 0.5,
-    "recent_gp": 1,
+    "last3": 0.6282,
+    "last3_gp": 3,
+    "recent": 0.6037,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -1464,6 +1543,11 @@
       2,
       16,
       0.5
+     ],
+     [
+      3,
+      29,
+      0.7073
      ]
     ],
     "split_mode": "halves",
@@ -1471,43 +1555,43 @@
    },
    "vs_prior": {
     "adot": {
-     "cur": -1.29,
-     "delta": -2.27,
+     "cur": -1.75,
+     "delta": -2.73,
      "moved": "flat",
      "prior": 0.98
     },
     "ay_sh": {
-     "cur": -0.081,
-     "delta": -0.105,
+     "cur": -0.073,
+     "delta": -0.097,
      "moved": "down",
      "prior": 0.024
     },
     "car_pg": {
-     "cur": 18.5,
-     "delta": 1.62,
-     "moved": "flat",
+     "cur": 22.0,
+     "delta": 5.12,
+     "moved": "up",
      "prior": 16.88
     },
     "tgt_pg": {
-     "cur": 7.0,
-     "delta": 0.94,
+     "cur": 5.33,
+     "delta": -0.73,
      "moved": "flat",
      "prior": 6.06
     },
     "tgt_sh": {
-     "cur": 0.28,
-     "delta": 0.082,
-     "moved": "up",
+     "cur": 0.219,
+     "delta": 0.021,
+     "moved": "flat",
      "prior": 0.198
     },
     "wopr": {
-     "cur": 0.363,
-     "delta": 0.048,
+     "cur": 0.278,
+     "delta": -0.037,
      "moved": "flat",
      "prior": 0.315
     }
    },
-   "wopr": 0.363
+   "wopr": 0.278
   },
   "blake corum": {
    "adot": null,
@@ -1681,28 +1765,28 @@
   },
   "bo melton": {
    "adot": null,
-   "ay_sh": 0.027,
+   "ay_sh": 0.045,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 0.25,
+   "ppr_prem": 0.17,
    "prior_gp": 13,
    "prior_team": "GB",
    "rec": 1,
    "team": "GB",
-   "tgt": 2,
+   "tgt": 3,
    "tgt_pg": 1.0,
-   "tgt_sh": 0.029,
+   "tgt_sh": 0.025,
    "trend": {
     "delta": null,
     "early": 0.025,
     "early_gp": 1,
-    "last3": 0.0297,
-    "last3_gp": 2,
-    "recent": 0.0345,
-    "recent_gp": 1,
+    "last3": 0.0264,
+    "last3_gp": 3,
+    "recent": 0.027,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -1713,6 +1797,11 @@
       2,
       1,
       0.0345
+     ],
+     [
+      3,
+      1,
+      0.0196
      ]
     ],
     "split_mode": "halves",
@@ -1721,8 +1810,8 @@
    "trend_car": null,
    "vs_prior": {
     "ay_sh": {
-     "cur": 0.027,
-     "delta": -0.043,
+     "cur": 0.045,
+     "delta": -0.025,
      "moved": "flat",
      "prior": 0.07
     },
@@ -1739,19 +1828,19 @@
      "prior": 1.0
     },
     "tgt_sh": {
-     "cur": 0.029,
-     "delta": -0.008,
+     "cur": 0.025,
+     "delta": -0.012,
      "moved": "flat",
      "prior": 0.037
     },
     "wopr": {
-     "cur": 0.062,
-     "delta": -0.042,
+     "cur": 0.069,
+     "delta": -0.035,
      "moved": "flat",
      "prior": 0.104
     }
    },
-   "wopr": 0.062
+   "wopr": 0.069
   },
   "bo nix": {
    "adot": null,
@@ -2244,27 +2333,27 @@
   "brian robinson": {
    "adot": null,
    "ay_sh": 0.0,
-   "car": 20,
+   "car": 30,
    "car_pg": 10.0,
    "changed_team": true,
-   "gp": 2,
+   "gp": 3,
    "pos": "RB",
-   "ppr_prem": 0.5,
+   "ppr_prem": 0.33,
    "prior_gp": 17,
    "prior_team": "SF",
    "rec": 2,
    "team": "ATL",
    "tgt": 2,
-   "tgt_pg": 1.0,
-   "tgt_sh": 0.04,
+   "tgt_pg": 0.67,
+   "tgt_sh": 0.027,
    "trend": {
     "delta": null,
     "early": 0.0,
     "early_gp": 1,
-    "last3": 0.0323,
-    "last3_gp": 2,
-    "recent": 0.0645,
-    "recent_gp": 1,
+    "last3": 0.0215,
+    "last3_gp": 3,
+    "recent": 0.0323,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -2275,6 +2364,11 @@
       2,
       2,
       0.0645
+     ],
+     [
+      3,
+      0,
+      0.0
      ]
     ],
     "split_mode": "halves",
@@ -2284,10 +2378,10 @@
     "delta": null,
     "early": 0.2903,
     "early_gp": 1,
-    "last3": 0.317,
-    "last3_gp": 2,
-    "recent": 0.3438,
-    "recent_gp": 1,
+    "last3": 0.2927,
+    "last3_gp": 3,
+    "recent": 0.2938,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -2298,6 +2392,11 @@
       2,
       11,
       0.3438
+     ],
+     [
+      3,
+      10,
+      0.2439
      ]
     ],
     "split_mode": "halves",
@@ -2317,25 +2416,25 @@
      "prior": 5.41
     },
     "tgt_pg": {
-     "cur": 1.0,
-     "delta": 0.29,
+     "cur": 0.67,
+     "delta": -0.04,
      "moved": "flat",
      "prior": 0.71
     },
     "tgt_sh": {
-     "cur": 0.04,
-     "delta": 0.018,
+     "cur": 0.027,
+     "delta": 0.005,
      "moved": "flat",
      "prior": 0.022
     },
     "wopr": {
-     "cur": 0.06,
-     "delta": 0.027,
+     "cur": 0.041,
+     "delta": 0.008,
      "moved": "flat",
      "prior": 0.033
     }
    },
-   "wopr": 0.06
+   "wopr": 0.041
   },
   "brian thomas jr": {
    "adot": 11.45,
@@ -3775,25 +3874,25 @@
   },
   "chris blair": {
    "adot": null,
-   "ay_sh": 0.108,
+   "ay_sh": 0.062,
    "car": 0,
    "car_pg": 0.0,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 0.25,
+   "ppr_prem": 0.17,
    "rec": 1,
    "team": "ATL",
    "tgt": 3,
-   "tgt_pg": 1.5,
-   "tgt_sh": 0.06,
+   "tgt_pg": 1.0,
+   "tgt_sh": 0.041,
    "trend": {
     "delta": null,
     "early": 0.0,
     "early_gp": 1,
-    "last3": 0.0484,
-    "last3_gp": 2,
-    "recent": 0.0968,
-    "recent_gp": 1,
+    "last3": 0.0323,
+    "last3_gp": 3,
+    "recent": 0.0484,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -3804,38 +3903,43 @@
       2,
       3,
       0.0968
+     ],
+     [
+      3,
+      0,
+      0.0
      ]
     ],
     "split_mode": "halves",
     "trend": "insufficient"
    },
    "trend_car": null,
-   "wopr": 0.166
+   "wopr": 0.105
   },
   "chris brooks": {
    "adot": null,
-   "ay_sh": -0.012,
+   "ay_sh": -0.008,
    "car": 11,
-   "car_pg": 5.5,
+   "car_pg": 3.67,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "RB",
-   "ppr_prem": 0.25,
+   "ppr_prem": 0.33,
    "prior_gp": 17,
    "prior_team": "GB",
-   "rec": 1,
+   "rec": 2,
    "team": "GB",
-   "tgt": 3,
-   "tgt_pg": 1.5,
-   "tgt_sh": 0.043,
+   "tgt": 4,
+   "tgt_pg": 1.33,
+   "tgt_sh": 0.033,
    "trend": {
     "delta": null,
     "early": 0.025,
     "early_gp": 1,
-    "last3": 0.047,
-    "last3_gp": 2,
-    "recent": 0.069,
-    "recent_gp": 1,
+    "last3": 0.0379,
+    "last3_gp": 3,
+    "recent": 0.0443,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -3846,6 +3950,11 @@
       2,
       2,
       0.069
+     ],
+     [
+      3,
+      1,
+      0.0196
      ]
     ],
     "split_mode": "halves",
@@ -3855,10 +3964,10 @@
     "delta": null,
     "early": 0.3333,
     "early_gp": 1,
-    "last3": 0.2778,
-    "last3_gp": 2,
-    "recent": 0.2222,
-    "recent_gp": 1,
+    "last3": 0.1852,
+    "last3_gp": 3,
+    "recent": 0.1111,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -3869,6 +3978,11 @@
       2,
       4,
       0.2222
+     ],
+     [
+      3,
+      0,
+      0.0
      ]
     ],
     "split_mode": "halves",
@@ -3876,37 +3990,37 @@
    },
    "vs_prior": {
     "ay_sh": {
-     "cur": -0.012,
-     "delta": -0.013,
+     "cur": -0.008,
+     "delta": -0.009,
      "moved": "flat",
      "prior": 0.001
     },
     "car_pg": {
-     "cur": 5.5,
-     "delta": 3.91,
-     "moved": "up",
+     "cur": 3.67,
+     "delta": 2.08,
+     "moved": "flat",
      "prior": 1.59
     },
     "tgt_pg": {
-     "cur": 1.5,
-     "delta": 0.5,
+     "cur": 1.33,
+     "delta": 0.33,
      "moved": "flat",
      "prior": 1.0
     },
     "tgt_sh": {
-     "cur": 0.043,
-     "delta": 0.006,
+     "cur": 0.033,
+     "delta": -0.004,
      "moved": "flat",
      "prior": 0.037
     },
     "wopr": {
-     "cur": 0.057,
-     "delta": 0.001,
+     "cur": 0.044,
+     "delta": -0.012,
      "moved": "flat",
      "prior": 0.056
     }
    },
-   "wopr": 0.057
+   "wopr": 0.044
   },
   "chris godwin jr": {
    "adot": null,
@@ -4335,29 +4449,29 @@
    "wopr": 0.344
   },
   "christian watson": {
-   "adot": 11.21,
-   "ay_sh": 0.318,
+   "adot": 10.48,
+   "ay_sh": 0.283,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 2.5,
+   "ppr_prem": 2.83,
    "prior_gp": 10,
    "prior_team": "GB",
-   "rec": 10,
+   "rec": 17,
    "team": "GB",
-   "tgt": 19,
-   "tgt_pg": 9.5,
-   "tgt_sh": 0.275,
+   "tgt": 29,
+   "tgt_pg": 9.67,
+   "tgt_sh": 0.242,
    "trend": {
     "delta": null,
     "early": 0.2,
     "early_gp": 1,
-    "last3": 0.2897,
-    "last3_gp": 2,
-    "recent": 0.3793,
-    "recent_gp": 1,
+    "last3": 0.2585,
+    "last3_gp": 3,
+    "recent": 0.2877,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -4368,6 +4482,11 @@
       2,
       11,
       0.3793
+     ],
+     [
+      3,
+      10,
+      0.1961
      ]
     ],
     "split_mode": "halves",
@@ -4376,15 +4495,15 @@
    "trend_car": null,
    "vs_prior": {
     "adot": {
-     "cur": 11.21,
-     "delta": -6.55,
+     "cur": 10.48,
+     "delta": -7.28,
      "moved": "down",
      "prior": 17.76
     },
     "ay_sh": {
-     "cur": 0.318,
-     "delta": -0.04,
-     "moved": "flat",
+     "cur": 0.283,
+     "delta": -0.075,
+     "moved": "down",
      "prior": 0.358
     },
     "car_pg": {
@@ -4394,25 +4513,25 @@
      "prior": 0.1
     },
     "tgt_pg": {
-     "cur": 9.5,
-     "delta": 4.0,
+     "cur": 9.67,
+     "delta": 4.17,
      "moved": "up",
      "prior": 5.5
     },
     "tgt_sh": {
-     "cur": 0.275,
-     "delta": 0.083,
-     "moved": "up",
+     "cur": 0.242,
+     "delta": 0.05,
+     "moved": "flat",
      "prior": 0.192
     },
     "wopr": {
-     "cur": 0.636,
-     "delta": 0.097,
+     "cur": 0.56,
+     "delta": 0.021,
      "moved": "flat",
      "prior": 0.539
     }
    },
-   "wopr": 0.636
+   "wopr": 0.56
   },
   "chuba hubbard": {
    "adot": null,
@@ -7955,29 +8074,29 @@
    "wopr": 0.468
   },
   "drake london": {
-   "adot": 5.0,
-   "ay_sh": 0.203,
+   "adot": 7.47,
+   "ay_sh": 0.37,
    "car": 2,
-   "car_pg": 1.0,
+   "car_pg": 0.67,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 1.5,
+   "ppr_prem": 2.5,
    "prior_gp": 12,
    "prior_team": "ATL",
-   "rec": 6,
+   "rec": 15,
    "team": "ATL",
-   "tgt": 9,
-   "tgt_pg": 4.5,
-   "tgt_sh": 0.18,
+   "tgt": 19,
+   "tgt_pg": 6.33,
+   "tgt_sh": 0.26,
    "trend": {
     "delta": null,
     "early": 0.2105,
     "early_gp": 1,
-    "last3": 0.1859,
-    "last3_gp": 2,
-    "recent": 0.1613,
-    "recent_gp": 1,
+    "last3": 0.2689,
+    "last3_gp": 3,
+    "recent": 0.298,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -7988,6 +8107,11 @@
       2,
       5,
       0.1613
+     ],
+     [
+      3,
+      10,
+      0.4348
      ]
     ],
     "split_mode": "halves",
@@ -7996,43 +8120,43 @@
    "trend_car": null,
    "vs_prior": {
     "adot": {
-     "cur": 5.0,
-     "delta": -5.9,
+     "cur": 7.47,
+     "delta": -3.43,
      "moved": "down",
      "prior": 10.9
     },
     "ay_sh": {
-     "cur": 0.203,
-     "delta": -0.198,
-     "moved": "down",
+     "cur": 0.37,
+     "delta": -0.031,
+     "moved": "flat",
      "prior": 0.401
     },
     "car_pg": {
-     "cur": 1.0,
-     "delta": 1.0,
+     "cur": 0.67,
+     "delta": 0.67,
      "moved": "flat",
      "prior": 0.0
     },
     "tgt_pg": {
-     "cur": 4.5,
-     "delta": -4.83,
+     "cur": 6.33,
+     "delta": -3.0,
      "moved": "down",
      "prior": 9.33
     },
     "tgt_sh": {
-     "cur": 0.18,
-     "delta": -0.124,
-     "moved": "down",
+     "cur": 0.26,
+     "delta": -0.044,
+     "moved": "flat",
      "prior": 0.304
     },
     "wopr": {
-     "cur": 0.412,
-     "delta": -0.324,
-     "moved": "down",
+     "cur": 0.649,
+     "delta": -0.087,
+     "moved": "flat",
      "prior": 0.736
     }
    },
-   "wopr": 0.412
+   "wopr": 0.649
   },
   "drake maye": {
    "adot": null,
@@ -10425,6 +10549,45 @@
    },
    "wopr": 0.193
   },
+  "j michael sturdivant": {
+   "adot": null,
+   "ay_sh": 0.035,
+   "car": 0,
+   "car_pg": 0.0,
+   "gp": 2,
+   "pos": "WR",
+   "ppr_prem": 0.75,
+   "rec": 3,
+   "team": "GB",
+   "tgt": 3,
+   "tgt_pg": 1.5,
+   "tgt_sh": 0.037,
+   "trend": {
+    "delta": null,
+    "early": 0.0,
+    "early_gp": 1,
+    "last3": 0.0294,
+    "last3_gp": 2,
+    "recent": 0.0588,
+    "recent_gp": 1,
+    "series": [
+     [
+      2,
+      0,
+      0.0
+     ],
+     [
+      3,
+      3,
+      0.0588
+     ]
+    ],
+    "split_mode": "halves",
+    "trend": "insufficient"
+   },
+   "trend_car": null,
+   "wopr": 0.081
+  },
   "jack bech": {
    "adot": null,
    "ay_sh": 0.098,
@@ -10866,29 +11029,29 @@
    "wopr": 0.148
   },
   "jahan dotson": {
-   "adot": null,
-   "ay_sh": 0.45,
+   "adot": 14.4,
+   "ay_sh": 0.375,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": true,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 0.75,
+   "ppr_prem": 0.67,
    "prior_gp": 15,
    "prior_team": "PHI",
-   "rec": 3,
+   "rec": 4,
    "team": "ATL",
-   "tgt": 7,
-   "tgt_pg": 3.5,
-   "tgt_sh": 0.14,
+   "tgt": 10,
+   "tgt_pg": 3.33,
+   "tgt_sh": 0.137,
    "trend": {
     "delta": null,
     "early": 0.1579,
     "early_gp": 1,
-    "last3": 0.1435,
-    "last3_gp": 2,
-    "recent": 0.129,
-    "recent_gp": 1,
+    "last3": 0.1391,
+    "last3_gp": 3,
+    "recent": 0.1297,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -10899,6 +11062,11 @@
       2,
       4,
       0.129
+     ],
+     [
+      3,
+      3,
+      0.1304
      ]
     ],
     "split_mode": "halves",
@@ -10906,9 +11074,15 @@
    },
    "trend_car": null,
    "vs_prior": {
+    "adot": {
+     "cur": 14.4,
+     "delta": -1.02,
+     "moved": "flat",
+     "prior": 15.42
+    },
     "ay_sh": {
-     "cur": 0.45,
-     "delta": 0.304,
+     "cur": 0.375,
+     "delta": 0.229,
      "moved": "up",
      "prior": 0.146
     },
@@ -10919,25 +11093,25 @@
      "prior": 0.0
     },
     "tgt_pg": {
-     "cur": 3.5,
-     "delta": 1.1,
+     "cur": 3.33,
+     "delta": 0.93,
      "moved": "flat",
      "prior": 2.4
     },
     "tgt_sh": {
-     "cur": 0.14,
-     "delta": 0.055,
+     "cur": 0.137,
+     "delta": 0.052,
      "moved": "flat",
      "prior": 0.085
     },
     "wopr": {
-     "cur": 0.525,
-     "delta": 0.295,
+     "cur": 0.468,
+     "delta": 0.238,
      "moved": "up",
      "prior": 0.23
     }
    },
-   "wopr": 0.525
+   "wopr": 0.468
   },
   "jahmyr gibbs": {
    "adot": 2.31,
@@ -11109,7 +11283,7 @@
     "wopr": {
      "cur": 0.198,
      "delta": -0.122,
-     "moved": "flat",
+     "moved": "down",
      "prior": 0.32
     }
    },
@@ -13305,6 +13479,80 @@
    },
    "wopr": 0.095
   },
+  "jonnu smith": {
+   "adot": null,
+   "ay_sh": 0.05,
+   "car": 0,
+   "car_pg": 0.0,
+   "changed_team": true,
+   "gp": 2,
+   "pos": "TE",
+   "ppr_prem": 1.0,
+   "prior_gp": 17,
+   "prior_team": "PIT",
+   "rec": 4,
+   "team": "GB",
+   "tgt": 6,
+   "tgt_pg": 3.0,
+   "tgt_sh": 0.066,
+   "trend": {
+    "delta": null,
+    "early": 0.075,
+    "early_gp": 1,
+    "last3": 0.0669,
+    "last3_gp": 2,
+    "recent": 0.0588,
+    "recent_gp": 1,
+    "series": [
+     [
+      1,
+      3,
+      0.075
+     ],
+     [
+      3,
+      3,
+      0.0588
+     ]
+    ],
+    "split_mode": "halves",
+    "trend": "insufficient"
+   },
+   "trend_car": null,
+   "vs_prior": {
+    "ay_sh": {
+     "cur": 0.05,
+     "delta": -0.024,
+     "moved": "flat",
+     "prior": 0.074
+    },
+    "car_pg": {
+     "cur": 0.0,
+     "delta": -0.53,
+     "moved": "flat",
+     "prior": 0.53
+    },
+    "tgt_pg": {
+     "cur": 3.0,
+     "delta": -0.18,
+     "moved": "flat",
+     "prior": 3.18
+    },
+    "tgt_sh": {
+     "cur": 0.066,
+     "delta": -0.037,
+     "moved": "flat",
+     "prior": 0.103
+    },
+    "wopr": {
+     "cur": 0.134,
+     "delta": -0.073,
+     "moved": "flat",
+     "prior": 0.207
+    }
+   },
+   "wopr": 0.134
+  },
   "jordan addison": {
    "adot": null,
    "ay_sh": 0.21,
@@ -13382,10 +13630,10 @@
   "jordan love": {
    "adot": null,
    "ay_sh": 0.0,
-   "car": 1,
-   "car_pg": 0.5,
+   "car": 2,
+   "car_pg": 0.67,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "QB",
    "ppr_prem": 0.0,
    "prior_gp": 15,
@@ -13400,9 +13648,9 @@
     "early": 0.0,
     "early_gp": 1,
     "last3": 0.0,
-    "last3_gp": 2,
+    "last3_gp": 3,
     "recent": 0.0,
-    "recent_gp": 1,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -13411,6 +13659,11 @@
      ],
      [
       2,
+      0,
+      0.0
+     ],
+     [
+      3,
       0,
       0.0
      ]
@@ -13427,8 +13680,8 @@
      "prior": 0.0
     },
     "car_pg": {
-     "cur": 0.5,
-     "delta": -2.63,
+     "cur": 0.67,
+     "delta": -2.46,
      "moved": "down",
      "prior": 3.13
     },
@@ -14032,7 +14285,7 @@
     "tgt_sh": {
      "cur": 0.357,
      "delta": 0.056,
-     "moved": "flat",
+     "moved": "up",
      "prior": 0.301
     },
     "wopr": {
@@ -14226,28 +14479,28 @@
   },
   "kaleb johnson": {
    "adot": null,
-   "ay_sh": 0.0,
-   "car": 8,
+   "ay_sh": -0.001,
+   "car": 12,
    "car_pg": 4.0,
    "changed_team": true,
-   "gp": 2,
+   "gp": 3,
    "pos": "RB",
-   "ppr_prem": 0.0,
+   "ppr_prem": 0.17,
    "prior_gp": 10,
    "prior_team": "PIT",
-   "rec": 0,
+   "rec": 1,
    "team": "GB",
-   "tgt": 0,
-   "tgt_pg": 0.0,
-   "tgt_sh": 0.0,
+   "tgt": 3,
+   "tgt_pg": 1.0,
+   "tgt_sh": 0.025,
    "trend": {
     "delta": null,
     "early": 0.0,
     "early_gp": 1,
-    "last3": 0.0,
-    "last3_gp": 2,
-    "recent": 0.0,
-    "recent_gp": 1,
+    "last3": 0.0196,
+    "last3_gp": 3,
+    "recent": 0.0294,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -14258,6 +14511,11 @@
       2,
       0,
       0.0
+     ],
+     [
+      3,
+      3,
+      0.0588
      ]
     ],
     "split_mode": "halves",
@@ -14267,10 +14525,10 @@
     "delta": null,
     "early": 0.0,
     "early_gp": 1,
-    "last3": 0.2222,
-    "last3_gp": 2,
+    "last3": 0.2963,
+    "last3_gp": 3,
     "recent": 0.4444,
-    "recent_gp": 1,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -14281,6 +14539,11 @@
       2,
       8,
       0.4444
+     ],
+     [
+      3,
+      4,
+      0.4444
      ]
     ],
     "split_mode": "halves",
@@ -14288,8 +14551,8 @@
    },
    "vs_prior": {
     "ay_sh": {
-     "cur": 0.0,
-     "delta": 0.005,
+     "cur": -0.001,
+     "delta": 0.004,
      "moved": "flat",
      "prior": -0.005
     },
@@ -14300,25 +14563,25 @@
      "prior": 2.8
     },
     "tgt_pg": {
-     "cur": 0.0,
-     "delta": -0.2,
+     "cur": 1.0,
+     "delta": 0.8,
      "moved": "flat",
      "prior": 0.2
     },
     "tgt_sh": {
-     "cur": 0.0,
-     "delta": -0.007,
+     "cur": 0.025,
+     "delta": 0.018,
      "moved": "flat",
      "prior": 0.007
     },
     "wopr": {
-     "cur": 0.0,
-     "delta": -0.007,
+     "cur": 0.037,
+     "delta": 0.03,
      "moved": "flat",
      "prior": 0.007
     }
    },
-   "wopr": 0.0
+   "wopr": 0.037
   },
   "kalif raymond": {
    "adot": 5.14,
@@ -14518,7 +14781,7 @@
     "ay_sh": {
      "cur": 0.002,
      "delta": -0.073,
-     "moved": "flat",
+     "moved": "down",
      "prior": 0.075
     },
     "car_pg": {
@@ -15837,28 +16100,28 @@
   },
   "kyle pitts": {
    "adot": null,
-   "ay_sh": 0.234,
+   "ay_sh": 0.156,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "TE",
-   "ppr_prem": 0.25,
+   "ppr_prem": 0.33,
    "prior_gp": 17,
    "prior_team": "ATL",
-   "rec": 1,
+   "rec": 2,
    "team": "ATL",
-   "tgt": 4,
+   "tgt": 6,
    "tgt_pg": 2.0,
-   "tgt_sh": 0.08,
+   "tgt_sh": 0.082,
    "trend": {
     "delta": null,
     "early": 0.0526,
     "early_gp": 1,
-    "last3": 0.0747,
-    "last3_gp": 2,
-    "recent": 0.0968,
-    "recent_gp": 1,
+    "last3": 0.0788,
+    "last3_gp": 3,
+    "recent": 0.0919,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -15869,6 +16132,11 @@
       2,
       3,
       0.0968
+     ],
+     [
+      3,
+      2,
+      0.087
      ]
     ],
     "split_mode": "halves",
@@ -15877,8 +16145,8 @@
    "trend_car": null,
    "vs_prior": {
     "ay_sh": {
-     "cur": 0.234,
-     "delta": 0.026,
+     "cur": 0.156,
+     "delta": -0.052,
      "moved": "flat",
      "prior": 0.208
     },
@@ -15895,19 +16163,19 @@
      "prior": 6.94
     },
     "tgt_sh": {
-     "cur": 0.08,
-     "delta": -0.147,
+     "cur": 0.082,
+     "delta": -0.145,
      "moved": "down",
      "prior": 0.227
     },
     "wopr": {
-     "cur": 0.284,
-     "delta": -0.202,
+     "cur": 0.233,
+     "delta": -0.253,
      "moved": "down",
      "prior": 0.486
     }
    },
-   "wopr": 0.284
+   "wopr": 0.233
   },
   "kyle williams": {
    "adot": null,
@@ -16123,7 +16391,7 @@
     "adot": {
      "cur": 13.1,
      "delta": 3.23,
-     "moved": "flat",
+     "moved": "up",
      "prior": 9.87
     },
     "ay_sh": {
@@ -17116,25 +17384,25 @@
   },
   "marshawn lloyd": {
    "adot": null,
-   "ay_sh": 0.021,
-   "car": 19,
-   "car_pg": 9.5,
-   "gp": 2,
+   "ay_sh": 0.002,
+   "car": 23,
+   "car_pg": 7.67,
+   "gp": 3,
    "pos": "RB",
-   "ppr_prem": 0.5,
-   "rec": 2,
+   "ppr_prem": 0.67,
+   "rec": 4,
    "team": "GB",
-   "tgt": 3,
-   "tgt_pg": 1.5,
-   "tgt_sh": 0.043,
+   "tgt": 6,
+   "tgt_pg": 2.0,
+   "tgt_sh": 0.05,
    "trend": {
     "delta": null,
     "early": 0.025,
     "early_gp": 1,
-    "last3": 0.047,
-    "last3_gp": 2,
-    "recent": 0.069,
-    "recent_gp": 1,
+    "last3": 0.0509,
+    "last3_gp": 3,
+    "recent": 0.0639,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -17145,6 +17413,11 @@
       2,
       2,
       0.069
+     ],
+     [
+      3,
+      3,
+      0.0588
      ]
     ],
     "split_mode": "halves",
@@ -17154,10 +17427,10 @@
     "delta": null,
     "early": 0.619,
     "early_gp": 1,
-    "last3": 0.4762,
-    "last3_gp": 2,
-    "recent": 0.3333,
-    "recent_gp": 1,
+    "last3": 0.4656,
+    "last3_gp": 3,
+    "recent": 0.3889,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -17168,12 +17441,17 @@
       2,
       6,
       0.3333
+     ],
+     [
+      3,
+      4,
+      0.4444
      ]
     ],
     "split_mode": "halves",
     "trend": "insufficient"
    },
-   "wopr": 0.08
+   "wopr": 0.076
   },
   "marvin harrison jr": {
    "adot": null,
@@ -17250,29 +17528,29 @@
    "wopr": 0.232
   },
   "matthew golden": {
-   "adot": 12.06,
-   "ay_sh": 0.324,
+   "adot": 13.87,
+   "ay_sh": 0.387,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
    "ppr_prem": 2.5,
    "prior_gp": 14,
    "prior_team": "GB",
-   "rec": 10,
+   "rec": 15,
    "team": "GB",
-   "tgt": 18,
-   "tgt_pg": 9.0,
-   "tgt_sh": 0.261,
+   "tgt": 30,
+   "tgt_pg": 10.0,
+   "tgt_sh": 0.25,
    "trend": {
     "delta": null,
     "early": 0.3,
     "early_gp": 1,
-    "last3": 0.2534,
-    "last3_gp": 2,
-    "recent": 0.2069,
-    "recent_gp": 1,
+    "last3": 0.2474,
+    "last3_gp": 3,
+    "recent": 0.2211,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -17283,6 +17561,11 @@
       2,
       6,
       0.2069
+     ],
+     [
+      3,
+      12,
+      0.2353
      ]
     ],
     "split_mode": "halves",
@@ -17291,14 +17574,14 @@
    "trend_car": null,
    "vs_prior": {
     "adot": {
-     "cur": 12.06,
-     "delta": -0.49,
+     "cur": 13.87,
+     "delta": 1.32,
      "moved": "flat",
      "prior": 12.55
     },
     "ay_sh": {
-     "cur": 0.324,
-     "delta": 0.156,
+     "cur": 0.387,
+     "delta": 0.219,
      "moved": "up",
      "prior": 0.168
     },
@@ -17309,25 +17592,25 @@
      "prior": 0.71
     },
     "tgt_pg": {
-     "cur": 9.0,
-     "delta": 5.86,
+     "cur": 10.0,
+     "delta": 6.86,
      "moved": "up",
      "prior": 3.14
     },
     "tgt_sh": {
-     "cur": 0.261,
-     "delta": 0.144,
+     "cur": 0.25,
+     "delta": 0.133,
      "moved": "up",
      "prior": 0.117
     },
     "wopr": {
-     "cur": 0.618,
-     "delta": 0.325,
+     "cur": 0.646,
+     "delta": 0.353,
      "moved": "up",
      "prior": 0.293
     }
    },
-   "wopr": 0.618
+   "wopr": 0.646
   },
   "matthew stafford": {
    "adot": null,
@@ -17926,6 +18209,45 @@
    },
    "wopr": 0.125
   },
+  "nick muse": {
+   "adot": null,
+   "ay_sh": 0.0,
+   "car": 0,
+   "car_pg": 0.0,
+   "gp": 2,
+   "pos": "TE",
+   "ppr_prem": 0.0,
+   "rec": 0,
+   "team": "ATL",
+   "tgt": 0,
+   "tgt_pg": 0.0,
+   "tgt_sh": 0.0,
+   "trend": {
+    "delta": null,
+    "early": 0.0,
+    "early_gp": 1,
+    "last3": 0.0,
+    "last3_gp": 2,
+    "recent": 0.0,
+    "recent_gp": 1,
+    "series": [
+     [
+      1,
+      0,
+      0.0
+     ],
+     [
+      3,
+      0,
+      0.0
+     ]
+    ],
+    "split_mode": "halves",
+    "trend": "insufficient"
+   },
+   "trend_car": null,
+   "wopr": 0.0
+  },
   "nikko remigio": {
    "adot": null,
    "ay_sh": 0.0,
@@ -18156,28 +18478,28 @@
   },
   "olamide zaccheaus": {
    "adot": null,
-   "ay_sh": 0.054,
+   "ay_sh": 0.031,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": true,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 0.5,
+   "ppr_prem": 0.67,
    "prior_gp": 14,
    "prior_team": "CHI",
-   "rec": 2,
+   "rec": 4,
    "team": "ATL",
-   "tgt": 4,
+   "tgt": 6,
    "tgt_pg": 2.0,
-   "tgt_sh": 0.08,
+   "tgt_sh": 0.082,
    "trend": {
     "delta": null,
     "early": 0.0526,
     "early_gp": 1,
-    "last3": 0.0747,
-    "last3_gp": 2,
-    "recent": 0.0968,
-    "recent_gp": 1,
+    "last3": 0.0788,
+    "last3_gp": 3,
+    "recent": 0.0919,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -18188,6 +18510,11 @@
       2,
       3,
       0.0968
+     ],
+     [
+      3,
+      2,
+      0.087
      ]
     ],
     "split_mode": "halves",
@@ -18196,9 +18523,9 @@
    "trend_car": null,
    "vs_prior": {
     "ay_sh": {
-     "cur": 0.054,
-     "delta": -0.07,
-     "moved": "flat",
+     "cur": 0.031,
+     "delta": -0.093,
+     "moved": "down",
      "prior": 0.124
     },
     "car_pg": {
@@ -18214,19 +18541,19 @@
      "prior": 4.64
     },
     "tgt_sh": {
-     "cur": 0.08,
-     "delta": -0.069,
+     "cur": 0.082,
+     "delta": -0.067,
      "moved": "down",
      "prior": 0.149
     },
     "wopr": {
-     "cur": 0.158,
-     "delta": -0.153,
+     "cur": 0.145,
+     "delta": -0.166,
      "moved": "down",
      "prior": 0.311
     }
    },
-   "wopr": 0.158
+   "wopr": 0.145
   },
   "omarion hampton": {
    "adot": null,
@@ -20522,29 +20849,29 @@
    "wopr": 0.043
   },
   "skyy moore": {
-   "adot": null,
-   "ay_sh": 0.082,
+   "adot": 7.09,
+   "ay_sh": 0.072,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": true,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
-   "ppr_prem": 0.5,
+   "ppr_prem": 0.83,
    "prior_gp": 17,
    "prior_team": "SF",
-   "rec": 2,
+   "rec": 5,
    "team": "GB",
-   "tgt": 4,
-   "tgt_pg": 2.0,
-   "tgt_sh": 0.058,
+   "tgt": 11,
+   "tgt_pg": 3.67,
+   "tgt_sh": 0.092,
    "trend": {
     "delta": null,
     "early": 0.025,
     "early_gp": 1,
-    "last3": 0.0642,
-    "last3_gp": 2,
-    "recent": 0.1034,
-    "recent_gp": 1,
+    "last3": 0.0886,
+    "last3_gp": 3,
+    "recent": 0.1204,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -20555,6 +20882,11 @@
       2,
       3,
       0.1034
+     ],
+     [
+      3,
+      7,
+      0.1373
      ]
     ],
     "split_mode": "halves",
@@ -20563,8 +20895,8 @@
    "trend_car": null,
    "vs_prior": {
     "ay_sh": {
-     "cur": 0.082,
-     "delta": 0.055,
+     "cur": 0.072,
+     "delta": 0.045,
      "moved": "flat",
      "prior": 0.027
     },
@@ -20575,25 +20907,25 @@
      "prior": 0.12
     },
     "tgt_pg": {
-     "cur": 2.0,
-     "delta": 1.59,
-     "moved": "flat",
+     "cur": 3.67,
+     "delta": 3.26,
+     "moved": "up",
      "prior": 0.41
     },
     "tgt_sh": {
-     "cur": 0.058,
-     "delta": 0.045,
-     "moved": "flat",
+     "cur": 0.092,
+     "delta": 0.079,
+     "moved": "up",
      "prior": 0.013
     },
     "wopr": {
-     "cur": 0.144,
-     "delta": 0.106,
-     "moved": "flat",
+     "cur": 0.188,
+     "delta": 0.15,
+     "moved": "up",
      "prior": 0.038
     }
    },
-   "wopr": 0.144
+   "wopr": 0.188
   },
   "stefon diggs": {
    "adot": 10.33,
@@ -22247,29 +22579,29 @@
    "wopr": 0.2
   },
   "tucker kraft": {
-   "adot": 10.22,
-   "ay_sh": 0.137,
+   "adot": 7.53,
+   "ay_sh": 0.119,
    "car": 0,
    "car_pg": 0.0,
    "changed_team": false,
-   "gp": 2,
+   "gp": 3,
    "pos": "TE",
-   "ppr_prem": 1.25,
+   "ppr_prem": 1.5,
    "prior_gp": 8,
    "prior_team": "GB",
-   "rec": 5,
+   "rec": 9,
    "team": "GB",
-   "tgt": 9,
-   "tgt_pg": 4.5,
-   "tgt_sh": 0.13,
+   "tgt": 17,
+   "tgt_pg": 5.67,
+   "tgt_sh": 0.142,
    "trend": {
     "delta": null,
     "early": 0.15,
     "early_gp": 1,
-    "last3": 0.1267,
-    "last3_gp": 2,
-    "recent": 0.1034,
-    "recent_gp": 1,
+    "last3": 0.1368,
+    "last3_gp": 3,
+    "recent": 0.1302,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -22280,6 +22612,11 @@
       2,
       3,
       0.1034
+     ],
+     [
+      3,
+      8,
+      0.1569
      ]
     ],
     "split_mode": "halves",
@@ -22288,14 +22625,14 @@
    "trend_car": null,
    "vs_prior": {
     "adot": {
-     "cur": 10.22,
-     "delta": 5.65,
-     "moved": "up",
+     "cur": 7.53,
+     "delta": 2.96,
+     "moved": "flat",
      "prior": 4.57
     },
     "ay_sh": {
-     "cur": 0.137,
-     "delta": 0.028,
+     "cur": 0.119,
+     "delta": 0.01,
      "moved": "flat",
      "prior": 0.109
     },
@@ -22306,25 +22643,25 @@
      "prior": 0.12
     },
     "tgt_pg": {
-     "cur": 4.5,
-     "delta": -1.0,
+     "cur": 5.67,
+     "delta": 0.17,
      "moved": "flat",
      "prior": 5.5
     },
     "tgt_sh": {
-     "cur": 0.13,
-     "delta": -0.058,
-     "moved": "down",
+     "cur": 0.142,
+     "delta": -0.046,
+     "moved": "flat",
      "prior": 0.188
     },
     "wopr": {
-     "cur": 0.292,
-     "delta": -0.066,
+     "cur": 0.296,
+     "delta": -0.062,
      "moved": "flat",
      "prior": 0.358
     }
    },
-   "wopr": 0.292
+   "wopr": 0.296
   },
   "tyjae spears": {
    "adot": null,
@@ -23457,25 +23794,25 @@
   },
   "zachariah branch": {
    "adot": null,
-   "ay_sh": -0.032,
+   "ay_sh": 0.016,
    "car": 0,
    "car_pg": 0.0,
-   "gp": 2,
+   "gp": 3,
    "pos": "WR",
    "ppr_prem": 0.5,
-   "rec": 2,
+   "rec": 3,
    "team": "ATL",
-   "tgt": 2,
-   "tgt_pg": 1.0,
-   "tgt_sh": 0.04,
+   "tgt": 4,
+   "tgt_pg": 1.33,
+   "tgt_sh": 0.055,
    "trend": {
     "delta": null,
     "early": 0.0,
     "early_gp": 1,
-    "last3": 0.0323,
-    "last3_gp": 2,
-    "recent": 0.0645,
-    "recent_gp": 1,
+    "last3": 0.0505,
+    "last3_gp": 3,
+    "recent": 0.0757,
+    "recent_gp": 2,
     "series": [
      [
       1,
@@ -23486,13 +23823,18 @@
       2,
       2,
       0.0645
+     ],
+     [
+      3,
+      2,
+      0.087
      ]
     ],
     "split_mode": "halves",
     "trend": "insufficient"
    },
    "trend_car": null,
-   "wopr": 0.038
+   "wopr": 0.093
   }
  }
 }
