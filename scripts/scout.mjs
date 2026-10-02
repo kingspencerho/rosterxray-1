@@ -455,7 +455,10 @@ L(`
     // ⛔ The flag is QB-ONLY on purpose: a quarterback either starts or he did
     // not, so a low share means he left or entered. For a back or receiver a
     // low share is usually his ROLE, and THE ROOM is where that gets read.
-    if (tag.trim() === "THIS SEASON" && r.gp != null && r.gp <= 2) {
+    // ⛔ This used to stop at gp <= 2, so from Week 3 on a QB who left a game
+    // early (Mayfield's thumb, W3) was silently back to whole-game arithmetic.
+    // A partial start dilutes the rate at any sample size (Oct 2 2026).
+    if (tag.trim() === "THIS SEASON" && r.gp != null) {
       const sc = snapCur(hit.name);
       if (sc && sc.weeks && sc.weeks.length) {
         L(`     snaps in those game(s): ` +

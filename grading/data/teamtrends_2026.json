@@ -13,8 +13,11 @@
    "pace_plays": 200,
    "proe_plays": 300
   },
-  "generated": "2026-09-26",
-  "league": {},
+  "generated": "2026-10-02",
+  "league": {
+   "proe_mean": 0.465,
+   "proe_sd": 1.814
+  },
   "neutral": {
    "margin": 7,
    "max_qtr": 3,
@@ -27,28 +30,28 @@
   "source": "nflverse play_by_play (nflfastR); pass_oe/xpass and epa as published",
   "teams_covered": 32,
   "threshold_source": "1 SD of this build's own league distribution",
-  "weeks_covered": 3
+  "weeks_covered": 4
  },
  "teams": {
   "ARI": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 6,
-     "n15": 2,
-     "n20": 1,
-     "rate10": 0.0984,
-     "rate15": 0.0328,
-     "rate20": 0.0164,
-     "runs": 61
+     "n10": 11,
+     "n15": 3,
+     "n20": 2,
+     "rate10": 0.1325,
+     "rate15": 0.0361,
+     "rate20": 0.0241,
+     "runs": 83
     },
-    "pass_plays": 57,
-    "rush_plays": 61
+    "pass_plays": 84,
+    "rush_plays": 83
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 56,
-    "proe_plays": 122
+    "pace_plays": 71,
+    "proe_plays": 207
    }
   },
   "ATL": {
@@ -76,189 +79,189 @@
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 6,
-     "n15": 2,
-     "n20": 1,
-     "rate10": 0.1277,
-     "rate15": 0.0426,
-     "rate20": 0.0213,
-     "runs": 47
+     "n10": 10,
+     "n15": 5,
+     "n20": 2,
+     "rate10": 0.1299,
+     "rate15": 0.0649,
+     "rate20": 0.026,
+     "runs": 77
     },
-    "pass_plays": 70,
-    "rush_plays": 47
+    "pass_plays": 112,
+    "rush_plays": 77
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 32,
-    "proe_plays": 121
+    "pace_plays": 53,
+    "proe_plays": 185
    }
   },
   "BUF": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 6,
-     "n15": 3,
+     "n10": 9,
+     "n15": 4,
      "n20": 0,
-     "rate10": 0.1154,
-     "rate15": 0.0577,
+     "rate10": 0.1125,
+     "rate15": 0.05,
      "rate20": 0.0,
-     "runs": 52
+     "runs": 80
     },
-    "pass_plays": 83,
-    "rush_plays": 52
+    "pass_plays": 119,
+    "rush_plays": 80
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 37,
-    "proe_plays": 126
+    "pace_plays": 50,
+    "proe_plays": 191
    }
   },
   "CAR": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 8,
-     "n15": 4,
-     "n20": 4,
-     "rate10": 0.1127,
-     "rate15": 0.0563,
-     "rate20": 0.0563,
-     "runs": 71
+     "n10": 13,
+     "n15": 6,
+     "n20": 5,
+     "rate10": 0.1313,
+     "rate15": 0.0606,
+     "rate20": 0.0505,
+     "runs": 99
     },
-    "pass_plays": 66,
-    "rush_plays": 71
+    "pass_plays": 100,
+    "rush_plays": 99
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 38,
-    "proe_plays": 133
+    "pace_plays": 73,
+    "proe_plays": 208
    }
   },
   "CHI": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
-     "n15": 3,
-     "n20": 2,
-     "rate10": 0.1,
-     "rate15": 0.06,
-     "rate20": 0.04,
-     "runs": 50
+     "n10": 9,
+     "n15": 5,
+     "n20": 3,
+     "rate10": 0.1304,
+     "rate15": 0.0725,
+     "rate20": 0.0435,
+     "runs": 69
     },
-    "pass_plays": 63,
-    "rush_plays": 50
+    "pass_plays": 91,
+    "rush_plays": 69
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 70,
-    "proe_plays": 148
+    "pace_plays": 106,
+    "proe_plays": 218
    }
   },
   "CIN": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 4,
-     "n15": 0,
-     "n20": 0,
-     "rate10": 0.1081,
-     "rate15": 0.0,
-     "rate20": 0.0,
-     "runs": 37
+     "n10": 8,
+     "n15": 2,
+     "n20": 2,
+     "rate10": 0.1379,
+     "rate15": 0.0345,
+     "rate20": 0.0345,
+     "runs": 58
     },
-    "pass_plays": 90,
-    "rush_plays": 37
+    "pass_plays": 125,
+    "rush_plays": 58
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 37,
-    "proe_plays": 122
+    "pace_plays": 67,
+    "proe_plays": 179
    }
   },
   "CLE": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 9,
-     "n15": 1,
-     "n20": 1,
-     "rate10": 0.1667,
-     "rate15": 0.0185,
-     "rate20": 0.0185,
-     "runs": 54
+     "n10": 15,
+     "n15": 3,
+     "n20": 2,
+     "rate10": 0.1531,
+     "rate15": 0.0306,
+     "rate20": 0.0204,
+     "runs": 98
     },
-    "pass_plays": 61,
-    "rush_plays": 54
+    "pass_plays": 157,
+    "rush_plays": 98
    },
-   "games": 2,
+   "games": 4,
    "off": {
-    "pace_plays": 25,
-    "proe_plays": 107
+    "pace_plays": 66,
+    "proe_plays": 236
    }
   },
   "DAL": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 8,
-     "n15": 4,
-     "n20": 2,
-     "rate10": 0.1212,
-     "rate15": 0.0606,
-     "rate20": 0.0303,
-     "runs": 66
+     "n10": 15,
+     "n15": 8,
+     "n20": 5,
+     "rate10": 0.1442,
+     "rate15": 0.0769,
+     "rate20": 0.0481,
+     "runs": 104
     },
-    "pass_plays": 66,
-    "rush_plays": 66
+    "pass_plays": 86,
+    "rush_plays": 104
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 47,
-    "proe_plays": 113
+    "pace_plays": 81,
+    "proe_plays": 186
    }
   },
   "DEN": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 7,
-     "n15": 4,
-     "n20": 2,
-     "rate10": 0.1186,
-     "rate15": 0.0678,
-     "rate20": 0.0339,
-     "runs": 59
+     "n10": 9,
+     "n15": 5,
+     "n20": 3,
+     "rate10": 0.1098,
+     "rate15": 0.061,
+     "rate20": 0.0366,
+     "runs": 82
     },
-    "pass_plays": 60,
-    "rush_plays": 59
+    "pass_plays": 117,
+    "rush_plays": 82
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 33,
-    "proe_plays": 109
+    "pace_plays": 43,
+    "proe_plays": 174
    }
   },
   "DET": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 10,
+     "n10": 12,
      "n15": 4,
      "n20": 3,
-     "rate10": 0.1724,
-     "rate15": 0.069,
-     "rate20": 0.0517,
-     "runs": 58
+     "rate10": 0.1558,
+     "rate15": 0.0519,
+     "rate20": 0.039,
+     "runs": 77
     },
-    "pass_plays": 94,
-    "rush_plays": 58
+    "pass_plays": 138,
+    "rush_plays": 77
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 33,
-    "proe_plays": 142
+    "pace_plays": 72,
+    "proe_plays": 205
    }
   },
   "GB": {
@@ -286,21 +289,21 @@
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
+     "n10": 6,
      "n15": 1,
      "n20": 1,
-     "rate10": 0.119,
-     "rate15": 0.0238,
-     "rate20": 0.0238,
-     "runs": 42
+     "rate10": 0.0822,
+     "rate15": 0.0137,
+     "rate20": 0.0137,
+     "runs": 73
     },
-    "pass_plays": 68,
-    "rush_plays": 42
+    "pass_plays": 108,
+    "rush_plays": 73
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 63,
-    "proe_plays": 158
+    "pace_plays": 74,
+    "proe_plays": 212
    }
   },
   "IND": {
@@ -310,18 +313,18 @@
      "n10": 10,
      "n15": 5,
      "n20": 2,
-     "rate10": 0.1587,
-     "rate15": 0.0794,
-     "rate20": 0.0317,
-     "runs": 63
+     "rate10": 0.119,
+     "rate15": 0.0595,
+     "rate20": 0.0238,
+     "runs": 84
     },
-    "pass_plays": 75,
-    "rush_plays": 63
+    "pass_plays": 105,
+    "rush_plays": 84
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 32,
-    "proe_plays": 119
+    "pace_plays": 76,
+    "proe_plays": 190
    }
   },
   "JAX": {
@@ -331,123 +334,123 @@
      "n10": 5,
      "n15": 2,
      "n20": 0,
-     "rate10": 0.1064,
-     "rate15": 0.0426,
+     "rate10": 0.0685,
+     "rate15": 0.0274,
      "rate20": 0.0,
-     "runs": 47
+     "runs": 73
     },
-    "pass_plays": 58,
-    "rush_plays": 47
+    "pass_plays": 92,
+    "rush_plays": 73
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 40,
-    "proe_plays": 114
+    "pace_plays": 61,
+    "proe_plays": 175
    }
   },
   "KC": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
+     "n10": 9,
      "n15": 2,
      "n20": 1,
-     "rate10": 0.1087,
-     "rate15": 0.0435,
-     "rate20": 0.0217,
-     "runs": 46
+     "rate10": 0.1169,
+     "rate15": 0.026,
+     "rate20": 0.013,
+     "runs": 77
     },
-    "pass_plays": 63,
-    "rush_plays": 46
+    "pass_plays": 99,
+    "rush_plays": 77
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 67,
-    "proe_plays": 146
+    "pace_plays": 90,
+    "proe_plays": 198
    }
   },
   "LA": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
+     "n10": 6,
      "n15": 2,
      "n20": 0,
-     "rate10": 0.098,
-     "rate15": 0.0392,
+     "rate10": 0.0789,
+     "rate15": 0.0263,
      "rate20": 0.0,
-     "runs": 51
+     "runs": 76
     },
-    "pass_plays": 68,
-    "rush_plays": 51
+    "pass_plays": 105,
+    "rush_plays": 76
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 28,
-    "proe_plays": 118
+    "pace_plays": 52,
+    "proe_plays": 202
    }
   },
   "LAC": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 3,
-     "n15": 1,
-     "n20": 0,
-     "rate10": 0.0526,
-     "rate15": 0.0175,
-     "rate20": 0.0,
-     "runs": 57
+     "n10": 8,
+     "n15": 4,
+     "n20": 1,
+     "rate10": 0.0899,
+     "rate15": 0.0449,
+     "rate20": 0.0112,
+     "runs": 89
     },
-    "pass_plays": 69,
-    "rush_plays": 57
+    "pass_plays": 99,
+    "rush_plays": 89
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 53,
-    "proe_plays": 122
+    "pace_plays": 81,
+    "proe_plays": 191
    }
   },
   "LV": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
-     "n15": 1,
-     "n20": 0,
-     "rate10": 0.1,
-     "rate15": 0.02,
-     "rate20": 0.0,
-     "runs": 50
+     "n10": 8,
+     "n15": 3,
+     "n20": 1,
+     "rate10": 0.1026,
+     "rate15": 0.0385,
+     "rate20": 0.0128,
+     "runs": 78
     },
-    "pass_plays": 62,
-    "rush_plays": 50
+    "pass_plays": 106,
+    "rush_plays": 78
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 52,
-    "proe_plays": 125
+    "pace_plays": 78,
+    "proe_plays": 191
    }
   },
   "MIA": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 6,
-     "n15": 3,
-     "n20": 0,
-     "rate10": 0.1017,
-     "rate15": 0.0508,
-     "rate20": 0.0,
-     "runs": 59
+     "n10": 9,
+     "n15": 5,
+     "n20": 1,
+     "rate10": 0.1071,
+     "rate15": 0.0595,
+     "rate20": 0.0119,
+     "runs": 84
     },
-    "pass_plays": 52,
-    "rush_plays": 59
+    "pass_plays": 76,
+    "rush_plays": 84
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 29,
-    "proe_plays": 115
+    "pace_plays": 65,
+    "proe_plays": 188
    }
   },
   "MIN": {
@@ -457,165 +460,165 @@
      "n10": 8,
      "n15": 2,
      "n20": 0,
-     "rate10": 0.1538,
-     "rate15": 0.0385,
+     "rate10": 0.1096,
+     "rate15": 0.0274,
      "rate20": 0.0,
-     "runs": 52
+     "runs": 73
     },
-    "pass_plays": 84,
-    "rush_plays": 52
+    "pass_plays": 127,
+    "rush_plays": 73
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 28,
-    "proe_plays": 113
+    "pace_plays": 52,
+    "proe_plays": 172
    }
   },
   "NE": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 5,
-     "n15": 0,
+     "n10": 7,
+     "n15": 1,
      "n20": 0,
-     "rate10": 0.1136,
-     "rate15": 0.0,
+     "rate10": 0.0946,
+     "rate15": 0.0135,
      "rate20": 0.0,
-     "runs": 44
+     "runs": 74
     },
-    "pass_plays": 70,
-    "rush_plays": 44
+    "pass_plays": 99,
+    "rush_plays": 74
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 56,
-    "proe_plays": 124
+    "pace_plays": 72,
+    "proe_plays": 187
    }
   },
   "NO": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 9,
-     "n15": 3,
-     "n20": 1,
-     "rate10": 0.1636,
-     "rate15": 0.0545,
-     "rate20": 0.0182,
-     "runs": 55
+     "n10": 11,
+     "n15": 4,
+     "n20": 2,
+     "rate10": 0.1375,
+     "rate15": 0.05,
+     "rate20": 0.025,
+     "runs": 80
     },
-    "pass_plays": 73,
-    "rush_plays": 55
+    "pass_plays": 111,
+    "rush_plays": 80
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 43,
-    "proe_plays": 153
+    "pace_plays": 82,
+    "proe_plays": 227
    }
   },
   "NYG": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 7,
-     "n15": 4,
+     "n10": 9,
+     "n15": 5,
      "n20": 1,
-     "rate10": 0.1628,
-     "rate15": 0.093,
-     "rate20": 0.0233,
-     "runs": 43
+     "rate10": 0.1406,
+     "rate15": 0.0781,
+     "rate20": 0.0156,
+     "runs": 64
     },
-    "pass_plays": 65,
-    "rush_plays": 43
+    "pass_plays": 101,
+    "rush_plays": 64
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 38,
-    "proe_plays": 124
+    "pace_plays": 56,
+    "proe_plays": 187
    }
   },
   "NYJ": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 4,
-     "n15": 0,
+     "n10": 6,
+     "n15": 1,
      "n20": 0,
-     "rate10": 0.125,
-     "rate15": 0.0,
+     "rate10": 0.1,
+     "rate15": 0.0167,
      "rate20": 0.0,
-     "runs": 32
+     "runs": 60
     },
-    "pass_plays": 67,
-    "rush_plays": 32
+    "pass_plays": 101,
+    "rush_plays": 60
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 58,
-    "proe_plays": 137
+    "pace_plays": 75,
+    "proe_plays": 201
    }
   },
   "PHI": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 7,
-     "n15": 2,
+     "n10": 8,
+     "n15": 3,
      "n20": 1,
-     "rate10": 0.1148,
-     "rate15": 0.0328,
-     "rate20": 0.0164,
-     "runs": 61
+     "rate10": 0.0851,
+     "rate15": 0.0319,
+     "rate20": 0.0106,
+     "runs": 94
     },
-    "pass_plays": 58,
-    "rush_plays": 61
+    "pass_plays": 92,
+    "rush_plays": 94
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 65,
-    "proe_plays": 129
+    "pace_plays": 84,
+    "proe_plays": 179
    }
   },
   "PIT": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 7,
-     "n15": 4,
-     "n20": 3,
-     "rate10": 0.1228,
-     "rate15": 0.0702,
-     "rate20": 0.0526,
-     "runs": 57
+     "n10": 11,
+     "n15": 6,
+     "n20": 5,
+     "rate10": 0.11,
+     "rate15": 0.06,
+     "rate20": 0.05,
+     "runs": 100
     },
-    "pass_plays": 51,
-    "rush_plays": 57
+    "pass_plays": 124,
+    "rush_plays": 100
    },
-   "games": 2,
+   "games": 4,
    "off": {
-    "pace_plays": 43,
-    "proe_plays": 135
+    "pace_plays": 91,
+    "proe_plays": 263
    }
   },
   "SEA": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 4,
-     "n15": 2,
+     "n10": 5,
+     "n15": 3,
      "n20": 0,
-     "rate10": 0.0833,
-     "rate15": 0.0417,
+     "rate10": 0.0641,
+     "rate15": 0.0385,
      "rate20": 0.0,
-     "runs": 48
+     "runs": 78
     },
-    "pass_plays": 66,
-    "rush_plays": 48
+    "pass_plays": 99,
+    "rush_plays": 78
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 31,
-    "proe_plays": 119
+    "pace_plays": 55,
+    "proe_plays": 186
    }
   },
   "SF": {
@@ -625,81 +628,81 @@
      "n10": 3,
      "n15": 1,
      "n20": 0,
-     "rate10": 0.0526,
-     "rate15": 0.0175,
+     "rate10": 0.0357,
+     "rate15": 0.0119,
      "rate20": 0.0,
-     "runs": 57
+     "runs": 84
     },
-    "pass_plays": 55,
-    "rush_plays": 57
+    "pass_plays": 108,
+    "rush_plays": 84
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 51,
-    "proe_plays": 115
+    "pace_plays": 61,
+    "proe_plays": 168
    }
   },
   "TB": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 4,
+     "n10": 6,
      "n15": 0,
      "n20": 0,
-     "rate10": 0.0851,
+     "rate10": 0.0857,
      "rate15": 0.0,
      "rate20": 0.0,
-     "runs": 47
+     "runs": 70
     },
-    "pass_plays": 68,
-    "rush_plays": 47
+    "pass_plays": 100,
+    "rush_plays": 70
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 35,
-    "proe_plays": 121
+    "pace_plays": 54,
+    "proe_plays": 190
    }
   },
   "TEN": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 3,
-     "n15": 0,
+     "n10": 7,
+     "n15": 1,
      "n20": 0,
-     "rate10": 0.0441,
-     "rate15": 0.0,
+     "rate10": 0.07,
+     "rate15": 0.01,
      "rate20": 0.0,
-     "runs": 68
+     "runs": 100
     },
-    "pass_plays": 64,
-    "rush_plays": 68
+    "pass_plays": 89,
+    "rush_plays": 100
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 38,
-    "proe_plays": 103
+    "pace_plays": 48,
+    "proe_plays": 163
    }
   },
   "WAS": {
    "def": {
     "expl_run": {
      "computed_from_pbp": true,
-     "n10": 4,
+     "n10": 5,
      "n15": 2,
      "n20": 2,
-     "rate10": 0.0909,
-     "rate15": 0.0455,
-     "rate20": 0.0455,
-     "runs": 44
+     "rate10": 0.0806,
+     "rate15": 0.0323,
+     "rate20": 0.0323,
+     "runs": 62
     },
-    "pass_plays": 61,
-    "rush_plays": 44
+    "pass_plays": 107,
+    "rush_plays": 62
    },
-   "games": 2,
+   "games": 3,
    "off": {
-    "pace_plays": 33,
-    "proe_plays": 140
+    "pace_plays": 59,
+    "proe_plays": 207
    }
   }
  }

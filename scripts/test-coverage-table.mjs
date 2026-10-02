@@ -76,9 +76,26 @@ ok("the table prints on a real card", out.includes("WHAT THOSE SHAPES DID TO THE
 ok("...and keeps the per-player caveat beside it, not instead of it",
    out.includes("r=0.161") && out.includes("a DIFFERENT question"));
 ok("...and names the game-script confound", /protect-the-lead/.test(out));
-// Addison faces CHI, measured at man +12.0, so the live-row pointer must fire
-ok("the live-row pointer fires on a HEAVY man defence", /this defence is HEAVY vs MAN/.test(out),
-   (out.match(/\^ this defence is.*/) || ["(no pointer printed)"])[0]);
+// The pointer must name the row this week's opponent is actually heaviest in.
+// ⛔ This used to hard-code "Addison faces CHI (man +12.0)". That was true in
+// Week 3 and false after the Week 4 refresh (MIN plays MIA, heavy cover-2), so
+// the guard failed on a CORRECT tool (Oct 2 2026). The expected row is now worked
+// out from the same two files scout reads, so the check holds every week.
+const rd = (p) => JSON.parse(readFileSync(p, "utf8"));
+const env = rd("grading/data/gameenv_2026.json"), sch = rd("grading/data/defense_scheme_2025.json");
+const ALT = { WAS: ["WAS", "WSH"], WSH: ["WAS", "WSH"], LA: ["LA", "LAR"], LAR: ["LA", "LAR"] };
+const g = (env.games || []).find((x) => x.away === "MIN" || x.home === "MIN");
+const opp = g && (g.away === "MIN" ? g.home : g.away);
+const prof = opp && (ALT[opp] || [opp]).map((t) => sch.teams?.[t] || sch[t]).find(Boolean);
+const want = prof && [["vs MAN", prof.man_rate_rel], ["vs COVER-2", prof.cov_cover_2_rel]]
+  .filter(([, r]) => typeof r === "number" && Math.abs(r) >= 0.03)
+  .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
+const said = (out.match(/\^ this defence is (HEAVY|LIGHT) (vs MAN|vs COVER-2)/) || []);
+ok("the live-row pointer names this week's opponent's heaviest shape",
+   want ? said[1] === (want[1] > 0 ? "HEAVY" : "LIGHT") && said[2] === want[0] : said.length === 0,
+   `opponent ${opp}: expected ${want ? (want[1] > 0 ? "HEAVY " : "LIGHT ") + want[0] : "no pointer"}, printed ${said[0] || "(none)"}`);
+ok("...and this week's data actually exercises it (a pointer was printed)", !!want && said.length > 0,
+   `opponent ${opp} has no shape at |rel| >= 0.03, so the pointer path went untested this week`);
 
 // ---- 5. must-fail ------------------------------------------------------
 ok("a drifted digit WOULD be caught", !same(scoutMan, [9.5, -1.4, -8.0, -7.4, 4.3, 2.7]));
