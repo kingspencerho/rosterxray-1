@@ -306,11 +306,23 @@ def indexed(node):
     return [node[k] for k in keys]
 
 
+def _positions(node) -> list:
+    """eligible_positions arrives as [{"position": "WR"}, ...] or a numeric-keyed dict."""
+    items = node if isinstance(node, list) else indexed(node) if isinstance(node, dict) else []
+    out = []
+    for it in items:
+        pos = flatten(it).get("position") if not isinstance(it, str) else it
+        if pos:
+            out.append(pos)
+    return out
+
+
 def player_row(raw) -> dict:
     p = flatten(raw.get("player", raw) if isinstance(raw, dict) else raw)
     name = p.get("name") or {}
     pos = p.get("primary_position") or p.get("display_position")
     sel = flatten(p.get("selected_position") or [])
+    bye = flatten(p.get("bye_weeks") or {}).get("week") if p.get("bye_weeks") else None
     return {
         "name": (name.get("full") if isinstance(name, dict) else None) or p.get("player_key"),
         "pos": pos,
@@ -319,7 +331,155 @@ def player_row(raw) -> dict:
         "status": p.get("status") or None,                 # IR / O / Q ...
         "pct_owned": (p.get("percent_owned") or {}).get("value") if isinstance(p.get("percent_owned"), dict) else None,
         "slot": sel.get("position"),
+        "eligible": _positions(p.get("eligible_positions")),
+        "bye": int(bye) if str(bye or "").isdigit() else None,
+        "editable": p.get("is_editable"),
     }
+
+
+# --- the lineup check: no AI, no storage, every team in one command ---------
+# WHAT IT IS (Oct 3 2026, his ask): the Sunday-morning sweep he was doing league by
+# league, as one command. For every team it flags a STARTER who is out, doubtful,
+# questionable or on bye, and an EMPTY starting slot, then names healthy bench
+# players who can legally fill that slot, ordered by PUBLIC expected points.
+# WHY IT IS SHAPED THIS WAY: the agreement's Approved Use Case is "automating
+# personal roster analysis and start/sit decisions", so this is squarely in scope.
+# The two hard limits are kept on purpose:
+#   * nothing is written to disk (Exhibit A 2.c.vii: no store, cache or index)
+#   * no AI touches the data (Exhibit A 3.e). The rules below are plain code.
+# Yahoo supplies the roster, slots, injury tag and bye week. The cross-check
+# (Sleeper's public feed) and the ordering (nflverse expected points) are public
+# data the app already refreshes, so the decision logic owes Yahoo nothing.
+BENCH_SLOTS = {"BN", "IR", "IR+", "IL", "IL+", "NA"}
+OUT_TAGS = {"O": "OUT", "IR": "IR", "IR-R": "IR", "PUP-R": "PUP", "PUP-P": "PUP", "PUP": "PUP",
+            "NFI-R": "NFI", "NFI-A": "NFI", "SUSP": "SUSPENDED", "NA": "INACTIVE",
+            "D": "DOUBTFUL", "COVID-19": "OUT"}
+PUBLIC_OUT = {"out", "ir", "doubtful", "pup", "sus", "suspended", "nfi", "na", "dnr"}
+
+
+def _key(name: str) -> str:
+    """Name key shared by Yahoo and the public layers: lowercase, no punctuation."""
+    # Mirrors the app's normalize(): hyphens become spaces, other punctuation goes.
+    # "Amon-Ra St. Brown" -> "amon ra st brown", the key the public files use.
+    n = "".join(ch for ch in (name or "").lower().replace("-", " ") if ch.isalnum() or ch == " ")
+    return " ".join(n.split())
+
+
+def _lookup(table: dict, name: str):
+    k = _key(name)
+    if k in table:
+        return table[k]
+    for suf in (" jr", " sr", " ii", " iii", " iv"):        # Kenneth Walker III vs walker
+        if k.endswith(suf) and k[: -len(suf)] in table:
+            return table[k[: -len(suf)]]
+        if k + suf in table:
+            return table[k + suf]
+    return None
+
+
+def check_team(roster: list, slots: dict, week, pub_status: dict, pub_exp: dict) -> list:
+    """Pure function: roster rows + {slot: count} -> list of flags. No I/O at all."""
+    flags = []
+    def problem(p):
+        if p.get("bye") and week and p["bye"] == week:
+            return "BYE"
+        tag = OUT_TAGS.get(p.get("status") or "")
+        if tag:
+            return tag
+        if (p.get("status") or "") == "Q":
+            return "QUESTIONABLE"
+        pub = _lookup(pub_status, p.get("name") or "") or {}
+        ps = str(pub.get("injury_status") or "").strip().lower()
+        if ps in PUBLIC_OUT:
+            return f"PUBLIC FEED: {pub.get('injury_status')}"
+        return None
+
+    def options(slot):
+        bench = [b for b in roster if (b.get("slot") or "BN") == "BN"
+                 and slot in (b.get("eligible") or []) and problem(b) in (None, "QUESTIONABLE")]
+        ranked = sorted(bench, key=lambda b: -((_lookup(pub_exp, b["name"]) or {}).get("exp_pg") or 0))
+        return [(b["name"], b.get("pos"), (_lookup(pub_exp, b["name"]) or {}).get("exp_pg"),
+                 problem(b)) for b in ranked[:3]]
+
+    filled = {}
+    for p in roster:
+        s = p.get("slot")
+        if not s or s in BENCH_SLOTS:
+            continue
+        filled[s] = filled.get(s, 0) + 1
+        why = problem(p)
+        if why:
+            flags.append({"kind": "starter", "slot": s, "player": p, "why": why,
+                          "locked": p.get("editable") in (0, "0"), "options": options(s)})
+    for s, need in slots.items():
+        if s in BENCH_SLOTS:
+            continue
+        for _ in range(max(0, need - filled.get(s, 0))):
+            flags.append({"kind": "empty", "slot": s, "player": None, "why": "EMPTY",
+                          "locked": False, "options": options(s)})
+    return flags
+
+
+def _roster_slots(settings_league: dict) -> dict:
+    st = flatten(settings_league.get("settings") or [])
+    out = {}
+    for rp in (st.get("roster_positions") or []):
+        r = flatten(rp).get("roster_position") or flatten(rp)
+        r = flatten(r)
+        if r.get("position") and str(r.get("is_starting_position", 1)) != "0":
+            out[r["position"]] = out.get(r["position"], 0) + int(r.get("count") or 1)
+    return out
+
+
+def _public_layers() -> tuple:
+    """The app's own PUBLIC data (Sleeper status, nflverse expected). Never Yahoo's."""
+    def load(name, key):
+        p = REPO_ROOT / "grading" / "data" / name
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+        d = d.get(key, d) if isinstance(d, dict) else {}
+        return {_key(k): v for k, v in d.items() if isinstance(v, dict)}
+    return load("status_2026.json", "players"), load("expected_2026.json", "players")
+
+
+def run_check(token: str) -> int:
+    """Every team, flags only. PRINTS, NEVER WRITES - that is the agreement."""
+    pub_status, pub_exp = _public_layers()
+    teams = pull_teams(token)
+    rows, need = [], 0
+    for t in teams:
+        lg = flatten(((api(f"league/{t['league_key']}/settings", token)
+                       .get("fantasy_content") or {}).get("league") or []))
+        week = int(lg.get("current_week") or 0) or None
+        roster = api(f"team/{t['team_key']}/roster", token)
+        rc = flatten(((roster.get("fantasy_content") or {}).get("team") or []))
+        players = ((rc.get("roster") or {}).get("0") or {}).get("players") or (rc.get("roster") or {}).get("players") or {}
+        flags = check_team(collect_players(players), _roster_slots(lg), week, pub_status, pub_exp)
+        need += 1 if any(not f["locked"] for f in flags) else 0
+        rows.append((lg.get("name") or t["league_key"], t.get("name"), week, flags))
+        time.sleep(0.2)                               # be gentle with the Rate Limits (2.c.v)
+    print(f"LINEUP CHECK · {len(teams)} teams · {need} need attention · shown, not saved")
+    for league, team, week, flags in rows:
+        print(f"\n  {league} · {team} · week {week or '?'}")
+        if not flags:
+            print("    ok  every starter active")
+            continue
+        for f in flags:
+            p = f["player"]
+            who = f"{p['name']} ({p.get('team') or '-'})" if p else "slot EMPTY"
+            lock = "  [game started - locked]" if f["locked"] else ""
+            print(f"    !!  {f['slot']:<6} {who:<34} {f['why']}{lock}")
+            if f["options"] and not f["locked"]:
+                opts = ", ".join(f"{n} {pos} ({e if e is not None else '-'}/g"
+                                 f"{', Q' if w == 'QUESTIONABLE' else ''})" for n, pos, e, w in f["options"])
+                print(f"        bench options by public expected pts: {opts}")
+            elif not f["locked"]:
+                print("        no eligible healthy bench player: a waiver add is the only fix")
+    print("\n  Statuses: Yahoo's tag, cross-checked against the public injury feed."
+          "\n  Bench order: nflverse expected points per game (public). Nothing here was saved.")
+    return 0
 
 
 def collect_players(container) -> list:
@@ -522,16 +682,64 @@ def self_test() -> int:
        "Caleb Douglas" in _shown and "12%" in _shown and "Q" in _shown)
     ok("it prints the summary line", "summary line" in _shown)
 
+    print("\nthe lineup check - plain rules, synthetic players, no Yahoo data")
+    _pos = _positions([{"position": "WR"}, {"position": "W/R/T"}])
+    ok("eligible positions parse from Yahoo's fragment list", _pos == ["WR", "W/R/T"], _pos)
+    _lg = {"settings": [{"roster_positions": [
+        {"roster_position": {"position": "QB", "count": 1, "is_starting_position": 1}},
+        {"roster_position": {"position": "WR", "count": 2, "is_starting_position": 1}},
+        {"roster_position": {"position": "W/R/T", "count": 1, "is_starting_position": 1}},
+        {"roster_position": {"position": "BN", "count": 5, "is_starting_position": 0}}]}]}
+    _slots = _roster_slots(_lg)
+    ok("roster slots count starters only", _slots == {"QB": 1, "WR": 2, "W/R/T": 1}, _slots)
+    ok("the name key matches the public files", _key("Amon-Ra St. Brown") == "amon ra st brown")
+    _ros = [
+        {"name": "Qb One", "slot": "QB", "eligible": ["QB"], "status": None, "bye": 5},
+        {"name": "Wr Out", "slot": "WR", "eligible": ["WR", "W/R/T"], "status": "O", "bye": 9},
+        {"name": "Wr Ok", "slot": "WR", "eligible": ["WR", "W/R/T"], "status": None, "bye": 9},
+        {"name": "Bench Good", "slot": "BN", "eligible": ["WR", "W/R/T"], "status": None, "bye": 9},
+        {"name": "Bench Bad", "slot": "BN", "eligible": ["WR", "W/R/T"], "status": None, "bye": 9},
+        {"name": "Bench Hurt", "slot": "BN", "eligible": ["WR", "W/R/T"], "status": "IR", "bye": 9},
+        {"name": "Feed Out", "slot": "BN", "eligible": ["WR"], "status": None, "bye": 9},
+    ]
+    _exp = {"bench good": {"exp_pg": 12.0}, "bench bad": {"exp_pg": 4.0}}
+    _f = check_team(_ros, _slots, 5, {"feed out": {"injury_status": "Out"}}, _exp)
+    _by = {(x["slot"], x["why"]): x for x in _f}
+    ok("a starter on bye is flagged", ("QB", "BYE") in _by, list(_by))
+    ok("a starter tagged O is flagged OUT", ("WR", "OUT") in _by, list(_by))
+    ok("an unfilled starting slot is flagged EMPTY", ("W/R/T", "EMPTY") in _by, list(_by))
+    _opts = [o[0] for o in _by.get(("WR", "OUT"), {}).get("options", [])]
+    ok("bench options order by public expected points", _opts[:2] == ["Bench Good", "Bench Bad"], _opts)
+    ok("an injured bench player is never offered", "Bench Hurt" not in _opts, _opts)
+    ok("a bench player the public feed calls Out is never offered", "Feed Out" not in _opts, _opts)
+    ok("a healthy starter raises nothing",
+       not any(x["player"] and x["player"]["name"] == "Wr Ok" for x in _f))
+    ok("a locked starter is marked as locked",
+       check_team([{"name": "L", "slot": "QB", "eligible": ["QB"], "status": "O", "editable": 0}],
+                  {"QB": 1}, 5, {}, {})[0]["locked"])
+    _src = Path(__file__).read_text(encoding="utf-8")
+    _body = _src[_src.index("def run_check("):_src.index("# --- pulls")]
+    ok("the lineup check writes nothing to disk",
+       not any(t in _body for t in ("write_text", "open(", ".dump(")), "found a write in run_check")
+
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
 
 
 # --- cli -------------------------------------------------------------------
 def main() -> int:
+    # Team names carry emoji; a cp1252 Windows console crashes on them (Oct 3 2026).
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(description="Pull your Yahoo fantasy team.")
     ap.add_argument("--auth", action="store_true", help="one-time OAuth handshake")
     ap.add_argument("--teams", action="store_true", help="list your NFL teams and their keys")
     ap.add_argument("--team", metavar="TEAM_KEY", help="pull roster, opponent and free agents")
+    ap.add_argument("--check", action="store_true",
+                    help="lineup check across EVERY team: starters out/questionable/on bye, "
+                         "empty slots, bench options. Shown, never saved")
     ap.add_argument("--week", type=int, default=None, help="defaults to the league's current week")
     ap.add_argument("--fa-limit", type=int, default=50, help="free agents to pull (default 50)")
     ap.add_argument("--redirect", default=None,
@@ -547,7 +755,7 @@ def main() -> int:
 
     if a.self_test:
         return self_test()
-    if not (a.auth or a.teams or a.team):
+    if not (a.auth or a.teams or a.team or a.check):
         ap.print_help()
         return 2
 
@@ -562,6 +770,9 @@ def main() -> int:
         return 0
 
     token = access_token(cid, sec, token_path)
+
+    if a.check:
+        return run_check(token)
 
     if a.teams:
         for t in pull_teams(token):
