@@ -523,6 +523,59 @@ def pull_available(token: str, league_key: str, limit: int) -> list:
     return rows
 
 
+FLEX_LETTERS = {"Q": "QB", "W": "WR", "R": "RB", "T": "TE"}
+SKILL_POS = ("QB", "RB", "WR", "TE")
+
+
+def _rec_points(settings_league: dict):
+    """Points per reception from the league's stat modifiers (Yahoo stat_id 11).
+    None when the settings do not say, which is reported as 'scoring unknown'."""
+    st = flatten(settings_league.get("settings") or [])
+    mods = flatten(st.get("stat_modifiers") or {})
+    stats = mods.get("stats") or []
+    items = stats if isinstance(stats, list) else indexed(stats)
+    found = False
+    for it in items:
+        sd = flatten(flatten(it).get("stat") or it)
+        if str(sd.get("stat_id")) == "11":
+            try:
+                return float(sd.get("value"))
+            except (TypeError, ValueError):
+                return None
+        found = True
+    return 0.0 if found else None
+
+
+def league_context(slots: dict, roster: list, rec) -> dict:
+    """Pure: lineup slots + your roster -> where you are SHORT (cannot fill a
+    starting slot with a healthy player) and THIN (no healthy backup).
+    Healthy means not on IR and not carrying an out-type Yahoo tag."""
+    def healthy(p):
+        return (p.get("slot") not in ("IR", "IR+", "IL", "IL+")
+                and not OUT_TAGS.get(p.get("status") or ""))
+    have = {pos: sum(1 for p in roster if p.get("pos") == pos and healthy(p)) for pos in SKILL_POS}
+    need = {pos: int(slots.get(pos, 0)) for pos in SKILL_POS}
+    short = [pos for pos in SKILL_POS if have[pos] < need[pos]]
+    thin = [pos for pos in SKILL_POS if need[pos] and have[pos] == need[pos]]
+    # Spare players are SHARED between flex slots, so they are used up one slot at
+    # a time, most restrictive flex first. Counting the same spare receiver for a
+    # W/R/T and a Q/W/R/T would report a superflex as covered when it is not.
+    spare = {pos: max(0, have[pos] - need[pos]) for pos in SKILL_POS}
+    flexes = sorted(((sl, n, [FLEX_LETTERS[c] for c in sl.split("/") if c in FLEX_LETTERS])
+                     for sl, n in slots.items() if "/" in sl), key=lambda x: len(x[2]))
+    flex = []
+    for slot, n, elig in flexes:
+        for _ in range(int(n)):
+            src = next((pos for pos in elig if spare[pos] > 0), None)
+            if src:
+                spare[src] -= 1
+            elif not any(f["slot"] == slot for f in flex):
+                flex.append({"slot": slot, "positions": elig})
+    superflex = any("Q" in s_.split("/") and "/" in s_ for s_ in slots) or need["QB"] >= 2
+    return {"rec": rec, "slots": {k: v for k, v in slots.items()}, "short": short,
+            "thin": thin, "flex_short": flex, "superflex": superflex}
+
+
 def run_waivers(token: str, limit: int) -> int:
     import subprocess
     leagues, seen = [], set()
@@ -533,7 +586,12 @@ def run_waivers(token: str, limit: int) -> int:
         lg = flatten(((api(f"league/{t['league_key']}/settings", token)
                        .get("fantasy_content") or {}).get("league") or []))
         avail = pull_available(token, t["league_key"], limit)
+        roster = api(f"team/{t['team_key']}/roster", token)
+        rc = flatten(((roster.get("fantasy_content") or {}).get("team") or []))
+        mine = collect_players(((rc.get("roster") or {}).get("0") or {}).get("players")
+                               or (rc.get("roster") or {}).get("players") or {})
         leagues.append({"label": lg.get("name") or t["league_key"],
+                        "context": league_context(_roster_slots(lg), mine, _rec_points(lg)),
                         "players": [{"name": r["name"], "pos": r["pos"], "team": r["team"],
                                      "status": r["status"], "pct_owned": None} for r in avail]})
     # Handed over on stdin, never through a file.
@@ -780,6 +838,26 @@ def self_test() -> int:
        "input=json.dumps" in _wbody and not any(t in _wbody for t in ("write_text", "open(", ".dump(")))
     ok("the waiver check scores with the app's own code, not a Python copy",
        "waiver-score.mjs" in _wbody and "scoreFreeAgent" not in _wbody.split("# Handed over")[1])
+
+    print("\nleague awareness - scoring and weak spots, synthetic league")
+    _set = {"settings": [{"stat_modifiers": {"stats": [
+        {"stat": {"stat_id": 4, "value": "0.04"}}, {"stat": {"stat_id": 11, "value": "1"}}]}}]}
+    ok("full PPR is read off stat 11", _rec_points(_set) == 1.0, _rec_points(_set))
+    ok("no reception modifier reads as standard",
+       _rec_points({"settings": [{"stat_modifiers": {"stats": [{"stat": {"stat_id": 4, "value": "0.04"}}]}}]}) == 0.0)
+    ok("missing modifiers read as unknown, not standard", _rec_points({"settings": [{}]}) is None)
+    _sl = {"QB": 1, "RB": 2, "WR": 3, "TE": 1, "W/R/T": 1, "Q/W/R/T": 1}
+    _mine = ([{"pos": "QB", "slot": "QB"}] +
+             [{"pos": "RB", "slot": "RB"}, {"pos": "RB", "slot": "RB", "status": "O"}] +
+             [{"pos": "WR", "slot": "WR"}] * 4 + [{"pos": "TE", "slot": "TE"}, {"pos": "TE", "slot": "IR"}])
+    _ctx = league_context(_sl, _mine, 0.5)
+    ok("an RB room with one healthy back for two slots is SHORT", "RB" in _ctx["short"], _ctx)
+    ok("one healthy TE for one slot is THIN, and an IR body does not count", "TE" in _ctx["thin"], _ctx)
+    ok("a QB slot plus a superflex is recognised as superflex", _ctx["superflex"])
+    ok("four healthy WRs for three slots is neither short nor thin",
+       "WR" not in _ctx["short"] and "WR" not in _ctx["thin"])
+    ok("flex slots with no spare healthy players are flagged",
+       any(f["slot"] == "Q/W/R/T" for f in _ctx["flex_short"]), _ctx["flex_short"])
 
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
