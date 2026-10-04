@@ -493,6 +493,55 @@ def collect_players(container) -> list:
     return rows
 
 
+# --- the waiver check: the REAL available list, scored by the app's own code -----
+# WHAT IT IS (Oct 3 2026, his ask): "who is available in MY league that the
+# numbers like". The app's waiver pool has always had to guess the wire. This pulls
+# each league's actual available players (status=A covers free agents AND players
+# on waivers) and hands them, IN MEMORY, to scripts/waiver-score.mjs, which runs
+# the app's own scoreFreeAgent and breakout board on exactly that list.
+# Nothing is copied from App.jsx into Python, so the two cannot disagree.
+# Nothing is written to disk and no AI reads it (Exhibit A 2.c.vii, 3.e).
+# "Player availability" is named in the Approved Use Case, and an available list
+# is a subset of a league, not "all players in a fantasy league" (2.c.x).
+YAHOO_PAGE = 25          # Yahoo caps a players collection at 25 per request
+
+
+def _available_path(league_key: str, start: int) -> str:
+    return f"league/{league_key}/players;status=A;sort=AR;start={start};count={YAHOO_PAGE}"
+
+
+def pull_available(token: str, league_key: str, limit: int) -> list:
+    rows = []
+    for start in range(0, limit, YAHOO_PAGE):
+        d = api(_available_path(league_key, start), token)
+        lc = flatten(((d.get("fantasy_content") or {}).get("league") or []))
+        page = collect_players(lc.get("players") or {})
+        rows.extend(page)
+        if len(page) < YAHOO_PAGE:
+            break
+        time.sleep(0.2)                              # Rate Limits (2.c.v)
+    return rows
+
+
+def run_waivers(token: str, limit: int) -> int:
+    import subprocess
+    leagues, seen = [], set()
+    for t in pull_teams(token):
+        if t["league_key"] in seen:                  # two teams in one league = one wire
+            continue
+        seen.add(t["league_key"])
+        lg = flatten(((api(f"league/{t['league_key']}/settings", token)
+                       .get("fantasy_content") or {}).get("league") or []))
+        avail = pull_available(token, t["league_key"], limit)
+        leagues.append({"label": lg.get("name") or t["league_key"],
+                        "players": [{"name": r["name"], "pos": r["pos"], "team": r["team"],
+                                     "status": r["status"], "pct_owned": None} for r in avail]})
+    # Handed over on stdin, never through a file.
+    done = subprocess.run(["node", "scripts/waiver-score.mjs"], cwd=REPO_ROOT,
+                          input=json.dumps({"leagues": leagues}), text=True, encoding="utf-8")
+    return done.returncode
+
+
 # --- pulls -----------------------------------------------------------------
 def pull_teams(token: str) -> list:
     d = api("users;use_login=1/games;game_keys=nfl/teams", token)
@@ -722,6 +771,16 @@ def self_test() -> int:
     ok("the lineup check writes nothing to disk",
        not any(t in _body for t in ("write_text", "open(", ".dump(")), "found a write in run_check")
 
+    print("\nthe waiver check - pagination and the in-memory handoff")
+    ok("the available list asks for free agents AND waivers, 25 at a time",
+       _available_path("461.l.1", 50) == "league/461.l.1/players;status=A;sort=AR;start=50;count=25")
+    _wsrc = Path(__file__).read_text(encoding="utf-8")
+    _wbody = _wsrc[_wsrc.index("def run_waivers("):_wsrc.index("# --- pulls")]
+    ok("the waiver check hands the list over on stdin, never through a file",
+       "input=json.dumps" in _wbody and not any(t in _wbody for t in ("write_text", "open(", ".dump(")))
+    ok("the waiver check scores with the app's own code, not a Python copy",
+       "waiver-score.mjs" in _wbody and "scoreFreeAgent" not in _wbody.split("# Handed over")[1])
+
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
 
@@ -737,6 +796,9 @@ def main() -> int:
     ap.add_argument("--auth", action="store_true", help="one-time OAuth handshake")
     ap.add_argument("--teams", action="store_true", help="list your NFL teams and their keys")
     ap.add_argument("--team", metavar="TEAM_KEY", help="pull roster, opponent and free agents")
+    ap.add_argument("--waivers", action="store_true",
+                    help="every league's AVAILABLE players, scored by the app's waiver and "
+                         "breakout logic. Shown, never saved")
     ap.add_argument("--check", action="store_true",
                     help="lineup check across EVERY team: starters out/questionable/on bye, "
                          "empty slots, bench options. Shown, never saved")
@@ -755,7 +817,7 @@ def main() -> int:
 
     if a.self_test:
         return self_test()
-    if not (a.auth or a.teams or a.team or a.check):
+    if not (a.auth or a.teams or a.team or a.check or a.waivers):
         ap.print_help()
         return 2
 
@@ -773,6 +835,8 @@ def main() -> int:
 
     if a.check:
         return run_check(token)
+    if a.waivers:
+        return run_waivers(token, max(a.fa_limit, 100))
 
     if a.teams:
         for t in pull_teams(token):
