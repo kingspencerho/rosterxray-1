@@ -464,12 +464,13 @@ def run_check(token: str) -> int:
         need += 1 if flags and any(not f["locked"] for f in flags) else 0
         rows.append((lg.get("name") or t["league_key"], t.get("name"), week, flags))
         time.sleep(0.2)                               # be gentle with the Rate Limits (2.c.v)
-    print(f"LINEUP CHECK · {len(teams)} teams · {need} need attention · shown, not saved")
+    gone = sum(1 for r in rows if r[3] is None)
+    print(f"LINEUP CHECK · {len(teams) - gone} active teams · {need} need attention"
+          + (f" · {gone} eliminated, not shown" if gone else "") + " · shown, not saved")
     for league, team, week, flags in rows:
-        print(f"\n  {league} · {team} · week {week or '?'}")
-        if flags is None:
-            print("    --  no players on your roster: eliminated (a guillotine chop) or released. Nothing to set.")
+        if flags is None:                             # eliminated: counted in the header only
             continue
+        print(f"\n  {league} · {team} · week {week or '?'}")
         if not flags:
             print("    ok  every starter active")
             continue
