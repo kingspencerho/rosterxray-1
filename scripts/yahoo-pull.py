@@ -456,13 +456,20 @@ def run_check(token: str) -> int:
         roster = api(f"team/{t['team_key']}/roster", token)
         rc = flatten(((roster.get("fantasy_content") or {}).get("team") or []))
         players = ((rc.get("roster") or {}).get("0") or {}).get("players") or (rc.get("roster") or {}).get("players") or {}
-        flags = check_team(collect_players(players), _roster_slots(lg), week, pub_status, pub_exp)
-        need += 1 if any(not f["locked"] for f in flags) else 0
+        mine = collect_players(players)
+        # An EMPTY roster is an eliminated team (a guillotine chop), not a lineup
+        # emergency. Oct 4 2026: it printed eight EMPTY slots and counted as
+        # "needs attention" for a team that had been cut.
+        flags = None if not mine else check_team(mine, _roster_slots(lg), week, pub_status, pub_exp)
+        need += 1 if flags and any(not f["locked"] for f in flags) else 0
         rows.append((lg.get("name") or t["league_key"], t.get("name"), week, flags))
         time.sleep(0.2)                               # be gentle with the Rate Limits (2.c.v)
     print(f"LINEUP CHECK · {len(teams)} teams · {need} need attention · shown, not saved")
     for league, team, week, flags in rows:
         print(f"\n  {league} · {team} · week {week or '?'}")
+        if flags is None:
+            print("    --  no players on your roster: eliminated (a guillotine chop) or released. Nothing to set.")
+            continue
         if not flags:
             print("    ok  every starter active")
             continue
@@ -590,6 +597,8 @@ def run_waivers(token: str, limit: int) -> int:
         rc = flatten(((roster.get("fantasy_content") or {}).get("team") or []))
         mine = collect_players(((rc.get("roster") or {}).get("0") or {}).get("players")
                                or (rc.get("roster") or {}).get("players") or {})
+        if not mine:                                 # eliminated: no wire worth scoring
+            continue
         leagues.append({"label": lg.get("name") or t["league_key"],
                         "context": league_context(_roster_slots(lg), mine, _rec_points(lg)),
                         "players": [{"name": r["name"], "pos": r["pos"], "team": r["team"],
@@ -858,6 +867,10 @@ def self_test() -> int:
        "WR" not in _ctx["short"] and "WR" not in _ctx["thin"])
     ok("flex slots with no spare healthy players are flagged",
        any(f["slot"] == "Q/W/R/T" for f in _ctx["flex_short"]), _ctx["flex_short"])
+
+    print("\nan eliminated team")
+    ok("an empty roster is never a list of EMPTY slots",
+       "flags = None if not mine else check_team(" in Path(__file__).read_text(encoding="utf-8"))
 
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
