@@ -154,15 +154,22 @@ def main():
         opp = tidx.get(r["opponent_team"], -1)
         pts = round(points(r), 1)
         tds = int(num(r["passing_tds"]) + num(r["rushing_tds"]) + num(r["receiving_tds"]))
+        # YAHOO'S COLUMN SET, IN YAHOO'S ORDER (Oct 10 2026, his ask, read off his
+        # Yahoo player cards): Passing Comp/Att/Yds/TD/Int, Rushing Att/Yds/TD,
+        # Receiving Tgt/Rec/Yds/TD, Fumbles Lost. A back shows rushing first, a
+        # receiver receiving first. Every label the app already reads is kept.
+        def i(k):
+            return int(num(r[k]))
+        fum = int(num(r["sack_fumbles_lost"]) + num(r["rushing_fumbles_lost"]) + num(r["receiving_fumbles_lost"]))
+        rush = [i("carries"), i("rushing_yards"), i("rushing_tds")]
+        recv = [i("targets"), i("receptions"), i("receiving_yards"), i("receiving_tds")]
         if pos == "QB":
-            tail = [int(num(r["attempts"])), int(num(r["passing_yards"])), int(num(r["passing_tds"])),
-                    int(num(r["carries"])), int(num(r["rushing_yards"]))]
+            tail = [i("completions"), i("attempts"), i("passing_yards"), i("passing_tds"),
+                    i("passing_interceptions")] + rush + [fum]
         elif pos == "RB":
-            tail = [int(num(r["carries"])), int(num(r["rushing_yards"])),
-                    int(num(r["targets"])), int(num(r["receptions"])), int(num(r["receiving_yards"]))]
+            tail = rush + recv + [fum]
         else:
-            tail = [int(num(r["targets"])), int(num(r["receptions"])),
-                    int(num(r["receiving_yards"])), int(num(r["receiving_air_yards"]))]
+            tail = recv + [i("receiving_air_yards")] + rush + [fum]
         return [wk, opp, pts, tds] + tail
 
     by = collections.defaultdict(list)
@@ -194,10 +201,14 @@ def main():
             "scoring": "half-PPR, 4pt passing TD",
             "bands": {"spike": 18, "usable": 10, "dud": 5},
             "cols": {
-                "QB": ["week", "opp", "pts", "tds", "att", "pass_yds", "pass_td", "car", "rush_yds"],
-                "RB": ["week", "opp", "pts", "tds", "car", "rush_yds", "tgt", "rec", "rec_yds"],
-                "WR": ["week", "opp", "pts", "tds", "tgt", "rec", "rec_yds", "air_yds"],
-                "TE": ["week", "opp", "pts", "tds", "tgt", "rec", "rec_yds", "air_yds"],
+                "QB": ["week", "opp", "pts", "tds", "comp", "att", "pass_yds", "pass_td", "int",
+                       "car", "rush_yds", "rush_td", "fum"],
+                "RB": ["week", "opp", "pts", "tds", "car", "rush_yds", "rush_td",
+                       "tgt", "rec", "rec_yds", "rec_td", "fum"],
+                "WR": ["week", "opp", "pts", "tds", "tgt", "rec", "rec_yds", "rec_td", "air_yds",
+                       "car", "rush_yds", "rush_td", "fum"],
+                "TE": ["week", "opp", "pts", "tds", "tgt", "rec", "rec_yds", "rec_td", "air_yds",
+                       "car", "rush_yds", "rush_td", "fum"],
             },
         }
     }

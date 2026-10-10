@@ -7838,7 +7838,12 @@ const configFromSlots = (players) => {
   // returns null and the config is left exactly as the reader set it. A half-applied
   // lineup would be worse than none, because it would look deliberate.
   if (tagged === 0 || starters < SLOT_MIN_STARTERS || lineup.QB < 1) return null;
-  return { lineup, benchSize: bench, irSlots: ir, starters, tagged, ignored };
+  // ⛔ NO BENCH ROWS SEEN IS NOT A ZERO-MAN BENCH (Oct 10 2026). A Yahoo team page
+  // or matchup screenshot usually stops above the bench, and the first build read
+  // that as "bench 0" and rewrote his league settings. Unseen means unknown: the
+  // reader's own bench and IR settings stand, and the summary does not claim them.
+  return { lineup, benchSize: bench > 0 ? bench : null, irSlots: bench > 0 || ir > 0 ? ir : null,
+           starters, tagged, ignored };
 };
 
 // The one-line summary the reader sees. It names every number that was applied, so a
@@ -7848,7 +7853,7 @@ const describeSlotConfig = (d) => {
   const parts = [`${d.lineup.QB}QB`, `${d.lineup.RB}RB`, `${d.lineup.WR}WR`, `${d.lineup.TE}TE`];
   if (d.lineup.FLEX) parts.push(`${d.lineup.FLEX}FLEX`);
   if (d.lineup.SFLEX) parts.push(`${d.lineup.SFLEX}SFLEX`);
-  parts.push(`${d.benchSize} bench`);
+  if (d.benchSize != null) parts.push(`${d.benchSize} bench`);
   if (d.irSlots) parts.push(`${d.irSlots} IR`);
   return parts.join(" · ");
 };
@@ -10535,8 +10540,17 @@ const WeeklyBars = ({ log }) => {
 // section was fixed for. `reason` is the population gate, stated in place.
 // Box-score column names a reader recognises from his league app, not the
 // builder's field names ("pass_yds" was printing on the card).
-const GAME_COL_LABEL = { tds: "TD", att: "Att", pass_yds: "Pass Yds", pass_td: "Pass TD", car: "Rush Att",
-  rush_yds: "Rush Yds", tgt: "Tgt", rec: "Rec", rec_yds: "Rec Yds", air_yds: "Air Yds" };
+// Grouped the way Yahoo's own player card groups them (Passing / Rushing /
+// Receiving / Fumbles), so "Att" and "Yds" read correctly under their group.
+// `tds` (all touchdowns) stays in the data for the stat line and is not a column:
+// the split TDs are shown instead.
+const GAME_COL_LABEL = { comp: "Comp", att: "Att", pass_yds: "Yds", pass_td: "TD", int: "Int",
+  car: "Att", rush_yds: "Yds", rush_td: "TD", tgt: "Tgt", rec: "Rec", rec_yds: "Yds", rec_td: "TD",
+  air_yds: "Air", fum: "Lost" };
+const GAME_COL_GROUP = { comp: "Passing", att: "Passing", pass_yds: "Passing", pass_td: "Passing", int: "Passing",
+  car: "Rushing", rush_yds: "Rushing", rush_td: "Rushing", tgt: "Receiving", rec: "Receiving",
+  rec_yds: "Receiving", rec_td: "Receiving", air_yds: "Receiving", fum: "Fumbles" };
+const GAME_COL_HIDDEN = new Set(["tds"]);
 
 const GameLogSection = ({ cur, prior, reason }) => {
   const [season, setSeason] = useState(cur ? "cur" : "prior");
@@ -10601,11 +10615,22 @@ const GameLogSection = ({ cur, prior, reason }) => {
         <div style={{ overflowX: "auto" }}>
           <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)" }}>
             <thead>
+              <tr style={{ color: "var(--text-dim)", fontSize: "9px", letterSpacing: "0.04em" }}>
+                <th colSpan={3} />
+                {log.games[0].stats.filter(st => !GAME_COL_HIDDEN.has(st.label)).reduce((acc, st) => {
+                  const grp = GAME_COL_GROUP[st.label] || "";
+                  if (acc.length && acc[acc.length - 1].grp === grp) acc[acc.length - 1].n++;
+                  else acc.push({ grp, n: 1 });
+                  return acc;
+                }, []).map((x, i) => (
+                  <th key={i} colSpan={x.n} style={{ padding: "2px 0 0 8px", fontWeight: 600, textAlign: "center", borderBottom: "1px solid var(--bg-raised)" }}>{x.grp}</th>
+                ))}
+              </tr>
               <tr style={{ color: "var(--text-faint)", textAlign: "right" }}>
                 <th style={{ textAlign: "left", padding: "3px 6px 5px 0", fontWeight: 600 }}>Wk</th>
                 <th style={{ textAlign: "left", padding: "3px 8px 5px 0", fontWeight: 600 }}>Opp</th>
                 <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Fan Pts</th>
-                {log.games[0].stats.map(st => (
+                {log.games[0].stats.filter(st => !GAME_COL_HIDDEN.has(st.label)).map(st => (
                   <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{GAME_COL_LABEL[st.label] || st.label}</th>
                 ))}
               </tr>
@@ -10616,7 +10641,7 @@ const GameLogSection = ({ cur, prior, reason }) => {
                   <td style={{ padding: "4px 6px 4px 0", color: "var(--text-faint)" }}>{g.week}</td>
                   <td style={{ padding: "4px 8px 4px 0" }}>{g.opp}</td>
                   <td style={{ padding: "4px 8px 4px 0", textAlign: "right", color: GAME_BAND_COLOR[g.band], fontWeight: 700 }}>{g.pts}</td>
-                  {g.stats.map(st => (
+                  {g.stats.filter(st => !GAME_COL_HIDDEN.has(st.label)).map(st => (
                     <td key={st.label} style={{ padding: "4px 0 4px 8px", textAlign: "right" }}>{st.value}</td>
                   ))}
                 </tr>
@@ -12276,7 +12301,9 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
         // handleAnalyze already carries for setInput.
         const detected = configFromSlots(players);
         const cfg = detected
-          ? { ...customConfig, lineup: detected.lineup, benchSize: detected.benchSize, irSlots: detected.irSlots }
+          ? { ...customConfig, lineup: detected.lineup,
+              benchSize: detected.benchSize ?? customConfig.benchSize,
+              irSlots: detected.irSlots ?? customConfig.irSlots }
           : null;
         if (cfg) {
           setCustomConfig(cfg);
@@ -14603,6 +14630,7 @@ Analyze this best ball roster. Return JSON only.`;
               </div>
               <div style={{ fontSize: "9px", color: "var(--text-dim)", lineHeight: 1.5, marginTop: "4px" }}>
                 Teams, scoring and playoff weeks are not printed on a roster card.
+                {slotConfig.benchSize == null && " No bench rows were visible, so your bench and IR settings were kept."}
               </div>
 
               {/* ⭐⭐ ASK ONE, ASSUME TWO — and the split is not cosmetic, it is what each

@@ -9998,3 +9998,18 @@ The weekly workflow squash-merges its own data PR into `main`, so `main` is no l
 branch. **Before deploying, `git fetch origin && git merge origin/main`, re-run `npm test`, then push the branch
 and fast-forward `main`.** A plain `git push origin <branch>:main` is refused once the bot has merged a refresh
 (first seen Oct 10, PR #100), which is the correct behaviour, not a permissions problem.
+
+### Oct 10 2026 (later still): Yahoo screens, Yahoo's game-log columns, IR stays at 1
+- **IR default stays 1 — his call** after seeing his leagues (9/13 carry 2) and Yahoo's default (2).
+- **Screenshot reader (api/analyze.js) now knows Yahoo's TEAM PAGE and MATCHUP PAGE.** Measured on his real
+  screenshots BEFORE the change: the team page read his 8 starters correctly; the matchup page returned BOTH
+  rosters, so the opponent's players would have been graded as his. The prompt now returns only the LEFT roster.
+- **No bench rows seen is not a zero-man bench.** `configFromSlots` returns `benchSize: null` (and `irSlots`
+  null) when no BN row was read, the extractor keeps his own settings, and the banner says they were kept. The
+  first read of a cut-off team page would have rewritten his league to bench 0. Guard 11 pins both.
+- **Game log = Yahoo's column set and grouping** (read off his Yahoo player cards): Passing Comp/Att/Yds/TD/Int,
+  Rushing Att/Yds/TD, Receiving Tgt/Rec/Yds/TD (+ our Air), Fumbles Lost, under group headers. Builder emits the
+  new columns for both seasons; every label the app and scout already read is kept (`tds` stays in the data for
+  the stat line and is not a column). Cross-checked Hampton W1-W4 against his Yahoo card: identical.
+- **Custom categories** (40-yd plays, 1st downs, pick-six, returns) are per-league in Yahoo and cannot be known
+  without his league; the card shows the standard set. 1st downs is in the free weekly file if ever wanted.

@@ -205,7 +205,24 @@ if (typeof fromSlots === "function") {
     fromSlots([{ name: "A", slot: "QB" }, { name: "B", slot: "RB" }]) === null);
   check("a read with no QB returns null",
     fromSlots(yahoo.filter(r => r.slot !== "QB")) === null);
+
+  // ⛔ NO BENCH ROWS SEEN IS NOT A ZERO-MAN BENCH (Oct 10 2026). His Yahoo team-page
+  // screenshot stopped above the bench and read as "bench 0", which would have
+  // rewritten his league settings. Unseen must come back as unknown (null).
+  const starters = fromSlots(yahoo.filter(r => r.slot !== "BN" && r.slot !== "IR"));
+  check("a screenshot with no bench rows leaves bench and IR unknown",
+    !!starters && starters.benchSize === null && starters.irSlots === null,
+    starters ? `bench ${starters.benchSize} ir ${starters.irSlots}` : "null");
 }
+check("...and the extractor keeps his own settings when they are unknown",
+  /detected\.benchSize \?\? customConfig\.benchSize/.test(cut("const extractFromImages = ", "const removeImage")));
+
+// ⛔ THE MATCHUP PAGE SHOWS TWO TEAMS. Measured Oct 10 2026 on his real matchup
+// screenshot: the extractor returned BOTH rosters, so the opponent's players would
+// have been graded as his. The prompt must keep only the left-hand roster.
+check("the prompt keeps only the left roster on a matchup page",
+  /Return ONLY the left-hand roster/.test(prompt) && /NEVER return a player from the right-hand side/.test(prompt));
+check("the prompt reads the team-page Pos column as the slot", /Yahoo TEAM PAGE/.test(prompt) && /W\/R\/T returned as "WRT"/.test(prompt));
 
 // A <select> handed a value with no matching option renders blank or snaps to the
 // first entry — silently. The panel would then show a number the engine is not using.
