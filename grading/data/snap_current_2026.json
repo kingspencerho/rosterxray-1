@@ -157,7 +157,7 @@
 "id": "00-0036422",
 "last_pct": 0.45,
 "pos": "TE",
-"snap_pct": 0.468,
+"snap_pct": 0.467,
 "snaps": 116,
 "team": "DEN",
 "weeks": [
@@ -1367,7 +1367,7 @@
 "id": "00-0038935",
 "last_pct": 0.87,
 "pos": "TE",
-"snap_pct": 0.787,
+"snap_pct": 0.788,
 "snaps": 189,
 "team": "JAX",
 "weeks": [
@@ -1652,7 +1652,7 @@
 "id": "00-0041067",
 "last_pct": 0.85,
 "pos": "WR",
-"snap_pct": 0.762,
+"snap_pct": 0.763,
 "snaps": 232,
 "team": "NO",
 "weeks": [
@@ -2014,7 +2014,7 @@
 "id": "00-0041438",
 "last_pct": 0.84,
 "pos": "WR",
-"snap_pct": 0.838,
+"snap_pct": 0.837,
 "snaps": 191,
 "team": "TEN",
 "weeks": [
@@ -2921,7 +2921,7 @@
 "id": "00-0033908",
 "last_pct": 0.57,
 "pos": "WR",
-"snap_pct": 0.613,
+"snap_pct": 0.612,
 "snaps": 148,
 "team": "SEA",
 "weeks": [
@@ -3051,7 +3051,7 @@
 "id": "00-0040890",
 "last_pct": 0.08,
 "pos": "WR",
-"snap_pct": 0.037,
+"snap_pct": 0.038,
 "snaps": 10,
 "team": "KC",
 "weeks": [
@@ -3232,7 +3232,7 @@
 "id": "00-0038115",
 "last_pct": 0.52,
 "pos": "TE",
-"snap_pct": 0.413,
+"snap_pct": 0.412,
 "snaps": 95,
 "team": "TEN",
 "weeks": [
@@ -3854,7 +3854,7 @@
 "id": "00-0041037",
 "last_pct": 0.95,
 "pos": "WR",
-"snap_pct": 0.922,
+"snap_pct": 0.923,
 "snaps": 224,
 "team": "CLE",
 "weeks": [
@@ -5187,7 +5187,7 @@
 "id": "00-0039299",
 "last_pct": 0.37,
 "pos": "RB",
-"snap_pct": 0.362,
+"snap_pct": 0.363,
 "snaps": 87,
 "team": "SEA",
 "weeks": [
@@ -5409,7 +5409,7 @@
 "id": "00-0040663",
 "last_pct": 0.89,
 "pos": "TE",
-"snap_pct": 0.857,
+"snap_pct": 0.858,
 "snaps": 209,
 "team": "CLE",
 "weeks": [
@@ -5461,7 +5461,7 @@
 "id": "00-0033090",
 "last_pct": 0.64,
 "pos": "TE",
-"snap_pct": 0.752,
+"snap_pct": 0.753,
 "snaps": 197,
 "team": "NE",
 "weeks": [
@@ -5896,7 +5896,7 @@
 "id": "00-0039365",
 "last_pct": 0.32,
 "pos": "WR",
-"snap_pct": 0.292,
+"snap_pct": 0.293,
 "snaps": 67,
 "team": "SF",
 "weeks": [
@@ -7427,7 +7427,7 @@
 "id": "00-0036223",
 "last_pct": 0.71,
 "pos": "RB",
-"snap_pct": 0.847,
+"snap_pct": 0.848,
 "snaps": 216,
 "team": "IND",
 "weeks": [
@@ -9051,7 +9051,7 @@
 "id": "00-0036970",
 "last_pct": 0.51,
 "pos": "TE",
-"snap_pct": 0.527,
+"snap_pct": 0.528,
 "snaps": 135,
 "team": "ATL",
 "weeks": [
@@ -9669,7 +9669,7 @@
 "id": "00-0040894",
 "last_pct": 0.08,
 "pos": "WR",
-"snap_pct": 0.092,
+"snap_pct": 0.093,
 "snaps": 26,
 "team": "LV",
 "weeks": [
@@ -10012,7 +10012,7 @@
 "id": "00-0039849",
 "last_pct": 0.65,
 "pos": "WR",
-"snap_pct": 0.738,
+"snap_pct": 0.737,
 "snaps": 206,
 "team": "ARI",
 "weeks": [
@@ -12817,7 +12817,7 @@
 "id": "00-0035229",
 "last_pct": 0.83,
 "pos": "TE",
-"snap_pct": 0.757,
+"snap_pct": 0.758,
 "snaps": 194,
 "team": "MIN",
 "weeks": [
@@ -14036,7 +14036,7 @@
 "id": "00-0041044",
 "last_pct": 0.23,
 "pos": "WR",
-"snap_pct": 0.228,
+"snap_pct": 0.227,
 "snaps": 58,
 "team": "ATL",
 "weeks": [
