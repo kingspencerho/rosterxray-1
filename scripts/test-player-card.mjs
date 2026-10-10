@@ -938,5 +938,19 @@ const untypedScore = statCards.filter(([, c]) => c.pos !== "QB" &&
 ok("a non-QB touchdown total stays untyped", untypedScore.length === 0,
    untypedScore.slice(0, 3).map(x => x[0]).join(", "));
 
+// ---- THE PAGED CARD (Oct 10 2026, his design) ----
+console.log("\nthe paged card");
+const pagesSrc = app.slice(app.indexOf("const CARD_PAGES = ["), app.indexOf("];", app.indexOf("const CARD_PAGES = [")));
+ok("the four pages run left to right in his order",
+   JSON.stringify([...pagesSrc.matchAll(/key: "(\w+)"/g)].map(m => m[1])) === JSON.stringify(["week", "points", "usage", "profile"]),
+   pagesSrc.slice(0, 120));
+ok("every page has its drill-down, in the one shared button style",
+   ['setSheet("log")', 'setSheet("usage")', 'setSheet("more")'].every(k => app.includes(`onClick={() => ${k}}`)) &&
+   (app.match(/<CardDrill /g) || []).length === 3);
+// His rule: dimensions stay proportionate on any device. A landscape phone
+// once shrank the whole app to 62%, taking 44px buttons to 27px.
+const landscape = app.slice(app.indexOf("@media (max-height: 500px) and (orientation: landscape)"));
+ok("a sideways phone never shrinks the app", !/transform:\s*scale\(/.test(landscape.slice(0, landscape.indexOf("}\n        }") + 12)) && !/\.app-content\s*\{[^}]*scale\(/.test(app));
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

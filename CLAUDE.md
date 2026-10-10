@@ -10054,3 +10054,19 @@ tabs now THIS WEEK · PLAYERS (search + a new head-to-head Compare of two of you
 measured risers/fallers; waiver suggestions shrink to a labelled section at its bottom) · TEAM. One drill-down button
 style for Full game log / Full breakdown / Efficiency. Usage bars coloured by position percentile (same four colours
 as Points). Profile filled with 2025-vs-2026 rows, an age bar against the position's peak years, games played.
+
+### Oct 10 2026: the paged player card is BUILT (his "build the card"), and landscape no longer shrinks
+- **Four pages, left to right:** This week (scoreboard: spread, total, matchup tier for his position; defense out;
+  status; The read; Recent news, now open) · Points (last 8 games coloured by the spike/usable/low/dud bands, a dashed
+  line at expected points per game, four facts, the season stat lines) · Usage (weekly target share, carry share for
+  a back, rush attempts for a QB, each bar coloured by `weeklyUsagePct` = rank among every game at his position this
+  season) · Profile (`ShiftRow` 2025 vs 2026, an age bar against `CAREER_ARC._meta.bands`, games played, turnover).
+- **One drill-down button (`CardDrill`) per page** swaps the pages for the full detail with a Back button:
+  log = the production group, usage = the job group, more = the outlook + reference groups. **No section was deleted**,
+  and the guards' source-order rules still hold because each page is its own conditional block (source order is not
+  tab order). Swipe left/right changes page.
+- Chart data is built in `buildPlayerCard` (`card.pointsChart`, `card.usageChart`, `card.game`), display only.
+- ⛔ **Landscape used to scale the whole app to 62% (`transform: scale(0.62)`), taking 44px buttons to 27px.** His rule:
+  dimensions stay proportionate on any device. Now a sideways phone keeps full size in a 760px column. Measured at
+  375x812, 812x375, 320x568 and 768x1024: 0 sub-32px targets, no overflow, no console errors. Guard 14 asserts the
+  page order, the three drill-downs, and that landscape never scales (sabotage-tested).

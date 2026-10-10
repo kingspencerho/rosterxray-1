@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { track } from '@vercel/analytics';
 // 2025 per-player production metrics (target share, WOPR, HVT/gm, spike/dud week
@@ -4099,6 +4099,35 @@ const careerPhaseLabel = (arc) => {
 // Builds everything the card renders. Returns a `reason` instead of null when
 // there is no data, so the UI can say WHY — an empty card is the silent-drop
 // failure mode in a new costume.
+// Where one week's share of the work ranks among every game at his position this
+// season. The pool is built once, from the same weekly series the card draws.
+let USAGE_POOL = null;
+const weeklyUsagePct = (pos, kind, v) => {
+  if (v == null) return null;
+  if (!USAGE_POOL) {
+    USAGE_POOL = {};
+    const add = (k, x) => { (USAGE_POOL[k] = USAGE_POOL[k] || []).push(x); };
+    for (const r of Object.values(VOLUME_CUR.players || {})) {
+      for (const x of r.trend?.series || []) add(`${r.pos}tgt`, x[2]);
+      for (const x of r.trend_car?.series || []) add(`${r.pos}car`, x[2]);
+    }
+    const qcols = GAME_LOGS_CUR._meta?.cols?.QB || [];
+    const ci = qcols.indexOf("car");
+    for (const r of Object.values(GAME_LOGS_CUR.players || {})) {
+      if (r.pos === "QB" && ci > -1) for (const g of r.g || []) add("QBqbcar", g[ci]);
+    }
+    for (const k of Object.keys(USAGE_POOL)) USAGE_POOL[k].sort((a, b) => a - b);
+  }
+  const a = USAGE_POOL[`${pos}${kind}`];
+  if (!a || a.length < 30) return null;
+  let i = 0;
+  while (i < a.length && a[i] < v) i++;
+  return Math.round((i / a.length) * 100);
+};
+// Same four colours as the points bars, so the two pages read the same way.
+const USAGE_RANK_COLOR = (p) => p == null ? "var(--text-dim)"
+  : p >= 75 ? "var(--pos)" : p >= 50 ? "var(--pos-bright)" : p >= 25 ? "var(--tier-even)" : "var(--neg)";
+
 const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard") => {
   const m = getMetrics(name);
   const traj = getSnapTrend(name);
@@ -4691,6 +4720,16 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
       const outs = (g.def_out?.[home ? g.away : g.home] || []).length;
       thisWeek.push({ label: `Next · W${GAMEENV_META.week}`, tone: "flat",
         text: `${home ? "vs" : "@"} ${opp}${line}${tot}${outs ? ` · ${outs} ${opp} defender${outs > 1 ? "s" : ""} out` : ""}` });
+      // The same game, structured, for the This week scoreboard. The tier is the
+      // matchup label the app prints everywhere; it ORDERS close calls, never decides one.
+      const mt = getMatchupTier(opp, pos);
+      card.game = {
+        week: GAMEENV_META.week, home, opp, team: teamKey(card.team), kick: g.kick || null,
+        fav: g.favorite ? teamKey(g.favorite) : null,
+        spread: g.spread != null ? Math.abs(g.spread) : null, total: g.total ?? null,
+        tier: mt && mt.tier && mt.tier !== "\u2014" ? mt.tier : null,
+        outs: (g.def_out?.[home ? g.away : g.home] || []).map(d => `${d.name} (${d.pos})`),
+      };
     }
   }
   card.thisWeek = thisWeek;
@@ -4880,6 +4919,88 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   // Cap at six. A summary that runs the length of the card is not a summary,
   // and the ordering above already puts the most causal lines first.
   card.read = read.slice(0, 6);
+
+  // ⭐ THE PAGED CARD (Oct 10 2026, his design, round three). Each page leads
+  // with ONE chart and the numbers that explain it; the data for all three is
+  // built here so the modal only draws. Display only: neither grade engine
+  // reads any of it.
+  {
+    const log = card.gameLogCur || card.gameLog;
+    const stat = (g, k) => g.stats.find(x => x.label === k)?.value || 0;
+    if (log) {
+      const all = log.games;
+      const sumOf = k => all.reduce((a, g) => a + stat(g, k), 0);
+      const exp = card.gameLogCur ? card.expected?.cur : card.expected?.prior;
+      const touches = pos === "QB" ? sumOf("att") / all.length : (sumOf("car") + sumOf("rec")) / all.length;
+      const hot = exp && exp.diff != null
+        ? (exp.diff >= 1.5 ? "He is scoring more than his usage should produce, so part of it may not repeat."
+          : exp.diff <= -1.5 ? "He is scoring less than his usage should produce, which is mostly bad luck on a real role."
+          : "He is scoring about what his usage should produce.")
+        : null;
+      card.pointsChart = {
+        season: log.season, partial: log.partial,
+        bars: all.slice(-8).map(g => ({ key: g.week, label: `W${g.week}`, v: g.pts, color: GAME_BAND_COLOR[g.band] })),
+        expPg: exp?.exp ?? null,
+        headline: hot,
+        facts: [
+          [touches.toFixed(1), pos === "QB" ? "Pass att / gm" : "Touches / gm"],
+          [String(sumOf("tds")), `TDs, ${log.gp} games`],
+          [String(log.ppg), "Points / gm"],
+          exp && exp.diff != null
+            ? [`${exp.diff > 0 ? "+" : ""}${exp.diff.toFixed(1)}`, "vs expected / gm"]
+            : [String(log.best), "Best game"],
+        ],
+      };
+    }
+
+    // USAGE: target share for receivers, carry share for backs, rush attempts
+    // for a quarterback. Each bar is coloured by where that week ranks among
+    // every game at his position this season (his call: same four colours as
+    // the points chart, so the two pages read the same way).
+    const tt = card.targetTrend;
+    const v = getVolumeCur(name);
+    const team = teamKey(card.team);
+    let series = null, kind = null, title = null;
+    if (pos === "RB" && tt?.car?.series?.length) { series = tt.car.series; kind = "car"; title = `Share of ${team} carries`; }
+    else if (pos !== "QB" && tt?.tgt?.series?.length) { series = tt.tgt.series; kind = "tgt"; title = `Share of ${team} targets`; }
+    else if (pos === "QB" && card.gameLogCur) {
+      series = card.gameLogCur.games.map(g => [g.week, stat(g, "car"), stat(g, "car")]);
+      kind = "qbcar"; title = "Rush attempts";
+    }
+    if (series && series.length) {
+      const share = kind !== "qbcar";
+      const fmt = x => share ? `${Math.round(x * 100)}` : `${x}`;
+      const shown = series.slice(-8);
+      const a = shown[0][2], b = shown[shown.length - 1][2];
+      const trend = kind === "car" ? tt?.car?.trend : kind === "tgt" ? tt?.tgt?.trend : null;
+      const word = trend === "rising" ? "rising" : trend === "falling" ? "falling" : trend === "stable" ? "steady" : null;
+      const facts = [];
+      if (pos === "QB") {
+        const lg = card.gameLogCur;
+        const sumOf = k => lg.games.reduce((x, g) => x + stat(g, k), 0);
+        facts.push([(sumOf("car") / lg.gp).toFixed(1), "Rush att / gm"], [(sumOf("att") / lg.gp).toFixed(1), "Pass att / gm"],
+          [String(sumOf("rush_yds")), "Rush yards"], [String(sumOf("pass_td")), "Pass TDs"]);
+      } else if (v) {
+        const p = x => x == null ? "\u2014" : `${Math.round(x * 100)}%`;
+        if (pos === "RB") facts.push([v.car_pg != null ? v.car_pg.toFixed(1) : "\u2014", "Carries / gm"], [tt?.car?.last3 != null ? p(tt.car.last3) : "\u2014", "Carry share, last 3"]);
+        facts.push([v.tgt_pg != null ? v.tgt_pg.toFixed(1) : "\u2014", "Targets / gm"], [p(v.tgt_sh), "Target share"]);
+        if (pos !== "RB") facts.push([v.adot != null ? v.adot.toFixed(1) : "\u2014", "Air yards / target"], [p(v.ay_sh), "Air-yards share"]);
+      }
+      card.usageChart = {
+        title, kind, unit: share ? "%" : "",
+        bars: shown.map(x => {
+          const pc = weeklyUsagePct(pos, kind, x[2]);
+          return { key: x[0], label: `W${x[0]}`, v: fmt(x[2]), raw: x[2], pct: pc, color: USAGE_RANK_COLOR(pc) };
+        }),
+        headline: share
+          ? `His share of ${team}'s ${kind === "car" ? "carries" : "targets"} went from ${fmt(a)}% in week ${shown[0][0]} to ${fmt(b)}% in week ${shown[shown.length - 1][0]}${word ? `, ${word} by this app's measure` : ""}.`
+          : `${fmt(b)} rush attempts in week ${shown[shown.length - 1][0]}. For a quarterback, rushing is the most repeatable scoring there is.`,
+        facts,
+        posPlural: `${pos}s`,
+      };
+    }
+    if (card.arc) card.arc.band = CAREER_ARC._meta?.bands?.[pos] || null;
+  }
   if (curRead.length) card.read = curRead;
 
   // The glossary explains exactly what this card rendered and nothing else, in
@@ -10867,8 +10988,94 @@ const PlayerLookup = ({ format, onPick, autoFocusOnOpen = true }) => {
   );
 };
 
+// The card's four pages, left to right by how often a reader needs them.
+const CARD_PAGES = [
+  { key: "week", label: "This week" },
+  { key: "points", label: "Points" },
+  { key: "usage", label: "Usage" },
+  { key: "profile", label: "Profile" },
+];
+const CardPageTitle = ({ children }) => (
+  <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: "8px" }}>{children}</div>
+);
+const CardHeadline = ({ children }) => (
+  <div style={{ fontSize: "13px", lineHeight: 1.5, color: "var(--text-primary)", marginBottom: "12px" }}>{children}</div>
+);
+// One chart shape for both pages: a value over each bar, the week under it, and
+// an optional dashed line (his expected points per game).
+const CardBars = ({ bars, line = null, unit = "" }) => {
+  const max = Math.max(...bars.map(b => +b.v || 0), line || 0, 1) * 1.1;
+  const H = 96;
+  return (
+    <div style={{ margin: "4px 0 2px" }}>
+      <div style={{ position: "relative", display: "flex", alignItems: "flex-end", gap: "6px", height: `${H + 18}px` }}>
+        {bars.map(b => (
+          <div key={b.key} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: "100%" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "16px", color: "var(--text-primary)", lineHeight: 1, marginBottom: "3px" }}>{b.v}{unit}</span>
+            <div style={{ width: "100%", height: `${Math.max(2, ((+b.v || 0) / max) * H)}px`, background: b.color, borderRadius: "3px 3px 1px 1px" }} />
+          </div>
+        ))}
+        {/* Inside the bar row, so the line's height is measured from the same floor as the bars. */}
+        {line != null && (
+          <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: `${(line / max) * H}px`, borderTop: "1px dashed var(--text-muted)" }} />
+        )}
+      </div>
+      <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
+        {bars.map(b => <span key={b.key} style={{ flex: 1, textAlign: "center", fontSize: "9px", color: "var(--text-dim)" }}>{b.label}</span>)}
+      </div>
+    </div>
+  );
+};
+const CardLegend = ({ items }) => (
+  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", fontSize: "9px", color: "var(--text-dim)", margin: "8px 0 12px" }}>
+    {items.map(([c, l, dashed]) => (
+      <span key={l} style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+        <span style={{ width: "9px", height: dashed ? 0 : "9px", borderTop: dashed ? "1px dashed var(--text-muted)" : "none", background: dashed ? "transparent" : c, borderRadius: "2px" }} />{l}
+      </span>
+    ))}
+  </div>
+);
+const CardFacts = ({ items }) => (
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border-default)", borderRadius: "6px", overflow: "hidden" }}>
+    {items.map(([v, l]) => (
+      <div key={l} style={{ background: "var(--bg-base)", padding: "8px 10px" }}>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "21px", color: "var(--text-primary)", lineHeight: 1.05 }}>{v}</div>
+        <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{l}</div>
+      </div>
+    ))}
+  </div>
+);
+// ⭐ ONE DRILL-DOWN BUTTON, SAME EVERYWHERE (his call, Oct 10 2026): a name that
+// says exactly what opens, a line saying what is inside, an arrow. Learned once.
+const CardDrill = ({ title, sub, onClick }) => (
+  <button type="button" onClick={onClick} style={{
+    marginTop: "14px", width: "100%", display: "flex", alignItems: "center", gap: "10px",
+    justifyContent: "flex-start", textAlign: "left", background: "var(--bg-raised)",
+    border: "1px solid var(--border-default)", borderRadius: "6px", padding: "10px 12px",
+    cursor: "pointer", color: "var(--text-primary)", fontFamily: "inherit",
+  }}>
+    <span style={{ display: "grid", placeItems: "center", width: "26px", height: "26px", borderRadius: "6px", background: "var(--bg-elevated)", color: "var(--ui-accent)", flex: "none", fontSize: "13px" }}>{"\u2261"}</span>
+    <span style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      <span style={{ fontSize: "12px", fontWeight: 700 }}>{title}</span>
+      <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>{sub}</span>
+    </span>
+    <span style={{ marginLeft: "auto", color: "var(--ui-accent)", fontSize: "18px" }}>{"\u203a"}</span>
+  </button>
+);
+const TIER_TONE = { Smash: "var(--pos)", Good: "var(--pos-bright)", Even: "var(--tier-even)", Hard: "var(--warn)", Avoid: "var(--neg)", Wall: "var(--neg)" };
+
 const PlayerCardModal = ({ card, onClose }) => {
+  // Hooks sit above the early return; the page resets whenever a new player opens.
+  const [page, setPage] = useState("week");
+  const [sheet, setSheet] = useState(null);
+  const touch = useRef(null);
+  useEffect(() => { setPage("week"); setSheet(null); }, [card?.name]);
   if (!card) return null;
+  const swipe = (dx) => {
+    const i = CARD_PAGES.findIndex(p => p.key === page);
+    const j = Math.max(0, Math.min(CARD_PAGES.length - 1, i + (dx < 0 ? 1 : -1)));
+    setPage(CARD_PAGES[j].key);
+  };
   const news = card.news || [];
   const t = card.trajectory;
   const tc = card.trajectoryCur;
@@ -10877,10 +11084,17 @@ const PlayerCardModal = ({ card, onClose }) => {
   return (
     <div
       onClick={onClose}
-      style={{ position: "fixed", inset: 0, background: "#000000cc", zIndex: 10000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px", overflowY: "auto" }}
+      style={{ position: "fixed", inset: 0, background: "#000000cc", zIndex: 10000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "min(40px, 6vh) 16px", overflowY: "auto" }}
     >
       <div
         onClick={e => e.stopPropagation()}
+        onTouchStart={e => { touch.current = [e.touches[0].clientX, e.touches[0].clientY]; }}
+        onTouchEnd={e => {
+          const t0 = touch.current; touch.current = null;
+          if (!t0 || sheet) return;
+          const dx = e.changedTouches[0].clientX - t0[0], dy = e.changedTouches[0].clientY - t0[1];
+          if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) swipe(dx);
+        }}
         role="dialog"
         aria-label={`${card.name} metrics`}
         style={{ background: "var(--bg-inset)", border: "1px solid var(--border-default)", borderRadius: "6px", width: "100%", maxWidth: "460px", padding: "20px 22px 24px", boxShadow: "0 12px 48px #000a" }}
@@ -10924,6 +11138,42 @@ const PlayerCardModal = ({ card, onClose }) => {
           </div>
         )}
 
+        {/* ⭐ THE PAGES (Oct 10 2026, his design). Tabs, left to right by how
+            often a reader needs them; swipe works too. A drill-down replaces the
+            pages with the full detail and a way back. Source order is NOT tab
+            order: each page is its own conditional block. */}
+        {sheet ? (
+          <button type="button" onClick={() => setSheet(null)} style={{
+            marginTop: "14px", background: "transparent", border: "1px solid var(--border-default)", borderRadius: "6px",
+            color: "var(--ui-accent)", fontFamily: "inherit", fontSize: "12px", cursor: "pointer", padding: "0 12px",
+          }}>{"\u2039"} Back to {CARD_PAGES.find(p => p.key === page)?.label}</button>
+        ) : (
+          <div role="tablist" aria-label="Player card pages" style={{ display: "flex", marginTop: "14px", borderBottom: "1px solid var(--border-default)" }}>
+            {CARD_PAGES.map(p => (
+              <button key={p.key} type="button" role="tab" aria-selected={page === p.key} onClick={() => setPage(p.key)} style={{
+                flex: 1, background: "transparent", border: "none", borderRadius: 0,
+                borderBottom: `2px solid ${page === p.key ? "var(--ui-accent)" : "transparent"}`,
+                color: page === p.key ? "var(--text-primary)" : "var(--text-muted)", fontWeight: page === p.key ? 700 : 500,
+                fontSize: "11px", letterSpacing: "0.04em", cursor: "pointer", fontFamily: "inherit", padding: 0,
+              }}>{p.label}</button>
+            ))}
+          </div>
+        )}
+
+        {!sheet && page === "points" && (
+          <div style={{ marginTop: "14px" }}>
+            {card.pointsChart ? (
+              <>
+                <CardPageTitle>Fantasy points · last {card.pointsChart.bars.length} games · {card.pointsChart.season}{card.pointsChart.partial ? "" : " (final)"}</CardPageTitle>
+                {card.pointsChart.headline && <CardHeadline>{card.pointsChart.headline}</CardHeadline>}
+                <CardBars bars={card.pointsChart.bars} line={card.pointsChart.expPg} />
+                <CardLegend items={[[GAME_BAND_COLOR.spike, "18+"], [GAME_BAND_COLOR.usable, "10+"], [GAME_BAND_COLOR.low, "5-10"], [GAME_BAND_COLOR.dud, "under 5"],
+                  ...(card.pointsChart.expPg != null ? [[null, "expected / gm", true]] : [])]} />
+                <CardFacts items={card.pointsChart.facts} />
+              </>
+            ) : (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>{card.gameLogReason || "No games on record yet."}</div>
+            )}
         {/* SEASON STAT LINE — the ordinary box score, at the top, because it is
             the one thing every reader already knows how to read. Everything
             else on this card is a rate, a share or a percentile, and a reader
@@ -10963,6 +11213,38 @@ const PlayerCardModal = ({ card, onClose }) => {
           </div>
         ))}
 
+            <CardDrill title="Full game log" sub="Every game, every stat, in Yahoo's columns" onClick={() => setSheet("log")} />
+          </div>
+        )}
+
+        {!sheet && page === "week" && (<>
+        {card.game && (
+          <div style={{ marginTop: "14px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "6px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "28px", letterSpacing: "0.03em" }}>{card.game.home ? card.game.opp : card.game.team}</span>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)", textAlign: "center" }}>
+                Week {card.game.week}
+                {card.game.kick && <><br />{new Date(card.game.kick).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}</>}
+              </span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "28px", letterSpacing: "0.03em" }}>{card.game.home ? card.game.team : card.game.opp}</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", marginTop: "10px", textAlign: "center" }}>
+              {[[card.game.fav && card.game.spread != null ? `${card.game.fav} -${card.game.spread}` : "\u2014", "Spread"],
+                [card.game.total ?? "\u2014", "Total"],
+                [card.game.tier || "\u2014", `${card.game.opp} vs ${card.pos}s`]].map(([v, l], i) => (
+                <div key={l}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", color: i === 2 ? (TIER_TONE[v] || "var(--text-primary)") : "var(--text-primary)" }}>{v}</div>
+                  <div style={{ fontSize: "8px", color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+            {card.game.outs.length > 0 && (
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "10px", lineHeight: 1.5 }}>
+                <span style={{ color: "var(--text-dim)" }}>{card.game.opp} defense out: </span>{card.game.outs.join(", ")}
+              </div>
+            )}
+          </div>
+        )}
         {/* THIS WEEK. The automatic news line (Oct 10 2026, his ask): status,
             last game and the game in front of him, all read from layers the
             weekly refresh rebuilds. Facts only, so it needs no writer and cannot
@@ -11010,20 +11292,6 @@ const PlayerCardModal = ({ card, onClose }) => {
           </div>
         )}
 
-        {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
-          <CardGroupHeader group="production" label="What he produced" hint="week by week, this season and last" />
-        )}
-
-        <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
-
-        {!card.reason && card.descriptive.length > 0 && (
-          <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three. Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. ⚠ In a FULL-PPR league the same player clears them more often, and unevenly by position — measured on 2025, spike rate rises about 26% at RB, 61% at WR and 76% at TE, and not at all at QB. Read these as half-PPR rates, not as a verdict on his ceiling in your format.">
-            {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
-          </CardSection>
-        )}
-
-        <OmittedNote items={card.omitted} group="production" />
-
         {/* NEWS SITS OUTSIDE THE no-data BRANCH ON PURPOSE. A rookie with no
             2025 role is precisely the player whose only useful information is
             what happened this month, and burying it behind "no 2025 data" would
@@ -11031,7 +11299,6 @@ const PlayerCardModal = ({ card, onClose }) => {
         <CardSection
           title="Recent news"
           accent={CARD_ACCENTS.news}
-          collapsible
           note={news.length
             ? `Dated notes only. Anything past ${NEWS_STALE_DAYS} days needs re-validating before it drives a pick.`
             : null}
@@ -11071,6 +11338,101 @@ const PlayerCardModal = ({ card, onClose }) => {
           ))}
         </CardSection>
 
+        </>)}
+
+        {!sheet && page === "usage" && (
+          <div style={{ marginTop: "14px" }}>
+            {card.usageChart ? (
+              <>
+                <CardPageTitle>{card.usageChart.title} · by week</CardPageTitle>
+                <CardHeadline>{card.usageChart.headline}</CardHeadline>
+                <CardBars bars={card.usageChart.bars} unit={card.usageChart.unit} />
+                <CardLegend items={[[USAGE_RANK_COLOR(80), `top 25% of ${card.usageChart.posPlural}`], [USAGE_RANK_COLOR(60), "above the middle"],
+                  [USAGE_RANK_COLOR(30), "below the middle"], [USAGE_RANK_COLOR(10), "bottom 25%"]]} />
+                {card.usageChart.facts.length > 0 && <CardFacts items={card.usageChart.facts} />}
+              </>
+            ) : (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                {card.reason || "No usage this season yet. It appears after his first game, with the weekly refresh."}
+              </div>
+            )}
+            <CardDrill title="Full breakdown" sub="Every usage number, ranked against his position" onClick={() => setSheet("usage")} />
+          </div>
+        )}
+
+        {!sheet && page === "profile" && (
+          <div style={{ marginTop: "14px" }}>
+            {card.shift && card.shift.rows.length > 0 && (
+              <div style={{ marginBottom: "14px" }}>
+                <CardPageTitle>{card.shift.priorSeason} {"\u2192"} this season</CardPageTitle>
+                {card.shift.rows.map(r => <ShiftRow key={r.key} row={r} />)}
+              </div>
+            )}
+            {card.arc && card.arc.band && (() => {
+              const lo = 21, hi = 37, at = x => `${((Math.min(hi, Math.max(lo, x)) - lo) / (hi - lo)) * 100}%`;
+              const bd = card.arc.band;
+              return (
+                <div style={{ marginBottom: "16px" }}>
+                  <CardPageTitle>Age · {card.pos} prime years shaded</CardPageTitle>
+                  <div style={{ position: "relative", height: "10px", background: "var(--bg-raised)", borderRadius: "5px", margin: "20px 0 4px" }}>
+                    <div style={{ position: "absolute", top: 0, bottom: 0, left: at(bd.rising), width: `calc(${at(bd.decline)} - ${at(bd.rising)})`, background: "var(--bg-elevated)", border: "1px solid var(--pos-bright)", borderRadius: "5px", opacity: 0.8 }} />
+                    <div style={{ position: "absolute", top: "-18px", left: at(card.arc.age), transform: "translateX(-50%)", fontFamily: "var(--font-display)", fontSize: "15px", textAlign: "center" }}>
+                      {card.arc.age}
+                      <div style={{ width: "2px", height: "16px", background: "var(--text-primary)", margin: "1px auto 0" }} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "var(--text-dim)" }}>
+                    <span>{lo}</span><span>prime {bd.rising}-{bd.decline}</span><span>{hi}</span>
+                  </div>
+                </div>
+              );
+            })()}
+            {card.availability && card.availability.bySeason.length > 0 && (
+              <div style={{ marginBottom: "14px" }}>
+                <CardPageTitle>Games played</CardPageTitle>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
+                  {card.availability.bySeason.slice(-3).map(x => (
+                    <div key={x.y} style={{ background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "6px", padding: "7px 8px" }}>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: "19px" }}>{x.gp}<span style={{ fontFamily: "inherit", fontSize: "11px", color: "var(--text-dim)" }}> /{x.of}</span></div>
+                      <div style={{ fontSize: "9px", color: "var(--text-dim)" }}>{x.y}</div>
+                      <div style={{ height: "4px", background: "var(--bg-raised)", borderRadius: "2px", marginTop: "5px", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${(x.gp / (x.of || 17)) * 100}%`, background: "var(--ui-accent)" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {(card.vacated || card.availability) && (
+              <CardFacts items={[
+                ...(card.vacated ? [[`${Math.round(card.vacated.pct)}%`, `${teamKey(card.vacated.team)} targets that left`]] : []),
+                ...(card.availability ? [[`${Math.round(card.availability.career * 100)}%`, "On the field, career"]] : []),
+              ]} />
+            )}
+            {!card.shift?.rows?.length && !card.arc && !card.availability && (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>No long-run record on file for this player yet.</div>
+            )}
+            <CardDrill title="Durability, efficiency, glossary" sub="On-field rate, age curve, line, coverage, what each term means" onClick={() => setSheet("more")} />
+          </div>
+        )}
+
+        {sheet === "log" && (<>
+        {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
+          <CardGroupHeader group="production" label="What he produced" hint="week by week, this season and last" />
+        )}
+
+        <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
+
+        {!card.reason && card.descriptive.length > 0 && (
+          <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three. Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. ⚠ In a FULL-PPR league the same player clears them more often, and unevenly by position — measured on 2025, spike rate rises about 26% at RB, 61% at WR and 76% at TE, and not at all at QB. Read these as half-PPR rates, not as a verdict on his ceiling in your format.">
+            {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
+          </CardSection>
+        )}
+
+        <OmittedNote items={card.omitted} group="production" />
+        </>)}
+
+        {sheet === "usage" && (<>
         {!card.reason && (
           <CardGroupHeader group="job" label="His job" hint="what the offense gives him" />
         )}
@@ -11339,6 +11701,8 @@ const PlayerCardModal = ({ card, onClose }) => {
 
           </>
         )}
+        </>)}
+        {sheet === "more" && (<>
 
         {(card.availability || card.availabilityReason || card.arc || card.vacated || card.oline) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />
@@ -11586,6 +11950,8 @@ const PlayerCardModal = ({ card, onClose }) => {
           </CardSection>
         )}
 
+
+        </>)}
 
         <div style={{ marginTop: "18px", paddingTop: "10px", borderTop: "1px solid var(--bg-raised)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.05em" }}>
           {card.curVintage ? `${card.curVintage} + ${card.vintage}` : card.vintage} · nflverse
@@ -14048,14 +14414,14 @@ Analyze this best ball roster. Return JSON only.`;
           }
         }
 
-        /* Landscape phone — scale down main app content only, not hero */
+        /* Landscape phone — SAME SIZE AS PORTRAIT, wider column. Until Oct 10
+           2026 this shrank the whole app to 62% (transform: scale(0.62)), which
+           took every 44px button down to 27px and every 12px label to 7px the
+           moment a phone turned sideways. His rule: dimensions stay
+           proportionate on any device. The layout already reflows by width, so
+           landscape only needs a readable column, never a smaller one. */
         @media (max-height: 500px) and (orientation: landscape) {
-          body { zoom: 1; }
-          .app-content {
-            transform: scale(0.62);
-            transform-origin: top left;
-            width: 161.3%;
-          }
+          .app-content { max-width: 760px; margin: 0 auto; }
         }
 
         @media (max-height: 500px) and (orientation: landscape) {
