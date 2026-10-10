@@ -10013,3 +10013,14 @@ and fast-forward `main`.** A plain `git push origin <branch>:main` is refused on
   the stat line and is not a column). Cross-checked Hampton W1-W4 against his Yahoo card: identical.
 - **Custom categories** (40-yd plays, 1st downs, pick-six, returns) are per-league in Yahoo and cannot be known
   without his league; the card shows the standard set. 1st downs is in the free weekly file if ever wanted.
+
+### Oct 10 2026: in-season pickups resolve (findPlayer step 6)
+**The gap:** every findPlayer step searched the ADP tables, so an undrafted player now starting (Jalon Daniels, TB's
+QB, on his roster) came back UNMATCHED and was left out of the grade. His Quitters roster graded 13 of 14.
+**Step 6 (`pickupFor`), redraft (`"yahoo"` format) only, runs after every other step misses:** an EXACT normalised
+name in the live Sleeper feed (`status_2026.json`), offensive skill position, on a team, and never a name in
+`_meta.ambiguous_off` (names two offensive players share; `build-status.py` now records them, 0 today). No spelling
+repair: "Jaylen Daniels" would otherwise become Jayden Daniels, a different QB. A pickup gets `adp: PICKUP_ADP`
+(260, past every draftable price, so no reach/value flag) and `pickup: true`. His roster now grades 14 of 14.
+Guard: `test-findplayer.mjs` step-6 section (7 checks; a sabotage letting best ball through exits 1). Fixture
+grades cannot move: every fixture player resolves in steps 1-5.

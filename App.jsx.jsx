@@ -5041,6 +5041,29 @@ const searchPlayers = (query, format = "standard", limit = 8) => {
   return out.slice(0, limit);
 };
 
+// === IN-SEASON PICKUPS (Oct 10 2026, his ask: "build the pickup lookup") ===
+// Every step of findPlayer searches the ADP tables, so a player nobody drafted
+// (Jalon Daniels, an undrafted rookie now TB's starting QB) came back UNMATCHED
+// and was left out of the grade. This is the LAST resort, redraft only: an EXACT
+// normalised-name hit in the live Sleeper roster feed, offensive skill position,
+// on a team, and never a name two offensive players share. No spelling repair
+// here: a misread name stays unmatched and visible rather than becoming a
+// different player. PICKUP_ADP sits past every draftable price, so no reach or
+// value flag fires on him (adpFlags ignores adp >= 200).
+const PICKUP_ADP = 260;
+const PICKUP_POS = new Set(["QB", "RB", "WR", "TE"]);
+const pickupFor = (name) => {
+  if (!STATUS_LIVE) return null;
+  const key = normalize(name);
+  const amb = new Set(STATUS_LAYER._meta?.ambiguous_off || []);
+  for (const k of [key, key.replace(SUFFIX_RE, "")]) {
+    if (!k || amb.has(k)) continue;
+    const st = STATUS_LAYER.players[k];
+    if (st && st.side === "off" && st.team && PICKUP_POS.has(st.pos)) return { key: k, pos: st.pos, team: st.team };
+  }
+  return null;
+};
+
 const findPlayer = (name, format = "standard") => {
   const norm = normalize(name);
   if (!norm) return null;
@@ -5181,6 +5204,13 @@ const findPlayer = (name, format = "standard") => {
         return mk(hits[0].key, hits[0].entry, { repairedFrom: qLast });
       }
     }
+  }
+
+  // 6. IN-SEASON PICKUP (redraft only; see pickupFor). Best ball rosters lock at
+  // the draft, so a player outside the ADP table cannot be on one.
+  if (format === "yahoo") {
+    const pk = pickupFor(name);
+    if (pk) return mk(pk.key, { adp: PICKUP_ADP, pos: pk.pos, team: pk.team }, { pickup: true });
   }
 
   return null;

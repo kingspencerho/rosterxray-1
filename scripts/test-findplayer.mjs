@@ -107,6 +107,25 @@ for (const fmt of ["yahoo","superflex"]) {
   }
 }
 console.log(`  position flips: ${flips}`);
+
+// ---- STEP 6: IN-SEASON PICKUPS (Oct 10 2026) ----
+// An undrafted player now starting (Jalon Daniels, TB QB) was UNMATCHED and left
+// out of the grade. Step 6 finds him in the live Sleeper feed, redraft only, by
+// EXACT name. Each line below is a rule a loosened version would break.
+console.log("\n=== STEP 6: IN-SEASON PICKUPS ===");
+const pk = (cond, label) => { if (!cond) fail++; console.log(`  ${cond ? "ok  " : "FAIL"} ${label}`); };
+const jd = e.findPlayer("Jalon Daniels", "yahoo");
+pk(!!jd && jd.pickup === true && jd.pos === "QB" && jd.team === "TB", "an undrafted starter resolves in redraft, as a pickup, with his live team");
+pk(!!jd && jd.adp >= 200, "a pickup carries an ADP past every draftable price, so no reach/value flag fires");
+pk(e.findPlayer("Jalon Daniels", "standard") === null, "best ball never reaches step 6 (rosters lock at the draft)");
+pk(e.findPlayer("Jaylen Daniels", "yahoo") === null, "a misread name stays unmatched; step 6 does no spelling repair");
+pk(e.findPlayer("Justin Jefferson", "yahoo")?.pickup !== true, "a drafted player still resolves from the ADP table, not the feed");
+{
+  const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8");
+  const body = src.slice(src.indexOf("const pickupFor = "), src.indexOf("const findPlayer = "));
+  pk(/ambiguous_off/.test(body) && /continue/.test(body), "a name two offensive players share is refused, never guessed");
+  pk(/st\.side === "off"/.test(body) && /PICKUP_POS\.has\(st\.pos\)/.test(body), "only offensive skill positions on a team qualify");
+}
 const failed = fail !== 0 || flips !== 0;
 console.log(`\n${failed ? "FAILURES: "+fail+" flips: "+flips : "ALL CHECKS PASSED"}`);
 // ⚠️ THIS GUARD COULD NOT FAIL UNTIL Sep 2 2026, AND ITS OWN HEADER SAID IT COULD.

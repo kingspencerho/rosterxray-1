@@ -145,6 +145,10 @@ def main():
     built_at = datetime.now(timezone.utc)
     players = {}
     dropped_no_name = 0
+    # A NAME TWO OFFENSIVE PLAYERS SHARE is recorded, because the dict below keeps
+    # only the last one silently. The app's pickup lookup refuses these names: a
+    # wrong player is worse than a missing one (Oct 10 2026).
+    seen_off, ambiguous = {}, set()
 
     for p in raw.values():
         if not isinstance(p, dict):
@@ -156,6 +160,10 @@ def main():
             # R11 - a filtered name must never be silent. Counted into _meta.
             dropped_no_name += 1
             continue
+        if p.get("position") in OFF_POSITIONS:
+            if key in seen_off and seen_off[key] != (p.get("position"), p.get("team")):
+                ambiguous.add(key)
+            seen_off[key] = (p.get("position"), p.get("team"))
         players[key] = {
             "pos": p.get("position"),
             "side": "off" if p.get("position") in OFF_POSITIONS else "def",
@@ -197,7 +205,8 @@ def main():
         # every week. A generated file is not a place to keep anything by hand.
         "renders": True,
         "renders_reason": "Wired Sep 8 2026 after the watch period. TWO REVIEWED CONSUMERS AND NO OTHERS: buildBreakoutBoard reads it for depthOpening (a teammate at the same depth-chart slot, ahead of him, carrying a hard status) and buildPlayerCard renders an availability row. Guard 26 holds the allowlist and still asserts analyzeRoster and analyzeRedraft never read it, which is the assertion that protects the grades.",
-        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard"],
+        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard", "findPlayer/pickupFor"],
+        "ambiguous_off": sorted(ambiguous),
         "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
         "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",
         "join_key": (
