@@ -9992,3 +9992,9 @@ answers "not in this league (Error #152)", and a Yahoo web search found nothing.
 (help.yahoo.com SLN6489): 10 teams, half PPR, 4-pt pass TD, -1 INT, 1 flex, 6 bench, 2 IR, playoffs W16-17.
 ESPN's (espn.com story 19540805): full PPR, 1 flex, 7 bench, IR optional. The app's default (`yahoo_std`) already
 matches on everything but IR (1 vs 2) and playoff start.
+
+### ⚠️ MAIN NOW RECEIVES COMMITS FROM THE REFRESH BOT (since Oct 10 2026)
+The weekly workflow squash-merges its own data PR into `main`, so `main` is no longer always an ancestor of this
+branch. **Before deploying, `git fetch origin && git merge origin/main`, re-run `npm test`, then push the branch
+and fast-forward `main`.** A plain `git push origin <branch>:main` is refused once the bot has merged a refresh
+(first seen Oct 10, PR #100), which is the correct behaviour, not a permissions problem.
