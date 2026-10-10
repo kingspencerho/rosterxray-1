@@ -397,7 +397,13 @@ def main():
         return (round(sd, 4), "derived (1 SD of this run's deltas)",
                 n, round(ds[n // 2], 4), round(sd, 4))
 
-    def label(key, threshold):
+    # CENTRED ON THE RUN'S OWN MEDIAN, not on zero (Oct 10 2026). The first
+    # live carry-share run had a median delta of +0.036: lead backs gained
+    # share as teammates got hurt, so zero-referenced labels called 13 backs
+    # rising and 6 falling. "Rising" means moved more than most backs moved,
+    # which is the sentence the threshold comment above already promises.
+    # Target share's median is 0.0, so that side is unchanged.
+    def label(key, threshold, centre=0.0):
         c = {"rising": 0, "falling": 0, "stable": 0, "insufficient": 0}
         for v in players.values():
             t = v.get(key)
@@ -408,9 +414,9 @@ def main():
                 # NOT "stable". Stable means measured and flat; this means not
                 # yet measurable, and a consumer must be able to say which.
                 t["trend"] = "insufficient"
-            elif d >= threshold:
+            elif d - centre >= threshold:
                 t["trend"] = "rising"
-            elif d <= -threshold:
+            elif d - centre <= -threshold:
                 t["trend"] = "falling"
             else:
                 t["trend"] = "stable"
@@ -426,7 +432,8 @@ def main():
             "min_window_gp": MIN_WINDOW_GP, "last_n": LAST_N,
             "split_mode": ("calendar" if weeks_covered >= 18 else "halves"),
             "delta_n": dn, "delta_median": dmed, "delta_stdev": dsd,
-            "counts": label(key, thr),
+            "centre": dmed or 0.0,
+            "counts": label(key, thr, dmed or 0.0),
         }
 
     # ---- vs the prior season ------------------------------------------

@@ -166,8 +166,15 @@ if ((vol._meta.weeks_covered || 0) === 0) {
 } else {
   for (const [key, m] of Object.entries(tMeta)) {
     if (m.threshold == null) continue;
-    ok(`${key}: delta distribution is centred`, Math.abs(m.delta_median) <= 0.03,
-      `median ${m.delta_median}`);
+    // Oct 10 2026: the first live carry-share run had a median delta of +0.036
+    // (lead backs gained share as teammates got hurt). Labels are now measured
+    // from the run's own median, so league-wide drift cannot tilt them. The
+    // property is that the label centre IS the median, not that the median is 0.
+    ok(`${key}: labels are centred on the run's median`, m.centre === (m.delta_median ?? 0),
+      `centre ${m.centre} vs median ${m.delta_median}`);
+    ok(`${key}: centring keeps the tails balanced`,
+      Math.abs(m.counts.rising - m.counts.falling) <= Math.max(3, 0.35 * (m.counts.rising + m.counts.falling)),
+      `${m.counts.rising} rising / ${m.counts.falling} falling`);
     ok(`${key}: threshold is ~1 SD`, Math.abs(m.threshold - m.delta_stdev) < 1e-6);
     const flagged = m.counts.rising + m.counts.falling;
     const pool = flagged + m.counts.stable;
@@ -181,8 +188,9 @@ if ((vol._meta.weeks_covered || 0) === 0) {
       const t = p[key];
       if (!t) continue;
       const thr = tMeta[key]?.threshold;
+      const c = tMeta[key]?.centre ?? 0;
       const want = t.delta == null || thr == null ? "insufficient"
-        : t.delta >= thr ? "rising" : t.delta <= -thr ? "falling" : "stable";
+        : t.delta - c >= thr ? "rising" : t.delta - c <= -thr ? "falling" : "stable";
       checked++;
       if (t.trend !== want) { bad++; if (bad < 4) console.log(`      ${name}.${key}: ${t.trend} but delta ${t.delta} vs ${thr}`); }
     }

@@ -9911,3 +9911,31 @@ rows: a sabotage restoring the bug fails with *"36 of 36 rows flagged a note tha
 - **ADP:** the FFC redraft source is dead in season (thin samples; 268 table names absent). Nothing applied.
 - **`snap_trajectory_2026` has 0 players BY DESIGN:** `MIN_WINDOW_GP = 3` needs 3 games in each window, so
   it cannot fill until about Week 6. It is a gate, not a lookup failure.
+
+## Week 5 refresh, Oct 10 2026: data, 106 player notes, and why the live site was stuck at Week 1
+
+**Data:** `refresh-inseason.sh 2026`, all nine steps (Weeks 1-4 plus the Week 5 Thursday game; Week 5 lines).
+**Notes:** 106 `RECENT_NEWS` entries written or replaced from a four-agent sweep of all 32 teams, every fact
+dated Sep 28 - Oct 10 2026 with a URL (digest with sources: the private repo's `nfl-news-ledger-2026.md`).
+Eleven IR notes carry "Status confirmed Oct 10 2026" so the card ages them from the confirmation, not the placement.
+**Verdicts moved only where availability or measured role made them false:** Achane fade (torn ACL), Kaytron Allen
+fade (waived Oct 8), Etienne / Jadarian Price / Pittman hold-falling (multi-week IR or out), Hampton hold-falling
+(carry share 65% -> 41%, a three-way split under McDaniel). `report-stale-news`: 0 stale players, 3 same-week status rows.
+
+### ⭐ The trend labels are centred on the run's median (build-volume-current.py, guard 29)
+The first live carry-share run had a **median delta of +0.036** (n=61): lead backs gained share as teammates got hurt,
+so zero-referenced labels read 13 rising / 6 falling. Labels are now `delta - median` against the 1 SD threshold,
+which is what the threshold comment already promised ("moved more than most players moved"). Carry side: 8 / 8.
+Target share's median is 0.0, so that side did not move. `_meta.trend.*.centre` records the centre; guard 29 now
+asserts centre == median and balanced tails, and a sabotage (centre forced to 0) fails both checks.
+
+### ⛔ Why rosterxray.com showed game logs through Week 1 only
+1. **The weekly workflow has failed every scheduled run since Sep 8** (8 of 8, step "Run the guards", read from the
+   public Actions API). Reproduced on `origin/main` with fresh data: `test-stale-depth-claims` fires because main's
+   prose notes age past the calendar, and now guard 29's old centring check. **A guard about PROSE freshness blocks
+   the DATA refresh**, so the data stops the week nobody re-sources notes on main. Nothing notifies anyone.
+2. **The one successful run (Sep 6) opened PR #98, which is still open.** A PR-based refresh needs a merge.
+3. **Nothing on this branch has reached `main` since PR #99 (Sep 6).** The Week 2, 3 and 4 refreshes were committed
+   here and never merged, so production serves the Sep 15 (Week 1) data.
+Windows note: `python3` is the Store alias on the desktop; guards that `execFileSync("python3")` fail there. A venv
+with `python3.exe` copied from its `python.exe`, first on PATH, runs the whole chain green.
