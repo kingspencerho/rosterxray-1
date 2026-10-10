@@ -10047,3 +10047,10 @@ the metrics that explain it beside it. **Proposed, awaiting his yes:** tabs THIS
 line, weather, status, news, opposing defense out) · POINTS (bars coloured by the spike/usable/dud bands, a dashed
 expected-points outline per bar) · USAGE (target share for WR/TE, carry share for RB, rush attempts for QB) ·
 PROFILE. ⚠️ Weather is NEW data: the app knows roofs, not forecasts.
+**Round three (v3, same link), his notes applied:** weather DROPPED (his call, too much for the value); the
+scoreboard's third slot is the existing matchup tier for his position. **Pickups is NOT a tab — his reasoning: the
+app cannot see a public user's waiver wire, so reasoned suggestions do not earn the second-best slot.** Proposed
+tabs now THIS WEEK · PLAYERS (search + a new head-to-head Compare of two of your players) · MOVERS (league-wide
+measured risers/fallers; waiver suggestions shrink to a labelled section at its bottom) · TEAM. One drill-down button
+style for Full game log / Full breakdown / Efficiency. Usage bars coloured by position percentile (same four colours
+as Points). Profile filled with 2025-vs-2026 rows, an age bar against the position's peak years, games played.
