@@ -2,7 +2,7 @@
  "_meta": {
   "season": 2026,
   "week": 5,
-  "fetched_at": "2026-10-10T10:38:48Z",
+  "fetched_at": "2026-10-10T12:09:44Z",
   "scoring": "half_ppr",
   "games_covered": 15,
   "games_priced": 14,
@@ -45,8 +45,40 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "TB": [],
-    "DAL": []
+    "TB": [
+     {
+      "name": "Antoine Winfield Jr.",
+      "pos": "S",
+      "status": "Out",
+      "part": "Ribs"
+     },
+     {
+      "name": "Benjamin Morrison",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Quadriceps"
+     },
+     {
+      "name": "SirVocea Dennis",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Ankle"
+     }
+    ],
+    "DAL": [
+     {
+      "name": "DeMarvion Overshown",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Cobie Durant",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ]
    }
   },
   {
@@ -65,8 +97,40 @@
    "blowout": true,
    "shootout": false,
    "def_out": {
-    "PHI": [],
-    "JAX": []
+    "PHI": [
+     {
+      "name": "Marcus Epps",
+      "pos": "S",
+      "status": "Out",
+      "part": "Groin"
+     }
+    ],
+    "JAX": [
+     {
+      "name": "Eric Murray",
+      "pos": "S",
+      "status": "Doubtful",
+      "part": "Concussion"
+     },
+     {
+      "name": "Christian Braswell",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Knee"
+     },
+     {
+      "name": "Caleb Ransaw",
+      "pos": "S",
+      "status": "Injured Reserve",
+      "part": "Knee"
+     },
+     {
+      "name": "B.J. Green II",
+      "pos": "DE",
+      "status": "Injured Reserve",
+      "part": "Elbow"
+     }
+    ]
    }
   },
   {
@@ -85,7 +149,26 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "CHI": [],
+    "CHI": [
+     {
+      "name": "Anthony Johnson Jr.",
+      "pos": "S",
+      "status": "Out",
+      "part": "Undisclosed"
+     },
+     {
+      "name": "Keyshaun Elliott",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Quadriceps"
+     },
+     {
+      "name": "Kyler Gordon",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Calf"
+     }
+    ],
     "GB": []
    }
   },
@@ -105,8 +188,34 @@
    "blowout": true,
    "shootout": false,
    "def_out": {
-    "HOU": [],
-    "TEN": []
+    "HOU": [
+     {
+      "name": "M.J. Stewart",
+      "pos": "S",
+      "status": "Out",
+      "part": "Knee"
+     },
+     {
+      "name": "Kayden McDonald",
+      "pos": "DT",
+      "status": "Injured Reserve",
+      "part": "Ankle"
+     }
+    ],
+    "TEN": [
+     {
+      "name": "Amani Hooker",
+      "pos": "S",
+      "status": "Out",
+      "part": "Concussion"
+     },
+     {
+      "name": "Joshua Williams",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Pectoral"
+     }
+    ]
    }
   },
   {
@@ -125,8 +234,28 @@
    "blowout": true,
    "shootout": false,
    "def_out": {
-    "CIN": [],
-    "MIA": []
+    "CIN": [
+     {
+      "name": "Kyle Dugger",
+      "pos": "S",
+      "status": "Out",
+      "part": "Quadriceps"
+     }
+    ],
+    "MIA": [
+     {
+      "name": "Robert Beal Jr.",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Storm Duck",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Knee"
+     }
+    ]
    }
   },
   {
@@ -146,7 +275,20 @@
    "shootout": false,
    "def_out": {
     "LV": [],
-    "NE": []
+    "NE": [
+     {
+      "name": "Karon Prunty",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Channing Canada",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ]
    }
   },
   {
@@ -165,8 +307,28 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "MIN": [],
-    "NO": []
+    "MIN": [
+     {
+      "name": "Charles Demmings",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ],
+    "NO": [
+     {
+      "name": "Anfernee Jennings",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Knee"
+     },
+     {
+      "name": "Kaden Elliss",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Calf"
+     }
+    ]
    }
   },
   {
@@ -185,8 +347,22 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "CLE": [],
-    "NYJ": []
+    "CLE": [
+     {
+      "name": "Kalia Davis",
+      "pos": "DT",
+      "status": "Injured Reserve",
+      "part": "Quadriceps"
+     }
+    ],
+    "NYJ": [
+     {
+      "name": "Kiko Mauigoa",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Quadriceps"
+     }
+    ]
    }
   },
   {
@@ -205,8 +381,28 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "IND": [],
-    "PIT": []
+    "IND": [
+     {
+      "name": "Jaylon Carlies",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Ribs"
+     }
+    ],
+    "PIT": [
+     {
+      "name": "Jamel Dean",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
+      "name": "DeShon Elliott",
+      "pos": "S",
+      "status": "Injured Reserve",
+      "part": "Knee"
+     }
+    ]
    }
   },
   {
@@ -225,8 +421,58 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "NYG": [],
-    "WSH": []
+    "NYG": [
+     {
+      "name": "Jason Pinnock",
+      "pos": "S",
+      "status": "Out",
+      "part": "Concussion"
+     },
+     {
+      "name": "Chauncey Golston",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Neck"
+     },
+     {
+      "name": "Brian Burns",
+      "pos": "LB",
+      "status": "Injured Reserve",
+      "part": "Knee - ACL"
+     }
+    ],
+    "WSH": [
+     {
+      "name": "Tyler Owens",
+      "pos": "S",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Charles Omenihu",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Groin"
+     },
+     {
+      "name": "Percy Butler",
+      "pos": "S",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Trey Amos",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Ankle"
+     },
+     {
+      "name": "Nick Cross",
+      "pos": "S",
+      "status": "Out",
+      "part": "Illness"
+     }
+    ]
    }
   },
   {
@@ -245,7 +491,26 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "DEN": [],
+    "DEN": [
+     {
+      "name": "Pat Surtain II",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
+      "name": "Riley Moss",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Ribs"
+     },
+     {
+      "name": "Jonathon Cooper",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Personal"
+     }
+    ],
     "LAC": []
    }
   },
@@ -265,8 +530,28 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "DET": [],
-    "ARI": []
+    "DET": [
+     {
+      "name": "Rock Ya-Sin",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Brian Branch",
+      "pos": "S",
+      "status": "Out",
+      "part": "Achilles"
+     }
+    ],
+    "ARI": [
+     {
+      "name": "Andrew Wingard",
+      "pos": "S",
+      "status": "Out",
+      "part": "Knee"
+     }
+    ]
    }
   },
   {
@@ -285,8 +570,46 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "SF": [],
-    "SEA": []
+    "SF": [
+     {
+      "name": "James Thompson Jr.",
+      "pos": "DT",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
+      "name": "Mykel Williams",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Knee - ACL"
+     },
+     {
+      "name": "Nick Bosa",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Calf"
+     },
+     {
+      "name": "Marques Sigle",
+      "pos": "S",
+      "status": "Out",
+      "part": "Ankle"
+     }
+    ],
+    "SEA": [
+     {
+      "name": "Chazz Surratt",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Calf"
+     },
+     {
+      "name": "Julian Neal",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ]
    }
   },
   {
@@ -305,8 +628,22 @@
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "BAL": [],
-    "ATL": []
+    "BAL": [
+     {
+      "name": "Trey Hendrickson",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Finger"
+     }
+    ],
+    "ATL": [
+     {
+      "name": "Yasir Abdullah",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ]
    }
   },
   {
@@ -332,23 +669,23 @@
  ],
  "projections": {
   "james cook": {
-   "pts": 14.79,
+   "pts": 14.73,
    "team": "BUF",
    "opp": "LAR",
    "pos": "RB",
    "rec": 1.6,
    "rec_yd": 11.2,
    "tgt": 2.4,
-   "rush_yd": 88.0,
-   "rush_att": 15.6
+   "rush_yd": 87.9,
+   "rush_att": 15.5
   },
   "dawson knox": {
-   "pts": 2.61,
+   "pts": 2.6,
    "team": "BUF",
    "opp": "LAR",
    "pos": "TE",
    "rec": 1.2,
-   "rec_yd": 11.5,
+   "rec_yd": 11.4,
    "tgt": 1.7
   },
   "max klare": {
@@ -361,7 +698,7 @@
    "tgt": 0.1
   },
   "khalil shakir": {
-   "pts": 7.81,
+   "pts": 7.79,
    "team": "BUF",
    "opp": "LAR",
    "pos": "WR",
@@ -383,39 +720,39 @@
    "rush_att": 0.1
   },
   "dalton kincaid": {
-   "pts": 8.36,
+   "pts": 8.34,
    "team": "BUF",
    "opp": "LAR",
    "pos": "TE",
    "rec": 3.7,
    "rec_yd": 50.8,
-   "tgt": 5.2
+   "tgt": 5.1
   },
   "colby parkinson": {
-   "pts": 3.55,
+   "pts": 3.58,
    "team": "LAR",
    "opp": "BUF",
    "pos": "TE",
    "rec": 1.6,
-   "rec_yd": 15.9,
+   "rec_yd": 16.1,
    "tgt": 2.3
   },
   "josh allen": {
-   "pts": 22.02,
+   "pts": 21.9,
    "team": "BUF",
    "opp": "LAR",
    "pos": "QB",
-   "rush_yd": 37.3,
+   "rush_yd": 37.2,
    "rush_att": 7.5,
-   "pass_yd": 236.6
+   "pass_yd": 236.4
   },
   "davante adams": {
-   "pts": 13.33,
+   "pts": 13.42,
    "team": "LAR",
    "opp": "BUF",
    "pos": "WR",
    "rec": 4.3,
-   "rec_yd": 78.3,
+   "rec_yd": 79.0,
    "tgt": 8.4
   },
   "skyler bell": {
@@ -430,12 +767,12 @@
    "rush_att": 0.0
   },
   "joshua palmer": {
-   "pts": 4.07,
+   "pts": 4.06,
    "team": "BUF",
    "opp": "LAR",
    "pos": "WR",
    "rec": 1.9,
-   "rec_yd": 25.3,
+   "rec_yd": 25.2,
    "tgt": 3.2
   },
   "tutu atwell": {
@@ -450,7 +787,7 @@
    "rush_att": 0.0
   },
   "ty johnson": {
-   "pts": 4.3,
+   "pts": 4.28,
    "team": "BUF",
    "opp": "LAR",
    "pos": "RB",
@@ -481,7 +818,7 @@
    "tgt": 0.5
   },
   "ray davis": {
-   "pts": 0.88,
+   "pts": 0.87,
    "team": "BUF",
    "opp": "LAR",
    "pos": "RB",
@@ -492,36 +829,36 @@
    "rush_att": 1.1
   },
   "kyren williams": {
-   "pts": 17.26,
+   "pts": 17.43,
    "team": "LAR",
    "opp": "BUF",
    "pos": "RB",
    "rec": 2.9,
-   "rec_yd": 20.4,
+   "rec_yd": 20.6,
    "tgt": 3.7,
-   "rush_yd": 79.9,
-   "rush_att": 15.0
+   "rush_yd": 80.8,
+   "rush_att": 15.1
   },
   "tyler higbee": {
-   "pts": 7.37,
+   "pts": 7.42,
    "team": "LAR",
    "opp": "BUF",
    "pos": "TE",
    "rec": 3.5,
-   "rec_yd": 34.5,
+   "rec_yd": 34.8,
    "tgt": 4.8
   },
   "konata mumpfield": {
-   "pts": 1.57,
+   "pts": 1.58,
    "team": "LAR",
    "opp": "BUF",
    "pos": "WR",
    "rec": 0.6,
-   "rec_yd": 8.0,
+   "rec_yd": 8.1,
    "tgt": 1.4
   },
   "keon coleman": {
-   "pts": 7.98,
+   "pts": 7.96,
    "team": "BUF",
    "opp": "LAR",
    "pos": "WR",
@@ -532,49 +869,49 @@
    "rush_att": 0.0
   },
   "blake corum": {
-   "pts": 6.88,
+   "pts": 6.95,
    "team": "LAR",
    "opp": "BUF",
    "pos": "RB",
    "rec": 0.6,
    "rec_yd": 4.0,
    "tgt": 0.9,
-   "rush_yd": 43.2,
+   "rush_yd": 43.7,
    "rush_att": 8.5
   },
   "puka nacua": {
-   "pts": 17.37,
+   "pts": 17.49,
    "team": "LAR",
    "opp": "BUF",
    "pos": "WR",
    "rec": 6.5,
-   "rec_yd": 96.7,
+   "rec_yd": 97.5,
    "tgt": 10.1,
-   "rush_yd": 2.7,
+   "rush_yd": 2.8,
    "rush_att": 0.4
   },
   "dj moore": {
-   "pts": 8.2,
+   "pts": 8.17,
    "team": "BUF",
    "opp": "LAR",
    "pos": "WR",
    "rec": 2.8,
    "rec_yd": 44.0,
-   "tgt": 5.2,
+   "tgt": 5.1,
    "rush_yd": 1.6,
    "rush_att": 0.3
   },
   "matthew stafford": {
-   "pts": 18.49,
+   "pts": 18.66,
    "team": "LAR",
    "opp": "BUF",
    "pos": "QB",
-   "rush_yd": 5.1,
+   "rush_yd": 5.2,
    "rush_att": 1.5,
-   "pass_yd": 260.3
+   "pass_yd": 262.5
   },
   "jordan whittington": {
-   "pts": 0.96,
+   "pts": 0.97,
    "team": "LAR",
    "opp": "BUF",
    "pos": "WR",
@@ -590,16 +927,16 @@
    "opp": "BUF",
    "pos": "TE",
    "rec": 0.4,
-   "rec_yd": 4.2,
+   "rec_yd": 4.3,
    "tgt": 0.7
   },
   "dontayvion wicks": {
-   "pts": 7.5,
+   "pts": 7.46,
    "team": "PHI",
    "opp": "JAX",
    "pos": "WR",
    "rec": 3.3,
-   "rec_yd": 44.8,
+   "rec_yd": 44.7,
    "tgt": 5.3,
    "rush_yd": 0.2,
    "rush_att": 0.0
@@ -932,7 +1269,7 @@
    "rush_att": 0.1
   },
   "nate boerkircher": {
-   "pts": 1.06,
+   "pts": 1.05,
    "team": "JAX",
    "opp": "PHI",
    "pos": "TE",
@@ -972,7 +1309,7 @@
    "rush_att": 0.1
   },
   "travis hunter": {
-   "pts": 0.81,
+   "pts": 0.8,
    "team": "JAX",
    "opp": "PHI",
    "pos": "DB",
@@ -1058,14 +1395,14 @@
    "rush_att": 0.1
   },
   "jaydon blue": {
-   "pts": 1.42,
+   "pts": 1.41,
    "team": "PHI",
    "opp": "JAX",
    "pos": "RB",
    "rec": 0.2,
    "rec_yd": 1.6,
    "tgt": 0.3,
-   "rush_yd": 6.9,
+   "rush_yd": 7.0,
    "rush_att": 2.1
   },
   "treyton welch": {
@@ -1138,7 +1475,7 @@
    "pass_yd": 231.4
   },
   "emanuel wilson": {
-   "pts": 11.61,
+   "pts": 11.62,
    "team": "SEA",
    "opp": "SF",
    "pos": "RB",
@@ -1227,12 +1564,12 @@
    "tgt": 6.1
   },
   "dameon pierce": {
-   "pts": 3.28,
+   "pts": 3.27,
    "team": "PHI",
    "opp": "JAX",
    "pos": "RB",
    "rec": 0.7,
-   "rec_yd": 4.3,
+   "rec_yd": 4.2,
    "tgt": 0.8,
    "rush_yd": 17.7,
    "rush_att": 4.8
@@ -1258,12 +1595,12 @@
    "rush_att": 0.1
   },
   "elijah moore": {
-   "pts": 1.86,
+   "pts": 1.85,
    "team": "PHI",
    "opp": "JAX",
    "pos": "WR",
    "rec": 1.0,
-   "rec_yd": 10.7,
+   "rec_yd": 10.6,
    "tgt": 1.7,
    "rush_yd": 0.2,
    "rush_att": 0.1
@@ -1349,12 +1686,12 @@
    "tgt": 0.9
   },
   "dallas goedert": {
-   "pts": 8.05,
+   "pts": 7.99,
    "team": "PHI",
    "opp": "JAX",
    "pos": "TE",
    "rec": 3.1,
-   "rec_yd": 36.8,
+   "rec_yd": 36.7,
    "tgt": 4.2
   },
   "sam darnold": {
@@ -1401,7 +1738,7 @@
    "opp": "SEA",
    "pos": "WR",
    "rec": 4.2,
-   "rec_yd": 64.3,
+   "rec_yd": 64.2,
    "tgt": 7.3
   },
   "max bredeson": {
@@ -1416,7 +1753,7 @@
    "rush_att": 0.0
   },
   "josh cameron": {
-   "pts": 2.86,
+   "pts": 2.84,
    "team": "JAX",
    "opp": "PHI",
    "pos": "WR",
@@ -1427,7 +1764,7 @@
    "rush_att": 0.2
   },
   "zach ertz": {
-   "pts": 1.14,
+   "pts": 1.13,
    "team": "PHI",
    "opp": "JAX",
    "pos": "TE",
@@ -1544,14 +1881,14 @@
    "rush_att": 11.9
   },
   "bhayshul tuten": {
-   "pts": 11.84,
+   "pts": 11.8,
    "team": "JAX",
    "opp": "PHI",
    "pos": "RB",
    "rec": 1.6,
-   "rec_yd": 12.5,
+   "rec_yd": 12.4,
    "tgt": 2.0,
-   "rush_yd": 59.1,
+   "rush_yd": 59.2,
    "rush_att": 15.0
   },
   "colson yankoff": {
@@ -1608,14 +1945,14 @@
    "rush_att": 0.1
   },
   "will shipley": {
-   "pts": 9.07,
+   "pts": 9.04,
    "team": "PHI",
    "opp": "JAX",
    "pos": "RB",
    "rec": 2.9,
    "rec_yd": 19.8,
    "tgt": 3.6,
-   "rush_yd": 37.4,
+   "rush_yd": 37.5,
    "rush_att": 13.9
   },
   "rasheen ali": {
@@ -1648,15 +1985,15 @@
    "tgt": 0.2
   },
   "chris rodriguez": {
-   "pts": 5.19,
+   "pts": 5.18,
    "team": "JAX",
    "opp": "PHI",
    "pos": "RB",
    "rec": 0.5,
    "rec_yd": 4.1,
    "tgt": 0.6,
-   "rush_yd": 25.0,
-   "rush_att": 6.3
+   "rush_yd": 25.1,
+   "rush_att": 6.4
   },
   "cameron latu": {
    "pts": 0.35,
@@ -1727,7 +2064,7 @@
    "pos": "QB",
    "rush_yd": 17.4,
    "rush_att": 3.8,
-   "pass_yd": 239.1
+   "pass_yd": 239.0
   },
   "rachaad white": {
    "pts": 6.22,
@@ -1821,13 +2158,13 @@
    "pass_yd": 277.4
   },
   "jakobi meyers": {
-   "pts": 7.12,
+   "pts": 7.09,
    "team": "JAX",
    "opp": "PHI",
    "pos": "WR",
    "rec": 3.3,
-   "rec_yd": 40.4,
-   "tgt": 5.0,
+   "rec_yd": 40.3,
+   "tgt": 4.9,
    "rush_yd": 1.2,
    "rush_att": 0.3
   },
@@ -1974,12 +2311,12 @@
    "rush_att": 0.3
   },
   "brian thomas": {
-   "pts": 5.63,
+   "pts": 5.61,
    "team": "JAX",
    "opp": "PHI",
    "pos": "WR",
    "rec": 2.4,
-   "rec_yd": 33.6,
+   "rec_yd": 33.5,
    "tgt": 4.3,
    "rush_yd": 1.1,
    "rush_att": 0.2
@@ -2076,13 +2413,13 @@
    "pass_yd": 225.4
   },
   "parker washington": {
-   "pts": 11.78,
+   "pts": 11.72,
    "team": "JAX",
    "opp": "PHI",
    "pos": "WR",
-   "rec": 4.5,
-   "rec_yd": 68.1,
-   "tgt": 7.4,
+   "rec": 4.4,
+   "rec_yd": 67.9,
+   "tgt": 7.3,
    "rush_yd": 1.4,
    "rush_att": 0.5
   },
@@ -2238,13 +2575,13 @@
    "rush_att": 0.9
   },
   "jalen hurts": {
-   "pts": 15.13,
+   "pts": 15.02,
    "team": "PHI",
    "opp": "JAX",
    "pos": "QB",
    "rush_yd": 24.5,
    "rush_att": 5.8,
-   "pass_yd": 201.9
+   "pass_yd": 201.4
   },
   "jonathan taylor": {
    "pts": 17.59,
@@ -2398,12 +2735,12 @@
    "tgt": 0.8
   },
   "makai lemon": {
-   "pts": 5.48,
+   "pts": 5.46,
    "team": "PHI",
    "opp": "JAX",
    "pos": "WR",
    "rec": 3.5,
-   "rec_yd": 28.6,
+   "rec_yd": 28.5,
    "tgt": 4.8,
    "rush_yd": 0.3,
    "rush_att": 0.1
@@ -2553,7 +2890,7 @@
    "opp": "SF",
    "pos": "WR",
    "rec": 6.7,
-   "rec_yd": 98.0,
+   "rec_yd": 97.9,
    "tgt": 9.6,
    "rush_yd": 2.0,
    "rush_att": 0.5
@@ -2568,7 +2905,7 @@
    "tgt": 3.1
   },
   "britain covey": {
-   "pts": 0.43,
+   "pts": 0.42,
    "team": "PHI",
    "opp": "JAX",
    "pos": "WR",
@@ -2875,7 +3212,7 @@
    "tgt": 4.3
   },
   "elijah arroyo": {
-   "pts": 0.88,
+   "pts": 0.87,
    "team": "SEA",
    "opp": "SF",
    "pos": "TE",
@@ -3061,12 +3398,12 @@
    "rush_att": 0.5
   },
   "brenton strange": {
-   "pts": 7.77,
+   "pts": 7.73,
    "team": "JAX",
    "opp": "PHI",
    "pos": "TE",
    "rec": 3.8,
-   "rec_yd": 40.1,
+   "rec_yd": 40.0,
    "tgt": 5.1
   },
   "chase brown": {
@@ -3192,13 +3529,13 @@
    "tgt": 0.3
   },
   "trevor lawrence": {
-   "pts": 17.98,
+   "pts": 17.87,
    "team": "JAX",
    "opp": "PHI",
    "pos": "QB",
    "rush_yd": 20.0,
    "rush_att": 5.1,
-   "pass_yd": 226.6
+   "pass_yd": 226.1
   },
   "darnell mooney": {
    "pts": 3.79,
@@ -3502,12 +3839,12 @@
    "rush_att": 0.0
   },
   "darius cooper": {
-   "pts": 5.83,
+   "pts": 5.79,
    "team": "PHI",
    "opp": "JAX",
    "pos": "WR",
    "rec": 2.9,
-   "rec_yd": 31.2,
+   "rec_yd": 31.1,
    "tgt": 4.3
   },
   "jordan watkins": {
@@ -3600,7 +3937,7 @@
    "rec": 1.3,
    "rec_yd": 16.4,
    "tgt": 2.0,
-   "rush_yd": 0.2,
+   "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "oronde gadsden": {
