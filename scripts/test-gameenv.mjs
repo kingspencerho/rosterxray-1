@@ -63,14 +63,20 @@ t(env._meta.scored === false, "_meta.scored is false");
 console.log("\n=== 3. reviewed consumers, allowlisted ===");
 // The point is that every consumer has been LOOKED AT, not that there are few.
 // Do not relax this to "any number of call sites"; an unlisted one still fails.
-const ALLOWED = ["buildGameEnvBoard"];
+// buildPlayerCard added Oct 10 2026: the card's "This week" line prints the
+// opponent and the betting line for the game in front of him. Display only;
+// section 1 still proves neither engine reads it.
+const ALLOWED = ["buildGameEnvBoard", "buildPlayerCard"];
 for (const acc of ["gameEnvFor", "getProj", "projDivergence"]) {
   const sites = [];
   const re = new RegExp(`\\b${acc.replace("(", "\\(")}\\s*\\(`, "g");
   let m;
   while ((m = re.exec(appCode))) {
     const before = appCode.slice(0, m.index);
-    const decl = [...before.matchAll(/const\s+(\w+)\s*=\s*(?:\([^)]*\)|\w+)\s*=>/g)].pop();
+    // The OWNER is the enclosing TOP-LEVEL function (column 0). Matching any
+    // `const x = () =>` attributed a call to the nearest small helper inside a
+    // function, which named a closure instead of the consumer.
+    const decl = [...before.matchAll(/^const\s+(\w+)\s*=\s*(?:\(.*?\)|\w+)\s*=>/gm)].pop();
     const owner = decl ? decl[1] : "(top level)";
     if (owner !== acc) sites.push(owner);
   }

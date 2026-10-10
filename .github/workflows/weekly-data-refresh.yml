@@ -9,10 +9,20 @@
 #
 # WHAT THIS DOES NOT DO, ON PURPOSE
 #
-#   It does not push to the default branch. CLAUDE.md rule 3 keeps development
-#   on a named branch, and more practically an unreviewed data commit going
-#   straight to the branch the live site serves is exactly the failure mode the
-#   split refresh cadence exists to prevent. This opens a PR instead.
+#   It does not push to the default branch. It opens a PR from its own
+#   data/refresh-* branch and, once every guard has passed in this same job,
+#   MERGES THAT PR ITSELF (his call, Oct 10 2026). The PR is the audit trail;
+#   the merge is what makes the numbers reach the live site.
+#   WHY IT MERGES ITSELF: from Sep 8 to Oct 6 every run failed, and the one run
+#   that passed (PR #98, Sep 6) sat unmerged, so rosterxray.com served Week 1
+#   game logs into Week 5. A refresh that waits on a human click is a refresh
+#   that does not happen. What keeps it safe is unchanged: only grading/data may
+#   change, the frozen scored file is never rebuilt, and nothing merges unless
+#   the full guard chain passed first.
+#
+#   It does not fail silently. A failed run opens (or comments on) one GitHub
+#   issue that mentions the owner, so the phone notifies; the next green run
+#   closes it.
 #
 #   It does not touch player_metrics_2025.json. That file feeds four SCORED
 #   inputs and is frozen for the whole season — refreshing it would move every
@@ -62,6 +72,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write        # the failure notice and its auto-close
 
 concurrency:
   group: weekly-data-refresh-${{ github.event.schedule || github.run_id }}
@@ -142,8 +153,18 @@ jobs:
       # THE GUARDS GATE THE COMMIT. If any one of them fails, the job stops here
       # and no PR is opened — the stale data stays live, which is the safe
       # direction to fail because its vintage label still tells the truth.
+      #
+      # RXR_DATA_REFRESH turns guard 41's CALENDAR rule (a role claim older than
+      # 7 days) into a report for the PR body instead of a failure. It is the only
+      # guard that goes red on the date alone, and the prose it reads is App.jsx,
+      # which this job never touches, so it was blocking the data for something
+      # the data did not cause. Every other guard, including guard 41's
+      # permanence rule, still gates the commit.
       - name: Run the guards
         if: steps.diff.outputs.changed == 'true'
+        env:
+          RXR_DATA_REFRESH: "1"
+          RXR_ADVISORY_OUT: .git/PROSE_ADVISORY
         run: npm test
 
       - name: Open the refresh PR
@@ -197,6 +218,10 @@ jobs:
               "<details><summary>Refresh log</summary>" ""
             printf '```\n'; cat refresh.log; printf '```\n'
             printf '\n%s\n' "</details>"
+            if [ -s .git/PROSE_ADVISORY ]; then
+              printf '\n%s\n\n' "**Player notes to re-source** (old role claims; reported, not blocking):"
+              cat .git/PROSE_ADVISORY
+            fi
           } > .git/PR_BODY
 
           # Reuse this week's PR if the job runs twice.
@@ -207,3 +232,38 @@ jobs:
               --title "Weekly data refresh · $(date -u +%Y-%m-%d)" \
               --body-file .git/PR_BODY
           fi
+
+          # MERGE IT. The guards already passed in this job and the scope check
+          # already proved only grading/data changed, so a human click adds a
+          # delay and no information. Squash keeps main's history one line per
+          # refresh. The merge is what triggers the Vercel rebuild.
+          gh pr merge "$BR" --squash --delete-branch
+
+      # A FAILURE MUST REACH A PERSON. GitHub's own email for a failed scheduled
+      # run went unread for eight straight weeks, so this opens ONE issue (then
+      # comments on it), mentioning the owner so the phone notifies.
+      - name: Report a failed refresh
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          N=$(gh issue list --state open --label refresh-failure --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$N" ]; then
+            gh issue comment "$N" --body "Failed again: $RUN"
+          else
+            gh label create refresh-failure --color B60205 --force >/dev/null 2>&1 || true
+            gh issue create --title "Weekly data refresh is failing" --label refresh-failure \
+              --body "@$OWNER the scheduled data refresh failed, so the live site's game logs and usage numbers are not updating. Run: $RUN"
+          fi
+
+      - name: Close the failure notice once a run succeeds
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          for N in $(gh issue list --state open --label refresh-failure --json number -q '.[].number' 2>/dev/null); do
+            gh issue close "$N" --comment "Refresh succeeded: $RUN"
+          done

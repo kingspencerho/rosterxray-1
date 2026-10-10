@@ -629,9 +629,12 @@ ok("the reference group is the dim token",
 // every persona consults it last; outlook after the job it could change. The
 // first build put reference before outlook because one lived inside the no-data
 // branch and one outside it.
+// ⭐ PRODUCTION LEADS SINCE Oct 10 2026, HIS CALL: in season the first thing a
+// reader looks for is what the player did week by week, so the game log sits
+// directly under The read and the job group follows it.
 const order = [...app.matchAll(/CardGroupHeader group="(\w+)"/g)].map(m => m[1]);
 ok("group headers render in reader order",
-   JSON.stringify(order) === JSON.stringify(["job", "production", "outlook", "reference"]),
+   JSON.stringify(order) === JSON.stringify(["production", "job", "outlook", "reference"]),
    JSON.stringify(order));
 
 // A group header must never appear alone. An empty group is a bare label.

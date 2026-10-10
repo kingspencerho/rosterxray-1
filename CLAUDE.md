@@ -9939,3 +9939,36 @@ asserts centre == median and balanced tails, and a sabotage (centre forced to 0)
    here and never merged, so production serves the Sep 15 (Week 1) data.
 Windows note: `python3` is the Store alias on the desktop; guards that `execFileSync("python3")` fail there. A venv
 with `python3.exe` copied from its `python.exe`, first on PATH, runs the whole chain green.
+
+## Oct 10 2026 (later): the refresh merges itself, and the player card reads top-down for a Sunday
+
+### The weekly refresh can no longer stall silently (his call: "build 1-3")
+1. **Guard 41's calendar rule is a REPORT during the data refresh.** `RXR_DATA_REFRESH=1` (set only in the
+   workflow's guard step) prints rule-2 hits (a role claim older than 7 days), writes them into the PR body, and
+   exits 0. Rule 1 (permanence) stays fatal. It was the only guard that goes red on the date alone, and it reads
+   App.jsx prose that a data refresh never touches.
+2. **The workflow merges its own PR** (`gh pr merge "$BR" --squash --delete-branch`) after every guard passed in
+   the same job. Still never pushes to main, still only grading/data, still never rebuilds the frozen file.
+3. **A failed run opens one GitHub issue that @-mentions the owner** (label `refresh-failure`), comments on it
+   after that, and the next green run closes it.
+Guard 15 pins all three; four sabotages (merge removed, `--admin` added, failure step made `always()`, flag
+turned off) each exit non-zero. **PR #98 (Sep 6 data) was closed by deleting its branch**: merging it would
+have reverted five weeks of data.
+
+### The player card, reordered around what a reader looks for first
+Stat lines -> **This week** -> **The read** -> **What he produced** (game log + week outcomes) -> Recent news
+(collapsed) -> His job -> What could change it -> Reference. Guard 14's group order is now
+`production, job, outlook, reference`.
+- **This week** (`card.thisWeek`) is the news that writes itself: Sleeper status + depth slot, last game
+  (points, volume, that week's target share) and the next game (opponent, line, total, defenders out). Facts
+  only, rebuilt by every weekly refresh.
+- **The read is current-season first.** Moving target/carry share, the biggest usage shift vs 2025, points vs
+  expected points (3+ games, gap of 3+), or a "steady role" line; then up to two 2025 TALENT tails (separation,
+  TPRR, red-zone share), capped at 4. The old 2025 lines remain only as a fallback when there is no current
+  data, minus "He plays" and "still short of peak", which said nothing a reader could act on.
+- **Bug fixed:** current-season usage (`targetTrend`, `shift`, `expected`, `ppr`) was built only inside the
+  `gp >= 8` 2025 gate, so rookies and last year's backups (Carnell Tate, Braelon Allen) had none of it. It is
+  now built for every player. Their job SECTIONS still sit behind the no-2025-data branch; the read and This
+  week carry them. Open item.
+- Guard 38's consumer check now attributes a call to its enclosing TOP-LEVEL function (it was naming the
+  nearest inner closure) and allowlists `buildPlayerCard`; a planted unlisted consumer fails.

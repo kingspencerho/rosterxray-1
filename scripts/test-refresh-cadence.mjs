@@ -294,6 +294,27 @@ ok("the volume builder documents the games-played denominator",
     ok("an unknown flag is rejected rather than ignored",
       /unknown flag/.test(sh) && /exit 2/.test(sh));
     ok("permissions are declared rather than inherited", /^permissions:/m.test(wf));
+
+    // ---- SELF-MERGE, THE PROSE ADVISORY, AND THE FAILURE NOTICE (Oct 10 2026) ----
+    // Every run failed Sep 8 - Oct 6 and the one green PR sat unmerged, so the
+    // live site served Week 1 game logs into Week 5. These pin the fix without
+    // loosening the four safety properties above.
+    const prStep = (wf.match(/- name: Open the refresh PR[\s\S]*?(?=\n      - name:|$)/) || [""])[0];
+    const guardStep = (wf.match(/- name: Run the guards[\s\S]*?(?=\n      #|\n      - name:)/) || [""])[0];
+    ok("the PR is merged by branch name, after it is opened, inside the gated PR step",
+      /gh pr merge "\$BR"/.test(prStep) && prStep.indexOf("gh pr merge") > prStep.indexOf("gh pr create")
+      && /steps\.diff\.outputs\.changed == 'true'/.test(prStep));
+    ok("the merge never uses --admin to skip a check", !/--admin/.test(wf));
+    ok("the merge step runs after the guard step", wf.indexOf("- name: Open the refresh PR") > wf.indexOf("- name: Run the guards"));
+    ok("only the guard step sets RXR_DATA_REFRESH, and it still runs npm test",
+      /RXR_DATA_REFRESH: "1"/.test(guardStep) && /npm test/.test(guardStep)
+      && (wf.match(/RXR_DATA_REFRESH/g) || []).length === (guardStep.match(/RXR_DATA_REFRESH/g) || []).length + (wf.slice(0, wf.indexOf("- name: Run the guards")).match(/RXR_DATA_REFRESH/g) || []).length);
+    const sdc = readFileSync(path.join(repoRoot, "scripts/test-stale-depth-claims.mjs"), "utf8");
+    ok("advisory mode relaxes ONLY rule 2 (the calendar rule); permanence stays fatal",
+      /RXR_DATA_REFRESH === "1"/.test(sdc) && /f\.rule !== 2/.test(sdc) && /rule: 1,/.test(sdc) && /rule: 2,/.test(sdc));
+    ok("a failed run opens or comments on an issue that mentions the owner",
+      /if: failure\(\)/.test(wf) && /gh issue create/.test(wf) && /@\$OWNER/.test(wf) && /issues: write/.test(wf));
+    ok("a green run closes the failure notice", /if: success\(\)/.test(wf) && /gh issue close/.test(wf));
   }
 }
 

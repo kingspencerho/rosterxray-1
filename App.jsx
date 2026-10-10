@@ -4246,6 +4246,29 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     };
   }
 
+  // THIS SEASON'S USAGE IS BUILT FOR EVERY PLAYER, not only the ones who
+  // cleared last season's 8-game gate (moved out of that gate Oct 10 2026). A
+  // rookie or last year's backup is exactly the player whose role is moving,
+  // and the gate was silently withholding it from them.
+  if (CUR_VOLUME_LIVE) {
+    const tt = getTargetTrend(name);
+    const ct = pos === "RB" ? getCarryTrend(name) : null;
+    card.ppr = pprPremium(name, pos);
+    card.expected = expectedPoints(name);
+    card.shift = usageShift(name, pos);
+    card.targetTrend = {
+      vintage: vintageLabel(VOLUME_CUR._meta),
+      splitMode: TREND_META.trend?.split_mode || null,
+      tgt: tt, tgtWhy: trendWhy(tt, TREND_META.trend),
+      tgtThreshold: TREND_META.trend?.threshold ?? null,
+      car: ct, carWhy: ct ? trendWhy(ct, TREND_META.trend_car) : null,
+      carThreshold: TREND_META.trend_car?.threshold ?? null,
+      // The prior season rides along and is never swapped for the current
+      // one. "16.5% in 2025, 29.2% over his last three" is the finding.
+      prior: m?.tgt_sh ?? null,
+    };
+  }
+
   if (m && (m.gp || 0) >= 8) {
     // The current-season twin, when the weekly refresh has run. It rides
     // ALONGSIDE the 2025 value on the same row rather than replacing it — the
@@ -4261,24 +4284,6 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     // say: a section that hides until it has a verdict reads as a broken
     // feature rather than as missing data, which is the silent-drop failure
     // in a new costume.
-    if (CUR_VOLUME_LIVE) {
-      const tt = getTargetTrend(name);
-      const ct = pos === "RB" ? getCarryTrend(name) : null;
-      card.ppr = pprPremium(name, pos);
-      card.expected = expectedPoints(name);
-      card.shift = usageShift(name, pos);
-      card.targetTrend = {
-        vintage: vintageLabel(VOLUME_CUR._meta),
-        splitMode: TREND_META.trend?.split_mode || null,
-        tgt: tt, tgtWhy: trendWhy(tt, TREND_META.trend),
-        tgtThreshold: TREND_META.trend?.threshold ?? null,
-        car: ct, carWhy: ct ? trendWhy(ct, TREND_META.trend_car) : null,
-        carThreshold: TREND_META.trend_car?.threshold ?? null,
-        // The prior season rides along and is never swapped for the current
-        // one. "16.5% in 2025, 29.2% over his last three" is the finding.
-        prior: m?.tgt_sh ?? null,
-      };
-    }
     for (const d of (CARD_METRICS[pos] || [])) {
       const v = d.get(m);
       if (v == null || Number.isNaN(v)) continue;
@@ -4616,11 +4621,137 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   // Ordered by the Source Hierarchy: role change first, then volume, then
   // talent, then scoring equity, then durability, then the calendar. A reader
   // who stops after two lines has still read the two that matter most.
+  // === THIS WEEK (auto, Oct 10 2026, his ask) ===
+  //
+  // The news that writes itself. Three FACTS, each read straight from a layer
+  // the weekly refresh already rebuilds, so it is current the morning the data
+  // lands and costs no research: his injury status (Sleeper), what he did last
+  // game (the game log + that week's share of the work), and the game in front
+  // of him (the betting line). No adjectives and no verdict; every line is a
+  // number or a status a reader can check. Hand-written notes still live in
+  // Recent news, lower down, and keep their own dates.
+  const thisWeek = [];
+  {
+    const st = card.status;
+    const asOf = st?.probed && !Number.isNaN(Date.parse(st.probed + "T00:00:00Z"))
+      ? ` · as of ${new Date(st.probed + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}` : "";
+    if (st && (st.injury || st.hard)) {
+      thisWeek.push({ label: "Status", tone: "warn",
+        text: `${st.injury || st.status}${st.part ? ` (${st.part})` : ""}${asOf}` });
+    } else if (st && st.slot != null) {
+      thisWeek.push({ label: "Status", tone: "flat",
+        text: `No injury designation · ${st.slotPos}${st.slot} on the depth chart${asOf}` });
+    }
+    const lg = card.gameLogCur;
+    const last = lg && lg.games[lg.games.length - 1];
+    if (last) {
+      const stat = (k) => last.stats.find(s => s.label === k)?.value;
+      const bits = [`${last.pts} pts`];
+      if (pos === "QB") {
+        if (stat("att") != null) bits.push(`${stat("pass_yds")} pass yds, ${stat("pass_td")} TD`);
+        if (stat("car")) bits.push(`${stat("car")} carries`);
+      } else {
+        if (stat("car")) bits.push(`${stat("car")} carries`);
+        if (stat("tgt") != null) bits.push(`${stat("tgt")} targets`);
+      }
+      const series = card.targetTrend?.tgt?.series || [];
+      const wk = series.find(x => x[0] === last.week);
+      if (wk && pos !== "QB") bits.push(`${Math.round(wk[2] * 100)}% target share`);
+      thisWeek.push({ label: `Week ${last.week}`, tone: "flat", text: `vs ${last.opp}: ${bits.join(" · ")}` });
+    }
+    const g = gameEnvFor(card.team);
+    if (g && (!g.kick || Date.parse(g.kick) > nowTs)) {
+      const home = (TEAM_SPELLINGS[card.team] || [card.team]).includes(g.home);
+      const opp = teamKey(home ? g.away : g.home);
+      const line = g.favorite && g.spread != null ? ` · ${teamKey(g.favorite)} -${Math.abs(g.spread)}` : "";
+      const tot = g.total != null ? ` · total ${g.total}` : "";
+      const outs = (g.def_out?.[home ? g.away : g.home] || []).length;
+      thisWeek.push({ label: `Next · W${GAMEENV_META.week}`, tone: "flat",
+        text: `${home ? "vs" : "@"} ${opp}${line}${tot}${outs ? ` · ${outs} ${opp} defender${outs > 1 ? "s" : ""} out` : ""}` });
+    }
+  }
+  card.thisWeek = thisWeek;
+
   const read = [];
+  let curRead = [];
   {
     const t = card.trajectoryCur || card.trajectory;
     const pctS = v => `${Math.round(v * 100)}%`;
     const findM = k => card.metrics.find(m => m.label === k);
+
+    // ⭐ IN SEASON, THE READ LEADS WITH THIS SEASON (Oct 10 2026, his ask: "make
+    // sure the data we're displaying is actually useful while not being
+    // redundant"). Everything below this block describes 2025; by October a
+    // reader deciding a lineup needs what is moving NOW. These lines come from
+    // the current-season layers only, each states its own numbers, and the
+    // 2025 lines fill in behind them only when this season has nothing to say.
+    const cur = [];
+    const ttT = card.targetTrend?.tgt, ttC = card.targetTrend?.car;
+    const moving = (x) => x && x.delta != null && (x.trend === "rising" || x.trend === "falling");
+    if (pos !== "QB" && moving(ttT)) {
+      cur.push({ tone: ttT.trend === "rising" ? "pos" : "neg",
+        text: `His target share is ${ttT.trend === "rising" ? "climbing" : "falling"} this season — ${pctS(ttT.early)} early, ${pctS(ttT.recent)} lately.` });
+    }
+    if (moving(ttC)) {
+      cur.push({ tone: ttC.trend === "rising" ? "pos" : "neg",
+        text: `His carry share is ${ttC.trend === "rising" ? "climbing" : "falling"} this season — ${pctS(ttC.early)} early, ${pctS(ttC.recent)} lately.` });
+    }
+    const tcur = card.trajectoryCur;
+    if (!cur.length && tcur && tcur.delta != null && tcur.trend !== "stable") {
+      cur.push({ tone: tcur.trend === "rising" ? "pos" : "neg",
+        text: `He is on the field ${tcur.trend === "rising" ? "more" : "less"} this season — ${pctS(tcur.early)} of snaps early, ${pctS(tcur.late)} lately.` });
+    }
+    const sh = card.shift;
+    if (sh && sh.rows?.length) {
+      const big = sh.rows.filter(r => (r.moved === "up" || r.moved === "down") && !r.echo)
+        .sort((a, b) => Math.abs(b.delta / (b.bar || 1)) - Math.abs(a.delta / (a.bar || 1)))[0];
+      if (big) {
+        const f = (v) => big.pct ? pctS(v) : `${(+v).toFixed(1)}${big.unit || ""}`;
+        cur.push({ tone: "flat",
+          text: `${big.label} is ${big.moved === "up" ? "up" : "down"} on last season — ${f(big.cur)} now against ${f(big.prior)} in ${sh.priorSeason}${sh.changedTeam ? ` (with ${sh.priorTeam})` : ""}.` });
+      }
+    }
+    const ex = card.expected?.cur;
+    if (ex && ex.gp >= 3 && Math.abs(ex.diff) >= 3) {
+      cur.push({ tone: "flat",
+        text: ex.diff > 0
+          ? `He is scoring ${ex.act.toFixed(1)} a game on usage worth ${ex.exp.toFixed(1)} — touchdowns and big plays are running ahead of his role.`
+          : `His usage is worth ${ex.exp.toFixed(1)} a game and he has scored ${ex.act.toFixed(1)} — the role is better than the box score.` });
+    }
+    // NOTHING MOVING IS STILL A FINDING. A player whose role is holding gets one
+    // line saying what that role IS this season, rather than falling back to
+    // 2025 filler. "Steady" is earned only with 2+ games of current usage.
+    const vc = getVolumeCur(name);
+    if (!cur.length && vc && (vc.gp || 0) >= 2) {
+      const qcR = card.qbCur;
+      if (pos === "QB" && qcR) {
+        cur.push({ tone: "flat", text: `Steady role — ${qcR.pass.toFixed(1)} pass attempts and ${qcR.rush.toFixed(1)} runs a game through ${qcR.gp} games.` });
+      } else if (pos === "RB") {
+        cur.push({ tone: "flat", text: `Steady role — ${(+vc.car_pg).toFixed(1)} carries and ${(+vc.tgt_pg).toFixed(1)} targets a game through ${vc.gp} games.` });
+      } else if (pos !== "QB" && vc.tgt_sh != null) {
+        cur.push({ tone: "flat", text: `Steady role — ${(+vc.tgt_pg).toFixed(1)} targets a game, ${pctS(vc.tgt_sh)} of his team's${m?.tgt_sh != null ? ` (${pctS(m.tgt_sh)} in 2025)` : ""}.` });
+      }
+    }
+    if (cur.length) {
+      // Two 2025 TALENT tails may follow — separation and per-route rate are
+      // what a single season of usage cannot show. Volume, durability, age and
+      // turnover are dropped here: this season's lines above already answer them.
+      const sep = card.deployment.find(d => d.key === "ngs_sep");
+      if (sep?.pct != null && (sep.pct >= 75 || sep.pct <= 25)) {
+        cur.push({ tone: sep.pct >= 75 ? "pos" : "neg",
+          text: sep.pct >= 75 ? `He gets open — ${sep.value} of separation in 2025, better than ${sep.pct}% of ${card.pos}s.`
+            : `He wins little separation — ${sep.value} in 2025, more than only ${sep.pct}% of ${card.pos}s.` });
+      }
+      const tprrC = card.routes.find(d => d.key === "tprr");
+      if (tprrC?.pct != null && (tprrC.pct >= 80 || tprrC.pct <= 20)) {
+        cur.push({ tone: tprrC.pct >= 80 ? "pos" : "neg",
+          text: tprrC.pct >= 80 ? `The offence looks for him — thrown at on ${tprrC.value.split(" of ")[0]} of his routes in 2025, better than ${tprrC.pct}% of ${card.pos}s.`
+            : `He is rarely looked for — thrown at on ${tprrC.value.split(" of ")[0]} of his routes in 2025.` });
+      }
+      const rzC = card.redzone.find(r => r.pct != null && r.pct >= 80);
+      if (rzC) cur.push({ tone: "pos", text: `He gets the scoring work — ${rzC.value.split(" of ")[0]} of his team's red-zone ${/car/.test(rzC.key) ? "runs" : "throws"} in 2025.` });
+      curRead = cur.slice(0, 4);
+    }
 
     if (t && t.trend && t.trend !== "stable" && t.delta != null) {
       read.push({
@@ -4708,11 +4839,9 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
         read.push({ tone: "neg", text: `Durability is trending the wrong way — ${pctS(a.career)} of games across his career, ${pctS(a.recent)} over the last ${a.recentWindow}.` });
       } else if (med != null && cur <= med - 0.12) {
         read.push({ tone: "neg", text: `He misses real time — on the field for ${pctS(cur)} of his team's games against a ${card.pos} median of ${pctS(med)}.` });
-      } else if (med != null && cur >= med + 0.18) {
-        read.push({ tone: "pos", text: `He plays — ${pctS(cur)} of his team's games, well above the ${card.pos} median.` });
       }
     }
-    if (card.arc && card.arc.phase !== "peak") {
+    if (card.arc && card.arc.phase === "decline") {
       read.push({
         tone: card.arc.phase === "decline" ? "neg" : "pos",
         text: card.arc.phase === "decline"
@@ -4727,6 +4856,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
   // Cap at six. A summary that runs the length of the card is not a summary,
   // and the ordering above already puts the most causal lines first.
   card.read = read.slice(0, 6);
+  if (curRead.length) card.read = curRead;
 
   // The glossary explains exactly what this card rendered and nothing else, in
   // the order the reader met it. A QB card never defines WOPR; an RB card with
@@ -10685,6 +10815,62 @@ const PlayerCardModal = ({ card, onClose }) => {
           </div>
         ))}
 
+        {/* THIS WEEK. The automatic news line (Oct 10 2026, his ask): status,
+            last game and the game in front of him, all read from layers the
+            weekly refresh rebuilds. Facts only, so it needs no writer and cannot
+            go stale between refreshes. */}
+        {card.thisWeek.length > 0 && (
+          <div style={{ marginTop: "14px", padding: "9px 11px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px" }}>
+            <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)", marginBottom: "5px" }}>This week</div>
+            {card.thisWeek.map((x, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", alignItems: "baseline", padding: "2px 0", fontSize: "12px", lineHeight: 1.5 }}>
+                <span style={{ flex: "none", minWidth: "58px", fontSize: "10px", letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-dim)" }}>{x.label}</span>
+                <span style={{ color: x.tone === "warn" ? "var(--caution)" : "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>{x.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* THE READ. First thing on the card, because a reader who does not
+            already know which of fourteen sections matters cannot start.
+            Every line restates a number visible further down, in plain English.
+            It issues NO VERDICT — that is the Diggs rule, and the reason
+            PLAYER_VERDICTS is not on this card either. */}
+        {card.read.length > 0 && (
+          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
+              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
+                The read
+              </span>
+              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>what is moving</span>
+            </div>
+            {card.read.map((r, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
+                <span style={{
+                  flex: "none", marginTop: "5px", width: "5px", height: "5px", borderRadius: "50%",
+                  background: r.tone === "pos" ? "var(--pos)" : r.tone === "neg" ? "var(--neg)" : r.tone === "warn" ? "var(--caution)" : "var(--text-dim)",
+                }} />
+                <span style={{ fontSize: "12.5px", lineHeight: 1.5, color: "var(--text-primary)" }}>{r.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
+          <CardGroupHeader group="production" label="What he produced" hint="week by week, this season and last" />
+        )}
+
+        <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
+
+        {!card.reason && card.descriptive.length > 0 && (
+          <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three. Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. ⚠ In a FULL-PPR league the same player clears them more often, and unevenly by position — measured on 2025, spike rate rises about 26% at RB, 61% at WR and 76% at TE, and not at all at QB. Read these as half-PPR rates, not as a verdict on his ceiling in your format.">
+            {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
+          </CardSection>
+        )}
+
+        <OmittedNote items={card.omitted} group="production" />
+
         {/* NEWS SITS OUTSIDE THE no-data BRANCH ON PURPOSE. A rookie with no
             2025 role is precisely the player whose only useful information is
             what happened this month, and burying it behind "no 2025 data" would
@@ -10732,32 +10918,6 @@ const PlayerCardModal = ({ card, onClose }) => {
           ))}
         </CardSection>
 
-        {/* THE READ. First thing on the card, because a reader who does not
-            already know which of fourteen sections matters cannot start.
-            Every line restates a number visible further down, in plain English.
-            It issues NO VERDICT — that is the Diggs rule, and the reason
-            PLAYER_VERDICTS is not on this card either. */}
-        {card.read.length > 0 && (
-          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
-                The read
-              </span>
-              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>from the data below</span>
-            </div>
-            {card.read.map((r, i) => (
-              <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
-                <span style={{
-                  flex: "none", marginTop: "5px", width: "5px", height: "5px", borderRadius: "50%",
-                  background: r.tone === "pos" ? "var(--pos)" : r.tone === "neg" ? "var(--neg)" : r.tone === "warn" ? "var(--caution)" : "var(--text-dim)",
-                }} />
-                <span style={{ fontSize: "12.5px", lineHeight: 1.5, color: "var(--text-primary)" }}>{r.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
         {!card.reason && (
           <CardGroupHeader group="job" label="His job" hint="what the offense gives him" />
         )}
@@ -10802,36 +10962,6 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {t && (
-              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
-                {t.delta == null ? (
-                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-                    {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
-                    <span style={{ color: "var(--gold)" }}>
-                      {t.lateGp >= t.earlyGp ? "W10-18 only" : "W1-9 only"}, so this is half a season, not a full-year role.
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
-                      <span style={{ color: "var(--text-muted)" }}>{pct(t.early)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W1-9</span>
-                      <span style={{ color: "var(--text-dim)" }}>→</span>
-                      <span style={{ color: t.trend === "rising" ? "var(--pos)" : t.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(t.late)}</span>
-                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W10-18</span>
-                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(t.last4)} last 4</span>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
-                      {t.trend === "stable"
-                        ? `Steady role. The ${pct(t.season)} season average is a fair read.`
-                        : `${t.trend === "rising" ? "Role grew" : "Role shrank"} — the ${pct(t.season)} season average ${t.trend === "rising" ? "understates" : "overstates"} where he finished.`}
-                      {t.changedTeam && " Changed teams mid-2025, so this spans two different jobs."}
-                    </div>
-                  </>
-                )}
-              </CardSection>
-            )}
-
             {qc && (
               <CardSection title={`Volume profile · ${card.curVintage}`} accent={CARD_ACCENTS.volume}>
                 <CardMetricRow label="Rush attempts / game" value={qc.rush.toFixed(1)} pct={null} r={0.815} />
@@ -10843,51 +10973,6 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {card.qb && (
-              <CardSection
-                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
-                accent={CARD_ACCENTS.volume}
-                note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
-              >
-                <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
-                <CardMetricRow label="Pass attempts / game" value={card.qb.pass.toFixed(1)} pct={null} r={0.605} />
-                <CardMetricRow label="Passing aDOT" value={card.qb.adot.toFixed(1)} pct={null} r={0.486} />
-                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
-                  League median {card.qb.median} rush att/gm.
-                  {card.qb.runner === "rushing" && <span style={{ color: "var(--pos)" }}> Rushing QB — this is scoring that survives a bad passing day.</span>}
-                  {card.qb.runner === "pocket" && <span style={{ color: "var(--gold)" }}> Pocket QB — effectively no rushing floor.</span>}
-                </div>
-              </CardSection>
-            )}
-
-            {card.absence.length > 0 && (
-              <CardSection
-                title="Who else was on the field"
-                accent={CARD_ACCENTS.absence}
-                collapsible
-                hint={`${card.absence.length} absence${card.absence.length > 1 ? "s" : ""}`}
-                note="A target share is a share OF something. These teammates missed real time, so part of the season above was played without them. The split is shown, not a conclusion — an absence explains where volume came from, it does not prove the volume was hollow.">
-                {card.absence.map((a, i) => (
-                  <div key={i} style={{ padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
-                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>
-                      {a.name}
-                      <span style={{ color: "var(--text-dim)", fontWeight: 400 }}> {a.pos} · {a.role}</span>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 6px" }}>
-                      played {a.playedOf} of {a.total} · missed {a.missed}
-                    </div>
-                    {[["with him", a.withTgt, a.withPts], ["without him", a.withoutTgt, a.withoutPts]].map(([lab, tgt, pts]) => (
-                      <div key={lab} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "1px 0" }}>
-                        <span style={{ color: "var(--text-dim)", minWidth: "84px" }}>{lab}</span>
-                        {tgt != null && <span style={{ color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{tgt.toFixed(1)} tgt/gm</span>}
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{pts.toFixed(1)} pts/gm</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </CardSection>
-            )}
-
             {/* ⚠️ NOT "Role trajectory" — that title already belongs to the SNAP
                 section directly above. Two identically-named sections in the
                 same group leave a reader unable to tell which number he is
@@ -10895,6 +10980,58 @@ const PlayerCardModal = ({ card, onClose }) => {
                 he on the field", this is "how much of the ball is his". Found
                 by rendering the card, not by reading the source. Guard 29
                 asserts the two titles stay distinct. */}
+            {card.targetTrend && (
+              <CardSection
+                title="Usage trajectory"
+                accent={CARD_ACCENTS.targetTrend}
+                hint={card.targetTrend.tgt?.delta != null ? card.targetTrend.tgt.trend : "in progress"}
+                note={`Week-by-week share of his team's work, ${card.targetTrend.vintage} — how much of the ball is his, as opposed to the snap share above, which is only whether he was on the field. This is role CHANGE (rank 1) and it outranks the season averages below, which are rank 2 — an average blends the player before the change with the player after it and describes neither.${card.targetTrend.prior != null ? ` For reference his 2025 target share was ${pct1(card.targetTrend.prior)}; the two seasons are shown side by side, never swapped.` : ""}`}>
+                <TrendBlock label="Target share" t={card.targetTrend.tgt} why={card.targetTrend.tgtWhy}
+                  threshold={card.targetTrend.tgtThreshold} splitMode={card.targetTrend.splitMode} />
+                {card.targetTrend.car && (
+                  <TrendBlock label="Carry share" t={card.targetTrend.car} why={card.targetTrend.carWhy}
+                    threshold={card.targetTrend.carThreshold} splitMode={card.targetTrend.splitMode} />
+                )}
+                {card.targetTrend.car && (
+                  <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                    Both sides are shown because a back can be flat in one and moving in the other. Read them together — a rising carry share on a falling target share is a role getting bigger and less valuable at the same time.
+                  </div>
+                )}
+              </CardSection>
+            )}
+
+            {card.shift && (
+              <CardSection
+                title="Usage vs last season"
+                accent={CARD_ACCENTS.shift}
+                collapsible
+                hint={!card.shift.rows.length ? "no prior"
+                  : !card.shift.measurable ? "not yet measurable"
+                  : card.shift.moved ? `${card.shift.moved} moved` : "holding"}
+                note={!card.shift.rows.length
+                  ? `${card.shift.why}. An absent baseline, not a gate he failed.`
+                  : `His ${card.shift.priorSeason} figures against this season's, both computed the same way \u2014 ${card.shift.priorGp} games then ${card.shift.gp}. Every number here is a coaching DECISION rather than a result: this layer carries no yards, no touchdowns and no efficiency, which is why one week of it is worth reading at all. A row is marked as moved only when the gap clears that metric's own bar, and the bar is one standard deviation of every player's shift this season \u2014 derived from the data, never typed in, so it is wide early and narrows as games accumulate.${card.shift.changedTeam ? ` \u26a0 He changed teams: the ${card.shift.priorSeason} column is ${card.shift.priorTeam}, not ${card.shift.team}, so it describes a different offence.` : ""}`}>
+                {!card.shift.rows.length ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>{card.shift.why}</div>
+                ) : (
+                  <>
+                    {card.shift.rows.map((r) => <ShiftRow key={r.key} row={r} />)}
+                    {!card.shift.measurable && (
+                      <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "8px" }}>
+                        {"\u26a0"} No bar is derived yet this season, so nothing here is called moved.
+                        That is NOT the same as flat \u2014 it means not yet measurable.
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardSection>
+            )}
+            {card.metrics.length > 0 && (
+              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}, on ${card.vintage}.${card.volumeCur ? ` Rows showing ${"\u2192"} are 2025 then ${card.volumeCur}; the percentile ranks the 2025 figure, because the current season has no comparable population yet.` : ""}`}>
+                {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
             {card.expected && (card.expected.cur || card.expected.prior) && (
               <CardSection
                 title="Expected points"
@@ -10937,66 +11074,14 @@ const PlayerCardModal = ({ card, onClose }) => {
                 )}
               </CardSection>
             )}
-            {card.shift && (
+            {card.redzone.length > 0 && (
               <CardSection
-                title="Usage vs last season"
-                accent={CARD_ACCENTS.shift}
+                title="Red zone"
+                accent={CARD_ACCENTS.redzone}
                 collapsible
-                hint={!card.shift.rows.length ? "no prior"
-                  : !card.shift.measurable ? "not yet measurable"
-                  : card.shift.moved ? `${card.shift.moved} moved` : "holding"}
-                note={!card.shift.rows.length
-                  ? `${card.shift.why}. An absent baseline, not a gate he failed.`
-                  : `His ${card.shift.priorSeason} figures against this season's, both computed the same way \u2014 ${card.shift.priorGp} games then ${card.shift.gp}. Every number here is a coaching DECISION rather than a result: this layer carries no yards, no touchdowns and no efficiency, which is why one week of it is worth reading at all. A row is marked as moved only when the gap clears that metric's own bar, and the bar is one standard deviation of every player's shift this season \u2014 derived from the data, never typed in, so it is wide early and narrows as games accumulate.${card.shift.changedTeam ? ` \u26a0 He changed teams: the ${card.shift.priorSeason} column is ${card.shift.priorTeam}, not ${card.shift.team}, so it describes a different offence.` : ""}`}>
-                {!card.shift.rows.length ? (
-                  <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>{card.shift.why}</div>
-                ) : (
-                  <>
-                    {card.shift.rows.map((r) => <ShiftRow key={r.key} row={r} />)}
-                    {!card.shift.measurable && (
-                      <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "8px" }}>
-                        {"\u26a0"} No bar is derived yet this season, so nothing here is called moved.
-                        That is NOT the same as flat \u2014 it means not yet measurable.
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardSection>
-            )}
-            {card.targetTrend && (
-              <CardSection
-                title="Usage trajectory"
-                accent={CARD_ACCENTS.targetTrend}
-                hint={card.targetTrend.tgt?.delta != null ? card.targetTrend.tgt.trend : "in progress"}
-                note={`Week-by-week share of his team's work, ${card.targetTrend.vintage} — how much of the ball is his, as opposed to the snap share above, which is only whether he was on the field. This is role CHANGE (rank 1) and it outranks the season averages below, which are rank 2 — an average blends the player before the change with the player after it and describes neither.${card.targetTrend.prior != null ? ` For reference his 2025 target share was ${pct1(card.targetTrend.prior)}; the two seasons are shown side by side, never swapped.` : ""}`}>
-                <TrendBlock label="Target share" t={card.targetTrend.tgt} why={card.targetTrend.tgtWhy}
-                  threshold={card.targetTrend.tgtThreshold} splitMode={card.targetTrend.splitMode} />
-                {card.targetTrend.car && (
-                  <TrendBlock label="Carry share" t={card.targetTrend.car} why={card.targetTrend.carWhy}
-                    threshold={card.targetTrend.carThreshold} splitMode={card.targetTrend.splitMode} />
-                )}
-                {card.targetTrend.car && (
-                  <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
-                    Both sides are shown because a back can be flat in one and moving in the other. Read them together — a rising carry share on a falling target share is a role getting bigger and less valuable at the same time.
-                  </div>
-                )}
-              </CardSection>
-            )}
-
-            {card.metrics.length > 0 && (
-              <CardSection title="Opportunity" accent={CARD_ACCENTS.opportunity} note={`Percentile among ${card.popGate} at ${card.pos}, on ${card.vintage}.${card.volumeCur ? ` Rows showing ${"\u2192"} are 2025 then ${card.volumeCur}; the percentile ranks the 2025 figure, because the current season has no comparable population yet.` : ""}`}>
-                {card.metrics.map((x, i) => <CardMetricRow key={i} {...x} />)}
-              </CardSection>
-            )}
-
-            {card.deployment.length > 0 && (
-              <CardSection
-                title="Deployment"
-                accent={CARD_ACCENTS.deployment}
-                collapsible
-                hint="separation · depth"
-                note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
-                {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
+                hint={`${card.redzone.length} measure${card.redzone.length > 1 ? "s" : ""}`}
+                note={`Scoring opportunity, which the framework tracks separately from overall volume. Each share prints the count it came from — red-zone samples are small, and a percentage without its count is unreadable. Percentile among ${card.redzoneGate} at ${card.pos}, a different population from Opportunity above.`}>
+                {card.redzone.map((x, i) => <CardMetricRow key={i} {...x} r={null} noTag />)}
               </CardSection>
             )}
 
@@ -11011,35 +11096,96 @@ const PlayerCardModal = ({ card, onClose }) => {
               </CardSection>
             )}
 
-            {card.redzone.length > 0 && (
+            {card.deployment.length > 0 && (
               <CardSection
-                title="Red zone"
-                accent={CARD_ACCENTS.redzone}
+                title="Deployment"
+                accent={CARD_ACCENTS.deployment}
                 collapsible
-                hint={`${card.redzone.length} measure${card.redzone.length > 1 ? "s" : ""}`}
-                note={`Scoring opportunity, which the framework tracks separately from overall volume. Each share prints the count it came from — red-zone samples are small, and a percentage without its count is unreadable. Percentile among ${card.redzoneGate} at ${card.pos}, a different population from Opportunity above.`}>
-                {card.redzone.map((x, i) => <CardMetricRow key={i} {...x} r={null} noTag />)}
+                hint="separation · depth"
+                note={`Next Gen Stats tracking, ${card.deploymentTargets} targets in 2025. ${card.pos} median separation is ${card.deploymentSepMedian} yds. Percentile among ${NGS_POP_GATE} at ${card.pos} — a different population from Opportunity above, so the two ranks are not interchangeable.`}>
+                {card.deployment.map((x, i) => <CardMetricRow key={i} {...x} />)}
+              </CardSection>
+            )}
+
+            {card.absence.length > 0 && (
+              <CardSection
+                title="Who else was on the field"
+                accent={CARD_ACCENTS.absence}
+                collapsible
+                hint={`${card.absence.length} absence${card.absence.length > 1 ? "s" : ""}`}
+                note="A target share is a share OF something. These teammates missed real time, so part of the season above was played without them. The split is shown, not a conclusion — an absence explains where volume came from, it does not prove the volume was hollow.">
+                {card.absence.map((a, i) => (
+                  <div key={i} style={{ padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: 600 }}>
+                      {a.name}
+                      <span style={{ color: "var(--text-dim)", fontWeight: 400 }}> {a.pos} · {a.role}</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 6px" }}>
+                      played {a.playedOf} of {a.total} · missed {a.missed}
+                    </div>
+                    {[["with him", a.withTgt, a.withPts], ["without him", a.withoutTgt, a.withoutPts]].map(([lab, tgt, pts]) => (
+                      <div key={lab} style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "11px", padding: "1px 0" }}>
+                        <span style={{ color: "var(--text-dim)", minWidth: "84px" }}>{lab}</span>
+                        {tgt != null && <span style={{ color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>{tgt.toFixed(1)} tgt/gm</span>}
+                        <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{pts.toFixed(1)} pts/gm</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </CardSection>
+            )}
+
+            {t && (
+              <CardSection title={tc ? "Role trajectory · 2025 season · final" : "Role trajectory"} accent={CARD_ACCENTS.trajectory}>
+                {t.delta == null ? (
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                    {pct(t.season)} snap share over {t.gp} game{t.gp === 1 ? "" : "s"} —{" "}
+                    <span style={{ color: "var(--gold)" }}>
+                      {t.lateGp >= t.earlyGp ? "W10-18 only" : "W1-9 only"}, so this is half a season, not a full-year role.
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "15px", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ color: "var(--text-muted)" }}>{pct(t.early)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W1-9</span>
+                      <span style={{ color: "var(--text-dim)" }}>→</span>
+                      <span style={{ color: t.trend === "rising" ? "var(--pos)" : t.trend === "falling" ? "var(--neg)" : "var(--text-primary)", fontWeight: 700 }}>{pct(t.late)}</span>
+                      <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>W10-18</span>
+                      <span style={{ marginLeft: "auto", color: "var(--text-secondary)", fontSize: "12px" }}>{pct(t.last4)} last 4</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "6px", lineHeight: 1.5 }}>
+                      {t.trend === "stable"
+                        ? `Steady role. The ${pct(t.season)} season average is a fair read.`
+                        : `${t.trend === "rising" ? "Role grew" : "Role shrank"} — the ${pct(t.season)} season average ${t.trend === "rising" ? "understates" : "overstates"} where he finished.`}
+                      {t.changedTeam && " Changed teams mid-2025, so this spans two different jobs."}
+                    </div>
+                  </>
+                )}
+              </CardSection>
+            )}
+
+            {card.qb && (
+              <CardSection
+                title={qc ? "Volume profile · 2025 season · final" : "Volume profile"}
+                accent={CARD_ACCENTS.volume}
+                note="Project a QB from these. His prior-season fantasy points are barely sticky (r 0.38); rushing volume is the most repeatable input in football (r 0.82)."
+              >
+                <CardMetricRow label="Rush attempts / game" value={card.qb.rush.toFixed(1)} pct={null} r={0.815} />
+                <CardMetricRow label="Pass attempts / game" value={card.qb.pass.toFixed(1)} pct={null} r={0.605} />
+                <CardMetricRow label="Passing aDOT" value={card.qb.adot.toFixed(1)} pct={null} r={0.486} />
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "7px" }}>
+                  League median {card.qb.median} rush att/gm.
+                  {card.qb.runner === "rushing" && <span style={{ color: "var(--pos)" }}> Rushing QB — this is scoring that survives a bad passing day.</span>}
+                  {card.qb.runner === "pocket" && <span style={{ color: "var(--gold)" }}> Pocket QB — effectively no rushing floor.</span>}
+                </div>
               </CardSection>
             )}
 
             <OmittedNote items={card.omitted} group="job" />
 
-            {(card.descriptive.length > 0 || card.gameLog || card.gameLogCur || (card.omitted || []).some(x => x.group === "production")) && (
-              <CardGroupHeader group="production" label="What he produced" hint="2025 output" nested />
-            )}
-
-            <GameLogSection cur={card.gameLogCur} prior={card.gameLog} reason={card.gameLogReason} />
-
-            {card.descriptive.length > 0 && (
-              <CardSection title="Week outcomes" accent={CARD_ACCENTS.outcomes} note="Spike rate is what best ball cares most about, and the least stable of the three. Bands are HALF-PPR: spike 18+, usable 10+, dud under 5. ⚠ In a FULL-PPR league the same player clears them more often, and unevenly by position — measured on 2025, spike rate rises about 26% at RB, 61% at WR and 76% at TE, and not at all at QB. Read these as half-PPR rates, not as a verdict on his ceiling in your format.">
-                {card.descriptive.map((x, i) => <CardMetricRow key={i} {...x} dim={x.r < 0.5} />)}
-              </CardSection>
-            )}
-
           </>
         )}
-
-        <OmittedNote items={card.omitted} group="production" />
 
         {(card.availability || card.availabilityReason || card.arc || card.vacated || card.oline) && (
           <CardGroupHeader group="outlook" label="What could change it" hint="durability, the calendar, turnover" />

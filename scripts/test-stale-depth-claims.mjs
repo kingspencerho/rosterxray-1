@@ -115,6 +115,7 @@ const check = (text, row) => {
   const s = String(text);
   const perm = s.match(PERMANENCE);
   if (perm) return {
+    rule: 1,
     frag: perm[0],
     why: "claims a job is permanently settled - a depth chart is a weekly fact and this entry forecloses next week",
     fix: "state the job and its date; drop the permanence. \"He is the Week 1 starter (Sep 9 2026)\" survives Sunday, \"THE JOB IS SETTLED\" does not.",
@@ -128,6 +129,7 @@ const check = (text, row) => {
   const ageDays = Math.floor((now - d.ts) / 86400000);
   if (ageDays <= IN_SEASON_ROLE_DAYS) return null;
   return {
+    rule: 2,
     frag: role[0],
     why: `states a current depth-chart position off a ${ageDays}-day-old date, in week ${season.week} - games have been played on top of it`,
     fix: "re-source it, or add the clause that makes it honest: when will you look again?",
@@ -164,9 +166,32 @@ for (const [src, key, text, row] of entries) {
   if (hit) failures.push({ src, key, ...hit });
 }
 
-if (failures.length) {
-  console.error(`FAIL  ${failures.length} prose entr${failures.length === 1 ? "y" : "ies"} make a depth-chart claim the calendar has outrun:\n`);
-  for (const f of failures) {
+// ⭐ THE DATA REFRESH READS RULE 2 AS A REPORT, NOT A GATE (Oct 10 2026).
+// Rule 2 is the only guard in the suite that fails on the CALENDAR alone: the
+// prose it reads lives in App.jsx, which a data refresh never touches, so every
+// week nobody re-sources a note it turned red on its own. The weekly workflow
+// failed every scheduled run from Sep 8 to Oct 6 for that reason, which froze
+// the live site's game logs at Week 1. A guard about PROSE freshness was
+// blocking the DATA.
+// RXR_DATA_REFRESH=1 (set only by .github/workflows/weekly-data-refresh.yml)
+// prints rule-2 hits, writes them to RXR_ADVISORY_OUT for the PR body, and exits
+// 0. ⛔ RULE 1 STILL FAILS: permanence is a phrasing defect, not a clock, so it
+// cannot appear between a green main and a data-only refresh. Guard 15 asserts
+// the workflow sets the flag and this file keeps rule 1 fatal.
+const advisory = process.env.RXR_DATA_REFRESH === "1";
+const fatal = advisory ? failures.filter((f) => f.rule !== 2) : failures;
+if (advisory && failures.length && !fatal.length) {
+  const lines = failures.map((f) => `- ${f.src} "${f.key}": ${f.why}`);
+  console.log(`ADVISORY  ${failures.length} prose entr${failures.length === 1 ? "y has" : "ies have"} a role claim older than ${IN_SEASON_ROLE_DAYS} days (re-source them in a session; this does not block the data):\n${lines.join("\n")}`);
+  if (process.env.RXR_ADVISORY_OUT) {
+    const { writeFileSync } = await import("fs");
+    writeFileSync(process.env.RXR_ADVISORY_OUT, lines.join("\n") + "\n");
+  }
+  process.exit(0);
+}
+if (fatal.length) {
+  console.error(`FAIL  ${fatal.length} prose entr${fatal.length === 1 ? "y" : "ies"} make a depth-chart claim the calendar has outrun:\n`);
+  for (const f of fatal) {
     console.error(`  ${f.src}  "${f.key}"`);
     console.error(`      ${f.why}`);
     console.error(`      ...${f.frag}...`);
