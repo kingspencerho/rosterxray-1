@@ -112,6 +112,7 @@ import REDZONE from './grading/data/redzone_2025.json';
 // scripts/build-availability.py. CONTEXT ONLY.
 import AVAILABILITY from './grading/data/availability_2026.json';
 import STATUS_LAYER from './grading/data/status_2026.json';
+import YAHOO_IDS from './grading/data/yahoo_ids_2026.json';
 import FPA_CUR from './grading/data/fpa_2026.json';
 import GAMEENV from './grading/data/gameenv_2026.json';
 import TRENDS_PRIOR from './grading/data/teamtrends_2025.json';
@@ -2930,6 +2931,28 @@ const getOline = (team) => {
 const STATUS_HARD = new Set(STATUS_LAYER._meta?.hard_status || []);
 const STATUS_LIVE = Object.keys(STATUS_LAYER.players || {}).length > 0;
 const getStatus = (name) => (STATUS_LIVE ? lookupPlayer(STATUS_LAYER.players, name) : null);
+
+// === YAHOO COMPANION (Oct 10 2026, his ask: work "seamlessly with the yahoo
+// fantasy app") ===
+// The same player's PUBLIC Yahoo page, from a public id crosswalk
+// (scripts/build-yahoo-ids.py). Nothing here calls the Yahoo API. Matched on
+// position as well as name; no match means no link, never a guess.
+const yahooUrlFor = (name, pos) => {
+  const hits = lookupPlayer(YAHOO_IDS.players, name);
+  if (!Array.isArray(hits) || !hits.length) return null;
+  const h = hits.find((x) => x.pos === pos);
+  return h ? (YAHOO_IDS._meta?.url || "").replace("{id}", h.id) : null;
+};
+// The public crosswalk stops adding Yahoo ids after the 2024 draft class
+// (measured Oct 10 2026: 1 of 2025's class, none of 2026's). Those players get
+// NO link. Two fallbacks were tested and both dead-end: Yahoo Fantasy's
+// /f1/playersearch?search= answers "not in this league (Error #152)", and a
+// Yahoo web search for the player page returns nothing usable.
+// Yahoo's own words for the things this app shows: lineup slots and the short
+// injury tags its roster screen prints beside a name.
+const YAHOO_SLOT = { FLEX: "W/R/T", SFLEX: "Q/W/R/T" };
+const YAHOO_TAG = { Questionable: "Q", Doubtful: "D", Out: "O", IR: "IR", PUP: "PUP",
+  Sus: "SUSP", Suspended: "SUSP", NFI: "NFI", DNR: "DNR", COV: "COV" };
 // A hard status is an ACTUAL ABSENCE. "Questionable" is not an opening and must
 // never be treated as one — half the league is questionable on a Friday.
 const isHardOut = (row) => !!row && (STATUS_HARD.has(row.injury_status) || STATUS_HARD.has(row.status));
@@ -4636,7 +4659,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     const asOf = st?.probed && !Number.isNaN(Date.parse(st.probed + "T00:00:00Z"))
       ? ` · as of ${new Date(st.probed + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}` : "";
     if (st && (st.injury || st.hard)) {
-      thisWeek.push({ label: "Status", tone: "warn",
+      thisWeek.push({ label: "Status", tone: "warn", tag: YAHOO_TAG[st.injury] || YAHOO_TAG[st.status] || null,
         text: `${st.injury || st.status}${st.part ? ` (${st.part})` : ""}${asOf}` });
     } else if (st && st.slot != null) {
       thisWeek.push({ label: "Status", tone: "flat",
@@ -4671,6 +4694,7 @@ const buildPlayerCard = (name, pos, team, nowTs = Date.now(), format = "standard
     }
   }
   card.thisWeek = thisWeek;
+  card.yahooUrl = yahooUrlFor(name, pos);
 
   const read = [];
   let curRead = [];
@@ -10509,6 +10533,11 @@ const WeeklyBars = ({ log }) => {
 // "could not access" it — which is the tell: an invisible absence reads as a
 // broken app, not as missing data. Same silent-drop class the availability
 // section was fixed for. `reason` is the population gate, stated in place.
+// Box-score column names a reader recognises from his league app, not the
+// builder's field names ("pass_yds" was printing on the card).
+const GAME_COL_LABEL = { tds: "TD", att: "Att", pass_yds: "Pass Yds", pass_td: "Pass TD", car: "Rush Att",
+  rush_yds: "Rush Yds", tgt: "Tgt", rec: "Rec", rec_yds: "Rec Yds", air_yds: "Air Yds" };
+
 const GameLogSection = ({ cur, prior, reason }) => {
   const [season, setSeason] = useState(cur ? "cur" : "prior");
   if (!cur && !prior) {
@@ -10575,9 +10604,9 @@ const GameLogSection = ({ cur, prior, reason }) => {
               <tr style={{ color: "var(--text-faint)", textAlign: "right" }}>
                 <th style={{ textAlign: "left", padding: "3px 6px 5px 0", fontWeight: 600 }}>Wk</th>
                 <th style={{ textAlign: "left", padding: "3px 8px 5px 0", fontWeight: 600 }}>Opp</th>
-                <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Pts</th>
+                <th style={{ padding: "3px 8px 5px 0", fontWeight: 600 }}>Fan Pts</th>
                 {log.games[0].stats.map(st => (
-                  <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{st.label}</th>
+                  <th key={st.label} style={{ padding: "3px 0 5px 8px", fontWeight: 600, whiteSpace: "nowrap" }}>{GAME_COL_LABEL[st.label] || st.label}</th>
                 ))}
               </tr>
             </thead>
@@ -10754,6 +10783,12 @@ const PlayerCardModal = ({ card, onClose }) => {
                 borderRadius: "3px", padding: "1px 6px", fontWeight: 600, letterSpacing: "0.08em",
               }}>{card.pos}</span>
               <span>{card.team || "—"}</span>
+              {card.yahooUrl && (
+                <a href={card.yahooUrl} target="_blank" rel="noopener noreferrer"
+                   style={{ color: "var(--ui-accent)", textDecoration: "none", border: "1px solid var(--border-subtle)", borderRadius: "3px", padding: "0 7px", minHeight: "32px", display: "inline-flex", alignItems: "center", order: 9 }}>
+                  Yahoo ↗
+                </a>
+              )}
               {card.adp != null && (
                 // Never print an ADP bare at a site that can show more than one
                 // format — the number means nothing without its market.
@@ -10825,7 +10860,12 @@ const PlayerCardModal = ({ card, onClose }) => {
             {card.thisWeek.map((x, i) => (
               <div key={i} style={{ display: "flex", gap: "10px", alignItems: "baseline", padding: "2px 0", fontSize: "12px", lineHeight: 1.5 }}>
                 <span style={{ flex: "none", minWidth: "58px", fontSize: "10px", letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-dim)" }}>{x.label}</span>
-                <span style={{ color: x.tone === "warn" ? "var(--caution)" : "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>{x.text}</span>
+                <span style={{ color: x.tone === "warn" ? "var(--caution)" : "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                  {x.tag && (
+                    <span style={{ display: "inline-block", marginRight: "6px", padding: "0 5px", border: "1px solid var(--caution)", borderRadius: "2px", fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em" }}>{x.tag}</span>
+                  )}
+                  {x.text}
+                </span>
               </div>
             ))}
           </div>
@@ -17321,7 +17361,7 @@ Analyze this best ball roster. Return JSON only.`;
                           letterSpacing: "0.05em",
                           fontSize: "11px",
                         }}>
-                          {r.slot}
+                          {YAHOO_SLOT[r.slot] || r.slot}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
                           <span style={{ color: "var(--text-primary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

@@ -211,6 +211,19 @@ else
   else
     echo "     not published yet for $SEASON - leaving the committed file alone"
   fi
+  echo
+
+  # 7b. YAHOO PLAYER IDS (public DynastyProcess crosswalk, not the Yahoo API).
+  # Display only: the card links each player to his own Yahoo page. Weekly so
+  # ids for new players land as the crosswalk adds them.
+  echo "7b/9 Yahoo player ids (DynastyProcess crosswalk, display only)"
+  if curl -sSL --fail --max-time 120 -o "$TMP/db_playerids.csv" \
+       "https://github.com/dynastyprocess/data/raw/master/files/db_playerids.csv"; then
+    python3 "$ROOT/scripts/build-yahoo-ids.py" "$TMP/db_playerids.csv" \
+      "$ROOT/grading/data/yahoo_ids_$SEASON.json" || fail=1
+  else
+    echo "     crosswalk unreachable - leaving the committed file alone"
+  fi
 
 fi
 

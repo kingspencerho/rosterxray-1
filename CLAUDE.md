@@ -9972,3 +9972,23 @@ Stat lines -> **This week** -> **The read** -> **What he produced** (game log + 
   week carry them. Open item.
 - Guard 38's consumer check now attributes a call to its enclosing TOP-LEVEL function (it was naming the
   nearest inner closure) and allowlists `buildPlayerCard`; a planted unlisted consumer fails.
+
+## Oct 10 2026: the Yahoo companion layer (his pick: A + B, C next)
+
+**A · Yahoo's own words.** Starting-lineup slots print `W/R/T` and `Q/W/R/T` (`YAHOO_SLOT`, display only, the
+engine keys are unchanged). The card's This-week status carries Yahoo's short injury tag (`YAHOO_TAG`: Q, D, O,
+IR, PUP, SUSP). Game-log column headers read `Pass Yds`, `Rec`, `Tgt` (`GAME_COL_LABEL`) instead of field names.
+**B · "Yahoo ↗" on every card.** `grading/data/yahoo_ids_2026.json` from `scripts/build-yahoo-ids.py`, a PUBLIC
+crosswalk (DynastyProcess `db_playerids.csv`), never the Yahoo API. Matched on name AND position; a name shared by
+two players at one position maps to nothing. Rebuilt weekly as step 7b of the full pass. ⚠️ **The crosswalk stops
+at the 2024 draft class** (measured: 1 id in 2025's class, none in 2026's; Sleeper's feed has the same gap, 220
+of 838 skill players). Those players get **no link**: Yahoo Fantasy's `/f1/playersearch?search=` was tested by him signed in and
+answers "not in this league (Error #152)", and a Yahoo web search found nothing. Coverage at build time: 160 of 216 top-200 redraft players have a direct link.
+⛔ **No session opens Yahoo in his logged-in browser to test it** (Yahoo ToS §2.4(i), recorded Oct 3). He taps it.
+
+**D · settings, measured, not yet changed (his call to decide).** His 13 Yahoo leagues (read live, not stored):
+12 teams 7/13 · 10 teams 4/13 · full PPR 7/13, half 6/13 · 4-pt pass TD 8/13 · 1 flex 9/13 · superflex 3/13 ·
+6 bench 7/13 · IR 2 in 9/13 · K+DEF 11/13 · playoffs start W15 7/13 · all head-to-head. Yahoo's published default
+(help.yahoo.com SLN6489): 10 teams, half PPR, 4-pt pass TD, -1 INT, 1 flex, 6 bench, 2 IR, playoffs W16-17.
+ESPN's (espn.com story 19540805): full PPR, 1 flex, 7 bench, IR optional. The app's default (`yahoo_std`) already
+matches on everything but IR (1 vs 2) and playoff start.
