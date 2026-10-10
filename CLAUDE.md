@@ -10037,3 +10037,13 @@ grades cannot move: every fixture player resolves in steps 1-5.
   (guard 34). Waiver Targets shows the top `FA_SHOW = 5` with two reasons each, the limit in one line at rest,
   the method behind a tap, no ADP, and **no free-text "already taken" box** (typing names is slow and misspells;
   guard 25 now asserts it stays gone). The Trends intro is one line plus a tap.
+
+### Oct 10 2026: design direction, round two (his picks, nothing built yet)
+Mockup: https://claude.ai/artifact/QEFhrDe1XBh2cqhx74Kc4w (v2). **His calls so far:** option C's lineup rows (a
+coloured edge for role direction + a 5-week mini chart), set in option B's Bebas numerals, which he likes best
+visually; a bottom tab bar ranked left to right by importance; a player card in pages, each led by one chart with
+the metrics that explain it beside it. **Proposed, awaiting his yes:** tabs THIS WEEK · PICKUPS · PLAYERS · TEAM
+(Lineup + Matchups + Trends merge into This Week; Waivers + Breakout into Pickups); card pages THIS WEEK (game,
+line, weather, status, news, opposing defense out) · POINTS (bars coloured by the spike/usable/dud bands, a dashed
+expected-points outline per bar) · USAGE (target share for WR/TE, carry share for RB, rush attempts for QB) ·
+PROFILE. ⚠️ Weather is NEW data: the app knows roofs, not forecasts.
