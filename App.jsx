@@ -7794,7 +7794,8 @@ const REDRAFT_LEAGUES = {
 const SLOT_FLEX = new Set(["WRT", "W/R/T", "FLEX", "WR/T", "RWT"]);
 const SLOT_SFLEX = new Set(["QWRT", "Q/W/R/T", "SFLEX", "SUPERFLEX", "OP"]);
 const SLOT_IGNORE = new Set(["K", "DEF", "DST", "D/ST", "PK"]);
-const SLOT_MIN_STARTERS = 5;   // below this the read is too thin to trust a whole config to
+const SLOT_MIN_STARTERS = 5;
+const SLOT_MIN_BENCH = 4;      // fewer visible bench rows than this = a cut-off screenshot   // below this the read is too thin to trust a whole config to
 
 // ⛔ A <select> HANDED A VALUE WITH NO MATCHING OPTION DOES NOT ERROR — it renders
 // blank or snaps to the first entry, and the panel then shows a number the engine is
@@ -7842,7 +7843,12 @@ const configFromSlots = (players) => {
   // or matchup screenshot usually stops above the bench, and the first build read
   // that as "bench 0" and rewrote his league settings. Unseen means unknown: the
   // reader's own bench and IR settings stand, and the summary does not claim them.
-  return { lineup, benchSize: bench > 0 ? bench : null, irSlots: bench > 0 || ir > 0 ? ir : null,
+  // ...AND A PARTLY VISIBLE BENCH IS NOT A SMALL BENCH. Measured on his own team
+  // page: the screenshot stopped one row into the bench and read "bench 1". A real
+  // bench is 5-8 in his leagues and 5-7 on the major sites, so fewer than
+  // SLOT_MIN_BENCH rows means the image was cut off, and the count is not trusted.
+  const benchSeen = bench >= SLOT_MIN_BENCH;
+  return { lineup, benchSize: benchSeen ? bench : null, irSlots: benchSeen ? ir : null,
            starters, tagged, ignored };
 };
 

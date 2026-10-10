@@ -213,6 +213,10 @@ if (typeof fromSlots === "function") {
   check("a screenshot with no bench rows leaves bench and IR unknown",
     !!starters && starters.benchSize === null && starters.irSlots === null,
     starters ? `bench ${starters.benchSize} ir ${starters.irSlots}` : "null");
+  // His team page cut off one row into the bench and read "bench 1".
+  const oneBench = fromSlots([...yahoo.filter(r => r.slot !== "BN" && r.slot !== "IR"), { name: "T. Allgeier", slot: "BN" }]);
+  check("a cut-off bench (one row) is not read as a 1-man bench",
+    !!oneBench && oneBench.benchSize === null, oneBench ? `bench ${oneBench.benchSize}` : "null");
 }
 check("...and the extractor keeps his own settings when they are unknown",
   /detected\.benchSize \?\? customConfig\.benchSize/.test(cut("const extractFromImages = ", "const removeImage")));
