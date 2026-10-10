@@ -66,7 +66,7 @@ console.log("\n=== 3. reviewed consumers, allowlisted ===");
 // buildPlayerCard added Oct 10 2026: the card's "This week" line prints the
 // opponent and the betting line for the game in front of him. Display only;
 // section 1 still proves neither engine reads it.
-const ALLOWED = ["buildGameEnvBoard", "buildPlayerCard"];
+const ALLOWED = ["buildGameEnvBoard", "buildPlayerCard", "resolveHintedName"];
 for (const acc of ["gameEnvFor", "getProj", "projDivergence"]) {
   const sites = [];
   const re = new RegExp(`\\b${acc.replace("(", "\\(")}\\s*\\(`, "g");

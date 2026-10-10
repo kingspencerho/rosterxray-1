@@ -22,7 +22,7 @@ const repoRoot = process.cwd();
 const tmpDir = path.join(os.tmpdir(), "rxr-probe"); mkdirSync(tmpDir, { recursive: true });
 writeFileSync(path.join(tmpDir, "stub.js"), "export const Analytics=()=>null;export const track=()=>{};\n");
 const src = readFileSync(path.join(repoRoot, "App.jsx.jsx"), "utf8") +
-  "\nexport { findPlayer, ADP_DATA, ADP_YAHOO, ADP_SUPERFLEX };\n";
+  "\nexport { findPlayer, resolveHintedName, ADP_DATA, ADP_YAHOO, ADP_SUPERFLEX };\n";
 const outfile = path.join(tmpDir, "e2.mjs");
 await build({ stdin:{contents:src,loader:"jsx",resolveDir:repoRoot,sourcefile:"App.jsx.jsx"},
   bundle:true, platform:"node", format:"esm", outfile, logLevel:"silent",
@@ -126,6 +126,13 @@ pk(e.findPlayer("Justin Jefferson", "yahoo")?.pickup !== true, "a drafted player
   pk(/ambiguous_off/.test(body) && /continue/.test(body), "a name two offensive players share is refused, never guessed");
   pk(/st\.side === "off"/.test(body) && /PICKUP_POS\.has\(st\.pos\)/.test(body), "only offensive skill positions on a team qualify");
 }
+// "J. DANIELS" on his share card matched the drafted Jayden (WAS) while his
+// roster held Jalon (TB). The printed opponent / team picks the right one.
+pk(e.resolveHintedName("J. Daniels", { opp: "DAL" }) === "Jalon Daniels", "a short name plus his opponent resolves to the right player");
+pk(e.resolveHintedName("J. Daniels", { team: "WAS" }) === "Jayden Daniels", "...and a printed team does the same the other way");
+pk(e.resolveHintedName("J. Daniels", {}) === "J. Daniels", "a short name that fits two players with no hint is left alone, never guessed");
+pk(e.resolveHintedName("J. Daniels", { opp: "ZZZ" }) === "J. Daniels", "a hint that matches nobody changes nothing");
+pk(e.resolveHintedName("Jalon Daniels", { opp: "DAL" }) === "Jalon Daniels", "full names pass through untouched");
 const failed = fail !== 0 || flips !== 0;
 console.log(`\n${failed ? "FAILURES: "+fail+" flips: "+flips : "ALL CHECKS PASSED"}`);
 // ⚠️ THIS GUARD COULD NOT FAIL UNTIL Sep 2 2026, AND ITS OWN HEADER SAID IT COULD.

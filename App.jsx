@@ -5064,6 +5064,51 @@ const pickupFor = (name) => {
   return null;
 };
 
+// A SHORT NAME IS TWO PLAYERS (Oct 10 2026). Yahoo's share card prints
+// "J. DANIELS", and findPlayer's initial step matched the drafted Jayden Daniels
+// (WAS) when the roster held Jalon Daniels (TB), an undrafted pickup. Yahoo also
+// prints the player's team ("TB - QB") or his opponent ("@ DAL"), and the
+// extractor now returns them as `team` / `opp`. This expands an INITIAL-form name
+// to the one player those hints point at, from the drafted table plus the live
+// feed. No hint, or a hint that does not single out exactly one player, changes
+// nothing: the name goes on unchanged, never guessed.
+const resolveHintedName = (raw, hint = {}) => {
+  const m = normalize(raw).match(/^([a-z])\s+(.+)$/);
+  if (!m) return raw;
+  const initial = m[1];
+  const last = m[2].split(" ").filter(w => !/^(jr|sr|ii|iii|iv|v)$/.test(w)).join(" ");
+  const cands = new Map();
+  const consider = (key, pos, team) => {
+    if (!PICKUP_POS.has(pos) || !team || team === "-" || team === "FA") return;
+    const base = key.replace(SUFFIX_RE, "");
+    const sp = base.indexOf(" ");
+    if (sp < 1 || base[0] !== initial || base.slice(sp + 1) !== last) return;
+    cands.set(base, { key, team: teamKey(team) });
+  };
+  for (const [k, v] of Object.entries(ADP_YAHOO)) consider(normalize(k), v.pos, v.team);
+  if (STATUS_LIVE) {
+    for (const [k, v] of Object.entries(STATUS_LAYER.players)) if (v.side === "off") consider(k, v.pos, v.team);
+  }
+  let list = [...cands.values()];
+  if (!list.length) return raw;
+  const ht = hint.team ? teamKey(hint.team) : null;
+  const ho = hint.opp ? teamKey(hint.opp) : null;
+  // One candidate across BOTH sources is expanded even without a hint: an
+  // undrafted pickup ("A. Ekeler") is otherwise unreachable, because only the
+  // drafted table has an initial-name step. A hint, when present, must agree.
+  if (!ht && !ho) return list.length === 1 ? titleCaseName(list[0].key) : raw;
+  if (ht) list = list.filter(c => c.team === ht);
+  else if (ho) {
+    list = list.filter(c => {
+      const g = gameEnvFor(c.team);
+      if (!g) return false;
+      const home = (TEAM_SPELLINGS[c.team] || [c.team]).includes(g.home);
+      return teamKey(home ? g.away : g.home) === ho;
+    });
+  } else return raw;
+  return list.length === 1 ? titleCaseName(list[0].key) : raw;
+};
+
 const findPlayer = (name, format = "standard") => {
   const norm = normalize(name);
   if (!norm) return null;
@@ -9038,6 +9083,10 @@ const scoreFreeAgent = (name, pos, team) => {
 };
 
 // The pool itself. `excluded` is the user's optional "already taken" list.
+// ⭐ HOW MANY WAIVER TARGETS SHOW. Oct 10 2026, his call: a short list a reader
+// can act on beats a long one they have to weigh. The pool still ranks everyone.
+const FA_SHOW = 5;
+
 const buildFreeAgentPool = (rosteredKeys, league, adpTable, excluded = new Set()) => {
   // How deep is this league actually rostered? teams x (starters + bench).
   // Everything shallower than that is presumed taken, which is the honest
@@ -9118,15 +9167,15 @@ const BREAKOUT_MIN_BASE_GP = 2;
 // garbage-time score. Requiring corroboration is what separates the two, and
 // WATCH is the state worth having — it fires a week BEFORE the box score does.
 const BREAKOUT_STATES = {
-  breakout: { rank: 4, label: "BREAKOUT", why: "role grew and the production followed" },
-  watch:    { rank: 3, label: "WATCH",    why: "role is growing, the points have not caught up yet" },
+  breakout: { rank: 4, label: "BREAKOUT", tone: "var(--pos)",        why: "role grew and the production followed" },
+  watch:    { rank: 3, label: "WATCH",    tone: "var(--pos-bright)", why: "role is growing, the points have not caught up yet" },
   // ⭐ THE EARLIEST SIGNAL ON THE BOARD, and the reason the status feed is
   // wired at all: it fires the day a teammate lands on IR, before a single
   // snap has moved. Ranked BELOW watch deliberately — watch is a MEASURED
   // step in his own usage, an opening is a circumstance that has not reached
   // his snap count yet. Measured evidence about him outranks a prediction.
-  opening:  { rank: 2, label: "OPENING",  why: "the player ahead of him is out — the snaps have not moved yet" },
-  noise:    { rank: 1, label: "NOISE",    why: "one loud game with no role change behind it" },
+  opening:  { rank: 2, label: "OPENING",  tone: "var(--pos-bright)", why: "the player ahead of him is out — the snaps have not moved yet" },
+  noise:    { rank: 1, label: "NOISE",    tone: "var(--text-dim)",   why: "one loud game with no role change behind it" },
   quiet:    { rank: 0, label: "quiet",    why: "no move in role or production" },
 };
 
@@ -9671,7 +9720,7 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution, echo, cur, noTag })
 );
 
 const TREND_TONE = {
-  rising: "var(--accent-lime)", falling: "var(--danger)",
+  rising: "var(--pos)", falling: "var(--neg)",
   stable: "var(--text-secondary)", insufficient: "var(--text-dim)",
 };
 const pct1 = (v) => v == null ? "—" : `${(v * 100).toFixed(1)}%`;
@@ -10144,8 +10193,11 @@ const FIRST_VISIT = (() => {
 // no-silent-drops rule applies to copy as much as to players: the way back is
 // always exactly where the text used to be, one tap, labelled. First-time
 // readers see everything expanded — the flag is only set once a grade is run.
+// ⭐ CLOSED FOR EVERY READER, Oct 10 2026, his call: "toggle the explanations so
+// it doesn't compromise app features." The teaching copy is one tap away; the
+// findings are what a reader sees first, first visit or fortieth.
 const Explainer = ({ children, label = "what this means" }) => {
-  const [open, setOpen] = useState(FIRST_VISIT);
+  const [open, setOpen] = useState(false);
   return (
     <details
       open={open}
@@ -11582,7 +11634,6 @@ export default function RosterScorer() {
   // analyzeRedraft: the engine must stay provably clean of every context layer,
   // and this reads six of them. Same architecture as buildPlayerCard.
   const [faOpen, setFaOpen] = useState(false);
-  const [faTaken, setFaTaken] = useState("");
   const [faPos, setFaPos] = useState("ALL");
   const [breakoutOpen, setBreakoutOpen] = useState(false);
   const [breakoutRookiesOnly, setBreakoutRookiesOnly] = useState(true);
@@ -11963,16 +12014,9 @@ export default function RosterScorer() {
   const freeAgents = useMemo(() => {
     if (!analyzed || analyzed.mode !== "redraft") return null;
     const rostered = new Set((analyzed.valid || []).map(p => normalize(p.name)));
-    // The user's own "already taken" list. One name per line or comma
-    // separated; anything that resolves is excluded. This is the only way the
-    // app can learn about the other eleven rosters, so it is offered rather
-    // than assumed.
-    const taken = new Set(
-      faTaken.split(/[\n,]/).map(x => normalize(x.trim())).filter(Boolean)
-    );
     const league = redraftLeague === "custom" ? buildLeagueFromConfig(customConfig) : REDRAFT_LEAGUES[redraftLeague];
-    return buildFreeAgentPool(rostered, league, ADP_YAHOO, taken);
-  }, [analyzed, faTaken, redraftLeague, customConfig]);
+    return buildFreeAgentPool(rostered, league, ADP_YAHOO);
+  }, [analyzed, redraftLeague, customConfig]);
 
   // Built at module level and invoked here, exactly as buildPlayerCard and the
   // free-agent pool are. Putting it inside analyzeRedraft would make the
@@ -12216,7 +12260,9 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
                 // LEAGUE starts beside every row, so the roster screenshot already describes
                 // the league shape and the reader was re-entering it by hand.
                 const slot = typeof p.slot === "string" && p.slot.trim() ? p.slot.trim().toUpperCase() : undefined;
-                return { name: p.name.trim(), pick: num(p.pick), adp: num(p.adp), slot };
+                // Team / opponent hints (Oct 10 2026): only well-formed abbreviations.
+                const abbr = (v) => (typeof v === "string" && /^[A-Za-z]{2,4}$/.test(v.trim()) ? v.trim().toUpperCase() : undefined);
+                return { name: p.name.trim(), pick: num(p.pick), adp: num(p.adp), slot, team: abbr(p.team), opp: abbr(p.opp) };
               }
               return null;
             }).filter(Boolean);
@@ -12289,6 +12335,10 @@ const compressAndEncode = (file) => new Promise((resolve, reject) => {
       if (players.length === 0) {
         throw new Error("Extraction returned only non-player text — tap Show Debug Response to inspect, or try Paste Text mode");
       }
+
+      // An initial-form name that fits two players is expanded to the one the
+      // printed team/opponent points at ("J. Daniels" @ DAL -> Jalon Daniels).
+      players = players.map(p => ({ ...p, name: resolveHintedName(p.name, p) }));
 
       // Dedupe by name — first occurrence wins, so the earliest (draft-order) row
       // keeps its pick/adp.
@@ -17506,7 +17556,7 @@ Analyze this best ball roster. Return JSON only.`;
                       {env.games.map((row, i) => {
                         const g = row.game;
                         const flags = [];
-                        if (g.shootout) flags.push(["shootout", "var(--accent-lime)"]);
+                        if (g.shootout) flags.push(["shootout", "var(--pos-bright)"]);
                         if (g.blowout) flags.push(["blowout risk", "var(--caution)"]);
                         if (g.indoor) flags.push(["dome", "var(--text-muted)"]);
                         return (
@@ -17726,7 +17776,7 @@ Analyze this best ball roster. Return JSON only.`;
               // nothing to trend. The panel does not exist rather than
               // rendering an empty table.
               if (!board || board.rows.length === 0) return null;
-              const tone = { rising: "var(--accent-lime)", falling: "var(--danger)", stable: "var(--text-secondary)", insufficient: "var(--text-dim)" };
+              const tone = { rising: "var(--pos)", falling: "var(--neg)", stable: "var(--text-secondary)", insufficient: "var(--text-dim)" };
               return (
                 <div id="rxr-trends" style={{ marginBottom: "20px" }}>
                   <SectionH2
@@ -17736,19 +17786,22 @@ Analyze this best ball roster. Return JSON only.`;
                     hint={board.movers > 0 ? `${board.movers} moving · ${board.vintage}` : board.vintage} />
                   {startSitOpen && (
                     <div style={{ padding: "10px 12px", background: "var(--bg-raised)", borderRadius: "0 0 6px 6px" }}>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "10px" }}>
-                        Your starters ranked by how much their role has MOVED this season, biggest movers first in both directions — a collapsing role is the start you would otherwise make out of habit. Share of his team's targets, or carries for a back, split {board.splitMode === "calendar" ? "W1-9 against W10-18" : "into halves of the weeks he has played"}. {board.tgtThreshold != null
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "4px" }}>
+                        Your starters, biggest role changes first.
+                      </div>
+                      <Explainer label="how this works">
+                        Ranked by how much each starter's role has moved this season, in both directions — a shrinking role is the start you would otherwise make out of habit. Share of his team's targets, or carries for a back, split {board.splitMode === "calendar" ? "W1-9 against W10-18" : "into halves of the weeks he has played"}. {board.tgtThreshold != null
                           ? <>A move counts as rising or falling once it clears {(board.tgtThreshold * 100).toFixed(1)}pp of target share{board.carThreshold != null ? ` or ${(board.carThreshold * 100).toFixed(1)}pp of carry share` : ""} — one standard deviation of every player's move this season, so the bar comes from this week's data rather than being picked. STABLE beside a visible change means the change is real but smaller than that bar.</>
                           : <>It is too early in the season to set a bar: too few players league-wide have enough games to split, so nothing is labelled rising or falling yet and every row shows what it can measure instead.</>}
                         <div style={{ marginTop: "4px", color: "var(--text-dim)" }}>
                           Quarterbacks are not listed: neither share describes a passer's role. This never touches your grade{board.pending > 0 ? `, and ${board.pending} starter${board.pending > 1 ? "s do" : " does"} not have enough games yet — those say so rather than reading flat` : ""}.
                         </div>
-                      </div>
+                      </Explainer>
                       {board.rows.map((r, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", padding: "7px 0", borderTop: i === 0 ? "none" : "1px solid var(--border-default)" }}>
                           <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", minWidth: "140px" }}>
                             {r.name}
-                            <span style={{ color: posColor(r.pos), fontWeight: 700, marginLeft: "6px", fontSize: "10px" }}>{r.pos}</span>
+                            <span style={{ color: posColor(r.pos).text, fontWeight: 700, marginLeft: "6px", fontSize: "10px" }}>{r.pos}</span>
                             <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: "10px" }}> {r.team}</span>
                           </span>
                           {r.delta != null ? (
@@ -17801,8 +17854,10 @@ Analyze this best ball roster. Return JSON only.`;
               const shown = freeAgents.candidates
                 .filter(c => faPos === "ALL" || c.pos === faPos)
                 .filter(c => !c.likelyRostered)
-                .slice(0, 12);
-              const deep = freeAgents.candidates.filter(c => !c.likelyRostered).length;
+                // ⭐ TOP 5, HIS CALL Oct 10 2026: "limited to like top 5... not
+                // confusing." Twelve rows with three bullets each was 36 facts to
+                // weigh; five rows with their two strongest reasons is a decision.
+                .slice(0, FA_SHOW);
               return (
                 <div style={{ marginBottom: "20px" }}>
                   <SectionH2
@@ -17810,36 +17865,20 @@ Analyze this best ball roster. Return JSON only.`;
                     title="WAIVER TARGETS"
                     open={faOpen}
                     onToggle={() => setFaOpen(o => !o)}
-                    hint={`${deep} ranked`}
+                    hint={`top ${FA_SHOW}`}
                   />
                   {faOpen && (<>
-                    {/* ⚠️ THE LIMIT, STATED FIRST. The app knows your roster and
-                        the player universe. It does not know the other eleven
-                        rosters, so this cannot be "your best available add" and
-                        must not be worded as one. */}
-                    <div style={{
-                      // ⚠️ A CAVEAT IS NOT THE CONTENT. This block was the largest
-                      // bright mass on the page and it says what the app CANNOT do —
-                      // the one thing on screen a returning reader never needs again.
-                      // It keeps its bold lead sentence and drops a step behind the
-                      // players, which is where the eye should land.
-                      fontSize: "11px", lineHeight: 1.55, color: "var(--text-muted)",
-                      background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
-                      borderRadius: "4px", padding: "9px 11px", marginBottom: "12px",
-                    }}>
-                      <strong style={{ color: "var(--text-primary)" }}>This app cannot see your league's waiver wire.</strong>{" "}
-                      It knows your roster and it knows every player; it does not know the other{" "}
-                      {(freeAgents.depth / 13).toFixed(0) - 1} rosters. So this ranks players who are
-                      not on <em>your</em> roster and who a {freeAgents.depth}-deep league plausibly leaves
-                      unrostered. Check the names against your actual wire, and paste anyone already
-                      taken below to drop them.
-                      <div style={{ marginTop: "7px", color: "var(--text-dim)" }}>
-                        Ranked on role change, volume, targets per route, availability and separation —
-                        in Source Hierarchy order. <strong style={{ color: "var(--text-secondary)" }}>Schedule is not
-                        in the score.</strong> Matchup data is the least stable input measured here, so it
-                        sorts a shortlist and never builds one.
-                      </div>
+                    {/* ⚠️ THE LIMIT STAYS AT REST, IN ONE LINE. The app cannot see the
+                        other rosters, so this is never "your best available add".
+                        The ranking method is reference and sits behind the tap. */}
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "4px" }}>
+                      This app cannot see your league's waiver wire, so check each name is still free.
                     </div>
+                    <Explainer label="how these are ranked">
+                      Role change first, then volume, targets per route, availability and separation.{" "}
+                      <strong style={{ color: "var(--text-primary)" }}>Schedule is not in the score</strong>:
+                      matchup data is the least stable input here, so it never puts a player on this list.
+                    </Explainer>
 
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
                       {["ALL", "RB", "WR", "TE", "QB"].map(pp => (
@@ -17891,9 +17930,6 @@ Analyze this best ball roster. Return JSON only.`;
                             {c.name}
                           </span>
                           <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{c.team}</span>
-                          <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>
-                            ADP {typeof c.adp === "number" ? c.adp.toFixed(0) : "—"}
-                          </span>
                         </div>
                         {/* THE EVIDENCE, NOT JUST THE RANK. A ranked list a reader
                             cannot audit is a black box, and checkable numbers are
@@ -17902,7 +17938,7 @@ Analyze this best ball roster. Return JSON only.`;
                             Hierarchy rank. See FaReason for why those are two
                             separate channels and why neither invents a hue. */}
                         <ul style={{ margin: "6px 0 0", padding: "0 0 0 15px", listStyle: "disc" }}>
-                          {c.reasons.slice(0, 3).map(r => (
+                          {c.reasons.slice(0, 2).map(r => (
                             <FaReason key={r.key} label={r.label}
                               numColor={posColor(c.pos).text} rank={FA_RANK[r.key] || 3} />
                           ))}
@@ -17910,22 +17946,6 @@ Analyze this best ball roster. Return JSON only.`;
                       </div>
                     ))}
 
-                    <div style={{ marginTop: "12px" }}>
-                      <div style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--ui-accent)", fontWeight: 700, marginBottom: "5px" }}>
-                        ALREADY TAKEN IN YOUR LEAGUE
-                      </div>
-                      <textarea
-                        value={faTaken}
-                        onChange={(e) => setFaTaken(e.target.value)}
-                        placeholder={"One name per line, or comma separated.\nAnything you paste here drops out of the list above."}
-                        style={{
-                          width: "100%", minHeight: "62px", fontSize: "12px", padding: "8px",
-                          background: "var(--bg-raised)", color: "var(--text-primary)",
-                          border: "1px solid var(--border-default)", borderRadius: "3px",
-                          fontFamily: "inherit", resize: "vertical",
-                        }}
-                      />
-                    </div>
                   </>)}
                 </div>
               );
@@ -18033,8 +18053,8 @@ Analyze this best ball roster. Return JSON only.`;
                               {r.state !== "quiet" && (
                                 <span style={{
                                   fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em",
-                                  color: "var(--text-primary)", background: "var(--bg-elevated)",
-                                  border: "1px solid var(--border-default)", borderRadius: "3px",
+                                  color: BREAKOUT_STATES[r.state].tone, background: "var(--bg-elevated)",
+                                  border: `1px solid ${BREAKOUT_STATES[r.state].tone}`, borderRadius: "3px",
                                   padding: "1px 5px",
                                 }}>{BREAKOUT_STATES[r.state].label}</span>
                               )}

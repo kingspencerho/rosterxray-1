@@ -42,13 +42,15 @@ Yahoo TEAM PAGE (web or app, added Oct 2026): a table whose far-left "Pos" colum
 
 Yahoo MATCHUP PAGE (added Oct 2026): two rosters side by side with a "Pos" column in the MIDDLE. The LEFT-hand roster belongs to the person who took the screenshot; everything to the RIGHT of the middle Pos column belongs to their OPPONENT. Return ONLY the left-hand roster. NEVER return a player from the right-hand side — grading an opponent's player as the user's own is the worst error this tool can make. "slot" = the middle Pos value for that row (W/R/T as "WRT", Q/W/R/T as "QWRT"); rows in the bench table below the starters are "BN".
 
-Return ONLY a JSON array of objects, one per player, in draft order. Each object has "name" (required, the player's full name as printed) plus optional "pick" and "adp" numbers and an optional "slot" string. Omit a key entirely when that value was not visible — do not send null, 0 or a guess. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
+TEAM AND OPPONENT HINTS (Yahoo screens, added Oct 2026): a short name like "J. Daniels" can be two different players, so ALSO return, when printed: "team" = the player's own NFL team abbreviation shown with him (e.g. "TB - QB" gives "TB"), and "opp" = the opponent in his game line (e.g. "@ DAL (2nd)" or "v DEN (7th)" gives "DAL" / "DEN"; ignore the rank in parentheses). Uppercase abbreviations only. Omit either key when it is not printed — never infer a team from memory.
+
+Return ONLY a JSON array of objects, one per player, in draft order. Each object has "name" (required, the player's full name as printed) plus optional "pick" and "adp" numbers and optional "slot", "team" and "opp" strings. Omit a key entirely when that value was not visible — do not send null, 0 or a guess. No markdown, no code fences, no preamble, no trailing text — just the raw JSON array.
 
 Example output exactly:
 [{"name":"Bijan Robinson","pick":2,"adp":2.4},{"name":"Tetairoa McMillan","pick":7,"adp":9.1},{"name":"Trey McBride","pick":13},{"name":"Caleb Williams"}]
 
 And from a Yahoo share card, where slots are present and numbers are not:
-[{"name":"J. Burrow","slot":"QB"},{"name":"O. Hampton","slot":"RB"},{"name":"J. Warren","slot":"WRT"},{"name":"D. Boston","slot":"BN"},{"name":"J. Tyson","slot":"IR"}]
+[{"name":"J. Burrow","slot":"QB","opp":"PIT"},{"name":"O. Hampton","slot":"RB","opp":"DEN"},{"name":"J. Warren","slot":"WRT","opp":"IND"},{"name":"D. Boston","slot":"BN","opp":"NYJ"},{"name":"J. Tyson","slot":"IR","opp":"MIN"}]
 
 Include ALL skill position players visible across all images (QB, RB, WR, TE). Skip kickers and defenses. (They occupy lineup slots the app does not model, so nothing is lost by omitting them entirely — do not return them with a slot either.) Deduplicate if the same player appears twice.`;
 

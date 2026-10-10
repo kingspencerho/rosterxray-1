@@ -10024,3 +10024,16 @@ repair: "Jaylen Daniels" would otherwise become Jayden Daniels, a different QB. 
 (260, past every draftable price, so no reach/value flag) and `pickup: true`. His roster now grades 14 of 14.
 Guard: `test-findplayer.mjs` step-6 section (7 checks; a sabotage letting best ball through exits 1). Fixture
 grades cannot move: every fixture player resolves in steps 1-5.
+
+### Oct 10 2026: a hinted short name, colour that means something, and less to read
+- **"J. Daniels" was Jayden when the roster said Jalon.** `resolveHintedName` runs before findPlayer in the
+  screenshot path: an initial-plus-surname read is matched against ADP_YAHOO and the live Sleeper feed, filtered
+  by the row's TEAM or OPPONENT (the extractor now returns both, `api/analyze.js`), and replaced with a full name
+  only when exactly one candidate fits. No hint and two candidates leaves the name alone. Guard: test-findplayer.
+- **The RISING/FALLING tags were white because `--danger` and `--accent-lime` are not defined.** Now `--pos` /
+  `--neg`; breakout tags carry a `tone` (BREAKOUT green, WATCH/OPENING lime, NOISE grey). Trends rows were also
+  passing `posColor()`'s object as a colour; fixed to `.text`.
+- **His rule, Oct 10: design from the user's seat, cut friction.** Explainers now start CLOSED for everyone
+  (guard 34). Waiver Targets shows the top `FA_SHOW = 5` with two reasons each, the limit in one line at rest,
+  the method behind a tap, no ADP, and **no free-text "already taken" box** (typing names is slow and misspells;
+  guard 25 now asserts it stays gone). The Trends intro is one line plus a tap.

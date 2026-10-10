@@ -57,8 +57,11 @@ ok("the read is module-level and precedes the handler that writes it",
 
 console.log("\nthe Explainer itself");
 ok("Explainer is defined exactly once", (app.match(/const Explainer = /g) || []).length === 1);
-ok("it seeds its open state from FIRST_VISIT, not from a fresh read",
-  /useState\(FIRST_VISIT\)/.test(app));
+const expBodyEarly = () => { const a = app.indexOf("const Explainer = "); return a < 0 ? "" : app.slice(a, a + 400); };
+// ⭐ Oct 10 2026, his call: explanations start CLOSED for every reader. The
+// findings come first; the teaching copy is one tap away.
+ok("it starts closed for every reader",
+  /const \[open, setOpen\] = useState\(false\)/.test(expBodyEarly()));
 ok("it is a real disclosure with a labelled way back",
   /<summary/.test(app) && /what this means/.test(app),
   "hiding is not deleting - the way back is where the text used to be");

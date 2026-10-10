@@ -154,8 +154,13 @@ ok("the panel states it cannot see the waiver wire",
   /cannot see your league's waiver wire/i.test(app));
 ok("...and that the score excludes the schedule",
   /Schedule is not[\s\S]{0,40}in the score/i.test(app));
-ok("an exclusion list is offered rather than the limit being assumed",
-  /ALREADY TAKEN IN YOUR LEAGUE/.test(app) && /setFaTaken/.test(app));
+// ⭐ Oct 10 2026, his call: the free-text "already taken" box is gone. Typing
+// names is slow and misspells; the one-line limit above tells the reader to
+// check the wire instead, and the list is short enough to check by eye.
+ok("no free-text exclusion box (typing names is friction)",
+  !/ALREADY TAKEN IN YOUR LEAGUE/.test(app) && !/setFaTaken/.test(app));
+ok("the list shows a short top N from one constant",
+  /const FA_SHOW = 5;/.test(app) && /\.slice\(0, FA_SHOW\)/.test(app));
 ok("unsigned players are excluded — no team means no role",
   /row\.team === "-" \|\| row\.team === "FA"/.test(app));
 ok("best ball is out of scope", /analyzed\.mode !== "redraft"/.test(app),
