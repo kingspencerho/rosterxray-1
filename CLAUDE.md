@@ -10087,3 +10087,18 @@ lineup behind "why". The redraft card's title is now **Draft grade**.
 **Profile page:** `ProfileCompare` replaces ShiftRow there: no r, last season dim, now large in his position colour,
 change bold only when it cleared the bar, WOPR dropped (it restates two rows). r is gone from every card row (it
 still fades weak rows; the value is a hover hint), and the glossary's `_r` entry now explains faded rows.
+
+### Oct 10 2026 (late): one grade graphic, photos, and one style across the card's four pages
+- ⛔ **One grade graphic, his call** ("the user won't know how to tell it apart"). The season badge is gone from the
+  grade card, and the title is back to **Redraft grade**. `buildSeasonGrade` now feeds the **Lineup section**: in season
+  it is "STARTING LINEUP · THIS SEASON", your best healthy lineup by expected points a game, each starter against the
+  average starter at that spot in a league your size, plus the total. Before the season it falls back to the ADP lineup.
+- **Photos, his call after the trade-offs** (Sleeper's images, not licensed to this app; the link can change): `PlayerAvatar`
+  puts the Sleeper headshot on an initials badge in team colours (`TEAM_COLORS`), so a missing or failed photo shows the
+  badge. The id is `sid` in `status_2026.json` (new field, `build-status.py`); `headshotFor` is a reviewed status consumer.
+  Shown on the card header and the lineup rows. Guard 14 asserts the fallback. ⚠️ Images load lazily, so a hidden
+  preview tab shows none until forced eager; that is the browser, not the app.
+- **The card's four pages share one style:** a quiet uppercase title per block (`CardPageTitle`, and `CardSection plain`
+  for news), the big numbers in his position colour (`CardFacts hue`), 24px between blocks, one drill-down button.
+  This week drops the duplicate "Next" line under the scoreboard; Points' season totals are plain rows; Profile gains a
+  headline from what moved. The Yahoo link sits beside the close button so the header fits on a phone.

@@ -108,7 +108,7 @@ HARD_STATUS = ("IR", "PUP", "Out", "Sus", "NFI", "DNR")
 # The exact field set every player row carries. The guard asserts this, so a
 # Sleeper shape change adds or drops a key loudly instead of silently.
 ROW_FIELDS = ("pos", "side", "team", "status", "injury_status", "injury_body_part",
-              "depth_chart_order", "depth_chart_position", "news_updated")
+              "depth_chart_order", "depth_chart_position", "news_updated", "sid")
 
 
 def normalize(name):
@@ -174,6 +174,9 @@ def main():
             "depth_chart_order": p.get("depth_chart_order"),
             "depth_chart_position": p.get("depth_chart_position") or None,
             "news_updated": iso(p.get("news_updated")),
+            # Sleeper's own player id, offence only: the app builds the headshot URL
+            # from it (his call, Oct 10 2026: photos on the lineup and the card).
+            "sid": str(p.get("player_id")) if p.get("position") in OFF_POSITIONS and p.get("player_id") else None,
         }
 
     hard = [k for k, v in players.items() if v["injury_status"] in HARD_STATUS]
@@ -205,7 +208,7 @@ def main():
         # every week. A generated file is not a place to keep anything by hand.
         "renders": True,
         "renders_reason": "Wired Sep 8 2026 after the watch period. TWO REVIEWED CONSUMERS AND NO OTHERS: buildBreakoutBoard reads it for depthOpening (a teammate at the same depth-chart slot, ahead of him, carrying a hard status) and buildPlayerCard renders an availability row. Guard 26 holds the allowlist and still asserts analyzeRoster and analyzeRedraft never read it, which is the assertion that protects the grades.",
-        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard", "findPlayer/pickupFor", "buildSeasonGrade"],
+        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard", "findPlayer/pickupFor", "buildSeasonGrade", "headshotFor"],
         "ambiguous_off": sorted(ambiguous),
         "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
         "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",

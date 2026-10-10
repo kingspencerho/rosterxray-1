@@ -952,5 +952,11 @@ ok("every page has its drill-down, in the one shared button style",
 const landscape = app.slice(app.indexOf("@media (max-height: 500px) and (orientation: landscape)"));
 ok("a sideways phone never shrinks the app", !/transform:\s*scale\(/.test(landscape.slice(0, landscape.indexOf("}\n        }") + 12)) && !/\.app-content\s*\{[^}]*scale\(/.test(app));
 
+// Photos are Sleeper's and can break at any time, so a failed photo must fall back
+// to the initials badge, never to a broken image (his call, Oct 10 2026).
+const avatar = app.slice(app.indexOf("const PlayerAvatar = "), app.indexOf("const CARD_PAGES = ["));
+ok("a failed photo falls back to the initials badge",
+   /onError=\{\(\) => setFailed\(true\)\}/.test(avatar) && /src && !failed &&/.test(avatar) && /\{initials\}/.test(avatar));
+
 console.log(fail ? `\n${fail} failure(s)` : "\nall player-card guards passed");
 process.exit(fail ? 1 : 0);

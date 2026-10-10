@@ -3108,10 +3108,10 @@ const buildSeasonGrade = (roster, league) => {
       const pick = avail.find(p => !used.has(p.name) && sp.elig.includes(p.pos));
       if (pick) {
         used.add(pick.name);
-        slots.push({ slot: sp.slot, name: pick.name, pos: pick.pos, gp: pick.gp, exp: pick.exp, avg, diff: pick.exp - avg, sd });
+        slots.push({ slot: sp.slot, name: pick.name, pos: pick.pos, team: pick.team, gp: pick.gp, exp: pick.exp, avg, diff: pick.exp - avg, sd });
       } else {
         const r = Math.max(...sp.elig.map(repl));
-        slots.push({ slot: sp.slot, name: null, pos: null, gp: 0, exp: r, avg, diff: r - avg, sd });
+        slots.push({ slot: sp.slot, name: null, pos: null, team: null, gp: 0, exp: r, avg, diff: r - avg, sd });
       }
     }
   }
@@ -10293,12 +10293,12 @@ const ExpectedRow = ({ r }) => {
   );
 };
 
-const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = false, nested = false, hint = null, children }) => {
+const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = false, nested = false, plain = false, hint = null, children }) => {
   const [open, setOpen] = React.useState(false);
   const shown = !collapsible || open;
   const Head = collapsible ? "button" : "div";
   return (
-    <div style={nested
+    <div style={plain ? { marginTop: "24px" } : nested
       ? { marginTop: "16px" }
       : { marginTop: "22px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
       {/* ⭐ ONE EDIT COVERS EVERY COLLAPSIBLE PANEL on the card and in the
@@ -10319,8 +10319,12 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
           cursor: collapsible ? "pointer" : "default", fontFamily: "inherit", textAlign: "left",
         }}
       >
-        <span style={{ width: "3px", height: "12px", background: accent, borderRadius: "1px", flex: "none" }} />
-        <div style={{ fontSize: "10px", color: accent, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
+        {/* `plain` is the paged card's section style (Oct 10 2026): the same quiet title
+            every page uses, no accent bar, no divider. */}
+        {!plain && <span style={{ width: "3px", height: "12px", background: accent, borderRadius: "1px", flex: "none" }} />}
+        <div style={plain
+          ? { fontSize: "10px", color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase" }
+          : { fontSize: "10px", color: accent, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 600 }}>{title}</div>
         {collapsible && (
           <span style={{ marginLeft: "auto", color: hint ? "var(--ui-accent)" : "var(--text-dim)", fontSize: "11px", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "4px" }}>
             {open ? "hide" : (hint || "show")}
@@ -10328,7 +10332,7 @@ const CardSection = ({ title, note, accent = "var(--ui-accent)", collapsible = f
           </span>
         )}
       </Head>
-      {shown && note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "9px", lineHeight: 1.5, paddingLeft: "11px" }}>{note}</div>}
+      {shown && note && <div style={{ fontSize: "11px", color: "var(--text-dim)", marginBottom: "9px", lineHeight: 1.5, paddingLeft: plain ? 0 : "11px" }}>{note}</div>}
       {shown && children}
     </div>
   );
@@ -11082,6 +11086,45 @@ const PlayerLookup = ({ format, onPick, autoFocusOnOpen = true }) => {
   );
 };
 
+// ⭐ HEADSHOTS (his call, Oct 10 2026, made AFTER the trade-offs were laid out:
+// the photos are Sleeper's, not licensed to this app, and the link can change or be
+// blocked at any time). So every photo sits on an initials badge in the team's
+// colours: if the photo is missing or fails to load, the badge is what shows and
+// nothing on the page breaks. The id comes from the weekly status feed (`sid`).
+const TEAM_COLORS = {
+  ARI: ["#97233F", "#000000"], ATL: ["#A71930", "#000000"], BAL: ["#241773", "#9E7C0C"], BUF: ["#00338D", "#C60C30"],
+  CAR: ["#0085CA", "#101820"], CHI: ["#0B162A", "#C83803"], CIN: ["#FB4F14", "#000000"], CLE: ["#311D00", "#FF3C00"],
+  DAL: ["#003594", "#869397"], DEN: ["#FB4F14", "#002244"], DET: ["#0076B6", "#B0B7BC"], GB: ["#203731", "#FFB612"],
+  HOU: ["#03202F", "#A71930"], IND: ["#002C5F", "#A2AAAD"], JAX: ["#006778", "#D7A22A"], KC: ["#E31837", "#FFB81C"],
+  LV: ["#000000", "#A5ACAF"], LAC: ["#0080C6", "#FFC20E"], LAR: ["#003594", "#FFA300"], MIA: ["#008E97", "#FC4C02"],
+  MIN: ["#4F2683", "#FFC62F"], NE: ["#002244", "#C60C30"], NO: ["#101820", "#D3BC8D"], NYG: ["#0B2265", "#A71930"],
+  NYJ: ["#125740", "#FFFFFF"], PHI: ["#004C54", "#A5ACAF"], PIT: ["#101820", "#FFB612"], SF: ["#AA0000", "#B3995D"],
+  SEA: ["#002244", "#69BE28"], TB: ["#D50A0A", "#34302B"], TEN: ["#0C2340", "#4B92DB"], WAS: ["#5A1414", "#FFB612"],
+};
+const headshotFor = (name) => {
+  const sid = getStatus(name)?.sid;
+  return sid ? `https://sleepercdn.com/content/nfl/players/thumb/${sid}.jpg` : null;
+};
+const PlayerAvatar = ({ name, team, size = 36 }) => {
+  const [failed, setFailed] = useState(false);
+  const src = headshotFor(name);
+  const [c1, c2] = TEAM_COLORS[teamKey(team)] || ["#262626", "#3a3a3a"];
+  const initials = String(name || "").replace(/\./g, "").split(/[\s-]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  return (
+    <span aria-hidden="true" style={{
+      position: "relative", flex: "none", width: `${size}px`, height: `${size}px`, borderRadius: "50%", overflow: "hidden",
+      display: "grid", placeItems: "center", background: c1, border: `2px solid ${c2}`,
+      color: "#ffffff", fontFamily: "var(--font-display)", fontSize: `${Math.round(size * 0.45)}px`, letterSpacing: "0.03em",
+    }}>
+      {initials}
+      {src && !failed && (
+        <img src={src} alt="" loading="lazy" onError={() => setFailed(true)}
+             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", background: "var(--bg-elevated)" }} />
+      )}
+    </span>
+  );
+};
+
 // The card's four pages, left to right by how often a reader needs them.
 const CARD_PAGES = [
   { key: "week", label: "This week" },
@@ -11129,11 +11172,11 @@ const CardLegend = ({ items }) => (
     ))}
   </div>
 );
-const CardFacts = ({ items }) => (
+const CardFacts = ({ items, hue = "var(--text-primary)" }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border-default)", borderRadius: "6px", overflow: "hidden" }}>
     {items.map(([v, l]) => (
       <div key={l} style={{ background: "var(--bg-base)", padding: "8px 10px" }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: "21px", color: "var(--text-primary)", lineHeight: 1.05 }}>{v}</div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "21px", color: hue, lineHeight: 1.05 }}>{v}</div>
         <div style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{l}</div>
       </div>
     ))}
@@ -11228,9 +11271,11 @@ const PlayerCardModal = ({ card, onClose }) => {
         style={{ background: "var(--bg-inset)", border: "1px solid var(--border-default)", borderRadius: "6px", width: "100%", maxWidth: "460px", padding: "20px 22px 24px", boxShadow: "0 12px 48px #000a" }}
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+          <PlayerAvatar name={card.name} team={card.team} size={52} />
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: "19px", color: "var(--text-primary)", fontWeight: 700, letterSpacing: "-0.01em" }}>{card.name}</div>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "7px" }}>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "4px 7px", flexWrap: "wrap" }}>
               <span style={{
                 color: POS_ACCENT[card.pos]?.text || "var(--text-secondary)",
                 border: `1px solid ${POS_ACCENT[card.pos]?.border || "#444"}66`,
@@ -11238,17 +11283,11 @@ const PlayerCardModal = ({ card, onClose }) => {
                 borderRadius: "3px", padding: "1px 6px", fontWeight: 600, letterSpacing: "0.08em",
               }}>{card.pos}</span>
               <span>{card.team || "—"}</span>
-              {card.yahooUrl && (
-                <a href={card.yahooUrl} target="_blank" rel="noopener noreferrer"
-                   style={{ color: "var(--ui-accent)", textDecoration: "none", border: "1px solid var(--border-subtle)", borderRadius: "3px", padding: "0 7px", minHeight: "32px", display: "inline-flex", alignItems: "center", order: 9 }}>
-                  Yahoo ↗
-                </a>
-              )}
               {card.adp != null && (
                 // Never print an ADP bare at a site that can show more than one
                 // format — the number means nothing without its market.
-                <span title={`${card.adpMarket} · ${card.adpVintage}`}>
-                  · ADP {card.adp}
+                <span title={`${card.adpMarket} · ${card.adpVintage}`} style={{ whiteSpace: "nowrap" }}>
+                  ADP {card.adp}
                   {" "}
                   <span style={{ color: "var(--text-dim)", marginLeft: "3px", fontSize: "10px" }}>
                     {card.adpMarket.includes("redraft") ? "redraft" : card.adpMarket.includes("superflex") ? "superflex" : "best ball"}
@@ -11257,7 +11296,16 @@ const PlayerCardModal = ({ card, onClose }) => {
               )}
             </div>
           </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: "none" }}>
+          {card.yahooUrl && (
+            <a href={card.yahooUrl} target="_blank" rel="noopener noreferrer"
+               style={{ color: "var(--ui-accent)", textDecoration: "none", border: "1px solid var(--border-subtle)", borderRadius: "5px", padding: "0 9px", minHeight: "36px", display: "inline-flex", alignItems: "center", fontSize: "11px", whiteSpace: "nowrap" }}>
+              Yahoo ↗
+            </a>
+          )}
           <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "1px solid var(--border-subtle)", borderRadius: "5px", color: "var(--text-muted)", cursor: "pointer", fontSize: "15px", lineHeight: 1, minWidth: "36px", minHeight: "36px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", fontFamily: "inherit" }}>✕</button>
+          </div>
         </div>
 
         {card.movedFrom && (
@@ -11297,7 +11345,9 @@ const PlayerCardModal = ({ card, onClose }) => {
                 <CardBars bars={card.pointsChart.bars} line={card.pointsChart.expPg} />
                 <CardLegend items={[[GAME_BAND_COLOR.spike, "18+"], [GAME_BAND_COLOR.usable, "10+"], [GAME_BAND_COLOR.low, "5-10"], [GAME_BAND_COLOR.dud, "under 5"],
                   ...(card.pointsChart.expPg != null ? [[null, "expected / gm", true]] : [])]} />
-                <CardFacts items={card.pointsChart.facts} />
+                <CardFacts items={card.pointsChart.facts} hue={POS_ACCENT[card.pos]?.text} />
+                <div style={{ height: "24px" }} />
+                <CardPageTitle>Season totals</CardPageTitle>
               </>
             ) : (
               <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>{card.gameLogReason || "No games on record yet."}</div>
@@ -11312,7 +11362,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             2026 line appears on its own the week gamelogs_2026.json gains
             rows, with no code change. */}
         {[card.gameLogCur, card.gameLog].filter(Boolean).map(log => (
-          <div key={log.season} style={{ marginTop: "12px", padding: "8px 10px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px" }}>
+          <div key={log.season} style={{ padding: "8px 0", borderBottom: "1px solid var(--bg-raised)" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap", fontSize: "10px", letterSpacing: "0.06em", color: "var(--text-dim)", marginBottom: "4px" }}>
               <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>{log.season}</span>
               <span>{log.partial ? `through week ${log.maxWeek}` : "final"}</span>
@@ -11346,8 +11396,9 @@ const PlayerCardModal = ({ card, onClose }) => {
         )}
 
         {!sheet && page === "week" && (<>
+        {card.game && <div style={{ marginTop: "14px" }}><CardPageTitle>This week's game</CardPageTitle></div>}
         {card.game && (
-          <div style={{ marginTop: "14px", padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "6px" }}>
+          <div style={{ padding: "12px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "6px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontFamily: "var(--font-display)", fontSize: "28px", letterSpacing: "0.03em" }}>{card.game.home ? card.game.opp : card.game.team}</span>
               <span style={{ fontSize: "10px", color: "var(--text-muted)", textAlign: "center" }}>
@@ -11378,10 +11429,10 @@ const PlayerCardModal = ({ card, onClose }) => {
             weekly refresh rebuilds. Facts only, so it needs no writer and cannot
             go stale between refreshes. */}
         {card.thisWeek.length > 0 && (
-          <div style={{ marginTop: "14px", padding: "9px 11px", background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderRadius: "3px" }}>
-            <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)", marginBottom: "5px" }}>This week</div>
-            {card.thisWeek.map((x, i) => (
-              <div key={i} style={{ display: "flex", gap: "10px", alignItems: "baseline", padding: "2px 0", fontSize: "12px", lineHeight: 1.5 }}>
+          <div style={{ marginTop: "24px" }}>
+            <CardPageTitle>Status and last game</CardPageTitle>
+            {card.thisWeek.filter(x => !(card.game && x.label.startsWith("Next"))).map((x, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", alignItems: "baseline", padding: "8px 0", fontSize: "12px", lineHeight: 1.5, borderBottom: "1px solid var(--bg-raised)" }}>
                 <span style={{ flex: "none", minWidth: "58px", fontSize: "10px", letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-dim)" }}>{x.label}</span>
                 <span style={{ color: x.tone === "warn" ? "var(--caution)" : "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
                   {x.tag && (
@@ -11400,14 +11451,8 @@ const PlayerCardModal = ({ card, onClose }) => {
             It issues NO VERDICT — that is the Diggs rule, and the reason
             PLAYER_VERDICTS is not on this card either. */}
         {card.read.length > 0 && (
-          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--border-default)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <span style={{ width: "3px", height: "13px", background: "var(--ui-accent)", borderRadius: "1px" }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 700, color: "var(--ui-accent)" }}>
-                The read
-              </span>
-              <span style={{ marginLeft: "auto", fontSize: "10px", color: "var(--text-dim)" }}>what is moving</span>
-            </div>
+          <div style={{ marginTop: "24px" }}>
+            <CardPageTitle>What's moving</CardPageTitle>
             {card.read.map((r, i) => (
               <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", padding: "3px 0" }}>
                 <span style={{
@@ -11426,6 +11471,7 @@ const PlayerCardModal = ({ card, onClose }) => {
             hide the one thing there is to say about him. */}
         <CardSection
           title="Recent news"
+          plain
           accent={CARD_ACCENTS.news}
           note={news.length
             ? `Dated notes only. Anything past ${NEWS_STALE_DAYS} days needs re-validating before it drives a pick.`
@@ -11477,7 +11523,7 @@ const PlayerCardModal = ({ card, onClose }) => {
                 <CardBars bars={card.usageChart.bars} unit={card.usageChart.unit} />
                 <CardLegend items={[[USAGE_RANK_COLOR(80), `top 25% of ${card.usageChart.posPlural}`], [USAGE_RANK_COLOR(60), "above the middle"],
                   [USAGE_RANK_COLOR(30), "below the middle"], [USAGE_RANK_COLOR(10), "bottom 25%"]]} />
-                {card.usageChart.facts.length > 0 && <CardFacts items={card.usageChart.facts} />}
+                {card.usageChart.facts.length > 0 && <CardFacts items={card.usageChart.facts} hue={POS_ACCENT[card.pos]?.text} />}
               </>
             ) : (
               <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>
@@ -11490,6 +11536,16 @@ const PlayerCardModal = ({ card, onClose }) => {
 
         {!sheet && page === "profile" && (
           <div style={{ marginTop: "14px" }}>
+            {card.shift && card.shift.rows.length > 0 && (() => {
+              const moved = card.shift.rows.filter(r => !r.echo && (r.moved === "up" || r.moved === "down"));
+              return (
+                <CardHeadline>
+                  {moved.length === 0
+                    ? `His role looks like last season's: nothing has moved more than week-to-week noise.`
+                    : `Changed since last season: ${moved.map(r => `${r.label.toLowerCase()} ${r.moved}`).join(", ")}.`}
+                </CardHeadline>
+              );
+            })()}
             {card.shift && card.shift.rows.length > 0 && (
               <div style={{ marginBottom: "24px" }}>
                 <CardPageTitle>Last season against now</CardPageTitle>
@@ -11532,7 +11588,7 @@ const PlayerCardModal = ({ card, onClose }) => {
               </div>
             )}
             {(card.vacated || card.availability) && (
-              <CardFacts items={[
+              <CardFacts hue={POS_ACCENT[card.pos]?.text} items={[
                 ...(card.vacated ? [[`${Math.round(card.vacated.pct)}%`, `${teamKey(card.vacated.team)} targets that left`]] : []),
                 ...(card.availability ? [[`${Math.round(card.availability.career * 100)}%`, "On the field, career"]] : []),
               ]} />
@@ -17530,7 +17586,7 @@ Analyze this best ball roster. Return JSON only.`;
               {renderGradeHero({
                 grade: analyzed.grade, score: analyzed.score,
                 fp: null,
-                title: "Draft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
+                title: "Redraft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
                 posCounts: analyzed.posCounts,
                 right: (
                   <button
@@ -17559,60 +17615,6 @@ Analyze this best ball roster. Return JSON only.`;
                   </button>
                 ),
               })}
-              {/* ⭐ THIS SEASON (option C, Oct 10 2026). One line at rest so the grade
-                  card keeps its shape; the lineup behind it is one tap away. Its own
-                  letter, never averaged with the draft grade above. */}
-              {seasonGrade && (
-                <details style={{ margin: "0 15px 12px", borderTop: "1px solid var(--border-default)", paddingTop: "4px" }}>
-                  <summary style={{ listStyle: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "12px", minHeight: "52px" }}>
-                    <span style={{
-                      flex: "none", width: "42px", height: "42px", borderRadius: "50%", display: "grid", placeItems: "center",
-                      border: `2px solid ${gradeColor(seasonGrade.letter)}`, color: gradeColor(seasonGrade.letter),
-                      fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 900,
-                    }}>{seasonGrade.letter}</span>
-                    <span style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
-                      <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)" }}>
-                        This season · weeks 1-{seasonGrade.weeks}
-                      </span>
-                      <span style={{ fontSize: "12px", color: "var(--text-primary)", lineHeight: 1.4 }}>
-                        <strong style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 400, color: gradeColor(seasonGrade.letter) }}>
-                          {seasonGrade.total > 0 ? "+" : ""}{seasonGrade.total} pts
-                        </strong>{" "}
-                        a week of usage vs an average {seasonGrade.teams}-team lineup
-                      </span>
-                    </span>
-                    <span style={{ marginLeft: "auto", flex: "none", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.06em" }}>why ⌄</span>
-                  </summary>
-                  <div style={{ padding: "4px 0 6px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "44px 1fr 52px 56px", gap: "8px", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)", padding: "4px 0 6px", borderBottom: "1px solid var(--border-default)" }}>
-                      <span>Slot</span><span>Player</span><span style={{ textAlign: "right" }}>Usage</span><span style={{ textAlign: "right" }}>vs avg</span>
-                    </div>
-                    {seasonGrade.slots.map((x, i) => (
-                      <div key={i} style={{ display: "grid", gridTemplateColumns: "44px 1fr 52px 56px", gap: "8px", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--bg-raised)", fontSize: "12px" }}>
-                        <span style={{ fontSize: "10px", fontWeight: 700, color: x.pos ? posColor(x.pos).text : "var(--text-dim)" }}>{YAHOO_SLOT[x.slot] || x.slot}</span>
-                        <span style={{ color: x.name ? "var(--text-primary)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {x.name || "empty: waiver level"}{x.name && x.gp < 2 ? <span style={{ color: "var(--text-dim)", fontSize: "10px" }}> · 1 game</span> : null}
-                        </span>
-                        <span style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: "17px" }}>{x.exp.toFixed(1)}</span>
-                        <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600, color: x.diff >= 0 ? "var(--pos)" : "var(--neg)" }}>
-                          {x.diff >= 0 ? "+" : ""}{x.diff.toFixed(1)}
-                        </span>
-                      </div>
-                    ))}
-                    {(seasonGrade.out.length > 0 || seasonGrade.noData.length > 0) && (
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px", lineHeight: 1.5 }}>
-                        {seasonGrade.out.length > 0 && <>Left out, injured: {seasonGrade.out.map(p => `${p.name}${p.status ? ` (${p.status})` : ""}`).join(", ")}. </>}
-                        {seasonGrade.noData.length > 0 && <>No games yet this season: {seasonGrade.noData.join(", ")}.</>}
-                      </div>
-                    )}
-                    <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "8px", lineHeight: 1.5 }}>
-                      Usage is expected points a game: what each player's targets, carries and red-zone chances
-                      are worth, before luck. It is measured this season, so this grade moves every week. The
-                      draft grade above stays fixed and grades the roster you built.
-                    </div>
-                  </div>
-                </details>
-              )}
               <div style={{ padding: "0 15px 15px" }}>
                 {/* METRIC COVERAGE, redraft. Same helper, same shared CEILING_GATE —
                     and the gate is EXACTLY the one the redraft Floor Layer scores on,
@@ -17993,10 +17995,17 @@ Analyze this best ball roster. Return JSON only.`;
                 margin: "0 0 4px",
                 color: "var(--text-primary)",
               }}>
-                STARTING LINEUP · OPTIMAL
+                {seasonGrade ? "STARTING LINEUP · THIS SEASON" : "STARTING LINEUP · OPTIMAL"}
               </h2>
+              {/* ⭐ ONE GRADE GRAPHIC, his call Oct 10 2026 ("the user won't know how to tell
+                  them apart"). The season read lives HERE instead: in season this section is
+                  your best healthy lineup by this season's usage, each starter against the
+                  average starter in a league your size. Before the season it falls back to
+                  the ADP lineup. It never touches the grade. */}
               <Explainer>
-                Your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best possible lineup</span> based on ADP — the players most likely to start every week. ADP shown for reference.
+                {seasonGrade
+                  ? <>Your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best healthy lineup by this season's usage</span>: expected points a game, which is what each player's targets, carries and red-zone chances are worth before luck. The right column is each starter against the average starter at that spot in a {seasonGrade.teams}-team league.</>
+                  : <>Your <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>best possible lineup</span> based on ADP — the players most likely to start every week. ADP shown for reference.</>}
               </Explainer>
               <div style={{
                 background: "var(--bg-surface)",
@@ -18004,8 +18013,40 @@ Analyze this best ball roster. Return JSON only.`;
                 borderRadius: "4px",
                 padding: "8px 16px",
               }}>
+                {seasonGrade && (<>
+                  <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 40px 44px", gap: "8px", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)", padding: "4px 0 6px", borderBottom: "1px solid var(--border-default)" }}>
+                    <span>Slot</span><span>Player</span><span style={{ textAlign: "right" }}>Usage</span><span style={{ textAlign: "right" }}>vs avg</span>
+                  </div>
+                  {seasonGrade.slots.map((x, i) => (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "40px 1fr 40px 44px", gap: "8px", alignItems: "center", padding: "7px 0", borderBottom: "1px solid var(--bg-raised)", fontSize: "12px" }}>
+                      <span style={{ color: "var(--accent-purple-light)", fontWeight: 700, letterSpacing: "0.05em", fontSize: "11px" }}>{YAHOO_SLOT[x.slot] || x.slot}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                        {x.name && <PlayerAvatar name={x.name} team={x.team} size={32} />}
+                        <span style={{ color: x.name ? "var(--text-primary)" : "var(--text-muted)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {x.name ? x.name.replace(/^(\S)\S*\s+/, "$1. ") : "empty: waiver level"}
+                        </span>
+                      </div>
+                      <span style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: "18px", color: x.pos ? posColor(x.pos).text : "var(--text-muted)" }}>{x.exp.toFixed(1)}</span>
+                      <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600, color: x.diff >= 0 ? "var(--pos)" : "var(--neg)" }}>
+                        {x.diff >= 0 ? "+" : ""}{x.diff.toFixed(1)}
+                      </span>
+                    </div>
+                  ))}
+                  {(seasonGrade.out.length > 0 || seasonGrade.noData.length > 0) && (
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px", lineHeight: 1.5 }}>
+                      {seasonGrade.out.length > 0 && <>Left out, injured: {seasonGrade.out.map(p => `${p.name}${p.status ? ` (${p.status})` : ""}`).join(", ")}. </>}
+                      {seasonGrade.noData.length > 0 && <>No games yet this season: {seasonGrade.noData.join(", ")}.</>}
+                    </div>
+                  )}
+                  <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-strong)", letterSpacing: "0.05em" }}>
+                    Your lineup vs an average {seasonGrade.teams}-team lineup:{" "}
+                    <span style={{ color: seasonGrade.total >= 0 ? "var(--pos)" : "var(--neg)", fontWeight: 700 }}>
+                      {seasonGrade.total >= 0 ? "+" : ""}{seasonGrade.total} pts a week
+                    </span>{" "}of usage, weeks 1-{seasonGrade.weeks}
+                  </div>
+                </>)}
                 {/* Flatten to per-player rows: slot label only on first row of each slot */}
-                {(() => {
+                {!seasonGrade && (() => {
                   const rows = [];
                   Object.entries(analyzed.startingLineup).forEach(([slot, players]) => {
                     players.forEach((p, idx) => {
@@ -18033,6 +18074,7 @@ Analyze this best ball roster. Return JSON only.`;
                           {YAHOO_SLOT[r.slot] || r.slot}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                          <PlayerAvatar name={r.player.name} team={r.player.team} size={32} />
                           <span style={{ color: "var(--text-primary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {r.player.name}
                           </span>
@@ -18057,9 +18099,9 @@ Analyze this best ball roster. Return JSON only.`;
                     );
                   });
                 })()}
-                <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-strong)", letterSpacing: "0.05em" }}>
+                {!seasonGrade && <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--border-strong)", letterSpacing: "0.05em" }}>
                   Overall starting lineup avg ADP: <span style={{ color: "var(--accent-purple-light)", fontWeight: 600 }}>{analyzed.avgStarterADP.toFixed(1)}</span>
-                </div>
+                </div>}
               </div>
             </div>
 
