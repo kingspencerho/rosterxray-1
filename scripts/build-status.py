@@ -205,7 +205,7 @@ def main():
         # every week. A generated file is not a place to keep anything by hand.
         "renders": True,
         "renders_reason": "Wired Sep 8 2026 after the watch period. TWO REVIEWED CONSUMERS AND NO OTHERS: buildBreakoutBoard reads it for depthOpening (a teammate at the same depth-chart slot, ahead of him, carrying a hard status) and buildPlayerCard renders an availability row. Guard 26 holds the allowlist and still asserts analyzeRoster and analyzeRedraft never read it, which is the assertion that protects the grades.",
-        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard", "findPlayer/pickupFor"],
+        "consumers": ["buildBreakoutBoard/depthOpening", "buildPlayerCard", "findPlayer/pickupFor", "buildSeasonGrade"],
         "ambiguous_off": sorted(ambiguous),
         "hard_status_note": "Only these count as an opening. 'Questionable' is NOT one - half the league is questionable on a Friday. Measured Sep 8 2026: 71 hard statuses, 50 with a depth-chart position, and only 5 holding a slot of 3 or better, four of them backup QBs. September is genuinely quiet; this layer earns its keep in-season.",
         "why_not_ai_prompt": "UNCHANGED BY THE WIRING. newsContext reaches the model under 'Recent news (breaking updates - override everything above for these players)', the highest-authority block in the prompt. An unattended, unversioned third-party feed placed there would hold veto power over every measured input in the app. Rendering it to a human who can judge it is a different act from handing it to the model as breaking news.",

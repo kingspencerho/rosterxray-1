@@ -10070,3 +10070,20 @@ as Points). Profile filled with 2025-vs-2026 rows, an age bar against the positi
   dimensions stay proportionate on any device. Now a sideways phone keeps full size in a 760px column. Measured at
   375x812, 812x375, 320x568 and 768x1024: 0 sub-32px targets, no overflow, no console errors. Guard 14 asserts the
   page order, the three drill-downs, and that landscape never scales (sabotage-tested).
+
+### Oct 10 2026: grade option A + C (his pick), and the Profile page cleaned up
+**A · the draft grade stops being wrong in season** (`analyzeRedraft` takes `nowTs`, read through `seasonNow`):
+- The app opens on the 2026 matchup numbers once `FPA_CUR` is live for all four positions (`dataMode` default).
+- All 12 custom-league re-grade call sites now pass the data mode (editing a setting silently fell back to 2025).
+- In season, a bye week already played costs nothing, and the draft value/reach score stops counting (it grades
+  the draft, not the team). Flags still print. **Calibration: ref1-4 redraft −1.50 each (the value-pick bonus), one
+  letter moved (ref2 A → A-), ref5 unchanged; both data modes.**
+**C · a separate "This season" grade** (`buildSeasonGrade`, context only, analyzeRedraft never reads it): your best
+healthy lineup by expected points per game (gp ≥ 2 pool), each slot against the MEDIAN player who fills that slot in a
+league of your size (dedicated slots, then flex), letter from total ÷ the SD of a random lineup (A ≥ 1.2, A- ≥ 0.7,
+B+ ≥ 0.3, B ≥ −0.2, C+ ≥ −0.6, C ≥ −1.0). Hard-out players are left out via the status feed (`buildSeasonGrade` added to
+the status layer's reviewed consumers, guard 26 and `build-status.py`). One line at rest inside the grade card, the
+lineup behind "why". The redraft card's title is now **Draft grade**.
+**Profile page:** `ProfileCompare` replaces ShiftRow there: no r, last season dim, now large in his position colour,
+change bold only when it cleared the bar, WOPR dropped (it restates two rows). r is gone from every card row (it
+still fades weak rows; the value is a hover hint), and the glossary's `_r` entry now explains faded rows.

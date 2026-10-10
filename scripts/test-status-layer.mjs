@@ -77,7 +77,7 @@ ok("App.jsx and App.jsx.jsx are identical", app === mirror);
 // point is that every consumer has been looked at, not that there is a small
 // number of them. An unlisted one still fails.
 const CONSUMER_TOKENS = ["status_2026", "STATUS_LAYER", "getStatus(", "statusContext", "getPlayerStatus"];
-const REVIEWED = ["depthOpening", "buildPlayerCard"];
+const REVIEWED = ["depthOpening", "buildPlayerCard", "buildSeasonGrade"];
 {
   // Every read of the accessor must sit inside a reviewed function.
   const bodies = REVIEWED.map(fn => bodyOf(app, `const ${fn} = `) || "").join("\n");

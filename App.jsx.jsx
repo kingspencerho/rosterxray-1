@@ -3035,6 +3035,98 @@ const getExpected = (name) =>
   (EXP_CUR_LIVE ? lookupPlayer(EXPECTED_CUR.players, name) : null);
 const getExpectedPrior = (name) => lookupPlayer(EXPECTED_PRIOR.players, name);
 
+// ⭐ THE SEASON GRADE (Oct 10 2026, his pick: option C). A SECOND grade, beside the
+// draft grade and never mixed into it. It answers one question: how much scoring is
+// your best healthy lineup's USAGE worth this season, against an average lineup in a
+// league your size? Usage = expected points per game (rank 2 in the Source Hierarchy:
+// opportunity, measured, current). The draft grade stays frozen and comparable over
+// time; this one moves every week by design, which is why it is a separate number.
+//
+// How "average" is built: every qualified player's usage, best first, fills a league
+// of `teams` lineups (dedicated slots, then flex from what is left). Each of your
+// slots is compared with the MEDIAN player who would fill that slot league-wide. The
+// letter comes from the total over one standard deviation of a random lineup, so the
+// bands mean the same thing in a 10-team league and a 14-team one.
+// ⛔ It never reads matchups or efficiency, and analyzeRedraft never reads it.
+const SEASON_MIN_GP = 2;
+const SEASON_FLEX = { FLEX: ["RB", "WR", "TE"], SFLEX: ["QB", "RB", "WR", "TE"] };
+const SEASON_BANDS = [[1.2, "A"], [0.7, "A-"], [0.3, "B+"], [-0.2, "B"], [-0.6, "C+"], [-1.0, "C"]];
+const buildSeasonGrade = (roster, league) => {
+  const weeks = EXPECTED_CUR._meta?.weeks_covered || 0;
+  if (!EXP_CUR_LIVE || weeks < SEASON_MIN_GP || !roster?.length) return null;
+  const teams = league?.teams || 12;
+  const lineup = league?.lineup || { QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1 };
+  const POS = ["QB", "RB", "WR", "TE"];
+  const pool = { QB: [], RB: [], WR: [], TE: [] };
+  for (const r of Object.values(EXPECTED_CUR.players || {})) {
+    if (pool[r.pos] && (r.gp || 0) >= SEASON_MIN_GP && r.exp_pg != null) pool[r.pos].push(r.exp_pg);
+  }
+  for (const a of Object.values(pool)) a.sort((x, y) => y - x);
+  const taken = { QB: 0, RB: 0, WR: 0, TE: 0 };
+  const slotPools = [];
+  for (const pos of POS) {
+    const n = (lineup[pos] || 0) * teams;
+    if (!n) continue;
+    slotPools.push({ slot: pos, elig: [pos], count: lineup[pos], vals: pool[pos].slice(0, n) });
+    taken[pos] = n;
+  }
+  for (const [slot, elig] of Object.entries(SEASON_FLEX)) {
+    const k = lineup[slot] || 0;
+    if (!k) continue;
+    const vals = [];
+    for (let i = 0; i < k * teams; i++) {
+      let best = null;
+      for (const p of elig) {
+        const v = pool[p][taken[p]];
+        if (v != null && (best == null || v > pool[best][taken[best]])) best = p;
+      }
+      if (best == null) break;
+      vals.push(pool[best][taken[best]]);
+      taken[best]++;
+    }
+    if (vals.length) slotPools.push({ slot, elig, count: k, vals });
+  }
+  const median = (a) => { const x = [...a].sort((p, q) => p - q); const m = Math.floor(x.length / 2); return x.length % 2 ? x[m] : (x[m - 1] + x[m]) / 2; };
+  const sdOf = (a) => { const m = median(a); return Math.sqrt(a.reduce((t, v) => t + (v - m) ** 2, 0) / Math.max(1, a.length)); };
+  // Replacement level: the best player a league this size leaves unrostered.
+  const repl = (p) => pool[p][taken[p]] ?? 0;
+  const mine = roster.filter(p => pool[p.pos]).map(p => {
+    const e = getExpected(p.name);
+    const st = getStatus(p.name);
+    return {
+      name: p.name, pos: p.pos, team: p.team,
+      exp: e && (e.gp || 0) >= 1 ? e.exp_pg : null, gp: e?.gp || 0,
+      out: isHardOut(st), status: st ? (st.injury_status || st.status || null) : null,
+    };
+  });
+  const avail = mine.filter(p => p.exp != null && !p.out).sort((a, b) => b.exp - a.exp);
+  const used = new Set();
+  const slots = [];
+  for (const sp of slotPools) {
+    const avg = median(sp.vals), sd = sdOf(sp.vals);
+    for (let i = 0; i < sp.count; i++) {
+      const pick = avail.find(p => !used.has(p.name) && sp.elig.includes(p.pos));
+      if (pick) {
+        used.add(pick.name);
+        slots.push({ slot: sp.slot, name: pick.name, pos: pick.pos, gp: pick.gp, exp: pick.exp, avg, diff: pick.exp - avg, sd });
+      } else {
+        const r = Math.max(...sp.elig.map(repl));
+        slots.push({ slot: sp.slot, name: null, pos: null, gp: 0, exp: r, avg, diff: r - avg, sd });
+      }
+    }
+  }
+  if (!slots.length) return null;
+  const total = slots.reduce((t, x) => t + x.diff, 0);
+  const sd = Math.sqrt(slots.reduce((t, x) => t + x.sd ** 2, 0)) || 1;
+  const z = total / sd;
+  const letter = (SEASON_BANDS.find(([cut]) => z >= cut) || [null, "D"])[1];
+  return {
+    letter, total: +total.toFixed(1), z: +z.toFixed(2), teams, weeks, slots,
+    out: mine.filter(p => p.out).map(p => ({ name: p.name, status: p.status })),
+    noData: mine.filter(p => p.exp == null && !p.out).map(p => p.name),
+  };
+};
+
 const expectedPoints = (name) => {
   const cur = getExpected(name);
   const prior = getExpectedPrior(name);
@@ -3791,9 +3883,9 @@ const CARD_DESCRIPTIVE = [
 // failure in a new costume.
 const CARD_GLOSSARY = {
   _r: {
-    term: "r 0.00 – 1.00",
-    what: "How much of last season's number is still true this season, measured across 2023-2025.",
-    how: "0.70+ is dependable to project from. Under 0.30 is close to a coin flip — read it as history, not a forecast.",
+    term: "Faded rows",
+    what: "Some numbers barely repeat from one season to the next, so the card fades them.",
+    how: "Read a faded row as what happened, not what will happen. Full-brightness rows are the ones that hold up.",
   },
   _pct: {
     term: "%ile",
@@ -8137,7 +8229,10 @@ const redraftPlayoffBoost = (m, opp, week) => {
   return { ...m, tier: "Even", color: "neutral", score: 3, competitiveBoost: true };
 };
 
-const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false, useProjected = false) => {
+const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false, useProjected = false, nowTs = Date.now()) => {
+  // ⭐ Oct 10 2026 (option A): in season, a bye already played costs nothing and the
+  // draft-value score stops counting — it grades the draft, not the team you have now.
+  const seasonClock = seasonNow(new Date(nowTs));
   // Accept either a preset key (string) or a resolved league object (custom)
   const league = typeof leagueOrKey === "string"
     ? REDRAFT_LEAGUES[leagueOrKey]
@@ -8282,6 +8377,7 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
   const STREAMABLE = new Set(qbIsStreamable ? ["QB", "TE"] : ["TE"]);
   const criticalByeConflicts = [];
   Object.entries(starterByeMap).forEach(([wk, byPos]) => {
+    if (seasonClock.inSeason && +wk < seasonClock.week) return; // already played
     Object.entries(byPos).forEach(([pos, count]) => {
       const required = league.lineup[pos] || 0;
       if (pos === "FLEX") return;
@@ -8641,14 +8737,14 @@ const analyzeRedraft = (picks, leagueOrKey = "yahoo_std", hasPickNumbers = false
     const valuePicks = adpFlags.filter(p => p.delta >= valueThreshold);
     const reaches = adpFlags.filter(p => isScoredReach(p, reachThreshold));
     const turnCleared = adpFlags.filter(p => p.delta <= -reachThreshold && p.survivesTurn === false);
-    if (valuePicks.length >= 2) {
+    if (valuePicks.length >= 2 && !seasonClock.inSeason) {
       strengths.push(`${valuePicks.length} ADP value picks`);
       score += Math.min(valuePicks.length * 0.4, 1.5);
     }
     if (turnCleared.length >= 1) {
       strengths.push(`${turnCleared.length} pick(s) taken at the turn, not reached for — ${turnCleared.map(p => `${p.name} (ADP ${Math.round(p.adp)}, next pick ${p.nextPick})`).join(", ")}`);
     }
-    if (reaches.length >= 3) {
+    if (reaches.length >= 3 && !seasonClock.inSeason) {
       weaknesses.push(`${reaches.length} significant reaches`);
       score -= Math.min(reaches.length * 0.3, 1.2);
     }
@@ -9815,11 +9911,9 @@ const CardMetricRow = ({ label, value, pct, r, dim, caution, echo, cur, noTag })
   }}>
     <span style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "7px" }}>
       {label}
-      {r != null && (
-        <span title={`year-over-year stability r=${r.toFixed(2)}`} style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.05em" }}>
-          r {r.toFixed(2)}
-        </span>
-      )}
+      {/* r is a number for the owner, not the reader (his call, Oct 10 2026). It
+          still FADES weak rows through `dim`; the value itself is a hover hint only. */}
+      {r != null && <span title={`year-over-year stability r=${r.toFixed(2)}`} style={{ display: "none" }} />}
       {caution && <span style={{ fontSize: "9px", color: "var(--gold)", letterSpacing: "0.02em" }}>⚠ {caution}</span>}
       {echo && <span style={{ fontSize: "9px", color: "var(--text-dim)", letterSpacing: "0.02em" }}>≈ {echo}</span>}
       {dim && !noTag && <span style={{ fontSize: "8px", color: "var(--gold)", border: "1px solid var(--gold)", borderRadius: "2px", padding: "0 3px", letterSpacing: "0.06em" }}>2025 ONLY</span>}
@@ -10152,7 +10246,7 @@ const ShiftRow = ({ row }) => {
                      fontWeight: moved ? 600 : 400 }}>
         {row.label}
         {row.echo && <span style={{ color: "var(--text-faint)", marginLeft: "5px" }}>{"\u2248"}</span>}
-        {row.r != null && <span style={{ color: "var(--text-faint)", marginLeft: "6px", fontSize: "10px" }}>{" "}r {row.r.toFixed(2)}</span>}
+
       </span>
       <span style={{ fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
                      color: moved ? "var(--text-primary)" : "var(--text-muted)" }}>
@@ -11064,6 +11158,40 @@ const CardDrill = ({ title, sub, onClick }) => (
 );
 const TIER_TONE = { Smash: "var(--pos)", Good: "var(--pos-bright)", Even: "var(--tier-even)", Hard: "var(--warn)", Avoid: "var(--neg)", Wall: "var(--neg)" };
 
+// Last season against this season, built to be read in one glance (his notes, Oct 10
+// 2026): no r, the current number large and in his position's colour, last season
+// small and dim, the change bold only when it cleared the bar. WOPR is left out
+// here because it restates target share and air-yards share.
+const ProfileCompare = ({ shift, pos }) => {
+  const rows = shift.rows.filter(r => !r.echo);
+  const hue = POS_ACCENT[pos]?.text || "var(--text-primary)";
+  const f = (row, v) => v == null ? "\u2014" : row.pct ? `${(v * 100).toFixed(1)}%` : `${v.toFixed(1)}`;
+  const d = (row) => row.delta == null ? "" : (row.pct ? Math.abs(row.delta * 100) : Math.abs(row.delta)).toFixed(1);
+  const cols = "1fr 58px 70px 52px";
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: "8px", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)", paddingBottom: "6px", borderBottom: "1px solid var(--border-default)" }}>
+        <span /> <span style={{ textAlign: "right" }}>{shift.priorSeason}</span><span style={{ textAlign: "right" }}>Now</span><span style={{ textAlign: "right" }}>Change</span>
+      </div>
+      {rows.map(row => {
+        const moved = row.moved === "up" || row.moved === "down";
+        return (
+          <div key={row.key} style={{ display: "grid", gridTemplateColumns: cols, gap: "8px", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--bg-raised)" }}>
+            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{row.label}</span>
+            <span style={{ textAlign: "right", fontSize: "12px", color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>{f(row, row.prior)}</span>
+            <span style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: "22px", lineHeight: 1, color: hue }}>{f(row, row.cur)}</span>
+            <span style={{ textAlign: "right", fontSize: "12px", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap",
+                           color: moved ? "var(--text-primary)" : "var(--text-dim)", fontWeight: moved ? 700 : 400 }}>
+              {row.delta == null || +d(row) === 0 ? "\u2014" : `${row.delta > 0 ? "\u2191" : "\u2193"} ${d(row)}`}
+            </span>
+          </div>
+        );
+      })}
+      <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px" }}>Bold change = a real move, bigger than week-to-week noise.</div>
+    </div>
+  );
+};
+
 const PlayerCardModal = ({ card, onClose }) => {
   // Hooks sit above the early return; the page resets whenever a new player opens.
   const [page, setPage] = useState("week");
@@ -11363,16 +11491,16 @@ const PlayerCardModal = ({ card, onClose }) => {
         {!sheet && page === "profile" && (
           <div style={{ marginTop: "14px" }}>
             {card.shift && card.shift.rows.length > 0 && (
-              <div style={{ marginBottom: "14px" }}>
-                <CardPageTitle>{card.shift.priorSeason} {"\u2192"} this season</CardPageTitle>
-                {card.shift.rows.map(r => <ShiftRow key={r.key} row={r} />)}
+              <div style={{ marginBottom: "24px" }}>
+                <CardPageTitle>Last season against now</CardPageTitle>
+                <ProfileCompare shift={card.shift} pos={card.pos} />
               </div>
             )}
             {card.arc && card.arc.band && (() => {
               const lo = 21, hi = 37, at = x => `${((Math.min(hi, Math.max(lo, x)) - lo) / (hi - lo)) * 100}%`;
               const bd = card.arc.band;
               return (
-                <div style={{ marginBottom: "16px" }}>
+                <div style={{ marginBottom: "24px" }}>
                   <CardPageTitle>Age · {card.pos} prime years shaded</CardPageTitle>
                   <div style={{ position: "relative", height: "10px", background: "var(--bg-raised)", borderRadius: "5px", margin: "20px 0 4px" }}>
                     <div style={{ position: "absolute", top: 0, bottom: 0, left: at(bd.rising), width: `calc(${at(bd.decline)} - ${at(bd.rising)})`, background: "var(--bg-elevated)", border: "1px solid var(--pos-bright)", borderRadius: "5px", opacity: 0.8 }} />
@@ -11388,7 +11516,7 @@ const PlayerCardModal = ({ card, onClose }) => {
               );
             })()}
             {card.availability && card.availability.bySeason.length > 0 && (
-              <div style={{ marginBottom: "14px" }}>
+              <div style={{ marginBottom: "20px" }}>
                 <CardPageTitle>Games played</CardPageTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
                   {card.availability.bySeason.slice(-3).map(x => (
@@ -12041,7 +12169,9 @@ export default function RosterScorer() {
   const [appReady, setAppReady] = useState(false);
   const [showPickAnalysis, setShowPickAnalysis] = useState(false);
   const [uploadTabClicked, setUploadTabClicked] = useState(false);
-  const [dataMode, setDataMode] = useState("actual");
+  // ⭐ Oct 10 2026, his call (option A): once 2026 defense numbers are live for every
+  // position, the app opens on them. Before that, last season's numbers are the default.
+  const [dataMode, setDataMode] = useState(() => ["QB", "RB", "WR", "TE"].every(FPA_CUR_LIVE) ? "projected" : "actual");
   const [aiNutshell, setAiNutshell] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   // The AI pass used to fail silently and fall through to the template nutshell,
@@ -12377,6 +12507,11 @@ export default function RosterScorer() {
       .catch(() => {});
   }, []);
 
+  // The season grade (option C): a second number, built beside the draft grade, never into it.
+  const seasonGrade = useMemo(() => (
+    analyzed && analyzed.mode === "redraft" ? buildSeasonGrade(analyzed.valid, analyzed.league) : null
+  ), [analyzed]);
+
   const freeAgents = useMemo(() => {
     if (!analyzed || analyzed.mode !== "redraft") return null;
     const rostered = new Set((analyzed.valid || []).map(p => normalize(p.name)));
@@ -12486,7 +12621,7 @@ export default function RosterScorer() {
     updateCustomConfig(path, value);
     if (analyzed && redraftLeague === "custom") {
       const picks = parseRosterRedraft(input);
-      setAnalyzed(analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers));
+      setAnalyzed(analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected"));
     }
   };
 
@@ -15174,7 +15309,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, teams: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15196,7 +15331,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, scoring: e.target.value };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15218,7 +15353,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, QB: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15240,7 +15375,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, RB: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15262,7 +15397,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, WR: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15284,7 +15419,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, TE: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15306,7 +15441,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, FLEX: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15328,7 +15463,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, lineup: { ...customConfig.lineup, SFLEX: parseInt(e.target.value) } };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15350,7 +15485,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, benchSize: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15372,7 +15507,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, irSlots: parseInt(e.target.value) };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -15394,7 +15529,7 @@ Analyze this best ball roster. Return JSON only.`;
                       if (analyzed && redraftLeague === "custom") {
                         const next = { ...customConfig, playoffWeeks: e.target.value === "14" ? [14, 15, 16] : [15, 16, 17] };
                         const picks = parseRosterRedraft(input);
-                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers);
+                        const result = analyzeRedraft(picks, buildLeagueFromConfig(next), picks.hasPickNumbers, dataMode === "projected");
                         setAnalyzed(result);
                       }
                     }}
@@ -17395,7 +17530,7 @@ Analyze this best ball roster. Return JSON only.`;
               {renderGradeHero({
                 grade: analyzed.grade, score: analyzed.score,
                 fp: null,
-                title: "Redraft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
+                title: "Draft grade", meta: analyzed.league.name, metaColor: "var(--accent-purple-light)",
                 posCounts: analyzed.posCounts,
                 right: (
                   <button
@@ -17424,6 +17559,60 @@ Analyze this best ball roster. Return JSON only.`;
                   </button>
                 ),
               })}
+              {/* ⭐ THIS SEASON (option C, Oct 10 2026). One line at rest so the grade
+                  card keeps its shape; the lineup behind it is one tap away. Its own
+                  letter, never averaged with the draft grade above. */}
+              {seasonGrade && (
+                <details style={{ margin: "0 15px 12px", borderTop: "1px solid var(--border-default)", paddingTop: "4px" }}>
+                  <summary style={{ listStyle: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "12px", minHeight: "52px" }}>
+                    <span style={{
+                      flex: "none", width: "42px", height: "42px", borderRadius: "50%", display: "grid", placeItems: "center",
+                      border: `2px solid ${gradeColor(seasonGrade.letter)}`, color: gradeColor(seasonGrade.letter),
+                      fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 900,
+                    }}>{seasonGrade.letter}</span>
+                    <span style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                      <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)" }}>
+                        This season · weeks 1-{seasonGrade.weeks}
+                      </span>
+                      <span style={{ fontSize: "12px", color: "var(--text-primary)", lineHeight: 1.4 }}>
+                        <strong style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 400, color: gradeColor(seasonGrade.letter) }}>
+                          {seasonGrade.total > 0 ? "+" : ""}{seasonGrade.total} pts
+                        </strong>{" "}
+                        a week of usage vs an average {seasonGrade.teams}-team lineup
+                      </span>
+                    </span>
+                    <span style={{ marginLeft: "auto", flex: "none", fontSize: "10px", color: "var(--ui-accent)", letterSpacing: "0.06em" }}>why ⌄</span>
+                  </summary>
+                  <div style={{ padding: "4px 0 6px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "44px 1fr 52px 56px", gap: "8px", fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)", padding: "4px 0 6px", borderBottom: "1px solid var(--border-default)" }}>
+                      <span>Slot</span><span>Player</span><span style={{ textAlign: "right" }}>Usage</span><span style={{ textAlign: "right" }}>vs avg</span>
+                    </div>
+                    {seasonGrade.slots.map((x, i) => (
+                      <div key={i} style={{ display: "grid", gridTemplateColumns: "44px 1fr 52px 56px", gap: "8px", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--bg-raised)", fontSize: "12px" }}>
+                        <span style={{ fontSize: "10px", fontWeight: 700, color: x.pos ? posColor(x.pos).text : "var(--text-dim)" }}>{YAHOO_SLOT[x.slot] || x.slot}</span>
+                        <span style={{ color: x.name ? "var(--text-primary)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {x.name || "empty: waiver level"}{x.name && x.gp < 2 ? <span style={{ color: "var(--text-dim)", fontSize: "10px" }}> · 1 game</span> : null}
+                        </span>
+                        <span style={{ textAlign: "right", fontFamily: "var(--font-display)", fontSize: "17px" }}>{x.exp.toFixed(1)}</span>
+                        <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600, color: x.diff >= 0 ? "var(--pos)" : "var(--neg)" }}>
+                          {x.diff >= 0 ? "+" : ""}{x.diff.toFixed(1)}
+                        </span>
+                      </div>
+                    ))}
+                    {(seasonGrade.out.length > 0 || seasonGrade.noData.length > 0) && (
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px", lineHeight: 1.5 }}>
+                        {seasonGrade.out.length > 0 && <>Left out, injured: {seasonGrade.out.map(p => `${p.name}${p.status ? ` (${p.status})` : ""}`).join(", ")}. </>}
+                        {seasonGrade.noData.length > 0 && <>No games yet this season: {seasonGrade.noData.join(", ")}.</>}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "8px", lineHeight: 1.5 }}>
+                      Usage is expected points a game: what each player's targets, carries and red-zone chances
+                      are worth, before luck. It is measured this season, so this grade moves every week. The
+                      draft grade above stays fixed and grades the roster you built.
+                    </div>
+                  </div>
+                </details>
+              )}
               <div style={{ padding: "0 15px 15px" }}>
                 {/* METRIC COVERAGE, redraft. Same helper, same shared CEILING_GATE —
                     and the gate is EXACTLY the one the redraft Floor Layer scores on,

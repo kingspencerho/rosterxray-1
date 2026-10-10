@@ -6,7 +6,8 @@
   "consumers": [
    "buildBreakoutBoard/depthOpening",
    "buildPlayerCard",
-   "findPlayer/pickupFor"
+   "findPlayer/pickupFor",
+   "buildSeasonGrade"
   ],
   "context_only": true,
   "counts": {
@@ -11208,7 +11209,7 @@
    "status": "Active",
    "team": "ATL"
   },
-  "jev\u00f3n holland": {
+  "jevón holland": {
    "depth_chart_order": 1,
    "depth_chart_position": "FS",
    "injury_body_part": null,
