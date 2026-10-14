@@ -128,7 +128,11 @@ pk(e.findPlayer("Justin Jefferson", "yahoo")?.pickup !== true, "a drafted player
 }
 // "J. DANIELS" on his share card matched the drafted Jayden (WAS) while his
 // roster held Jalon (TB). The printed opponent / team picks the right one.
-pk(e.resolveHintedName("J. Daniels", { opp: "DAL" }) === "Jalon Daniels", "a short name plus his opponent resolves to the right player");
+// ponytail: the opponent is read off this week's schedule. A hard-coded "DAL"
+// was TB's Week 5 opponent and failed the Oct 13 refresh once the week moved.
+const tbGame = JSON.parse(readFileSync(path.join(repoRoot, "grading/data/gameenv_2026.json"), "utf8")).games.find(g => g.away === "TB" || g.home === "TB");
+const tbOpp = tbGame ? (tbGame.away === "TB" ? tbGame.home : tbGame.away) : null;
+pk(!tbOpp || e.resolveHintedName("J. Daniels", { opp: tbOpp }) === "Jalon Daniels", "a short name plus his opponent resolves to the right player");
 pk(e.resolveHintedName("J. Daniels", { team: "WAS" }) === "Jayden Daniels", "...and a printed team does the same the other way");
 pk(e.resolveHintedName("J. Daniels", {}) === "J. Daniels", "a short name that fits two players with no hint is left alone, never guessed");
 pk(e.resolveHintedName("J. Daniels", { opp: "ZZZ" }) === "J. Daniels", "a hint that matches nobody changes nothing");

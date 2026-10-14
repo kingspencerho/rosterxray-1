@@ -84,8 +84,11 @@ ok("...and names the game-script confound", /protect-the-lead/.test(out));
 const rd = (p) => JSON.parse(readFileSync(p, "utf8"));
 const env = rd("grading/data/gameenv_2026.json"), sch = rd("grading/data/defense_scheme_2025.json");
 const ALT = { WAS: ["WAS", "WSH"], WSH: ["WAS", "WSH"], LA: ["LA", "LAR"], LAR: ["LA", "LAR"] };
-const g = (env.games || []).find((x) => x.away === "MIN" || x.home === "MIN");
-const opp = g && (g.away === "MIN" ? g.home : g.away);
+// scout prints the FIRST column whose team plays this week, so a MIN bye
+// (Week 6) moves the pointer to Robinson's TEN game. Mirror that order.
+const side = ["MIN", "TEN"].find((t) => (env.games || []).some((x) => x.away === t || x.home === t));
+const g = side && env.games.find((x) => x.away === side || x.home === side);
+const opp = g && (g.away === side ? g.home : g.away);
 const prof = opp && (ALT[opp] || [opp]).map((t) => sch.teams?.[t] || sch[t]).find(Boolean);
 const want = prof && [["vs MAN", prof.man_rate_rel], ["vs COVER-2", prof.cov_cover_2_rel]]
   .filter(([, r]) => typeof r === "number" && Math.abs(r) >= 0.03)
