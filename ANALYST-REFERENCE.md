@@ -2081,6 +2081,25 @@ else.
 
 ---
 
+### Touchdowns over expected (xTD / TDOE) · from the NFL Savant review, Oct 15 2026
+
+| | |
+|---|---|
+| **File** | would extend `expected_<season>.json` (`build-expected-points.py`) |
+| **Field** | `td`, `td_exp`, `tdoe` — the builder ALREADY reads `rush_touchdown_exp` and `rec_touchdown_exp` through `score(r, "_exp")`; it just never emits them |
+| **Surfaces** | card Points page fact, and a "scored more TDs than his chances" line on the waiver/trade side |
+| **Status** | proposed (context only, never scored) |
+
+**Plain English.** How many touchdowns his chances were worth, against how many he scored. A back with 5 TDs on 2.1 expected is due to cool off; one with 0 on 2.5 is due to bounce back.
+
+**Why it matters.** Touchdowns are the noisiest part of fantasy points (TD per touch r = 0.20), so the gap between actual and expected TDs is mostly luck, and luck reverts. NFL Savant puts this on its fantasy page as "Sell high · most TDs over expected / Buy low · most TDs under expected". It is the cheapest high-value idea from that site: no new download, one builder field.
+
+**Gotchas.** Expected TDs are a MODEL (ffverse), not a measurement. Say "expected", never "should have". Small samples: 5 games of TDOE is mostly noise in BOTH directions, which is exactly the point being made, so the copy must not read as a prediction for a single week.
+
+**Other NFL Savant ideas weighed the same day (all computable from nflverse, which we already pull; never copy their computed numbers, that is their product):** opponent-type defense splits (run-heavy vs pass-heavy opponents) — small samples, their own reliability tags run 34-62%; offensive-line vs defensive-line gap ratings — rushing efficiency barely repeats (YPC r 0.02), skip; per-stat "reliability %" next to each number — a plain-words version of the r values the cards no longer show, worth a design look; game-day weather from the free NWS API — he dropped weather Oct 10, revisit only if he asks; referee and coach pages — not fantasy-relevant; defense fantasy points per game — feeds the K/DEF streaming gap in the waiver tool.
+
+---
+
 ## §7 · Tier C — deliberately not built
 
 > ⚠️ **"Rejected" here means NOT SCORED, which is not the same as absent.** Offensive line rank was built as a CONTEXT layer on Sep 11 2026 and stays in this section, because the thing that was rejected — letting it move a grade — is still rejected and always will be. ⭐ **A metric can be on a card and out of the engine at the same time; this section is about the engine.**
@@ -2474,6 +2493,7 @@ passed. Run the script.
 | 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
 | 4 | Re-verify the remaining Tier C rejections against their stated dates | one command each | no |
 | 5 | **Fix `tgt_sh` for mid-season movers in `build-player-metrics.py`** | one denominator change | **only when the scored file is next legitimately regenerated** |
+| 6 | [Touchdowns over expected (xTD / TDOE)](#touchdowns-over-expected-xtd--tdoe--from-the-nfl-savant-review-oct-15-2026) | one builder field + a card line | no (context only) |
 
 **On #5.** Found Sep 1 2026 by validating the volume twin against 2025: nine
 players disagree by more than five points, all traded mid-season, all inflated,
