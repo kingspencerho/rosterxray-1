@@ -2493,7 +2493,7 @@ passed. Run the script.
 | 3 | Structured `date` on `RECENT_NEWS` (SITUATIONS already reads one) | maintenance | no |
 | 4 | Re-verify the remaining Tier C rejections against their stated dates | one command each | no |
 | 5 | **Fix `tgt_sh` for mid-season movers in `build-player-metrics.py`** | one denominator change | **only when the scored file is next legitimately regenerated** |
-| 6 | [Touchdowns over expected (xTD / TDOE)](#touchdowns-over-expected-xtd--tdoe--from-the-nfl-savant-review-oct-15-2026) | one builder field + a card line | no (context only) |
+| 6 | Touchdowns over expected (xTD / TDOE), see §6 | one builder field + a card line | no (context only) |
 
 **On #5.** Found Sep 1 2026 by validating the volume twin against 2025: nine
 players disagree by more than five points, all traded mid-season, all inflated,
