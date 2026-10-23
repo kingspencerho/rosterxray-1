@@ -41,7 +41,7 @@ console.log("\n=== SUFFIX BRIDGE + MUST NOT FALSE-MATCH ===");
 t('"Mike Washington" -> the RB, not another Washington', f("Mike Washington","yahoo"), "Mike Washington JR (RB LV)");
 t('"Malik Washington" stays the WR',                     f("Malik Washington","yahoo"), "Malik Washington (WR MIA)");
 t('"Darnell Washington" stays the TE',                   f("Darnell Washington","yahoo"), "Darnell Washington (TE PIT)");
-t('"Marvin Harrison" (no suffix) -> Jr',                 f("Marvin Harrison","yahoo"), "Marvin Harrison JR (WR ARI)");
+t('"Marvin Harrison" (no suffix) -> Jr',                 f("Marvin Harrison","yahoo"), "Marvin Harrison JR (WR HOU)");  // traded ARI -> HOU, announced Oct 12 2026
 t('"Omar Cooper" (no suffix) -> Jr',                     f("Omar Cooper","yahoo"), "Omar Cooper JR (WR NYJ)");
 
 console.log("\n=== NO REGRESSION on existing paths ===");
