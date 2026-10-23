@@ -165,6 +165,9 @@ jobs:
         env:
           RXR_DATA_REFRESH: "1"
           RXR_ADVISORY_OUT: .git/PROSE_ADVISORY
+          # Guard 52 reports ADP teams the Sleeper feed contradicts (a trade lands in
+          # the feed before anyone edits App.jsx) instead of failing on news.
+          RXR_ADP_TEAM_OUT: .git/ADP_TEAM_ADVISORY
         run: npm test
 
       - name: Open the refresh PR
@@ -221,6 +224,10 @@ jobs:
             if [ -s .git/PROSE_ADVISORY ]; then
               printf '\n%s\n\n' "**Player notes to re-source** (old role claims; reported, not blocking):"
               cat .git/PROSE_ADVISORY
+            fi
+            if [ -s .git/ADP_TEAM_ADVISORY ]; then
+              printf '\n%s\n\n' "**ADP teams the live feed contradicts** (verify the move, then fix every ADP table; reported, not blocking):"
+              cat .git/ADP_TEAM_ADVISORY
             fi
           } > .git/PR_BODY
 

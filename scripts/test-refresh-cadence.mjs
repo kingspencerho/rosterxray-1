@@ -315,6 +315,13 @@ ok("the volume builder documents the games-played denominator",
     ok("a failed run opens or comments on an issue that mentions the owner",
       /if: failure\(\)/.test(wf) && /gh issue create/.test(wf) && /@\$OWNER/.test(wf) && /issues: write/.test(wf));
     ok("a green run closes the failure notice", /if: success\(\)/.test(wf) && /gh issue close/.test(wf));
+    // Guard 52 (Oct 23 2026): an ADP team the Sleeper feed contradicts is news, so
+    // the refresh reports it in the PR body; outside the refresh it still fails.
+    const g52 = readFileSync(path.join(repoRoot, "scripts/test-adp-team-vs-feed.mjs"), "utf8");
+    ok("the guard step hands guard 52 its report file, and the PR body prints it",
+      /RXR_ADP_TEAM_OUT: \.git\/ADP_TEAM_ADVISORY/.test(guardStep) && /cat \.git\/ADP_TEAM_ADVISORY/.test(prStep));
+    ok("guard 52 reports only under RXR_DATA_REFRESH and fails otherwise",
+      /RXR_DATA_REFRESH === "1"/.test(g52) && /process\.exit\(0\);\s*\n\}\s*\nconsole\.error\(`\\nFAIL/.test(g52));
   }
 }
 

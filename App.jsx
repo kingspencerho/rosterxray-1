@@ -359,7 +359,7 @@ const ADP_DATA = {
   "aaron rodgers": { adp: 179.2, pos: "QB", team: "PIT" },  // ADP refresh 2026-08-16: 187.5 -> 179.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "chris bell": { adp: 214.4, pos: "WR", team: "MIA" },
   "kyle williams": { adp: 214.4, pos: "WR", team: "NE" },  // read off a real Underdog best-ball board Sep 6 2026 — a user draft screenshot, which the ADP source-of-truth rule ranks above any scrape  // ADP refresh 2026-08-16: 188.5 -> 214.4 (Underdog best ball, 0 drafts, live to 2026-08-16)
-  "kaytron allen": { adp: 212.3, pos: "RB", team: "WAS" },  // ADP refresh 2026-08-16: 198.0 -> 212.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
+  "kaytron allen": { adp: 212.3, pos: "RB", team: "MIA" },  // ADP refresh 2026-08-16: 198.0 -> 212.3 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "david njoku": { adp: 212.2, pos: "TE", team: "LAC" },  // ADP refresh 2026-08-16: 190.3 -> 212.2 (Underdog best ball, 0 drafts, live to 2026-08-16)
   "charlie kolar": { adp: 201.3, pos: "TE", team: "LAC" },  // derived Aug 23 2026 from a real superflex board read of 210.8 minus the measured +9.5 TE band offset — no direct standard best-ball quote exists. adp>=200, so this drives resolution and ordering only.
   "emanuel wilson": { adp: 215.9, pos: "RB", team: "SEA" },  // ADP refresh 2026-08-16: 192.4 -> 215.9 (Underdog best ball, 0 drafts, live to 2026-08-16)
@@ -727,7 +727,7 @@ const ADP_SUPERFLEX = {
   "charlie kolar": { adp: 210.8, pos: "TE", team: "LAC" },  // read off the user's live Underdog superflex board Aug 23 2026
   "emanuel wilson": { adp: 180.0, pos: "RB", team: "SEA" },
   "brian robinson": { adp: 169, pos: "RB", team: "ATL" },
-  "kaytron allen": { adp: 183, pos: "RB", team: "WAS" },
+  "kaytron allen": { adp: 183, pos: "RB", team: "MIA" },
   "denzel boston": { adp: 178, pos: "WR", team: "CLE" },
   "deebo samuel": { adp: 114, pos: "WR", team: "SF" },  // Aug 15 2026: measured -73 live move applied to this table's scale (post-SF-signing)
   "terrance ferguson": { adp: 191, pos: "TE", team: "LAR" },
@@ -1443,7 +1443,7 @@ const RECENT_NEWS = {
   "dallas goedert": "PHI — did not practise Thursday Oct 22 2026 with a knee injury and is questionable for Monday vs DAL. Eli Stowers and Grant Calcaterra practised fully on their IR return windows. Tanner McKee starts with Jalen Hurts likely out for the season.",
   "terry mclaurin": "WAS — OUT FOR THE SEASON with a torn left patellar tendon from Week 6 at SF; he needs surgery (Commanders, Oct 20 2026). Stefon Diggs is the WR1, with Treylon Burks, Dyami Brown and rookie Antonio Williams behind him.",
   "antonio williams": "WAS — rookie WR with a real role: 69% of snaps and 8 targets in Week 4, 12 catches for 124 and a touchdown on 19 targets on the season, rostered in about 6% of Yahoo leagues (Oct 6 2026). Stefon Diggs is out and Terry McLaurin questionable for Week 5 vs NYG.",
-  "kaytron allen": "WAS — WAIVED on Oct 8 2026 after 12 carries for 41 in four games. Jacory Croskey-Merritt leads the backfield, with Austin Ekeler re-signed behind him.",
+  "kaytron allen": "MIA — claimed off waivers from Washington on Oct 9 2026, a day after Washington waived him (12 carries for 41 in four games there). Miami added him after De'Von Achane's season-ending ACL tear. The Oct 13 2026 feed lists him RB6 and inactive (coach's decision); re-check his depth slot each week.",
   "jacory croskey merritt": "WAS — LEAD BACK (updated Oct 9 2026). Week 4: a team-high 29 snaps, 9 carries for 15 and 2 catches for 35. He is listed with a groin injury but has no game designation for Week 5 vs NYG. Austin Ekeler (re-signed, 4 carries for 29 in his Week 4 debut) and Rachaad White (shoulder) are behind him.",
   "kyle monangai": "CHI — week-to-week with turf toe and a thumb injury; he has missed three straight games but is not going on IR and may return in Week 8 at SEA (Oct 21 2026). D'Andre Swift carried 22 times in the Week 7 win over NE meanwhile.",
   "dandre swift": "CHI — LEAD BACK with Kyle Monangai out: 22 carries for 78 and a touchdown in the Week 7 Thursday win over NE (Oct 22 2026), after 21.0 half-PPR points in Week 6 at ATL. Monangai (toe, thumb) is week-to-week and may return in Week 8 at SEA. Re-check the split when he returns.",
@@ -1516,7 +1516,7 @@ const VERDICTS = {
   "brock bowers": { verdict: "TARGET", date: "2026-05-19", reason: "TE1 in easiest 3-week playoff window in league", confidence: "HIGH" },
   "harold fannin": { verdict: "TARGET", date: "2026-06-03", reason: "72/731/6 as rookie, 31% target share, Monken now HC brings same pass-heavy identity as HC", confidence: "HIGH" },
   "cam skattebo": { verdict: "hold", date: "2026-10-23", reason: "No carries after his Week 6 fumbles and no back owns the NYG job (Oct 20-21 2026); a committee with Tracy and Singletary until one separates.", confidence: "MEDIUM" },
-  "kaytron allen": { verdict: "fade", date: "2026-10-10", reason: "WAS — WAIVED on Oct 8 2026 after 12 carries for 41 in four games.", confidence: "LOTTERY" },
+  "kaytron allen": { verdict: "fade", date: "2026-10-10", reason: "MIA — claimed off waivers from Washington on Oct 9 2026; RB6 and inactive in the Oct 13 2026 feed.", confidence: "LOTTERY" },
   "omarion hampton": { verdict: "hold", date: "2026-10-10", reason: "LAC — IN A THREE-WAY SPLIT under new OC Mike McDaniel (updated Oct 6 2026).", confidence: "HIGH" },
   "jaylen warren": { verdict: "TARGET", date: "2026-06-03", reason: "RB17 in 2025, PPR-friendly, McCarthy HC brings run-heavy identity to PIT", confidence: "HIGH" },
   "eli stowers": { verdict: "fade", date: "2026-08-05", reason: "Dallas Goedert remains Philadelphia's TE1 and A.J. Brown is the receiver who left. As of Aug 2 Stowers is TE3, behind Goedert and Johnny Mundt, who takes first-team 12-personnel reps because new OC Mannion pairs a blocking TE with a receiving TE. Stowers is not yet an NFL-caliber blocker and lost spring development reps to a leg injury. Still the successor whenever PHI moves on from Goedert, but that is a 2027 thesis and not a 2026 one.", confidence: "MEDIUM-HIGH" },
@@ -1713,7 +1713,7 @@ const SITUATIONS = {
   // RECENT_NEWS. Same class as the Kyler Murray gap. The evidence has since flipped
   // his way, so this row now agrees with the default rather than contradicting it.
   "jeremiyah love": { verdict: "TARGET", trend: "rising", trendNote: "Started the preseason opener with the ARI ones, ~75% of snaps over the first three drives, and all 14 touches in the first half (11-58 rushing, 3-14 receiving) with a viral spin-and-hurdle rep. He, not Allgeier, led the first-team carries in that game. Two live caveats. The ankle is a HIGH ankle sprain: he did not practice the following week and sat out the second preseason game, per HC Mike LaFleur (updated Aug 23 2026). Arizona has since said it is hopeful he is ready for Week 1. High ankle sprains routinely run three to six weeks, so treat the opener as plausible rather than assumed, and note that any missed September time falls inside the W1-14 qualifying round. Second, the calendar: pre-Week-3 preseason snaps are evaluation before they are confirmation. Allgeier still took three carries on the opening drive, so the committee is not dead — it has just inverted. No. 3 overall capital behind it.", situationFlags: ["breakout_profile"], riskFlags: ["creeping_committee", "injury_history"] },
-  "kaytron allen": { date: "2026-10-10", verdict: "fade", trend: "falling", trendNote: "WAS — WAIVED on Oct 8 2026 after 12 carries for 41 in four games. Jacory Croskey-Merritt leads the backfield, with Austin Ekeler re-signed behind him.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
+  "kaytron allen": { date: "2026-10-10", verdict: "fade", trend: "falling", trendNote: "MIA — claimed off waivers from Washington on Oct 9 2026, a day after Washington waived him (12 carries for 41 in four games there). Miami added him after De'Von Achane's season-ending ACL tear. The Oct 13 2026 feed lists him RB6 and inactive (coach's decision); re-check his depth slot each week.", situationFlags: ["scheme_fit"], riskFlags: ["creeping_committee"] },
 
   "jacory croskey merritt": { verdict: "fade", trend: "stable", trendNote: "WAS committee back — four-way competition in a run-heavy scheme limits any single back's upside", situationFlags: [], riskFlags: ["confirmed_committee"] },
   "tyjae spears": { verdict: "fade", trend: "falling", trendNote: "TEN committee with Pollard — injury-plagued, career-low attempts in 2025, no role clarity expected in 2026", situationFlags: [], riskFlags: ["confirmed_committee", "injury_history"] },
@@ -2134,7 +2134,7 @@ const ADP_YAHOO = {
   "rashid shaheed": { adp: 130.1, pos: "WR", team: "SEA" },
   "adonai mitchell": { adp: 169.0, pos: "WR", team: "NYJ" },
   "kayshon boutte": { adp: 170.0, pos: "WR", team: "HOU" },
-  "kaytron allen": { adp: 171.0, pos: "RB", team: "WAS" },
+  "kaytron allen": { adp: 171.0, pos: "RB", team: "MIA" },
   "ray davis": { adp: 172.0, pos: "RB", team: "BUF" },
   "emmett johnson": { adp: 173.0, pos: "RB", team: "KC" },
   "kenyon sadiq": { adp: 129.1, pos: "TE", team: "NYJ" },

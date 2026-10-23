@@ -10118,7 +10118,7 @@ McLaurin, Adams -> fade).
 - **J.J. McCarthy read MIN** while the app's own Jaxson Dart note already said the Giants had acquired him.
 - `test-alias-adp-sync` checks that the tables AGREE; they agreed on the wrong team. **The Sleeper feed
   (`status_2026.json`) had both right.** A cross-check of ADP `team` against the live feed would catch this class
-  mechanically; not built yet.
+  mechanically. **Built the same day: guard 52, next section.**
 - Najee Harris (released Oct 20) is now `team: "-"`.
 
 **Calibration: 68 of 90 identical; 22 moved, all up, all on ref2/ref3, all from the Harrison team fix.** ref3 gains a
@@ -10128,3 +10128,43 @@ Harrison -> HOU; `test-player-lookup` Najee -> "-"). Guard 41 also caught five O
 outrun (Swift, Sampson, Jaylen Wright, Malik Washington, Allar); all re-sourced.
 ⚠️ **Windows: `npm test` needs a real `python3` first on PATH** (the Store alias fails guard 28). A venv with
 `python.exe` copied to `python3.exe` in its own `Scripts` folder works; copying `python.exe` alone does not.
+
+## Guard 52: every ADP team is checked against the live feed (added Oct 23, 2026)
+
+`scripts/test-adp-team-vs-feed.mjs`, wired into `npm test` after guard 9.
+
+**What it replaced, and what that cost.** Guard 9 (`test-alias-adp-sync`) only checks that the three ADP tables
+AGREE with each other. On Oct 23 they agreed on the wrong team: Marvin Harrison Jr. read ARI eleven days after
+his Oct 12 trade to HOU, and J.J. McCarthy read MIN. Fixing the two moved 22 of 90 fixture grades. The Sleeper
+feed had both right the whole time.
+
+**What it does.** Every row of `ADP_DATA`, `ADP_SUPERFLEX` and `ADP_YAHOO` is looked up in
+`grading/data/status_2026.json` and its team compared. **The match is the app's own code:** `normalize`,
+`SUFFIX_RE`, `METRIC_NAME_ALIASES`, `lookupPlayer` and `teamKey` are sliced out of App.jsx as source text and run,
+so "marvin harrison jr" finds Sleeper's "marvin harrison" exactly as `getStatus()` does. WAS/WSH and LA/LAR
+compare equal through `teamKey`.
+
+**Reported as INFO, never failed:** not in the feed (released, unsigned, or a short alias like `mhj`), an ADP
+team of `-`/`FA`, a feed row at a different position (Travis Hunter is DB there; never guessed), a name in
+`_meta.ambiguous_off`, and any row past guard 10's draftable line. `DRAFTABLE_MAX` is READ from
+`test-table-coverage.mjs`, not retyped.
+
+**Two modes, the guard 41 pattern.** In a session commit a stale draftable team FAILS. Under
+`RXR_DATA_REFRESH=1` (the weekly workflow only) it is a report: a trade reaches the feed before anyone edits
+App.jsx, so failing there would block the data over news. The hits go to `RXR_ADP_TEAM_OUT`
+(`.git/ADP_TEAM_ADVISORY`) and print in the refresh PR body under "ADP teams the live feed contradicts". Guard 15
+asserts both the env line and the PR-body print.
+
+**The self-test runs on SYNTHETIC rows, on purpose.** The first version asserted Harrison's LIVE row passes, so
+staling the real data tripped the self-test instead of the check, and a future Harrison trade would have failed
+the guard even in refresh mode. It now uses a fixture feed keyed "marvin harrison" and an ADP row keyed
+"marvin harrison jr".
+
+**First run found one real draftable miss:** Kaytron Allen read WAS in all three tables; Miami claimed him off
+waivers Oct 9 2026. Team fixed to MIA in all three, his three notes re-sourced. He is in none of the five
+fixtures, so no fixture grade moves. Three deep-tail rows the feed also contradicts are INFO (Beckham NYG/MIN at
+242, Joly DEN/MIA at 282, Neal NO/WAS at 286); fix them when convenient, they cannot cost a draftable grade.
+
+**Sabotage, both ways:** Harrison reverted to ARI in App.jsx fails (2 rows) and, under `RXR_DATA_REFRESH=1`,
+exits 0 and writes the report; a guard that skips the team compare fails its self-test; removing the WAS/WSH
+alias fails; dropping the workflow env line or making refresh mode exit 1 fails guard 15.
