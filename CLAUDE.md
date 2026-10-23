@@ -10102,3 +10102,29 @@ still fades weak rows; the value is a hover hint), and the glossary's `_r` entry
   for news), the big numbers in his position colour (`CardFacts hue`), 24px between blocks, one drill-down button.
   This week drops the duplicate "Next" line under the scoreboard; Points' season totals are plain rows; Profile gains a
   headline from what moved. The Yahoo link sits beside the close button so the header fits on a phone.
+
+## Week 7 news sweep, Oct 23 2026: 51 notes, and two ADP teams that were weeks out of date
+
+**51 prose entries rewritten from dated Oct 18-23 reporting** (digest with sources: the private repo's
+`nfl-news-ledger-2026.md`). Headliners: Hurts likely out for the season (blood clots in both lungs), McLaurin out
+for the season, Davante Adams IR 6-10 weeks, Jacobs reinstated, McCarthy named the NYG starter, Najee Harris
+released, Rice multi-week, Evans doubtful, Montgomery out, Lamar limited, Mayfield expected back.
+**Verdicts moved only where availability or role made them false** (Lloyd and Kaleb Johnson -> DART falling with
+Jacobs back; Montgomery, Rice, Skattebo, Barkley -> hold; Jacobs, McCarthy, White, Marks -> hold rising; Hurts,
+McLaurin, Adams -> fade).
+
+### ⛔ Two ADP team fields were wrong for over a week, and no guard can see that
+- **Marvin Harrison Jr. read ARI in all three tables** (both spellings) **eleven days after the Oct 12 trade to HOU.**
+- **J.J. McCarthy read MIN** while the app's own Jaxson Dart note already said the Giants had acquired him.
+- `test-alias-adp-sync` checks that the tables AGREE; they agreed on the wrong team. **The Sleeper feed
+  (`status_2026.json`) had both right.** A cross-check of ADP `team` against the live feed would catch this class
+  mechanically; not built yet.
+- Najee Harris (released Oct 20) is now `team: "-"`.
+
+**Calibration: 68 of 90 identical; 22 moved, all up, all on ref2/ref3, all from the Harrison team fix.** ref3 gains a
+HOU partial stack (Montgomery + Harrison, +0.75); ref2's ARI partial stack loses Harrison and now earns the
+strong-window credit (+0.40). Two test expectations carried the old team and were updated (`test-findplayer`
+Harrison -> HOU; `test-player-lookup` Najee -> "-"). Guard 41 also caught five Oct 9-10 role claims the calendar had
+outrun (Swift, Sampson, Jaylen Wright, Malik Washington, Allar); all re-sourced.
+⚠️ **Windows: `npm test` needs a real `python3` first on PATH** (the Store alias fails guard 28). A venv with
+`python.exe` copied to `python3.exe` in its own `Scripts` folder works; copying `python.exe` alone does not.
