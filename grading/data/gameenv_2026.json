@@ -2,11 +2,11 @@
  "_meta": {
   "season": 2026,
   "week": 7,
-  "fetched_at": "2026-10-20T18:24:01Z",
+  "fetched_at": "2026-10-24T17:44:01Z",
   "scoring": "half_ppr",
   "games_covered": 14,
-  "games_priced": 14,
-  "players_projected": 361,
+  "games_priced": 13,
+  "players_projected": 346,
   "flags": {
    "blowout": {
     "min_abs_spread": 7.0,
@@ -36,25 +36,47 @@
    "id": "401873010",
    "away": "NE",
    "home": "CHI",
-   "total": 50.5,
-   "favorite": "CHI",
-   "spread": 3.0,
-   "implied": {
-    "NE": 23.75,
-    "CHI": 26.75
-   },
+   "total": null,
+   "favorite": null,
+   "spread": null,
+   "implied": null,
    "indoor": false,
    "kick": "2026-10-23T00:15Z",
    "blowout": false,
-   "shootout": true,
+   "shootout": false,
    "def_out": {
-    "NE": [],
+    "NE": [
+     {
+      "name": "Joshua Farmer",
+      "pos": "DT",
+      "status": "Out",
+      "part": "Coach's Decision"
+     },
+     {
+      "name": "Channing Canada",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Karon Prunty",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     }
+    ],
     "CHI": [
      {
       "name": "Anthony Johnson Jr.",
       "pos": "S",
       "status": "Injured Reserve",
       "part": "Undisclosed"
+     },
+     {
+      "name": "T.J. Edwards",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Hamstring"
      }
     ]
    }
@@ -65,10 +87,10 @@
    "home": "NO",
    "total": 44.5,
    "favorite": "PIT",
-   "spread": 3.5,
+   "spread": 3.0,
    "implied": {
-    "PIT": 24.0,
-    "NO": 20.5
+    "PIT": 23.75,
+    "NO": 20.75
    },
    "indoor": false,
    "kick": "2026-10-25T13:30Z",
@@ -77,10 +99,16 @@
    "def_out": {
     "PIT": [
      {
-      "name": "DeShon Elliott",
-      "pos": "S",
+      "name": "Brandin Echols",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Sebastian Joseph-Day",
+      "pos": "DT",
       "status": "Injured Reserve",
-      "part": "Knee"
+      "part": "Triceps"
      }
     ],
     "NO": []
@@ -90,12 +118,12 @@
    "id": "401873017",
    "away": "SF",
    "home": "ATL",
-   "total": 50.5,
+   "total": 49.5,
    "favorite": "SF",
-   "spread": 3.0,
+   "spread": 2.5,
    "implied": {
-    "SF": 26.75,
-    "ATL": 23.75
+    "SF": 26.0,
+    "ATL": 23.5
    },
    "indoor": true,
    "kick": "2026-10-25T17:00Z",
@@ -108,14 +136,38 @@
       "pos": "LB",
       "status": "Out",
       "part": "Hamstring"
+     },
+     {
+      "name": "Luke Gifford",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Groin"
+     },
+     {
+      "name": "Marques Sigle",
+      "pos": "S",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
+      "name": "Nick Bosa",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Knee"
      }
     ],
     "ATL": [
      {
-      "name": "Yasir Abdullah",
-      "pos": "LB",
-      "status": "Injured Reserve",
+      "name": "Billy Bowman Jr.",
+      "pos": "CB",
+      "status": "Out",
       "part": "Hamstring"
+     },
+     {
+      "name": "A.J. Terrell Jr.",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Groin"
      }
     ]
    }
@@ -124,25 +176,38 @@
    "id": "401873013",
    "away": "CLE",
    "home": "TEN",
-   "total": 38.5,
+   "total": 36.5,
    "favorite": "CLE",
-   "spread": 1.5,
+   "spread": 2.5,
    "implied": {
-    "CLE": 20.0,
-    "TEN": 18.5
+    "CLE": 19.5,
+    "TEN": 17.0
    },
    "indoor": false,
    "kick": "2026-10-25T17:00Z",
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "CLE": [],
+    "CLE": [
+     {
+      "name": "Mike Hall Jr.",
+      "pos": "DT",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
+      "name": "Kalia Davis",
+      "pos": "DT",
+      "status": "Injured Reserve",
+      "part": "Quadriceps"
+     }
+    ],
     "TEN": [
      {
-      "name": "Milo Eifler",
+      "name": "Dorian Mausi",
       "pos": "LB",
       "status": "Injured Reserve",
-      "part": "Undisclosed"
+      "part": "Foot"
      }
     ]
    }
@@ -165,33 +230,72 @@
    "def_out": {
     "IND": [
      {
+      "name": "CJ Allen",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Ankle"
+     },
+     {
       "name": "Sauce Gardner",
       "pos": "CB",
-      "status": "Doubtful",
+      "status": "Out",
       "part": "Calf"
      }
     ],
-    "MIN": []
+    "MIN": [
+     {
+      "name": "Tyler Batty",
+      "pos": "LB",
+      "status": "Injured Reserve",
+      "part": "Knee - ACL"
+     }
+    ]
    }
   },
   {
    "id": "401873015",
    "away": "MIA",
    "home": "NYJ",
-   "total": 38.5,
+   "total": 39.5,
    "favorite": "NYJ",
    "spread": 4.5,
    "implied": {
-    "MIA": 17.0,
-    "NYJ": 21.5
+    "MIA": 17.5,
+    "NYJ": 22.0
    },
    "indoor": false,
    "kick": "2026-10-25T17:00Z",
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "MIA": [],
-    "NYJ": []
+    "MIA": [
+     {
+      "name": "Reese Taylor",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Quadriceps"
+     },
+     {
+      "name": "Robert Beal Jr.",
+      "pos": "DE",
+      "status": "Doubtful",
+      "part": "Hamstring"
+     }
+    ],
+    "NYJ": [
+     {
+      "name": "Kiko Mauigoa",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Quadriceps"
+     },
+     {
+      "name": "Joseph Ossai",
+      "pos": "DE",
+      "status": "Out",
+      "part": "Ankle"
+     }
+    ]
    }
   },
   {
@@ -200,10 +304,10 @@
    "home": "CAR",
    "total": 44.5,
    "favorite": "CAR",
-   "spread": 3.5,
+   "spread": 3.0,
    "implied": {
-    "TB": 20.5,
-    "CAR": 24.0
+    "TB": 20.75,
+    "CAR": 23.75
    },
    "indoor": false,
    "kick": "2026-10-25T17:00Z",
@@ -214,16 +318,34 @@
      {
       "name": "Antoine Winfield Jr.",
       "pos": "S",
-      "status": "Doubtful",
+      "status": "Out",
       "part": "Ribs"
+     },
+     {
+      "name": "Christian Rozeboom",
+      "pos": "LB",
+      "status": "Injured Reserve",
+      "part": "Finger"
      }
     ],
     "CAR": [
      {
-      "name": "Cam Jackson",
-      "pos": "DT",
+      "name": "Thomas Incoom",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Calf"
+     },
+     {
+      "name": "Jaelan Phillips",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Hamstring"
+     },
+     {
+      "name": "Bam Martin-Scott",
+      "pos": "LB",
       "status": "Injured Reserve",
-      "part": "Shoulder"
+      "part": "Hamstring"
      }
     ]
    }
@@ -232,12 +354,12 @@
    "id": "401873012",
    "away": "CIN",
    "home": "BAL",
-   "total": 51.5,
-   "favorite": "BAL",
-   "spread": 3.0,
+   "total": 47.5,
+   "favorite": "CIN",
+   "spread": 1.5,
    "implied": {
-    "CIN": 24.25,
-    "BAL": 27.25
+    "CIN": 24.5,
+    "BAL": 23.0
    },
    "indoor": false,
    "kick": "2026-10-25T17:00Z",
@@ -258,7 +380,26 @@
       "part": "Hamstring"
      }
     ],
-    "BAL": []
+    "BAL": [
+     {
+      "name": "Jaylinn Hawkins",
+      "pos": "S",
+      "status": "Out",
+      "part": "Knee"
+     },
+     {
+      "name": "Tavius Robinson",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Pectoral"
+     },
+     {
+      "name": "T.J. Tampa",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Knee"
+     }
+    ]
    }
   },
   {
@@ -277,19 +418,50 @@
    "blowout": true,
    "shootout": false,
    "def_out": {
-    "NYG": [],
+    "NYG": [
+     {
+      "name": "Jevon Holland",
+      "pos": "S",
+      "status": "Out",
+      "part": "Concussion"
+     },
+     {
+      "name": "Tremaine Edmunds",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Chest"
+     },
+     {
+      "name": "Greg Newsome II",
+      "pos": "CB",
+      "status": "Out",
+      "part": "Concussion"
+     },
+     {
+      "name": "Paulson Adebo",
+      "pos": "CB",
+      "status": "Injured Reserve",
+      "part": "Knee"
+     }
+    ],
     "HOU": [
      {
       "name": "Jalen Pitre",
       "pos": "S",
-      "status": "Doubtful",
+      "status": "Out",
       "part": "Shoulder - AC Joint"
      },
      {
-      "name": "Jaylin Smith",
-      "pos": "CB",
+      "name": "Reed Blankenship",
+      "pos": "S",
+      "status": "Out",
+      "part": "Concussion"
+     },
+     {
+      "name": "Jake Hummel",
+      "pos": "LB",
       "status": "Injured Reserve",
-      "part": "Hamstring"
+      "part": "Groin"
      }
     ]
    }
@@ -312,19 +484,26 @@
    "def_out": {
     "DEN": [
      {
-      "name": "Pat Surtain II",
-      "pos": "CB",
-      "status": "Doubtful",
+      "name": "Talanoa Hufanga",
+      "pos": "S",
+      "status": "Out",
       "part": "Ankle"
      },
      {
-      "name": "Talanoa Hufanga",
-      "pos": "S",
-      "status": "Doubtful",
+      "name": "Jonah Elliss",
+      "pos": "LB",
+      "status": "Out",
       "part": "Ankle"
      }
     ],
-    "ARI": []
+    "ARI": [
+     {
+      "name": "Andrew Wingard",
+      "pos": "S",
+      "status": "Out",
+      "part": "Knee"
+     }
+    ]
    }
   },
   {
@@ -345,19 +524,25 @@
    "def_out": {
     "GB": [
      {
-      "name": "Micah Parsons",
-      "pos": "DE",
+      "name": "Zaire Franklin",
+      "pos": "LB",
       "status": "Out",
-      "part": "Knee - ACL"
-     },
-     {
-      "name": "Jonathan Ford",
-      "pos": "DT",
-      "status": "Injured Reserve",
-      "part": "Calf"
+      "part": "Shin"
      }
     ],
     "DET": [
+     {
+      "name": "Brian Branch",
+      "pos": "S",
+      "status": "Out",
+      "part": "Achilles"
+     },
+     {
+      "name": "Kerby Joseph",
+      "pos": "S",
+      "status": "Out",
+      "part": "Knee"
+     },
      {
       "name": "Devin White",
       "pos": "LB",
@@ -371,36 +556,36 @@
    "id": "401873021",
    "away": "LAR",
    "home": "LV",
-   "total": 47.5,
+   "total": 48.5,
    "favorite": "LAR",
-   "spread": 4.5,
+   "spread": 3.0,
    "implied": {
-    "LAR": 26.0,
-    "LV": 21.5
+    "LAR": 25.75,
+    "LV": 22.75
    },
    "indoor": true,
    "kick": "2026-10-25T20:25Z",
    "blowout": false,
-   "shootout": false,
+   "shootout": true,
    "def_out": {
     "LAR": [
      {
-      "name": "Poona Ford",
-      "pos": "DT",
+      "name": "Nate Landman",
+      "pos": "LB",
       "status": "Out",
-      "part": "Triceps"
-     },
-     {
-      "name": "Kobie Turner",
-      "pos": "DE",
-      "status": "Out",
-      "part": "Groin"
+      "part": "Concussion"
      },
      {
       "name": "Myles Garrett",
       "pos": "DE",
       "status": "Injured Reserve",
       "part": "Knee"
+     },
+     {
+      "name": "Kobie Turner",
+      "pos": "DE",
+      "status": "Injured Reserve",
+      "part": "Groin"
      }
     ],
     "LV": [
@@ -419,25 +604,31 @@
    "home": "SEA",
    "total": 42.5,
    "favorite": "SEA",
-   "spread": 2.5,
+   "spread": 3.0,
    "implied": {
-    "KC": 20.0,
-    "SEA": 22.5
+    "KC": 19.75,
+    "SEA": 22.75
    },
    "indoor": false,
    "kick": "2026-10-26T00:20Z",
    "blowout": false,
    "shootout": false,
    "def_out": {
-    "KC": [
+    "KC": [],
+    "SEA": [
      {
-      "name": "Cooper McDonald",
+      "name": "Chazz Surratt",
       "pos": "LB",
-      "status": "Injured Reserve",
-      "part": "Knee"
+      "status": "Out",
+      "part": "Calf"
+     },
+     {
+      "name": "Drake Thomas",
+      "pos": "LB",
+      "status": "Out",
+      "part": "Ankle"
      }
-    ],
-    "SEA": []
+    ]
    }
   },
   {
@@ -458,10 +649,16 @@
    "def_out": {
     "DAL": [
      {
-      "name": "Dee Winters",
+      "name": "P.J. Locke",
+      "pos": "S",
+      "status": "Injured Reserve",
+      "part": "Foot"
+     },
+     {
+      "name": "Marist Liufau",
       "pos": "LB",
-      "status": "Doubtful",
-      "part": "Achilles"
+      "status": "Injured Reserve",
+      "part": "Forearm"
      }
     ],
     "PHI": []
@@ -470,47 +667,56 @@
  ],
  "projections": {
   "ceedee lamb": {
-   "pts": 14.39,
+   "pts": 14.23,
    "team": "DAL",
    "opp": "PHI",
    "pos": "WR",
    "rec": 6.0,
-   "rec_yd": 84.7,
-   "tgt": 9.2,
+   "rec_yd": 83.7,
+   "tgt": 9.1,
    "rush_yd": 2.0,
    "rush_att": 0.4
   },
   "dak prescott": {
-   "pts": 16.12,
+   "pts": 15.98,
    "team": "DAL",
    "opp": "PHI",
    "pos": "QB",
-   "rush_yd": 14.2,
-   "rush_att": 3.2,
-   "pass_yd": 242.3
+   "rush_yd": 14.4,
+   "rush_att": 3.3,
+   "pass_yd": 239.6
+  },
+  "grant calcaterra": {
+   "pts": 0.45,
+   "team": "PHI",
+   "opp": "DAL",
+   "pos": "TE",
+   "rec": 0.2,
+   "rec_yd": 2.3,
+   "tgt": 0.3
   },
   "dameon pierce": {
-   "pts": 5.96,
+   "pts": 5.99,
    "team": "PHI",
    "opp": "DAL",
    "pos": "RB",
    "rec": 0.7,
-   "rec_yd": 4.3,
-   "tgt": 0.9,
-   "rush_yd": 36.2,
-   "rush_att": 8.7
+   "rec_yd": 4.2,
+   "tgt": 0.8,
+   "rush_yd": 36.7,
+   "rush_att": 8.8
   },
   "dallas goedert": {
-   "pts": 9.27,
+   "pts": 9.13,
    "team": "PHI",
    "opp": "DAL",
    "pos": "TE",
    "rec": 3.6,
-   "rec_yd": 42.1,
+   "rec_yd": 41.6,
    "tgt": 4.7
   },
   "johnny mundt": {
-   "pts": 0.74,
+   "pts": 0.73,
    "team": "PHI",
    "opp": "DAL",
    "pos": "TE",
@@ -519,13 +725,13 @@
    "tgt": 0.6
   },
   "ryan flournoy": {
-   "pts": 5.63,
+   "pts": 5.57,
    "team": "DAL",
    "opp": "PHI",
    "pos": "WR",
-   "rec": 2.9,
-   "rec_yd": 33.2,
-   "tgt": 4.8,
+   "rec": 2.8,
+   "rec_yd": 32.9,
+   "tgt": 4.7,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
@@ -540,17 +746,8 @@
    "rush_yd": 2.0,
    "rush_att": 0.5
   },
-  "ej jenkins": {
-   "pts": 0.2,
-   "team": "PHI",
-   "opp": "DAL",
-   "pos": "TE",
-   "rec": 0.1,
-   "rec_yd": 1.1,
-   "tgt": 0.1
-  },
   "luke schoonmaker": {
-   "pts": 0.91,
+   "pts": 0.9,
    "team": "DAL",
    "opp": "PHI",
    "pos": "TE",
@@ -559,35 +756,24 @@
    "tgt": 0.7
   },
   "makai lemon": {
-   "pts": 4.51,
+   "pts": 4.9,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
-   "rec": 2.6,
-   "rec_yd": 23.3,
-   "tgt": 3.6,
+   "rec": 2.8,
+   "rec_yd": 25.4,
+   "tgt": 4.0,
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
-  "jaydon blue": {
-   "pts": 0.13,
-   "team": "PHI",
-   "opp": "DAL",
-   "pos": "RB",
-   "rec": 0.1,
-   "rec_yd": 0.4,
-   "tgt": 0.1,
-   "rush_yd": 0.3,
-   "rush_att": 0.1
-  },
   "tanner mckee": {
-   "pts": 14.06,
+   "pts": 14.2,
    "team": "PHI",
    "opp": "DAL",
    "pos": "QB",
-   "rush_yd": 10.3,
+   "rush_yd": 10.5,
    "rush_att": 2.7,
-   "pass_yd": 199.3
+   "pass_yd": 205.1
   },
   "britain covey": {
    "pts": 0.11,
@@ -599,35 +785,24 @@
    "tgt": 0.1
   },
   "jake ferguson": {
-   "pts": 6.34,
+   "pts": 6.27,
    "team": "DAL",
    "opp": "PHI",
    "pos": "TE",
-   "rec": 3.2,
-   "rec_yd": 27.8,
+   "rec": 3.1,
+   "rec_yd": 27.5,
    "tgt": 4.5
   },
   "marquise brown": {
-   "pts": 0.4,
+   "pts": 0.39,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
    "rec": 0.2,
-   "rec_yd": 2.3,
+   "rec_yd": 2.2,
    "tgt": 0.3,
    "rush_yd": 0.0,
    "rush_att": 0.0
-  },
-  "carson steele": {
-   "pts": 0.23,
-   "team": "PHI",
-   "opp": "DAL",
-   "pos": "RB",
-   "rec": 0.1,
-   "rec_yd": 0.7,
-   "tgt": 0.1,
-   "rush_yd": 0.6,
-   "rush_att": 0.1
   },
   "jonathan mingo": {
    "pts": 0.22,
@@ -639,40 +814,40 @@
    "tgt": 0.2
   },
   "dontayvion wicks": {
-   "pts": 5.29,
+   "pts": 5.64,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
-   "rec": 2.1,
-   "rec_yd": 31.2,
-   "tgt": 3.5,
+   "rec": 2.3,
+   "rec_yd": 33.4,
+   "tgt": 3.7,
    "rush_yd": 0.2,
    "rush_att": 0.0
   },
   "kavontae turpin": {
-   "pts": 1.88,
+   "pts": 1.87,
    "team": "DAL",
    "opp": "PHI",
    "pos": "WR",
    "rec": 0.6,
-   "rec_yd": 8.4,
+   "rec_yd": 8.3,
    "tgt": 1.1,
    "rush_yd": 3.0,
    "rush_att": 0.6
   },
   "george pickens": {
-   "pts": 9.58,
+   "pts": 9.47,
    "team": "DAL",
    "opp": "PHI",
    "pos": "WR",
-   "rec": 4.2,
-   "rec_yd": 62.8,
-   "tgt": 7.1,
+   "rec": 4.1,
+   "rec_yd": 62.0,
+   "tgt": 7.0,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "elijah moore": {
-   "pts": 0.26,
+   "pts": 0.25,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
@@ -683,47 +858,47 @@
    "rush_att": 0.1
   },
   "javonte williams": {
-   "pts": 16.37,
+   "pts": 16.51,
    "team": "DAL",
    "opp": "PHI",
    "pos": "RB",
    "rec": 2.5,
-   "rec_yd": 13.5,
+   "rec_yd": 13.3,
    "tgt": 3.1,
-   "rush_yd": 64.2,
-   "rush_att": 17.8
+   "rush_yd": 65.1,
+   "rush_att": 18.0
   },
   "saquon barkley": {
-   "pts": 12.72,
+   "pts": 12.94,
    "team": "PHI",
    "opp": "DAL",
    "pos": "RB",
    "rec": 2.0,
-   "rec_yd": 13.1,
+   "rec_yd": 12.9,
    "tgt": 2.6,
-   "rush_yd": 79.3,
-   "rush_att": 15.2
+   "rush_yd": 81.7,
+   "rush_att": 15.7
   },
   "zach ertz": {
-   "pts": 1.94,
+   "pts": 1.91,
    "team": "PHI",
    "opp": "DAL",
    "pos": "TE",
    "rec": 1.0,
-   "rec_yd": 10.2,
+   "rec_yd": 10.0,
    "tgt": 1.5
   },
   "darius cooper": {
-   "pts": 2.41,
+   "pts": 2.37,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
    "rec": 0.9,
-   "rec_yd": 12.2,
+   "rec_yd": 12.1,
    "tgt": 1.4
   },
   "brevyn spann ford": {
-   "pts": 0.85,
+   "pts": 0.84,
    "team": "DAL",
    "opp": "PHI",
    "pos": "TE",
@@ -743,58 +918,58 @@
    "rush_att": 0.3
   },
   "tyler goodson": {
-   "pts": 2.91,
+   "pts": 2.92,
    "team": "DAL",
    "opp": "PHI",
    "pos": "RB",
    "rec": 0.7,
-   "rec_yd": 4.6,
+   "rec_yd": 4.5,
    "tgt": 1.0,
-   "rush_yd": 14.6,
-   "rush_att": 3.7
+   "rush_yd": 14.8,
+   "rush_att": 3.8
   },
   "devonta smith": {
-   "pts": 10.86,
+   "pts": 11.6,
    "team": "PHI",
    "opp": "DAL",
    "pos": "WR",
-   "rec": 4.7,
-   "rec_yd": 64.0,
-   "tgt": 6.9,
+   "rec": 5.0,
+   "rec_yd": 68.5,
+   "tgt": 7.4,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "cj stroud": {
-   "pts": 17.32,
+   "pts": 18.41,
    "team": "HOU",
    "opp": "NYG",
    "pos": "QB",
-   "rush_yd": 16.3,
-   "rush_att": 3.1,
-   "pass_yd": 232.1
+   "rush_yd": 19.7,
+   "rush_att": 3.7,
+   "pass_yd": 233.8
   },
   "aaron rodgers": {
-   "pts": 17.32,
+   "pts": 17.3,
    "team": "PIT",
    "opp": "NO",
    "pos": "QB",
    "rush_yd": 6.7,
    "rush_att": 1.2,
-   "pass_yd": 212.3
+   "pass_yd": 212.6
   },
   "jaxon smith njigba": {
-   "pts": 19.33,
+   "pts": 20.72,
    "team": "SEA",
    "opp": "KC",
    "pos": "WR",
-   "rec": 6.9,
-   "rec_yd": 103.0,
-   "tgt": 10.2,
-   "rush_yd": 2.1,
+   "rec": 7.2,
+   "rec_yd": 107.7,
+   "tgt": 10.6,
+   "rush_yd": 2.0,
    "rush_att": 0.5
   },
   "tucker kraft": {
-   "pts": 9.4,
+   "pts": 9.37,
    "team": "GB",
    "opp": "DET",
    "pos": "TE",
@@ -803,36 +978,47 @@
    "tgt": 6.3
   },
   "darnell washington": {
-   "pts": 5.28,
+   "pts": 5.79,
    "team": "PIT",
    "opp": "NO",
    "pos": "TE",
-   "rec": 2.7,
-   "rec_yd": 28.8,
-   "tgt": 3.6
+   "rec": 3.0,
+   "rec_yd": 31.6,
+   "tgt": 4.0
   },
   "jahmyr gibbs": {
-   "pts": 22.67,
+   "pts": 22.89,
    "team": "DET",
    "opp": "GB",
    "pos": "RB",
    "rec": 5.2,
-   "rec_yd": 37.5,
+   "rec_yd": 37.9,
    "tgt": 6.2,
-   "rush_yd": 83.0,
+   "rush_yd": 84.1,
    "rush_att": 18.5
   },
   "drew ogletree": {
-   "pts": 0.43,
+   "pts": 0.66,
    "team": "IND",
    "opp": "MIN",
    "pos": "TE",
-   "rec": 0.2,
-   "rec_yd": 2.3,
-   "tgt": 0.4
+   "rec": 0.4,
+   "rec_yd": 3.5,
+   "tgt": 0.6
+  },
+  "jordan mason": {
+   "pts": 9.15,
+   "team": "MIN",
+   "opp": "IND",
+   "pos": "RB",
+   "rec": 1.0,
+   "rec_yd": 6.9,
+   "tgt": 1.1,
+   "rush_yd": 44.8,
+   "rush_att": 9.0
   },
   "julius chestnut": {
-   "pts": 0.23,
+   "pts": 0.22,
    "team": "TEN",
    "opp": "CLE",
    "pos": "RB",
@@ -843,16 +1029,16 @@
    "rush_att": 0.2
   },
   "tay martin": {
-   "pts": 0.25,
+   "pts": 0.15,
    "team": "DET",
    "opp": "GB",
    "pos": "WR",
    "rec": 0.1,
-   "rec_yd": 1.4,
-   "tgt": 0.2
+   "rec_yd": 0.9,
+   "tgt": 0.1
   },
   "trey mcbride": {
-   "pts": 12.01,
+   "pts": 11.88,
    "team": "ARI",
    "opp": "DEN",
    "pos": "TE",
@@ -868,80 +1054,69 @@
    "opp": "GB",
    "pos": "TE",
    "rec": 0.8,
-   "rec_yd": 6.8,
+   "rec_yd": 6.9,
    "tgt": 1.0
   },
   "tylan wallace": {
-   "pts": 0.65,
+   "pts": 0.63,
    "team": "CLE",
    "opp": "TEN",
    "pos": "WR",
    "rec": 0.3,
-   "rec_yd": 3.6,
+   "rec_yd": 3.5,
    "tgt": 0.4
   },
   "nico collins": {
-   "pts": 14.91,
+   "pts": 14.56,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 5.6,
-   "rec_yd": 78.8,
-   "tgt": 8.3,
+   "rec": 5.3,
+   "rec_yd": 75.7,
+   "tgt": 7.9,
    "rush_yd": 1.3,
    "rush_att": 0.2
   },
-  "kyle pitts": {
-   "pts": 6.47,
+  "kyle pitts sr": {
+   "pts": 7.34,
    "team": "ATL",
    "opp": "SF",
    "pos": "TE",
-   "rec": 2.6,
-   "rec_yd": 30.3,
-   "tgt": 4.1
+   "rec": 3.0,
+   "rec_yd": 34.2,
+   "tgt": 4.6
   },
   "jaylen waddle": {
-   "pts": 11.15,
+   "pts": 10.49,
    "team": "DEN",
    "opp": "ARI",
    "pos": "WR",
-   "rec": 4.6,
-   "rec_yd": 65.1,
-   "tgt": 7.5,
+   "rec": 4.3,
+   "rec_yd": 61.4,
+   "tgt": 7.1,
    "rush_yd": 1.4,
    "rush_att": 0.2
   },
   "jauan jennings": {
-   "pts": 5.64,
+   "pts": 4.81,
    "team": "MIN",
    "opp": "IND",
    "pos": "WR",
-   "rec": 1.9,
-   "rec_yd": 25.8,
-   "tgt": 3.4
+   "rec": 1.8,
+   "rec_yd": 23.0,
+   "tgt": 3.2
   },
   "juwan johnson": {
-   "pts": 8.63,
+   "pts": 8.4,
    "team": "NO",
    "opp": "PIT",
    "pos": "TE",
-   "rec": 4.1,
-   "rec_yd": 45.3,
-   "tgt": 5.5
-  },
-  "deejay dallas": {
-   "pts": 1.53,
-   "team": "MIN",
-   "opp": "IND",
-   "pos": "RB",
-   "rec": 0.5,
-   "rec_yd": 3.9,
-   "tgt": 0.6,
-   "rush_yd": 4.2,
-   "rush_att": 0.8
+   "rec": 4.0,
+   "rec_yd": 43.9,
+   "tgt": 5.4
   },
   "jonathan taylor": {
-   "pts": 16.5,
+   "pts": 16.46,
    "team": "IND",
    "opp": "MIN",
    "pos": "RB",
@@ -952,27 +1127,27 @@
    "rush_att": 19.1
   },
   "devin singletary": {
-   "pts": 4.97,
+   "pts": 4.64,
    "team": "NYG",
    "opp": "HOU",
    "pos": "RB",
    "rec": 1.2,
-   "rec_yd": 8.2,
+   "rec_yd": 7.8,
    "tgt": 1.6,
-   "rush_yd": 20.2,
+   "rush_yd": 17.9,
    "rush_att": 6.3
   },
   "foster moreau": {
-   "pts": 2.51,
+   "pts": 2.57,
    "team": "HOU",
    "opp": "NYG",
    "pos": "TE",
    "rec": 1.2,
-   "rec_yd": 11.4,
+   "rec_yd": 11.5,
    "tgt": 1.6
   },
   "daniel jones": {
-   "pts": 10.27,
+   "pts": 10.8,
    "team": "IND",
    "opp": "MIN",
    "pos": "QB",
@@ -987,21 +1162,21 @@
    "pos": "WR",
    "rec": 4.1,
    "rec_yd": 56.1,
-   "tgt": 7.6,
+   "tgt": 7.7,
    "rush_yd": 0.7,
    "rush_att": 0.1
   },
   "tj hockenson": {
-   "pts": 9.1,
+   "pts": 7.95,
    "team": "MIN",
    "opp": "IND",
    "pos": "TE",
-   "rec": 4.5,
-   "rec_yd": 47.4,
-   "tgt": 5.8
+   "rec": 4.2,
+   "rec_yd": 42.4,
+   "tgt": 5.5
   },
   "tyler conklin": {
-   "pts": 0.28,
+   "pts": 0.29,
    "team": "DET",
    "opp": "GB",
    "pos": "TE",
@@ -1010,14 +1185,14 @@
    "tgt": 0.2
   },
   "mark andrews": {
-   "pts": 8.9,
+   "pts": 7.31,
    "team": "BAL",
    "opp": "CIN",
    "pos": "TE",
-   "rec": 4.1,
-   "rec_yd": 45.6,
-   "tgt": 5.6,
-   "rush_yd": 1.1,
+   "rec": 3.6,
+   "rec_yd": 38.0,
+   "tgt": 4.9,
+   "rush_yd": 1.0,
    "rush_att": 0.2
   },
   "ian thomas": {
@@ -1030,18 +1205,18 @@
    "tgt": 0.3
   },
   "calvin ridley": {
-   "pts": 2.21,
+   "pts": 2.15,
    "team": "TEN",
    "opp": "CLE",
    "pos": "WR",
    "rec": 0.9,
-   "rec_yd": 12.5,
+   "rec_yd": 12.4,
    "tgt": 1.7,
    "rush_yd": 0.0,
    "rush_att": 0.0
   },
   "kendrick bourne": {
-   "pts": 6.08,
+   "pts": 6.05,
    "team": "ARI",
    "opp": "DEN",
    "pos": "WR",
@@ -1050,27 +1225,27 @@
    "tgt": 5.0
   },
   "matthew stafford": {
-   "pts": 17.31,
+   "pts": 17.35,
    "team": "LAR",
    "opp": "LV",
    "pos": "QB",
    "rush_yd": 4.9,
    "rush_att": 1.3,
-   "pass_yd": 264.9
+   "pass_yd": 266.7
   },
-  "chris godwin": {
-   "pts": 7.78,
+  "chris godwin jr": {
+   "pts": 9.09,
    "team": "TB",
    "opp": "CAR",
    "pos": "WR",
-   "rec": 4.0,
-   "rec_yd": 43.2,
-   "tgt": 5.3,
+   "rec": 4.7,
+   "rec_yd": 50.8,
+   "tgt": 6.2,
    "rush_yd": 0.5,
    "rush_att": 0.1
   },
   "alvin kamara": {
-   "pts": 6.51,
+   "pts": 6.54,
    "team": "NO",
    "opp": "PIT",
    "pos": "RB",
@@ -1081,53 +1256,53 @@
    "rush_att": 7.0
   },
   "christian mccaffrey": {
-   "pts": 18.88,
+   "pts": 18.42,
    "team": "SF",
    "opp": "ATL",
    "pos": "RB",
-   "rec": 4.9,
-   "rec_yd": 36.2,
+   "rec": 5.0,
+   "rec_yd": 36.4,
    "tgt": 6.0,
-   "rush_yd": 62.9,
-   "rush_att": 14.5
+   "rush_yd": 62.1,
+   "rush_att": 14.3
   },
   "brandin cooks": {
-   "pts": 6.25,
+   "pts": 6.86,
    "team": "SF",
    "opp": "ATL",
    "pos": "WR",
-   "rec": 2.4,
-   "rec_yd": 36.4,
-   "tgt": 4.6
+   "rec": 2.6,
+   "rec_yd": 40.5,
+   "tgt": 5.1
   },
   "will kacmarek": {
-   "pts": 1.01,
+   "pts": 1.02,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "TE",
    "rec": 0.6,
-   "rec_yd": 5.2,
+   "rec_yd": 5.3,
    "tgt": 0.8
   },
   "kaelon black": {
-   "pts": 5.15,
+   "pts": 5.0,
    "team": "SF",
    "opp": "ATL",
    "pos": "RB",
    "rec": 1.0,
    "rec_yd": 8.0,
    "tgt": 1.3,
-   "rush_yd": 27.4,
-   "rush_att": 7.1
+   "rush_yd": 26.7,
+   "rush_att": 6.9
   },
   "deion burks": {
-   "pts": 0.12,
+   "pts": 0.92,
    "team": "IND",
    "opp": "MIN",
    "pos": "WR",
-   "rec": 0.1,
-   "rec_yd": 0.7,
-   "tgt": 0.1
+   "rec": 0.5,
+   "rec_yd": 5.4,
+   "tgt": 0.9
   },
   "malik benson": {
    "pts": 0.64,
@@ -1139,16 +1314,16 @@
    "tgt": 0.7
   },
   "matt hibner": {
-   "pts": 2.73,
+   "pts": 2.08,
    "team": "BAL",
    "opp": "CIN",
    "pos": "TE",
-   "rec": 1.2,
-   "rec_yd": 14.9,
-   "tgt": 1.5
+   "rec": 1.0,
+   "rec_yd": 11.6,
+   "tgt": 1.2
   },
   "bauer sharp": {
-   "pts": 0.09,
+   "pts": 0.08,
    "team": "TB",
    "opp": "CAR",
    "pos": "TE",
@@ -1166,144 +1341,135 @@
    "tgt": 0.1
   },
   "josh cuevas": {
-   "pts": 0.86,
+   "pts": 1.45,
    "team": "BAL",
    "opp": "CIN",
    "pos": "TE",
-   "rec": 0.4,
-   "rec_yd": 5.0,
-   "tgt": 0.5
+   "rec": 0.7,
+   "rec_yd": 8.4,
+   "tgt": 0.9
   },
   "dohnte meyers": {
-   "pts": 2.52,
+   "pts": 2.51,
    "team": "CIN",
    "opp": "BAL",
    "pos": "WR",
    "rec": 1.2,
-   "rec_yd": 13.4,
+   "rec_yd": 13.2,
    "tgt": 1.8,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "ben yurosek": {
-   "pts": 0.19,
+   "pts": 0.16,
    "team": "MIN",
    "opp": "IND",
    "pos": "TE",
    "rec": 0.1,
-   "rec_yd": 0.9,
+   "rec_yd": 0.8,
    "tgt": 0.1
   },
   "trevor etienne": {
-   "pts": 2.29,
+   "pts": 2.28,
    "team": "CAR",
    "opp": "TB",
    "pos": "RB",
    "rec": 0.7,
    "rec_yd": 4.7,
    "tgt": 0.8,
-   "rush_yd": 10.5,
+   "rush_yd": 10.6,
    "rush_att": 2.7
   },
-  "harold fannin": {
-   "pts": 9.32,
+  "harold fannin jr": {
+   "pts": 8.95,
    "team": "CLE",
    "opp": "TEN",
    "pos": "TE",
-   "rec": 4.2,
-   "rec_yd": 41.2,
+   "rec": 4.1,
+   "rec_yd": 40.8,
    "tgt": 5.6,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "tai felton": {
-   "pts": 1.39,
+   "pts": 1.22,
    "team": "MIN",
    "opp": "IND",
    "pos": "WR",
    "rec": 0.6,
-   "rec_yd": 7.4,
+   "rec_yd": 6.6,
    "tgt": 0.9,
    "rush_yd": 0.2,
-   "rush_att": 0.0
+   "rush_att": 0.1
   },
   "woody marks": {
-   "pts": 10.27,
+   "pts": 13.99,
    "team": "HOU",
    "opp": "NYG",
    "pos": "RB",
    "rec": 1.8,
-   "rec_yd": 11.2,
+   "rec_yd": 11.3,
    "tgt": 2.2,
-   "rush_yd": 49.4,
-   "rush_att": 11.7
+   "rush_yd": 71.5,
+   "rush_att": 16.8
   },
   "jalen coker": {
-   "pts": 11.6,
+   "pts": 12.96,
    "team": "CAR",
    "opp": "TB",
    "pos": "WR",
-   "rec": 4.8,
-   "rec_yd": 61.7,
-   "tgt": 6.5,
+   "rec": 5.3,
+   "rec_yd": 69.2,
+   "tgt": 7.3,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "malik nabers": {
-   "pts": 11.75,
+   "pts": 11.2,
    "team": "NYG",
    "opp": "HOU",
    "pos": "WR",
    "rec": 5.6,
-   "rec_yd": 73.3,
-   "tgt": 9.9,
+   "rec_yd": 69.3,
+   "tgt": 10.0,
    "rush_yd": 0.7,
    "rush_att": 0.2
   },
-  "theo johnson": {
-   "pts": 2.26,
-   "team": "NYG",
-   "opp": "HOU",
-   "pos": "TE",
-   "rec": 1.0,
-   "rec_yd": 13.3,
-   "tgt": 1.9
-  },
   "jaleel mclaughlin": {
-   "pts": 1.49,
+   "pts": 1.23,
    "team": "CLE",
    "opp": "TEN",
    "pos": "RB",
    "rec": 0.2,
    "rec_yd": 1.5,
    "tgt": 0.3,
-   "rush_yd": 7.0,
-   "rush_att": 1.4
+   "rush_yd": 5.7,
+   "rush_att": 1.1
   },
   "emanuel wilson": {
-   "pts": 7.42,
+   "pts": 9.4,
    "team": "SEA",
    "opp": "KC",
    "pos": "RB",
-   "rec": 0.9,
-   "rec_yd": 6.7,
-   "tgt": 1.2,
-   "rush_yd": 36.5,
-   "rush_att": 11.4
+   "rec": 1.5,
+   "rec_yd": 10.6,
+   "tgt": 1.9,
+   "rush_yd": 41.6,
+   "rush_att": 13.0
   },
   "nikko remigio": {
-   "pts": 0.12,
+   "pts": 0.43,
    "team": "KC",
    "opp": "SEA",
    "pos": "WR",
-   "rec": 0.0,
-   "rec_yd": 0.6,
-   "tgt": 0.1,
+   "rec": 0.2,
+   "rec_yd": 2.5,
+   "tgt": 0.3,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "jared wayne": {
-   "pts": 0.86,
+   "pts": 0.87,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
@@ -1312,144 +1478,124 @@
    "tgt": 0.7
   },
   "sam laporta": {
-   "pts": 10.44,
+   "pts": 10.46,
    "team": "DET",
    "opp": "GB",
    "pos": "TE",
    "rec": 4.9,
-   "rec_yd": 55.4,
-   "tgt": 6.6,
+   "rec_yd": 55.7,
+   "tgt": 6.5,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
-  "rashee rice": {
-   "pts": 10.81,
-   "team": "KC",
-   "opp": "SEA",
-   "pos": "WR",
-   "rec": 4.9,
-   "rec_yd": 60.6,
-   "tgt": 7.2,
-   "rush_yd": 1.6,
-   "rush_att": 0.5
-  },
   "tre tucker": {
-   "pts": 7.72,
+   "pts": 7.63,
    "team": "LV",
    "opp": "LAR",
    "pos": "WR",
    "rec": 2.9,
-   "rec_yd": 43.4,
+   "rec_yd": 43.1,
    "tgt": 5.2,
-   "rush_yd": 2.2,
+   "rush_yd": 2.1,
    "rush_att": 0.5
   },
   "kayshon boutte": {
-   "pts": 2.62,
+   "pts": 2.22,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 1.2,
-   "rec_yd": 15.2,
-   "tgt": 1.9
+   "rec": 1.0,
+   "rec_yd": 12.7,
+   "tgt": 1.6
   },
   "jaylen warren": {
-   "pts": 15.24,
+   "pts": 15.28,
    "team": "PIT",
    "opp": "NO",
    "pos": "RB",
    "rec": 3.4,
    "rec_yd": 28.9,
    "tgt": 4.1,
-   "rush_yd": 80.2,
-   "rush_att": 14.6
+   "rush_yd": 80.6,
+   "rush_att": 14.7
   },
   "jelani woods": {
-   "pts": 0.28,
+   "pts": 0.48,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "TE",
-   "rec": 0.1,
-   "rec_yd": 1.5,
-   "tgt": 0.2
+   "rec": 0.2,
+   "rec_yd": 2.6,
+   "tgt": 0.3
   },
   "brock purdy": {
-   "pts": 20.27,
+   "pts": 20.31,
    "team": "SF",
    "opp": "ATL",
    "pos": "QB",
-   "rush_yd": 19.7,
-   "rush_att": 3.9,
-   "pass_yd": 269.8
+   "rush_yd": 22.6,
+   "rush_att": 4.5,
+   "pass_yd": 270.8
   },
   "kyren williams": {
-   "pts": 18.47,
+   "pts": 18.33,
    "team": "LAR",
    "opp": "LV",
    "pos": "RB",
    "rec": 3.0,
-   "rec_yd": 21.7,
+   "rec_yd": 21.8,
    "tgt": 3.6,
-   "rush_yd": 87.5,
-   "rush_att": 16.6
+   "rush_yd": 86.8,
+   "rush_att": 16.5
   },
   "isaiah likely": {
-   "pts": 9.95,
+   "pts": 10.0,
    "team": "NYG",
    "opp": "HOU",
    "pos": "TE",
-   "rec": 5.0,
-   "rec_yd": 51.6,
-   "tgt": 7.5
+   "rec": 5.3,
+   "rec_yd": 51.1,
+   "tgt": 8.0
   },
   "wandale robinson": {
-   "pts": 8.29,
+   "pts": 8.07,
    "team": "TEN",
    "opp": "CLE",
    "pos": "WR",
    "rec": 4.2,
-   "rec_yd": 40.3,
+   "rec_yd": 40.0,
    "tgt": 6.7,
    "rush_yd": 0.6,
    "rush_att": 0.1
   },
   "drake london": {
-   "pts": 13.57,
+   "pts": 13.86,
    "team": "ATL",
    "opp": "SF",
    "pos": "WR",
-   "rec": 5.5,
-   "rec_yd": 91.7,
-   "tgt": 8.8,
+   "rec": 5.6,
+   "rec_yd": 93.4,
+   "tgt": 8.9,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "luke farrell": {
-   "pts": 1.46,
+   "pts": 1.45,
    "team": "SF",
    "opp": "ATL",
    "pos": "TE",
    "rec": 0.8,
-   "rec_yd": 7.7,
+   "rec_yd": 7.8,
    "tgt": 1.1
   },
-  "ben skowronek": {
-   "pts": 1.6,
-   "team": "PIT",
-   "opp": "NO",
-   "pos": "WR",
-   "rec": 0.7,
-   "rec_yd": 7.2,
-   "tgt": 1.0
-  },
   "tommy tremble": {
-   "pts": 2.44,
+   "pts": 3.52,
    "team": "CAR",
    "opp": "TB",
    "pos": "TE",
-   "rec": 1.3,
-   "rec_yd": 11.4,
-   "tgt": 1.8
+   "rec": 1.9,
+   "rec_yd": 16.5,
+   "tgt": 2.5
   },
   "michael carter": {
    "pts": 0.11,
@@ -1463,32 +1609,32 @@
    "rush_att": 0.1
   },
   "pat freiermuth": {
-   "pts": 7.83,
+   "pts": 8.09,
    "team": "PIT",
    "opp": "NO",
    "pos": "TE",
-   "rec": 3.7,
-   "rec_yd": 35.2,
-   "tgt": 4.8
+   "rec": 3.8,
+   "rec_yd": 36.4,
+   "tgt": 5.0
   },
   "darnell mooney": {
-   "pts": 2.4,
+   "pts": 2.62,
    "team": "NYG",
    "opp": "HOU",
    "pos": "WR",
-   "rec": 1.1,
-   "rec_yd": 15.9,
-   "tgt": 2.2,
+   "rec": 1.2,
+   "rec_yd": 17.3,
+   "tgt": 2.6,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "charlie woerner": {
-   "pts": 0.57,
+   "pts": 0.59,
    "team": "ATL",
    "opp": "SF",
    "pos": "TE",
    "rec": 0.3,
-   "rec_yd": 2.6,
+   "rec_yd": 2.7,
    "tgt": 0.4
   },
   "aj dillon": {
@@ -1503,18 +1649,18 @@
    "rush_att": 1.3
   },
   "tee higgins": {
-   "pts": 12.88,
+   "pts": 12.77,
    "team": "CIN",
    "opp": "BAL",
    "pos": "WR",
-   "rec": 5.0,
-   "rec_yd": 79.9,
-   "tgt": 8.0,
+   "rec": 4.9,
+   "rec_yd": 79.0,
+   "tgt": 7.9,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "ashton dulin": {
-   "pts": 0.37,
+   "pts": 0.36,
    "team": "IND",
    "opp": "MIN",
    "pos": "WR",
@@ -1525,59 +1671,59 @@
    "rush_att": 0.1
   },
   "noah fant": {
-   "pts": 4.59,
+   "pts": 4.62,
    "team": "NO",
    "opp": "PIT",
    "pos": "TE",
    "rec": 2.1,
    "rec_yd": 20.7,
-   "tgt": 2.9
+   "tgt": 3.0
   },
   "cooper kupp": {
-   "pts": 5.37,
+   "pts": 5.71,
    "team": "SEA",
    "opp": "KC",
    "pos": "WR",
-   "rec": 2.5,
-   "rec_yd": 30.9,
-   "tgt": 3.9,
+   "rec": 2.6,
+   "rec_yd": 32.3,
+   "tgt": 4.1,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "austin hooper": {
-   "pts": 2.72,
+   "pts": 2.79,
    "team": "ATL",
    "opp": "SF",
    "pos": "TE",
    "rec": 1.2,
-   "rec_yd": 11.9,
+   "rec_yd": 12.2,
    "tgt": 1.7
   },
   "laquon treadwell": {
-   "pts": 2.96,
+   "pts": 3.95,
    "team": "IND",
    "opp": "MIN",
    "pos": "WR",
-   "rec": 1.4,
-   "rec_yd": 19.4,
-   "tgt": 2.8
+   "rec": 1.9,
+   "rec_yd": 25.9,
+   "tgt": 3.7
   },
   "chris manhertz": {
-   "pts": 0.07,
+   "pts": 0.49,
    "team": "NYG",
    "opp": "HOU",
    "pos": "TE",
-   "rec": 0.0,
-   "rec_yd": 0.4,
-   "tgt": 0.1
+   "rec": 0.2,
+   "rec_yd": 2.7,
+   "tgt": 0.5
   },
   "dj herman": {
-   "pts": 0.88,
+   "pts": 0.89,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "RB",
    "rec": 0.5,
-   "rec_yd": 4.5,
+   "rec_yd": 4.6,
    "tgt": 0.7,
    "rush_yd": 0.2,
    "rush_att": 0.1
@@ -1592,7 +1738,7 @@
    "tgt": 0.1
   },
   "kyle juszczyk": {
-   "pts": 1.54,
+   "pts": 1.52,
    "team": "SF",
    "opp": "ATL",
    "pos": "FB",
@@ -1612,13 +1758,13 @@
    "tgt": 0.2
   },
   "geno smith": {
-   "pts": 16.16,
+   "pts": 16.4,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "QB",
-   "rush_yd": 12.0,
-   "rush_att": 3.1,
-   "pass_yd": 233.8
+   "rush_yd": 11.8,
+   "rush_att": 3.0,
+   "pass_yd": 236.7
   },
   "dallen bentley": {
    "pts": 0.2,
@@ -1630,7 +1776,7 @@
    "tgt": 0.1
   },
   "max bredeson": {
-   "pts": 0.1,
+   "pts": 0.08,
    "team": "MIN",
    "opp": "IND",
    "pos": "RB",
@@ -1641,74 +1787,74 @@
    "rush_att": 0.0
   },
   "seth mcgowan": {
-   "pts": 2.61,
+   "pts": 2.72,
    "team": "IND",
    "opp": "MIN",
    "pos": "RB",
    "rec": 0.6,
    "rec_yd": 4.0,
    "tgt": 0.8,
-   "rush_yd": 13.6,
-   "rush_att": 3.7
+   "rush_yd": 14.4,
+   "rush_att": 3.9
   },
-  "kevin coleman": {
-   "pts": 1.82,
+  "kevin coleman jr": {
+   "pts": 1.84,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
    "rec": 0.8,
-   "rec_yd": 9.4,
-   "tgt": 1.9
+   "rec_yd": 9.5,
+   "tgt": 2.0
   },
-  "ted hurst": {
-   "pts": 4.0,
+  "ted hurst iii": {
+   "pts": 6.68,
    "team": "TB",
    "opp": "CAR",
    "pos": "WR",
-   "rec": 1.6,
-   "rec_yd": 22.7,
-   "tgt": 3.2,
+   "rec": 2.6,
+   "rec_yd": 38.4,
+   "tgt": 5.4,
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
   "myles price": {
-   "pts": 0.09,
+   "pts": 0.08,
    "team": "MIN",
    "opp": "IND",
    "pos": "WR",
    "rec": 0.0,
-   "rec_yd": 0.5,
+   "rec_yd": 0.4,
    "tgt": 0.1
   },
   "ashton jeanty": {
-   "pts": 13.06,
+   "pts": 14.15,
    "team": "LV",
    "opp": "LAR",
    "pos": "RB",
    "rec": 3.9,
-   "rec_yd": 28.5,
+   "rec_yd": 28.7,
    "tgt": 5.4,
-   "rush_yd": 54.3,
+   "rush_yd": 54.2,
    "rush_att": 15.5
   },
   "mason taylor": {
-   "pts": 2.93,
+   "pts": 3.39,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "TE",
-   "rec": 1.7,
-   "rec_yd": 14.4,
-   "tgt": 2.1
+   "rec": 2.0,
+   "rec_yd": 16.7,
+   "tgt": 2.4
   },
   "cam skattebo": {
-   "pts": 4.65,
+   "pts": 4.31,
    "team": "NYG",
    "opp": "HOU",
    "pos": "RB",
    "rec": 1.2,
-   "rec_yd": 10.3,
+   "rec_yd": 9.6,
    "tgt": 1.6,
-   "rush_yd": 20.0,
+   "rush_yd": 17.8,
    "rush_att": 6.5
   },
   "treyton welch": {
@@ -1721,14 +1867,14 @@
    "tgt": 0.2
   },
   "jaylen wright": {
-   "pts": 4.36,
+   "pts": 4.34,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "RB",
    "rec": 0.9,
-   "rec_yd": 8.3,
+   "rec_yd": 8.4,
    "tgt": 1.4,
-   "rush_yd": 20.9,
+   "rush_yd": 20.6,
    "rush_att": 5.9
   },
   "malachi corley": {
@@ -1743,51 +1889,51 @@
    "rush_att": 0.1
   },
   "malik washington": {
-   "pts": 7.7,
+   "pts": 7.78,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
    "rec": 3.6,
-   "rec_yd": 41.8,
-   "tgt": 5.8,
+   "rec_yd": 42.3,
+   "tgt": 5.9,
    "rush_yd": 5.6,
    "rush_att": 1.1
   },
   "isaiah williams": {
-   "pts": 0.54,
+   "pts": 0.31,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "WR",
-   "rec": 0.2,
-   "rec_yd": 2.7,
-   "tgt": 0.3,
+   "rec": 0.1,
+   "rec_yd": 1.4,
+   "tgt": 0.1,
    "rush_yd": 0.5,
    "rush_att": 0.1
   },
   "blake corum": {
-   "pts": 7.31,
+   "pts": 7.4,
    "team": "LAR",
    "opp": "LV",
    "pos": "RB",
    "rec": 0.7,
-   "rec_yd": 5.9,
+   "rec_yd": 6.0,
    "tgt": 1.0,
-   "rush_yd": 47.0,
-   "rush_att": 9.4
+   "rush_yd": 47.7,
+   "rush_att": 9.5
   },
   "braelon allen": {
-   "pts": 6.64,
+   "pts": 6.63,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "RB",
    "rec": 1.5,
-   "rec_yd": 10.6,
+   "rec_yd": 10.7,
    "tgt": 1.8,
-   "rush_yd": 29.9,
-   "rush_att": 8.0
+   "rush_yd": 29.5,
+   "rush_att": 7.9
   },
   "rasheen ali": {
-   "pts": 0.25,
+   "pts": 0.24,
    "team": "BAL",
    "opp": "CIN",
    "pos": "RB",
@@ -1798,18 +1944,18 @@
    "rush_att": 0.1
   },
   "brycen tremayne": {
-   "pts": 2.63,
+   "pts": 2.61,
    "team": "CAR",
    "opp": "TB",
    "pos": "WR",
    "rec": 1.3,
-   "rec_yd": 13.8,
+   "rec_yd": 13.7,
    "tgt": 1.9,
    "rush_yd": 0.2,
    "rush_att": 0.0
   },
   "elijah higgins": {
-   "pts": 1.41,
+   "pts": 1.4,
    "team": "ARI",
    "opp": "DEN",
    "pos": "TE",
@@ -1818,13 +1964,13 @@
    "tgt": 1.0
   },
   "tank dell": {
-   "pts": 2.01,
+   "pts": 1.59,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 0.9,
-   "rec_yd": 10.4,
-   "tgt": 1.4
+   "rec": 0.7,
+   "rec_yd": 8.2,
+   "tgt": 1.1
   },
   "dareke young": {
    "pts": 0.41,
@@ -1836,13 +1982,13 @@
    "tgt": 0.3
   },
   "daniel bellinger": {
-   "pts": 1.57,
+   "pts": 1.54,
    "team": "TEN",
    "opp": "CLE",
    "pos": "TE",
    "rec": 0.9,
    "rec_yd": 7.9,
-   "tgt": 1.2
+   "tgt": 1.1
   },
   "bo melton": {
    "pts": 1.34,
@@ -1860,89 +2006,89 @@
    "team": "LV",
    "opp": "LAR",
    "pos": "WR",
-   "rec": 1.3,
-   "rec_yd": 18.7,
+   "rec": 1.4,
+   "rec_yd": 18.9,
    "tgt": 3.0,
    "rush_yd": 0.9,
    "rush_att": 0.2
   },
   "malik willis": {
-   "pts": 14.52,
+   "pts": 14.57,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "QB",
-   "rush_yd": 31.1,
-   "rush_att": 5.5,
-   "pass_yd": 188.6
+   "rush_yd": 30.7,
+   "rush_att": 5.4,
+   "pass_yd": 190.8
   },
   "garrett wilson": {
-   "pts": 13.69,
+   "pts": 13.89,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "WR",
-   "rec": 5.9,
-   "rec_yd": 74.1,
-   "tgt": 8.1,
+   "rec": 6.0,
+   "rec_yd": 75.0,
+   "tgt": 8.2,
    "rush_yd": 0.7,
    "rush_att": 0.2
   },
   "cade otton": {
-   "pts": 5.88,
+   "pts": 6.5,
    "team": "TB",
    "opp": "CAR",
    "pos": "TE",
-   "rec": 3.4,
-   "rec_yd": 32.7,
-   "tgt": 5.0
+   "rec": 3.8,
+   "rec_yd": 36.3,
+   "tgt": 5.5
   },
   "tutu atwell": {
-   "pts": 1.78,
+   "pts": 1.79,
    "team": "LAR",
    "opp": "LV",
    "pos": "WR",
    "rec": 0.6,
-   "rec_yd": 11.2,
+   "rec_yd": 11.3,
    "tgt": 1.3,
    "rush_yd": 0.0,
    "rush_att": 0.0
   },
   "jordan love": {
-   "pts": 19.43,
+   "pts": 19.33,
    "team": "GB",
    "opp": "DET",
    "pos": "QB",
    "rush_yd": 11.6,
    "rush_att": 2.4,
-   "pass_yd": 273.9
+   "pass_yd": 273.7
   },
   "jerry jeudy": {
-   "pts": 2.55,
+   "pts": 2.49,
    "team": "CLE",
    "opp": "TEN",
    "pos": "WR",
-   "rec": 1.3,
-   "rec_yd": 15.2,
-   "tgt": 2.0,
+   "rec": 1.2,
+   "rec_yd": 15.0,
+   "tgt": 1.9,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "joe burrow": {
-   "pts": 19.65,
+   "pts": 19.83,
    "team": "CIN",
    "opp": "BAL",
    "pos": "QB",
-   "rush_yd": 11.2,
-   "rush_att": 3.0,
-   "pass_yd": 266.1
+   "rush_yd": 12.6,
+   "rush_att": 3.4,
+   "pass_yd": 262.9
   },
   "sam darnold": {
-   "pts": 13.97,
+   "pts": 15.3,
    "team": "SEA",
    "opp": "KC",
    "pos": "QB",
-   "rush_yd": 12.3,
-   "rush_att": 3.3,
-   "pass_yd": 213.8
+   "rush_yd": 14.0,
+   "rush_att": 3.7,
+   "pass_yd": 223.5
   },
   "robert tonyan": {
    "pts": 0.06,
@@ -1954,16 +2100,16 @@
    "tgt": 0.0
   },
   "tim patrick": {
-   "pts": 2.4,
+   "pts": 1.46,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "WR",
-   "rec": 1.1,
-   "rec_yd": 13.4,
-   "tgt": 1.5
+   "rec": 0.7,
+   "rec_yd": 8.2,
+   "tgt": 0.9
   },
   "david moore": {
-   "pts": 1.19,
+   "pts": 1.18,
    "team": "CAR",
    "opp": "TB",
    "pos": "WR",
@@ -1972,24 +2118,24 @@
    "tgt": 0.9
   },
   "george kittle": {
-   "pts": 13.85,
+   "pts": 14.04,
    "team": "SF",
    "opp": "ATL",
    "pos": "TE",
-   "rec": 5.7,
-   "rec_yd": 71.7,
-   "tgt": 7.4
+   "rec": 5.9,
+   "rec_yd": 73.7,
+   "tgt": 7.6
   },
-  "aaron jones": {
-   "pts": 9.76,
+  "aaron jones sr": {
+   "pts": 11.76,
    "team": "MIN",
    "opp": "IND",
    "pos": "RB",
    "rec": 1.9,
-   "rec_yd": 14.1,
-   "tgt": 2.4,
-   "rush_yd": 46.2,
-   "rush_att": 9.9
+   "rec_yd": 14.0,
+   "tgt": 2.5,
+   "rush_yd": 63.6,
+   "rush_att": 14.4
   },
   "jonnu smith": {
    "pts": 2.53,
@@ -2001,7 +2147,7 @@
    "tgt": 1.8
   },
   "jacoby brissett": {
-   "pts": 14.16,
+   "pts": 13.92,
    "team": "ARI",
    "opp": "DEN",
    "pos": "QB",
@@ -2010,69 +2156,60 @@
    "pass_yd": 184.2
   },
   "derrick henry": {
-   "pts": 16.86,
+   "pts": 15.87,
    "team": "BAL",
    "opp": "CIN",
    "pos": "RB",
-   "rec": 1.5,
-   "rec_yd": 14.1,
-   "tgt": 1.8,
-   "rush_yd": 83.1,
-   "rush_att": 16.2
+   "rec": 1.3,
+   "rec_yd": 11.8,
+   "tgt": 1.5,
+   "rush_yd": 83.7,
+   "rush_att": 17.0
   },
   "darren waller": {
-   "pts": 7.32,
+   "pts": 6.21,
    "team": "CAR",
    "opp": "TB",
    "pos": "TE",
-   "rec": 3.2,
-   "rec_yd": 33.7,
-   "tgt": 4.5
-  },
-  "jameis winston": {
-   "pts": 12.45,
-   "team": "NYG",
-   "opp": "HOU",
-   "pos": "QB",
-   "rush_yd": 10.5,
-   "rush_att": 2.8,
-   "pass_yd": 216.5
+   "rec": 2.7,
+   "rec_yd": 28.7,
+   "tgt": 3.8
   },
   "demond claiborne": {
-   "pts": 0.64,
+   "pts": 0.59,
    "team": "MIN",
    "opp": "IND",
    "pos": "RB",
    "rec": 0.1,
-   "rec_yd": 1.0,
+   "rec_yd": 0.9,
    "tgt": 0.1,
    "rush_yd": 2.3,
    "rush_att": 0.6
   },
   "zachariah branch": {
-   "pts": 2.34,
+   "pts": 2.39,
    "team": "ATL",
    "opp": "SF",
    "pos": "WR",
    "rec": 1.2,
-   "rec_yd": 11.5,
+   "rec_yd": 11.7,
    "tgt": 1.7,
-   "rush_yd": 0.6,
+   "rush_yd": 0.5,
    "rush_att": 0.1
   },
   "chris bell": {
-   "pts": 4.65,
+   "pts": 4.7,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
    "rec": 1.8,
-   "rec_yd": 28.6,
+   "rec_yd": 29.0,
    "tgt": 4.2,
    "rush_yd": 0.2,
    "rush_att": 0.0
   },
   "marlin klein": {
-   "pts": 1.42,
+   "pts": 1.44,
    "team": "HOU",
    "opp": "NYG",
    "pos": "TE",
@@ -2080,103 +2217,92 @@
    "rec_yd": 7.3,
    "tgt": 0.9
   },
-  "kc concepcion": {
-   "pts": 7.89,
+  "kc concepcion jr": {
+   "pts": 7.69,
    "team": "CLE",
    "opp": "TEN",
    "pos": "WR",
    "rec": 4.1,
-   "rec_yd": 41.1,
+   "rec_yd": 40.7,
    "tgt": 6.1,
-   "rush_yd": 2.5,
+   "rush_yd": 2.6,
    "rush_att": 0.8
   },
   "caleb douglas": {
-   "pts": 4.99,
+   "pts": 6.2,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
-   "rec": 2.3,
-   "rec_yd": 30.9,
-   "tgt": 3.6,
+   "rec": 2.9,
+   "rec_yd": 38.4,
+   "tgt": 4.5,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "malachi fields": {
-   "pts": 4.27,
+   "pts": 4.45,
    "team": "NYG",
    "opp": "HOU",
    "pos": "WR",
-   "rec": 1.8,
-   "rec_yd": 25.6,
-   "tgt": 3.7,
+   "rec": 2.0,
+   "rec_yd": 26.5,
+   "tgt": 4.1,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "lajohntay wester": {
-   "pts": 0.22,
+   "pts": 0.2,
    "team": "BAL",
    "opp": "CIN",
    "pos": "WR",
    "rec": 0.1,
-   "rec_yd": 1.1,
+   "rec_yd": 1.0,
    "tgt": 0.1,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "tetairoa mcmillan": {
-   "pts": 12.79,
+   "pts": 11.73,
    "team": "CAR",
    "opp": "TB",
    "pos": "WR",
-   "rec": 5.2,
-   "rec_yd": 77.8,
-   "tgt": 8.5,
+   "rec": 4.7,
+   "rec_yd": 71.6,
+   "tgt": 7.8,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "cam ward": {
-   "pts": 13.8,
+   "pts": 13.31,
    "team": "TEN",
    "opp": "CLE",
    "pos": "QB",
-   "rush_yd": 15.5,
+   "rush_yd": 15.6,
    "rush_att": 3.8,
-   "pass_yd": 187.8
-  },
-  "tyler warren": {
-   "pts": 8.09,
-   "team": "IND",
-   "opp": "MIN",
-   "pos": "TE",
-   "rec": 4.9,
-   "rec_yd": 38.3,
-   "tgt": 6.8,
-   "rush_yd": 1.0,
-   "rush_att": 0.3
+   "pass_yd": 186.3
   },
   "gunnar helm": {
-   "pts": 3.91,
+   "pts": 3.83,
    "team": "TEN",
    "opp": "CLE",
    "pos": "TE",
    "rec": 2.5,
-   "rec_yd": 19.6,
+   "rec_yd": 19.5,
    "tgt": 3.3
   },
-  "ollie gordon": {
-   "pts": 12.91,
+  "ollie gordon ii": {
+   "pts": 12.29,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "RB",
-   "rec": 1.9,
-   "rec_yd": 11.8,
-   "tgt": 2.2,
-   "rush_yd": 65.6,
-   "rush_att": 14.0
+   "rec": 1.6,
+   "rec_yd": 9.7,
+   "tgt": 1.8,
+   "rush_yd": 64.8,
+   "rush_att": 13.8
   },
   "savion williams": {
-   "pts": 1.93,
+   "pts": 1.92,
    "team": "GB",
    "opp": "DET",
    "pos": "WR",
@@ -2187,71 +2313,62 @@
    "rush_att": 0.6
   },
   "kameron johnson": {
-   "pts": 0.39,
+   "pts": 1.63,
    "team": "TB",
    "opp": "CAR",
    "pos": "WR",
-   "rec": 0.2,
-   "rec_yd": 1.9,
-   "tgt": 0.3,
+   "rec": 0.7,
+   "rec_yd": 8.5,
+   "tgt": 1.3,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "devaughn vele": {
-   "pts": 8.1,
+   "pts": 8.31,
    "team": "NO",
    "opp": "PIT",
    "pos": "WR",
-   "rec": 3.8,
-   "rec_yd": 47.1,
-   "tgt": 6.0,
+   "rec": 3.9,
+   "rec_yd": 48.2,
+   "tgt": 6.1,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
-  "anthony gould": {
-   "pts": 0.14,
-   "team": "IND",
-   "opp": "MIN",
-   "pos": "WR",
-   "rec": 0.1,
-   "rec_yd": 0.8,
-   "tgt": 0.1
-  },
   "sione vaki": {
-   "pts": 3.81,
+   "pts": 3.84,
    "team": "DET",
    "opp": "GB",
    "pos": "RB",
    "rec": 1.0,
-   "rec_yd": 9.3,
+   "rec_yd": 9.4,
    "tgt": 1.2,
-   "rush_yd": 14.3,
+   "rush_yd": 14.6,
    "rush_att": 3.8
   },
-  "tyrone tracy": {
-   "pts": 6.7,
+  "tyrone tracy jr": {
+   "pts": 5.87,
    "team": "NYG",
    "opp": "HOU",
    "pos": "RB",
    "rec": 1.4,
-   "rec_yd": 11.2,
+   "rec_yd": 10.5,
    "tgt": 1.9,
-   "rush_yd": 29.1,
-   "rush_att": 8.6
+   "rush_yd": 23.6,
+   "rush_att": 7.8
   },
   "adonai mitchell": {
-   "pts": 2.07,
+   "pts": 5.41,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "WR",
-   "rec": 0.9,
-   "rec_yd": 12.2,
-   "tgt": 1.5,
+   "rec": 2.4,
+   "rec_yd": 32.1,
+   "tgt": 3.9,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "jordan whittington": {
-   "pts": 1.39,
+   "pts": 1.4,
    "team": "LAR",
    "opp": "LV",
    "pos": "WR",
@@ -2273,15 +2390,16 @@
    "rush_att": 0.3
   },
   "jj mccarthy": {
-   "pts": 0.44,
+   "pts": 13.25,
    "team": "NYG",
    "opp": "HOU",
    "pos": "QB",
-   "rush_yd": 2.5,
-   "rush_att": 0.6
+   "rush_yd": 15.7,
+   "rush_att": 4.2,
+   "pass_yd": 224.6
   },
   "jacob saylors": {
-   "pts": 0.25,
+   "pts": 0.26,
    "team": "DET",
    "opp": "GB",
    "pos": "RB",
@@ -2292,29 +2410,29 @@
    "rush_att": 0.2
   },
   "sean tucker": {
-   "pts": 1.39,
+   "pts": 1.59,
    "team": "TB",
    "opp": "CAR",
    "pos": "RB",
    "rec": 0.1,
    "rec_yd": 0.9,
    "tgt": 0.2,
-   "rush_yd": 6.4,
-   "rush_att": 1.4
+   "rush_yd": 7.5,
+   "rush_att": 1.6
   },
   "puka nacua": {
-   "pts": 18.42,
+   "pts": 18.5,
    "team": "LAR",
    "opp": "LV",
    "pos": "WR",
-   "rec": 7.4,
-   "rec_yd": 108.0,
-   "tgt": 11.0,
-   "rush_yd": 3.5,
+   "rec": 7.5,
+   "rec_yd": 108.8,
+   "tgt": 11.1,
+   "rush_yd": 3.4,
    "rush_att": 0.5
   },
   "christian watson": {
-   "pts": 15.37,
+   "pts": 15.32,
    "team": "GB",
    "opp": "DET",
    "pos": "WR",
@@ -2324,52 +2442,52 @@
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
-  "john metchie": {
-   "pts": 1.22,
+  "john metchie iii": {
+   "pts": 1.21,
    "team": "CAR",
    "opp": "TB",
    "pos": "WR",
    "rec": 0.6,
    "rec_yd": 6.3,
-   "tgt": 1.0,
+   "tgt": 0.9,
    "rush_yd": 0.0,
    "rush_att": 0.0
   },
   "chris olave": {
-   "pts": 14.12,
+   "pts": 14.16,
    "team": "NO",
    "opp": "PIT",
    "pos": "WR",
    "rec": 5.9,
-   "rec_yd": 88.0,
+   "rec_yd": 88.1,
    "tgt": 9.2,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "tyler allgeier": {
-   "pts": 6.12,
+   "pts": 9.91,
    "team": "ARI",
    "opp": "DEN",
    "pos": "RB",
-   "rec": 2.5,
-   "rec_yd": 12.1,
-   "tgt": 2.8,
-   "rush_yd": 22.9,
-   "rush_att": 6.1
+   "rec": 3.0,
+   "rec_yd": 14.6,
+   "tgt": 3.3,
+   "rush_yd": 45.7,
+   "rush_att": 12.2
   },
   "jahan dotson": {
-   "pts": 4.62,
+   "pts": 4.73,
    "team": "ATL",
    "opp": "SF",
    "pos": "WR",
    "rec": 1.7,
-   "rec_yd": 25.6,
-   "tgt": 3.5,
+   "rec_yd": 26.1,
+   "tgt": 3.6,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "jalen tolbert": {
-   "pts": 0.67,
+   "pts": 0.68,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "WR",
@@ -2378,56 +2496,45 @@
    "tgt": 0.6
   },
   "noah gray": {
-   "pts": 2.8,
+   "pts": 3.21,
    "team": "KC",
    "opp": "SEA",
    "pos": "TE",
-   "rec": 1.7,
-   "rec_yd": 15.2,
-   "tgt": 2.2
+   "rec": 1.9,
+   "rec_yd": 17.4,
+   "tgt": 2.6
   },
   "justice hill": {
-   "pts": 5.71,
+   "pts": 6.77,
    "team": "BAL",
    "opp": "CIN",
    "pos": "RB",
-   "rec": 1.9,
-   "rec_yd": 17.0,
-   "tgt": 2.4,
-   "rush_yd": 18.2,
-   "rush_att": 3.1
-  },
-  "david montgomery": {
-   "pts": 8.5,
-   "team": "HOU",
-   "opp": "NYG",
-   "pos": "RB",
-   "rec": 0.9,
-   "rec_yd": 6.1,
-   "tgt": 0.9,
-   "rush_yd": 38.8,
-   "rush_att": 10.1
+   "rec": 1.8,
+   "rec_yd": 15.0,
+   "tgt": 2.2,
+   "rush_yd": 29.8,
+   "rush_att": 5.4
   },
   "kyler murray": {
-   "pts": 20.33,
+   "pts": 16.36,
    "team": "MIN",
    "opp": "IND",
    "pos": "QB",
-   "rush_yd": 41.6,
-   "rush_att": 6.7,
-   "pass_yd": 220.5
+   "rush_yd": 33.0,
+   "rush_att": 5.5,
+   "pass_yd": 197.1
   },
   "mike gesicki": {
-   "pts": 6.87,
+   "pts": 6.83,
    "team": "CIN",
    "opp": "BAL",
    "pos": "TE",
    "rec": 2.9,
-   "rec_yd": 33.0,
+   "rec_yd": 32.6,
    "tgt": 4.0
   },
   "patrick ricard": {
-   "pts": 0.09,
+   "pts": 0.08,
    "team": "NYG",
    "opp": "HOU",
    "pos": "FB",
@@ -2438,31 +2545,42 @@
    "rush_att": 0.0
   },
   "eric saubert": {
-   "pts": 0.9,
+   "pts": 1.27,
    "team": "SEA",
    "opp": "KC",
    "pos": "TE",
-   "rec": 0.5,
-   "rec_yd": 3.9,
-   "tgt": 0.8
+   "rec": 0.7,
+   "rec_yd": 5.4,
+   "tgt": 1.1
   },
   "mo alie cox": {
-   "pts": 0.68,
+   "pts": 1.19,
    "team": "IND",
    "opp": "MIN",
    "pos": "TE",
-   "rec": 0.3,
-   "rec_yd": 3.4,
-   "tgt": 0.5
+   "rec": 0.6,
+   "rec_yd": 6.0,
+   "tgt": 0.9
+  },
+  "deandre carter": {
+   "pts": 0.21,
+   "team": "DET",
+   "opp": "GB",
+   "pos": "WR",
+   "rec": 0.1,
+   "rec_yd": 0.9,
+   "tgt": 0.1,
+   "rush_yd": 0.4,
+   "rush_att": 0.1
   },
   "travis kelce": {
-   "pts": 9.28,
+   "pts": 9.77,
    "team": "KC",
    "opp": "SEA",
    "pos": "TE",
-   "rec": 4.4,
-   "rec_yd": 52.7,
-   "tgt": 6.2
+   "rec": 4.7,
+   "rec_yd": 55.6,
+   "tgt": 6.5
   },
   "barion brown": {
    "pts": 0.43,
@@ -2474,12 +2592,12 @@
    "tgt": 0.3
   },
   "colbie young": {
-   "pts": 1.51,
+   "pts": 1.5,
    "team": "CIN",
    "opp": "BAL",
    "pos": "WR",
    "rec": 0.9,
-   "rec_yd": 7.7,
+   "rec_yd": 7.6,
    "tgt": 1.1
   },
   "seydou traore": {
@@ -2490,15 +2608,6 @@
    "rec": 0.0,
    "rec_yd": 0.4,
    "tgt": 0.1
-  },
-  "jalon daniels": {
-   "pts": 13.03,
-   "team": "TB",
-   "opp": "CAR",
-   "pos": "QB",
-   "rush_yd": 20.3,
-   "rush_att": 3.7,
-   "pass_yd": 182.2
   },
   "eli heidenreich": {
    "pts": 0.13,
@@ -2512,7 +2621,7 @@
    "rush_att": 0.1
   },
   "bryce lance": {
-   "pts": 2.14,
+   "pts": 2.15,
    "team": "NO",
    "opp": "PIT",
    "pos": "WR",
@@ -2521,168 +2630,168 @@
    "tgt": 2.1
   },
   "cyrus allen": {
-   "pts": 0.73,
+   "pts": 1.85,
    "team": "KC",
    "opp": "SEA",
    "pos": "WR",
-   "rec": 0.3,
-   "rec_yd": 4.1,
-   "tgt": 0.7
+   "rec": 0.9,
+   "rec_yd": 10.4,
+   "tgt": 1.6
   },
   "kenyon sadiq": {
-   "pts": 7.27,
+   "pts": 3.98,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "TE",
-   "rec": 3.4,
-   "rec_yd": 37.2,
-   "tgt": 4.5,
+   "rec": 1.8,
+   "rec_yd": 20.1,
+   "tgt": 2.4,
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
   "jakobi lane": {
-   "pts": 4.11,
+   "pts": 5.13,
    "team": "BAL",
    "opp": "CIN",
    "pos": "WR",
-   "rec": 1.7,
-   "rec_yd": 24.5,
-   "tgt": 2.9,
+   "rec": 2.2,
+   "rec_yd": 30.9,
+   "tgt": 3.9,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "carnell tate": {
-   "pts": 10.04,
+   "pts": 9.85,
    "team": "TEN",
    "opp": "CLE",
    "pos": "WR",
    "rec": 5.0,
-   "rec_yd": 61.6,
-   "tgt": 8.5,
+   "rec_yd": 61.2,
+   "tgt": 8.4,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
-  "omar cooper": {
-   "pts": 8.2,
+  "omar cooper jr": {
+   "pts": 7.78,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "WR",
-   "rec": 3.6,
-   "rec_yd": 46.3,
-   "tgt": 4.5,
+   "rec": 3.4,
+   "rec_yd": 43.8,
+   "tgt": 4.2,
    "rush_yd": 0.9,
    "rush_att": 0.2
   },
   "germie bernard": {
-   "pts": 9.06,
+   "pts": 9.31,
    "team": "PIT",
    "opp": "NO",
    "pos": "WR",
-   "rec": 4.4,
-   "rec_yd": 48.0,
-   "tgt": 6.8,
+   "rec": 4.5,
+   "rec_yd": 49.4,
+   "tgt": 7.0,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "konata mumpfield": {
-   "pts": 4.24,
+   "pts": 4.26,
    "team": "LAR",
    "opp": "LV",
    "pos": "WR",
    "rec": 1.5,
-   "rec_yd": 23.3,
+   "rec_yd": 23.5,
    "tgt": 3.3
   },
   "gavin bartholomew": {
-   "pts": 0.69,
+   "pts": 0.6,
    "team": "MIN",
    "opp": "IND",
    "pos": "TE",
    "rec": 0.3,
-   "rec_yd": 3.5,
-   "tgt": 0.5
+   "rec_yd": 3.1,
+   "tgt": 0.4
   },
   "jordan watkins": {
-   "pts": 5.99,
+   "pts": 5.96,
    "team": "SF",
    "opp": "ATL",
    "pos": "WR",
    "rec": 2.3,
-   "rec_yd": 38.8,
+   "rec_yd": 38.9,
    "tgt": 4.0
   },
   "tyler shough": {
-   "pts": 15.96,
+   "pts": 16.05,
    "team": "NO",
    "opp": "PIT",
    "pos": "QB",
    "rush_yd": 18.6,
    "rush_att": 4.5,
-   "pass_yd": 242.0
+   "pass_yd": 242.2
   },
   "chimere dike": {
-   "pts": 1.45,
+   "pts": 1.41,
    "team": "TEN",
    "opp": "CLE",
    "pos": "WR",
    "rec": 0.7,
-   "rec_yd": 6.7,
+   "rec_yd": 6.6,
    "tgt": 1.0,
    "rush_yd": 0.7,
    "rush_att": 0.2
   },
   "jaylin noel": {
-   "pts": 4.71,
+   "pts": 7.47,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 1.8,
-   "rec_yd": 26.7,
-   "tgt": 2.5,
-   "rush_yd": 0.4,
+   "rec": 2.8,
+   "rec_yd": 42.1,
+   "tgt": 4.0,
+   "rush_yd": 0.5,
    "rush_att": 0.1
   },
   "quinshon judkins": {
-   "pts": 10.54,
+   "pts": 10.24,
    "team": "CLE",
    "opp": "TEN",
    "pos": "RB",
    "rec": 2.1,
-   "rec_yd": 13.5,
-   "tgt": 2.3,
-   "rush_yd": 49.4,
-   "rush_att": 16.0
+   "rec_yd": 13.4,
+   "tgt": 2.2,
+   "rush_yd": 49.6,
+   "rush_att": 16.1
   },
   "elic ayomanor": {
-   "pts": 5.01,
+   "pts": 4.86,
    "team": "TEN",
    "opp": "CLE",
    "pos": "WR",
    "rec": 1.7,
-   "rec_yd": 27.9,
+   "rec_yd": 27.6,
    "tgt": 3.7,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "rj harvey": {
-   "pts": 9.82,
+   "pts": 9.42,
    "team": "DEN",
    "opp": "ARI",
    "pos": "RB",
-   "rec": 3.5,
-   "rec_yd": 26.3,
-   "tgt": 3.9,
-   "rush_yd": 29.7,
-   "rush_att": 6.8
+   "rec": 3.3,
+   "rec_yd": 25.2,
+   "tgt": 3.7,
+   "rush_yd": 28.8,
+   "rush_att": 6.6
   },
   "tez johnson": {
-   "pts": 3.15,
+   "pts": 4.61,
    "team": "TB",
    "opp": "CAR",
    "pos": "WR",
-   "rec": 1.2,
-   "rec_yd": 19.5,
-   "tgt": 2.4,
+   "rec": 1.8,
+   "rec_yd": 26.4,
+   "tgt": 2.9,
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
@@ -2697,75 +2806,66 @@
    "rush_yd": 0.5,
    "rush_att": 0.1
   },
-  "tip reiman": {
-   "pts": 0.66,
-   "team": "ARI",
-   "opp": "DEN",
-   "pos": "TE",
-   "rec": 0.4,
-   "rec_yd": 3.2,
-   "tgt": 0.6
-  },
   "kirk cousins": {
-   "pts": 15.86,
+   "pts": 15.79,
    "team": "LV",
    "opp": "LAR",
    "pos": "QB",
    "rush_yd": 7.0,
    "rush_att": 2.3,
-   "pass_yd": 219.1
+   "pass_yd": 220.3
   },
-  "marvin harrison": {
-   "pts": 3.35,
+  "marvin harrison jr": {
+   "pts": 3.0,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 1.2,
-   "rec_yd": 18.7,
-   "tgt": 2.5
+   "rec": 1.1,
+   "rec_yd": 16.5,
+   "tgt": 2.2
   },
   "troy franklin": {
-   "pts": 4.18,
+   "pts": 4.41,
    "team": "DEN",
    "opp": "ARI",
    "pos": "WR",
-   "rec": 1.6,
-   "rec_yd": 23.1,
-   "tgt": 2.9,
+   "rec": 1.7,
+   "rec_yd": 24.5,
+   "tgt": 3.0,
    "rush_yd": 0.5,
    "rush_att": 0.1
   },
   "xavier worthy": {
-   "pts": 7.29,
+   "pts": 9.05,
    "team": "KC",
    "opp": "SEA",
    "pos": "WR",
-   "rec": 3.5,
-   "rec_yd": 35.9,
-   "tgt": 6.1,
-   "rush_yd": 5.1,
+   "rec": 4.5,
+   "rec_yd": 45.6,
+   "tgt": 7.8,
+   "rush_yd": 5.0,
    "rush_att": 1.1
   },
   "blake whiteheart": {
-   "pts": 1.87,
+   "pts": 1.79,
    "team": "CLE",
    "opp": "TEN",
    "pos": "TE",
    "rec": 0.8,
-   "rec_yd": 8.4,
+   "rec_yd": 8.3,
    "tgt": 1.1
   },
   "mitch tinsley": {
-   "pts": 0.89,
+   "pts": 0.88,
    "team": "CIN",
    "opp": "BAL",
    "pos": "WR",
    "rec": 0.4,
-   "rec_yd": 4.6,
+   "rec_yd": 4.5,
    "tgt": 0.7
   },
   "jalen brooks": {
-   "pts": 2.46,
+   "pts": 2.44,
    "team": "ARI",
    "opp": "DEN",
    "pos": "WR",
@@ -2774,64 +2874,64 @@
    "tgt": 2.8
   },
   "charlie jones": {
-   "pts": 0.19,
+   "pts": 0.4,
    "team": "NYG",
    "opp": "HOU",
    "pos": "WR",
-   "rec": 0.1,
-   "rec_yd": 1.0,
-   "tgt": 0.1,
+   "rec": 0.2,
+   "rec_yd": 2.2,
+   "tgt": 0.3,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "payne durham": {
-   "pts": 0.16,
+   "pts": 0.93,
    "team": "TB",
    "opp": "CAR",
    "pos": "TE",
-   "rec": 0.1,
-   "rec_yd": 0.8,
-   "tgt": 0.1
+   "rec": 0.5,
+   "rec_yd": 4.6,
+   "tgt": 0.8
   },
   "xavier hutchinson": {
-   "pts": 2.19,
+   "pts": 1.86,
    "team": "HOU",
    "opp": "NYG",
    "pos": "WR",
-   "rec": 1.0,
-   "rec_yd": 13.5,
-   "tgt": 1.9,
+   "rec": 0.8,
+   "rec_yd": 11.4,
+   "tgt": 1.6,
    "rush_yd": 0.4,
    "rush_att": 0.1
   },
   "davis allen": {
-   "pts": 2.14,
+   "pts": 2.15,
    "team": "LAR",
    "opp": "LV",
    "pos": "TE",
    "rec": 1.1,
    "rec_yd": 11.8,
-   "tgt": 1.6
+   "tgt": 1.7
   },
   "zay flowers": {
-   "pts": 16.68,
+   "pts": 15.63,
    "team": "BAL",
    "opp": "CIN",
    "pos": "WR",
    "rec": 6.0,
-   "rec_yd": 100.4,
+   "rec_yd": 95.5,
    "tgt": 8.2,
    "rush_yd": 1.4,
    "rush_att": 0.2
   },
   "jordan addison": {
-   "pts": 8.2,
+   "pts": 7.13,
    "team": "MIN",
    "opp": "IND",
    "pos": "WR",
-   "rec": 2.6,
-   "rec_yd": 43.0,
-   "tgt": 5.2,
+   "rec": 2.5,
+   "rec_yd": 38.5,
+   "tgt": 4.9,
    "rush_yd": 2.6,
    "rush_att": 0.3
   },
@@ -2858,75 +2958,64 @@
    "rush_att": 0.1
   },
   "chase brown": {
-   "pts": 12.89,
+   "pts": 13.11,
    "team": "CIN",
    "opp": "BAL",
    "pos": "RB",
    "rec": 4.0,
-   "rec_yd": 22.9,
-   "tgt": 4.6,
-   "rush_yd": 53.3,
-   "rush_att": 14.7
+   "rec_yd": 22.6,
+   "tgt": 4.5,
+   "rush_yd": 55.0,
+   "rush_att": 15.2
   },
   "ko kieft": {
-   "pts": 0.03,
+   "pts": 0.12,
    "team": "TB",
    "opp": "CAR",
    "pos": "TE",
-   "rec": 0.0,
-   "rec_yd": 0.2,
-   "tgt": 0.0
-  },
-  "tyler badie": {
-   "pts": 2.86,
-   "team": "DEN",
-   "opp": "ARI",
-   "pos": "RB",
-   "rec": 1.3,
-   "rec_yd": 11.8,
-   "tgt": 1.7,
-   "rush_yd": 3.4,
-   "rush_att": 0.6
+   "rec": 0.1,
+   "rec_yd": 0.6,
+   "tgt": 0.1
   },
   "greg dulcich": {
-   "pts": 5.12,
+   "pts": 5.18,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "TE",
    "rec": 2.9,
-   "rec_yd": 29.9,
+   "rec_yd": 30.3,
    "tgt": 3.9
   },
   "breece hall": {
-   "pts": 12.71,
+   "pts": 12.7,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "RB",
    "rec": 2.8,
-   "rec_yd": 24.4,
+   "rec_yd": 24.7,
    "tgt": 2.9,
-   "rush_yd": 55.9,
-   "rush_att": 15.5
+   "rush_yd": 55.2,
+   "rush_att": 15.3
   },
   "jameson williams": {
-   "pts": 9.78,
+   "pts": 10.07,
    "team": "DET",
    "opp": "GB",
    "pos": "WR",
    "rec": 3.7,
-   "rec_yd": 58.1,
-   "tgt": 6.2,
+   "rec_yd": 60.1,
+   "tgt": 6.3,
    "rush_yd": 2.9,
    "rush_att": 0.6
   },
   "jeremy ruckert": {
-   "pts": 2.14,
+   "pts": 2.17,
    "team": "NYJ",
    "opp": "MIA",
    "pos": "TE",
    "rec": 1.2,
-   "rec_yd": 10.0,
-   "tgt": 1.3
+   "rec_yd": 10.1,
+   "tgt": 1.4
   },
   "kene nwangwu": {
    "pts": 0.1,
@@ -2938,6 +3027,17 @@
    "tgt": 0.0,
    "rush_yd": 0.6,
    "rush_att": 0.2
+  },
+  "khalil herbert": {
+   "pts": 3.14,
+   "team": "ATL",
+   "opp": "SF",
+   "pos": "RB",
+   "rec": 0.6,
+   "rec_yd": 4.4,
+   "tgt": 0.9,
+   "rush_yd": 14.1,
+   "rush_att": 4.0
   },
   "feleipe franks": {
    "pts": 0.06,
@@ -2951,13 +3051,13 @@
    "rush_att": 0.1
   },
   "cody white": {
-   "pts": 4.66,
+   "pts": 3.19,
    "team": "LV",
    "opp": "LAR",
    "pos": "WR",
-   "rec": 1.3,
-   "rec_yd": 19.9,
-   "tgt": 2.6
+   "rec": 0.9,
+   "rec_yd": 13.8,
+   "tgt": 1.8
   },
   "devin duvernay": {
    "pts": 0.14,
@@ -2982,16 +3082,16 @@
    "rush_att": 0.2
   },
   "liljordan humphrey": {
-   "pts": 1.85,
+   "pts": 1.49,
    "team": "DEN",
    "opp": "ARI",
    "pos": "WR",
-   "rec": 0.8,
-   "rec_yd": 9.3,
-   "tgt": 1.2
+   "rec": 0.6,
+   "rec_yd": 7.5,
+   "tgt": 1.0
   },
   "courtland sutton": {
-   "pts": 7.58,
+   "pts": 7.56,
    "team": "DEN",
    "opp": "ARI",
    "pos": "WR",
@@ -3000,33 +3100,33 @@
    "tgt": 5.8
   },
   "dalton schultz": {
-   "pts": 6.55,
+   "pts": 6.65,
    "team": "HOU",
    "opp": "NYG",
    "pos": "TE",
    "rec": 3.7,
-   "rec_yd": 36.4,
+   "rec_yd": 36.7,
    "tgt": 4.8
   },
   "lamar jackson": {
-   "pts": 23.25,
+   "pts": 18.78,
    "team": "BAL",
    "opp": "CIN",
    "pos": "QB",
-   "rush_yd": 60.2,
-   "rush_att": 8.5,
-   "pass_yd": 272.6
+   "rush_yd": 35.6,
+   "rush_att": 5.2,
+   "pass_yd": 264.2
   },
   "dare ogunbowale": {
-   "pts": 0.16,
+   "pts": 5.79,
    "team": "HOU",
    "opp": "NYG",
    "pos": "RB",
-   "rec": 0.1,
-   "rec_yd": 0.5,
-   "tgt": 0.1,
-   "rush_yd": 0.3,
-   "rush_att": 0.1
+   "rec": 0.9,
+   "rec_yd": 7.3,
+   "tgt": 1.3,
+   "rush_yd": 28.7,
+   "rush_att": 8.0
   },
   "samaje perine": {
    "pts": 4.91,
@@ -3034,13 +3134,13 @@
    "opp": "BAL",
    "pos": "RB",
    "rec": 1.7,
-   "rec_yd": 12.4,
+   "rec_yd": 12.3,
    "tgt": 2.0,
-   "rush_yd": 15.6,
+   "rush_yd": 15.7,
    "rush_att": 4.2
   },
   "evan engram": {
-   "pts": 4.74,
+   "pts": 4.72,
    "team": "DEN",
    "opp": "ARI",
    "pos": "TE",
@@ -3049,39 +3149,39 @@
    "tgt": 3.1
   },
   "nick vannett": {
-   "pts": 0.24,
+   "pts": 0.45,
    "team": "BAL",
    "opp": "CIN",
    "pos": "TE",
-   "rec": 0.1,
-   "rec_yd": 1.3,
-   "tgt": 0.1
+   "rec": 0.2,
+   "rec_yd": 2.5,
+   "tgt": 0.3
   },
   "jared goff": {
-   "pts": 18.71,
+   "pts": 18.88,
    "team": "DET",
    "opp": "GB",
    "pos": "QB",
-   "rush_yd": 4.6,
+   "rush_yd": 4.7,
    "rush_att": 1.6,
-   "pass_yd": 277.0
+   "pass_yd": 279.8
   },
   "keenan allen": {
-   "pts": 6.34,
+   "pts": 7.29,
    "team": "IND",
    "opp": "MIN",
    "pos": "WR",
-   "rec": 3.6,
-   "rec_yd": 36.5,
-   "tgt": 6.1
+   "rec": 4.1,
+   "rec_yd": 42.0,
+   "tgt": 7.0
   },
   "carsen ryan": {
-   "pts": 0.17,
+   "pts": 0.16,
    "team": "CLE",
    "opp": "TEN",
    "pos": "TE",
    "rec": 0.1,
-   "rec_yd": 0.9,
+   "rec_yd": 0.8,
    "tgt": 0.1
   },
   "riley nowakowski": {
@@ -3096,38 +3196,49 @@
    "rush_att": 0.0
   },
   "justin joly": {
-   "pts": 0.37,
+   "pts": 0.38,
    "team": "MIA",
    "opp": "NYJ",
    "pos": "TE",
    "rec": 0.2,
-   "rec_yd": 2.0,
+   "rec_yd": 2.1,
    "tgt": 0.3
   },
   "denzel boston": {
-   "pts": 9.68,
+   "pts": 9.34,
    "team": "CLE",
    "opp": "TEN",
    "pos": "WR",
    "rec": 3.1,
-   "rec_yd": 54.2,
+   "rec_yd": 53.7,
    "tgt": 5.2,
    "rush_yd": 0.6,
    "rush_att": 0.1
   },
+  "jonah coleman": {
+   "pts": 4.15,
+   "team": "DEN",
+   "opp": "ARI",
+   "pos": "RB",
+   "rec": 1.2,
+   "rec_yd": 8.8,
+   "tgt": 1.3,
+   "rush_yd": 15.0,
+   "rush_att": 3.1
+  },
   "emmett johnson": {
-   "pts": 3.29,
+   "pts": 3.2,
    "team": "KC",
    "opp": "SEA",
    "pos": "RB",
-   "rec": 1.1,
-   "rec_yd": 10.4,
-   "tgt": 1.4,
-   "rush_yd": 10.4,
-   "rush_att": 3.4
+   "rec": 1.2,
+   "rec_yd": 11.5,
+   "tgt": 1.5,
+   "rush_yd": 8.3,
+   "rush_att": 2.7
   },
   "oscar delp": {
-   "pts": 1.15,
+   "pts": 1.16,
    "team": "NO",
    "opp": "PIT",
    "pos": "TE",
@@ -3146,8 +3257,8 @@
    "rush_yd": 0.5,
    "rush_att": 0.1
   },
-  "mike washington": {
-   "pts": 5.26,
+  "mike washington jr": {
+   "pts": 5.23,
    "team": "LV",
    "opp": "LAR",
    "pos": "RB",
@@ -3158,7 +3269,7 @@
    "rush_att": 5.8
   },
   "tahj brooks": {
-   "pts": 0.51,
+   "pts": 0.52,
    "team": "CIN",
    "opp": "BAL",
    "pos": "RB",
@@ -3168,27 +3279,16 @@
    "rush_yd": 2.3,
    "rush_att": 0.8
   },
-  "emeka egbuka": {
-   "pts": 8.8,
-   "team": "TB",
-   "opp": "CAR",
-   "pos": "WR",
-   "rec": 4.0,
-   "rec_yd": 47.0,
-   "tgt": 7.4,
-   "rush_yd": 1.1,
-   "rush_att": 0.2
-  },
   "jalen royals": {
-   "pts": 1.94,
+   "pts": 5.07,
    "team": "KC",
    "opp": "SEA",
    "pos": "WR",
-   "rec": 1.0,
-   "rec_yd": 9.1,
-   "tgt": 1.6,
+   "rec": 2.6,
+   "rec_yd": 23.9,
+   "tgt": 4.3,
    "rush_yd": 0.2,
-   "rush_att": 0.1
+   "rush_att": 0.0
   },
   "kaleb johnson": {
    "pts": 0.21,
@@ -3202,56 +3302,56 @@
    "rush_att": 0.2
   },
   "matthew golden": {
-   "pts": 12.96,
+   "pts": 12.92,
    "team": "GB",
    "opp": "DET",
    "pos": "WR",
    "rec": 4.9,
-   "rec_yd": 78.6,
-   "tgt": 9.0,
+   "rec_yd": 78.5,
+   "tgt": 8.9,
    "rush_yd": 0.6,
    "rush_att": 0.1
   },
   "tory horton": {
-   "pts": 2.67,
+   "pts": 2.86,
    "team": "SEA",
    "opp": "KC",
    "pos": "WR",
-   "rec": 1.1,
-   "rec_yd": 14.0,
+   "rec": 1.2,
+   "rec_yd": 14.6,
    "tgt": 1.9,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "mitchell evans": {
-   "pts": 1.37,
+   "pts": 1.36,
    "team": "CAR",
    "opp": "TB",
    "pos": "TE",
    "rec": 0.8,
-   "rec_yd": 7.5,
-   "tgt": 1.0
+   "rec_yd": 7.4,
+   "tgt": 0.9
   },
   "george holani": {
-   "pts": 5.13,
+   "pts": 6.01,
    "team": "SEA",
    "opp": "KC",
    "pos": "RB",
-   "rec": 1.5,
-   "rec_yd": 10.9,
-   "tgt": 1.9,
-   "rush_yd": 21.2,
-   "rush_att": 7.0
+   "rec": 2.1,
+   "rec_yd": 15.2,
+   "tgt": 2.6,
+   "rush_yd": 20.5,
+   "rush_att": 6.8
   },
   "aj barner": {
-   "pts": 5.88,
+   "pts": 6.3,
    "team": "SEA",
    "opp": "KC",
    "pos": "TE",
-   "rec": 3.0,
-   "rec_yd": 29.5,
-   "tgt": 4.5,
-   "rush_yd": 1.8,
+   "rec": 3.2,
+   "rec_yd": 31.2,
+   "tgt": 4.7,
+   "rush_yd": 1.7,
    "rush_att": 0.6
   },
   "jatavion sanders": {
@@ -3263,36 +3363,36 @@
    "rec_yd": 0.9,
    "tgt": 0.1
   },
-  "erick all": {
-   "pts": 1.21,
+  "erick all jr": {
+   "pts": 1.5,
    "team": "CIN",
    "opp": "BAL",
    "pos": "TE",
-   "rec": 0.7,
-   "rec_yd": 6.2,
-   "tgt": 0.9
+   "rec": 0.8,
+   "rec_yd": 7.6,
+   "tgt": 1.1
   },
   "bucky irving": {
-   "pts": 14.81,
+   "pts": 15.13,
    "team": "TB",
    "opp": "CAR",
    "pos": "RB",
-   "rec": 2.9,
-   "rec_yd": 17.5,
-   "tgt": 3.5,
-   "rush_yd": 79.2,
-   "rush_att": 15.8
+   "rec": 2.7,
+   "rec_yd": 16.3,
+   "tgt": 3.2,
+   "rush_yd": 84.2,
+   "rush_att": 16.8
   },
   "marshawn lloyd": {
-   "pts": 4.14,
+   "pts": 4.56,
    "team": "GB",
    "opp": "DET",
    "pos": "RB",
    "rec": 0.8,
    "rec_yd": 6.5,
    "tgt": 1.1,
-   "rush_yd": 19.0,
-   "rush_att": 4.5
+   "rush_yd": 22.0,
+   "rush_att": 5.2
   },
   "dylan laube": {
    "pts": 0.35,
@@ -3306,25 +3406,25 @@
    "rush_att": 0.4
   },
   "bo nix": {
-   "pts": 19.63,
+   "pts": 19.23,
    "team": "DEN",
    "opp": "ARI",
    "pos": "QB",
-   "rush_yd": 19.8,
-   "rush_att": 4.5,
+   "rush_yd": 17.7,
+   "rush_att": 4.0,
    "pass_yd": 237.2
   },
-  "michael penix": {
-   "pts": 14.97,
+  "michael penix jr": {
+   "pts": 15.29,
    "team": "ATL",
    "opp": "SF",
    "pos": "QB",
-   "rush_yd": 10.2,
-   "rush_att": 2.9,
-   "pass_yd": 215.5
+   "rush_yd": 10.0,
+   "rush_att": 2.8,
+   "pass_yd": 219.8
   },
   "nate adkins": {
-   "pts": 1.66,
+   "pts": 1.65,
    "team": "DEN",
    "opp": "ARI",
    "pos": "TE",
@@ -3333,13 +3433,13 @@
    "tgt": 0.9
   },
   "will mallory": {
-   "pts": 0.26,
+   "pts": 4.08,
    "team": "IND",
    "opp": "MIN",
    "pos": "TE",
-   "rec": 0.1,
-   "rec_yd": 1.4,
-   "tgt": 0.2
+   "rec": 2.4,
+   "rec_yd": 22.7,
+   "tgt": 3.7
   },
   "josh whyle": {
    "pts": 0.31,
@@ -3351,91 +3451,80 @@
    "tgt": 0.2
   },
   "kendre miller": {
-   "pts": 8.17,
+   "pts": 8.23,
    "team": "NO",
    "opp": "PIT",
    "pos": "RB",
    "rec": 1.4,
    "rec_yd": 9.5,
    "tgt": 1.7,
-   "rush_yd": 37.2,
+   "rush_yd": 37.3,
    "rush_att": 11.9
   },
-  "zach charbonnet": {
-   "pts": 5.09,
-   "team": "SEA",
-   "opp": "KC",
-   "pos": "RB",
-   "rec": 1.0,
-   "rec_yd": 6.5,
-   "tgt": 1.2,
-   "rush_yd": 18.1,
-   "rush_att": 4.8
-  },
   "bijan robinson": {
-   "pts": 20.91,
+   "pts": 21.81,
    "team": "ATL",
    "opp": "SF",
    "pos": "RB",
-   "rec": 4.1,
-   "rec_yd": 31.0,
-   "tgt": 5.1,
-   "rush_yd": 93.5,
-   "rush_att": 18.9
+   "rec": 4.0,
+   "rec_yd": 30.2,
+   "tgt": 5.0,
+   "rush_yd": 99.9,
+   "rush_att": 20.2
   },
   "tyjae spears": {
-   "pts": 6.13,
+   "pts": 6.0,
    "team": "TEN",
    "opp": "CLE",
    "pos": "RB",
    "rec": 2.4,
-   "rec_yd": 14.2,
+   "rec_yd": 14.1,
    "tgt": 2.8,
-   "rush_yd": 19.8,
+   "rush_yd": 19.9,
    "rush_att": 4.8
   },
-  "marvin mims": {
-   "pts": 3.91,
+  "marvin mims jr": {
+   "pts": 3.95,
    "team": "DEN",
    "opp": "ARI",
    "pos": "WR",
-   "rec": 1.6,
-   "rec_yd": 19.3,
+   "rec": 1.7,
+   "rec_yd": 19.5,
    "tgt": 2.5,
    "rush_yd": 2.1,
    "rush_att": 0.4
   },
   "michael mayer": {
-   "pts": 5.52,
+   "pts": 5.53,
    "team": "LV",
    "opp": "LAR",
    "pos": "TE",
    "rec": 3.2,
-   "rec_yd": 28.9,
+   "rec_yd": 29.1,
    "tgt": 4.5
   },
   "bryce young": {
-   "pts": 18.69,
+   "pts": 18.51,
    "team": "CAR",
    "opp": "TB",
    "pos": "QB",
-   "rush_yd": 22.9,
+   "rush_yd": 23.0,
    "rush_att": 4.7,
-   "pass_yd": 225.8
+   "pass_yd": 224.6
   },
   "rashid shaheed": {
-   "pts": 4.7,
+   "pts": 4.94,
    "team": "SEA",
    "opp": "KC",
    "pos": "WR",
-   "rec": 1.9,
-   "rec_yd": 25.6,
-   "tgt": 3.7,
-   "rush_yd": 4.2,
+   "rec": 2.0,
+   "rec_yd": 26.8,
+   "tgt": 3.9,
+   "rush_yd": 4.1,
    "rush_att": 0.7
   },
   "connor heyward": {
-   "pts": 0.57,
+   "pts": 0.56,
    "team": "LV",
    "opp": "LAR",
    "pos": "RB",
@@ -3445,49 +3534,38 @@
    "rush_yd": 1.5,
    "rush_att": 0.5
   },
-  "brian robinson": {
-   "pts": 4.84,
-   "team": "ATL",
-   "opp": "SF",
-   "pos": "RB",
-   "rec": 0.7,
-   "rec_yd": 5.1,
-   "tgt": 0.9,
-   "rush_yd": 20.9,
-   "rush_att": 5.8
-  },
-  "kenneth walker": {
-   "pts": 16.73,
+  "kenneth walker iii": {
+   "pts": 17.43,
    "team": "KC",
    "opp": "SEA",
    "pos": "RB",
-   "rec": 3.6,
-   "rec_yd": 23.4,
-   "tgt": 4.8,
-   "rush_yd": 81.0,
-   "rush_att": 16.9
+   "rec": 3.8,
+   "rec_yd": 24.8,
+   "tgt": 5.1,
+   "rush_yd": 83.9,
+   "rush_att": 17.5
   },
   "zonovan knight": {
-   "pts": 3.47,
+   "pts": 7.05,
    "team": "ARI",
    "opp": "DEN",
    "pos": "RB",
-   "rec": 0.7,
-   "rec_yd": 5.2,
-   "tgt": 1.0,
-   "rush_yd": 15.2,
-   "rush_att": 3.9
+   "rec": 1.1,
+   "rec_yd": 8.2,
+   "tgt": 1.6,
+   "rush_yd": 34.7,
+   "rush_att": 8.9
   },
-  "pierre strong": {
-   "pts": 3.1,
+  "pierre strong jr": {
+   "pts": 3.43,
    "team": "GB",
    "opp": "DET",
    "pos": "RB",
    "rec": 0.8,
    "rec_yd": 6.7,
    "tgt": 1.1,
-   "rush_yd": 12.5,
-   "rush_att": 2.5
+   "rush_yd": 14.8,
+   "rush_att": 3.0
   },
   "kylen granson": {
    "pts": 0.12,
@@ -3499,29 +3577,29 @@
    "tgt": 0.1
   },
   "chuba hubbard": {
-   "pts": 14.86,
+   "pts": 14.83,
    "team": "CAR",
    "opp": "TB",
    "pos": "RB",
    "rec": 2.8,
-   "rec_yd": 19.6,
+   "rec_yd": 19.5,
    "tgt": 3.2,
-   "rush_yd": 72.1,
-   "rush_att": 17.6
+   "rush_yd": 72.5,
+   "rush_att": 17.8
   },
   "rashod bateman": {
-   "pts": 6.14,
+   "pts": 4.45,
    "team": "BAL",
    "opp": "CIN",
    "pos": "WR",
-   "rec": 2.5,
-   "rec_yd": 38.6,
-   "tgt": 4.0,
+   "rec": 1.9,
+   "rec_yd": 28.2,
+   "tgt": 3.0,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "brevin jordan": {
-   "pts": 0.34,
+   "pts": 0.35,
    "team": "HOU",
    "opp": "NYG",
    "pos": "TE",
@@ -3530,48 +3608,48 @@
    "tgt": 0.2
   },
   "kenny gainwell": {
-   "pts": 7.96,
+   "pts": 6.37,
    "team": "TB",
    "opp": "CAR",
    "pos": "RB",
-   "rec": 2.3,
-   "rec_yd": 17.4,
-   "tgt": 3.0,
-   "rush_yd": 28.3,
-   "rush_att": 5.8
+   "rec": 1.9,
+   "rec_yd": 14.8,
+   "tgt": 2.6,
+   "rush_yd": 21.8,
+   "rush_att": 4.5
   },
   "jamarr chase": {
-   "pts": 15.9,
+   "pts": 15.8,
    "team": "CIN",
    "opp": "BAL",
    "pos": "WR",
-   "rec": 6.4,
-   "rec_yd": 79.5,
-   "tgt": 9.4,
-   "rush_yd": 0.9,
-   "rush_att": 0.2
+   "rec": 6.3,
+   "rec_yd": 78.6,
+   "tgt": 9.3,
+   "rush_yd": 1.0,
+   "rush_att": 0.3
   },
   "amon ra st brown": {
-   "pts": 16.07,
+   "pts": 16.18,
    "team": "DET",
    "opp": "GB",
    "pos": "WR",
    "rec": 6.7,
-   "rec_yd": 79.7,
+   "rec_yd": 80.5,
    "tgt": 10.1,
-   "rush_yd": 1.4,
+   "rush_yd": 1.5,
    "rush_att": 0.3
   },
   "rico dowdle": {
-   "pts": 7.67,
+   "pts": 8.08,
    "team": "PIT",
    "opp": "NO",
    "pos": "RB",
-   "rec": 1.3,
-   "rec_yd": 8.8,
-   "tgt": 1.6,
-   "rush_yd": 36.5,
-   "rush_att": 8.9
+   "rec": 1.6,
+   "rec_yd": 11.1,
+   "tgt": 2.1,
+   "rush_yd": 35.8,
+   "rush_att": 8.7
   },
   "adam trautman": {
    "pts": 1.57,
@@ -3583,86 +3661,95 @@
    "tgt": 1.1
   },
   "colby parkinson": {
-   "pts": 5.39,
+   "pts": 5.41,
    "team": "LAR",
    "opp": "LV",
    "pos": "TE",
-   "rec": 2.6,
-   "rec_yd": 26.5,
-   "tgt": 3.6
+   "rec": 2.7,
+   "rec_yd": 26.7,
+   "tgt": 3.7
   },
   "jk dobbins": {
-   "pts": 9.84,
+   "pts": 9.17,
    "team": "DEN",
    "opp": "ARI",
    "pos": "RB",
-   "rec": 1.4,
-   "rec_yd": 8.5,
-   "tgt": 1.7,
-   "rush_yd": 61.2,
-   "rush_att": 13.6
+   "rec": 1.6,
+   "rec_yd": 9.2,
+   "tgt": 1.8,
+   "rush_yd": 54.7,
+   "rush_att": 12.1
   },
   "justin jefferson": {
-   "pts": 16.18,
+   "pts": 14.05,
    "team": "MIN",
    "opp": "IND",
    "pos": "WR",
-   "rec": 6.0,
-   "rec_yd": 89.4,
-   "tgt": 8.6,
+   "rec": 5.6,
+   "rec_yd": 79.9,
+   "tgt": 8.1,
    "rush_yd": 0.5,
-   "rush_att": 0.1
+   "rush_att": 0.2
   },
   "olamide zaccheaus": {
-   "pts": 1.53,
+   "pts": 1.56,
    "team": "ATL",
    "opp": "SF",
    "pos": "WR",
    "rec": 0.6,
-   "rec_yd": 7.3,
+   "rec_yd": 7.4,
    "tgt": 1.2,
    "rush_yd": 0.9,
    "rush_att": 0.2
   },
   "drew sample": {
-   "pts": 2.01,
+   "pts": 2.36,
    "team": "CIN",
    "opp": "BAL",
    "pos": "TE",
-   "rec": 1.3,
-   "rec_yd": 9.8,
-   "tgt": 1.6
+   "rec": 1.5,
+   "rec_yd": 11.4,
+   "tgt": 1.8
   },
   "tony pollard": {
-   "pts": 11.06,
+   "pts": 10.86,
    "team": "TEN",
    "opp": "CLE",
    "pos": "RB",
    "rec": 2.0,
-   "rec_yd": 10.0,
+   "rec_yd": 9.9,
    "tgt": 2.7,
-   "rush_yd": 64.6,
+   "rush_yd": 64.8,
    "rush_att": 14.7
   },
   "josh jacobs": {
-   "pts": 11.63,
+   "pts": 10.81,
    "team": "GB",
    "opp": "DET",
    "pos": "RB",
    "rec": 1.9,
    "rec_yd": 14.5,
    "tgt": 2.4,
-   "rush_yd": 56.4,
-   "rush_att": 13.1
+   "rush_yd": 51.2,
+   "rush_att": 11.9
   },
   "christian kirk": {
-   "pts": 4.05,
+   "pts": 5.64,
    "team": "SF",
    "opp": "ATL",
    "pos": "WR",
-   "rec": 1.9,
-   "rec_yd": 23.1,
-   "tgt": 3.3
+   "rec": 2.7,
+   "rec_yd": 32.4,
+   "tgt": 4.6
+  },
+  "baker mayfield": {
+   "pts": 15.41,
+   "team": "TB",
+   "opp": "CAR",
+   "pos": "QB",
+   "rush_yd": 26.9,
+   "rush_att": 4.6,
+   "pass_yd": 203.7
   },
   "pharaoh brown": {
    "pts": 0.46,
@@ -3674,31 +3761,31 @@
    "tgt": 0.4
   },
   "patrick mahomes": {
-   "pts": 16.0,
+   "pts": 16.42,
    "team": "KC",
    "opp": "SEA",
    "pos": "QB",
-   "rush_yd": 21.1,
-   "rush_att": 4.0,
-   "pass_yd": 216.8
+   "rush_yd": 23.2,
+   "rush_att": 4.4,
+   "pass_yd": 219.3
   },
   "deshaun watson": {
-   "pts": 14.97,
+   "pts": 14.34,
    "team": "CLE",
    "opp": "TEN",
    "pos": "QB",
-   "rush_yd": 13.5,
-   "rush_att": 3.1,
-   "pass_yd": 214.9
+   "rush_yd": 13.7,
+   "rush_att": 3.2,
+   "pass_yd": 212.8
   },
   "tyler higbee": {
-   "pts": 6.82,
+   "pts": 7.81,
    "team": "LAR",
    "opp": "LV",
    "pos": "TE",
-   "rec": 3.3,
-   "rec_yd": 34.7,
-   "tgt": 4.3
+   "rec": 3.8,
+   "rec_yd": 39.8,
+   "tgt": 4.9
   },
   "kaden wetjen": {
    "pts": 0.13,
@@ -3720,17 +3807,6 @@
    "rec_yd": 1.4,
    "tgt": 0.2
   },
-  "jeremiyah love": {
-   "pts": 7.26,
-   "team": "ARI",
-   "opp": "DEN",
-   "pos": "RB",
-   "rec": 1.0,
-   "rec_yd": 5.2,
-   "tgt": 1.4,
-   "rush_yd": 44.1,
-   "rush_att": 11.0
-  },
   "max klare": {
    "pts": 0.46,
    "team": "LAR",
@@ -3741,7 +3817,7 @@
    "tgt": 0.3
   },
   "cj donaldson": {
-   "pts": 2.78,
+   "pts": 2.79,
    "team": "NO",
    "opp": "PIT",
    "pos": "RB",
@@ -3751,83 +3827,72 @@
    "rush_yd": 7.3,
    "rush_att": 1.8
   },
-  "elijah sarratt": {
-   "pts": 0.45,
-   "team": "BAL",
-   "opp": "CIN",
-   "pos": "WR",
-   "rec": 0.2,
-   "rec_yd": 2.6,
-   "tgt": 0.3,
-   "rush_yd": 0.0,
-   "rush_att": 0.0
-  },
   "jake briningstool": {
    "pts": 0.53,
    "team": "KC",
    "opp": "SEA",
    "pos": "TE",
    "rec": 0.3,
-   "rec_yd": 2.8,
+   "rec_yd": 2.9,
    "tgt": 0.4
   },
   "isaac teslaa": {
-   "pts": 3.68,
+   "pts": 3.71,
    "team": "DET",
    "opp": "GB",
    "pos": "WR",
    "rec": 1.4,
-   "rec_yd": 23.6,
+   "rec_yd": 23.8,
    "tgt": 2.6,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "isaiah bond": {
-   "pts": 2.1,
+   "pts": 2.05,
    "team": "CLE",
    "opp": "TEN",
    "pos": "WR",
    "rec": 0.8,
-   "rec_yd": 12.2,
+   "rec_yd": 12.1,
    "tgt": 1.4,
    "rush_yd": 0.8,
    "rush_att": 0.2
   },
+  "dylan sampson": {
+   "pts": 5.34,
+   "team": "CLE",
+   "opp": "TEN",
+   "pos": "RB",
+   "rec": 1.8,
+   "rec_yd": 12.9,
+   "tgt": 2.0,
+   "rush_yd": 17.8,
+   "rush_att": 4.7
+  },
   "jordan james": {
-   "pts": 0.58,
+   "pts": 0.57,
    "team": "SF",
    "opp": "ATL",
    "pos": "RB",
    "rec": 0.1,
    "rec_yd": 0.4,
    "tgt": 0.1,
-   "rush_yd": 3.5,
+   "rush_yd": 3.6,
    "rush_att": 0.8
   },
-  "brashard smith": {
-   "pts": 0.18,
-   "team": "KC",
-   "opp": "SEA",
-   "pos": "RB",
-   "rec": 0.1,
-   "rec_yd": 0.3,
-   "tgt": 0.1,
-   "rush_yd": 0.8,
-   "rush_att": 0.3
-  },
   "devontez walker": {
-   "pts": 2.66,
+   "pts": 3.52,
    "team": "BAL",
    "opp": "CIN",
    "pos": "WR",
-   "rec": 0.8,
-   "rec_yd": 15.6,
-   "tgt": 1.5,
+   "rec": 1.1,
+   "rec_yd": 21.2,
+   "tgt": 2.1,
    "rush_yd": 0.3,
    "rush_att": 0.1
   },
   "jacob cowing": {
-   "pts": 1.8,
+   "pts": 1.79,
    "team": "SF",
    "opp": "ATL",
    "pos": "WR",
@@ -3836,40 +3901,29 @@
    "tgt": 1.3
   },
   "brock bowers": {
-   "pts": 13.35,
+   "pts": 14.13,
    "team": "LV",
    "opp": "LAR",
    "pos": "TE",
-   "rec": 5.7,
-   "rec_yd": 66.5,
-   "tgt": 8.4,
+   "rec": 6.0,
+   "rec_yd": 70.8,
+   "tgt": 9.0,
    "rush_yd": 0.9,
    "rush_att": 0.2
   },
   "cade stover": {
-   "pts": 0.72,
+   "pts": 0.74,
    "team": "HOU",
    "opp": "NYG",
    "pos": "TE",
    "rec": 0.4,
-   "rec_yd": 3.1,
+   "rec_yd": 3.2,
    "tgt": 0.5,
-   "rush_yd": 0.5,
+   "rush_yd": 0.6,
    "rush_att": 0.1
   },
-  "jawhar jordan": {
-   "pts": 3.08,
-   "team": "HOU",
-   "opp": "NYG",
-   "pos": "RB",
-   "rec": 0.6,
-   "rec_yd": 3.7,
-   "tgt": 0.6,
-   "rush_yd": 17.0,
-   "rush_att": 3.2
-  },
   "audric estime": {
-   "pts": 0.7,
+   "pts": 0.68,
    "team": "CLE",
    "opp": "TEN",
    "pos": "RB",
@@ -3880,7 +3934,7 @@
    "rush_att": 0.8
   },
   "michael wilson": {
-   "pts": 10.39,
+   "pts": 10.29,
    "team": "ARI",
    "opp": "DEN",
    "pos": "WR",
@@ -3891,38 +3945,38 @@
    "rush_att": 0.1
   },
   "kalif raymond": {
-   "pts": 5.54,
+   "pts": 5.65,
    "team": "CHI",
    "opp": "NE",
    "pos": "WR",
-   "rec": 2.8,
-   "rec_yd": 29.9,
-   "tgt": 3.3,
-   "rush_yd": 0.9,
+   "rec": 2.7,
+   "rec_yd": 30.9,
+   "tgt": 3.2,
+   "rush_yd": 1.0,
    "rush_att": 0.2
   },
   "jahdae walker": {
-   "pts": 0.63,
+   "pts": 0.21,
    "team": "CHI",
    "opp": "NE",
    "pos": "WR",
-   "rec": 0.2,
-   "rec_yd": 2.7,
-   "tgt": 0.4
+   "rec": 0.1,
+   "rec_yd": 0.9,
+   "tgt": 0.1
   },
-  "efton chism": {
-   "pts": 4.39,
+  "efton chism iii": {
+   "pts": 4.41,
    "team": "NE",
    "opp": "CHI",
    "pos": "WR",
    "rec": 1.7,
-   "rec_yd": 25.3,
+   "rec_yd": 25.4,
    "tgt": 2.6,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "treveyon henderson": {
-   "pts": 6.31,
+   "pts": 6.33,
    "team": "NE",
    "opp": "CHI",
    "pos": "RB",
@@ -3933,7 +3987,7 @@
    "rush_att": 6.0
   },
   "corey kiner": {
-   "pts": 4.52,
+   "pts": 4.53,
    "team": "NE",
    "opp": "CHI",
    "pos": "RB",
@@ -3944,134 +3998,126 @@
    "rush_att": 4.7
   },
   "dandre swift": {
-   "pts": 14.74,
+   "pts": 14.65,
    "team": "CHI",
    "opp": "NE",
    "pos": "RB",
-   "rec": 2.4,
-   "rec_yd": 16.7,
-   "tgt": 2.8,
-   "rush_yd": 56.2,
-   "rush_att": 13.1
+   "rec": 2.3,
+   "rec_yd": 16.4,
+   "tgt": 2.6,
+   "rush_yd": 60.2,
+   "rush_att": 13.3
   },
   "caleb williams": {
-   "pts": 17.57,
+   "pts": 18.65,
    "team": "CHI",
    "opp": "NE",
    "pos": "QB",
-   "rush_yd": 28.3,
-   "rush_att": 5.5,
-   "pass_yd": 226.4
+   "rush_yd": 30.3,
+   "rush_att": 5.7,
+   "pass_yd": 234.1
   },
   "roschon johnson": {
-   "pts": 0.25,
+   "pts": 8.92,
    "team": "CHI",
    "opp": "NE",
    "pos": "RB",
-   "rush_yd": 1.4,
-   "rush_att": 0.4
+   "rec": 1.9,
+   "rec_yd": 13.6,
+   "tgt": 2.2,
+   "rush_yd": 33.7,
+   "rush_att": 8.8
   },
   "aj brown": {
-   "pts": 12.51,
+   "pts": 12.57,
    "team": "NE",
    "opp": "CHI",
    "pos": "WR",
    "rec": 4.7,
-   "rec_yd": 79.2,
+   "rec_yd": 79.5,
    "tgt": 7.9,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
   "hunter henry": {
-   "pts": 7.69,
+   "pts": 7.74,
    "team": "NE",
    "opp": "CHI",
    "pos": "TE",
-   "rec": 3.4,
-   "rec_yd": 44.0,
+   "rec": 3.5,
+   "rec_yd": 44.1,
    "tgt": 4.6
   },
   "sam roush": {
-   "pts": 1.76,
+   "pts": 1.79,
    "team": "CHI",
    "opp": "NE",
    "pos": "TE",
    "rec": 1.0,
-   "rec_yd": 9.5,
+   "rec_yd": 9.8,
    "tgt": 1.4
   },
   "kyle williams": {
-   "pts": 4.13,
+   "pts": 4.16,
    "team": "NE",
    "opp": "CHI",
    "pos": "WR",
    "rec": 1.3,
-   "rec_yd": 25.7,
+   "rec_yd": 25.8,
    "tgt": 2.6,
    "rush_yd": 0.1,
    "rush_att": 0.0
   },
-  "kyle monangai": {
-   "pts": 9.0,
-   "team": "CHI",
-   "opp": "NE",
-   "pos": "RB",
-   "rec": 1.3,
-   "rec_yd": 9.8,
-   "tgt": 1.6,
-   "rush_yd": 43.0,
-   "rush_att": 8.7
-  },
-  "luther burden": {
-   "pts": 10.06,
+  "luther burden iii": {
+   "pts": 10.29,
    "team": "CHI",
    "opp": "NE",
    "pos": "WR",
-   "rec": 4.6,
-   "rec_yd": 58.1,
-   "tgt": 6.4,
-   "rush_yd": 3.5,
+   "rec": 4.5,
+   "rec_yd": 60.1,
+   "tgt": 6.3,
+   "rush_yd": 3.7,
    "rush_att": 0.8
   },
   "colston loveland": {
-   "pts": 7.64,
+   "pts": 7.78,
    "team": "CHI",
    "opp": "NE",
    "pos": "TE",
    "rec": 4.1,
-   "rec_yd": 39.8,
-   "tgt": 5.9,
+   "rec_yd": 41.2,
+   "tgt": 5.8,
    "rush_yd": 0.2,
    "rush_att": 0.1
   },
   "rhamondre stevenson": {
-   "pts": 9.97,
+   "pts": 10.01,
    "team": "NE",
    "opp": "CHI",
    "pos": "RB",
    "rec": 2.2,
-   "rec_yd": 19.3,
+   "rec_yd": 19.4,
    "tgt": 2.6,
-   "rush_yd": 41.5,
+   "rush_yd": 41.4,
    "rush_att": 9.1
   },
   "eli raridon": {
-   "pts": 4.54,
+   "pts": 4.57,
    "team": "NE",
    "opp": "CHI",
    "pos": "TE",
    "rec": 2.0,
-   "rec_yd": 24.7,
+   "rec_yd": 24.8,
    "tgt": 2.6
   },
   "drake maye": {
-   "pts": 21.58,
+   "pts": 21.72,
    "team": "NE",
    "opp": "CHI",
    "pos": "QB",
    "rush_yd": 37.8,
    "rush_att": 5.8,
-   "pass_yd": 280.9
+   "pass_yd": 282.0
   },
   "cameron latu": {
    "pts": 0.39,
@@ -4083,44 +4129,44 @@
    "tgt": 0.3
   },
   "demario douglas": {
-   "pts": 7.04,
+   "pts": 7.07,
    "team": "NE",
    "opp": "CHI",
    "pos": "WR",
    "rec": 3.0,
-   "rec_yd": 42.7,
+   "rec_yd": 42.9,
    "tgt": 4.9,
    "rush_yd": 0.8,
    "rush_att": 0.2
   },
   "cole kmet": {
-   "pts": 3.28,
+   "pts": 3.34,
    "team": "CHI",
    "opp": "NE",
    "pos": "TE",
-   "rec": 1.7,
-   "rec_yd": 15.8,
-   "tgt": 2.3
+   "rec": 1.6,
+   "rec_yd": 16.3,
+   "tgt": 2.2
   },
   "zavion thomas": {
-   "pts": 0.69,
+   "pts": 1.59,
    "team": "CHI",
    "opp": "NE",
    "pos": "WR",
-   "rec": 0.3,
-   "rec_yd": 3.2,
-   "tgt": 0.5,
-   "rush_yd": 0.5,
-   "rush_att": 0.1
+   "rec": 0.6,
+   "rec_yd": 5.9,
+   "tgt": 0.8,
+   "rush_yd": 3.2,
+   "rush_att": 0.7
   },
   "rome odunze": {
-   "pts": 8.82,
+   "pts": 9.02,
    "team": "CHI",
    "opp": "NE",
    "pos": "WR",
-   "rec": 3.8,
-   "rec_yd": 57.3,
-   "tgt": 6.4,
+   "rec": 3.7,
+   "rec_yd": 59.3,
+   "tgt": 6.3,
    "rush_yd": 0.1,
    "rush_att": 0.0
   }
