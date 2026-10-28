@@ -610,6 +610,53 @@ def run_waivers(token: str, limit: int) -> int:
     return done.returncode
 
 
+# --- moves: what HE did, for the behaviour log -------------------------------
+# Oct 27, 2026, his ask: track the adds and drops he makes so each one can be logged
+# with HIS reason in fantasy-behavior-log.md. The log keeps his decision and reason;
+# this pull is DISPLAYED, never saved (Exhibit A 2.c.vii), like every other mode.
+def parse_moves(tx_root, team_key: str, since_ts: int) -> list:
+    """League transactions -> this team's moves since since_ts, newest first."""
+    out = []
+    for item in indexed(tx_root):
+        tx = flatten(item.get("transaction", []))
+        ts = int(tx.get("timestamp") or 0)
+        if ts < since_ts or tx.get("status") not in (None, "successful"):
+            continue
+        for pl in indexed(tx.get("players") or {}):
+            parts = pl.get("player", [])
+            info = flatten(parts[0] if parts else [])
+            td = (parts[1] if len(parts) > 1 and isinstance(parts[1], dict) else {}).get("transaction_data")
+            td = flatten(td) if isinstance(td, list) else (td or {})
+            mine_in = td.get("destination_team_key") == team_key
+            mine_out = td.get("source_team_key") == team_key
+            if not (mine_in or mine_out):
+                continue
+            out.append({"ts": ts, "action": "ADD" if mine_in else "DROP",
+                        "via": td.get("source_type") if mine_in else td.get("destination_type"),
+                        "name": (info.get("name") or {}).get("full"),
+                        "pos": info.get("display_position"), "team": info.get("editorial_team_abbr"),
+                        "kind": tx.get("type")})
+    return sorted(out, key=lambda m: -m["ts"])
+
+
+def run_moves(token: str, days: int) -> int:
+    since = int(time.time()) - days * 86400
+    total = 0
+    for t in pull_teams(token):
+        d = api(f"league/{t['league_key']}/transactions;types=add,drop,trade;count=100", token)
+        lg = flatten((d.get("fantasy_content") or {}).get("league") or [])
+        moves = parse_moves(lg.get("transactions") or {}, t["team_key"], since)
+        if not moves:
+            continue
+        print(f"\n{lg.get('name') or t['league_key']}  ({t['name']})")
+        for m in moves:
+            when = time.strftime("%a %b %d", time.localtime(m["ts"]))
+            print(f"  {when}  {m['action']:4s} {m['name']} ({m['pos']}, {m['team']})  via {m['via']}  [{m['kind']}]")
+        total += len(moves)
+    print(f"\n{total} move(s) in the last {days} day(s). Shown, never saved.")
+    return 0
+
+
 # --- pulls -----------------------------------------------------------------
 def pull_teams(token: str) -> list:
     d = api("users;use_login=1/games;game_keys=nfl/teams", token)
@@ -873,6 +920,23 @@ def self_test() -> int:
     ok("an empty roster is never a list of EMPTY slots",
        "flags = None if not mine else check_team(" in Path(__file__).read_text(encoding="utf-8"))
 
+    print("\nmoves")
+    _tx = {"0": {"transaction": [{"type": "add/drop", "status": "successful", "timestamp": "2000"},
+            {"players": {"0": {"player": [[{"name": {"full": "Mason Taylor"}}, {"display_position": "TE"},
+                                           {"editorial_team_abbr": "NYJ"}],
+                                          {"transaction_data": [{"source_type": "waivers", "destination_team_key": "T1"}]}]},
+                         "1": {"player": [[{"name": {"full": "Kenyon Sadiq"}}],
+                                          {"transaction_data": {"source_team_key": "T1", "destination_type": "waivers"}}]},
+                         "count": 2}}]},
+           "1": {"transaction": [{"type": "add", "status": "successful", "timestamp": "500"},
+            {"players": {"0": {"player": [[{"name": {"full": "Old Move"}}],
+                                          {"transaction_data": [{"destination_team_key": "T1"}]}]}, "count": 1}}]},
+           "count": 2}
+    _mv = parse_moves(_tx, "T1", 1000)
+    ok("an add and a drop on his team are both read", [m["action"] for m in _mv] == ["ADD", "DROP"], _mv)
+    ok("a move older than the window is skipped", all(m["name"] != "Old Move" for m in _mv), _mv)
+    ok("another team's move is not his", parse_moves(_tx, "T9", 0) == [])
+
     print("\n" + ("PASS  yahoo-pull self-test" if not fails else f"FAIL  {len(fails)} assertion(s)"))
     return 1 if fails else 0
 
@@ -894,6 +958,10 @@ def main() -> int:
     ap.add_argument("--check", action="store_true",
                     help="lineup check across EVERY team: starters out/questionable/on bye, "
                          "empty slots, bench options. Shown, never saved")
+    ap.add_argument("--moves", action="store_true",
+                    help="your adds, drops and trades across every league, for the behaviour log. "
+                         "Shown, never saved")
+    ap.add_argument("--days", type=int, default=7, help="--moves window in days (default 7)")
     ap.add_argument("--week", type=int, default=None, help="defaults to the league's current week")
     ap.add_argument("--fa-limit", type=int, default=50, help="free agents to pull (default 50)")
     ap.add_argument("--redirect", default=None,
@@ -909,7 +977,7 @@ def main() -> int:
 
     if a.self_test:
         return self_test()
-    if not (a.auth or a.teams or a.team or a.check or a.waivers):
+    if not (a.auth or a.teams or a.team or a.check or a.waivers or a.moves):
         ap.print_help()
         return 2
 
@@ -929,6 +997,8 @@ def main() -> int:
         return run_check(token)
     if a.waivers:
         return run_waivers(token, max(a.fa_limit, 100))
+    if a.moves:
+        return run_moves(token, a.days)
 
     if a.teams:
         for t in pull_teams(token):
