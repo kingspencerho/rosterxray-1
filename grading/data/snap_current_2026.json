@@ -9,7 +9,7 @@
 "hierarchy_rank": "2 - opportunity. Current season, so it OUTRANKS the 2025 layers.",
 "is_not": "NOT route share. Route share counts pass plays only; this counts every offensive snap. routes_2025 measures the two at r=0.957 - very close, not equal. Never quote this as a route number.",
 "keyed_by": "canonical display name from player_ids.json, resolved via pfr_player_id. The feed's own spelling never reaches the output.",
-"players": 565,
+"players": 577,
 "season": 2026,
 "source": "nflverse snap_counts",
 "unresolved_names": 0,
@@ -20,7 +20,7 @@
 4,
 5
 ],
-"weeks_covered": 7,
+"weeks_covered": 8,
 "weeks_missing_teams": {
 "5": [
 "CAR",
@@ -37,21 +37,28 @@
 "JAX",
 "LAC",
 "WAS"
+],
+"8": [
+"HOU",
+"NO",
+"NYG",
+"SF"
 ]
 },
 "weeks_partial": [
 6,
-7
+7,
+8
 ]
 },
 "players": {
 "aaron jones": {
-"gp": 6,
+"gp": 7,
 "id": "00-0033293",
-"last_pct": 0.25,
+"last_pct": 0.4,
 "pos": "RB",
-"snap_pct": 0.653,
-"snaps": 253,
+"snap_pct": 0.617,
+"snaps": 274,
 "team": "MIN",
 "weeks": [
 {
@@ -83,16 +90,21 @@
 "pct": 0.25,
 "snaps": 15,
 "week": 7
+},
+{
+"pct": 0.4,
+"snaps": 21,
+"week": 8
 }
 ]
 },
 "aaron rodgers": {
-"gp": 7,
+"gp": 8,
 "id": "00-0023459",
-"last_pct": 1.0,
+"last_pct": 0.95,
 "pos": "QB",
-"snap_pct": 0.99,
-"snaps": 469,
+"snap_pct": 0.985,
+"snaps": 525,
 "team": "PIT",
 "weeks": [
 {
@@ -129,16 +141,21 @@
 "pct": 1.0,
 "snaps": 64,
 "week": 7
+},
+{
+"pct": 0.95,
+"snaps": 56,
+"week": 8
 }
 ]
 },
 "adam prentice": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036727",
-"last_pct": 0.16,
+"last_pct": 0.21,
 "pos": "FB",
-"snap_pct": 0.109,
-"snaps": 46,
+"snap_pct": 0.121,
+"snaps": 59,
 "team": "DEN",
 "weeks": [
 {
@@ -175,16 +192,21 @@
 "pct": 0.16,
 "snaps": 10,
 "week": 7
+},
+{
+"pct": 0.21,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "adam trautman": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036422",
-"last_pct": 0.61,
+"last_pct": 0.56,
 "pos": "TE",
-"snap_pct": 0.501,
-"snaps": 216,
+"snap_pct": 0.509,
+"snaps": 251,
 "team": "DEN",
 "weeks": [
 {
@@ -221,16 +243,21 @@
 "pct": 0.61,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.56,
+"snaps": 35,
+"week": 8
 }
 ]
 },
 "adonai mitchell": {
-"gp": 3,
+"gp": 4,
 "id": "00-0039890",
-"last_pct": 0.44,
+"last_pct": 0.61,
 "pos": "WR",
-"snap_pct": 0.65,
-"snaps": 133,
+"snap_pct": 0.64,
+"snaps": 172,
 "team": "NYJ",
 "weeks": [
 {
@@ -247,16 +274,21 @@
 "pct": 0.44,
 "snaps": 26,
 "week": 7
+},
+{
+"pct": 0.61,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "aj barner": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039793",
-"last_pct": 0.8,
+"last_pct": 0.95,
 "pos": "TE",
-"snap_pct": 0.881,
-"snaps": 409,
+"snap_pct": 0.89,
+"snaps": 469,
 "team": "SEA",
 "weeks": [
 {
@@ -293,6 +325,11 @@
 "pct": 0.8,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.95,
+"snaps": 60,
+"week": 8
 }
 ]
 },
@@ -438,6 +475,11 @@
 "pct": 0.04,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -483,12 +525,12 @@
 ]
 },
 "ameer abdullah": {
-"gp": 5,
+"gp": 6,
 "id": "00-0032104",
-"last_pct": 0.01,
+"last_pct": 0.17,
 "pos": "RB",
-"snap_pct": 0.066,
-"snaps": 20,
+"snap_pct": 0.083,
+"snaps": 29,
 "team": "JAX",
 "weeks": [
 {
@@ -520,16 +562,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 6
+},
+{
+"pct": 0.17,
+"snaps": 9,
+"week": 8
 }
 ]
 },
 "amon ra st brown": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036963",
-"last_pct": 0.78,
+"last_pct": 0.72,
 "pos": "WR",
-"snap_pct": 0.865,
-"snaps": 357,
+"snap_pct": 0.844,
+"snaps": 409,
 "team": "DET",
 "weeks": [
 {
@@ -561,6 +608,11 @@
 "pct": 0.78,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 0.72,
+"snaps": 52,
+"week": 8
 }
 ]
 },
@@ -586,12 +638,12 @@
 ]
 },
 "andrew armstrong": {
-"gp": 2,
+"gp": 3,
 "id": "00-0040298",
-"last_pct": 0.58,
+"last_pct": 0.32,
 "pos": "WR",
-"snap_pct": 0.635,
-"snaps": 73,
+"snap_pct": 0.53,
+"snaps": 95,
 "team": "KC",
 "weeks": [
 {
@@ -603,6 +655,11 @@
 "pct": 0.58,
 "snaps": 31,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 22,
+"week": 8
 }
 ]
 },
@@ -649,16 +706,21 @@
 "pct": 0.08,
 "snaps": 5,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "andrew ogletree": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037292",
-"last_pct": 0.57,
+"last_pct": 0.26,
 "pos": "TE",
-"snap_pct": 0.313,
-"snaps": 149,
+"snap_pct": 0.306,
+"snaps": 165,
 "team": "IND",
 "weeks": [
 {
@@ -695,6 +757,11 @@
 "pct": 0.57,
 "snaps": 35,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 16,
+"week": 8
 }
 ]
 },
@@ -750,6 +817,22 @@
 }
 ]
 },
+"anthony richardson": {
+"gp": 1,
+"id": "00-0039164",
+"last_pct": 0.21,
+"pos": "QB",
+"snap_pct": 0.21,
+"snaps": 13,
+"team": "IND",
+"weeks": [
+{
+"pct": 0.21,
+"snaps": 13,
+"week": 8
+}
+]
+},
 "anthony tyus": {
 "gp": 3,
 "id": "00-0040394",
@@ -778,16 +861,21 @@
 "pct": 0.09,
 "snaps": 5,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "antonio williams": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041040",
-"last_pct": 0.67,
+"last_pct": 0.83,
 "pos": "WR",
-"snap_pct": 0.552,
-"snaps": 220,
+"snap_pct": 0.591,
+"snaps": 270,
 "team": "WAS",
 "weeks": [
 {
@@ -819,6 +907,11 @@
 "pct": 0.67,
 "snaps": 45,
 "week": 6
+},
+{
+"pct": 0.83,
+"snaps": 50,
+"week": 8
 }
 ]
 },
@@ -844,12 +937,12 @@
 ]
 },
 "ashton dulin": {
-"gp": 3,
+"gp": 4,
 "id": "00-0035021",
-"last_pct": 0.02,
+"last_pct": 0.31,
 "pos": "WR",
-"snap_pct": 0.187,
-"snaps": 34,
+"snap_pct": 0.218,
+"snaps": 53,
 "team": "IND",
 "weeks": [
 {
@@ -866,16 +959,21 @@
 "pct": 0.02,
 "snaps": 1,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "ashton jeanty": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040122",
-"last_pct": 0.72,
+"last_pct": 0.4,
 "pos": "RB",
-"snap_pct": 0.699,
-"snaps": 335,
+"snap_pct": 0.661,
+"snaps": 360,
 "team": "LV",
 "weeks": [
 {
@@ -912,6 +1010,11 @@
 "pct": 0.72,
 "snaps": 49,
 "week": 7
+},
+{
+"pct": 0.4,
+"snaps": 25,
+"week": 8
 }
 ]
 },
@@ -948,12 +1051,12 @@
 ]
 },
 "austin ekeler": {
-"gp": 3,
+"gp": 4,
 "id": "00-0033699",
-"last_pct": 0.1,
+"last_pct": 0.33,
 "pos": "RB",
-"snap_pct": 0.157,
-"snaps": 30,
+"snap_pct": 0.2,
+"snaps": 50,
 "team": "WAS",
 "weeks": [
 {
@@ -970,16 +1073,21 @@
 "pct": 0.1,
 "snaps": 7,
 "week": 6
+},
+{
+"pct": 0.33,
+"snaps": 20,
+"week": 8
 }
 ]
 },
 "austin hooper": {
-"gp": 7,
+"gp": 8,
 "id": "00-0032392",
-"last_pct": 0.43,
+"last_pct": 0.13,
 "pos": "TE",
-"snap_pct": 0.263,
-"snaps": 119,
+"snap_pct": 0.246,
+"snaps": 126,
 "team": "ATL",
 "weeks": [
 {
@@ -1016,16 +1124,21 @@
 "pct": 0.43,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.13,
+"snaps": 7,
+"week": 8
 }
 ]
 },
 "baker mayfield": {
-"gp": 4,
+"gp": 5,
 "id": "00-0034855",
-"last_pct": 0.9,
+"last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.96,
-"snaps": 244,
+"snap_pct": 0.968,
+"snaps": 304,
 "team": "TB",
 "weeks": [
 {
@@ -1047,16 +1160,21 @@
 "pct": 0.9,
 "snaps": 57,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 60,
+"week": 8
 }
 ]
 },
 "bam knight": {
-"gp": 5,
+"gp": 6,
 "id": "00-0037157",
-"last_pct": 0.53,
+"last_pct": 0.22,
 "pos": "RB",
-"snap_pct": 0.23,
-"snaps": 87,
+"snap_pct": 0.228,
+"snaps": 105,
 "team": "ARI",
 "weeks": [
 {
@@ -1093,6 +1211,11 @@
 "pct": 0.53,
 "snaps": 43,
 "week": 7
+},
+{
+"pct": 0.22,
+"snaps": 18,
+"week": 8
 }
 ]
 },
@@ -1138,12 +1261,12 @@
 ]
 },
 "bauer sharp": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041094",
-"last_pct": 0.25,
+"last_pct": 0.32,
 "pos": "TE",
-"snap_pct": 0.083,
-"snaps": 38,
+"snap_pct": 0.113,
+"snaps": 57,
 "team": "TB",
 "weeks": [
 {
@@ -1180,16 +1303,21 @@
 "pct": 0.25,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "ben sinnott": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039912",
 "last_pct": 0.27,
 "pos": "TE",
-"snap_pct": 0.408,
-"snaps": 165,
+"snap_pct": 0.389,
+"snaps": 181,
 "team": "WAS",
 "weeks": [
 {
@@ -1221,6 +1349,11 @@
 "pct": 0.27,
 "snaps": 18,
 "week": 6
+},
+{
+"pct": 0.27,
+"snaps": 16,
+"week": 8
 }
 ]
 },
@@ -1297,12 +1430,12 @@
 ]
 },
 "ben yurosek": {
-"gp": 2,
+"gp": 3,
 "id": "00-0040509",
-"last_pct": 0.51,
+"last_pct": 0.43,
 "pos": "TE",
-"snap_pct": 0.53,
-"snaps": 69,
+"snap_pct": 0.497,
+"snaps": 92,
 "team": "MIN",
 "weeks": [
 {
@@ -1314,16 +1447,21 @@
 "pct": 0.51,
 "snaps": 30,
 "week": 7
+},
+{
+"pct": 0.43,
+"snaps": 23,
+"week": 8
 }
 ]
 },
 "bhayshul tuten": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040719",
-"last_pct": 0.58,
+"last_pct": 0.5,
 "pos": "RB",
-"snap_pct": 0.555,
-"snaps": 214,
+"snap_pct": 0.547,
+"snaps": 241,
 "team": "JAX",
 "weeks": [
 {
@@ -1355,16 +1493,21 @@
 "pct": 0.58,
 "snaps": 41,
 "week": 6
+},
+{
+"pct": 0.5,
+"snaps": 27,
+"week": 8
 }
 ]
 },
 "bijan robinson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038542",
 "last_pct": 0.81,
 "pos": "RB",
-"snap_pct": 0.714,
-"snaps": 316,
+"snap_pct": 0.726,
+"snaps": 359,
 "team": "ATL",
 "weeks": [
 {
@@ -1401,16 +1544,21 @@
 "pct": 0.81,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.81,
+"snaps": 43,
+"week": 8
 }
 ]
 },
 "blake corum": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039738",
-"last_pct": 0.44,
+"last_pct": 0.31,
 "pos": "RB",
-"snap_pct": 0.301,
-"snaps": 150,
+"snap_pct": 0.302,
+"snaps": 167,
 "team": "LA",
 "weeks": [
 {
@@ -1447,16 +1595,21 @@
 "pct": 0.44,
 "snaps": 32,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 17,
+"week": 8
 }
 ]
 },
 "blake whiteheart": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038710",
-"last_pct": 0.31,
+"last_pct": 0.36,
 "pos": "TE",
-"snap_pct": 0.337,
-"snaps": 148,
+"snap_pct": 0.34,
+"snaps": 173,
 "team": "CLE",
 "weeks": [
 {
@@ -1493,16 +1646,21 @@
 "pct": 0.31,
 "snaps": 22,
 "week": 7
+},
+{
+"pct": 0.36,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "bo melton": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037091",
-"last_pct": 0.19,
+"last_pct": 0.36,
 "pos": "WR",
-"snap_pct": 0.241,
-"snaps": 110,
+"snap_pct": 0.256,
+"snaps": 135,
 "team": "GB",
 "weeks": [
 {
@@ -1539,16 +1697,21 @@
 "pct": 0.19,
 "snaps": 13,
 "week": 7
+},
+{
+"pct": 0.36,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "bo nix": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039732",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.997,
-"snaps": 428,
+"snap_pct": 0.998,
+"snaps": 490,
 "team": "DEN",
 "weeks": [
 {
@@ -1585,16 +1748,21 @@
 "pct": 1.0,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 62,
+"week": 8
 }
 ]
 },
 "brady russell": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038488",
-"last_pct": 0.32,
+"last_pct": 0.16,
 "pos": "FB",
-"snap_pct": 0.231,
-"snaps": 103,
+"snap_pct": 0.223,
+"snaps": 113,
 "team": "SEA",
 "weeks": [
 {
@@ -1631,16 +1799,21 @@
 "pct": 0.32,
 "snaps": 22,
 "week": 7
+},
+{
+"pct": 0.16,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "braelon allen": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039794",
-"last_pct": 0.78,
+"last_pct": 0.83,
 "pos": "RB",
-"snap_pct": 0.669,
-"snaps": 274,
+"snap_pct": 0.689,
+"snaps": 327,
 "team": "NYJ",
 "weeks": [
 {
@@ -1677,6 +1850,11 @@
 "pct": 0.78,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 53,
+"week": 8
 }
 ]
 },
@@ -1712,12 +1890,12 @@
 ]
 },
 "brandon johnson": {
-"gp": 2,
+"gp": 3,
 "id": "00-0037382",
-"last_pct": 0.12,
+"last_pct": 0.17,
 "pos": "WR",
-"snap_pct": 0.08,
-"snaps": 11,
+"snap_pct": 0.11,
+"snaps": 21,
 "team": "PIT",
 "weeks": [
 {
@@ -1729,16 +1907,21 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "brandon smith": {
-"gp": 3,
+"gp": 4,
 "id": "00-0036775",
-"last_pct": 0.45,
+"last_pct": 0.36,
 "pos": "WR",
-"snap_pct": 0.413,
-"snaps": 86,
+"snap_pct": 0.4,
+"snaps": 107,
 "team": "PIT",
 "weeks": [
 {
@@ -1755,6 +1938,11 @@
 "pct": 0.45,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.36,
+"snaps": 21,
+"week": 8
 }
 ]
 },
@@ -1914,12 +2102,12 @@
 ]
 },
 "brenton strange": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038935",
-"last_pct": 0.76,
+"last_pct": 0.52,
 "pos": "TE",
-"snap_pct": 0.787,
-"snaps": 301,
+"snap_pct": 0.749,
+"snaps": 329,
 "team": "JAX",
 "weeks": [
 {
@@ -1951,6 +2139,11 @@
 "pct": 0.76,
 "snaps": 54,
 "week": 6
+},
+{
+"pct": 0.52,
+"snaps": 28,
+"week": 8
 }
 ]
 },
@@ -1986,12 +2179,12 @@
 ]
 },
 "brevyn spann ford": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039530",
-"last_pct": 0.53,
+"last_pct": 0.88,
 "pos": "TE",
-"snap_pct": 0.386,
-"snaps": 185,
+"snap_pct": 0.448,
+"snaps": 250,
 "team": "DAL",
 "weeks": [
 {
@@ -2028,6 +2221,11 @@
 "pct": 0.53,
 "snaps": 36,
 "week": 7
+},
+{
+"pct": 0.88,
+"snaps": 65,
+"week": 8
 }
 ]
 },
@@ -2073,12 +2271,12 @@
 ]
 },
 "brian thomas": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039893",
-"last_pct": 0.21,
+"last_pct": 0.52,
 "pos": "WR",
-"snap_pct": 0.433,
-"snaps": 165,
+"snap_pct": 0.446,
+"snaps": 193,
 "team": "JAX",
 "weeks": [
 {
@@ -2110,6 +2308,11 @@
 "pct": 0.21,
 "snaps": 15,
 "week": 6
+},
+{
+"pct": 0.52,
+"snaps": 28,
+"week": 8
 }
 ]
 },
@@ -2186,12 +2389,12 @@
 ]
 },
 "brock bowers": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039338",
-"last_pct": 0.84,
+"last_pct": 0.86,
 "pos": "TE",
-"snap_pct": 0.826,
-"snaps": 288,
+"snap_pct": 0.832,
+"snaps": 342,
 "team": "LV",
 "weeks": [
 {
@@ -2218,6 +2421,11 @@
 "pct": 0.84,
 "snaps": 57,
 "week": 7
+},
+{
+"pct": 0.86,
+"snaps": 54,
+"week": 8
 }
 ]
 },
@@ -2268,12 +2476,12 @@
 ]
 },
 "brock wright": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036754",
-"last_pct": 0.56,
+"last_pct": 0.76,
 "pos": "TE",
-"snap_pct": 0.488,
-"snaps": 201,
+"snap_pct": 0.527,
+"snaps": 256,
 "team": "DET",
 "weeks": [
 {
@@ -2305,6 +2513,11 @@
 "pct": 0.56,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.76,
+"snaps": 55,
+"week": 8
 }
 ]
 },
@@ -2355,12 +2568,12 @@
 ]
 },
 "bryce young": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039150",
-"last_pct": 0.77,
+"last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.935,
-"snaps": 397,
+"snap_pct": 0.944,
+"snaps": 470,
 "team": "CAR",
 "weeks": [
 {
@@ -2392,16 +2605,21 @@
 "pct": 0.77,
 "snaps": 43,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 73,
+"week": 8
 }
 ]
 },
 "brycen tremayne": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038840",
-"last_pct": 0.38,
+"last_pct": 0.26,
 "pos": "WR",
-"snap_pct": 0.463,
-"snaps": 200,
+"snap_pct": 0.434,
+"snaps": 219,
 "team": "CAR",
 "weeks": [
 {
@@ -2433,16 +2651,21 @@
 "pct": 0.38,
 "snaps": 21,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "bucky irving": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039361",
-"last_pct": 0.59,
+"last_pct": 0.5,
 "pos": "RB",
-"snap_pct": 0.64,
-"snaps": 298,
+"snap_pct": 0.623,
+"snaps": 328,
 "team": "TB",
 "weeks": [
 {
@@ -2479,16 +2702,21 @@
 "pct": 0.59,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.5,
+"snaps": 30,
+"week": 8
 }
 ]
 },
 "cade otton": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038129",
-"last_pct": 0.89,
+"last_pct": 0.95,
 "pos": "TE",
-"snap_pct": 0.939,
-"snaps": 435,
+"snap_pct": 0.94,
+"snaps": 492,
 "team": "TB",
 "weeks": [
 {
@@ -2525,6 +2753,11 @@
 "pct": 0.89,
 "snaps": 56,
 "week": 7
+},
+{
+"pct": 0.95,
+"snaps": 57,
+"week": 8
 }
 ]
 },
@@ -2575,12 +2808,12 @@
 ]
 },
 "caleb douglas": {
-"gp": 3,
+"gp": 4,
 "id": "00-0041523",
-"last_pct": 0.68,
+"last_pct": 0.86,
 "pos": "WR",
-"snap_pct": 0.817,
-"snaps": 146,
+"snap_pct": 0.828,
+"snaps": 202,
 "team": "MIA",
 "weeks": [
 {
@@ -2597,16 +2830,21 @@
 "pct": 0.68,
 "snaps": 44,
 "week": 7
+},
+{
+"pct": 0.86,
+"snaps": 56,
+"week": 8
 }
 ]
 },
 "caleb williams": {
-"gp": 4,
+"gp": 5,
 "id": "00-0039918",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.965,
-"snaps": 285,
+"snap_pct": 0.972,
+"snaps": 355,
 "team": "CHI",
 "weeks": [
 {
@@ -2628,16 +2866,21 @@
 "pct": 1.0,
 "snaps": 69,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 70,
+"week": 8
 }
 ]
 },
 "calvin ridley": {
-"gp": 6,
+"gp": 7,
 "id": "00-0034837",
-"last_pct": 0.61,
+"last_pct": 0.52,
 "pos": "WR",
-"snap_pct": 0.538,
-"snaps": 178,
+"snap_pct": 0.536,
+"snaps": 218,
 "team": "TEN",
 "weeks": [
 {
@@ -2669,6 +2912,27 @@
 "pct": 0.61,
 "snaps": 28,
 "week": 6
+},
+{
+"pct": 0.52,
+"snaps": 40,
+"week": 8
+}
+]
+},
+"cam grandy": {
+"gp": 1,
+"id": "00-0039631",
+"last_pct": 0.04,
+"pos": "TE",
+"snap_pct": 0.04,
+"snaps": 3,
+"team": "CIN",
+"weeks": [
+{
+"pct": 0.04,
+"snaps": 3,
+"week": 8
 }
 ]
 },
@@ -2719,12 +2983,12 @@
 ]
 },
 "cam ward": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040676",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 399,
+"snaps": 476,
 "team": "TEN",
 "weeks": [
 {
@@ -2761,32 +3025,42 @@
 "pct": 1.0,
 "snaps": 63,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 77,
+"week": 8
 }
 ]
 },
 "camden brown": {
-"gp": 0,
+"gp": 1,
 "id": "00-0040930",
-"last_pct": 0.0,
+"last_pct": 0.01,
 "pos": "WR",
-"snap_pct": 0.0,
-"snaps": 0,
+"snap_pct": 0.01,
+"snaps": 1,
 "team": "DAL",
 "weeks": [
 {
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.01,
+"snaps": 1,
+"week": 8
 }
 ]
 },
 "cameron latu": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038564",
-"last_pct": 0.07,
+"last_pct": 0.12,
 "pos": "TE",
-"snap_pct": 0.133,
-"snaps": 51,
+"snap_pct": 0.131,
+"snaps": 58,
 "team": "NE",
 "weeks": [
 {
@@ -2823,6 +3097,11 @@
 "pct": 0.07,
 "snaps": 4,
 "week": 7
+},
+{
+"pct": 0.12,
+"snaps": 7,
+"week": 8
 }
 ]
 },
@@ -2926,6 +3205,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -3024,12 +3308,12 @@
 ]
 },
 "ceedee lamb": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036358",
-"last_pct": 0.81,
+"last_pct": 0.76,
 "pos": "WR",
-"snap_pct": 0.786,
-"snaps": 374,
+"snap_pct": 0.782,
+"snaps": 430,
 "team": "DAL",
 "weeks": [
 {
@@ -3066,6 +3350,11 @@
 "pct": 0.81,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.76,
+"snaps": 56,
+"week": 8
 }
 ]
 },
@@ -3101,12 +3390,12 @@
 ]
 },
 "charlie kolar": {
-"gp": 4,
+"gp": 5,
 "id": "00-0038046",
-"last_pct": 0.66,
+"last_pct": 0.62,
 "pos": "TE",
-"snap_pct": 0.647,
-"snaps": 168,
+"snap_pct": 0.642,
+"snaps": 206,
 "team": "LAC",
 "weeks": [
 {
@@ -3128,16 +3417,21 @@
 "pct": 0.66,
 "snaps": 45,
 "week": 6
+},
+{
+"pct": 0.62,
+"snaps": 38,
+"week": 8
 }
 ]
 },
 "charlie woerner": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036429",
-"last_pct": 0.72,
+"last_pct": 0.55,
 "pos": "TE",
-"snap_pct": 0.567,
-"snaps": 254,
+"snap_pct": 0.565,
+"snaps": 283,
 "team": "ATL",
 "weeks": [
 {
@@ -3174,16 +3468,21 @@
 "pct": 0.72,
 "snaps": 49,
 "week": 7
+},
+{
+"pct": 0.55,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "chig okonkwo": {
-"gp": 4,
+"gp": 5,
 "id": "00-0037809",
-"last_pct": 0.76,
+"last_pct": 0.77,
 "pos": "TE",
-"snap_pct": 0.653,
-"snaps": 171,
+"snap_pct": 0.676,
+"snaps": 217,
 "team": "WAS",
 "weeks": [
 {
@@ -3205,16 +3504,21 @@
 "pct": 0.76,
 "snaps": 51,
 "week": 6
+},
+{
+"pct": 0.77,
+"snaps": 46,
+"week": 8
 }
 ]
 },
 "chimere dike": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040705",
-"last_pct": 0.21,
+"last_pct": 0.82,
 "pos": "WR",
-"snap_pct": 0.127,
-"snaps": 52,
+"snap_pct": 0.214,
+"snaps": 115,
 "team": "TEN",
 "weeks": [
 {
@@ -3251,16 +3555,21 @@
 "pct": 0.21,
 "snaps": 13,
 "week": 7
+},
+{
+"pct": 0.82,
+"snaps": 63,
+"week": 8
 }
 ]
 },
 "chris bell": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041525",
-"last_pct": 0.48,
+"last_pct": 0.69,
 "pos": "WR",
-"snap_pct": 0.608,
-"snaps": 215,
+"snap_pct": 0.62,
+"snaps": 260,
 "team": "MIA",
 "weeks": [
 {
@@ -3292,16 +3601,21 @@
 "pct": 0.48,
 "snaps": 31,
 "week": 7
+},
+{
+"pct": 0.69,
+"snaps": 45,
+"week": 8
 }
 ]
 },
 "chris blair": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036463",
-"last_pct": 0.26,
+"last_pct": 0.17,
 "pos": "WR",
-"snap_pct": 0.227,
-"snaps": 104,
+"snap_pct": 0.22,
+"snaps": 113,
 "team": "ATL",
 "weeks": [
 {
@@ -3338,6 +3652,11 @@
 "pct": 0.26,
 "snaps": 18,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 9,
+"week": 8
 }
 ]
 },
@@ -3373,12 +3692,12 @@
 ]
 },
 "chris godwin": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033921",
-"last_pct": 0.73,
+"last_pct": 0.82,
 "pos": "WR",
 "snap_pct": 0.823,
-"snaps": 381,
+"snaps": 430,
 "team": "TB",
 "weeks": [
 {
@@ -3415,6 +3734,11 @@
 "pct": 0.73,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.82,
+"snaps": 49,
+"week": 8
 }
 ]
 },
@@ -3563,12 +3887,12 @@
 ]
 },
 "chris rodriguez": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038611",
-"last_pct": 0.3,
+"last_pct": 0.22,
 "pos": "RB",
-"snap_pct": 0.25,
-"snaps": 94,
+"snap_pct": 0.246,
+"snaps": 106,
 "team": "JAX",
 "weeks": [
 {
@@ -3600,6 +3924,11 @@
 "pct": 0.3,
 "snaps": 21,
 "week": 6
+},
+{
+"pct": 0.22,
+"snaps": 12,
+"week": 8
 }
 ]
 },
@@ -3666,12 +3995,12 @@
 ]
 },
 "christian watson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038124",
-"last_pct": 0.81,
+"last_pct": 0.49,
 "pos": "WR",
-"snap_pct": 0.804,
-"snaps": 368,
+"snap_pct": 0.765,
+"snaps": 402,
 "team": "GB",
 "weeks": [
 {
@@ -3708,16 +4037,21 @@
 "pct": 0.81,
 "snaps": 54,
 "week": 7
+},
+{
+"pct": 0.49,
+"snaps": 34,
+"week": 8
 }
 ]
 },
 "chuba hubbard": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036555",
-"last_pct": 0.61,
+"last_pct": 0.92,
 "pos": "RB",
-"snap_pct": 0.765,
-"snaps": 327,
+"snap_pct": 0.787,
+"snaps": 394,
 "team": "CAR",
 "weeks": [
 {
@@ -3749,22 +4083,32 @@
 "pct": 0.61,
 "snaps": 34,
 "week": 7
+},
+{
+"pct": 0.92,
+"snaps": 67,
+"week": 8
 }
 ]
 },
 "cj daniels": {
-"gp": 1,
+"gp": 2,
 "id": "00-0041399",
 "last_pct": 0.04,
 "pos": "WR",
 "snap_pct": 0.04,
-"snaps": 3,
+"snaps": 5,
 "team": "LA",
 "weeks": [
 {
 "pct": 0.04,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.04,
+"snaps": 2,
+"week": 8
 }
 ]
 },
@@ -3876,13 +4220,29 @@
 }
 ]
 },
+"cody schrader": {
+"gp": 1,
+"id": "00-0039703",
+"last_pct": 0.03,
+"pos": "RB",
+"snap_pct": 0.03,
+"snaps": 2,
+"team": "DEN",
+"weeks": [
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
+}
+]
+},
 "cody white": {
-"gp": 7,
+"gp": 8,
 "id": "00-0035891",
-"last_pct": 0.25,
+"last_pct": 0.03,
 "pos": "WR",
-"snap_pct": 0.311,
-"snaps": 153,
+"snap_pct": 0.276,
+"snaps": 155,
 "team": "LV",
 "weeks": [
 {
@@ -3919,16 +4279,21 @@
 "pct": 0.25,
 "snaps": 17,
 "week": 7
+},
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
 }
 ]
 },
 "colbie young": {
-"gp": 4,
+"gp": 5,
 "id": "00-0041069",
-"last_pct": 0.13,
+"last_pct": 0.26,
 "pos": "WR",
-"snap_pct": 0.115,
-"snaps": 27,
+"snap_pct": 0.144,
+"snaps": 46,
 "team": "CIN",
 "weeks": [
 {
@@ -3950,6 +4315,11 @@
 "pct": 0.13,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 19,
+"week": 8
 }
 ]
 },
@@ -4074,16 +4444,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "colson yankoff": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039686",
-"last_pct": 0.07,
+"last_pct": 0.02,
 "pos": "TE",
-"snap_pct": 0.165,
-"snaps": 68,
+"snap_pct": 0.144,
+"snaps": 69,
 "team": "WAS",
 "weeks": [
 {
@@ -4115,16 +4490,21 @@
 "pct": 0.07,
 "snaps": 5,
 "week": 6
+},
+{
+"pct": 0.02,
+"snaps": 1,
+"week": 8
 }
 ]
 },
 "colston loveland": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040126",
-"last_pct": 0.84,
+"last_pct": 0.93,
 "pos": "TE",
-"snap_pct": 0.851,
-"snaps": 453,
+"snap_pct": 0.861,
+"snaps": 518,
 "team": "CHI",
 "weeks": [
 {
@@ -4161,16 +4541,21 @@
 "pct": 0.84,
 "snaps": 58,
 "week": 7
+},
+{
+"pct": 0.93,
+"snaps": 65,
+"week": 8
 }
 ]
 },
 "connor heyward": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037304",
-"last_pct": 0.1,
+"last_pct": 0.33,
 "pos": "FB",
-"snap_pct": 0.256,
-"snaps": 122,
+"snap_pct": 0.265,
+"snaps": 143,
 "team": "LV",
 "weeks": [
 {
@@ -4207,16 +4592,21 @@
 "pct": 0.1,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.33,
+"snaps": 21,
+"week": 8
 }
 ]
 },
 "cooper kupp": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033908",
-"last_pct": 0.65,
+"last_pct": 0.92,
 "pos": "WR",
-"snap_pct": 0.68,
-"snaps": 316,
+"snap_pct": 0.71,
+"snaps": 374,
 "team": "SEA",
 "weeks": [
 {
@@ -4253,6 +4643,11 @@
 "pct": 0.65,
 "snaps": 45,
 "week": 7
+},
+{
+"pct": 0.92,
+"snaps": 58,
+"week": 8
 }
 ]
 },
@@ -4278,12 +4673,12 @@
 ]
 },
 "corey kiner": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040556",
-"last_pct": 0.11,
+"last_pct": 0.18,
 "pos": "RB",
-"snap_pct": 0.119,
-"snaps": 55,
+"snap_pct": 0.126,
+"snaps": 66,
 "team": "NE",
 "weeks": [
 {
@@ -4320,16 +4715,21 @@
 "pct": 0.11,
 "snaps": 6,
 "week": 7
+},
+{
+"pct": 0.18,
+"snaps": 11,
+"week": 8
 }
 ]
 },
 "courtland sutton": {
-"gp": 7,
+"gp": 8,
 "id": "00-0034348",
-"last_pct": 0.7,
+"last_pct": 0.81,
 "pos": "WR",
-"snap_pct": 0.767,
-"snaps": 329,
+"snap_pct": 0.772,
+"snaps": 379,
 "team": "DEN",
 "weeks": [
 {
@@ -4366,6 +4766,11 @@
 "pct": 0.7,
 "snaps": 43,
 "week": 7
+},
+{
+"pct": 0.81,
+"snaps": 50,
+"week": 8
 }
 ]
 },
@@ -4386,12 +4791,12 @@
 ]
 },
 "cyrus allen": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040890",
-"last_pct": 0.3,
+"last_pct": 0.45,
 "pos": "WR",
-"snap_pct": 0.1,
-"snaps": 35,
+"snap_pct": 0.15,
+"snaps": 66,
 "team": "KC",
 "weeks": [
 {
@@ -4423,16 +4828,21 @@
 "pct": 0.3,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.45,
+"snaps": 31,
+"week": 8
 }
 ]
 },
 "dak prescott": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033077",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 471,
+"snaps": 545,
 "team": "DAL",
 "weeks": [
 {
@@ -4469,6 +4879,11 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 74,
+"week": 8
 }
 ]
 },
@@ -4489,12 +4904,12 @@
 ]
 },
 "dallas goedert": {
-"gp": 5,
+"gp": 6,
 "id": "00-0034351",
-"last_pct": 0.73,
+"last_pct": 0.8,
 "pos": "TE",
-"snap_pct": 0.686,
-"snaps": 214,
+"snap_pct": 0.705,
+"snaps": 269,
 "team": "PHI",
 "weeks": [
 {
@@ -4521,16 +4936,21 @@
 "pct": 0.73,
 "snaps": 48,
 "week": 7
+},
+{
+"pct": 0.8,
+"snaps": 55,
+"week": 8
 }
 ]
 },
 "dalton kincaid": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038933",
-"last_pct": 0.72,
+"last_pct": 0.57,
 "pos": "TE",
-"snap_pct": 0.677,
-"snaps": 264,
+"snap_pct": 0.661,
+"snaps": 311,
 "team": "BUF",
 "weeks": [
 {
@@ -4562,6 +4982,11 @@
 "pct": 0.72,
 "snaps": 49,
 "week": 6
+},
+{
+"pct": 0.57,
+"snaps": 47,
+"week": 8
 }
 ]
 },
@@ -4638,12 +5063,12 @@
 ]
 },
 "dandre swift": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036275",
-"last_pct": 0.86,
+"last_pct": 0.77,
 "pos": "RB",
-"snap_pct": 0.616,
-"snaps": 320,
+"snap_pct": 0.635,
+"snaps": 374,
 "team": "CHI",
 "weeks": [
 {
@@ -4680,16 +5105,21 @@
 "pct": 0.86,
 "snaps": 59,
 "week": 7
+},
+{
+"pct": 0.77,
+"snaps": 54,
+"week": 8
 }
 ]
 },
 "daniel bellinger": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038115",
-"last_pct": 0.48,
+"last_pct": 0.4,
 "pos": "TE",
-"snap_pct": 0.436,
-"snaps": 175,
+"snap_pct": 0.431,
+"snaps": 206,
 "team": "TEN",
 "weeks": [
 {
@@ -4726,16 +5156,21 @@
 "pct": 0.48,
 "snaps": 30,
 "week": 7
+},
+{
+"pct": 0.4,
+"snaps": 31,
+"week": 8
 }
 ]
 },
 "daniel jones": {
-"gp": 7,
+"gp": 8,
 "id": "00-0035710",
-"last_pct": 1.0,
+"last_pct": 0.79,
 "pos": "QB",
-"snap_pct": 1.0,
-"snaps": 471,
+"snap_pct": 0.974,
+"snaps": 519,
 "team": "IND",
 "weeks": [
 {
@@ -4772,6 +5207,11 @@
 "pct": 1.0,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 0.79,
+"snaps": 48,
+"week": 8
 }
 ]
 },
@@ -4807,12 +5247,12 @@
 ]
 },
 "dareke young": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037093",
-"last_pct": 0.04,
+"last_pct": 0.08,
 "pos": "WR",
-"snap_pct": 0.137,
-"snaps": 66,
+"snap_pct": 0.13,
+"snaps": 71,
 "team": "LV",
 "weeks": [
 {
@@ -4849,16 +5289,21 @@
 "pct": 0.04,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.08,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "darius cooper": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040024",
-"last_pct": 0.92,
+"last_pct": 0.96,
 "pos": "WR",
-"snap_pct": 0.563,
-"snaps": 252,
+"snap_pct": 0.613,
+"snaps": 318,
 "team": "PHI",
 "weeks": [
 {
@@ -4895,6 +5340,11 @@
 "pct": 0.92,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 0.96,
+"snaps": 66,
+"week": 8
 }
 ]
 },
@@ -4945,12 +5395,12 @@
 ]
 },
 "darnell washington": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038558",
-"last_pct": 0.56,
+"last_pct": 0.63,
 "pos": "TE",
-"snap_pct": 0.649,
-"snaps": 308,
+"snap_pct": 0.646,
+"snaps": 345,
 "team": "PIT",
 "weeks": [
 {
@@ -4987,16 +5437,21 @@
 "pct": 0.56,
 "snaps": 36,
 "week": 7
+},
+{
+"pct": 0.63,
+"snaps": 37,
+"week": 8
 }
 ]
 },
 "darren waller": {
-"gp": 6,
+"gp": 7,
 "id": "00-0031610",
-"last_pct": 0.45,
+"last_pct": 0.62,
 "pos": "TE",
-"snap_pct": 0.457,
-"snaps": 193,
+"snap_pct": 0.48,
+"snaps": 238,
 "team": "CAR",
 "weeks": [
 {
@@ -5028,6 +5483,11 @@
 "pct": 0.45,
 "snaps": 25,
 "week": 7
+},
+{
+"pct": 0.62,
+"snaps": 45,
+"week": 8
 }
 ]
 },
@@ -5073,12 +5533,12 @@
 ]
 },
 "david martin robinson": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039648",
-"last_pct": 0.05,
+"last_pct": 0.01,
 "pos": "TE",
-"snap_pct": 0.064,
-"snaps": 17,
+"snap_pct": 0.055,
+"snaps": 18,
 "team": "TEN",
 "weeks": [
 {
@@ -5110,6 +5570,11 @@
 "pct": 0.05,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.01,
+"snaps": 1,
+"week": 8
 }
 ]
 },
@@ -5177,6 +5642,11 @@
 "pct": 0.23,
 "snaps": 13,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -5202,28 +5672,33 @@
 ]
 },
 "david sills": {
-"gp": 1,
+"gp": 2,
 "id": "00-0035359",
-"last_pct": 0.25,
+"last_pct": 0.37,
 "pos": "WR",
-"snap_pct": 0.25,
-"snaps": 16,
+"snap_pct": 0.31,
+"snaps": 38,
 "team": "TB",
 "weeks": [
 {
 "pct": 0.25,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.37,
+"snaps": 22,
+"week": 8
 }
 ]
 },
 "davis allen": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039074",
-"last_pct": 0.69,
+"last_pct": 0.74,
 "pos": "TE",
-"snap_pct": 0.457,
-"snaps": 233,
+"snap_pct": 0.493,
+"snaps": 273,
 "team": "LA",
 "weeks": [
 {
@@ -5260,16 +5735,21 @@
 "pct": 0.69,
 "snaps": 50,
 "week": 7
+},
+{
+"pct": 0.74,
+"snaps": 40,
+"week": 8
 }
 ]
 },
 "dawson knox": {
-"gp": 6,
+"gp": 7,
 "id": "00-0035689",
-"last_pct": 0.69,
+"last_pct": 0.7,
 "pos": "TE",
-"snap_pct": 0.688,
-"snaps": 269,
+"snap_pct": 0.69,
+"snaps": 326,
 "team": "BUF",
 "weeks": [
 {
@@ -5301,6 +5781,11 @@
 "pct": 0.69,
 "snaps": 47,
 "week": 6
+},
+{
+"pct": 0.7,
+"snaps": 57,
+"week": 8
 }
 ]
 },
@@ -5337,6 +5822,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -5353,6 +5843,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -5393,12 +5888,12 @@
 ]
 },
 "deejay dallas": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036425",
-"last_pct": 0.1,
+"last_pct": 0.32,
 "pos": "RB",
-"snap_pct": 0.118,
-"snaps": 46,
+"snap_pct": 0.147,
+"snaps": 63,
 "team": "MIN",
 "weeks": [
 {
@@ -5430,16 +5925,21 @@
 "pct": 0.1,
 "snaps": 6,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 17,
+"week": 8
 }
 ]
 },
 "deion burks": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041132",
-"last_pct": 0.11,
+"last_pct": 0.31,
 "pos": "WR",
-"snap_pct": 0.135,
-"snaps": 57,
+"snap_pct": 0.16,
+"snaps": 76,
 "team": "IND",
 "weeks": [
 {
@@ -5476,6 +5976,11 @@
 "pct": 0.11,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 19,
+"week": 8
 }
 ]
 },
@@ -5501,12 +6006,12 @@
 ]
 },
 "demario douglas": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038621",
 "last_pct": 0.65,
 "pos": "WR",
-"snap_pct": 0.553,
-"snaps": 254,
+"snap_pct": 0.565,
+"snaps": 293,
 "team": "NE",
 "weeks": [
 {
@@ -5543,6 +6048,11 @@
 "pct": 0.65,
 "snaps": 35,
 "week": 7
+},
+{
+"pct": 0.65,
+"snaps": 39,
+"week": 8
 }
 ]
 },
@@ -5578,12 +6088,12 @@
 ]
 },
 "denzel boston": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041037",
-"last_pct": 0.87,
+"last_pct": 0.83,
 "pos": "WR",
-"snap_pct": 0.913,
-"snaps": 405,
+"snap_pct": 0.903,
+"snaps": 463,
 "team": "CLE",
 "weeks": [
 {
@@ -5620,16 +6130,21 @@
 "pct": 0.87,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 58,
+"week": 8
 }
 ]
 },
 "derius davis": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038573",
-"last_pct": 0.07,
+"last_pct": 0.05,
 "pos": "WR",
-"snap_pct": 0.095,
-"snaps": 37,
+"snap_pct": 0.089,
+"snaps": 40,
 "team": "LAC",
 "weeks": [
 {
@@ -5661,16 +6176,21 @@
 "pct": 0.07,
 "snaps": 5,
 "week": 6
+},
+{
+"pct": 0.05,
+"snaps": 3,
+"week": 8
 }
 ]
 },
 "derrick henry": {
-"gp": 7,
+"gp": 8,
 "id": "00-0032764",
-"last_pct": 0.51,
+"last_pct": 0.45,
 "pos": "RB",
-"snap_pct": 0.571,
-"snaps": 260,
+"snap_pct": 0.556,
+"snaps": 283,
 "team": "BAL",
 "weeks": [
 {
@@ -5707,16 +6227,21 @@
 "pct": 0.51,
 "snaps": 34,
 "week": 7
+},
+{
+"pct": 0.45,
+"snaps": 23,
+"week": 8
 }
 ]
 },
 "deshaun watson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033537",
-"last_pct": 1.0,
+"last_pct": 0.94,
 "pos": "QB",
-"snap_pct": 0.999,
-"snaps": 443,
+"snap_pct": 0.991,
+"snaps": 509,
 "team": "CLE",
 "weeks": [
 {
@@ -5753,6 +6278,11 @@
 "pct": 1.0,
 "snaps": 70,
 "week": 7
+},
+{
+"pct": 0.94,
+"snaps": 66,
+"week": 8
 }
 ]
 },
@@ -5819,12 +6349,12 @@
 ]
 },
 "devin duvernay": {
-"gp": 0,
+"gp": 1,
 "id": "00-0036331",
-"last_pct": 0.0,
+"last_pct": 0.42,
 "pos": "WR",
-"snap_pct": 0.0,
-"snaps": 0,
+"snap_pct": 0.42,
+"snaps": 34,
 "team": "ARI",
 "weeks": [
 {
@@ -5861,6 +6391,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.42,
+"snaps": 34,
+"week": 8
 }
 ]
 },
@@ -5953,12 +6488,12 @@
 ]
 },
 "devontez walker": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039792",
-"last_pct": 0.3,
+"last_pct": 0.16,
 "pos": "WR",
-"snap_pct": 0.465,
-"snaps": 180,
+"snap_pct": 0.421,
+"snaps": 188,
 "team": "BAL",
 "weeks": [
 {
@@ -5990,6 +6525,11 @@
 "pct": 0.3,
 "snaps": 20,
 "week": 7
+},
+{
+"pct": 0.16,
+"snaps": 8,
+"week": 8
 }
 ]
 },
@@ -6025,13 +6565,29 @@
 }
 ]
 },
+"dj giddens": {
+"gp": 1,
+"id": "00-0040179",
+"last_pct": 0.13,
+"pos": "RB",
+"snap_pct": 0.13,
+"snaps": 8,
+"team": "IND",
+"weeks": [
+{
+"pct": 0.13,
+"snaps": 8,
+"week": 8
+}
+]
+},
 "dj herman": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041436",
-"last_pct": 0.45,
+"last_pct": 0.31,
 "pos": "FB",
-"snap_pct": 0.363,
-"snaps": 127,
+"snap_pct": 0.356,
+"snaps": 147,
 "team": "MIA",
 "weeks": [
 {
@@ -6063,16 +6619,21 @@
 "pct": 0.45,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 20,
+"week": 8
 }
 ]
 },
 "dj moore": {
-"gp": 4,
+"gp": 5,
 "id": "00-0034827",
-"last_pct": 0.39,
+"last_pct": 0.66,
 "pos": "WR",
-"snap_pct": 0.525,
-"snaps": 132,
+"snap_pct": 0.552,
+"snaps": 186,
 "team": "BUF",
 "weeks": [
 {
@@ -6094,16 +6655,21 @@
 "pct": 0.39,
 "snaps": 23,
 "week": 4
+},
+{
+"pct": 0.66,
+"snaps": 54,
+"week": 8
 }
 ]
 },
 "dk metcalf": {
-"gp": 7,
+"gp": 8,
 "id": "00-0035640",
 "last_pct": 0.92,
 "pos": "WR",
-"snap_pct": 0.949,
-"snaps": 450,
+"snap_pct": 0.945,
+"snaps": 504,
 "team": "PIT",
 "weeks": [
 {
@@ -6140,16 +6706,21 @@
 "pct": 0.92,
 "snaps": 59,
 "week": 7
+},
+{
+"pct": 0.92,
+"snaps": 54,
+"week": 8
 }
 ]
 },
 "dohnte meyers": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040785",
-"last_pct": 0.38,
+"last_pct": 0.59,
 "pos": "WR",
-"snap_pct": 0.41,
-"snaps": 160,
+"snap_pct": 0.436,
+"snaps": 204,
 "team": "CIN",
 "weeks": [
 {
@@ -6181,6 +6752,11 @@
 "pct": 0.38,
 "snaps": 20,
 "week": 7
+},
+{
+"pct": 0.59,
+"snaps": 44,
+"week": 8
 }
 ]
 },
@@ -6226,12 +6802,12 @@
 ]
 },
 "drake london": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037238",
-"last_pct": 0.81,
+"last_pct": 0.96,
 "pos": "WR",
-"snap_pct": 0.887,
-"snaps": 392,
+"snap_pct": 0.896,
+"snaps": 443,
 "team": "ATL",
 "weeks": [
 {
@@ -6268,16 +6844,21 @@
 "pct": 0.81,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.96,
+"snaps": 51,
+"week": 8
 }
 ]
 },
 "drake maye": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039851",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.973,
-"snaps": 450,
+"snap_pct": 0.976,
+"snaps": 510,
 "team": "NE",
 "weeks": [
 {
@@ -6314,6 +6895,11 @@
 "pct": 1.0,
 "snaps": 54,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 60,
+"week": 8
 }
 ]
 },
@@ -6339,12 +6925,12 @@
 ]
 },
 "drew sample": {
-"gp": 6,
+"gp": 7,
 "id": "00-0035631",
-"last_pct": 0.55,
+"last_pct": 0.39,
 "pos": "TE",
-"snap_pct": 0.517,
-"snaps": 190,
+"snap_pct": 0.499,
+"snaps": 219,
 "team": "CIN",
 "weeks": [
 {
@@ -6376,6 +6962,11 @@
 "pct": 0.55,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.39,
+"snaps": 29,
+"week": 8
 }
 ]
 },
@@ -6411,12 +7002,12 @@
 ]
 },
 "dyami brown": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036626",
-"last_pct": 0.49,
+"last_pct": 0.25,
 "pos": "WR",
-"snap_pct": 0.467,
-"snaps": 189,
+"snap_pct": 0.436,
+"snaps": 204,
 "team": "WAS",
 "weeks": [
 {
@@ -6448,16 +7039,21 @@
 "pct": 0.49,
 "snaps": 33,
 "week": 6
+},
+{
+"pct": 0.25,
+"snaps": 15,
+"week": 8
 }
 ]
 },
 "dylan laube": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039407",
-"last_pct": 0.08,
+"last_pct": 0.02,
 "pos": "RB",
-"snap_pct": 0.147,
-"snaps": 57,
+"snap_pct": 0.129,
+"snaps": 58,
 "team": "LV",
 "weeks": [
 {
@@ -6494,16 +7090,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.02,
+"snaps": 1,
+"week": 8
 }
 ]
 },
 "dylan sampson": {
-"gp": 1,
+"gp": 2,
 "id": "00-0040162",
-"last_pct": 0.46,
+"last_pct": 0.56,
 "pos": "RB",
-"snap_pct": 0.46,
-"snaps": 32,
+"snap_pct": 0.51,
+"snaps": 71,
 "team": "CLE",
 "weeks": [
 {
@@ -6515,16 +7116,21 @@
 "pct": 0.46,
 "snaps": 32,
 "week": 7
+},
+{
+"pct": 0.56,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "efton chism": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040563",
-"last_pct": 0.63,
+"last_pct": 0.88,
 "pos": "WR",
-"snap_pct": 0.482,
-"snaps": 193,
+"snap_pct": 0.539,
+"snaps": 246,
 "team": "NE",
 "weeks": [
 {
@@ -6556,6 +7162,11 @@
 "pct": 0.63,
 "snaps": 34,
 "week": 7
+},
+{
+"pct": 0.88,
+"snaps": 53,
+"week": 8
 }
 ]
 },
@@ -6622,12 +7233,12 @@
 ]
 },
 "eli raridon": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041395",
-"last_pct": 0.54,
+"last_pct": 0.92,
 "pos": "TE",
-"snap_pct": 0.5,
-"snaps": 204,
+"snap_pct": 0.56,
+"snaps": 259,
 "team": "NE",
 "weeks": [
 {
@@ -6659,32 +7270,42 @@
 "pct": 0.54,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.92,
+"snaps": 55,
+"week": 8
 }
 ]
 },
 "eli stowers": {
-"gp": 1,
+"gp": 2,
 "id": "00-0041483",
-"last_pct": 0.18,
+"last_pct": 0.19,
 "pos": "TE",
-"snap_pct": 0.18,
-"snaps": 12,
+"snap_pct": 0.185,
+"snaps": 25,
 "team": "PHI",
 "weeks": [
 {
 "pct": 0.18,
 "snaps": 12,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "elic ayomanor": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040170",
-"last_pct": 0.89,
+"last_pct": 0.65,
 "pos": "WR",
-"snap_pct": 0.641,
-"snaps": 259,
+"snap_pct": 0.643,
+"snaps": 309,
 "team": "TEN",
 "weeks": [
 {
@@ -6721,6 +7342,11 @@
 "pct": 0.89,
 "snaps": 56,
 "week": 7
+},
+{
+"pct": 0.65,
+"snaps": 50,
+"week": 8
 }
 ]
 },
@@ -6766,12 +7392,12 @@
 ]
 },
 "elijah higgins": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039041",
-"last_pct": 0.48,
+"last_pct": 0.32,
 "pos": "TE",
-"snap_pct": 0.391,
-"snaps": 202,
+"snap_pct": 0.383,
+"snaps": 228,
 "team": "ARI",
 "weeks": [
 {
@@ -6808,32 +7434,42 @@
 "pct": 0.48,
 "snaps": 39,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 26,
+"week": 8
 }
 ]
 },
 "elijah mitchell": {
-"gp": 1,
+"gp": 2,
 "id": "00-0036567",
-"last_pct": 0.21,
+"last_pct": 0.57,
 "pos": "RB",
-"snap_pct": 0.21,
-"snaps": 14,
+"snap_pct": 0.39,
+"snaps": 53,
 "team": "PHI",
 "weeks": [
 {
 "pct": 0.21,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.57,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "elijah moore": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036980",
-"last_pct": 0.33,
+"last_pct": 0.26,
 "pos": "WR",
-"snap_pct": 0.184,
-"snaps": 58,
+"snap_pct": 0.197,
+"snaps": 76,
 "team": "PHI",
 "weeks": [
 {
@@ -6860,6 +7496,11 @@
 "pct": 0.33,
 "snaps": 22,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 18,
+"week": 8
 }
 ]
 },
@@ -6922,6 +7563,11 @@
 "pct": 0.48,
 "snaps": 33,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -6988,12 +7634,12 @@
 ]
 },
 "emmett johnson": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041013",
-"last_pct": 0.26,
+"last_pct": 0.19,
 "pos": "RB",
-"snap_pct": 0.273,
-"snaps": 101,
+"snap_pct": 0.261,
+"snaps": 114,
 "team": "KC",
 "weeks": [
 {
@@ -7025,16 +7671,21 @@
 "pct": 0.26,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "eric saubert": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033576",
-"last_pct": 0.32,
+"last_pct": 0.24,
 "pos": "TE",
-"snap_pct": 0.267,
-"snaps": 123,
+"snap_pct": 0.264,
+"snaps": 138,
 "team": "SEA",
 "weeks": [
 {
@@ -7071,6 +7722,11 @@
 "pct": 0.32,
 "snaps": 22,
 "week": 7
+},
+{
+"pct": 0.24,
+"snaps": 15,
+"week": 8
 }
 ]
 },
@@ -7116,12 +7772,12 @@
 ]
 },
 "evan engram": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033881",
-"last_pct": 0.39,
+"last_pct": 0.48,
 "pos": "TE",
-"snap_pct": 0.544,
-"snaps": 233,
+"snap_pct": 0.536,
+"snaps": 263,
 "team": "DEN",
 "weeks": [
 {
@@ -7158,6 +7814,11 @@
 "pct": 0.39,
 "snaps": 24,
 "week": 7
+},
+{
+"pct": 0.48,
+"snaps": 30,
+"week": 8
 }
 ]
 },
@@ -7220,6 +7881,11 @@
 "pct": 0.16,
 "snaps": 9,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -7306,13 +7972,29 @@
 }
 ]
 },
+"gardner minshew": {
+"gp": 1,
+"id": "00-0035289",
+"last_pct": 0.42,
+"pos": "QB",
+"snap_pct": 0.42,
+"snaps": 34,
+"team": "ARI",
+"weeks": [
+{
+"pct": 0.42,
+"snaps": 34,
+"week": 8
+}
+]
+},
 "garrett wilson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037740",
-"last_pct": 0.85,
+"last_pct": 0.81,
 "pos": "WR",
-"snap_pct": 0.904,
-"snaps": 385,
+"snap_pct": 0.893,
+"snaps": 437,
 "team": "NYJ",
 "weeks": [
 {
@@ -7349,6 +8031,11 @@
 "pct": 0.85,
 "snaps": 50,
 "week": 7
+},
+{
+"pct": 0.81,
+"snaps": 52,
+"week": 8
 }
 ]
 },
@@ -7369,12 +8056,12 @@
 ]
 },
 "gavin bartholomew": {
-"gp": 4,
+"gp": 5,
 "id": "00-0040215",
-"last_pct": 0.12,
+"last_pct": 0.04,
 "pos": "TE",
-"snap_pct": 0.258,
-"snaps": 72,
+"snap_pct": 0.214,
+"snaps": 74,
 "team": "MIN",
 "weeks": [
 {
@@ -7406,16 +8093,21 @@
 "pct": 0.12,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.04,
+"snaps": 2,
+"week": 8
 }
 ]
 },
 "geno smith": {
-"gp": 7,
+"gp": 8,
 "id": "00-0030565",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 430,
+"snaps": 494,
 "team": "NYJ",
 "weeks": [
 {
@@ -7452,16 +8144,21 @@
 "pct": 1.0,
 "snaps": 59,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 64,
+"week": 8
 }
 ]
 },
 "george holani": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039299",
-"last_pct": 0.36,
+"last_pct": 0.17,
 "pos": "RB",
-"snap_pct": 0.4,
-"snaps": 187,
+"snap_pct": 0.371,
+"snaps": 198,
 "team": "SEA",
 "weeks": [
 {
@@ -7498,6 +8195,11 @@
 "pct": 0.36,
 "snaps": 25,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 11,
+"week": 8
 }
 ]
 },
@@ -7548,12 +8250,12 @@
 ]
 },
 "george pickens": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037247",
-"last_pct": 0.6,
+"last_pct": 0.57,
 "pos": "WR",
-"snap_pct": 0.81,
-"snaps": 384,
+"snap_pct": 0.78,
+"snaps": 426,
 "team": "DAL",
 "weeks": [
 {
@@ -7590,16 +8292,21 @@
 "pct": 0.6,
 "snaps": 41,
 "week": 7
+},
+{
+"pct": 0.57,
+"snaps": 42,
+"week": 8
 }
 ]
 },
 "germie bernard": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041489",
-"last_pct": 0.91,
+"last_pct": 0.85,
 "pos": "WR",
-"snap_pct": 0.61,
-"snaps": 291,
+"snap_pct": 0.64,
+"snaps": 341,
 "team": "PIT",
 "weeks": [
 {
@@ -7636,32 +8343,42 @@
 "pct": 0.91,
 "snaps": 58,
 "week": 7
+},
+{
+"pct": 0.85,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "grant calcaterra": {
-"gp": 1,
+"gp": 2,
 "id": "00-0037086",
-"last_pct": 0.12,
+"last_pct": 0.17,
 "pos": "TE",
-"snap_pct": 0.12,
-"snaps": 8,
+"snap_pct": 0.145,
+"snaps": 20,
 "team": "PHI",
 "weeks": [
 {
 "pct": 0.12,
 "snaps": 8,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 12,
+"week": 8
 }
 ]
 },
 "greg dortch": {
-"gp": 3,
+"gp": 4,
 "id": "00-0035500",
-"last_pct": 0.03,
+"last_pct": 0.05,
 "pos": "WR",
 "snap_pct": 0.053,
-"snaps": 11,
+"snaps": 15,
 "team": "BUF",
 "weeks": [
 {
@@ -7693,16 +8410,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 6
+},
+{
+"pct": 0.05,
+"snaps": 4,
+"week": 8
 }
 ]
 },
 "greg dulcich": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037252",
-"last_pct": 0.65,
+"last_pct": 0.69,
 "pos": "TE",
-"snap_pct": 0.663,
-"snaps": 241,
+"snap_pct": 0.667,
+"snaps": 286,
 "team": "MIA",
 "weeks": [
 {
@@ -7734,16 +8456,21 @@
 "pct": 0.65,
 "snaps": 42,
 "week": 7
+},
+{
+"pct": 0.69,
+"snaps": 45,
+"week": 8
 }
 ]
 },
 "gunnar helm": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040584",
-"last_pct": 0.84,
+"last_pct": 0.64,
 "pos": "TE",
-"snap_pct": 0.777,
-"snaps": 310,
+"snap_pct": 0.76,
+"snaps": 359,
 "team": "TEN",
 "weeks": [
 {
@@ -7780,16 +8507,21 @@
 "pct": 0.84,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 0.64,
+"snaps": 49,
+"week": 8
 }
 ]
 },
 "harold fannin": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040663",
-"last_pct": 0.83,
+"last_pct": 0.86,
 "pos": "TE",
-"snap_pct": 0.869,
-"snaps": 386,
+"snap_pct": 0.868,
+"snaps": 446,
 "team": "CLE",
 "weeks": [
 {
@@ -7826,16 +8558,21 @@
 "pct": 0.83,
 "snaps": 58,
 "week": 7
+},
+{
+"pct": 0.86,
+"snaps": 60,
+"week": 8
 }
 ]
 },
 "hayden rucci": {
-"gp": 4,
+"gp": 5,
 "id": "00-0039489",
-"last_pct": 0.13,
+"last_pct": 0.16,
 "pos": "TE",
-"snap_pct": 0.302,
-"snaps": 84,
+"snap_pct": 0.274,
+"snaps": 94,
 "team": "LAC",
 "weeks": [
 {
@@ -7857,16 +8594,21 @@
 "pct": 0.13,
 "snaps": 9,
 "week": 6
+},
+{
+"pct": 0.16,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "hunter henry": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033090",
-"last_pct": 0.76,
+"last_pct": 0.13,
 "pos": "TE",
-"snap_pct": 0.739,
-"snaps": 338,
+"snap_pct": 0.662,
+"snaps": 346,
 "team": "NE",
 "weeks": [
 {
@@ -7903,6 +8645,11 @@
 "pct": 0.76,
 "snaps": 41,
 "week": 7
+},
+{
+"pct": 0.13,
+"snaps": 8,
+"week": 8
 }
 ]
 },
@@ -7938,12 +8685,12 @@
 ]
 },
 "hunter luepke": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038738",
-"last_pct": 0.24,
+"last_pct": 0.23,
 "pos": "FB",
-"snap_pct": 0.171,
-"snaps": 78,
+"snap_pct": 0.179,
+"snaps": 95,
 "team": "DAL",
 "weeks": [
 {
@@ -7980,16 +8727,21 @@
 "pct": 0.24,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.23,
+"snaps": 17,
+"week": 8
 }
 ]
 },
 "ian thomas": {
-"gp": 7,
+"gp": 8,
 "id": "00-0034365",
-"last_pct": 0.26,
+"last_pct": 0.46,
 "pos": "TE",
-"snap_pct": 0.333,
-"snaps": 158,
+"snap_pct": 0.349,
+"snaps": 187,
 "team": "LV",
 "weeks": [
 {
@@ -8026,6 +8778,11 @@
 "pct": 0.26,
 "snaps": 18,
 "week": 7
+},
+{
+"pct": 0.46,
+"snaps": 29,
+"week": 8
 }
 ]
 },
@@ -8047,16 +8804,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "isaac teslaa": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040669",
-"last_pct": 0.49,
+"last_pct": 0.36,
 "pos": "WR",
-"snap_pct": 0.602,
-"snaps": 249,
+"snap_pct": 0.567,
+"snaps": 275,
 "team": "DET",
 "weeks": [
 {
@@ -8088,16 +8850,21 @@
 "pct": 0.49,
 "snaps": 33,
 "week": 7
+},
+{
+"pct": 0.36,
+"snaps": 26,
+"week": 8
 }
 ]
 },
 "isaiah bond": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040782",
-"last_pct": 0.09,
+"last_pct": 0.11,
 "pos": "WR",
-"snap_pct": 0.191,
-"snaps": 87,
+"snap_pct": 0.181,
+"snaps": 95,
 "team": "CLE",
 "weeks": [
 {
@@ -8134,16 +8901,21 @@
 "pct": 0.09,
 "snaps": 6,
 "week": 7
+},
+{
+"pct": 0.11,
+"snaps": 8,
+"week": 8
 }
 ]
 },
 "isaiah davis": {
-"gp": 4,
+"gp": 5,
 "id": "00-0039798",
-"last_pct": 0.22,
+"last_pct": 0.17,
 "pos": "RB",
-"snap_pct": 0.138,
-"snaps": 33,
+"snap_pct": 0.144,
+"snaps": 44,
 "team": "NYJ",
 "weeks": [
 {
@@ -8180,6 +8952,11 @@
 "pct": 0.22,
 "snaps": 13,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 11,
+"week": 8
 }
 ]
 },
@@ -8230,12 +9007,12 @@
 ]
 },
 "isaiah williams": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039451",
-"last_pct": 0.22,
+"last_pct": 0.16,
 "pos": "WR",
-"snap_pct": 0.604,
-"snaps": 255,
+"snap_pct": 0.549,
+"snaps": 265,
 "team": "NYJ",
 "weeks": [
 {
@@ -8272,16 +9049,21 @@
 "pct": 0.22,
 "snaps": 13,
 "week": 7
+},
+{
+"pct": 0.16,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "j michael sturdivant": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040948",
-"last_pct": 0.06,
+"last_pct": 0.42,
 "pos": "WR",
-"snap_pct": 0.123,
-"snaps": 48,
+"snap_pct": 0.166,
+"snaps": 77,
 "team": "GB",
 "weeks": [
 {
@@ -8313,16 +9095,21 @@
 "pct": 0.06,
 "snaps": 4,
 "week": 7
+},
+{
+"pct": 0.42,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "jack bech": {
-"gp": 3,
+"gp": 4,
 "id": "00-0040729",
-"last_pct": 0.16,
+"last_pct": 0.4,
 "pos": "WR",
-"snap_pct": 0.367,
-"snaps": 72,
+"snap_pct": 0.375,
+"snaps": 97,
 "team": "LV",
 "weeks": [
 {
@@ -8339,16 +9126,21 @@
 "pct": 0.16,
 "snaps": 11,
 "week": 3
+},
+{
+"pct": 0.4,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "jack endries": {
-"gp": 2,
+"gp": 3,
 "id": "00-0041116",
-"last_pct": 0.17,
+"last_pct": 0.16,
 "pos": "TE",
-"snap_pct": 0.095,
-"snaps": 10,
+"snap_pct": 0.117,
+"snaps": 22,
 "team": "CIN",
 "weeks": [
 {
@@ -8365,6 +9157,11 @@
 "pct": 0.17,
 "snaps": 9,
 "week": 7
+},
+{
+"pct": 0.16,
+"snaps": 12,
+"week": 8
 }
 ]
 },
@@ -8401,12 +9198,12 @@
 ]
 },
 "jackson hawes": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040194",
-"last_pct": 0.37,
+"last_pct": 0.39,
 "pos": "TE",
 "snap_pct": 0.393,
-"snaps": 154,
+"snaps": 186,
 "team": "BUF",
 "weeks": [
 {
@@ -8438,6 +9235,11 @@
 "pct": 0.37,
 "snaps": 25,
 "week": 6
+},
+{
+"pct": 0.39,
+"snaps": 32,
+"week": 8
 }
 ]
 },
@@ -8556,16 +9358,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "jacoby brissett": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033119",
-"last_pct": 1.0,
+"last_pct": 0.58,
 "pos": "QB",
-"snap_pct": 1.0,
-"snaps": 504,
+"snap_pct": 0.948,
+"snaps": 551,
 "team": "ARI",
 "weeks": [
 {
@@ -8602,6 +9409,11 @@
 "pct": 1.0,
 "snaps": 81,
 "week": 7
+},
+{
+"pct": 0.58,
+"snaps": 47,
+"week": 8
 }
 ]
 },
@@ -8642,12 +9454,12 @@
 ]
 },
 "jadarian price": {
-"gp": 3,
+"gp": 4,
 "id": "00-0041512",
-"last_pct": 0.28,
+"last_pct": 0.48,
 "pos": "RB",
-"snap_pct": 0.367,
-"snaps": 67,
+"snap_pct": 0.395,
+"snaps": 97,
 "team": "SEA",
 "weeks": [
 {
@@ -8664,16 +9476,21 @@
 "pct": 0.28,
 "snaps": 19,
 "week": 3
+},
+{
+"pct": 0.48,
+"snaps": 30,
+"week": 8
 }
 ]
 },
 "jahan dotson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037741",
-"last_pct": 0.56,
+"last_pct": 0.72,
 "pos": "WR",
-"snap_pct": 0.677,
-"snaps": 300,
+"snap_pct": 0.682,
+"snaps": 338,
 "team": "ATL",
 "weeks": [
 {
@@ -8710,16 +9527,21 @@
 "pct": 0.56,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.72,
+"snaps": 38,
+"week": 8
 }
 ]
 },
 "jahdae walker": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040277",
-"last_pct": 0.04,
+"last_pct": 0.07,
 "pos": "WR",
-"snap_pct": 0.126,
-"snaps": 66,
+"snap_pct": 0.119,
+"snaps": 71,
 "team": "CHI",
 "weeks": [
 {
@@ -8756,16 +9578,21 @@
 "pct": 0.04,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.07,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "jahmyr gibbs": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039139",
-"last_pct": 0.9,
+"last_pct": 0.76,
 "pos": "RB",
-"snap_pct": 0.788,
-"snaps": 325,
+"snap_pct": 0.784,
+"snaps": 380,
 "team": "DET",
 "weeks": [
 {
@@ -8797,16 +9624,21 @@
 "pct": 0.9,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 0.76,
+"snaps": 55,
+"week": 8
 }
 ]
 },
 "jake briningstool": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040081",
-"last_pct": 0.09,
+"last_pct": 0.07,
 "pos": "TE",
-"snap_pct": 0.135,
-"snaps": 52,
+"snap_pct": 0.126,
+"snaps": 57,
 "team": "KC",
 "weeks": [
 {
@@ -8838,16 +9670,21 @@
 "pct": 0.09,
 "snaps": 5,
 "week": 7
+},
+{
+"pct": 0.07,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "jake ferguson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038041",
-"last_pct": 0.56,
+"last_pct": 0.05,
 "pos": "TE",
-"snap_pct": 0.67,
-"snaps": 313,
+"snap_pct": 0.592,
+"snaps": 317,
 "team": "DAL",
 "weeks": [
 {
@@ -8884,6 +9721,11 @@
 "pct": 0.56,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.05,
+"snaps": 4,
+"week": 8
 }
 ]
 },
@@ -8904,12 +9746,12 @@
 ]
 },
 "jakobi lane": {
-"gp": 3,
+"gp": 4,
 "id": "00-0040870",
-"last_pct": 0.69,
+"last_pct": 0.65,
 "pos": "WR",
-"snap_pct": 0.543,
-"snaps": 104,
+"snap_pct": 0.57,
+"snaps": 137,
 "team": "BAL",
 "weeks": [
 {
@@ -8926,16 +9768,21 @@
 "pct": 0.69,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.65,
+"snaps": 33,
+"week": 8
 }
 ]
 },
 "jakobi meyers": {
-"gp": 6,
+"gp": 7,
 "id": "00-0034960",
-"last_pct": 0.75,
+"last_pct": 0.54,
 "pos": "WR",
-"snap_pct": 0.797,
-"snaps": 304,
+"snap_pct": 0.76,
+"snaps": 333,
 "team": "JAX",
 "weeks": [
 {
@@ -8967,16 +9814,21 @@
 "pct": 0.75,
 "snaps": 53,
 "week": 6
+},
+{
+"pct": 0.54,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "jaleel mclaughlin": {
-"gp": 5,
+"gp": 6,
 "id": "00-0038794",
-"last_pct": 0.62,
+"last_pct": 0.03,
 "pos": "RB",
-"snap_pct": 0.21,
-"snaps": 66,
+"snap_pct": 0.18,
+"snaps": 68,
 "team": "CLE",
 "weeks": [
 {
@@ -9008,6 +9860,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
 }
 ]
 },
@@ -9058,12 +9915,12 @@
 ]
 },
 "jalen coker": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039491",
-"last_pct": 0.66,
+"last_pct": 0.86,
 "pos": "WR",
-"snap_pct": 0.674,
-"snaps": 231,
+"snap_pct": 0.705,
+"snaps": 294,
 "team": "CAR",
 "weeks": [
 {
@@ -9090,6 +9947,11 @@
 "pct": 0.66,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.86,
+"snaps": 63,
+"week": 8
 }
 ]
 },
@@ -9167,12 +10029,12 @@
 ]
 },
 "jalen nailor": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037291",
-"last_pct": 0.75,
+"last_pct": 0.46,
 "pos": "WR",
-"snap_pct": 0.565,
-"snaps": 231,
+"snap_pct": 0.55,
+"snaps": 260,
 "team": "LV",
 "weeks": [
 {
@@ -9204,16 +10066,21 @@
 "pct": 0.75,
 "snaps": 51,
 "week": 7
+},
+{
+"pct": 0.46,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "jalen royals": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040646",
-"last_pct": 0.68,
+"last_pct": 0.32,
 "pos": "WR",
-"snap_pct": 0.478,
-"snaps": 141,
+"snap_pct": 0.452,
+"snaps": 163,
 "team": "KC",
 "weeks": [
 {
@@ -9245,16 +10112,21 @@
 "pct": 0.68,
 "snaps": 36,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 22,
+"week": 8
 }
 ]
 },
 "jalen tolbert": {
-"gp": 3,
+"gp": 4,
 "id": "00-0037666",
-"last_pct": 0.23,
+"last_pct": 0.09,
 "pos": "WR",
-"snap_pct": 0.18,
-"snaps": 33,
+"snap_pct": 0.158,
+"snaps": 39,
 "team": "MIA",
 "weeks": [
 {
@@ -9271,6 +10143,11 @@
 "pct": 0.23,
 "snaps": 15,
 "week": 5
+},
+{
+"pct": 0.09,
+"snaps": 6,
+"week": 8
 }
 ]
 },
@@ -9343,12 +10220,12 @@
 ]
 },
 "jamarr chase": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036900",
-"last_pct": 0.87,
+"last_pct": 0.96,
 "pos": "WR",
-"snap_pct": 0.797,
-"snaps": 289,
+"snap_pct": 0.82,
+"snaps": 360,
 "team": "CIN",
 "weeks": [
 {
@@ -9380,6 +10257,11 @@
 "pct": 0.87,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.96,
+"snaps": 71,
+"week": 8
 }
 ]
 },
@@ -9425,12 +10307,12 @@
 ]
 },
 "james cook": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037248",
-"last_pct": 0.66,
+"last_pct": 0.54,
 "pos": "RB",
-"snap_pct": 0.667,
-"snaps": 261,
+"snap_pct": 0.649,
+"snaps": 305,
 "team": "BUF",
 "weeks": [
 {
@@ -9462,16 +10344,37 @@
 "pct": 0.66,
 "snaps": 45,
 "week": 6
+},
+{
+"pct": 0.54,
+"snaps": 44,
+"week": 8
+}
+]
+},
+"james mitchell": {
+"gp": 1,
+"id": "00-0037282",
+"last_pct": 0.42,
+"pos": "TE",
+"snap_pct": 0.42,
+"snaps": 31,
+"team": "DAL",
+"weeks": [
+{
+"pct": 0.42,
+"snaps": 31,
+"week": 8
 }
 ]
 },
 "jameson williams": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037240",
-"last_pct": 0.84,
+"last_pct": 0.83,
 "pos": "WR",
-"snap_pct": 0.892,
-"snaps": 367,
+"snap_pct": 0.883,
+"snaps": 427,
 "team": "DET",
 "weeks": [
 {
@@ -9503,16 +10406,21 @@
 "pct": 0.84,
 "snaps": 57,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 60,
+"week": 8
 }
 ]
 },
 "jared goff": {
-"gp": 6,
+"gp": 7,
 "id": "00-0033106",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.992,
-"snaps": 409,
+"snap_pct": 0.993,
+"snaps": 481,
 "team": "DET",
 "weeks": [
 {
@@ -9544,6 +10452,11 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 72,
+"week": 8
 }
 ]
 },
@@ -9601,6 +10514,11 @@
 "pct": 0.02,
 "snaps": 1,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -9621,12 +10539,12 @@
 ]
 },
 "jauan jennings": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036259",
-"last_pct": 0.56,
+"last_pct": 0.55,
 "pos": "WR",
-"snap_pct": 0.696,
-"snaps": 234,
+"snap_pct": 0.672,
+"snaps": 263,
 "team": "MIN",
 "weeks": [
 {
@@ -9653,16 +10571,21 @@
 "pct": 0.56,
 "snaps": 33,
 "week": 7
+},
+{
+"pct": 0.55,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "javonte williams": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036997",
-"last_pct": 0.65,
+"last_pct": 0.74,
 "pos": "RB",
-"snap_pct": 0.749,
-"snaps": 351,
+"snap_pct": 0.748,
+"snaps": 406,
 "team": "DAL",
 "weeks": [
 {
@@ -9699,6 +10622,11 @@
 "pct": 0.65,
 "snaps": 44,
 "week": 7
+},
+{
+"pct": 0.74,
+"snaps": 55,
+"week": 8
 }
 ]
 },
@@ -9719,12 +10647,12 @@
 ]
 },
 "jaxon smith njigba": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038543",
-"last_pct": 0.77,
+"last_pct": 0.97,
 "pos": "WR",
-"snap_pct": 0.836,
-"snaps": 387,
+"snap_pct": 0.852,
+"snaps": 448,
 "team": "SEA",
 "weeks": [
 {
@@ -9761,6 +10689,11 @@
 "pct": 0.77,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 0.97,
+"snaps": 61,
+"week": 8
 }
 ]
 },
@@ -9786,12 +10719,12 @@
 ]
 },
 "jayden daniels": {
-"gp": 4,
+"gp": 5,
 "id": "00-0039910",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.887,
-"snaps": 238,
+"snap_pct": 0.91,
+"snaps": 298,
 "team": "WAS",
 "weeks": [
 {
@@ -9813,6 +10746,11 @@
 "pct": 1.0,
 "snaps": 67,
 "week": 6
+},
+{
+"pct": 1.0,
+"snaps": 60,
+"week": 8
 }
 ]
 },
@@ -9850,16 +10788,37 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
+}
+]
+},
+"jaydon blue": {
+"gp": 1,
+"id": "00-0040586",
+"last_pct": 0.12,
+"pos": "RB",
+"snap_pct": 0.12,
+"snaps": 8,
+"team": "PHI",
+"weeks": [
+{
+"pct": 0.12,
+"snaps": 8,
+"week": 8
 }
 ]
 },
 "jaylen waddle": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036613",
-"last_pct": 0.56,
+"last_pct": 0.45,
 "pos": "WR",
-"snap_pct": 0.661,
-"snaps": 283,
+"snap_pct": 0.635,
+"snaps": 311,
 "team": "DEN",
 "weeks": [
 {
@@ -9896,16 +10855,21 @@
 "pct": 0.56,
 "snaps": 34,
 "week": 7
+},
+{
+"pct": 0.45,
+"snaps": 28,
+"week": 8
 }
 ]
 },
 "jaylen warren": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037228",
-"last_pct": 0.62,
+"last_pct": 0.58,
 "pos": "RB",
-"snap_pct": 0.741,
-"snaps": 352,
+"snap_pct": 0.721,
+"snaps": 386,
 "team": "PIT",
 "weeks": [
 {
@@ -9942,16 +10906,21 @@
 "pct": 0.62,
 "snaps": 40,
 "week": 7
+},
+{
+"pct": 0.58,
+"snaps": 34,
+"week": 8
 }
 ]
 },
 "jaylen wright": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039874",
 "last_pct": 0.12,
 "pos": "RB",
-"snap_pct": 0.138,
-"snaps": 36,
+"snap_pct": 0.135,
+"snaps": 44,
 "team": "MIA",
 "weeks": [
 {
@@ -9978,6 +10947,11 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 7
+},
+{
+"pct": 0.12,
+"snaps": 8,
+"week": 8
 }
 ]
 },
@@ -10059,12 +11033,12 @@
 ]
 },
 "jelani woods": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037755",
-"last_pct": 0.24,
+"last_pct": 0.28,
 "pos": "TE",
-"snap_pct": 0.299,
-"snaps": 126,
+"snap_pct": 0.296,
+"snaps": 144,
 "team": "NYJ",
 "weeks": [
 {
@@ -10101,16 +11075,21 @@
 "pct": 0.24,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.28,
+"snaps": 18,
+"week": 8
 }
 ]
 },
 "jeremiyah love": {
-"gp": 5,
+"gp": 6,
 "id": "00-0041027",
-"last_pct": 0.49,
+"last_pct": 0.19,
 "pos": "RB",
-"snap_pct": 0.482,
-"snaps": 174,
+"snap_pct": 0.433,
+"snaps": 189,
 "team": "ARI",
 "weeks": [
 {
@@ -10137,32 +11116,42 @@
 "pct": 0.49,
 "snaps": 36,
 "week": 5
+},
+{
+"pct": 0.19,
+"snaps": 15,
+"week": 8
 }
 ]
 },
 "jeremy mcnichols": {
-"gp": 1,
+"gp": 2,
 "id": "00-0033955",
-"last_pct": 0.18,
+"last_pct": 0.2,
 "pos": "RB",
-"snap_pct": 0.18,
-"snaps": 12,
+"snap_pct": 0.19,
+"snaps": 24,
 "team": "WAS",
 "weeks": [
 {
 "pct": 0.18,
 "snaps": 12,
 "week": 6
+},
+{
+"pct": 0.2,
+"snaps": 12,
+"week": 8
 }
 ]
 },
 "jeremy ruckert": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037805",
-"last_pct": 0.39,
+"last_pct": 0.27,
 "pos": "TE",
-"snap_pct": 0.369,
-"snaps": 156,
+"snap_pct": 0.356,
+"snaps": 173,
 "team": "NYJ",
 "weeks": [
 {
@@ -10199,16 +11188,21 @@
 "pct": 0.39,
 "snaps": 23,
 "week": 7
+},
+{
+"pct": 0.27,
+"snaps": 17,
+"week": 8
 }
 ]
 },
 "jerry jeudy": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036407",
-"last_pct": 0.61,
+"last_pct": 0.6,
 "pos": "WR",
-"snap_pct": 0.593,
-"snaps": 263,
+"snap_pct": 0.594,
+"snaps": 305,
 "team": "CLE",
 "weeks": [
 {
@@ -10245,6 +11239,11 @@
 "pct": 0.61,
 "snaps": 43,
 "week": 7
+},
+{
+"pct": 0.6,
+"snaps": 42,
+"week": 8
 }
 ]
 },
@@ -10312,12 +11311,12 @@
 ]
 },
 "jk dobbins": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036158",
-"last_pct": 0.23,
+"last_pct": 0.21,
 "pos": "RB",
-"snap_pct": 0.407,
-"snaps": 174,
+"snap_pct": 0.383,
+"snaps": 187,
 "team": "DEN",
 "weeks": [
 {
@@ -10354,16 +11353,21 @@
 "pct": 0.23,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.21,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "joe burrow": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036442",
-"last_pct": 0.94,
+"last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.99,
-"snaps": 372,
+"snap_pct": 0.991,
+"snaps": 446,
 "team": "CIN",
 "weeks": [
 {
@@ -10395,6 +11399,11 @@
 "pct": 0.94,
 "snaps": 50,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 74,
+"week": 8
 }
 ]
 },
@@ -10420,12 +11429,12 @@
 ]
 },
 "john bates": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036628",
-"last_pct": 0.37,
+"last_pct": 0.35,
 "pos": "TE",
-"snap_pct": 0.43,
-"snaps": 173,
+"snap_pct": 0.419,
+"snaps": 194,
 "team": "WAS",
 "weeks": [
 {
@@ -10457,16 +11466,21 @@
 "pct": 0.37,
 "snaps": 25,
 "week": 6
+},
+{
+"pct": 0.35,
+"snaps": 21,
+"week": 8
 }
 ]
 },
 "john metchie": {
-"gp": 5,
+"gp": 6,
 "id": "00-0037614",
-"last_pct": 0.46,
+"last_pct": 0.45,
 "pos": "WR",
-"snap_pct": 0.368,
-"snaps": 131,
+"snap_pct": 0.382,
+"snaps": 164,
 "team": "CAR",
 "weeks": [
 {
@@ -10493,16 +11507,21 @@
 "pct": 0.46,
 "snaps": 26,
 "week": 7
+},
+{
+"pct": 0.45,
+"snaps": 33,
+"week": 8
 }
 ]
 },
 "johnny mundt": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033246",
-"last_pct": 0.24,
+"last_pct": 0.19,
 "pos": "TE",
-"snap_pct": 0.454,
-"snaps": 199,
+"snap_pct": 0.421,
+"snaps": 212,
 "team": "PHI",
 "weeks": [
 {
@@ -10539,16 +11558,21 @@
 "pct": 0.24,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "jonah coleman": {
-"gp": 3,
+"gp": 4,
 "id": "00-0041496",
-"last_pct": 0.49,
+"last_pct": 0.66,
 "pos": "RB",
-"snap_pct": 0.317,
-"snaps": 58,
+"snap_pct": 0.402,
+"snaps": 99,
 "team": "DEN",
 "weeks": [
 {
@@ -10565,16 +11589,21 @@
 "pct": 0.49,
 "snaps": 30,
 "week": 7
+},
+{
+"pct": 0.66,
+"snaps": 41,
+"week": 8
 }
 ]
 },
 "jonathan mingo": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039062",
-"last_pct": 0.34,
+"last_pct": 0.19,
 "pos": "WR",
-"snap_pct": 0.211,
-"snaps": 99,
+"snap_pct": 0.209,
+"snaps": 113,
 "team": "DAL",
 "weeks": [
 {
@@ -10611,16 +11640,21 @@
 "pct": 0.34,
 "snaps": 23,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 14,
+"week": 8
 }
 ]
 },
 "jonathan taylor": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036223",
-"last_pct": 0.67,
+"last_pct": 0.62,
 "pos": "RB",
-"snap_pct": 0.796,
-"snaps": 374,
+"snap_pct": 0.774,
+"snaps": 412,
 "team": "IND",
 "weeks": [
 {
@@ -10657,6 +11691,11 @@
 "pct": 0.67,
 "snaps": 41,
 "week": 7
+},
+{
+"pct": 0.62,
+"snaps": 38,
+"week": 8
 }
 ]
 },
@@ -10728,12 +11767,12 @@
 ]
 },
 "jordan addison": {
-"gp": 5,
+"gp": 6,
 "id": "00-0038994",
-"last_pct": 0.83,
+"last_pct": 0.98,
 "pos": "WR",
-"snap_pct": 0.896,
-"snaps": 282,
+"snap_pct": 0.91,
+"snaps": 334,
 "team": "MIN",
 "weeks": [
 {
@@ -10760,6 +11799,11 @@
 "pct": 0.83,
 "snaps": 49,
 "week": 7
+},
+{
+"pct": 0.98,
+"snaps": 52,
+"week": 8
 }
 ]
 },
@@ -10800,12 +11844,12 @@
 ]
 },
 "jordan love": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036264",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 0.996,
-"snaps": 454,
+"snaps": 523,
 "team": "GB",
 "weeks": [
 {
@@ -10842,16 +11886,21 @@
 "pct": 1.0,
 "snaps": 67,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 69,
+"week": 8
 }
 ]
 },
 "jordan mason": {
-"gp": 2,
+"gp": 3,
 "id": "00-0037525",
-"last_pct": 0.64,
+"last_pct": 0.28,
 "pos": "RB",
-"snap_pct": 0.545,
-"snaps": 67,
+"snap_pct": 0.457,
+"snaps": 82,
 "team": "MIN",
 "weeks": [
 {
@@ -10863,6 +11912,11 @@
 "pct": 0.64,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.28,
+"snaps": 15,
+"week": 8
 }
 ]
 },
@@ -10903,12 +11957,12 @@
 ]
 },
 "jordan whittington": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039751",
-"last_pct": 0.21,
+"last_pct": 0.07,
 "pos": "WR",
-"snap_pct": 0.272,
-"snaps": 122,
+"snap_pct": 0.243,
+"snaps": 126,
 "team": "LA",
 "weeks": [
 {
@@ -10940,16 +11994,21 @@
 "pct": 0.21,
 "snaps": 15,
 "week": 7
+},
+{
+"pct": 0.07,
+"snaps": 4,
+"week": 8
 }
 ]
 },
 "josh allen": {
-"gp": 6,
+"gp": 7,
 "id": "00-0034857",
-"last_pct": 1.0,
+"last_pct": 0.95,
 "pos": "QB",
-"snap_pct": 1.0,
-"snaps": 389,
+"snap_pct": 0.993,
+"snaps": 467,
 "team": "BUF",
 "weeks": [
 {
@@ -10981,16 +12040,21 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 6
+},
+{
+"pct": 0.95,
+"snaps": 78,
+"week": 8
 }
 ]
 },
 "josh cameron": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041100",
-"last_pct": 0.51,
+"last_pct": 0.52,
 "pos": "WR",
-"snap_pct": 0.342,
-"snaps": 132,
+"snap_pct": 0.367,
+"snaps": 160,
 "team": "JAX",
 "weeks": [
 {
@@ -11022,16 +12086,21 @@
 "pct": 0.51,
 "snaps": 36,
 "week": 6
+},
+{
+"pct": 0.52,
+"snaps": 28,
+"week": 8
 }
 ]
 },
 "josh cuevas": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040887",
-"last_pct": 0.22,
+"last_pct": 0.25,
 "pos": "TE",
-"snap_pct": 0.226,
-"snaps": 102,
+"snap_pct": 0.229,
+"snaps": 115,
 "team": "BAL",
 "weeks": [
 {
@@ -11068,16 +12137,21 @@
 "pct": 0.22,
 "snaps": 15,
 "week": 7
+},
+{
+"pct": 0.25,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "josh downs": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038997",
-"last_pct": 0.85,
+"last_pct": 0.75,
 "pos": "WR",
-"snap_pct": 0.819,
-"snaps": 384,
+"snap_pct": 0.81,
+"snaps": 430,
 "team": "IND",
 "weeks": [
 {
@@ -11114,22 +12188,32 @@
 "pct": 0.85,
 "snaps": 52,
 "week": 7
+},
+{
+"pct": 0.75,
+"snaps": 46,
+"week": 8
 }
 ]
 },
 "josh jacobs": {
-"gp": 1,
+"gp": 2,
 "id": "00-0035700",
-"last_pct": 0.52,
+"last_pct": 0.71,
 "pos": "RB",
-"snap_pct": 0.52,
-"snaps": 35,
+"snap_pct": 0.615,
+"snaps": 84,
 "team": "GB",
 "weeks": [
 {
 "pct": 0.52,
 "snaps": 35,
 "week": 7
+},
+{
+"pct": 0.71,
+"snaps": 49,
+"week": 8
 }
 ]
 },
@@ -11160,12 +12244,12 @@
 ]
 },
 "josh palmer": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036988",
-"last_pct": 0.25,
+"last_pct": 0.09,
 "pos": "WR",
-"snap_pct": 0.37,
-"snaps": 119,
+"snap_pct": 0.323,
+"snaps": 126,
 "team": "BUF",
 "weeks": [
 {
@@ -11192,16 +12276,21 @@
 "pct": 0.25,
 "snaps": 17,
 "week": 6
+},
+{
+"pct": 0.09,
+"snaps": 7,
+"week": 8
 }
 ]
 },
 "josh whyle": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038589",
-"last_pct": 0.1,
+"last_pct": 0.04,
 "pos": "TE",
-"snap_pct": 0.15,
-"snaps": 60,
+"snap_pct": 0.134,
+"snaps": 63,
 "team": "GB",
 "weeks": [
 {
@@ -11238,6 +12327,11 @@
 "pct": 0.1,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.04,
+"snaps": 3,
+"week": 8
 }
 ]
 },
@@ -11290,12 +12384,12 @@
 ]
 },
 "julius chestnut": {
-"gp": 0,
+"gp": 1,
 "id": "00-0037594",
-"last_pct": 0.0,
+"last_pct": 0.03,
 "pos": "RB",
-"snap_pct": 0.0,
-"snaps": 0,
+"snap_pct": 0.03,
+"snaps": 2,
 "team": "TEN",
 "weeks": [
 {
@@ -11332,16 +12426,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
 }
 ]
 },
 "justice hill": {
-"gp": 7,
+"gp": 8,
 "id": "00-0034975",
-"last_pct": 0.46,
+"last_pct": 0.49,
 "pos": "RB",
-"snap_pct": 0.426,
-"snaps": 193,
+"snap_pct": 0.434,
+"snaps": 218,
 "team": "BAL",
 "weeks": [
 {
@@ -11378,6 +12477,11 @@
 "pct": 0.46,
 "snaps": 31,
 "week": 7
+},
+{
+"pct": 0.49,
+"snaps": 25,
+"week": 8
 }
 ]
 },
@@ -11398,12 +12502,12 @@
 ]
 },
 "justin herbert": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036355",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 398,
+"snaps": 459,
 "team": "LAC",
 "weeks": [
 {
@@ -11435,16 +12539,21 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 6
+},
+{
+"pct": 1.0,
+"snaps": 61,
+"week": 8
 }
 ]
 },
 "justin jefferson": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036322",
-"last_pct": 0.93,
+"last_pct": 0.96,
 "pos": "WR",
-"snap_pct": 0.772,
-"snaps": 237,
+"snap_pct": 0.803,
+"snaps": 288,
 "team": "MIN",
 "weeks": [
 {
@@ -11471,6 +12580,11 @@
 "pct": 0.93,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.96,
+"snaps": 51,
+"week": 8
 }
 ]
 },
@@ -11616,6 +12730,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -11728,12 +12847,12 @@
 ]
 },
 "kalif raymond": {
-"gp": 7,
+"gp": 8,
 "id": "00-0032464",
-"last_pct": 0.7,
+"last_pct": 0.69,
 "pos": "WR",
-"snap_pct": 0.619,
-"snaps": 323,
+"snap_pct": 0.627,
+"snaps": 371,
 "team": "CHI",
 "weeks": [
 {
@@ -11770,16 +12889,21 @@
 "pct": 0.7,
 "snaps": 48,
 "week": 7
+},
+{
+"pct": 0.69,
+"snaps": 48,
+"week": 8
 }
 ]
 },
 "kameron johnson": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039589",
-"last_pct": 0.03,
+"last_pct": 0.02,
 "pos": "WR",
-"snap_pct": 0.048,
-"snaps": 15,
+"snap_pct": 0.043,
+"snaps": 16,
 "team": "TB",
 "weeks": [
 {
@@ -11816,6 +12940,11 @@
 "pct": 0.03,
 "snaps": 2,
 "week": 7
+},
+{
+"pct": 0.02,
+"snaps": 1,
+"week": 8
 }
 ]
 },
@@ -11939,16 +13068,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "kc concepcion": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041547",
-"last_pct": 0.79,
+"last_pct": 0.83,
 "pos": "WR",
-"snap_pct": 0.699,
-"snaps": 309,
+"snap_pct": 0.715,
+"snaps": 367,
 "team": "CLE",
 "weeks": [
 {
@@ -11985,16 +13119,21 @@
 "pct": 0.79,
 "snaps": 55,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 58,
+"week": 8
 }
 ]
 },
 "keandre lambert smith": {
-"gp": 1,
+"gp": 2,
 "id": "00-0040184",
-"last_pct": 0.87,
+"last_pct": 0.03,
 "pos": "WR",
-"snap_pct": 0.87,
-"snaps": 59,
+"snap_pct": 0.45,
+"snaps": 61,
 "team": "LAC",
 "weeks": [
 {
@@ -12006,16 +13145,21 @@
 "pct": 0.87,
 "snaps": 59,
 "week": 6
+},
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
 }
 ]
 },
 "keaton mitchell": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038454",
-"last_pct": 0.25,
+"last_pct": 0.31,
 "pos": "RB",
-"snap_pct": 0.317,
-"snaps": 126,
+"snap_pct": 0.316,
+"snaps": 145,
 "team": "LAC",
 "weeks": [
 {
@@ -12047,16 +13191,21 @@
 "pct": 0.25,
 "snaps": 17,
 "week": 6
+},
+{
+"pct": 0.31,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "keenan allen": {
-"gp": 6,
+"gp": 7,
 "id": "00-0030279",
-"last_pct": 0.49,
+"last_pct": 0.52,
 "pos": "WR",
-"snap_pct": 0.593,
-"snaps": 242,
+"snap_pct": 0.583,
+"snaps": 274,
 "team": "IND",
 "weeks": [
 {
@@ -12088,16 +13237,21 @@
 "pct": 0.49,
 "snaps": 30,
 "week": 7
+},
+{
+"pct": 0.52,
+"snaps": 32,
+"week": 8
 }
 ]
 },
 "keleki latu": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040363",
-"last_pct": 0.07,
+"last_pct": 0.1,
 "pos": "TE",
-"snap_pct": 0.057,
-"snaps": 22,
+"snap_pct": 0.063,
+"snaps": 30,
 "team": "BUF",
 "weeks": [
 {
@@ -12129,6 +13283,11 @@
 "pct": 0.07,
 "snaps": 5,
 "week": 6
+},
+{
+"pct": 0.1,
+"snaps": 8,
+"week": 8
 }
 ]
 },
@@ -12174,12 +13333,12 @@
 ]
 },
 "kendrick bourne": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033307",
-"last_pct": 0.56,
+"last_pct": 0.31,
 "pos": "WR",
-"snap_pct": 0.583,
-"snaps": 292,
+"snap_pct": 0.549,
+"snaps": 317,
 "team": "ARI",
 "weeks": [
 {
@@ -12216,6 +13375,11 @@
 "pct": 0.56,
 "snaps": 45,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 25,
+"week": 8
 }
 ]
 },
@@ -12242,16 +13406,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 6
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "kenneth walker": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038134",
-"last_pct": 0.74,
+"last_pct": 0.81,
 "pos": "RB",
-"snap_pct": 0.743,
-"snaps": 280,
+"snap_pct": 0.753,
+"snaps": 336,
 "team": "KC",
 "weeks": [
 {
@@ -12283,16 +13452,21 @@
 "pct": 0.74,
 "snaps": 39,
 "week": 7
+},
+{
+"pct": 0.81,
+"snaps": 56,
+"week": 8
 }
 ]
 },
 "kenny gainwell": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036919",
-"last_pct": 0.3,
+"last_pct": 0.5,
 "pos": "RB",
-"snap_pct": 0.359,
-"snaps": 164,
+"snap_pct": 0.376,
+"snaps": 194,
 "team": "TB",
 "weeks": [
 {
@@ -12329,6 +13503,11 @@
 "pct": 0.3,
 "snaps": 19,
 "week": 7
+},
+{
+"pct": 0.5,
+"snaps": 30,
+"week": 8
 }
 ]
 },
@@ -12358,13 +13537,29 @@
 }
 ]
 },
-"kenyon sadiq": {
-"gp": 7,
-"id": "00-0041032",
-"last_pct": 0.37,
+"kenny yeboah": {
+"gp": 0,
+"id": "00-0036510",
+"last_pct": 0.0,
 "pos": "TE",
-"snap_pct": 0.423,
-"snaps": 172,
+"snap_pct": 0.0,
+"snaps": 0,
+"team": "ARI",
+"weeks": [
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
+}
+]
+},
+"kenyon sadiq": {
+"gp": 8,
+"id": "00-0041032",
+"last_pct": 0.48,
+"pos": "TE",
+"snap_pct": 0.43,
+"snaps": 203,
 "team": "NYJ",
 "weeks": [
 {
@@ -12401,16 +13596,21 @@
 "pct": 0.37,
 "snaps": 22,
 "week": 7
+},
+{
+"pct": 0.48,
+"snaps": 31,
+"week": 8
 }
 ]
 },
 "keon coleman": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039901",
-"last_pct": 0.85,
+"last_pct": 0.77,
 "pos": "WR",
-"snap_pct": 0.675,
-"snaps": 265,
+"snap_pct": 0.689,
+"snaps": 328,
 "team": "BUF",
 "weeks": [
 {
@@ -12442,6 +13642,11 @@
 "pct": 0.85,
 "snaps": 58,
 "week": 6
+},
+{
+"pct": 0.77,
+"snaps": 63,
+"week": 8
 }
 ]
 },
@@ -12493,12 +13698,12 @@
 ]
 },
 "kevin coleman": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041529",
-"last_pct": 0.15,
+"last_pct": 0.26,
 "pos": "WR",
-"snap_pct": 0.445,
-"snaps": 160,
+"snap_pct": 0.419,
+"snaps": 177,
 "team": "MIA",
 "weeks": [
 {
@@ -12530,6 +13735,11 @@
 "pct": 0.15,
 "snaps": 10,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 17,
+"week": 8
 }
 ]
 },
@@ -12560,28 +13770,33 @@
 ]
 },
 "khalil herbert": {
-"gp": 1,
+"gp": 2,
 "id": "00-0036906",
-"last_pct": 0.16,
+"last_pct": 0.19,
 "pos": "RB",
-"snap_pct": 0.16,
-"snaps": 11,
+"snap_pct": 0.175,
+"snaps": 21,
 "team": "ATL",
 "weeks": [
 {
 "pct": 0.16,
 "snaps": 11,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "khalil shakir": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037261",
-"last_pct": 0.6,
+"last_pct": 0.67,
 "pos": "WR",
-"snap_pct": 0.633,
-"snaps": 245,
+"snap_pct": 0.639,
+"snaps": 300,
 "team": "BUF",
 "weeks": [
 {
@@ -12613,16 +13828,21 @@
 "pct": 0.6,
 "snaps": 41,
 "week": 6
+},
+{
+"pct": 0.67,
+"snaps": 55,
+"week": 8
 }
 ]
 },
 "kimani vidal": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039391",
-"last_pct": 0.37,
+"last_pct": 0.46,
 "pos": "RB",
-"snap_pct": 0.26,
-"snaps": 106,
+"snap_pct": 0.289,
+"snaps": 134,
 "team": "LAC",
 "weeks": [
 {
@@ -12654,16 +13874,21 @@
 "pct": 0.37,
 "snaps": 25,
 "week": 6
+},
+{
+"pct": 0.46,
+"snaps": 28,
+"week": 8
 }
 ]
 },
 "kirk cousins": {
-"gp": 7,
+"gp": 8,
 "id": "00-0029604",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.976,
-"snaps": 469,
+"snap_pct": 0.979,
+"snaps": 532,
 "team": "LV",
 "weeks": [
 {
@@ -12700,6 +13925,11 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 63,
+"week": 8
 }
 ]
 },
@@ -12757,6 +13987,11 @@
 "pct": 0.1,
 "snaps": 6,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -12777,12 +14012,12 @@
 ]
 },
 "konata mumpfield": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040590",
-"last_pct": 0.43,
+"last_pct": 0.5,
 "pos": "WR",
-"snap_pct": 0.417,
-"snaps": 209,
+"snap_pct": 0.428,
+"snaps": 236,
 "team": "LA",
 "weeks": [
 {
@@ -12819,6 +14054,27 @@
 "pct": 0.43,
 "snaps": 31,
 "week": 7
+},
+{
+"pct": 0.5,
+"snaps": 27,
+"week": 8
+}
+]
+},
+"kyle allen": {
+"gp": 1,
+"id": "00-0034577",
+"last_pct": 0.05,
+"pos": "QB",
+"snap_pct": 0.05,
+"snaps": 4,
+"team": "BUF",
+"weeks": [
+{
+"pct": 0.05,
+"snaps": 4,
+"week": 8
 }
 ]
 },
@@ -12895,12 +14151,12 @@
 ]
 },
 "kyle pitts": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036970",
-"last_pct": 0.56,
+"last_pct": 0.55,
 "pos": "TE",
-"snap_pct": 0.589,
-"snaps": 259,
+"snap_pct": 0.584,
+"snaps": 288,
 "team": "ATL",
 "weeks": [
 {
@@ -12937,16 +14193,21 @@
 "pct": 0.56,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.55,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "kyle williams": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040131",
-"last_pct": 0.39,
+"last_pct": 0.83,
 "pos": "WR",
-"snap_pct": 0.299,
-"snaps": 137,
+"snap_pct": 0.365,
+"snaps": 187,
 "team": "NE",
 "weeks": [
 {
@@ -12983,6 +14244,11 @@
 "pct": 0.39,
 "snaps": 21,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 50,
+"week": 8
 }
 ]
 },
@@ -13008,12 +14274,12 @@
 ]
 },
 "kyler murray": {
-"gp": 5,
+"gp": 6,
 "id": "00-0035228",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.834,
-"snaps": 278,
+"snap_pct": 0.862,
+"snaps": 331,
 "team": "MIN",
 "weeks": [
 {
@@ -13040,16 +14306,21 @@
 "pct": 1.0,
 "snaps": 59,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 53,
+"week": 8
 }
 ]
 },
 "kyren williams": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037840",
-"last_pct": 0.51,
+"last_pct": 0.69,
 "pos": "RB",
-"snap_pct": 0.67,
-"snaps": 343,
+"snap_pct": 0.672,
+"snaps": 380,
 "team": "LA",
 "weeks": [
 {
@@ -13086,16 +14357,21 @@
 "pct": 0.51,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.69,
+"snaps": 37,
+"week": 8
 }
 ]
 },
 "ladd mcconkey": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039915",
-"last_pct": 0.12,
+"last_pct": 0.9,
 "pos": "WR",
-"snap_pct": 0.458,
-"snaps": 151,
+"snap_pct": 0.532,
+"snaps": 206,
 "team": "LAC",
 "weeks": [
 {
@@ -13122,16 +14398,21 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 6
+},
+{
+"pct": 0.9,
+"snaps": 55,
+"week": 8
 }
 ]
 },
 "lajohntay wester": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040075",
-"last_pct": 0.01,
+"last_pct": 0.12,
 "pos": "WR",
-"snap_pct": 0.18,
-"snaps": 68,
+"snap_pct": 0.171,
+"snaps": 74,
 "team": "BAL",
 "weeks": [
 {
@@ -13168,16 +14449,21 @@
 "pct": 0.01,
 "snaps": 1,
 "week": 7
+},
+{
+"pct": 0.12,
+"snaps": 6,
+"week": 8
 }
 ]
 },
 "lamar jackson": {
-"gp": 4,
+"gp": 5,
 "id": "00-0034796",
-"last_pct": 0.52,
+"last_pct": 0.02,
 "pos": "QB",
-"snap_pct": 0.88,
-"snaps": 223,
+"snap_pct": 0.708,
+"snaps": 224,
 "team": "BAL",
 "weeks": [
 {
@@ -13199,32 +14485,42 @@
 "pct": 0.52,
 "snaps": 33,
 "week": 4
+},
+{
+"pct": 0.02,
+"snaps": 1,
+"week": 8
 }
 ]
 },
 "lan larison": {
-"gp": 1,
+"gp": 2,
 "id": "00-0040568",
-"last_pct": 0.04,
+"last_pct": 0.08,
 "pos": "RB",
-"snap_pct": 0.04,
-"snaps": 3,
+"snap_pct": 0.06,
+"snaps": 8,
 "team": "NE",
 "weeks": [
 {
 "pct": 0.04,
 "snaps": 3,
 "week": 1
+},
+{
+"pct": 0.08,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "laquon treadwell": {
-"gp": 7,
+"gp": 8,
 "id": "00-0032951",
-"last_pct": 0.74,
+"last_pct": 0.7,
 "pos": "WR",
-"snap_pct": 0.743,
-"snaps": 358,
+"snap_pct": 0.738,
+"snaps": 401,
 "team": "IND",
 "weeks": [
 {
@@ -13261,16 +14557,21 @@
 "pct": 0.74,
 "snaps": 45,
 "week": 7
+},
+{
+"pct": 0.7,
+"snaps": 43,
+"week": 8
 }
 ]
 },
 "lequint allen": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040238",
 "last_pct": 0.11,
 "pos": "RB",
-"snap_pct": 0.132,
-"snaps": 51,
+"snap_pct": 0.129,
+"snaps": 57,
 "team": "JAX",
 "weeks": [
 {
@@ -13302,16 +14603,21 @@
 "pct": 0.11,
 "snaps": 8,
 "week": 6
+},
+{
+"pct": 0.11,
+"snaps": 6,
+"week": 8
 }
 ]
 },
 "lew nichols": {
-"gp": 3,
+"gp": 4,
 "id": "00-0038409",
-"last_pct": 0.05,
+"last_pct": 0.02,
 "pos": "RB",
-"snap_pct": 0.077,
-"snaps": 14,
+"snap_pct": 0.062,
+"snaps": 15,
 "team": "PIT",
 "weeks": [
 {
@@ -13338,6 +14644,11 @@
 "pct": 0.05,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.02,
+"snaps": 1,
+"week": 8
 }
 ]
 },
@@ -13363,12 +14674,12 @@
 ]
 },
 "liljordan humphrey": {
-"gp": 4,
+"gp": 5,
 "id": "00-0035406",
-"last_pct": 0.25,
+"last_pct": 0.19,
 "pos": "WR",
-"snap_pct": 0.203,
-"snaps": 49,
+"snap_pct": 0.2,
+"snaps": 61,
 "team": "DEN",
 "weeks": [
 {
@@ -13390,6 +14701,11 @@
 "pct": 0.25,
 "snaps": 15,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 12,
+"week": 8
 }
 ]
 },
@@ -13440,12 +14756,12 @@
 ]
 },
 "luke mccaffrey": {
-"gp": 1,
+"gp": 2,
 "id": "00-0039355",
-"last_pct": 0.12,
+"last_pct": 0.05,
 "pos": "WR",
-"snap_pct": 0.12,
-"snaps": 8,
+"snap_pct": 0.085,
+"snaps": 11,
 "team": "WAS",
 "weeks": [
 {
@@ -13462,6 +14778,11 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 6
+},
+{
+"pct": 0.05,
+"snaps": 3,
+"week": 8
 }
 ]
 },
@@ -13512,12 +14833,12 @@
 ]
 },
 "luther burden": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040735",
-"last_pct": 0.61,
+"last_pct": 0.57,
 "pos": "WR",
-"snap_pct": 0.606,
-"snaps": 318,
+"snap_pct": 0.601,
+"snaps": 358,
 "team": "CHI",
 "weeks": [
 {
@@ -13554,6 +14875,11 @@
 "pct": 0.61,
 "snaps": 42,
 "week": 7
+},
+{
+"pct": 0.57,
+"snaps": 40,
+"week": 8
 }
 ]
 },
@@ -13605,12 +14931,12 @@
 ]
 },
 "makai lemon": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040867",
-"last_pct": 0.91,
+"last_pct": 0.94,
 "pos": "WR",
-"snap_pct": 0.749,
-"snaps": 325,
+"snap_pct": 0.772,
+"snaps": 390,
 "team": "PHI",
 "weeks": [
 {
@@ -13647,16 +14973,21 @@
 "pct": 0.91,
 "snaps": 60,
 "week": 7
+},
+{
+"pct": 0.94,
+"snaps": 65,
+"week": 8
 }
 ]
 },
 "malachi corley": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039920",
-"last_pct": 0.2,
+"last_pct": 0.19,
 "pos": "WR",
-"snap_pct": 0.156,
-"snaps": 52,
+"snap_pct": 0.162,
+"snaps": 65,
 "team": "CLE",
 "weeks": [
 {
@@ -13693,6 +15024,11 @@
 "pct": 0.2,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 13,
+"week": 8
 }
 ]
 },
@@ -13821,6 +15157,11 @@
 "pct": 0.02,
 "snaps": 1,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -13892,12 +15233,12 @@
 ]
 },
 "malik washington": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039880",
-"last_pct": 0.8,
+"last_pct": 0.74,
 "pos": "WR",
-"snap_pct": 0.84,
-"snaps": 300,
+"snap_pct": 0.826,
+"snaps": 348,
 "team": "MIA",
 "weeks": [
 {
@@ -13929,16 +15270,21 @@
 "pct": 0.8,
 "snaps": 52,
 "week": 7
+},
+{
+"pct": 0.74,
+"snaps": 48,
+"week": 8
 }
 ]
 },
 "malik willis": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038128",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 358,
+"snaps": 423,
 "team": "MIA",
 "weeks": [
 {
@@ -13970,6 +15316,11 @@
 "pct": 1.0,
 "snaps": 65,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 65,
+"week": 8
 }
 ]
 },
@@ -14000,12 +15351,12 @@
 ]
 },
 "mark andrews": {
-"gp": 7,
+"gp": 8,
 "id": "00-0034753",
 "last_pct": 0.57,
 "pos": "TE",
-"snap_pct": 0.649,
-"snaps": 294,
+"snap_pct": 0.639,
+"snaps": 323,
 "team": "BAL",
 "weeks": [
 {
@@ -14042,16 +15393,21 @@
 "pct": 0.57,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.57,
+"snaps": 29,
+"week": 8
 }
 ]
 },
 "mark redman": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040598",
-"last_pct": 0.25,
+"last_pct": 0.39,
 "pos": "TE",
-"snap_pct": 0.309,
-"snaps": 140,
+"snap_pct": 0.319,
+"snaps": 167,
 "team": "GB",
 "weeks": [
 {
@@ -14088,6 +15444,11 @@
 "pct": 0.25,
 "snaps": 17,
 "week": 7
+},
+{
+"pct": 0.39,
+"snaps": 27,
+"week": 8
 }
 ]
 },
@@ -14144,12 +15505,12 @@
 ]
 },
 "marquise brown": {
-"gp": 2,
+"gp": 3,
 "id": "00-0035662",
-"last_pct": 0.55,
+"last_pct": 0.46,
 "pos": "WR",
-"snap_pct": 0.385,
-"snaps": 53,
+"snap_pct": 0.41,
+"snaps": 85,
 "team": "PHI",
 "weeks": [
 {
@@ -14161,16 +15522,21 @@
 "pct": 0.55,
 "snaps": 36,
 "week": 7
+},
+{
+"pct": 0.46,
+"snaps": 32,
+"week": 8
 }
 ]
 },
 "marshawn lloyd": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039811",
-"last_pct": 0.36,
+"last_pct": 0.16,
 "pos": "RB",
-"snap_pct": 0.384,
-"snaps": 175,
+"snap_pct": 0.356,
+"snaps": 186,
 "team": "GB",
 "weeks": [
 {
@@ -14207,6 +15573,11 @@
 "pct": 0.36,
 "snaps": 24,
 "week": 7
+},
+{
+"pct": 0.16,
+"snaps": 11,
+"week": 8
 }
 ]
 },
@@ -14252,12 +15623,12 @@
 ]
 },
 "marvin mims": {
-"gp": 5,
+"gp": 6,
 "id": "00-0038976",
-"last_pct": 0.26,
+"last_pct": 0.29,
 "pos": "WR",
-"snap_pct": 0.234,
-"snaps": 71,
+"snap_pct": 0.243,
+"snaps": 89,
 "team": "DEN",
 "weeks": [
 {
@@ -14284,16 +15655,21 @@
 "pct": 0.26,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.29,
+"snaps": 18,
+"week": 8
 }
 ]
 },
 "mason rudolph": {
-"gp": 2,
+"gp": 3,
 "id": "00-0034771",
-"last_pct": 0.03,
+"last_pct": 0.05,
 "pos": "QB",
-"snap_pct": 0.035,
-"snaps": 5,
+"snap_pct": 0.04,
+"snaps": 8,
 "team": "PIT",
 "weeks": [
 {
@@ -14305,16 +15681,21 @@
 "pct": 0.03,
 "snaps": 2,
 "week": 5
+},
+{
+"pct": 0.05,
+"snaps": 3,
+"week": 8
 }
 ]
 },
 "mason taylor": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040736",
-"last_pct": 0.63,
+"last_pct": 0.61,
 "pos": "TE",
-"snap_pct": 0.578,
-"snaps": 190,
+"snap_pct": 0.583,
+"snaps": 229,
 "team": "NYJ",
 "weeks": [
 {
@@ -14341,16 +15722,21 @@
 "pct": 0.63,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.61,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "matthew golden": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040667",
-"last_pct": 0.85,
+"last_pct": 0.86,
 "pos": "WR",
-"snap_pct": 0.834,
-"snaps": 381,
+"snap_pct": 0.838,
+"snaps": 440,
 "team": "GB",
 "weeks": [
 {
@@ -14387,16 +15773,21 @@
 "pct": 0.85,
 "snaps": 57,
 "week": 7
+},
+{
+"pct": 0.86,
+"snaps": 59,
+"week": 8
 }
 ]
 },
 "matthew hibner": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040879",
-"last_pct": 0.39,
+"last_pct": 0.41,
 "pos": "TE",
-"snap_pct": 0.422,
-"snaps": 167,
+"snap_pct": 0.42,
+"snaps": 188,
 "team": "BAL",
 "weeks": [
 {
@@ -14428,16 +15819,21 @@
 "pct": 0.39,
 "snaps": 26,
 "week": 7
+},
+{
+"pct": 0.41,
+"snaps": 21,
+"week": 8
 }
 ]
 },
 "matthew stafford": {
-"gp": 7,
+"gp": 8,
 "id": "00-0026498",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.977,
-"snaps": 495,
+"snap_pct": 0.98,
+"snaps": 549,
 "team": "LA",
 "weeks": [
 {
@@ -14474,16 +15870,21 @@
 "pct": 1.0,
 "snaps": 72,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 54,
+"week": 8
 }
 ]
 },
 "max bredeson": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041081",
-"last_pct": 0.19,
+"last_pct": 0.13,
 "pos": "FB",
-"snap_pct": 0.253,
-"snaps": 96,
+"snap_pct": 0.236,
+"snaps": 103,
 "team": "MIN",
 "weeks": [
 {
@@ -14515,16 +15916,21 @@
 "pct": 0.19,
 "snaps": 11,
 "week": 7
+},
+{
+"pct": 0.13,
+"snaps": 7,
+"week": 8
 }
 ]
 },
 "max klare": {
-"gp": 1,
+"gp": 2,
 "id": "00-0041510",
-"last_pct": 0.01,
+"last_pct": 0.46,
 "pos": "TE",
-"snap_pct": 0.01,
-"snaps": 1,
+"snap_pct": 0.235,
+"snaps": 26,
 "team": "LA",
 "weeks": [
 {
@@ -14546,16 +15952,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 6
+},
+{
+"pct": 0.46,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "michael burton": {
-"gp": 7,
+"gp": 8,
 "id": "00-0031595",
-"last_pct": 0.16,
+"last_pct": 0.11,
 "pos": "FB",
-"snap_pct": 0.139,
-"snaps": 62,
+"snap_pct": 0.135,
+"snaps": 70,
 "team": "CLE",
 "weeks": [
 {
@@ -14592,16 +16003,21 @@
 "pct": 0.16,
 "snaps": 11,
 "week": 7
+},
+{
+"pct": 0.11,
+"snaps": 8,
+"week": 8
 }
 ]
 },
 "michael carter": {
-"gp": 1,
+"gp": 2,
 "id": "00-0036924",
-"last_pct": 0.25,
+"last_pct": 0.17,
 "pos": "RB",
-"snap_pct": 0.25,
-"snaps": 16,
+"snap_pct": 0.21,
+"snaps": 29,
 "team": "TEN",
 "weeks": [
 {
@@ -14613,16 +16029,21 @@
 "pct": 0.25,
 "snaps": 16,
 "week": 7
+},
+{
+"pct": 0.17,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "michael mayer": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039066",
-"last_pct": 0.82,
+"last_pct": 0.79,
 "pos": "TE",
-"snap_pct": 0.809,
-"snaps": 390,
+"snap_pct": 0.806,
+"snaps": 440,
 "team": "LV",
 "weeks": [
 {
@@ -14659,16 +16080,21 @@
 "pct": 0.82,
 "snaps": 56,
 "week": 7
+},
+{
+"pct": 0.79,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "michael penix": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039917",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.99,
-"snaps": 312,
+"snap_pct": 0.992,
+"snaps": 365,
 "team": "ATL",
 "weeks": [
 {
@@ -14695,6 +16121,11 @@
 "pct": 1.0,
 "snaps": 68,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 53,
+"week": 8
 }
 ]
 },
@@ -14725,12 +16156,12 @@
 ]
 },
 "michael wilson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038559",
-"last_pct": 0.9,
+"last_pct": 0.79,
 "pos": "WR",
-"snap_pct": 0.903,
-"snaps": 454,
+"snap_pct": 0.889,
+"snaps": 518,
 "team": "ARI",
 "weeks": [
 {
@@ -14767,6 +16198,11 @@
 "pct": 0.9,
 "snaps": 73,
 "week": 7
+},
+{
+"pct": 0.79,
+"snaps": 64,
+"week": 8
 }
 ]
 },
@@ -14812,12 +16248,12 @@
 ]
 },
 "mike gesicki": {
-"gp": 6,
+"gp": 7,
 "id": "00-0034829",
-"last_pct": 0.38,
+"last_pct": 0.68,
 "pos": "TE",
-"snap_pct": 0.44,
-"snaps": 167,
+"snap_pct": 0.474,
+"snaps": 217,
 "team": "CIN",
 "weeks": [
 {
@@ -14849,16 +16285,21 @@
 "pct": 0.38,
 "snaps": 20,
 "week": 7
+},
+{
+"pct": 0.68,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "mike washington": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040878",
-"last_pct": 0.26,
+"last_pct": 0.6,
 "pos": "RB",
-"snap_pct": 0.206,
-"snaps": 100,
+"snap_pct": 0.255,
+"snaps": 138,
 "team": "LV",
 "weeks": [
 {
@@ -14895,16 +16336,21 @@
 "pct": 0.26,
 "snaps": 18,
 "week": 7
+},
+{
+"pct": 0.6,
+"snaps": 38,
+"week": 8
 }
 ]
 },
 "mitchell evans": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040187",
-"last_pct": 0.5,
+"last_pct": 0.32,
 "pos": "TE",
-"snap_pct": 0.483,
-"snaps": 203,
+"snap_pct": 0.46,
+"snaps": 226,
 "team": "CAR",
 "weeks": [
 {
@@ -14936,6 +16382,11 @@
 "pct": 0.5,
 "snaps": 28,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 23,
+"week": 8
 }
 ]
 },
@@ -14966,12 +16417,12 @@
 ]
 },
 "mo alie cox": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033217",
-"last_pct": 0.64,
+"last_pct": 0.26,
 "pos": "TE",
-"snap_pct": 0.417,
-"snaps": 197,
+"snap_pct": 0.397,
+"snaps": 213,
 "team": "IND",
 "weeks": [
 {
@@ -15008,6 +16459,11 @@
 "pct": 0.64,
 "snaps": 39,
 "week": 7
+},
+{
+"pct": 0.26,
+"snaps": 16,
+"week": 8
 }
 ]
 },
@@ -15024,16 +16480,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 1
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "myles price": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040506",
-"last_pct": 0.03,
+"last_pct": 0.04,
 "pos": "WR",
-"snap_pct": 0.163,
-"snaps": 59,
+"snap_pct": 0.146,
+"snaps": 61,
 "team": "MIN",
 "weeks": [
 {
@@ -15065,6 +16526,11 @@
 "pct": 0.03,
 "snaps": 2,
 "week": 7
+},
+{
+"pct": 0.04,
+"snaps": 2,
+"week": 8
 }
 ]
 },
@@ -15105,12 +16571,12 @@
 ]
 },
 "nate adkins": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038783",
-"last_pct": 0.39,
+"last_pct": 0.31,
 "pos": "TE",
-"snap_pct": 0.32,
-"snaps": 138,
+"snap_pct": 0.319,
+"snaps": 157,
 "team": "DEN",
 "weeks": [
 {
@@ -15147,16 +16613,21 @@
 "pct": 0.39,
 "snaps": 24,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "nate boerkircher": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041503",
-"last_pct": 0.55,
+"last_pct": 0.48,
 "pos": "TE",
-"snap_pct": 0.482,
-"snaps": 184,
+"snap_pct": 0.481,
+"snaps": 210,
 "team": "JAX",
 "weeks": [
 {
@@ -15188,6 +16659,11 @@
 "pct": 0.55,
 "snaps": 39,
 "week": 6
+},
+{
+"pct": 0.48,
+"snaps": 26,
+"week": 8
 }
 ]
 },
@@ -15214,16 +16690,21 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 4
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "nick kallerup": {
-"gp": 4,
+"gp": 5,
 "id": "00-0040058",
-"last_pct": 0.38,
+"last_pct": 0.06,
 "pos": "TE",
-"snap_pct": 0.217,
-"snaps": 62,
+"snap_pct": 0.186,
+"snaps": 66,
 "team": "SEA",
 "weeks": [
 {
@@ -15245,6 +16726,11 @@
 "pct": 0.38,
 "snaps": 26,
 "week": 7
+},
+{
+"pct": 0.06,
+"snaps": 4,
+"week": 8
 }
 ]
 },
@@ -15265,12 +16751,12 @@
 ]
 },
 "nick muse": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037317",
-"last_pct": 0.31,
+"last_pct": 0.19,
 "pos": "TE",
-"snap_pct": 0.18,
-"snaps": 82,
+"snap_pct": 0.181,
+"snaps": 92,
 "team": "ATL",
 "weeks": [
 {
@@ -15307,16 +16793,21 @@
 "pct": 0.31,
 "snaps": 21,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "nick vannett": {
-"gp": 3,
+"gp": 4,
 "id": "00-0032394",
-"last_pct": 0.21,
+"last_pct": 0.22,
 "pos": "TE",
-"snap_pct": 0.287,
-"snaps": 56,
+"snap_pct": 0.27,
+"snaps": 67,
 "team": "BAL",
 "weeks": [
 {
@@ -15333,6 +16824,11 @@
 "pct": 0.21,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.22,
+"snaps": 11,
+"week": 8
 }
 ]
 },
@@ -15436,6 +16932,11 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
@@ -15481,12 +16982,12 @@
 ]
 },
 "noah gray": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036637",
-"last_pct": 0.53,
+"last_pct": 0.54,
 "pos": "TE",
-"snap_pct": 0.588,
-"snaps": 219,
+"snap_pct": 0.581,
+"snaps": 256,
 "team": "KC",
 "weeks": [
 {
@@ -15518,6 +17019,11 @@
 "pct": 0.53,
 "snaps": 28,
 "week": 7
+},
+{
+"pct": 0.54,
+"snaps": 37,
+"week": 8
 }
 ]
 },
@@ -15548,12 +17054,12 @@
 ]
 },
 "olamide zaccheaus": {
-"gp": 6,
+"gp": 7,
 "id": "00-0035208",
-"last_pct": 0.55,
+"last_pct": 0.47,
 "pos": "WR",
-"snap_pct": 0.387,
-"snaps": 144,
+"snap_pct": 0.399,
+"snaps": 169,
 "team": "ATL",
 "weeks": [
 {
@@ -15585,16 +17091,21 @@
 "pct": 0.55,
 "snaps": 30,
 "week": 6
+},
+{
+"pct": 0.47,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "ollie gordon": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040198",
-"last_pct": 0.83,
+"last_pct": 0.82,
 "pos": "RB",
-"snap_pct": 0.523,
-"snaps": 195,
+"snap_pct": 0.566,
+"snaps": 248,
 "team": "MIA",
 "weeks": [
 {
@@ -15626,16 +17137,21 @@
 "pct": 0.83,
 "snaps": 54,
 "week": 7
+},
+{
+"pct": 0.82,
+"snaps": 53,
+"week": 8
 }
 ]
 },
 "omar cooper": {
-"gp": 3,
+"gp": 4,
 "id": "00-0041511",
-"last_pct": 0.64,
+"last_pct": 0.78,
 "pos": "WR",
-"snap_pct": 0.51,
-"snaps": 94,
+"snap_pct": 0.577,
+"snaps": 144,
 "team": "NYJ",
 "weeks": [
 {
@@ -15652,16 +17168,21 @@
 "pct": 0.64,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.78,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "omarion hampton": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040666",
-"last_pct": 0.5,
+"last_pct": 0.3,
 "pos": "RB",
-"snap_pct": 0.463,
-"snaps": 183,
+"snap_pct": 0.44,
+"snaps": 201,
 "team": "LAC",
 "weeks": [
 {
@@ -15693,16 +17214,21 @@
 "pct": 0.5,
 "snaps": 34,
 "week": 6
+},
+{
+"pct": 0.3,
+"snaps": 18,
+"week": 8
 }
 ]
 },
 "oronde gadsden": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040189",
-"last_pct": 0.49,
+"last_pct": 0.48,
 "pos": "TE",
-"snap_pct": 0.468,
-"snaps": 190,
+"snap_pct": 0.47,
+"snaps": 219,
 "team": "LAC",
 "weeks": [
 {
@@ -15734,6 +17260,11 @@
 "pct": 0.49,
 "snaps": 33,
 "week": 6
+},
+{
+"pct": 0.48,
+"snaps": 29,
+"week": 8
 }
 ]
 },
@@ -15779,12 +17310,12 @@
 ]
 },
 "parker washington": {
-"gp": 6,
+"gp": 7,
 "id": "00-0038606",
-"last_pct": 0.73,
+"last_pct": 0.67,
 "pos": "WR",
-"snap_pct": 0.763,
-"snaps": 293,
+"snap_pct": 0.75,
+"snaps": 329,
 "team": "JAX",
 "weeks": [
 {
@@ -15816,6 +17347,11 @@
 "pct": 0.73,
 "snaps": 52,
 "week": 6
+},
+{
+"pct": 0.67,
+"snaps": 36,
+"week": 8
 }
 ]
 },
@@ -15851,12 +17387,12 @@
 ]
 },
 "pat freiermuth": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036894",
 "last_pct": 0.53,
 "pos": "TE",
-"snap_pct": 0.667,
-"snaps": 318,
+"snap_pct": 0.65,
+"snaps": 349,
 "team": "PIT",
 "weeks": [
 {
@@ -15893,6 +17429,11 @@
 "pct": 0.53,
 "snaps": 34,
 "week": 7
+},
+{
+"pct": 0.53,
+"snaps": 31,
+"week": 8
 }
 ]
 },
@@ -15918,12 +17459,12 @@
 ]
 },
 "patrick mahomes": {
-"gp": 6,
+"gp": 7,
 "id": "00-0033873",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 375,
+"snaps": 444,
 "team": "KC",
 "weeks": [
 {
@@ -15955,6 +17496,11 @@
 "pct": 1.0,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 69,
+"week": 8
 }
 ]
 },
@@ -16005,12 +17551,12 @@
 ]
 },
 "payne durham": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039050",
-"last_pct": 0.46,
+"last_pct": 0.7,
 "pos": "TE",
-"snap_pct": 0.281,
-"snaps": 134,
+"snap_pct": 0.334,
+"snaps": 176,
 "team": "TB",
 "weeks": [
 {
@@ -16047,6 +17593,11 @@
 "pct": 0.46,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.7,
+"snaps": 42,
+"week": 8
 }
 ]
 },
@@ -16072,12 +17623,12 @@
 ]
 },
 "pierre strong": {
-"gp": 3,
+"gp": 4,
 "id": "00-0038098",
-"last_pct": 0.12,
+"last_pct": 0.13,
 "pos": "RB",
-"snap_pct": 0.36,
-"snaps": 74,
+"snap_pct": 0.302,
+"snaps": 83,
 "team": "GB",
 "weeks": [
 {
@@ -16094,16 +17645,21 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 7
+},
+{
+"pct": 0.13,
+"snaps": 9,
+"week": 8
 }
 ]
 },
 "puka nacua": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039075",
-"last_pct": 0.85,
+"last_pct": 0.96,
 "pos": "WR",
-"snap_pct": 0.84,
-"snaps": 302,
+"snap_pct": 0.86,
+"snaps": 354,
 "team": "LA",
 "weeks": [
 {
@@ -16130,16 +17686,21 @@
 "pct": 0.85,
 "snaps": 61,
 "week": 7
+},
+{
+"pct": 0.96,
+"snaps": 52,
+"week": 8
 }
 ]
 },
 "quentin johnston": {
-"gp": 5,
+"gp": 6,
 "id": "00-0038544",
 "last_pct": 0.82,
 "pos": "WR",
-"snap_pct": 0.806,
-"snaps": 267,
+"snap_pct": 0.808,
+"snaps": 317,
 "team": "LAC",
 "weeks": [
 {
@@ -16166,32 +17727,42 @@
 "pct": 0.82,
 "snaps": 56,
 "week": 6
+},
+{
+"pct": 0.82,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "quinn ewers": {
-"gp": 1,
+"gp": 2,
 "id": "00-0040234",
-"last_pct": 0.05,
+"last_pct": 0.19,
 "pos": "QB",
-"snap_pct": 0.05,
-"snaps": 3,
+"snap_pct": 0.12,
+"snaps": 13,
 "team": "JAX",
 "weeks": [
 {
 "pct": 0.05,
 "snaps": 3,
 "week": 3
+},
+{
+"pct": 0.19,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "quinshon judkins": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040784",
-"last_pct": 0.53,
+"last_pct": 0.39,
 "pos": "RB",
-"snap_pct": 0.592,
-"snaps": 223,
+"snap_pct": 0.563,
+"snaps": 250,
 "team": "CLE",
 "weeks": [
 {
@@ -16223,16 +17794,21 @@
 "pct": 0.53,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.39,
+"snaps": 27,
+"week": 8
 }
 ]
 },
 "quintin morris": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036590",
-"last_pct": 0.13,
+"last_pct": 0.2,
 "pos": "TE",
-"snap_pct": 0.185,
-"snaps": 67,
+"snap_pct": 0.187,
+"snaps": 78,
 "team": "JAX",
 "weeks": [
 {
@@ -16264,16 +17840,21 @@
 "pct": 0.13,
 "snaps": 9,
 "week": 6
+},
+{
+"pct": 0.2,
+"snaps": 11,
+"week": 8
 }
 ]
 },
 "rachaad white": {
-"gp": 5,
+"gp": 6,
 "id": "00-0037256",
-"last_pct": 0.69,
+"last_pct": 0.47,
 "pos": "RB",
-"snap_pct": 0.53,
-"snaps": 179,
+"snap_pct": 0.52,
+"snaps": 207,
 "team": "WAS",
 "weeks": [
 {
@@ -16300,6 +17881,11 @@
 "pct": 0.69,
 "snaps": 46,
 "week": 6
+},
+{
+"pct": 0.47,
+"snaps": 28,
+"week": 8
 }
 ]
 },
@@ -16340,12 +17926,12 @@
 ]
 },
 "rashee rice": {
-"gp": 4,
+"gp": 5,
 "id": "00-0039067",
-"last_pct": 0.1,
+"last_pct": 0.57,
 "pos": "WR",
-"snap_pct": 0.623,
-"snaps": 166,
+"snap_pct": 0.612,
+"snaps": 205,
 "team": "KC",
 "weeks": [
 {
@@ -16367,16 +17953,21 @@
 "pct": 0.1,
 "snaps": 6,
 "week": 4
+},
+{
+"pct": 0.57,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "rasheen ali": {
-"gp": 1,
+"gp": 2,
 "id": "00-0039796",
 "last_pct": 0.06,
 "pos": "RB",
 "snap_pct": 0.06,
-"snaps": 4,
+"snaps": 7,
 "team": "BAL",
 "weeks": [
 {
@@ -16413,6 +18004,11 @@
 "pct": 0.06,
 "snaps": 4,
 "week": 7
+},
+{
+"pct": 0.06,
+"snaps": 3,
+"week": 8
 }
 ]
 },
@@ -16463,12 +18059,12 @@
 ]
 },
 "rashod bateman": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036550",
-"last_pct": 0.73,
+"last_pct": 0.76,
 "pos": "WR",
-"snap_pct": 0.699,
-"snaps": 320,
+"snap_pct": 0.706,
+"snaps": 359,
 "team": "BAL",
 "weeks": [
 {
@@ -16505,16 +18101,21 @@
 "pct": 0.73,
 "snaps": 49,
 "week": 7
+},
+{
+"pct": 0.76,
+"snaps": 39,
+"week": 8
 }
 ]
 },
 "ray davis": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039875",
-"last_pct": 0.13,
+"last_pct": 0.21,
 "pos": "RB",
-"snap_pct": 0.112,
-"snaps": 43,
+"snap_pct": 0.126,
+"snaps": 60,
 "team": "BUF",
 "weeks": [
 {
@@ -16546,6 +18147,11 @@
 "pct": 0.13,
 "snaps": 9,
 "week": 6
+},
+{
+"pct": 0.21,
+"snaps": 17,
+"week": 8
 }
 ]
 },
@@ -16581,12 +18187,12 @@
 ]
 },
 "reggie virgil": {
-"gp": 3,
+"gp": 4,
 "id": "00-0041070",
-"last_pct": 0.04,
+"last_pct": 0.47,
 "pos": "WR",
-"snap_pct": 0.087,
-"snaps": 19,
+"snap_pct": 0.182,
+"snaps": 57,
 "team": "ARI",
 "weeks": [
 {
@@ -16603,16 +18209,21 @@
 "pct": 0.04,
 "snaps": 3,
 "week": 7
+},
+{
+"pct": 0.47,
+"snaps": 38,
+"week": 8
 }
 ]
 },
 "rhamondre stevenson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0036875",
-"last_pct": 0.69,
+"last_pct": 0.77,
 "pos": "RB",
-"snap_pct": 0.627,
-"snaps": 294,
+"snap_pct": 0.645,
+"snaps": 340,
 "team": "NE",
 "weeks": [
 {
@@ -16649,16 +18260,21 @@
 "pct": 0.69,
 "snaps": 37,
 "week": 7
+},
+{
+"pct": 0.77,
+"snaps": 46,
+"week": 8
 }
 ]
 },
 "rico dowdle": {
-"gp": 4,
+"gp": 5,
 "id": "00-0036139",
-"last_pct": 0.44,
+"last_pct": 0.47,
 "pos": "RB",
-"snap_pct": 0.387,
-"snaps": 106,
+"snap_pct": 0.404,
+"snaps": 134,
 "team": "PIT",
 "weeks": [
 {
@@ -16680,16 +18296,21 @@
 "pct": 0.44,
 "snaps": 28,
 "week": 7
+},
+{
+"pct": 0.47,
+"snaps": 28,
+"week": 8
 }
 ]
 },
 "riley nowakowski": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041398",
-"last_pct": 0.06,
+"last_pct": 0.12,
 "pos": "FB",
-"snap_pct": 0.053,
-"snaps": 25,
+"snap_pct": 0.061,
+"snaps": 32,
 "team": "PIT",
 "weeks": [
 {
@@ -16726,6 +18347,11 @@
 "pct": 0.06,
 "snaps": 4,
 "week": 7
+},
+{
+"pct": 0.12,
+"snaps": 7,
+"week": 8
 }
 ]
 },
@@ -16771,12 +18397,12 @@
 ]
 },
 "robert tonyan": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033757",
-"last_pct": 0.09,
+"last_pct": 0.1,
 "pos": "TE",
-"snap_pct": 0.057,
-"snaps": 28,
+"snap_pct": 0.062,
+"snaps": 34,
 "team": "PIT",
 "weeks": [
 {
@@ -16813,6 +18439,11 @@
 "pct": 0.09,
 "snaps": 6,
 "week": 7
+},
+{
+"pct": 0.1,
+"snaps": 6,
+"week": 8
 }
 ]
 },
@@ -16853,12 +18484,12 @@
 ]
 },
 "rome odunze": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039919",
-"last_pct": 0.94,
+"last_pct": 0.9,
 "pos": "WR",
-"snap_pct": 0.85,
-"snaps": 449,
+"snap_pct": 0.856,
+"snaps": 512,
 "team": "CHI",
 "weeks": [
 {
@@ -16895,6 +18526,11 @@
 "pct": 0.94,
 "snaps": 65,
 "week": 7
+},
+{
+"pct": 0.9,
+"snaps": 63,
+"week": 8
 }
 ]
 },
@@ -16961,12 +18597,12 @@
 ]
 },
 "roschon johnson": {
-"gp": 5,
+"gp": 6,
 "id": "00-0039021",
-"last_pct": 0.14,
+"last_pct": 0.2,
 "pos": "RB",
-"snap_pct": 0.21,
-"snaps": 79,
+"snap_pct": 0.208,
+"snaps": 93,
 "team": "CHI",
 "weeks": [
 {
@@ -17003,16 +18639,21 @@
 "pct": 0.14,
 "snaps": 10,
 "week": 7
+},
+{
+"pct": 0.2,
+"snaps": 14,
+"week": 8
 }
 ]
 },
 "ryan flournoy": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039410",
-"last_pct": 0.78,
+"last_pct": 0.68,
 "pos": "WR",
-"snap_pct": 0.743,
-"snaps": 352,
+"snap_pct": 0.735,
+"snaps": 402,
 "team": "DAL",
 "weeks": [
 {
@@ -17049,17 +18690,22 @@
 "pct": 0.78,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 0.68,
+"snaps": 50,
+"week": 8
 }
 ]
 },
 "ryan miller": {
-"gp": 4,
+"gp": 5,
 "id": "00-0038824",
-"last_pct": 0.24,
+"last_pct": 0.08,
 "pos": "WR",
-"snap_pct": 0.17,
-"snaps": 43,
-"team": "MIA",
+"snap_pct": 0.152,
+"snaps": 48,
+"team": "NE",
 "weeks": [
 {
 "pct": 0.0,
@@ -17085,16 +18731,21 @@
 "pct": 0.24,
 "snaps": 16,
 "week": 5
+},
+{
+"pct": 0.08,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "sam darnold": {
-"gp": 6,
+"gp": 7,
 "id": "00-0034869",
 "last_pct": 1.0,
 "pos": "QB",
-"snap_pct": 0.85,
-"snaps": 349,
+"snap_pct": 0.871,
+"snaps": 412,
 "team": "SEA",
 "weeks": [
 {
@@ -17126,16 +18777,21 @@
 "pct": 1.0,
 "snaps": 69,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 63,
+"week": 8
 }
 ]
 },
 "sam laporta": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039065",
-"last_pct": 0.97,
+"last_pct": 0.93,
 "pos": "TE",
-"snap_pct": 0.893,
-"snaps": 367,
+"snap_pct": 0.899,
+"snaps": 434,
 "team": "DET",
 "weeks": [
 {
@@ -17167,16 +18823,21 @@
 "pct": 0.97,
 "snaps": 66,
 "week": 7
+},
+{
+"pct": 0.93,
+"snaps": 67,
+"week": 8
 }
 ]
 },
 "sam roush": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041558",
-"last_pct": 0.2,
+"last_pct": 0.53,
 "pos": "TE",
-"snap_pct": 0.211,
-"snaps": 114,
+"snap_pct": 0.251,
+"snaps": 151,
 "team": "CHI",
 "weeks": [
 {
@@ -17213,16 +18874,21 @@
 "pct": 0.2,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.53,
+"snaps": 37,
+"week": 8
 }
 ]
 },
 "saquon barkley": {
-"gp": 5,
+"gp": 6,
 "id": "00-0034844",
-"last_pct": 0.15,
+"last_pct": 0.32,
 "pos": "RB",
-"snap_pct": 0.362,
-"snaps": 101,
+"snap_pct": 0.355,
+"snaps": 123,
 "team": "PHI",
 "weeks": [
 {
@@ -17249,16 +18915,21 @@
 "pct": 0.15,
 "snaps": 10,
 "week": 7
+},
+{
+"pct": 0.32,
+"snaps": 22,
+"week": 8
 }
 ]
 },
 "savion williams": {
-"gp": 2,
+"gp": 3,
 "id": "00-0040009",
-"last_pct": 0.6,
+"last_pct": 0.55,
 "pos": "WR",
-"snap_pct": 0.565,
-"snaps": 80,
+"snap_pct": 0.56,
+"snaps": 118,
 "team": "GB",
 "weeks": [
 {
@@ -17270,16 +18941,21 @@
 "pct": 0.6,
 "snaps": 40,
 "week": 7
+},
+{
+"pct": 0.55,
+"snaps": 38,
+"week": 8
 }
 ]
 },
 "scott matlock": {
-"gp": 2,
+"gp": 3,
 "id": "00-0038614",
-"last_pct": 0.22,
+"last_pct": 0.36,
 "pos": "FB",
-"snap_pct": 0.205,
-"snaps": 28,
+"snap_pct": 0.257,
+"snaps": 50,
 "team": "LAC",
 "weeks": [
 {
@@ -17291,6 +18967,11 @@
 "pct": 0.22,
 "snaps": 15,
 "week": 6
+},
+{
+"pct": 0.36,
+"snaps": 22,
+"week": 8
 }
 ]
 },
@@ -17327,16 +19008,21 @@
 "pct": 0.14,
 "snaps": 9,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "seth mcgowan": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041125",
-"last_pct": 0.33,
+"last_pct": 0.25,
 "pos": "RB",
-"snap_pct": 0.206,
-"snaps": 98,
+"snap_pct": 0.211,
+"snaps": 113,
 "team": "IND",
 "weeks": [
 {
@@ -17373,16 +19059,21 @@
 "pct": 0.33,
 "snaps": 20,
 "week": 7
+},
+{
+"pct": 0.25,
+"snaps": 15,
+"week": 8
 }
 ]
 },
 "seydou traore": {
-"gp": 2,
+"gp": 3,
 "id": "00-0041579",
-"last_pct": 0.17,
+"last_pct": 0.11,
 "pos": "TE",
-"snap_pct": 0.095,
-"snaps": 12,
+"snap_pct": 0.1,
+"snaps": 19,
 "team": "MIA",
 "weeks": [
 {
@@ -17414,6 +19105,11 @@
 "pct": 0.17,
 "snaps": 11,
 "week": 7
+},
+{
+"pct": 0.11,
+"snaps": 7,
+"week": 8
 }
 ]
 },
@@ -17434,28 +19130,33 @@
 ]
 },
 "shedeur sanders": {
-"gp": 1,
+"gp": 2,
 "id": "00-0040668",
-"last_pct": 0.01,
+"last_pct": 0.06,
 "pos": "QB",
-"snap_pct": 0.01,
-"snaps": 1,
+"snap_pct": 0.035,
+"snaps": 5,
 "team": "CLE",
 "weeks": [
 {
 "pct": 0.01,
 "snaps": 1,
 "week": 3
+},
+{
+"pct": 0.06,
+"snaps": 4,
+"week": 8
 }
 ]
 },
 "simi fehoko": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036646",
-"last_pct": 0.09,
+"last_pct": 0.49,
 "pos": "WR",
-"snap_pct": 0.082,
-"snaps": 28,
+"snap_pct": 0.15,
+"snaps": 68,
 "team": "ARI",
 "weeks": [
 {
@@ -17492,16 +19193,21 @@
 "pct": 0.09,
 "snaps": 7,
 "week": 7
+},
+{
+"pct": 0.49,
+"snaps": 40,
+"week": 8
 }
 ]
 },
 "sione vaki": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039364",
-"last_pct": 0.13,
+"last_pct": 0.28,
 "pos": "RB",
-"snap_pct": 0.237,
-"snaps": 97,
+"snap_pct": 0.243,
+"snaps": 117,
 "team": "DET",
 "weeks": [
 {
@@ -17533,6 +19239,11 @@
 "pct": 0.13,
 "snaps": 9,
 "week": 7
+},
+{
+"pct": 0.28,
+"snaps": 20,
+"week": 8
 }
 ]
 },
@@ -17610,12 +19321,12 @@
 ]
 },
 "stefon diggs": {
-"gp": 5,
+"gp": 6,
 "id": "00-0031588",
-"last_pct": 0.61,
+"last_pct": 0.65,
 "pos": "WR",
-"snap_pct": 0.6,
-"snaps": 204,
+"snap_pct": 0.608,
+"snaps": 243,
 "team": "WAS",
 "weeks": [
 {
@@ -17642,6 +19353,27 @@
 "pct": 0.61,
 "snaps": 41,
 "week": 6
+},
+{
+"pct": 0.65,
+"snaps": 39,
+"week": 8
+}
+]
+},
+"stephen carlson": {
+"gp": 1,
+"id": "00-0035039",
+"last_pct": 0.14,
+"pos": "TE",
+"snap_pct": 0.14,
+"snaps": 10,
+"team": "CHI",
+"weeks": [
+{
+"pct": 0.14,
+"snaps": 10,
+"week": 8
 }
 ]
 },
@@ -17688,12 +19420,12 @@
 ]
 },
 "tai felton": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040154",
-"last_pct": 0.07,
+"last_pct": 0.04,
 "pos": "WR",
-"snap_pct": 0.382,
-"snaps": 132,
+"snap_pct": 0.325,
+"snaps": 134,
 "team": "MIN",
 "weeks": [
 {
@@ -17725,6 +19457,11 @@
 "pct": 0.07,
 "snaps": 4,
 "week": 7
+},
+{
+"pct": 0.04,
+"snaps": 2,
+"week": 8
 }
 ]
 },
@@ -17776,12 +19513,12 @@
 ]
 },
 "tanner arkin": {
-"gp": 2,
+"gp": 3,
 "id": "00-0041314",
-"last_pct": 0.2,
+"last_pct": 0.27,
 "pos": "TE",
-"snap_pct": 0.22,
-"snaps": 30,
+"snap_pct": 0.237,
+"snaps": 46,
 "team": "NE",
 "weeks": [
 {
@@ -17798,6 +19535,11 @@
 "pct": 0.2,
 "snaps": 15,
 "week": 5
+},
+{
+"pct": 0.27,
+"snaps": 16,
+"week": 8
 }
 ]
 },
@@ -17833,12 +19575,12 @@
 ]
 },
 "tanner koziol": {
-"gp": 4,
+"gp": 5,
 "id": "00-0041084",
-"last_pct": 0.15,
+"last_pct": 0.35,
 "pos": "TE",
-"snap_pct": 0.11,
-"snaps": 30,
+"snap_pct": 0.158,
+"snaps": 49,
 "team": "JAX",
 "weeks": [
 {
@@ -17860,16 +19602,21 @@
 "pct": 0.15,
 "snaps": 11,
 "week": 6
+},
+{
+"pct": 0.35,
+"snaps": 19,
+"week": 8
 }
 ]
 },
 "tanner mckee": {
-"gp": 2,
+"gp": 3,
 "id": "00-0038400",
 "last_pct": 1.0,
 "pos": "QB",
 "snap_pct": 1.0,
-"snaps": 130,
+"snaps": 199,
 "team": "PHI",
 "weeks": [
 {
@@ -17881,16 +19628,21 @@
 "pct": 1.0,
 "snaps": 66,
 "week": 7
+},
+{
+"pct": 1.0,
+"snaps": 69,
+"week": 8
 }
 ]
 },
 "tay martin": {
-"gp": 3,
+"gp": 4,
 "id": "00-0037524",
-"last_pct": 0.01,
+"last_pct": 0.03,
 "pos": "WR",
 "snap_pct": 0.03,
-"snaps": 6,
+"snaps": 8,
 "team": "DET",
 "weeks": [
 {
@@ -17922,16 +19674,21 @@
 "pct": 0.01,
 "snaps": 1,
 "week": 7
+},
+{
+"pct": 0.03,
+"snaps": 2,
+"week": 8
 }
 ]
 },
 "teagan quitoriano": {
-"gp": 3,
+"gp": 4,
 "id": "00-0037277",
-"last_pct": 0.36,
+"last_pct": 0.25,
 "pos": "TE",
-"snap_pct": 0.397,
-"snaps": 89,
+"snap_pct": 0.36,
+"snaps": 109,
 "team": "ARI",
 "weeks": [
 {
@@ -17948,16 +19705,21 @@
 "pct": 0.36,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.25,
+"snaps": 20,
+"week": 8
 }
 ]
 },
 "ted hurst": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041048",
-"last_pct": 0.56,
+"last_pct": 0.42,
 "pos": "WR",
-"snap_pct": 0.594,
-"snaps": 273,
+"snap_pct": 0.573,
+"snaps": 298,
 "team": "TB",
 "weeks": [
 {
@@ -17994,16 +19756,21 @@
 "pct": 0.56,
 "snaps": 35,
 "week": 7
+},
+{
+"pct": 0.42,
+"snaps": 25,
+"week": 8
 }
 ]
 },
 "tee higgins": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036410",
-"last_pct": 0.87,
+"last_pct": 0.88,
 "pos": "WR",
-"snap_pct": 0.787,
-"snaps": 293,
+"snap_pct": 0.8,
+"snaps": 358,
 "team": "CIN",
 "weeks": [
 {
@@ -18035,6 +19802,11 @@
 "pct": 0.87,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.88,
+"snaps": 65,
+"week": 8
 }
 ]
 },
@@ -18101,12 +19873,12 @@
 ]
 },
 "tetairoa mcmillan": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040124",
-"last_pct": 0.68,
+"last_pct": 0.89,
 "pos": "WR",
-"snap_pct": 0.817,
-"snaps": 347,
+"snap_pct": 0.827,
+"snaps": 412,
 "team": "CAR",
 "weeks": [
 {
@@ -18138,16 +19910,21 @@
 "pct": 0.68,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.89,
+"snaps": 65,
+"week": 8
 }
 ]
 },
 "tez johnson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0040237",
-"last_pct": 0.65,
+"last_pct": 0.42,
 "pos": "WR",
-"snap_pct": 0.384,
-"snaps": 177,
+"snap_pct": 0.389,
+"snaps": 202,
 "team": "TB",
 "weeks": [
 {
@@ -18184,6 +19961,11 @@
 "pct": 0.65,
 "snaps": 41,
 "week": 7
+},
+{
+"pct": 0.42,
+"snaps": 25,
+"week": 8
 }
 ]
 },
@@ -18297,12 +20079,12 @@
 ]
 },
 "tj hockenson": {
-"gp": 6,
+"gp": 7,
 "id": "00-0035229",
-"last_pct": 0.76,
+"last_pct": 0.83,
 "pos": "TE",
-"snap_pct": 0.637,
-"snaps": 241,
+"snap_pct": 0.664,
+"snaps": 285,
 "team": "MIN",
 "weeks": [
 {
@@ -18334,6 +20116,11 @@
 "pct": 0.76,
 "snaps": 45,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 44,
+"week": 8
 }
 ]
 },
@@ -18390,12 +20177,12 @@
 ]
 },
 "tommy tremble": {
-"gp": 6,
+"gp": 7,
 "id": "00-0037005",
-"last_pct": 0.48,
+"last_pct": 0.6,
 "pos": "TE",
-"snap_pct": 0.545,
-"snaps": 231,
+"snap_pct": 0.553,
+"snaps": 275,
 "team": "CAR",
 "weeks": [
 {
@@ -18427,16 +20214,21 @@
 "pct": 0.48,
 "snaps": 27,
 "week": 7
+},
+{
+"pct": 0.6,
+"snaps": 44,
+"week": 8
 }
 ]
 },
 "tony pollard": {
-"gp": 7,
+"gp": 8,
 "id": "00-0035261",
-"last_pct": 0.75,
+"last_pct": 0.82,
 "pos": "RB",
-"snap_pct": 0.589,
-"snaps": 233,
+"snap_pct": 0.618,
+"snaps": 296,
 "team": "TEN",
 "weeks": [
 {
@@ -18473,16 +20265,21 @@
 "pct": 0.75,
 "snaps": 47,
 "week": 7
+},
+{
+"pct": 0.82,
+"snaps": 63,
+"week": 8
 }
 ]
 },
 "tory horton": {
-"gp": 6,
+"gp": 7,
 "id": "00-0040648",
-"last_pct": 0.45,
+"last_pct": 0.68,
 "pos": "WR",
-"snap_pct": 0.297,
-"snaps": 128,
+"snap_pct": 0.351,
+"snaps": 171,
 "team": "SEA",
 "weeks": [
 {
@@ -18514,6 +20311,11 @@
 "pct": 0.45,
 "snaps": 31,
 "week": 7
+},
+{
+"pct": 0.68,
+"snaps": 43,
+"week": 8
 }
 ]
 },
@@ -18581,16 +20383,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "travis hunter": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040718",
-"last_pct": 0.13,
+"last_pct": 0.11,
 "pos": "WR",
-"snap_pct": 0.092,
-"snaps": 30,
+"snap_pct": 0.095,
+"snaps": 36,
 "team": "JAX",
 "weeks": [
 {
@@ -18622,16 +20429,21 @@
 "pct": 0.13,
 "snaps": 9,
 "week": 6
+},
+{
+"pct": 0.11,
+"snaps": 6,
+"week": 8
 }
 ]
 },
 "travis kelce": {
-"gp": 6,
+"gp": 7,
 "id": "00-0030506",
-"last_pct": 0.83,
+"last_pct": 0.78,
 "pos": "TE",
-"snap_pct": 0.778,
-"snaps": 292,
+"snap_pct": 0.779,
+"snaps": 346,
 "team": "KC",
 "weeks": [
 {
@@ -18663,16 +20475,21 @@
 "pct": 0.83,
 "snaps": 44,
 "week": 7
+},
+{
+"pct": 0.78,
+"snaps": 54,
+"week": 8
 }
 ]
 },
 "tre harris": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040727",
-"last_pct": 0.45,
+"last_pct": 0.51,
 "pos": "WR",
-"snap_pct": 0.706,
-"snaps": 233,
+"snap_pct": 0.673,
+"snaps": 264,
 "team": "LAC",
 "weeks": [
 {
@@ -18699,16 +20516,21 @@
 "pct": 0.45,
 "snaps": 30,
 "week": 5
+},
+{
+"pct": 0.51,
+"snaps": 31,
+"week": 8
 }
 ]
 },
 "tre tucker": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038563",
-"last_pct": 0.82,
+"last_pct": 0.54,
 "pos": "WR",
-"snap_pct": 0.687,
-"snaps": 328,
+"snap_pct": 0.669,
+"snaps": 362,
 "team": "LV",
 "weeks": [
 {
@@ -18745,6 +20567,11 @@
 "pct": 0.82,
 "snaps": 56,
 "week": 7
+},
+{
+"pct": 0.54,
+"snaps": 34,
+"week": 8
 }
 ]
 },
@@ -18806,12 +20633,12 @@
 ]
 },
 "trevor etienne": {
-"gp": 2,
+"gp": 3,
 "id": "00-0040644",
-"last_pct": 0.3,
+"last_pct": 0.07,
 "pos": "RB",
-"snap_pct": 0.17,
-"snaps": 20,
+"snap_pct": 0.137,
+"snaps": 25,
 "team": "CAR",
 "weeks": [
 {
@@ -18823,16 +20650,21 @@
 "pct": 0.3,
 "snaps": 17,
 "week": 7
+},
+{
+"pct": 0.07,
+"snaps": 5,
+"week": 8
 }
 ]
 },
 "trevor lawrence": {
-"gp": 6,
+"gp": 7,
 "id": "00-0036971",
-"last_pct": 1.0,
+"last_pct": 0.81,
 "pos": "QB",
-"snap_pct": 0.972,
-"snaps": 372,
+"snap_pct": 0.949,
+"snaps": 416,
 "team": "JAX",
 "weeks": [
 {
@@ -18864,16 +20696,21 @@
 "pct": 1.0,
 "snaps": 71,
 "week": 6
+},
+{
+"pct": 0.81,
+"snaps": 44,
+"week": 8
 }
 ]
 },
 "trey mcbride": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037744",
-"last_pct": 0.93,
+"last_pct": 0.95,
 "pos": "TE",
-"snap_pct": 0.909,
-"snaps": 458,
+"snap_pct": 0.914,
+"snaps": 535,
 "team": "ARI",
 "weeks": [
 {
@@ -18910,16 +20747,21 @@
 "pct": 0.93,
 "snaps": 75,
 "week": 7
+},
+{
+"pct": 0.95,
+"snaps": 77,
+"week": 8
 }
 ]
 },
 "treylon burks": {
-"gp": 5,
+"gp": 6,
 "id": "00-0037742",
-"last_pct": 0.55,
+"last_pct": 0.67,
 "pos": "WR",
-"snap_pct": 0.506,
-"snaps": 166,
+"snap_pct": 0.533,
+"snaps": 206,
 "team": "WAS",
 "weeks": [
 {
@@ -18946,6 +20788,11 @@
 "pct": 0.55,
 "snaps": 37,
 "week": 6
+},
+{
+"pct": 0.67,
+"snaps": 40,
+"week": 8
 }
 ]
 },
@@ -18986,12 +20833,12 @@
 ]
 },
 "troy franklin": {
-"gp": 7,
+"gp": 8,
 "id": "00-0039868",
-"last_pct": 0.46,
+"last_pct": 0.71,
 "pos": "WR",
-"snap_pct": 0.401,
-"snaps": 172,
+"snap_pct": 0.44,
+"snaps": 216,
 "team": "DEN",
 "weeks": [
 {
@@ -19028,6 +20875,11 @@
 "pct": 0.46,
 "snaps": 28,
 "week": 7
+},
+{
+"pct": 0.71,
+"snaps": 44,
+"week": 8
 }
 ]
 },
@@ -19048,12 +20900,12 @@
 ]
 },
 "tucker kraft": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038996",
 "last_pct": 0.88,
 "pos": "TE",
-"snap_pct": 0.82,
-"snaps": 372,
+"snap_pct": 0.827,
+"snaps": 433,
 "team": "GB",
 "weeks": [
 {
@@ -19090,16 +20942,21 @@
 "pct": 0.88,
 "snaps": 59,
 "week": 7
+},
+{
+"pct": 0.88,
+"snaps": 61,
+"week": 8
 }
 ]
 },
 "tutu atwell": {
-"gp": 4,
+"gp": 5,
 "id": "00-0036849",
-"last_pct": 0.35,
+"last_pct": 0.39,
 "pos": "WR",
-"snap_pct": 0.287,
-"snaps": 87,
+"snap_pct": 0.308,
+"snaps": 108,
 "team": "LA",
 "weeks": [
 {
@@ -19121,16 +20978,21 @@
 "pct": 0.35,
 "snaps": 25,
 "week": 7
+},
+{
+"pct": 0.39,
+"snaps": 21,
+"week": 8
 }
 ]
 },
 "ty johnson": {
-"gp": 4,
+"gp": 5,
 "id": "00-0035537",
-"last_pct": 0.18,
+"last_pct": 0.24,
 "pos": "RB",
-"snap_pct": 0.237,
-"snaps": 60,
+"snap_pct": 0.238,
+"snaps": 80,
 "team": "BUF",
 "weeks": [
 {
@@ -19152,6 +21014,11 @@
 "pct": 0.18,
 "snaps": 12,
 "week": 6
+},
+{
+"pct": 0.24,
+"snaps": 20,
+"week": 8
 }
 ]
 },
@@ -19197,12 +21064,12 @@
 ]
 },
 "tylan wallace": {
-"gp": 5,
+"gp": 6,
 "id": "00-0036630",
-"last_pct": 0.16,
+"last_pct": 0.14,
 "pos": "WR",
-"snap_pct": 0.21,
-"snaps": 64,
+"snap_pct": 0.198,
+"snaps": 74,
 "team": "CLE",
 "weeks": [
 {
@@ -19229,16 +21096,21 @@
 "pct": 0.16,
 "snaps": 11,
 "week": 7
+},
+{
+"pct": 0.14,
+"snaps": 10,
+"week": 8
 }
 ]
 },
 "tyler allgeier": {
-"gp": 7,
+"gp": 8,
 "id": "00-0037263",
-"last_pct": 0.47,
+"last_pct": 0.59,
 "pos": "RB",
-"snap_pct": 0.516,
-"snaps": 253,
+"snap_pct": 0.525,
+"snaps": 301,
 "team": "ARI",
 "weeks": [
 {
@@ -19275,6 +21147,11 @@
 "pct": 0.47,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.59,
+"snaps": 48,
+"week": 8
 }
 ]
 },
@@ -19315,12 +21192,12 @@
 ]
 },
 "tyler conklin": {
-"gp": 4,
+"gp": 5,
 "id": "00-0034270",
-"last_pct": 0.12,
+"last_pct": 0.31,
 "pos": "TE",
-"snap_pct": 0.107,
-"snaps": 30,
+"snap_pct": 0.148,
+"snaps": 52,
 "team": "DET",
 "weeks": [
 {
@@ -19342,16 +21219,21 @@
 "pct": 0.12,
 "snaps": 8,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 22,
+"week": 8
 }
 ]
 },
 "tyler goodson": {
-"gp": 5,
+"gp": 6,
 "id": "00-0037120",
-"last_pct": 0.21,
+"last_pct": 0.27,
 "pos": "RB",
-"snap_pct": 0.152,
-"snaps": 55,
+"snap_pct": 0.172,
+"snaps": 75,
 "team": "DAL",
 "weeks": [
 {
@@ -19378,16 +21260,21 @@
 "pct": 0.21,
 "snaps": 14,
 "week": 7
+},
+{
+"pct": 0.27,
+"snaps": 20,
+"week": 8
 }
 ]
 },
 "tyler higbee": {
-"gp": 7,
+"gp": 8,
 "id": "00-0033110",
-"last_pct": 0.74,
+"last_pct": 0.83,
 "pos": "TE",
-"snap_pct": 0.58,
-"snaps": 300,
+"snap_pct": 0.611,
+"snaps": 345,
 "team": "LA",
 "weeks": [
 {
@@ -19424,16 +21311,21 @@
 "pct": 0.74,
 "snaps": 53,
 "week": 7
+},
+{
+"pct": 0.83,
+"snaps": 45,
+"week": 8
 }
 ]
 },
 "tyler huntley": {
-"gp": 4,
+"gp": 5,
 "id": "00-0035993",
-"last_pct": 1.0,
+"last_pct": 0.2,
 "pos": "QB",
-"snap_pct": 0.87,
-"snaps": 231,
+"snap_pct": 0.736,
+"snaps": 241,
 "team": "BAL",
 "weeks": [
 {
@@ -19455,6 +21347,11 @@
 "pct": 1.0,
 "snaps": 67,
 "week": 7
+},
+{
+"pct": 0.2,
+"snaps": 10,
+"week": 8
 }
 ]
 },
@@ -19505,12 +21402,12 @@
 ]
 },
 "tyler warren": {
-"gp": 5,
+"gp": 6,
 "id": "00-0040128",
-"last_pct": 0.94,
+"last_pct": 0.72,
 "pos": "TE",
-"snap_pct": 0.91,
-"snaps": 298,
+"snap_pct": 0.878,
+"snaps": 342,
 "team": "IND",
 "weeks": [
 {
@@ -19537,6 +21434,11 @@
 "pct": 0.94,
 "snaps": 67,
 "week": 5
+},
+{
+"pct": 0.72,
+"snaps": 44,
+"week": 8
 }
 ]
 },
@@ -19660,18 +21562,23 @@
 ]
 },
 "van jefferson": {
-"gp": 1,
+"gp": 2,
 "id": "00-0036415",
-"last_pct": 0.05,
+"last_pct": 0.12,
 "pos": "WR",
-"snap_pct": 0.05,
-"snaps": 3,
+"snap_pct": 0.085,
+"snaps": 10,
 "team": "WAS",
 "weeks": [
 {
 "pct": 0.05,
 "snaps": 3,
 "week": 5
+},
+{
+"pct": 0.12,
+"snaps": 7,
+"week": 8
 }
 ]
 },
@@ -19717,12 +21624,12 @@
 ]
 },
 "wandale robinson": {
-"gp": 7,
+"gp": 8,
 "id": "00-0038117",
-"last_pct": 0.6,
+"last_pct": 0.94,
 "pos": "WR",
-"snap_pct": 0.656,
-"snaps": 262,
+"snap_pct": 0.691,
+"snaps": 334,
 "team": "TEN",
 "weeks": [
 {
@@ -19759,16 +21666,21 @@
 "pct": 0.6,
 "snaps": 38,
 "week": 7
+},
+{
+"pct": 0.94,
+"snaps": 72,
+"week": 8
 }
 ]
 },
 "will kacmarek": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041524",
-"last_pct": 0.45,
+"last_pct": 0.31,
 "pos": "TE",
-"snap_pct": 0.43,
-"snaps": 150,
+"snap_pct": 0.413,
+"snaps": 170,
 "team": "MIA",
 "weeks": [
 {
@@ -19800,16 +21712,21 @@
 "pct": 0.45,
 "snaps": 29,
 "week": 7
+},
+{
+"pct": 0.31,
+"snaps": 20,
+"week": 8
 }
 ]
 },
 "will mallory": {
-"gp": 2,
+"gp": 3,
 "id": "00-0038394",
-"last_pct": 0.34,
+"last_pct": 0.15,
 "pos": "TE",
-"snap_pct": 0.43,
-"snaps": 64,
+"snap_pct": 0.337,
+"snaps": 73,
 "team": "IND",
 "weeks": [
 {
@@ -19821,6 +21738,11 @@
 "pct": 0.34,
 "snaps": 21,
 "week": 7
+},
+{
+"pct": 0.15,
+"snaps": 9,
+"week": 8
 }
 ]
 },
@@ -19973,6 +21895,22 @@
 }
 ]
 },
+"xavier restrepo": {
+"gp": 0,
+"id": "00-0040522",
+"last_pct": 0.0,
+"pos": "WR",
+"snap_pct": 0.0,
+"snaps": 0,
+"team": "TEN",
+"weeks": [
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
+}
+]
+},
 "xavier smith": {
 "gp": 3,
 "id": "00-0038359",
@@ -20000,12 +21938,12 @@
 ]
 },
 "xavier worthy": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039894",
-"last_pct": 0.87,
+"last_pct": 0.94,
 "pos": "WR",
-"snap_pct": 0.82,
-"snaps": 307,
+"snap_pct": 0.837,
+"snaps": 372,
 "team": "KC",
 "weeks": [
 {
@@ -20037,6 +21975,27 @@
 "pct": 0.87,
 "snaps": 46,
 "week": 7
+},
+{
+"pct": 0.94,
+"snaps": 65,
+"week": 8
+}
+]
+},
+"zach charbonnet": {
+"gp": 1,
+"id": "00-0039165",
+"last_pct": 0.37,
+"pos": "RB",
+"snap_pct": 0.37,
+"snaps": 23,
+"team": "SEA",
+"weeks": [
+{
+"pct": 0.37,
+"snaps": 23,
+"week": 8
 }
 ]
 },
@@ -20067,12 +22026,12 @@
 ]
 },
 "zachariah branch": {
-"gp": 7,
+"gp": 8,
 "id": "00-0041044",
-"last_pct": 0.34,
+"last_pct": 0.09,
 "pos": "WR",
-"snap_pct": 0.256,
-"snaps": 112,
+"snap_pct": 0.235,
+"snaps": 117,
 "team": "ATL",
 "weeks": [
 {
@@ -20109,6 +22068,11 @@
 "pct": 0.34,
 "snaps": 23,
 "week": 7
+},
+{
+"pct": 0.09,
+"snaps": 5,
+"week": 8
 }
 ]
 },
@@ -20135,16 +22099,21 @@
 "pct": 0.0,
 "snaps": 0,
 "week": 7
+},
+{
+"pct": 0.0,
+"snaps": 0,
+"week": 8
 }
 ]
 },
 "zavion thomas": {
-"gp": 6,
+"gp": 7,
 "id": "00-0041051",
-"last_pct": 0.07,
+"last_pct": 0.19,
 "pos": "WR",
-"snap_pct": 0.11,
-"snaps": 49,
+"snap_pct": 0.121,
+"snaps": 62,
 "team": "CHI",
 "weeks": [
 {
@@ -20181,16 +22150,21 @@
 "pct": 0.07,
 "snaps": 5,
 "week": 7
+},
+{
+"pct": 0.19,
+"snaps": 13,
+"week": 8
 }
 ]
 },
 "zay flowers": {
-"gp": 6,
+"gp": 7,
 "id": "00-0039064",
-"last_pct": 0.85,
+"last_pct": 0.82,
 "pos": "WR",
-"snap_pct": 0.65,
-"snaps": 257,
+"snap_pct": 0.674,
+"snaps": 299,
 "team": "BAL",
 "weeks": [
 {
@@ -20222,6 +22196,11 @@
 "pct": 0.85,
 "snaps": 57,
 "week": 7
+},
+{
+"pct": 0.82,
+"snaps": 42,
+"week": 8
 }
 ]
 }
