@@ -242,7 +242,11 @@ ok("notes are rendered whole, never clipped",
 // renders, and the empty branch must be reachable and actually exercised.
 const cards = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team, NOW));
 ok("news is always an array, never undefined", cards.every(c => Array.isArray(c.news)));
-const withNews = cards.filter(c => c.news.length).length;
+// Counted at the REAL clock, not the pinned NOW (Aug 28): notes dated after NOW
+// render as "future" and drop out, so every in-season refresh shrank this count
+// until it failed on correct notes (Nov 22 2026: 16 of 294 at NOW).
+const withNews = draftable.map(([n, v]) => e.buildPlayerCard(n, v.pos, v.team, Date.now()))
+  .filter(c => c.news.length).length;
 ok("some players carry dated news", withNews > 20, `${withNews} of ${cards.length}`);
 ok("...and some carry none, so the empty branch is live",
    cards.some(c => c.news.length === 0));

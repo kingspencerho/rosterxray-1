@@ -100,7 +100,7 @@ ok("a custom limit is honoured", e.searchPlayers("a", "standard", 3).length <= 3
 // checks for resolution and this checks for discovery.
 console.log("\n=== the players that motivated this ===");
 // najee harris: released by NYG Oct 20 2026; still searchable, now unsigned ("-").
-for (const [q, team] of [["keenan allen", "IND"], ["najee harris", "-"]]) {
+for (const [q, team] of [["keenan allen", "SF"], ["najee harris", "-"]]) {
   for (const fmt of Object.keys(TABLES)) {
     const r = e.searchPlayers(q, fmt)[0];
     ok(`${q} is searchable in ${fmt} and reads ${team}`, r && r.team === team,
