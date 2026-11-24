@@ -414,6 +414,7 @@ Treat market ADP as a soft variable, not a hard constraint. In large-field tourn
 - Use game totals (O/U) as hard logic gates. Reference only.
 - Apply hardcoded player verdicts from a prior offseason without a freshness check.
 - Apply a team's defensive FPA rating to that same team's offensive players.
+- **Fade a player without a volume reason (added Nov 24, 2026, his ruling).** A fade names what takes his touches or targets away: a confirmed role loss, a named player taking the work, a snap or target share that is already falling. Efficiency (yards per carry, yards per target), age and "he might share" are context only and never carry a fade on their own. Why: through Week 11 of 2026 the 31 players faded while healthy scored 6.5 points MORE than players drafted beside them, and 17 of the 21 who played most of the season beat their price. The three worst (Hubbard on yards per carry, Pollard on age, Swift on committee worry) all kept their volume and finished RB3, RB15 and RB11. Yards per carry repeats at 0.022 (ANALYST-REFERENCE.md section 2). One season, eleven weeks.
 
 ### In-Draft Hard Stops
 - **Standard best ball:** Never suggest a 4th QB. In superflex formats, evaluate QB count against format requirements before flagging.
